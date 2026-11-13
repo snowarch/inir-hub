@@ -34,7 +34,7 @@ Variants {
                     || !(options?.pinned ?? false) || !(options?.reserveSpace ?? true)
                     || output !== screenScope.outputName) return 0
             const width = Math.max(300, Math.min(600, Number(options?.width ?? 380))) * IrisFrame.d
-            const held = IrisFrame.inset(edge) - IrisFrame.band
+            const held = IrisFrame.insetOn(edge, screenScope.outputName) - IrisFrame.band
             const air = (options?.notch ?? false) && held <= 0 ? 0 : 12 * IrisFrame.d
             return Math.round(IrisFrame.band + held + width + air)
         }
@@ -49,7 +49,7 @@ Variants {
             WlrLayershell.layer: WlrLayer.Background
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusionMode: ExclusionMode.Normal
-            exclusiveZone: Math.max(IrisFrame.reserve(stub.edge, screenScope.chassisPresent), screenScope.sidebarDepth(stub.edge))
+            exclusiveZone: Math.max(IrisFrame.reserve(stub.edge, screenScope.chassisPresent, screenScope.outputName), screenScope.sidebarDepth(stub.edge))
             // One edge only: opposite-edge anchors lose the exclusive zone.
             anchors {
                 top: stub.edge === "top"

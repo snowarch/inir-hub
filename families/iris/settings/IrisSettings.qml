@@ -142,7 +142,7 @@ Item {
     // The overlay's free box: clear of the band, the Island, the Dock and the pieces on their edges.
     readonly property var room: {
         const gap = Math.round(14 * root.d)
-        const side = edge => Math.max(0, IrisFrame.safeInset(edge) - IrisFrame.band,
+        const side = edge => Math.max(0, IrisFrame.safeInset(edge, root.screen?.name ?? "") - IrisFrame.band,
             root.workspaceEmpty ? IrisFrame.emptyDepth(edge) + IrisFrame.musicReach(edge) : 0) + gap
         const left = side("left"), right = side("right"), top = side("top"), bottom = side("bottom")
         return { x: left, y: top, width: Math.max(0, root.width - left - right), height: Math.max(0, root.height - top - bottom) }

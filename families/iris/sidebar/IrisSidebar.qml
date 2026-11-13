@@ -26,7 +26,7 @@ PanelWindow {
     readonly property bool pinned: root.options.pinned ?? false
     readonly property real d: IrisStyle.density
     readonly property string outputName: root.left ? GlobalStates.sidebarLeftTargetOutput : GlobalStates.sidebarRightTargetOutput
-    readonly property real edgeHeld: IrisFrame.inset(root.left ? "left" : "right") - IrisFrame.band
+    readonly property real edgeHeld: IrisFrame.insetOn(root.left ? "left" : "right", root.outputName) - IrisFrame.band
     readonly property bool notch: (root.options.notch ?? false) && root.edgeHeld <= 0
     readonly property bool peek: root.open && !root.pinned && IrisState.sidebarPeek === root.side
     property bool editing: false
@@ -158,8 +158,8 @@ PanelWindow {
     readonly property real edgeGap: (root.notch ? 0 : 12 * root.d) + IrisFrame.band + root.edgeHeld
     readonly property real verticalGap: 12 * root.d
     readonly property real notchOverflow: root.notch ? frame.radius : 0
-    readonly property real topInset: root.verticalGap + IrisFrame.safeInset("top")
-    readonly property real bottomInset: root.verticalGap + IrisFrame.safeInset("bottom")
+    readonly property real topInset: root.verticalGap + IrisFrame.safeInset("top", root.outputName)
+    readonly property real bottomInset: root.verticalGap + IrisFrame.safeInset("bottom", root.outputName)
     readonly property real availableHeight: Math.max(1, root.height - root.topInset - root.bottomInset)
 
     IrisMorphSurface {

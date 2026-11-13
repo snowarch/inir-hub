@@ -46,7 +46,7 @@ Item {
     readonly property bool joinsEdge: root.fromIsland && IrisFrame.notch
     readonly property bool joinsFrame: root.joinsEdge && IrisFrame.framed
     function edgeClear(edge: string): real {
-        let held = IrisFrame.inset(edge)
+        let held = IrisFrame.insetOn(edge, root.outputName)
         if ((Config.options?.iris?.dock?.enable ?? true) && IrisFrame.dockEdge === edge)
             held = Math.max(held, IrisFrame.band + IrisFrame.dockBand + IrisFrame.dockMargin)
         return held - IrisFrame.band + IrisFrame.musicReach(edge) + Math.round(12 * root.d)

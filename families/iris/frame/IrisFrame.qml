@@ -101,7 +101,7 @@ QtObject {
         if (mode === "horizontal" && (edge === "left" || edge === "right")) return 0
         return 18 * root.d * Math.max(0.5, Math.min(3, Number(root.surround?.musicStrength ?? 160) / 100))
     }
-    function safeInset(edge: string): real { return root.inset(edge) + root.musicReach(edge) }
+    function safeInset(edge: string, screen: string): real { return root.insetOn(edge, screen) + root.musicReach(edge) }
     readonly property int musicAppearanceCode: ({ sculpted: 0, etched: 1, satin: 2 })[String(root.surround?.musicAppearance ?? "etched")] ?? 1
     readonly property color musicInk: {
         const colour = String(root.surround?.musicColour ?? "pearl")
@@ -227,6 +227,16 @@ QtObject {
     }
     function pieceInsetOn(side: string): real { return root.wallOn(side) + root.pieceGapOn(side) }
     function pieceDepthOn(side: string): real { return root.pieceGapOn(side) + root.pieceBand }
+    // Bubbles stand only on the screens the person chose (iris.bubbles.screenList); none chosen, or none of them
+    // connected, is every screen. A screen without them has no piece on any edge: nothing drawn, reserved or kept off.
+    readonly property var bubbleScreens: Array.from(root.bubbles?.screenList ?? [])
+    function bubblesOn(screen: string): bool {
+        const list = root.bubbleScreens
+        return list.length === 0 || list.includes(screen) || !Quickshell.screens.some(s => list.includes(s?.name ?? ""))
+    }
+    function piecesOn(edge: string, screen: string): bool {
+        return root.piecesAttached && root.pieceEdges.includes(edge) && root.bubblesOn(screen)
+    }
     // An announcement is never switched on: like Material's bar indicator it shows whenever its state is there.
     readonly property var announcements: ["shellUpdate"]
     property var availableExtras: null
@@ -265,7 +275,7 @@ QtObject {
     readonly property real bodyMargin: Math.round(8 * root.d)
     readonly property string placementMode: String(root.theme?.placement ?? "auto")
 
-    function place(origin: var, width: real, height: real, screenWidth: real, screenHeight: real, radius: real, avoid: var, air: real): var {
+    function place(origin: var, width: real, height: real, screenWidth: real, screenHeight: real, radius: real, avoid: var, air: real, screen: string): var {
         if (!origin) return { sideways: false, towardsLeft: false, towardsUp: false, x: (screenWidth - width) / 2, y: (screenHeight - height) / 2 }
         const ob = origin.obstacle ?? origin
         const cx = origin.x + origin.width / 2
@@ -278,7 +288,7 @@ QtObject {
         let right = screenWidth - width - wall("right") - root.bodyAir
         let top = wall("top") + root.bodyAir
         let bottom = screenHeight - height - wall("bottom") - root.bodyAir
-        const strip = side => root.piecesAttached && root.pieceEdges.includes(side) ? root.pieceDepthOn(side) : 0
+        const strip = side => root.piecesOn(side, screen) ? root.pieceDepthOn(side) : 0
         const sitsOn = side => side === "left" ? ob.x - wall("left") <= strip("left") + 1
             : side === "right" ? screenWidth - wall("right") - ob.x - ob.width <= strip("right") + 1
             : side === "top" ? ob.y - wall("top") <= strip("top") + 1
@@ -438,18 +448,21 @@ QtObject {
         return { tl: settle(nests.tl), tr: settle(nests.tr), bl: settle(nests.bl), br: settle(nests.br) }
     }
 
-    function reserve(edge: string, chassisPresent: bool): real {
+    function reserve(edge: string, chassisPresent: bool, screen: string): real {
         let inner = 0
         if (chassisPresent && edge === root.islandEdge) inner = Math.max(inner, root.islandDepth)
-        if (chassisPresent && root.piecesReserve && root.pieceEdges.includes(edge))
+        if (chassisPresent && root.piecesReserve && root.piecesOn(edge, screen))
             inner = Math.max(inner, root.pieceDepthOn(edge))
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockDepth)
         return Math.round(root.band + inner)
     }
-    function inset(edge: string): real {
+    // How far the frame holds an edge: on one screen, or wherever bubbles stand (`inset`, for what has no screen).
+    function inset(edge: string): real { return root.holdOf(edge, root.piecesAttached && root.pieceEdges.includes(edge)) }
+    function insetOn(edge: string, screen: string): real { return root.holdOf(edge, root.piecesOn(edge, screen)) }
+    function holdOf(edge: string, pieces: bool): real {
         let inner = 0
         if (edge === root.islandEdge) inner = Math.max(inner, root.islandVisualDepth)
-        if (root.piecesAttached && root.pieceEdges.includes(edge))
+        if (pieces)
             inner = Math.max(inner, root.pieceDepthOn(edge))
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockVisualDepth)
         return Math.round(root.band + inner)

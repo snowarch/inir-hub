@@ -284,13 +284,13 @@ Item {
             readonly property real menuLeftClear: {
                 if (!GlobalStates.sidebarLeftOpen || GlobalStates.sidebarLeftPresentationOutput !== (root.screen?.name ?? "")) return 12
                 const o = Config.options?.iris?.sidebars?.left ?? ({})
-                return IrisFrame.inset("left") + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+                return IrisFrame.insetOn("left", root.screen?.name ?? "") + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
                     + ((o?.notch ?? false) ? 0 : 12 * root.d) + 12
             }
             readonly property real menuRightClear: {
                 if (!GlobalStates.sidebarRightOpen || GlobalStates.sidebarRightPresentationOutput !== (root.screen?.name ?? "")) return 12
                 const o = Config.options?.iris?.sidebars?.right ?? ({})
-                return IrisFrame.inset("right") + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+                return IrisFrame.insetOn("right", root.screen?.name ?? "") + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
                     + ((o?.notch ?? false) ? 0 : 12 * root.d) + 12
             }
             function captureMenuAnchor(icon: Item): void {
@@ -1225,8 +1225,8 @@ Item {
                     ? Math.round(Math.min(window.width - 24, windowsContent.implicitWidth + 20 * root.d))
                     : Math.round(Math.min(Math.max(200 * root.d, menuContent.implicitWidth + 12 * root.d), 260 * root.d))
                 height: Math.round(menu.activeContent.implicitHeight + (menu.mode === "windows" ? 20 : 12) * root.d)
-                readonly property real topClear: IrisFrame.safeInset("top") + 8 * root.d
-                readonly property real bottomClear: IrisFrame.safeInset("bottom") + 8 * root.d
+                readonly property real topClear: IrisFrame.safeInset("top", root.screen?.name ?? "") + 8 * root.d
+                readonly property real bottomClear: IrisFrame.safeInset("bottom", root.screen?.name ?? "") + 8 * root.d
                 x: Math.round(root.atLeft ? dock.x + dock.width + 8 * root.d
                     : root.atRight ? dock.x - width - 8 * root.d
                     : Math.max(window.menuLeftClear, Math.min(window.width - width - window.menuRightClear, window.menuAnchor.x - width / 2)))

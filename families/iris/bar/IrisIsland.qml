@@ -1039,8 +1039,8 @@ Item {
         }
         const sceneY = root.parent?.y ?? 0
         const screenH = root.Window.window?.height ?? root.targetScreen?.height ?? 1080
-        const min = IrisFrame.safeInset("top") + Math.round(8 * root.d) - sceneY
-        const max = screenH - IrisFrame.safeInset("bottom") - Math.round(8 * root.d) - sceneY - height
+        const min = IrisFrame.safeInset("top", root.targetScreen?.name ?? "") + Math.round(8 * root.d) - sceneY
+        const max = screenH - IrisFrame.safeInset("bottom", root.targetScreen?.name ?? "") - Math.round(8 * root.d) - sceneY - height
         return Math.round(Math.max(min, Math.min(max, root.originCenterY - height / 2)))
     }
 

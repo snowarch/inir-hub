@@ -30,13 +30,9 @@ Item {
     readonly property var extraKinds: IrisPieces.extraIds
     readonly property var allSlots: root.islandSlots.concat(root.extraKinds.map(kind => "extra-" + kind),
         IrisPieces.appPieceIds(), root.trayAppSlots)
-    // Floating bubbles on the screens the person chose (iris.bubbles.screenList); none chosen, or none of them
-    // connected, is every screen.
-    readonly property var bubbleScreens: Config.options?.iris?.bubbles?.screenList ?? []
-    function bubblesOn(name: string): bool {
-        const list = root.bubbleScreens
-        return list.length === 0 || list.includes(name) || !Quickshell.screens.some(s => list.includes(s?.name ?? ""))
-    }
+    // Floating bubbles only on the screens the person chose (IrisFrame owns which): elsewhere no bubble, line or plate
+    // stands, so the frame draws no strip for them either.
+    function bubblesOn(name: string): bool { return IrisFrame.bubblesOn(name) }
     readonly property bool bubblesHere: root.bubblesOn(root.screenName)
     onBubblesHereChanged: absorbedPublish.restart()
     // A keybind's card or menu opens on the focused screen, or on the first one that shows bubbles.
@@ -496,6 +492,7 @@ Item {
         return root.linePoint(slot, zone, zone.startsWith("edge:") ? [slot] : root.lineOf(zone), root.zones)
     }
     readonly property var rects: {
+        if (!root.bubblesHere) return root.allSlots.map(() => null)
         const centres = root.allSlots.map(slot => root.placeName(slot) !== "island" && root.kindOf(slot).length > 0 ? root.placeOf(slot) : null)
         return root.stepAside(centres).map(centre => centre
             ? { x: Math.round(centre.x - root.size / 2), y: Math.round(centre.y - root.size / 2), size: root.size } : null)
@@ -581,7 +578,7 @@ Item {
     }
     readonly property var plates: {
         const out = []
-        if (!root.barred) return out
+        if (!root.barred || !root.bubblesHere) return out
         for (const zone of root.zones) {
             const line = root.lineOf(zone.zone)
             if (line.length < 2) continue
@@ -833,15 +830,15 @@ Item {
                 && (sidebars?.left?.enable ?? true)) {
             const o = sidebars?.left ?? ({})
             const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
-            const notch = (o?.notch ?? false) && IrisFrame.inset("left") <= IrisFrame.band
-            out.push({ x: 0, y: 0, width: IrisFrame.inset("left") + width + (notch ? 0 : 12 * root.d), height: root.height })
+            const notch = (o?.notch ?? false) && IrisFrame.insetOn("left", root.screenName) <= IrisFrame.band
+            out.push({ x: 0, y: 0, width: IrisFrame.insetOn("left", root.screenName) + width + (notch ? 0 : 12 * root.d), height: root.height })
         }
         if (GlobalStates.sidebarRightOpen && GlobalStates.sidebarRightPresentationOutput === root.screenName
                 && (sidebars?.right?.enable ?? true)) {
             const o = sidebars?.right ?? ({})
             const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
-            const notch = (o?.notch ?? false) && IrisFrame.inset("right") <= IrisFrame.band
-            const depth = IrisFrame.inset("right") + width + (notch ? 0 : 12 * root.d)
+            const notch = (o?.notch ?? false) && IrisFrame.insetOn("right", root.screenName) <= IrisFrame.band
+            const depth = IrisFrame.insetOn("right", root.screenName) + width + (notch ? 0 : 12 * root.d)
             out.push({ x: root.width - depth, y: 0, width: depth, height: root.height })
         }
         return out
@@ -1717,7 +1714,7 @@ Item {
     readonly property var cardPlacement: root.cardAnchor && !root.cardHangs
         ? IrisFrame.place(root.cardOrigin, card.width, card.height, root.width, root.height, root.cardBaseRadius,
             root.cardBesides, !root.cardFromSatellite && IrisStyle.cardJoins
-                ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap)) : null
+                ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap), root.screenName) : null
     readonly property string cardOriginId: {
         if (root.cardHangs || root.cardFromIslandPiece) return "island"
         if (root.cardSource.startsWith("island-")) return "satellite:" + root.cardSource.slice(7)
@@ -1726,7 +1723,7 @@ Item {
         if (slot.length === 0) return ""
         return root.plateFor(slot) ? "plate:" + root.plateKey(slot) : "piece:" + slot
     }
-    function edgeClear(edge: string): real { return Math.round(8 * root.d) + IrisFrame.safeInset(edge) }
+    function edgeClear(edge: string): real { return Math.round(8 * root.d) + IrisFrame.safeInset(edge, root.screenName) }
 
     MouseArea {
         anchors.fill: parent

@@ -61,7 +61,7 @@ Item {
     readonly property real baseRadius: IrisStyle.surfaceRadius("controlCenter", IrisStyle.radiusPanel)
     readonly property var placement: root.fromPiece
         ? IrisFrame.place(root.origin, panel.width, panel.height, root.width, root.height, root.baseRadius,
-            root.besides, IrisStyle.cardJoins ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap)) : null
+            root.besides, IrisStyle.cardJoins ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap), root.screenName) : null
     // The active Design may hold its own scene in this body (DESIGNS.md › Composiciones); the body stays this file's.
     readonly property string scene: IrisDesign.skin("controlCenter")
     readonly property real panelWidth: root.scene.length > 0 ? Math.min(root.width - 16, (360) * IrisStyle.density)
@@ -71,8 +71,8 @@ Item {
     // How far the body hangs from the Island: welded into it in iRiS, apart from it when a Design says so.
     readonly property real hang: root.scene.length > 0 ? (-IrisStyle.weld / IrisStyle.density) * IrisStyle.density : -IrisStyle.weld
     readonly property real edge: Math.round(8 * IrisStyle.density) + IrisFrame.band
-    readonly property real edgeLeft: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("left")
-    readonly property real edgeRight: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("right")
+    readonly property real edgeLeft: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("left", root.screenName)
+    readonly property real edgeRight: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("right", root.screenName)
 
     MouseArea { anchors.fill: parent; onClicked: GlobalStates.controlPanelOpen = false }
     Shortcut { sequence: "Escape"; onActivated: GlobalStates.controlPanelOpen = false }
@@ -120,7 +120,7 @@ Item {
             : (root.width - width) / 2
         y: root.placement ? root.placement.y
             : root.holding ? Math.max(12, Math.min(root.heldTop, root.height - height - root.edgeGap))
-            : root.islandSide ? Math.round(Math.max(IrisFrame.safeInset("top") + root.edge, Math.min(root.height - height - IrisFrame.safeInset("bottom") - root.edge,
+            : root.islandSide ? Math.round(Math.max(IrisFrame.safeInset("top", root.screenName) + root.edge, Math.min(root.height - height - IrisFrame.safeInset("bottom", root.screenName) - root.edge,
                 (root.origin ? root.origin.y + root.origin.height / 2 : (root.islandBody ? root.islandBody.y + root.islandBody.height / 2 : root.height / 2)) - height / 2)))
             : root.barBottom ? (root.islandBody ? root.islandBody.y - height - root.hang
                 : root.height - height - root.edgeGap - IrisFrame.band)
@@ -129,8 +129,8 @@ Item {
         onYChanged: if (!root.holding) root.heldTop = panel.y
         width: root.panelWidth
         readonly property real room: {
-            const top = IrisFrame.safeInset("top") + Math.round(8 * IrisStyle.density)
-            const bottom = IrisFrame.safeInset("bottom") + Math.round(8 * IrisStyle.density)
+            const top = IrisFrame.safeInset("top", root.screenName) + Math.round(8 * IrisStyle.density)
+            const bottom = IrisFrame.safeInset("bottom", root.screenName) + Math.round(8 * IrisStyle.density)
             const body = root.islandBody
             if (root.placement || root.islandSide || !body) return root.height - top - bottom
             return root.barBottom ? body.y - top : root.height - (body.y + body.height) - bottom
