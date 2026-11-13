@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Dialogs
 import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Shapes
@@ -428,10 +427,9 @@ Item {
         root.expanded = false
         avatarDialog.open()
     }
-    FileDialog {
+    FilePickerDialog {
         id: avatarDialog
         title: Translation.tr("Profile picture")
-        fileMode: FileDialog.OpenFile
         nameFilters: [Translation.tr("Images") + " (*.png *.jpg *.jpeg *.webp *.bmp *.avif)"]
         onAccepted: {
             setAvatar.command = [Quickshell.shellPath("scripts/accounts/set-avatar.sh"), FileUtils.trimFileProtocol(String(selectedFile))]
@@ -525,6 +523,17 @@ Item {
             || root.targetScreen?.name !== GlobalStates.focusedScreen?.name) return
         root.event = { icon: icon, tint: tint, title: title, detail: detail, value: value, kind: kind, failed: false, image: root.eventImage }
         root.eventImage = ""
+        eventTimer.restart()
+    }
+    // A right click on a timer's face stops it; the notice that says so takes the stop back on a press. Said even
+    // with notices off: the person asked for it, and the notice is the only way back.
+    function stopTimerFromFace(): void {
+        const kind = root.timerKind
+        if (kind.length === 0) return
+        const glyph = root.timerGlyph
+        TimerService.stopTimer(kind)
+        root.event = { icon: glyph, tint: IrisStyle.identity.orange, title: Translation.tr("Stopped"), detail: Translation.tr("Undo"),
+            value: -1, kind: "status", failed: false, image: "", undo: true }
         eventTimer.restart()
     }
     // A job that ends says so in the compact Island: its strip fills and a pulse runs through it, or it fails in signal.
@@ -1123,7 +1132,9 @@ Item {
         id: hoverDelay
         interval: Math.max(120, Number(root.options?.hoverDelay ?? 300))
         onTriggered: {
-            if (!root.hoverArmed || !root.pointerOnIsland || root.expanded || root.feedback || root.editingDesktop || wheelQuiet.running) return
+            // A notice is read and answered where it stands (Undo, turn off, open the picture): hover never covers it.
+            if (!root.hoverArmed || !root.pointerOnIsland || root.expanded || root.feedback || root.momentShown
+                || root.editingDesktop || wheelQuiet.running) return
             if (root.pieceHovered) return
             if (root.tapPage === "desktop") root.openPage("desktop", false, null)
         }
@@ -3031,12 +3042,15 @@ Item {
                 width: root.zoned && !root.vertical ? Math.round(root.heartLength) : parent.width
                 height: root.zoned && root.vertical ? Math.round(root.heartLength) : parent.height + compactPress.noticeReach
                 enabled: !root.inlineExpanded && (!root.zoned || root.heartShown)
-                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                // A timer's face: right click stops it (with undo), middle click pauses it.
+                readonly property bool timerFace: root.compactMode === "timer"
+                acceptedButtons: Qt.LeftButton | Qt.MiddleButton | (compactPress.timerFace ? Qt.RightButton : Qt.NoButton)
                 cursorShape: islandGrip.carrying ? Qt.ClosedHandCursor
                     : IrisState.edit ? Qt.OpenHandCursor : Qt.PointingHandCursor
                 preventStealing: true
                 Accessible.role: Accessible.Button
                 Accessible.name: IrisState.edit ? Translation.tr("Edit Dynamic Island")
+                    : root.eventShown && root.event.undo === true ? Translation.tr("Undo")
                     : root.expanded ? Translation.tr("Collapse island") : Translation.tr("Expand island")
                 pressAndHoldInterval: 380
                 QtObject {
@@ -3079,12 +3093,22 @@ Item {
                 onClicked: mouse => {
                     if (islandGrip.carrying) return
                     if (mouse.button === Qt.MiddleButton) {
-                        if (root.hasMedia) MprisController.togglePlaying()
+                        if (compactPress.timerFace) TimerService.toggleTimer(root.timerKind)
+                        else if (root.hasMedia) MprisController.togglePlaying()
                         return
                     }
                     if (IrisState.edit) {
                         IrisState.editSelection = ""
                         IrisState.editTarget = "island"
+                        return
+                    }
+                    if (mouse.button === Qt.RightButton) {
+                        if (compactPress.timerFace) root.stopTimerFromFace()
+                        return
+                    }
+                    if (root.eventShown && root.event.undo === true) {
+                        TimerService.undoStop()
+                        eventTimer.stop()
                         return
                     }
                     // The mark's own name is showing: the press it asks for lands here.

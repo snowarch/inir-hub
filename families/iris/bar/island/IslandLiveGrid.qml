@@ -29,6 +29,9 @@ GridLayout {
     // Worth a grid when two or more live and at least one is the system's own (the page is reached through those).
     readonly property bool useful: grid.count >= 2 && (grid.island.recording || grid.timing || grid.jobs.length > 0)
     readonly property real pillHeight: Math.round(54 * grid.d)
+    // Pills that share a row two by two (the timer always takes its own): an odd last one takes the row too.
+    readonly property int halves: grid.pills - (grid.timing ? 1 : 0)
+    function lastAlone(at: int): bool { return grid.halves % 2 === 1 && at === grid.halves - 1 }
 
     columns: 2
     columnSpacing: Math.round(8 * grid.d)
@@ -43,10 +46,13 @@ GridLayout {
         property string title: ""
         property string meta: ""
         property string figure: ""
+        property alias extra: extraSlot.data
+        // A pill with two controls, or one left alone on its row, takes the whole row.
+        property bool wide: false
         signal tapped()
         Layout.fillWidth: true
         Layout.preferredWidth: 1
-        Layout.columnSpan: 1
+        Layout.columnSpan: pill.wide ? 2 : 1
         implicitHeight: grid.pillHeight
         radius: IrisStyle.capsule(height)
         color: pillTap.hovered ? IrisStyle.fillHover : IrisStyle.fill
@@ -92,6 +98,13 @@ GridLayout {
                 color: grid.nothing ? IrisStyle.text : pill.tint
                 pixelSize: Math.round(IrisStyle.typeHeadline * 1.05)
                 weight: IrisStyle.figureWeight
+            }
+            Item {
+                id: extraSlot
+                visible: children.length > 0
+                Layout.preferredWidth: grid.pillHeight - Math.round(16 * grid.d)
+                Layout.preferredHeight: Layout.preferredWidth
+                Layout.alignment: Qt.AlignVCenter
             }
             Item {
                 id: trailSlot
@@ -155,7 +168,38 @@ GridLayout {
     }
 
     Pill {
+        visible: grid.timing
+        tint: IrisStyle.identity.orange
+        wide: true
+        meta: grid.island.timerLabel
+        title: grid.island.timerPaused ? Translation.tr("Paused") : ""
+        figure: grid.island.clockText(grid.island.timerSeconds)
+        lead: Item {
+            anchors.fill: parent
+            ProgressRing {
+                anchors.fill: parent
+                stroke: Math.max(3, 3.5 * grid.d)
+                tint: grid.nothing ? IrisStyle.text : IrisStyle.identity.orange
+                progress: grid.island.timerKind === "stopwatch" ? 1 : Math.max(0, 1 - grid.island.timerProgress)
+            }
+            Glyph { anchors.centerIn: parent; text: grid.island.timerGlyph; iconSize: Math.round(parent.width * 0.42); color: grid.nothing ? IrisStyle.text : IrisStyle.identity.orange }
+        }
+        extra: Round {
+            glyph: grid.island.timerPaused ? "play_arrow" : "pause"
+            tint: IrisStyle.identity.orange
+            Accessible.name: grid.island.timerPaused ? Translation.tr("Resume") : Translation.tr("Pause")
+            onClicked: TimerService.toggleTimer(grid.island.timerKind)
+        }
+        trail: Round {
+            glyph: "close"
+            tint: IrisStyle.text
+            Accessible.name: Translation.tr("Stop")
+            onClicked: TimerService.stopTimer(grid.island.timerKind)
+        }
+    }
+    Pill {
         visible: grid.island.recording
+        wide: grid.lastAlone(0)
         tint: IrisStyle.danger
         meta: Translation.tr("Recording")
         figure: grid.island.clockText(RecorderStatus.elapsedSeconds)
@@ -171,37 +215,13 @@ GridLayout {
         }
         onTapped: grid.island.page = "activity"
     }
-    Pill {
-        visible: grid.timing
-        tint: IrisStyle.identity.orange
-        meta: grid.island.timerLabel
-        figure: grid.island.clockText(grid.island.timerSeconds)
-        lead: Item {
-            anchors.fill: parent
-            ProgressRing {
-                anchors.fill: parent
-                stroke: Math.max(3, 3.5 * grid.d)
-                tint: grid.nothing ? IrisStyle.text : IrisStyle.identity.orange
-                progress: grid.island.timerKind === "stopwatch" ? 1 : Math.max(0, grid.island.timerProgress)
-            }
-            Glyph { anchors.centerIn: parent; text: grid.island.timerGlyph; iconSize: Math.round(parent.width * 0.42); color: grid.nothing ? IrisStyle.text : IrisStyle.identity.orange }
-        }
-        trail: Round {
-            glyph: grid.island.timerPaused ? "play_arrow" : "pause"
-            tint: IrisStyle.identity.orange
-            Accessible.name: grid.island.timerPaused ? Translation.tr("Resume") : Translation.tr("Pause")
-            onClicked: {
-                if (grid.island.timerKind === "pomodoro") TimerService.togglePomodoro()
-                else if (grid.island.timerKind === "countdown") TimerService.toggleCountdown()
-                else TimerService.toggleStopwatch()
-            }
-        }
-    }
     Repeater {
         model: grid.jobs
         Pill {
             id: jobPill
             required property var modelData
+            required property int index
+            wide: grid.lastAlone((grid.island.recording ? 1 : 0) + jobPill.index)
             readonly property real value: Number(jobPill.modelData.progress ?? -1)
             readonly property bool ended: Boolean(jobPill.modelData.ended)
             tint: Boolean(jobPill.modelData.failed) ? IrisStyle.danger : IrisStyle.identityColor(String(jobPill.modelData.tint ?? "lavender"))
@@ -226,6 +246,8 @@ GridLayout {
         Pill {
             id: devicePill
             required property var modelData
+            required property int index
+            wide: grid.lastAlone((grid.island.recording ? 1 : 0) + grid.jobs.length + devicePill.index)
             readonly property real level: Number(devicePill.modelData.battery ?? 0)
             tint: devicePill.level <= 0.2 ? IrisStyle.danger : IrisStyle.success
             meta: Translation.tr("Connected")
@@ -235,14 +257,6 @@ GridLayout {
             onTapped: grid.island.openPage("controls", true)
         }
     }
-    // An odd number of pills leaves the last one alone on its row: it takes the row, as a wide pill.
-    Item {
-        visible: grid.pills % 2 === 1
-        Layout.fillWidth: true
-        Layout.preferredWidth: 1
-        Layout.preferredHeight: 0
-    }
-
     // The song: cover, title and artist, the bars in the cover's colour; its time either side of the line; the
     // transport under it. A tap on it opens the player page.
     Rectangle {
