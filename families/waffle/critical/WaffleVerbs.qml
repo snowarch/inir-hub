@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell.Io
 import qs
 import qs.modules.common
 import qs.services
@@ -15,8 +16,31 @@ QtObject {
         GlobalStates.searchOpen = true
     }
 
+    // What Waffle's Settings can change, for the shell's settings door: the rows of its search index that carry a
+    // key, read the first time they are asked for.
+    readonly property FileView _index: FileView {
+        path: Qt.resolvedUrl("../settings/search-index.generated.json")
+        preload: false
+        blockAllReads: true
+        printErrors: false
+    }
+    property var _rows: null
+    function _settingsIndex(): var {
+        if (root._rows === null) {
+            try {
+                root._rows = JSON.parse(root._index.text()).filter(row => row.key)
+            } catch (e) {
+                root._rows = []
+            }
+        }
+        return root._rows
+    }
+
     readonly property var verbs: ({
         owner: "waffle",
+        settings: {
+            index: () => root._settingsIndex()
+        },
         // Leaving Waffle closes its panels, so they don't come back open with it.
         family: {
             leave: () => {

@@ -4,6 +4,7 @@ import qs.modules.common
 import qs.services
 import qs.services.deferred
 import qs.modules.iris.state
+import qs.modules.iris.settings
 
 // How iRiS answers the shell's shared verbs: its own Orbit, a Place in the chassis with one layout and no Studio,
 // and Spotlight for task view, the overview and the clipboard. Cleared when iRiS goes, so Material's come back.
@@ -53,8 +54,56 @@ QtObject {
         }
     ]
 
+    // What iRiS Settings can change, for the shell's settings door: each row over one config key whose value is a
+    // switch, a choice or a range, as Settings has it now (the Design's own and the compositor's stay with them).
+    // A change goes through the row itself, so whatever else that row does (a theme regeneration, a piece moved
+    // off the bar) happens too, and Settings' own Undo has it.
+    property var _indexFrom: null
+    property var _indexRows: []
+    property var _specByKey: ({})
+    function _settingsIndex(): var {
+        const specs = IrisOptions.settings
+        if (root._indexFrom === specs) return root._indexRows
+        const kinds = { "switch": "bool", "choice": "choice", "range": "number" }
+        const rows = [], byKey = {}
+        for (const spec of specs) {
+            const key = String(spec.path ?? "")
+            const type = kinds[spec.kind]
+            if (!type || !key || key === "panelFamily" || spec.mirror || key in byKey) continue
+            if (spec.widget || spec.widgetDesign || spec.comp || spec.state || spec.set || spec.flags || spec.bundle || spec.numeric) continue
+            if (!IrisOptions.fits(spec)) continue
+            const section = IrisOptions.sectionById(IrisOptions.sectionOf(spec))
+            const row = { key: key, type: type, label: String(spec.label ?? ""), section: String(spec.group ?? section?.title ?? ""),
+                page: String(section?.title ?? ""), description: String(spec.description ?? ""), keywords: Array.from(spec.keywords ?? []) }
+            if (type === "choice") {
+                row.choices = Array.from(IrisOptions.choicesOf(spec) ?? []).map(choice => ({ value: choice.value, label: String(choice.label ?? choice.value) }))
+                if (row.choices.length === 0) continue
+            } else if (type === "number") {
+                Object.assign(row, { min: Number(spec.min), max: Number(spec.max), step: Number(spec.step ?? 0), scale: Number(spec.scale ?? 1), unit: String(spec.unit ?? "").trim() })
+                if (!Number.isFinite(row.min) || !Number.isFinite(row.max)) continue
+            }
+            byKey[key] = spec
+            rows.push(row)
+        }
+        root._indexFrom = specs
+        root._indexRows = rows
+        root._specByKey = byKey
+        return rows
+    }
+    function _applySetting(key: string, value: var): bool {
+        root._settingsIndex()
+        const spec = root._specByKey[key]
+        if (!spec) return false
+        IrisOptions.commit(spec, value)
+        return true
+    }
+
     readonly property var verbs: ({
         owner: "iris",
+        settings: {
+            index: () => root._settingsIndex(),
+            apply: (key, value) => root._applySetting(key, value)
+        },
         actions: {
             list: () => root._actions
         },
