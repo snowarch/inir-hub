@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.services
@@ -94,6 +95,8 @@ Item {
             TextField {
                 cursorDelegate: TextCursor {}
                 id: searchField
+                QQC.ContextMenu.menu: null
+                QQC.ContextMenu.onRequested: position => TextEditMenu.open(searchField, position)
                 Layout.fillWidth: true
                 placeholderText: Translation.tr("Search fonts...")
                 renderType: Text.NativeRendering

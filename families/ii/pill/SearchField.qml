@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls
 import qs.modules.common
 import qs.modules.common.widgets
@@ -45,6 +46,8 @@ Item {
 
     TextField {
         id: field
+        QQC.ContextMenu.menu: null
+        QQC.ContextMenu.onRequested: position => TextEditMenu.open(field, position)
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: glyph.right
         anchors.leftMargin: PillTheme.showGlyphs ? 10 * root.s : 0

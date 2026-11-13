@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
@@ -899,6 +900,8 @@ Item {
                             TextField {
                                 cursorDelegate: TextCursor {}
                                 id: pwField
+                                QQC.ContextMenu.menu: null
+                                QQC.ContextMenu.onRequested: position => TextEditMenu.open(pwField, position)
                                 anchors.left: parent.left
                                 anchors.leftMargin: 10 * root.s
                                 anchors.right: pwRight.left
@@ -1058,6 +1061,8 @@ Item {
                 TextField {
                     cursorDelegate: TextCursor {}
                     id: crField
+                    QQC.ContextMenu.menu: null
+                    QQC.ContextMenu.onRequested: position => TextEditMenu.open(crField, position)
                     visible: cr.editing
                     anchors.right: parent.right
                     anchors.rightMargin: 8 * root.s

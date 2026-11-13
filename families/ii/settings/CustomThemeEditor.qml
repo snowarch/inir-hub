@@ -1,7 +1,7 @@
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Dialogs
 import Quickshell
 import Quickshell.Io
 import qs.services
@@ -1257,6 +1257,8 @@ ColumnLayout {
                     TextField {
                         cursorDelegate: TextCursor {}
                         id: presetSearchField
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(presetSearchField, position)
                         Layout.fillWidth: true
                         placeholderText: Translation.tr("Search presets...")
                         renderType: Text.NativeRendering
@@ -1520,6 +1522,8 @@ ColumnLayout {
 
                     TextArea {
                         id: exportTextArea
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(exportTextArea, position)
                         readOnly: true
                         text: JSON.stringify(Config.options.appearance.customTheme, null, 2)
                         renderType: Text.NativeRendering
@@ -1647,6 +1651,8 @@ ColumnLayout {
                     TextArea {
                         cursorDelegate: TextCursor {}
                         id: importTextArea
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(importTextArea, position)
                         placeholderText: Translation.tr("Paste theme JSON here...")
                         renderType: Text.NativeRendering
                         font.family: Appearance.font.family.monospace
@@ -2437,7 +2443,7 @@ ColumnLayout {
         property string dialogKey: ""
         property color dialogColor: Appearance.colors.colOutline
 
-        ColorDialog {
+        ColorPickerDialog {
             id: colorPicker
             selectedColor: paletteCard.dialogColor
             onAccepted: {

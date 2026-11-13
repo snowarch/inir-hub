@@ -3,6 +3,7 @@ import qs.modules.common.widgets
 import qs.modules.common.functions
 import qs.services
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
@@ -286,6 +287,8 @@ Item {
                 TextArea {
                     cursorDelegate: TextCursor {}
                     id: textArea
+                    QQC.ContextMenu.menu: null
+                    QQC.ContextMenu.onRequested: position => TextEditMenu.open(textArea, position)
                     width: scrollView.availableWidth
                     wrapMode: TextArea.Wrap
                     renderType: Text.NativeRendering

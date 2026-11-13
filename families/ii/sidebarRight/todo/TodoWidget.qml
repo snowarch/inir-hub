@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
@@ -292,6 +293,8 @@ Item {
 
                 TextField {
                     id: todoInput
+                    QQC.ContextMenu.menu: null
+                    QQC.ContextMenu.onRequested: position => TextEditMenu.open(todoInput, position)
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls
 import Quickshell
 import qs.modules.common
@@ -327,6 +328,8 @@ PillSurface {
                     TextField {
                         cursorDelegate: TextCursor {}
                         id: cityField
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(cityField, position)
                         visible: cityBox.editing
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -978,6 +981,8 @@ PillSurface {
                     TextField {
                         cursorDelegate: TextCursor {}
                         id: titleField
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(titleField, position)
                         anchors.fill: parent
                         background: null
                         padding: 0
@@ -1058,6 +1063,8 @@ PillSurface {
                     TextField {
                         cursorDelegate: TextCursor {}
                         id: startField
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(startField, position)
                         anchors.fill: parent
                         background: null
                         padding: 0
@@ -1093,6 +1100,8 @@ PillSurface {
                     TextField {
                         cursorDelegate: TextCursor {}
                         id: endField
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(endField, position)
                         anchors.fill: parent
                         background: null
                         padding: 0

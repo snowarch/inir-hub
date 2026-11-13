@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
@@ -616,6 +617,8 @@ Loader {
                         TextArea {
                             cursorDelegate: TextCursor { accent: IrisStyle.accent }
                             id: noteEditor
+                            QQC.ContextMenu.menu: null
+                            QQC.ContextMenu.onRequested: position => TextEditMenu.open(noteEditor, position)
                             placeholderText: Translation.tr("Write something to keep…")
                             placeholderTextColor: IrisStyle.muted
                             color: IrisStyle.text

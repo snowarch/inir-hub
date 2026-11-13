@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.modules.common
@@ -77,6 +78,8 @@ Item {
             TextField {
                 cursorDelegate: TextCursor {}
                 id: searchField
+                QQC.ContextMenu.menu: null
+                QQC.ContextMenu.onRequested: position => TextEditMenu.open(searchField, position)
                 Layout.fillWidth: true
                 placeholderText: Translation.tr("Search themes...")
                 renderType: Text.NativeRendering
