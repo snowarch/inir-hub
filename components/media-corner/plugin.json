@@ -4,7 +4,7 @@
     "name": "Media Corner",
     "summary": "Browse anime, films and series and see where they stream",
     "icon": "movie",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "parts": {
         "panel": "Panel.qml"
     },
