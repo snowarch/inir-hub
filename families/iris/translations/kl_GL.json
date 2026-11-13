@@ -2436,5 +2436,13 @@
   "Glyph art": "Naqinnernik eqqumiitsuliaq",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Widgetip tamarmi tunuani igalaap tunuliaqutaq qanoq taartigissanersoq: appasissoq erseqqissuuvoq, qaffasissoq immulersorpoq.",
   "Bubbles on": "Bubbles-it uani",
-  "The bubbles off the Island. None chosen shows them on every screen.": "Bubbles-it Island-ip silataani. Qinigaqanngikkuni skærmit tamaasa takuneqarsinnaapput."
+  "The bubbles off the Island. None chosen shows them on every screen.": "Bubbles-it Island-ip silataani. Qinigaqanngikkuni skærmit tamaasa takuneqarsinnaapput.",
+  "Floating tools": "Floating tools-it",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: immiussivik, mixer, FPS killiliussaq, crosshair, allattukkat il.il. pinnguaatip qaavani; ataavartinniarukku pin-iuk.",
+  "Dim the screen behind": "Saqqummersitsivik tunuani taarsiguk",
+  "Tool background": "Atortut tunuliaqutaat",
+  "How solid each tool's plate is; a pinned tool can set its own.": "Atortut tamarmik tunuliaqutaasa qanoq issutsinerat; pin-iusoq namminerisaminik pisinnaavoq.",
+  "Pinned tools that let clicks through": "Pin-iusut click-it ingerlatittartut",
+  "Their opacity, so the game shows behind them.": "Ersittussusiat, pinnguaat tunuani takuneqarsinnaaqqullugu.",
+  "Zoom in on open": "Ammarneqarnerani angilliguk"
 }

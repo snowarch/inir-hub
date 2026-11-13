@@ -2436,5 +2436,13 @@
   "Glyph art": "Glif sanatı",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Her widget'ın arkasındaki camın duvar kâğıdını ne kadar buzlayacağı: düşükte net kalır, yüksekte süt gibi olur.",
   "Bubbles on": "Baloncuklar",
-  "The bubbles off the Island. None chosen shows them on every screen.": "Island dışındaki baloncuklar. Hiçbiri seçilmezse her ekranda görünür."
+  "The bubbles off the Island. None chosen shows them on every screen.": "Island dışındaki baloncuklar. Hiçbiri seçilmezse her ekranda görünür.",
+  "Floating tools": "Kayan araçlar",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: kaydedici, karıştırıcı, kare sınırı, nişangâh, notlar ve dahası oyunun üstünde; kalması için birini sabitleyin.",
+  "Dim the screen behind": "Arkadaki ekranı karart",
+  "Tool background": "Araç arka planı",
+  "How solid each tool's plate is; a pinned tool can set its own.": "Her aracın zemininin ne kadar dolu olduğu; sabitlenen birinin kendi değeri olabilir.",
+  "Pinned tools that let clicks through": "Tıklamaları geçiren sabit araçlar",
+  "Their opacity, so the game shows behind them.": "Oyun arkada görünsün diye opaklıkları.",
+  "Zoom in on open": "Açılırken yakınlaştır"
 }

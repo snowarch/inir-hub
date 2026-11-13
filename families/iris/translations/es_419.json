@@ -2436,5 +2436,13 @@
   "Glyph art": "Arte de glifos",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Cuánto empaña el cristal detrás de cada widget al fondo de pantalla: bajo lo deja nítido, alto lo vuelve lechoso.",
   "Bubbles on": "Burbujas en",
-  "The bubbles off the Island. None chosen shows them on every screen.": "Las burbujas fuera de la Island. Sin ninguna elegida, aparecen en todas las pantallas."
+  "The bubbles off the Island. None chosen shows them on every screen.": "Las burbujas fuera de la Island. Sin ninguna elegida, aparecen en todas las pantallas.",
+  "Floating tools": "Herramientas flotantes",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: grabadora, mezclador, límite de FPS, mira, notas y más sobre lo que juegas; fija una para que se quede.",
+  "Dim the screen behind": "Oscurecer la pantalla detrás",
+  "Tool background": "Fondo de las herramientas",
+  "How solid each tool's plate is; a pinned tool can set its own.": "Qué tan sólida es la placa de cada herramienta; una fijada puede tener la suya.",
+  "Pinned tools that let clicks through": "Herramientas fijadas que dejan pasar clics",
+  "Their opacity, so the game shows behind them.": "Su opacidad, para que el juego se vea detrás.",
+  "Zoom in on open": "Acercar al abrir"
 }

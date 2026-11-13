@@ -2436,5 +2436,13 @@
   "Glyph art": "فن الرموز",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "مدى تغبيش الزجاج خلف كل أداة لخلفية الشاشة: المنخفض يبقيها واضحة، والمرتفع يجعلها حليبية.",
   "Bubbles on": "الفقاعات على",
-  "The bubbles off the Island. None chosen shows them on every screen.": "الفقاعات خارج الـ Island. إن لم تختر شيئًا تظهر على كل الشاشات."
+  "The bubbles off the Island. None chosen shows them on every screen.": "الفقاعات خارج الـ Island. إن لم تختر شيئًا تظهر على كل الشاشات.",
+  "Floating tools": "الأدوات العائمة",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: مسجل، خلاط، حد الإطارات، تصويب، ملاحظات والمزيد فوق ما تلعبه؛ ثبّت أداة لتبقى.",
+  "Dim the screen behind": "تعتيم الشاشة خلفها",
+  "Tool background": "خلفية الأدوات",
+  "How solid each tool's plate is; a pinned tool can set its own.": "مدى صلابة لوح كل أداة؛ يمكن للأداة المثبتة أن تحدد قيمتها.",
+  "Pinned tools that let clicks through": "الأدوات المثبتة التي تمرر النقرات",
+  "Their opacity, so the game shows behind them.": "شفافيتها، لتظهر اللعبة خلفها.",
+  "Zoom in on open": "تكبير عند الفتح"
 }

@@ -2436,5 +2436,13 @@
   "Glyph art": "Символьная графика",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Насколько стекло под каждым виджетом размывает обои: при малом значении они чёткие, при большом — молочные.",
   "Bubbles on": "Пузыри на",
-  "The bubbles off the Island. None chosen shows them on every screen.": "Пузыри вне Island. Если ничего не выбрано, они видны на всех экранах."
+  "The bubbles off the Island. None chosen shows them on every screen.": "Пузыри вне Island. Если ничего не выбрано, они видны на всех экранах.",
+  "Floating tools": "Плавающие инструменты",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: запись, микшер, лимит FPS, прицел, заметки и многое другое поверх игры; закрепите инструмент, чтобы он остался.",
+  "Dim the screen behind": "Затемнять экран позади",
+  "Tool background": "Фон инструментов",
+  "How solid each tool's plate is; a pinned tool can set its own.": "Насколько плотная подложка у каждого инструмента; у закреплённого может быть своя.",
+  "Pinned tools that let clicks through": "Закреплённые инструменты, пропускающие клики",
+  "Their opacity, so the game shows behind them.": "Их непрозрачность, чтобы игра была видна позади.",
+  "Zoom in on open": "Приближение при открытии"
 }

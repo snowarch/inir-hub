@@ -2436,5 +2436,13 @@
   "Glyph art": "ग्लिफ़ कला",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "हर विजेट के पीछे का काँच वॉलपेपर को कितना धुंधला करे: कम पर साफ़ रहता है, ज़्यादा पर दूधिया हो जाता है।",
   "Bubbles on": "बबल यहाँ",
-  "The bubbles off the Island. None chosen shows them on every screen.": "Island के बाहर के बबल। कुछ न चुनें तो हर स्क्रीन पर दिखते हैं।"
+  "The bubbles off the Island. None chosen shows them on every screen.": "Island के बाहर के बबल। कुछ न चुनें तो हर स्क्रीन पर दिखते हैं।",
+  "Floating tools": "फ़्लोटिंग टूल",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: रिकॉर्डर, मिक्सर, फ़्रेम सीमा, क्रॉसहेयर, नोट्स और बहुत कुछ गेम के ऊपर; किसी को पिन करें ताकि वह रहे।",
+  "Dim the screen behind": "पीछे की स्क्रीन धुंधली करें",
+  "Tool background": "टूल पृष्ठभूमि",
+  "How solid each tool's plate is; a pinned tool can set its own.": "हर टूल की प्लेट कितनी ठोस हो; पिन किया टूल अपनी रख सकता है।",
+  "Pinned tools that let clicks through": "क्लिक पार होने देने वाले पिन टूल",
+  "Their opacity, so the game shows behind them.": "उनकी अपारदर्शिता, ताकि गेम पीछे दिखे।",
+  "Zoom in on open": "खोलते समय ज़ूम"
 }

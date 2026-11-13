@@ -2436,5 +2436,13 @@
   "Glyph art": "字符画",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "每个小部件背后的玻璃对壁纸的磨砂程度：低则保持清晰，高则变得如牛奶般朦胧。",
   "Bubbles on": "气泡显示于",
-  "The bubbles off the Island. None chosen shows them on every screen.": "Island 之外的气泡。未选择时，所有屏幕都会显示。"
+  "The bubbles off the Island. None chosen shows them on every screen.": "Island 之外的气泡。未选择时，所有屏幕都会显示。",
+  "Floating tools": "浮动工具",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G：录制、混音、帧率上限、准星、笔记等，叠在游戏之上；固定一个即可让它留下。",
+  "Dim the screen behind": "调暗后方屏幕",
+  "Tool background": "工具背景",
+  "How solid each tool's plate is; a pinned tool can set its own.": "每个工具底板的不透明度；固定的工具可单独设置。",
+  "Pinned tools that let clicks through": "可点击穿透的固定工具",
+  "Their opacity, so the game shows behind them.": "它们的不透明度，让游戏在后方可见。",
+  "Zoom in on open": "打开时缩放"
 }

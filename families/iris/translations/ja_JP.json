@@ -2436,5 +2436,13 @@
   "Glyph art": "グリフアート",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "各ウィジェットの背後のガラスが壁紙をどれだけ曇らせるか。低いとくっきり、高いと乳白色になります。",
   "Bubbles on": "バブルの表示先",
-  "The bubbles off the Island. None chosen shows them on every screen.": "Island の外のバブル。何も選ばなければすべての画面に表示されます。"
+  "The bubbles off the Island. None chosen shows them on every screen.": "Island の外のバブル。何も選ばなければすべての画面に表示されます。",
+  "Floating tools": "フローティングツール",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: 録画、ミキサー、FPS 上限、クロスヘア、メモなどをゲームの上に。ピン留めすると残ります。",
+  "Dim the screen behind": "背後の画面を暗くする",
+  "Tool background": "ツールの背景",
+  "How solid each tool's plate is; a pinned tool can set its own.": "各ツールの背景の不透明度。ピン留めしたツールは個別に設定できます。",
+  "Pinned tools that let clicks through": "クリックを通すピン留めツール",
+  "Their opacity, so the game shows behind them.": "後ろのゲームが見えるようにする不透明度。",
+  "Zoom in on open": "開くときにズーム"
 }

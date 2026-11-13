@@ -20,6 +20,7 @@ import qs.modules.iris.osk
 import qs.modules.shared.background
 import qs.modules.shared.background.widgets
 import qs.modules.shared.lock
+import qs.modules.shared.overlay
 import qs.modules.iris.state
 import qs.modules.iris.frame
 import qs.modules.iris.prism
@@ -276,7 +277,7 @@ Item {
 
     OnDemandPanelLoader {
         identifier: "irisOverlay"
-        open: GlobalStates.overlayOpen
+        open: OverlayContext.wanted
         requireEnabledPanel: false
         keep: true
         source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml")

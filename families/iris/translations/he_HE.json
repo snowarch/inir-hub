@@ -2436,5 +2436,13 @@
   "Glyph art": "אמנות גליפים",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "כמה הזכוכית מאחורי כל וידג׳ט מעמעמת את הטפט: נמוך משאיר אותו חד, גבוה הופך אותו לחלבי.",
   "Bubbles on": "בועות על",
-  "The bubbles off the Island. None chosen shows them on every screen.": "הבועות מחוץ ל-Island. בלי בחירה הן מופיעות בכל המסכים."
+  "The bubbles off the Island. None chosen shows them on every screen.": "הבועות מחוץ ל-Island. בלי בחירה הן מופיעות בכל המסכים.",
+  "Floating tools": "כלים צפים",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: מקליט, מיקסר, מגבלת פריימים, כוונת, פתקים ועוד מעל המשחק; הצמידו כלי כדי שיישאר.",
+  "Dim the screen behind": "החשכת המסך מאחור",
+  "Tool background": "רקע הכלים",
+  "How solid each tool's plate is; a pinned tool can set its own.": "כמה אטום המשטח של כל כלי; כלי מוצמד יכול לקבוע לעצמו.",
+  "Pinned tools that let clicks through": "כלים מוצמדים שמעבירים לחיצות",
+  "Their opacity, so the game shows behind them.": "השקיפות שלהם, כדי שהמשחק ייראה מאחור.",
+  "Zoom in on open": "הגדלה בפתיחה"
 }

@@ -2436,5 +2436,13 @@
   "Glyph art": "Glyph art",
   "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.",
   "Bubbles on": "Bubbles on",
-  "The bubbles off the Island. None chosen shows them on every screen.": "The bubbles off the Island. None chosen shows them on every screen."
+  "The bubbles off the Island. None chosen shows them on every screen.": "The bubbles off the Island. None chosen shows them on every screen.",
+  "Floating tools": "Floating tools",
+  "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.": "Super+G: recorder, mixer, frame cap, crosshair, notes and more over what you play; pin one to keep it there.",
+  "Dim the screen behind": "Dim the screen behind",
+  "Tool background": "Tool background",
+  "How solid each tool's plate is; a pinned tool can set its own.": "How solid each tool's plate is; a pinned tool can set its own.",
+  "Pinned tools that let clicks through": "Pinned tools that let clicks through",
+  "Their opacity, so the game shows behind them.": "Their opacity, so the game shows behind them.",
+  "Zoom in on open": "Zoom in on open"
 }
