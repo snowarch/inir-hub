@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.15",
+    "version": "2.34.16",
     "changes": {
+        "2.34.16": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in Waffle Settings › Interface › Floating tools", "Live pins show on the desktop under Waffle too", "Text fields open their right-click menu in Waffle's look", "Task View previews stay live when focus moves", "A fresh install starts with no wallpaper or backdrop dim"],
         "2.34.15": ["Choosing a file or a colour opens the shell's own picker in your colours, not a white window"],
         "2.34.14": ["Media flyout: a live stream hides its timeline instead of sliding it back and forth", "Taskbar menus wear the taskbar’s own colour and glass", "A window preview no longer covers an open taskbar menu"],
         "2.34.13": ["On Umbriel, an app's menu in the taskbar sends its window to the scratchpad and back"],
@@ -39,7 +40,7 @@
         "process",
         "files"
     ],
-    "minInir": "3.0.2",
+    "minInir": "3.2.0",
     "provides": "modules/waffle",
     "requires": [
         "ii"

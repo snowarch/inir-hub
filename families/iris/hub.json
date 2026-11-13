@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.85",
+    "version": "2.33.86",
     "changes": {
+      "2.33.86": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in iRiS Settings › Gaming & Fullscreen › Floating tools", "Island timers: right click stops one (with Undo), middle click pauses it; the open Island has pause and stop, and the time reads whole", "The dock slides its icons into place when an app opens or closes, without a flicker", "Text fields open their right-click menu in iRiS's look, inside the panel, so a sidebar no longer closes under it", "Window previews in Orbit and the Overview stay live when focus moves", "A fresh install starts with no wallpaper or backdrop dim"],
       "2.33.85": ["Choosing a file, a folder or a picture opens the shell's own picker in your colours, not a white window"],
       "2.33.84": ["One key can open a page of the Island and close it again: `inir iris togglePage desktop`", "Edit desktop: the size keys over a widget take the pointer after you move it"],
       "2.33.83": ["Bubbles can live on the screens you pick (Settings, Display, Screens): the Island elsewhere stays clean", "Island player: a live stream shows Live with a full line instead of a timeline that slides back and forth", "On Umbriel, an app's menu in the dock sends its window to the scratchpad and back", "Island: a hub widget's module can fill its row on the Desktop page (the radio's player)", "Player chips show the same cover as the player, a station's logo included"],
@@ -106,7 +107,7 @@
         "google.com",
         "startpage.com"
     ],
-    "minInir": "3.1.0",
+    "minInir": "3.2.0",
     "provides": "modules/iris",
     "preview": "preview.webp"
 }
