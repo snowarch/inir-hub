@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import qs
 import qs.services
 import qs.modules.common
@@ -14,20 +15,41 @@ ColumnLayout {
     id: root
 
     readonly property real d: IrisStyle.density
-    readonly property string outputName: GlobalStates.focusedScreen?.name ?? ""
-    // Widgets without an iRiS face that are on this screen anyway, listed after the set so they count and can be taken away.
+    readonly property string here: GlobalStates.focusedScreen?.name ?? ""
+    // With widgets on two or more screens the set is picked for one of them (the one the gallery opened on, until another
+    // is picked above the set) or for every screen at once ("*"); with one, it is that screen's.
+    readonly property var screens: IrisFaceData.widgetScreens
+    readonly property bool picking: root.screens.length > 1
+    property string chosen: ""
+    readonly property bool everyScreen: root.picking && root.chosen === "*"
+    readonly property string outputName: !root.picking ? root.here
+        : root.screens.includes(root.chosen) ? root.chosen
+        : root.screens.includes(root.here) ? root.here : root.screens[0]
+    // Widgets without an iRiS face that are on the desktop anyway, listed after the set so they count and can be taken away.
     readonly property var entries: {
         Config.revision
-        return IrisFaceData.galleryEntries.concat(IrisFaceData.otherEntries.filter(entry => root.isOn(entry.key)))
+        return IrisFaceData.galleryEntries.concat(IrisFaceData.otherEntries.filter(entry => root.anywhere(entry.key)))
     }
     readonly property int placed: {
         Config.revision
         return root.entries.filter(entry => root.isOn(entry.key)).length
     }
 
+    function onAt(output: string, key: string): bool {
+        return DesktopWidgetLayout.enabled(output, key, Config.getNestedValue("background.widgets." + key + ".enable", false))
+    }
+    // On for what is picked: this screen, or every screen when every screen is picked.
     function isOn(key: string): bool {
         Config.revision
-        return DesktopWidgetLayout.enabled(root.outputName, key, Config.getNestedValue("background.widgets." + key + ".enable", false))
+        return root.everyScreen ? root.screens.every(output => root.onAt(output, key)) : root.onAt(root.outputName, key)
+    }
+    function anywhere(key: string): bool {
+        Config.revision
+        return root.everyScreen ? root.screens.some(output => root.onAt(output, key)) : root.onAt(root.outputName, key)
+    }
+    function toggle(key: string, on: bool): void {
+        if (root.everyScreen) DesktopWidgetLayout.setGloballyEnabled(key, on)
+        else IrisFaceData.setWidgetOn(root.outputName, key, on)
     }
 
     readonly property real longestWord: {
@@ -41,6 +63,15 @@ ColumnLayout {
     FontMetrics { id: nameMetrics; font.family: IrisStyle.fontRead; font.pixelSize: IrisStyle.typeMeta; font.letterSpacing: IrisStyle.tracking(IrisStyle.typeMeta) }
 
     spacing: Math.round(12 * root.d)
+
+    IrisSegmented {
+        Layout.fillWidth: true
+        visible: root.picking
+        options: [{ label: "Every screen", value: "*" }].concat(root.screens.map(output => ({ label: output, value: output })))
+        current: root.everyScreen ? "*" : root.outputName
+        accessibleName: Translation.tr("Widgets on")
+        onPicked: value => root.chosen = String(value)
+    }
 
     GridLayout {
         id: grid
@@ -124,7 +155,7 @@ ColumnLayout {
                     elide: Text.ElideRight
                 }
                 HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-                TapHandler { id: tap; onTapped: DesktopWidgetLayout.setGloballyEnabled(entry.modelData.key, !entry.on) }
+                TapHandler { id: tap; onTapped: root.toggle(entry.modelData.key, !entry.on) }
                 Accessible.role: Accessible.CheckBox
                 Accessible.name: entry.modelData.label
                 Accessible.checked: entry.on
@@ -138,7 +169,9 @@ ColumnLayout {
 
         IrisText {
             Layout.fillWidth: true
-            text: root.placed === 1 ? Translation.tr("1 widget on this screen") : Translation.tr("%1 widgets on this screen").arg(root.placed)
+            text: root.everyScreen ? (root.placed === 1 ? Translation.tr("1 widget on every screen") : Translation.tr("%1 widgets on every screen").arg(root.placed))
+                : !root.picking || root.outputName === root.here ? (root.placed === 1 ? Translation.tr("1 widget on this screen") : Translation.tr("%1 widgets on this screen").arg(root.placed))
+                : root.placed === 1 ? Translation.tr("1 widget on %1").arg(root.outputName) : Translation.tr("%1 widgets on %2").arg(root.placed).arg(root.outputName)
             color: IrisStyle.muted
             font.pixelSize: IrisStyle.typeMeta
         }
