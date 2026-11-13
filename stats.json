@@ -1,38 +1,38 @@
 {
- "generated": "2026-11-12T13:15:06Z",
+ "generated": "2026-11-13T12:37:07Z",
  "items": {
   "afterglyph": {
    "downloads": 0,
-   "installs": 9,
-   "up": 0,
+   "installs": 34,
+   "up": 1,
    "down": 0
   },
   "airisu": {
    "downloads": 0,
-   "installs": 455,
-   "up": 7,
+   "installs": 527,
+   "up": 8,
    "down": 0,
    "reactions": {
-    "❤️": 7,
+    "❤️": 6,
     "🤯": 2,
     "🫃": 7
    }
   },
   "countdown": {
    "downloads": 1,
-   "installs": 58,
+   "installs": 62,
    "up": 4,
    "down": 0
   },
   "excalidraw": {
    "downloads": 1,
-   "installs": 45,
+   "installs": 51,
    "up": 1,
    "down": 0
   },
   "fastfetch": {
    "downloads": 1,
-   "installs": 455,
+   "installs": 526,
    "up": 7,
    "down": 2,
    "reactions": {
@@ -41,44 +41,50 @@
   },
   "ii": {
    "downloads": 2,
-   "installs": 487,
+   "installs": 557,
    "up": 2,
+   "down": 0
+  },
+  "inir-docker": {
+   "downloads": 0,
+   "installs": 14,
+   "up": 0,
    "down": 0
   },
   "iris": {
    "downloads": 1,
-   "installs": 481,
-   "up": 7,
+   "installs": 553,
+   "up": 8,
    "down": 0,
    "reactions": {
-    "❤️": 6,
-    "🫃": 7
+    "❤️": 7,
+    "🫃": 8
    }
   },
   "moss-garden": {
    "downloads": 1,
-   "installs": 53,
+   "installs": 59,
    "up": 1,
    "down": 0
   },
   "paper-lantern": {
    "downloads": 1,
-   "installs": 33,
-   "up": 3,
+   "installs": 35,
+   "up": 2,
    "down": 0,
    "reactions": {
-    "🔥": 2
+    "🔥": 1
    }
   },
   "prism": {
    "downloads": 0,
-   "installs": 28,
+   "installs": 160,
    "up": 0,
    "down": 0
   },
   "radio": {
    "downloads": 0,
-   "installs": 6,
+   "installs": 19,
    "up": 1,
    "down": 0,
    "reactions": {
@@ -87,20 +93,20 @@
   },
   "shell-line": {
    "downloads": 1,
-   "installs": 45,
+   "installs": 50,
    "up": 0,
    "down": 0
   },
   "tidepool": {
    "downloads": 1,
-   "installs": 62,
+   "installs": 66,
    "up": 0,
    "down": 0
   },
   "waffle": {
    "downloads": 1,
-   "installs": 462,
-   "up": 0,
+   "installs": 533,
+   "up": 1,
    "down": 0
   }
  }
