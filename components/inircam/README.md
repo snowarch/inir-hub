@@ -1,41 +1,71 @@
-# Inircam
+# iNiR Cam
 
-A camera panel for iNiR: your IP cameras as live pictures on the desktop, and
-pinned as small windows that stay up while you work.
+IP camera viewer for [iNiR](https://github.com/snowarch/iNiR): a live camera panel (grid, enlarged, wall, manage) with pinnable desktop windows, plus a desktop widget.
 
-- **Grid** of every camera, **All cameras** as a wall, and one camera **enlarged**
-- **Pin** a camera to the desktop: a small floating window you can move and
-  resize, which stays there while the panel is closed
-- RTSP and HTTP/MJPEG streams, with TCP-first RTSP
-- **Test connection** before you save a camera, so a wrong address or password is
-  told to you right away
-- Cameras are kept in this component's own file
-  (`~/.config/inir/plugins/inircam.json`, readable by you only)
+Inspired by [OmaCam](https://github.com/entroit/omacam) (MIT, Entroit) and adapted for iNiR's component/widget system and runtime environment.
 
-## Opening it
+## Features
 
-Every family's app launcher lists **Inircam**; a click opens the panel. From a
-terminal:
+- **Camera panel**: grid view, enlarged single-camera view, all-cameras wall, and camera management/add/edit form.
+- **Pinned cameras**: pin cameras as floating desktop windows that can stay above/below windows, be moved/resized, reopened in the panel, and persisted across restarts.
+- **Desktop widget**: live camera grid on the desktop (`~/.config/inir/widgets/inircam`) with quick actions and iRiS face support.
+- **RTSP/RTSPS and HTTP streams**: brand presets (Tapo, Dahua/Imou, Reolink, Hikvision, Amcrest, UniFi Protect, ONVIF/generic, HTTP/MJPEG, custom URL).
+- **Connection testing/probing**: `ffprobe`-based probe to distinguish auth/path/offline/playback issues before/while using streams.
+- **NVR/DVR scan & discovery helpers**: camera form includes manual add, NVR/DVR channel scan, and network discovery flows (when supported by bundled helpers).
+
+## How it works (streams)
+
+- **RTSP/RTSPS feeds** are rendered using an **ffmpeg frame-pull** pipeline for reliability on systems where Qt Multimedia's FFmpeg/VAAPI backend cannot display RTSP streams correctly.
+  - `inircam-feeds` (bundled helper) runs `ffmpeg` processes that continuously refresh per-camera JPEG frames in `/tmp` (sub/main streams).
+  - The panel/widget reads and displays those frames live.
+  - The panel auto-syncs feed pullers periodically (and on camera changes) so dead streams are restarted.
+- **Non-RTSP sources** (e.g. HTTP/MJPEG URLs, depending on context/implementation) may use the Qt Multimedia path where applicable.
+- **Sub vs main streams**: grid/widget views typically use substreams for efficiency; enlarged/wall/main views can use higher-quality streams (depending on camera config and view).
+
+> If feeds appear stuck on “Connecting…”, ensure `inircam-feeds` can reach the cameras/NVR and restart feed pullers (see [Troubleshooting](#troubleshooting)).
+
+## Opening and controls
+
+### Panel (component)
+
+Open from iNiR (app launcher / component entry) or via IPC:
 
 ```bash
-inir inircam toggle
+# Panel (component)
+qs -p ~/.config/quickshell/inir ipc call inircam toggle
+qs -p ~/.config/quickshell/inir ipc call inircam open
+qs -p ~/.config/quickshell/inir ipc call inircam close
+qs -p ~/.config/quickshell/inir ipc call inircam manage
+qs -p ~/.config/quickshell/inir ipc call inircam add
+qs -p ~/.config/quickshell/inir ipc call inircam addNvr
+qs -p ~/.config/quickshell/inir ipc call inircam discover
+qs -p ~/.config/quickshell/inir ipc call inircam pin "<cameraId>"
+qs -p ~/.config/quickshell/inir ipc call inircam pins
 ```
 
-A keybind for it, in Niri's or Umbriel's config:
+Niri keybind example:
 
 ```kdl
-Mod+Shift+C { spawn "inir" "inircam" "toggle"; }
+Mod+Shift+C { spawn "qs" "-p" "/home/misomarchy/.config/quickshell/inir" "ipc" "call" "inircam" "toggle"; }
 ```
 
-## Adding a camera
+> Depending on your iNiR CLI version/config, `inir inircam <function>` may also route to the same IPC target.
 
-In the panel: **Cameras → Add camera**. Fill in the name, the host or IP, the
-username and password, and the stream address. **Test connection** checks it
-before you save.
+### Desktop widget
 
-The brand presets fill the address for you:
+The desktop widget (`custom.inircam`) registers `inircam-widget` IPC on the focused screen and provides quick actions in the widget UI (add/manage/open panel, etc.). It reads camera config from the shared inircam config file.
 
-| Brand | Main stream |
+## Adding cameras
+
+In the panel: **Cameras → Add camera**.
+
+- Choose a brand preset or **Custom URL**
+- Enter host/IP, credentials, and stream paths/URLs (main and optional substream)
+- Use **Test connection** (ffprobe) before saving when possible
+
+Common presets:
+
+| Brand | Main stream template |
 | --- | --- |
 | Tapo / TP-Link | `rtsp://{host}:554/stream1` |
 | Dahua / Imou | `rtsp://{host}:554/cam/realmonitor?channel=1&subtype=0` |
@@ -43,60 +73,98 @@ The brand presets fill the address for you:
 | Hikvision | `rtsp://{host}:554/Streaming/Channels/101` |
 | Amcrest | `rtsp://{host}:554/cam/realmonitor?channel=1&subtype=0` |
 | UniFi Protect | `rtsps://{host}:7441/{cameraId}` |
-| ONVIF / generic RTSP | `rtsp://{host}:554/` |
+| ONVIF / generic RTSP | `rtsp://{host}:554/` (model-specific path often required) |
 | HTTP / MJPEG | `http://{host}/` |
-| Custom URL | your own address |
+| Custom URL | full URL (`rtsp://`, `rtsps://`, `http://`, etc.) |
 
-A camera that speaks a different path is a **Custom URL**: write the whole
-address yourself. The low-resolution address is optional; without it the grid
-uses the main stream.
+Notes:
+- Tapo cameras usually require a **camera account** (Tapo app → camera → Settings → Advanced → Camera Account), not the app login.
+- Some brands/models use different RTSP paths; use **Test connection** and adjust if needed.
 
-Tapo cameras need their own RTSP login: create a camera account in the Tapo
-app (Settings → Advanced → Camera Account) and use that login here, not the
-one you see in the app.
+## Pinned cameras
 
-## Pinning a camera
+- Pin/unpin from the panel (or IPC `inircam pin <cameraId>`).
+- Pinned cameras open as separate windows and can be moved/resized.
+- Pin state is persisted by the component (see storage below).
 
-Open a camera and press **Pin to desktop** (or use the **Pin** button in the
-camera list). The pinned camera becomes a small window on the desktop:
+## Storage and configuration
 
-- drag it to move it, drag its corner to resize it
-- hover it for the controls: mute, keep above the windows or on the desktop,
-  open it in the panel, unpin it
-- double click opens it in the panel
+- **Camera config (shared)**: `~/.config/inir/plugins/inircam.json` (contains camera credentials/URLs; keep permissions restrictive)
+- **Pinned windows/state**: stored by the component/plugin (e.g. pin store/config files alongside inircam plugin data, depending on implementation)
+- **Desktop widget config**: managed by iNiR widget config (`widget.json` config keys; e.g. columns, click actions, etc.)
 
-Pinned cameras are remembered and come back after a restart.
+## Requirements
 
-## What it needs
+- **iNiR / Quickshell** environment with the inircam component/plugin installed
+- **ffmpeg** and **ffprobe** (used for RTSP frame pulling and connection probing)
+- Network access from this machine to the camera/NVR hosts
+- For RTSP frame pulling: the bundled `inircam-feeds` helper must be able to run on the system
 
-- **ffprobe** (from `ffmpeg`) for **Test connection** and for telling a wrong
-  password apart from an unreachable camera
-- Qt Multimedia with the FFmpeg backend, which iNiR already carries
+## Feed helper (`inircam-feeds`)
+
+`inircam-feeds` manages ffmpeg processes that pull RTSP streams into continuously updated JPEG frames for the UI.
+
+Typical usage:
+
+```bash
+# start or restart missing/dead feed pullers
+~/.local/bin/inircam-feeds sync
+
+# keep feeds alive in foreground (optional)
+~/.local/bin/inircam-feeds daemon
+
+# stop managed feed pullers
+~/.local/bin/inircam-feeds stop
+```
+
+When installed as a component/module, a bundled copy may also be available in the inircam module directory; the panel attempts to auto-sync feeds periodically.
 
 ## Permissions
 
-- `network` — it opens the camera streams
-- `process` — it runs `ffprobe` to test a camera
-- `files` — it keeps the camera list and the pinned cameras
+Declared in `hub.json` (component):
 
-Nothing is sent anywhere: the streams go straight from the camera to your
-computer, and the camera list never leaves it.
+- `process` — runs `ffprobe`/helper processes for probing and feed pulling
+- `network` — connects to camera/NVR streams and endpoints
+- `files` — reads/writes camera/pin configuration and local runtime/frame files
 
-## Commands
+## Privacy and security
 
-| Command | What it does |
-| --- | --- |
-| `inir inircam toggle` | Open or close the panel |
-| `inir inircam open` | Open the panel |
-| `inir inircam close` | Close the panel |
-| `inir inircam pin CAMERA_ID` | Pin a camera to the desktop, or unpin it |
-| `inir inircam pins` | Every pinned camera, as JSON |
+- Streams go directly between your machine and your cameras/NVR (no cloud relay by this component).
+- Camera credentials may be stored in `~/.config/inir/plugins/inircam.json`; protect this file and use least-privilege camera accounts where possible.
+- Snapshots/recordings behavior depends on UI actions and implementation; frame pulling writes temporary JPEG frames for live display.
+
+## Troubleshooting
+
+- **Stuck on “Connecting…”**
+  - Verify the camera/NVR is reachable (`ping`, `ffprobe` against the RTSP URL).
+  - Restart feed pullers: `~/.local/bin/inircam-feeds sync` (or the bundled helper).
+  - Check feed logs in `${XDG_RUNTIME_DIR:-/tmp}/inircam-feeds/*.log`.
+  - Ensure credentials and stream paths are correct (use **Test connection**).
+- **Some streams work, others fail**
+  - Substream/main stream paths or codecs may differ by channel/model. Try different subtype/channel/path values.
+  - NVRs may limit concurrent sessions; too many main streams can cause timeouts.
+- **Feeds stop after some time**
+  - RTSP sessions can drop; re-run `inircam-feeds sync` or keep the helper running (`daemon`) if needed.
+  - Network instability/NVR timeouts can cause ffmpeg to exit and require restart.
+- **Widget buttons do nothing**
+  - Ensure the inircam panel component is installed/loaded (the widget triggers panel IPC actions).
+  - Check logs for QML/IPC errors (`inir logs`).
+
+## Comparison with OmaCam
+
+iNiR Cam is inspired by [OmaCam](https://github.com/entroit/omacam), but it is **not a 1:1 port**:
+
+- **Integration target**: OmaCam is an Omarchy bar plugin; iNiR Cam is an iNiR panel/component and desktop widget.
+- **UI/UX**: similar concepts (grid/enlarged/wall, pinned players, probing), but different layouts, controls, and configuration surfaces.
+- **Configuration model**: OmaCam uses a rich `~/.config/omacam/config.json` (keys, click actions, connection tuning, etc.). iNiR Cam currently stores camera config in `~/.config/inir/plugins/inircam.json` and uses iNiR widget/component settings where applicable; keybinding/click customization parity is not complete.
+- **Streaming backend**: OmaCam uses Qt Multimedia/FFmpeg with a shared stream pool approach. iNiR Cam adds an **ffmpeg frame-pull fallback for RTSP** (via `inircam-feeds`) to work around RTSP rendering issues on affected systems; this trades some efficiency/latency characteristics for reliability.
+- **Audio/snapshots/advanced tuning**: feature parity varies by implementation and environment; check the current UI and IPC for supported actions.
 
 ## Credits
 
-Built on the idea of [omacam](https://github.com/entroit/omacam) (MIT), Entroit's
-camera viewer for the Omarchy bar.
+- [OmaCam](https://github.com/entroit/omacam) (MIT, Entroit) — original concept and reference implementation for Omarchy
+- iNiR and Quickshell ecosystem components used by this implementation
 
 ## License
 
-MIT.
+MIT (see `LICENSE` in this component).

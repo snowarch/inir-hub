@@ -56,7 +56,8 @@ Scope {
         root.focusId = list[(index + delta + list.length) % list.length].id
     }
 
-    function openForm(camera) {
+    function openForm(camera, mode) {
+        root.formInitialMode = mode || "manual"
         root.editing = camera ? Object.assign({}, camera) : {
             id: "",
             name: "",
@@ -70,6 +71,7 @@ Scope {
         }
         root.view = "form"
     }
+    property string formInitialMode: "manual"
 
     function saveCamera(camera) {
         if (camera && camera.id) store.updateCamera(camera.id, camera)
@@ -143,6 +145,14 @@ Scope {
         function close(): void { root.open = false }
         /// Open the camera panel
         function open(): void { root.open = true }
+        /// Open the camera list/management view
+        function manage(): void { root.open = true; root.view = "manage" }
+        /// Open the add-camera form
+        function add(): void { root.open = true; root.openForm(null, "manual") }
+        /// Open the NVR/DVR scan form
+        function addNvr(): void { root.open = true; root.openForm(null, "nvr") }
+        /// Open network discovery
+        function discover(): void { root.open = true; root.openForm(null, "discover") }
         /// Pin a camera to the desktop, or unpin it when it is already pinned
         function pin(cameraId: string): string {
             const on = pins.toggle(cameraId)

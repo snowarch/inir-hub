@@ -44,7 +44,7 @@ start_feed() {
   fi
 
   ffmpeg -hide_banner -loglevel warning -nostdin \
-    -rtsp_transport tcp -timeout 5000000 \
+    -rtsp_transport tcp -timeout 30000000 \
     -fflags nobuffer -flags low_delay \
     -i "$url" -an \
     -vf "fps=8,scale='min(1280,iw)':-2" \
