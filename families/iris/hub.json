@@ -107,7 +107,7 @@
         "google.com",
         "startpage.com"
     ],
-    "minInir": "3.2.0",
+    "minInir": "3.1.1",
     "provides": "modules/iris",
     "preview": "preview.webp"
 }
