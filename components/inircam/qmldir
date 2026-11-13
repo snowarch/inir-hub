@@ -1,7 +1,12 @@
 module qs.modules.inircam
 Panel 1.0 Panel.qml
-CameraStore 1.0 CameraStore.qml
+CameraGrid 1.0 CameraGrid.qml
+CameraWall 1.0 CameraWall.qml
+CameraEnlarged 1.0 CameraEnlarged.qml
+CameraManage 1.0 CameraManage.qml
+CameraForm 1.0 CameraForm.qml
 CameraFeed 1.0 CameraFeed.qml
-StreamPool 1.0 StreamPool.qml
-CameraStream 1.0 CameraStream.qml
+CameraStore 1.0 CameraStore.qml
+PinStore 1.0 PinStore.qml
+PinnedCamera 1.0 PinnedCamera.qml
 Probe 1.0 Probe.qml

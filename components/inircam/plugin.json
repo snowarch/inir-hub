@@ -1,13 +1,13 @@
 {
-    "id": "inircam",
-    "kind": "component",
-    "name": "InirCam",
-    "summary": "Live IP camera viewer: grid, enlarged view, camera wall, and pinned players",
-    "icon": "videocam",
-    "version": "1.0.0",
-    "provides": "modules/inircam",
-    "parts": {
-        "panel": "Panel.qml"
-    },
-    "families": []
+  "id": "inircam",
+  "kind": "component",
+  "name": "InirCam",
+  "summary": "Desktop camera panel with live RTSP/ONVIF feeds, grid/wall/enlarged views, and pinned cameras",
+  "icon": "videocam",
+  "version": "1.0.1",
+  "provides": "modules/inircam",
+  "parts": {
+    "panel": "Panel.qml"
+  },
+  "families": []
 }

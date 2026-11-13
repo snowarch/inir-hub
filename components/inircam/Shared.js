@@ -1,20 +1,17 @@
 .pragma library
 
-// Shared state across InirCam components (substream failures, etc.)
+// State shared by every camera picture in this component (one copy per engine).
+
+// Cameras whose low-res stream does not work; their tiles use the full stream.
 var subBroken = {}
 
-function cameraKey(camera, quality) {
-  if (!camera) return ""
-  return (camera.id || "") + "|" + (quality || "main")
+// Full-stream resolution per camera ("2304×1296"), once seen.
+var mainResolution = {}
+
+function markSubBroken(cameraId) {
+    if (cameraId) subBroken[cameraId] = true
 }
 
-function nextTag() {
-  // simple counter stored on the library object
-  if (typeof SharedSerial === "undefined") {
-    // not possible in pragma library global; use property on this
-  }
-  if (!_serial) _serial = 0
-  _serial += 1
-  return "t" + _serial
+function noteResolution(cameraId, width, height) {
+    if (cameraId && width > 0 && height > 0) mainResolution[cameraId] = width + "×" + height
 }
-var _serial = 0

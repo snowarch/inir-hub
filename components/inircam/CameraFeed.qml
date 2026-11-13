@@ -1,172 +1,259 @@
 import QtQuick
 import QtMultimedia
 import Quickshell
-import "Shared.js" as Shared
+import Quickshell.Io
+import qs.modules.common
+import qs.modules.common.widgets
+import "Brands.js" as Brands
+import qs.services
 
-// Renders a camera stream from the shared StreamPool.
+// Live camera view. RTSP streams are pulled via ffmpeg into a continuously
+// updated JPEG frame (reliable across Qt Multimedia/VAAPI backends); other
+// sources use Qt Multimedia directly.
 Item {
-  id: root
+    id: root
 
-  required property var pool
-  required property var camera
-  required property var play
-  property bool capture: false
-  property bool muted: true
+    required property var camera
+    property string quality: "main"
+    property bool active: true
+    property bool muted: true
+    property int retrySeconds: 15
+    property bool lowLatency: true
 
-  readonly property var live: pool.stream(camera, play.quality)
-  readonly property string status: {
-    if (!play.on) return "off"
-    if (!live) return "connecting"
-    return live.status || "connecting"
-  }
-  readonly property string why: live ? (live.why || "") : ""
-  readonly property var diag: live ? live.diag : null
-  readonly property string retryLabel: (live && live.retryIn > 0) ? ("Retrying in " + live.retryIn + "s") : ""
+    readonly property string streamUrlStr: root.camera ? Brands.streamUrl(root.camera, root.quality).toString() : ""
+    readonly property bool useFfmpeg: /^rtsps?:/i.test(root.streamUrlStr)
+    readonly property string framePath: "/tmp/inircam-feed-" + Quickshell.processId + "-" + (root.camera ? root.camera.id : "none") + "-" + root.quality + ".jpg"
 
-  readonly property bool isLive: status === "live"
-  readonly property bool isConnecting: status === "connecting"
-  readonly property bool isError: status === "error"
+    property string status: "idle"   // idle · connecting · live · error
+    property string note: ""
+    property int _frameNonce: 0
+    property bool _ffmpegStarting: false
 
-  signal snapshotSaved(string path)
-  signal snapshotFailed(string reason)
+    signal snapshotSaved(string path)
+    signal snapshotFailed(string reason)
 
-  function thumbSource() {
-    if (!camera || !camera.id) return ""
-    return "file:///tmp/inircam-thumb-" + camera.id + ".jpg"
-  }
+    function start() {
+        retry.stop()
+        if (!root.camera || root.streamUrlStr === "") {
+            root.status = "idle"
+            root.note = ""
+            return
+        }
+        root.status = "connecting"
+        root.note = ""
+        if (root.useFfmpeg) startFfmpeg()
+        else startPlayer()
+    }
 
-  function captureThumb() {
-    if (!isLive || !camera || !camera.id) return
-    var path = "/tmp/inircam-thumb-" + camera.id + ".jpg"
-    video.grabToImage(function(result) {
-      if (result && result.saveToFile) result.saveToFile(path)
-    })
-  }
+    function stop() {
+        retry.stop()
+        stopPlayer()
+        stopFfmpeg()
+        root.status = "idle"
+    }
 
-  function takeSnapshot() {
-    var name = (camera && camera.name ? camera.name : "camera").replace(/[^A-Za-z0-9 _-]/g, "_")
-    var ts = Qt.formatDateTime(new Date(), "yyyyMMdd-HHmmss")
-    var path = (Quickshell.env("HOME") || "/tmp") + "/Pictures/inircam-" + name + "-" + ts + ".jpg"
-    video.grabToImage(function(result) {
-      try {
-        if (result && result.saveToFile(path)) root.snapshotSaved(path)
-        else root.snapshotFailed("Could not save snapshot")
-      } catch (e) {
-        root.snapshotFailed(String(e))
-      }
-    })
-  }
+    function startPlayer() {
+        stopFfmpeg()
+        player.stop()
+        player.source = ""
+        player.source = root.streamUrlStr
+        player.play()
+    }
 
-  implicitWidth: 320
-  implicitHeight: 180
+    function stopPlayer() {
+        player.stop()
+        player.source = ""
+    }
 
-  Rectangle {
-    anchors.fill: parent
-    color: "#101418"
-    radius: 10
-    clip: true
+    function startFfmpeg() {
+        // RTSP frames are supplied by the inircam-feeds helper (external ffmpeg).
+        // We only poll/display the frame file here.
+        stopPlayer()
+        stopFfmpeg(false)
+        root._ffmpegStarting = true
+        framePoll.interval = 1200
+        framePoll.restart()
+    }
 
-    Image {
-      id: thumb
-      anchors.fill: parent
-      visible: !root.isLive
-      source: root.thumbSource()
-      fillMode: Image.PreserveAspectCrop
-      asynchronous: true
-      cache: false
-      opacity: 0.35
+    function stopFfmpeg(resetState = true) {
+        framePoll.stop()
+        root._ffmpegStarting = false
+        // do not kill external ffmpeg here; helper manages process lifetime
+        if (resetState) {
+            root._frameNonce = 0
+            frameImg.source = ""
+        }
+    }
+
+    function takeSnapshot() {
+        if (root.status !== "live") {
+            root.snapshotFailed(Translation.tr("No picture to save"))
+            return
+        }
+        const name = ((root.camera && root.camera.name) || "camera").replace(/[^A-Za-z0-9 _-]/g, "_")
+        const stamp = Qt.formatDateTime(new Date(), "yyyyMMdd-HHmmss")
+        const path = `${Directories.picturesPath}/inircam-${name}-${stamp}.jpg`
+        if (root.useFfmpeg) {
+            snapProc._path = path
+            snapProc.command = ["cp", root.framePath, path]
+            snapProc.running = true
+            return
+        }
+        const ok = video.grabToImage(function(result) {
+            if (result) root.snapshotSaved(path)
+            else root.snapshotFailed(Translation.tr("The picture could not be saved"))
+        })
+        if (!ok) root.snapshotFailed(Translation.tr("The picture could not be saved"))
+    }
+
+    implicitWidth: 320
+    implicitHeight: 180
+
+    onActiveChanged: root.active ? root.start() : root.stop()
+    onStreamUrlStrChanged: if (root.active) root.start()
+    Component.onCompleted: if (root.active) root.start()
+    Component.onDestruction: {
+        root.stop()
+        // best-effort cleanup of frame file
+        cleanupProc.command = ["rm", "-f", root.framePath]
+        cleanupProc.running = true
+    }
+
+    // ── Qt Multimedia path (non-RTSP) ───────────────────────────────────
+    MediaPlayer {
+        id: player
+        videoOutput: video
+        audioOutput: audio
+        loops: 1
+        playbackOptions.playbackIntent: root.lowLatency
+
+        onPlaybackStateChanged: {
+            if (root.useFfmpeg) return
+            if (playbackState === MediaPlayer.PlayingState) root.status = "live"
+            else if (playbackState === MediaPlayer.StoppedState && root.active && root.status === "live") {
+                // unexpected stop -> reconnect
+                root.status = "connecting"
+                retry.restart()
+            }
+        }
+        onErrorOccurred: function(error, errorString) {
+            if (root.useFfmpeg) return
+            root.status = "error"
+            root.note = errorString || Translation.tr("The camera could not be reached")
+            retry.restart()
+        }
+    }
+
+    AudioOutput {
+        id: audio
+        muted: root.muted
     }
 
     VideoOutput {
-      id: video
-      anchors.fill: parent
-      visible: root.isLive
-      fillMode: VideoOutput.PreserveAspectCrop
+        id: video
+        anchors.fill: parent
+        visible: !root.useFfmpeg && root.status === "live"
+        fillMode: VideoOutput.PreserveAspectCrop
     }
 
-    Item {
-      anchors.fill: parent
-      visible: !root.isLive
+    // ── ffmpeg frame path (RTSP, passive viewer) ──────────────────────
+    // External helper (inircam-feeds) keeps ffmpeg frame pullers running.
 
-      Column {
-        anchors.centerIn: parent
-        spacing: 6
-        width: Math.min(parent.width - 24, 320)
+    Timer {
+        id: framePoll
+        interval: 125
+        repeat: true
+        running: false
+        onTriggered: {
+            root._frameNonce++
+            frameImg.source = "file://" + root.framePath + "?t=" + root._frameNonce
+            // ramp to steady poll after initial delay
+            if (interval > 125) interval = 125
+        }
+    }
 
-        Text {
-          anchors.horizontalCenter: parent.horizontalCenter
-          text: root.isConnecting ? "Connecting…" : (root.isError ? "Offline" : "Idle")
-          color: "white"
-          font.pixelSize: 14
-          font.weight: Font.Medium
+    Image {
+        id: frameImg
+        anchors.fill: parent
+        visible: root.useFfmpeg
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: false
+        cache: false
+        smooth: true
+        source: ""
+        onStatusChanged: {
+            if (!root.useFfmpeg) return
+            if (status === Image.Ready) {
+                root._ffmpegStarting = false
+                root.status = "live"
+                root.note = ""
+            } else if (status === Image.Error) {
+                // file not ready yet while connecting; keep waiting
+                if (root.status !== "connecting") root.status = "connecting"
+            }
         }
-        Text {
-          anchors.horizontalCenter: parent.horizontalCenter
-          width: parent.width
-          horizontalAlignment: Text.AlignHCenter
-          wrapMode: Text.Wrap
-          visible: root.why !== "" || root.retryLabel !== ""
-          text: root.why !== "" ? root.why : root.retryLabel
-          color: "#c9d1d9"
-          font.pixelSize: 11
+    }
+
+    Process {
+        id: snapProc
+        property string _path: ""
+        onExited: (code) => {
+            if (code === 0) root.snapshotSaved(_path)
+            else root.snapshotFailed(Translation.tr("The picture could not be saved"))
         }
-      }
+    }
+
+    Process {
+        id: cleanupProc
+    }
+
+    // ── Retry + status overlay ──────────────────────────────────────────
+    Timer {
+        id: retry
+        interval: Math.max(1, root.retrySeconds) * 1000
+        repeat: false
+        onTriggered: if (root.active) root.start()
     }
 
     Rectangle {
-      anchors.left: parent.left
-      anchors.top: parent.top
-      anchors.margins: 8
-      height: 18
-      width: statusRow.implicitWidth + 10
-      radius: 9
-      color: root.isLive ? "#1f7a3f" : (root.isError ? "#8b2e2e" : "#4a5568")
-      opacity: 0.95
-      visible: root.play.on
-
-      Row {
-        id: statusRow
-        anchors.centerIn: parent
-        spacing: 4
-        Text {
-          text: root.isLive ? "LIVE" : (root.isConnecting ? "…" : "ERR")
-          color: "white"
-          font.pixelSize: 10
-          font.weight: Font.DemiBold
-        }
-      }
+        anchors.fill: parent
+        color: Appearance.colors.colSurfaceContainerHighest
+        visible: root.status !== "live"
     }
-  }
 
-  // Bind player output when live stream/player changes.
-  Binding {
-    target: video
-    property: "player"
-    value: (root.live && root.live.player) ? root.live.player : null
-    when: true
-  }
-  Binding {
-    target: root.live ? root.live.player : null
-    property: "muted"
-    value: root.muted
-    when: root.live && root.live.player
-  }
+    Column {
+        anchors.centerIn: parent
+        width: parent.width - 24
+        spacing: 4
+        visible: root.status !== "live"
 
-  Timer {
-    interval: 20000
-    repeat: true
-    running: root.capture && root.isLive
-    triggeredOnStart: true
-    onTriggered: root.captureThumb()
-  }
-
-  Component.onCompleted: {
-    if (root.pool && root.pool.hold) root.pool.hold(camera, play.quality)
-  }
-  Component.onDestruction: {
-    if (root.pool && root.pool.release) root.pool.release(camera, play.quality)
-  }
-  onCameraChanged: {
-    if (root.pool) { /* hold/release handled by pool keying externally in simple cases */ }
-  }
+        MaterialSymbol {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: root.status === "connecting" ? "sync" : "videocam_off"
+            iconSize: Appearance.font.pixelSize.huge
+            color: Appearance.colors.colOnSurfaceVariant
+            RotationAnimator on rotation {
+                running: root.status === "connecting"
+                from: 0; to: 360; duration: 1100; loops: Animation.Infinite
+            }
+        }
+        StyledText {
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            text: root.status === "connecting" ? Translation.tr("Connecting…") : Translation.tr("No picture")
+            color: Appearance.colors.colOnSurface
+            font.pixelSize: Appearance.font.pixelSize.small
+        }
+        StyledText {
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            visible: root.note !== ""
+            text: root.note
+            color: Appearance.colors.colOnSurfaceVariant
+            font.pixelSize: Appearance.font.pixelSize.smaller
+            elide: Text.ElideRight
+            maximumLineCount: 2
+            wrapMode: Text.Wrap
+        }
+    }
 }

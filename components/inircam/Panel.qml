@@ -1,183 +1,216 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import qs.modules.common
 import qs.modules.common.widgets
-import "Config.js" as Cfg
+import qs.services
 import "Brands.js" as Brands
 
+// The camera panel: the grid of cameras, the enlarged view, the wall, the
+// camera list and the form to add one. It is a component of its own: it sits
+// beside the family and never edits it.
 Scope {
     id: root
 
     property bool open: false
-    property string view: "grid" // grid | enlarged | wall | manage | form
+    // grid · enlarged · wall · manage · form
+    property string view: "grid"
     property string focusId: ""
-    property var editingCamera: null
-    property string formBrand: "tapo"
+    property var editing: null
     property string notice: ""
 
-    readonly property string cfgDir: (Quickshell.env("HOME") || "/tmp") + "/.config/inir/inircam"
-    readonly property string cfgPath: cfgDir + "/config.json"
+    readonly property var cameras: store.enabledCameras()
 
-    property var settings: Cfg.clone(Cfg.DEFAULTS)
-
-    function loadConfig(text) {
-        try {
-            var obj = JSON.parse(text || "{}")
-            var m = Cfg.merge(obj)
-            root.settings = m.config
-        } catch (e) {
-            root.settings = Cfg.clone(Cfg.DEFAULTS)
+    function toggle() { root.open = !root.open }
+    function close() {
+        if (root.view === "form") {
+            root.view = "manage"
+            root.editing = null
+            return
         }
+        if (root.view === "grid") {
+            root.open = false
+            return
+        }
+        root.view = "grid"
     }
 
-    function saveConfig() {
-        cfgSave.command = ["bash", "-c",
-            "set -e; dir=\"$1\"; file=\"$2\"; tmp=\"$file.tmp\"; mkdir -p \"$dir\"; cat > \"$tmp\"; chmod 600 \"$tmp\" 2>/dev/null || true; mv \"$tmp\" \"$file\"",
-            "bash", root.cfgDir, root.cfgPath]
-        cfgSave.running = false
-        cfgSave.running = true
+    function openCamera(id) {
+        if (!id) return
+        root.focusId = id
+        root.view = "enlarged"
     }
 
-    function showNotice(msg) {
-        notice = msg || ""
-        if (noticeTimer.running) noticeTimer.restart()
-        else noticeTimer.start()
+    function stepCamera(delta) {
+        const list = root.cameras
+        if (list.length === 0) return
+        let index = 0
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].id === root.focusId) {
+                index = i
+                break
+            }
+        }
+        root.focusId = list[(index + delta + list.length) % list.length].id
     }
 
-    function enabledCameras() {
-        var out = []
-        var list = store.cameras || []
-        for (var i = 0; i < list.length; i++) if (list[i].enabled !== false) out.push(list[i])
-        return out
+    function openForm(camera) {
+        root.editing = camera ? Object.assign({}, camera) : {
+            id: "",
+            name: "",
+            brand: "tapo",
+            host: "",
+            cameraId: "",
+            username: "",
+            password: "",
+            urlMain: "",
+            urlSub: ""
+        }
+        root.view = "form"
     }
 
-    function cameraById(id) { return store.cameraById(id) }
-
-    function openGrid() { view = "grid"; focusId = "" }
-    function openManage() { view = "manage" }
-    function openWall() { view = "wall" }
-    function openEnlarged(id) { focusId = id || focusId; if (focusId) view = "enlarged" }
-    function openForm(cam) {
-        editingCamera = cam || null
-        formBrand = (cam && cam.brand) ? cam.brand : "tapo"
-        view = "form"
-        // Populate form on next tick when loader/fields exist
-        Qt.callLater(populateForm)
+    function saveCamera(camera) {
+        if (camera && camera.id) store.updateCamera(camera.id, camera)
+        else store.addCamera(camera)
+        root.editing = null
+        root.view = "manage"
+        root.notice = Translation.tr("Camera saved")
     }
 
-    function populateForm() {
-        // best-effort: fields are looked up by objectName not set; rely on bindings reset by recreating form state
-        // (form visibility toggles keep state; we reset explicitly via formReset counter)
-        formReset += 1
-    }
-    property int formReset: 0
-
-    function nextCamera(delta) {
-        var cams = enabledCameras()
-        if (cams.length === 0) return
-        var idx = 0
-        for (var i = 0; i < cams.length; i++) if (cams[i].id === focusId) { idx = i; break }
-        idx = (idx + delta + cams.length) % cams.length
-        focusId = cams[idx].id
+    function deleteCamera(camera) {
+        pins.remove(pins.pinFor(camera.id)?.id ?? "")
+        store.removeCamera(camera.id)
     }
 
     function handleKey(event) {
-        var k = Cfg.keyPath(event)
-        var acts = (settings.keys && settings.keys.actions) ? settings.keys.actions : {}
-        if (k === acts.back || k === "Escape") {
-            if (view === "form") { view = "manage"; event.accepted = true; return }
-            if (view === "manage" || view === "enlarged" || view === "wall") { openGrid(); event.accepted = true; return }
-            root.open = false; event.accepted = true; return
+        const key = event.text || ""
+        if (event.key === Qt.Key_Escape) {
+            root.close()
+            event.accepted = true
+            return
         }
-        if (view === "grid") {
-            if (k === acts.manage) { openManage(); event.accepted = true; return }
-            if (k === acts.wall) { openWall(); event.accepted = true; return }
-            if (settings.keys && settings.keys.cameraNumbers) {
-                var idn = Cfg.keyId(event)
-                if (idn > 0) {
-                    var cams = enabledCameras()
-                    if (idn <= cams.length) { openEnlarged(cams[idn - 1].id); event.accepted = true; return }
-                }
+        if (root.view === "grid" && key >= "1" && key <= "9") {
+            const index = parseInt(key) - 1
+            if (index < root.cameras.length) {
+                root.openCamera(root.cameras[index].id)
+                event.accepted = true
             }
-        } else if (view === "enlarged") {
-            if (k === acts.next) { nextCamera(1); event.accepted = true; return }
-            if (k === acts.previous) { nextCamera(-1); event.accepted = true; return }
-            if (k === acts.fullscreen) { view = "wall"; event.accepted = true; return } // simple: wall as fullscreen-like
-            if (k === acts.grid) { openGrid(); event.accepted = true; return }
-            if (k === acts.refresh) { pool.revision += 1; event.accepted = true; return }
-        } else if (view === "wall") {
-            if (k === acts.grid) { openGrid(); event.accepted = true; return }
-            if (k === acts.next) { nextCamera(1); event.accepted = true; return }
-            if (k === acts.previous) { nextCamera(-1); event.accepted = true; return }
         }
     }
-
-    function toggle() { root.open = !root.open }
-    function close() { root.open = false }
 
     CameraStore { id: store }
+    PinStore { id: pins }
 
-    StreamPool {
-        id: pool
-        settings: root.settings
-    }
+    Probe { id: cameraProbe }
 
-    Probe { id: probe }
-
-    FileView {
-        id: cfgFile
-        path: root.cfgPath
-        printErrors: false
-        onLoaded: root.loadConfig(text())
-        onLoadFailed: root.loadConfig("{}")
-    }
-
+    // RTSP feeds use external ffmpeg frame pullers (reliable across backends).
+    // Sync pullers when cameras change and keep them alive while the component is active.
+    readonly property string feedHelper: Qt.resolvedUrl("inircam-feeds").toString().replace(/^file:\/\//, "")
     Process {
-        id: cfgSave
-        stdinEnabled: true
-        onStarted: {
-            write(JSON.stringify(root.settings, null, 2))
-            stdinEnabled = false
-            closeStdin()
-        }
-        onExited: stdinEnabled = true
+        id: feedSync
+        running: false
     }
-
+    function syncFeeds() {
+        if (!root.feedHelper || root.feedHelper.indexOf("inircam-feeds") === -1) return
+        feedSync.command = ["sh", "-c", 'test -x "$1" && "$1" sync || true', "sh", root.feedHelper]
+        feedSync.running = false
+        feedSync.running = true
+    }
     Timer {
-        id: noticeTimer
-        interval: 3500
-        onTriggered: root.notice = ""
+        interval: 15000
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: root.syncFeeds()
+    }
+    Connections {
+        target: store
+        function onCamerasChanged() { root.syncFeeds() }
     }
 
-    /// Live IP camera viewer panel.
+    /// The camera panel: open or close it, open a camera, pin it to the desktop.
+    ///
     /// ```kdl
-    /// Mod+Shift+I hotkey-overlay-title="Camera viewer" { spawn "inir" "inircam" "toggle"; }
+    /// Mod+Shift+C { spawn "inir" "inircam" "toggle"; }
     /// ```
     IpcHandler {
         target: "inircam"
-        /// Show or hide the camera panel.
+        /// Open or close the camera panel
         function toggle(): void { root.toggle() }
-        /// Open the camera panel.
+        /// Close the camera panel
+        function close(): void { root.open = false }
+        /// Open the camera panel
         function open(): void { root.open = true }
-        /// Close the camera panel.
-        function close(): void { root.close() }
+        /// Pin a camera to the desktop, or unpin it when it is already pinned
+        function pin(cameraId: string): string {
+            const on = pins.toggle(cameraId)
+            return on ? "pinned" : "unpinned"
+        }
+        /// Every pinned camera as JSON
+        function pins(): string { return JSON.stringify(pins.pins) }
     }
 
+    // The pinned cameras: their own windows, up while the panel is closed.
+    Variants {
+        model: pins.pins.map(pin => pin.id)
 
+        PanelWindow {
+            id: pinWindow
+            required property string modelData
+            readonly property var pin: pins.pins.find(p => p.id === pinWindow.modelData) ?? null
+            readonly property var camera: pinWindow.pin ? store.cameraById(pinWindow.pin.cameraId) : null
+            readonly property int pad: 14
+
+            screen: {
+                const wanted = pinWindow.pin ? pinWindow.pin.output : ""
+                if (wanted.length > 0) {
+                    const found = Quickshell.screens.find(s => s.name === wanted)
+                    if (found) return found
+                }
+                return Quickshell.screens[0] ?? null
+            }
+            visible: pinWindow.pin !== null
+            color: "transparent"
+            exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.namespace: "quickshell:inircam-pin"
+            WlrLayershell.layer: pinWindow.pin && pinWindow.pin.onTop === false ? WlrLayer.Bottom : WlrLayer.Top
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+            anchors { top: true; left: true }
+            margins {
+                left: Math.round(pinWindow.pin ? pinWindow.pin.x : 0) - pinWindow.pad
+                top: Math.round(pinWindow.pin ? pinWindow.pin.y : 0) - pinWindow.pad
+            }
+            implicitWidth: pinCard.width + pinWindow.pad * 2
+            implicitHeight: pinCard.height + pinWindow.pad * 2
+            mask: Region { item: pinCard }
+
+            PinnedCamera {
+                id: pinCard
+                x: pinWindow.pad
+                y: pinWindow.pad
+                pin: pinWindow.pin
+                camera: pinWindow.camera
+                bounds: Qt.size(pinWindow.screen?.width ?? 1920, pinWindow.screen?.height ?? 1080)
+                onMoved: (id, x, y) => pins.update(id, { x: x, y: y, output: pinWindow.screen?.name ?? "" })
+                onResized: (id, width) => pins.update(id, { width: width })
+                onClosed: id => pins.remove(id)
+                onOpened: cameraId => { root.open = true; root.openCamera(cameraId) }
+                onTopToggled: (id, onTop) => pins.update(id, { onTop: onTop })
+            }
+        }
+    }
+
+    // The panel itself: built only while it is open, so nothing runs while it is closed.
     LazyLoader {
         active: root.open
-        component: PanelWindow {
-            id: win
+        PanelWindow {
+            id: window
             visible: root.open
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.namespace: "inir:inircam"
+            WlrLayershell.namespace: "quickshell:inircam"
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
@@ -194,461 +227,141 @@ Scope {
                 anchors.centerIn: parent
                 width: Math.min(parent.width - 80, 1100)
                 height: Math.min(parent.height - 80, 760)
-                radius: 16
-                color: "#1a1f24"
-                border.color: "#334155"
+                radius: Appearance.rounding.large
+                color: Appearance.colors.colLayer1
+                border.color: Appearance.colors.colOutlineVariant
                 border.width: 1
                 clip: true
                 focus: true
-                Keys.onPressed: (event) => root.handleKey(event)
+                Keys.onPressed: event => root.handleKey(event)
 
                 MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 14
-                    spacing: 10
+                    anchors.margins: 16
+                    spacing: 12
 
-                    // Header
+                    // The header: where you are and what you can do from here.
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
+
                         StyledText {
-                            text: "InirCam"
-                            font.pixelSize: 18
+                            text: Translation.tr("Cameras")
+                            font.pixelSize: Appearance.font.pixelSize.title
                             font.weight: Font.DemiBold
-                            color: "#e5e7eb"
+                            color: Appearance.colors.colOnLayer1
                         }
                         StyledText {
                             visible: root.view !== "grid"
                             text: ({
-                                enlarged: "Enlarged",
-                                wall: "Wall",
-                                manage: "Manage cameras",
-                                form: root.editingCamera ? "Edit camera" : "Add camera"
-                            })[root.view] || ""
-                            color: "#94a3b8"
-                            font.pixelSize: 13
+                                enlarged: Translation.tr("Enlarged"),
+                                wall: Translation.tr("All cameras"),
+                                manage: Translation.tr("Cameras"),
+                                form: root.editing && root.editing.id ? Translation.tr("Edit camera") : Translation.tr("Add camera")
+                            })[root.view] ?? ""
+                            color: Appearance.colors.colOnSurfaceVariant
+                            font.pixelSize: Appearance.font.pixelSize.small
                         }
                         Item { Layout.fillWidth: true }
-                        Row {
-                            spacing: 6
-                            RippleButton {
-                                visible: root.view !== "grid"
-                                buttonText: "Back"
-                                onClicked: root.openGrid()
-                            }
-                            RippleButton {
-                                visible: root.view === "grid"
-                                buttonText: "Wall"
-                                onClicked: root.openWall()
-                            }
-                            RippleButton {
-                                visible: root.view === "grid" || root.view === "manage"
-                                buttonText: "Manage"
-                                onClicked: root.openManage()
-                            }
-                            RippleButton {
-                                visible: root.view === "manage"
-                                buttonText: "Add camera"
-                                onClicked: root.openForm(null)
-                            }
-                            RippleButton {
-                                buttonText: "Close"
-                                onClicked: root.close()
-                            }
+
+                        RippleButton {
+                            visible: root.view === "grid"
+                            buttonText: Translation.tr("All cameras")
+                            onClicked: root.view = "wall"
+                        }
+                        RippleButton {
+                            visible: root.view === "grid" || root.view === "wall"
+                            buttonText: Translation.tr("Cameras")
+                            onClicked: root.view = "manage"
+                        }
+                        RippleButton {
+                            visible: root.view === "manage"
+                            buttonText: Translation.tr("Add camera")
+                            onClicked: root.openForm(null)
+                        }
+                        RippleButton {
+                            visible: root.view === "grid" || root.view === "enlarged" || root.view === "wall"
+                            buttonText: Translation.tr("Grid")
+                            onClicked: root.view = "grid"
+                        }
+                        RippleButton {
+                            buttonText: Translation.tr("Close")
+                            onClicked: root.close()
                         }
                     }
 
-                    // Notice
+                    // The notice line: what just happened.
                     Rectangle {
                         Layout.fillWidth: true
                         visible: root.notice !== ""
-                        height: 30
-                        radius: 8
-                        color: "#243244"
+                        implicitHeight: 32
+                        radius: Appearance.rounding.small
+                        color: Appearance.colors.colLayer2
+
                         StyledText {
-                            anchors.centerIn: parent
+                            anchors.left: parent.left
+                            anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
                             text: root.notice
-                            color: "#dbeafe"
-                            font.pixelSize: 12
+                            color: Appearance.colors.colOnLayer2
+                            font.pixelSize: Appearance.font.pixelSize.small
                         }
                     }
 
-                    // Body
                     Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
-                        // GRID
-                        Flickable {
+                        CameraGrid {
                             anchors.fill: parent
                             visible: root.view === "grid"
-                            contentHeight: gridCol.implicitHeight
-                            clip: true
-                            ScrollBar.vertical: ScrollBar { }
-
-                            Column {
-                                id: gridCol
-                                width: parent.width
-                                spacing: 10
-
-                                StyledText {
-                                    visible: store.ready && enabledCameras().length === 0
-                                    text: store.cameras.length === 0
-                                        ? "No cameras yet. Open Manage to add one."
-                                        : "All cameras are disabled. Open Manage to enable one."
-                                    color: "#94a3b8"
-                                    font.pixelSize: 14
-                                }
-
-                                Grid {
-                                    id: camGrid
-                                    width: parent.width
-                                    columns: Math.max(1, Number(root.settings.grid?.columns || 2))
-                                    spacing: 10
-                                    Repeater {
-                                        model: enabledCameras()
-                                        delegate: Rectangle {
-                                            required property var modelData
-                                            required property int index
-                                            width: (camGrid.width - camGrid.spacing * (camGrid.columns - 1)) / camGrid.columns
-                                            height: Math.max(160, width * 0.56)
-                                            radius: 12
-                                            color: "#0f1720"
-                                            border.color: "#334155"
-                                            clip: true
-
-                                            CameraFeed {
-                                                anchors.fill: parent
-                                                anchors.margins: 0
-                                                pool: pool
-                                                camera: modelData
-                                                play: ({ on: root.open, quality: "sub" })
-                                                capture: true
-                                                muted: true
-                                            }
-
-                                            Rectangle {
-                                                anchors.left: parent.left
-                                                anchors.right: parent.right
-                                                anchors.bottom: parent.bottom
-                                                height: 34
-                                                color: "#66000000"
-                                            }
-                                            StyledText {
-                                                anchors.left: parent.left
-                                                anchors.bottom: parent.bottom
-                                                anchors.margins: 8
-                                                text: (index + 1) + ". " + (modelData.name || "Camera")
-                                                color: "white"
-                                                font.pixelSize: 13
-                                            }
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: root.openEnlarged(modelData.id)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            cameras: root.cameras
+                            pinnedIds: pins.pins.map(p => p.cameraId)
+                            onCameraClicked: id => root.openCamera(id)
                         }
 
-                        // ENLARGED
-                        Item {
-                            anchors.fill: parent
-                            visible: root.view === "enlarged"
-                            property var cam: root.cameraById(root.focusId)
-                            ColumnLayout {
-                                anchors.fill: parent
-                                spacing: 8
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    radius: 12
-                                    color: "#0b1117"
-                                    clip: true
-                                    CameraFeed {
-                                        id: enlargedFeed
-                                        anchors.fill: parent
-                                        visible: parent.parent.parent.cam !== null
-                                        pool: pool
-                                        camera: parent.parent.parent.cam || ({ id: "", name: "" })
-                                        play: ({ on: root.open && root.view === "enlarged", quality: "main" })
-                                        capture: true
-                                        muted: false
-                                        onSnapshotSaved: (path) => root.showNotice("Snapshot saved: " + path)
-                                        onSnapshotFailed: (reason) => root.showNotice(reason)
-                                    }
-                                    StyledText {
-                                        anchors.centerIn: parent
-                                        visible: parent.parent.parent.cam === null
-                                        text: "Camera not found"
-                                        color: "#94a3b8"
-                                    }
-                                }
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 8
-                                    StyledText {
-                                        text: (parent.parent.cam ? parent.parent.cam.name : "")
-                                        color: "#e5e7eb"
-                                        font.pixelSize: 15
-                                        font.weight: Font.Medium
-                                    }
-                                    Item { Layout.fillWidth: true }
-                                    RippleButton { buttonText: "Prev"; onClicked: root.nextCamera(-1) }
-                                    RippleButton { buttonText: "Next"; onClicked: root.nextCamera(1) }
-                                    RippleButton { buttonText: "Snapshot"; onClicked: enlargedFeed.takeSnapshot() }
-                                    RippleButton { buttonText: "Mute/Unmute"; onClicked: enlargedFeed.muted = !enlargedFeed.muted }
-                                    RippleButton { buttonText: "Edit"; onClicked: if (parent.parent.cam) root.openForm(parent.parent.cam) }
-                                }
-                            }
-                        }
-
-                        // WALL (simple all-cameras grid, main streams)
-                        Flickable {
+                        CameraWall {
                             anchors.fill: parent
                             visible: root.view === "wall"
-                            contentHeight: wallCol.implicitHeight
-                            clip: true
-                            ScrollBar.vertical: ScrollBar { }
-                            Column {
-                                id: wallCol
-                                width: parent.width
-                                spacing: 10
-                                Grid {
-                                    id: wallGrid
-                                    width: parent.width
-                                    columns: Math.max(1, Number(root.settings.wall?.columns || root.settings.grid?.columns || 2))
-                                    spacing: 8
-                                    Repeater {
-                                        model: enabledCameras()
-                                        delegate: Rectangle {
-                                            required property var modelData
-                                            width: (wallGrid.width - wallGrid.spacing * (wallGrid.columns - 1)) / wallGrid.columns
-                                            height: Math.max(180, width * 0.56)
-                                            radius: 10
-                                            color: "#0f1720"
-                                            clip: true
-                                            CameraFeed {
-                                                anchors.fill: parent
-                                                pool: pool
-                                                camera: modelData
-                                                play: ({ on: root.open && root.view === "wall", quality: "main" })
-                                                capture: false
-                                                muted: true
-                                            }
-                                            Rectangle { anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; height: 28; color: "#66000000" }
-                                            StyledText { anchors.left: parent.left; anchors.bottom: parent.bottom; anchors.margins: 6; text: modelData.name || "Camera"; color: "white"; font.pixelSize: 12 }
-                                            MouseArea { anchors.fill: parent; onClicked: root.openEnlarged(modelData.id) }
-                                        }
-                                    }
-                                }
-                            }
+                            cameras: root.cameras
+                            onCameraClicked: id => root.openCamera(id)
                         }
 
-                        // MANAGE
-                        Flickable {
+                        CameraEnlarged {
+                            anchors.fill: parent
+                            visible: root.view === "enlarged"
+                            camera: store.cameraById(root.focusId)
+                            pinned: pins.pinFor(root.focusId) !== null
+                            onPrevious: root.stepCamera(-1)
+                            onNext: root.stepCamera(1)
+                            onPinToggled: root.focusId ? pins.toggle(root.focusId) : false
+                            onEdited: camera => root.openForm(camera)
+                        }
+
+                        CameraManage {
                             anchors.fill: parent
                             visible: root.view === "manage"
-                            contentHeight: manageCol.implicitHeight
-                            clip: true
-                            ScrollBar.vertical: ScrollBar { }
-                            Column {
-                                id: manageCol
-                                width: parent.width
-                                spacing: 8
-                                StyledText {
-                                    visible: (store.cameras || []).length === 0
-                                    text: "No cameras configured."
-                                    color: "#94a3b8"
-                                }
-                                Repeater {
-                                    model: store.cameras || []
-                                    delegate: Rectangle {
-                                        required property var modelData
-                                        width: manageCol.width
-                                        height: 64
-                                        radius: 10
-                                        color: "#111827"
-                                        border.color: "#334155"
-                                        RowLayout {
-                                            anchors.fill: parent
-                                            anchors.margins: 10
-                                            spacing: 10
-                                            ColumnLayout {
-                                                Layout.fillWidth: true
-                                                spacing: 2
-                                                StyledText { text: modelData.name || "Camera"; color: "#e5e7eb"; font.pixelSize: 14 }
-                                                StyledText {
-                                                    text: (modelData.brand || "custom") + " • " + (Brands.redact ? Brands.redact(Brands.streamUrl(modelData, "main")) : (modelData.host || ""))
-                                                    color: "#94a3b8"; font.pixelSize: 11
-                                                    elide: Text.ElideRight
-                                                    Layout.fillWidth: true
-                                                }
-                                            }
-                                            RippleButton { buttonText: modelData.enabled !== false ? "Disable" : "Enable"; onClicked: { var c = Object.assign({}, modelData); c.enabled = !(modelData.enabled !== false); store.updateCamera(modelData.id, c) } }
-                                            RippleButton { buttonText: "Edit"; onClicked: root.openForm(modelData) }
-                                            RippleButton { buttonText: "Delete"; onClicked: store.removeCamera(modelData.id) }
-                                        }
-                                    }
-                                }
-                            }
+                            cameras: store.cameras
+                            pinnedIds: pins.pins.map(p => p.cameraId)
+                            onAdd: root.openForm(null)
+                            onEdited: camera => root.openForm(camera)
+                            onDeleted: camera => root.deleteCamera(camera)
+                            onPinToggled: id => pins.toggle(id)
                         }
 
-                        // FORM
-                        Flickable {
+                        CameraForm {
                             anchors.fill: parent
                             visible: root.view === "form"
-                            contentHeight: formCol.implicitHeight
-                            clip: true
-                            ScrollBar.vertical: ScrollBar { }
-
-                            Column {
-                                id: formCol
-                                width: Math.min(parent.width, 640)
-                                spacing: 10
-                                property var cam: root.editingCamera || ({})
-                                property string brandId: root.formBrand
-
-                                function applyFromCamera() {
-                                    var c = root.editingCamera || ({})
-                                    fName.text = c.name || ""
-                                    var bid = c.brand || "tapo"
-                                    root.formBrand = bid
-                                    var bi = Brands.BRANDS.findIndex(b => b.id === bid)
-                                    fBrand.currentIndex = bi >= 0 ? bi : 0
-                                    fHost.text = c.host || ""
-                                    fCamId.text = c.cameraId || ""
-                                    fUser.text = c.username || ""
-                                    fPass.text = c.password || ""
-                                    fMain.text = c.urlMain || c.url || Brands.template(bid, "main") || ""
-                                    fSub.text = c.urlSub || Brands.template(bid, "sub") || ""
-                                }
-                                Connections {
-                                    target: root
-                                    function onFormResetChanged() { formCol.applyFromCamera() }
-                                    function onViewChanged() { if (root.view === "form") formCol.applyFromCamera() }
-                                }
-
-                                StyledText { text: root.editingCamera ? "Edit camera" : "Add camera"; color: "#e5e7eb"; font.pixelSize: 16 }
-                                GridLayout {
-                                    columns: 2
-                                    columnSpacing: 10
-                                    rowSpacing: 8
-                                    width: parent.width
-
-                                    StyledText { text: "Name"; color: "#cbd5e1" }
-                                    TextField { id: fName; Layout.fillWidth: true; placeholderText: "Front door" }
-
-                                    StyledText { text: "Brand"; color: "#cbd5e1" }
-                                    ComboBox {
-                                        id: fBrand
-                                        Layout.fillWidth: true
-                                        model: Brands.BRANDS.map(b => b.label)
-                                        onActivated: {
-                                            var b = Brands.BRANDS[currentIndex]
-                                            root.formBrand = b ? b.id : "custom"
-                                            if (!fMain.text && b && b.main) fMain.text = b.main
-                                            if (!fSub.text && b && b.sub) fSub.text = b.sub
-                                        }
-                                    }
-
-                                    StyledText { text: "Host / IP"; color: "#cbd5e1" }
-                                    TextField { id: fHost; Layout.fillWidth: true; placeholderText: "192.168.1.50" }
-
-                                    StyledText { text: "Camera ID"; color: "#cbd5e1" }
-                                    TextField { id: fCamId; Layout.fillWidth: true; placeholderText: "(for UniFi stream key, etc.)" }
-
-                                    StyledText { text: "Username"; color: "#cbd5e1" }
-                                    TextField { id: fUser; Layout.fillWidth: true }
-
-                                    StyledText { text: "Password"; color: "#cbd5e1" }
-                                    TextField { id: fPass; Layout.fillWidth: true; echoMode: TextInput.Password }
-
-                                    StyledText { text: "Main URL"; color: "#cbd5e1" }
-                                    TextField { id: fMain; Layout.fillWidth: true; placeholderText: "rtsp://user:pass@host/stream1" }
-
-                                    StyledText { text: "Sub URL"; color: "#cbd5e1" }
-                                    TextField { id: fSub; Layout.fillWidth: true; placeholderText: "(optional low-res stream)" }
-                                }
-
-                                Row {
-                                    spacing: 8
-                                    RippleButton {
-                                        buttonText: "Test connection"
-                                        onClicked: {
-                                            var cam = {
-                                                id: formCol.cam.id || "",
-                                                name: fName.text || "Camera",
-                                                brand: (Brands.BRANDS[fBrand.currentIndex] || {}).id || "custom",
-                                                host: fHost.text, cameraId: fCamId.text,
-                                                username: fUser.text, password: fPass.text,
-                                                urlMain: fMain.text, urlSub: fSub.text
-                                            }
-                                            probe.test(Brands.streamUrl(cam, "main"), cam)
-                                        }
-                                    }
-                                    RippleButton {
-                                        buttonText: "Save"
-                                        onClicked: {
-                                            var cam = {
-                                                id: formCol.cam.id,
-                                                name: fName.text || "Camera",
-                                                brand: (Brands.BRANDS[fBrand.currentIndex] || {}).id || "custom",
-                                                host: fHost.text, cameraId: fCamId.text,
-                                                username: fUser.text, password: fPass.text,
-                                                urlMain: fMain.text, urlSub: fSub.text,
-                                                enabled: formCol.cam.enabled !== false
-                                            }
-                                            if (root.editingCamera && root.editingCamera.id) store.updateCamera(root.editingCamera.id, cam)
-                                            else store.addCamera(cam)
-                                            root.showNotice("Camera saved")
-                                            root.openManage()
-                                        }
-                                    }
-                                    RippleButton { buttonText: "Cancel"; onClicked: root.openManage() }
-                                }
-
-                                Rectangle {
-                                    width: parent.width
-                                    visible: probe.running || (probe.result && probe.result.done)
-                                    height: probeCol.implicitHeight + 16
-                                    radius: 8
-                                    color: "#111827"
-                                    border.color: "#334155"
-                                    Column {
-                                        id: probeCol
-                                        anchors.fill: parent
-                                        anchors.margins: 8
-                                        spacing: 4
-                                        StyledText { text: probe.running ? "Testing connection…" : "Connection test"; color: "#e5e7eb"; font.pixelSize: 13 }
-                                        StyledText {
-                                            visible: !probe.running && probe.result
-                                            text: probe.result ? (probe.result.ok ? ("OK" + (probe.result.codec ? " • " + probe.result.codec : "") + (probe.result.size ? " • " + probe.result.size : "")) : ("Failed: " + (probe.result.error || "unknown error"))) : ""
-                                            color: (probe.result && probe.result.ok) ? "#86efac" : "#fca5a5"
-                                            font.pixelSize: 12
-                                            wrapMode: Text.Wrap
-                                            width: parent.width
-                                        }
-                                        StyledText {
-                                            visible: !probe.running && probe.result && probe.result.hint
-                                            text: probe.result ? (probe.result.hint || "") : ""
-                                            color: "#94a3b8"; font.pixelSize: 11; wrapMode: Text.Wrap; width: parent.width
-                                        }
-                                    }
-                                }
-                            }
+                            camera: root.editing
+                            probe: cameraProbe
+                            onSaved: camera => root.saveCamera(camera)
+                            onCancelled: { root.editing = null; root.view = "manage" }
                         }
                     }
                 }
             }
         }
-    }
-
-    Component.onCompleted: {
-        cfgFile.reload()
     }
 }
