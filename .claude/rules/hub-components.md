@@ -36,8 +36,10 @@ Removing it takes all of it away and leaves the person's desktop and settings ex
 - iRiS: draw with `IrisStyle.*` and the parts in `qs.modules.iris.components` and `qs.modules.iris.frame`, the way
   iRiS's own surfaces are built. Read an iRiS surface to learn the shape; never copy it into your folder.
 - Material: `Appearance.*` and `qs.modules.ii.kit`. Waffle: `Looks.*` and the `W*` parts in `qs.modules.waffle.looks`.
-- Every family: the shell's kit (`qs.modules.common`: `Appearance.*`, `StyledText`, `MaterialSymbol`,
-  `RippleButton`).
+- Every family: `FamilyStyle.*` (`qs.modules.common`: the active family's colours, radii, type, density, motion)
+  and the shell's kit (`StyledText`, `MaterialSymbol`, `RippleButton`). What must be the family's own (its plate and
+  glass, its switches) is a face per family in `faces/<family>/`, loaded by a `Loader` only while that family is
+  active: a family that is not installed then never breaks the component.
 - A family already has a feature like yours (iRiS has its own anime watching, Material its sidebars): yours must not
   run a second copy of it next to the first. Build on what the family offers, or make yours different.
 

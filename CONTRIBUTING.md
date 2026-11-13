@@ -245,8 +245,10 @@ component worn with it. `inir hub new component my-corner` gives you one:
 - **`Panel.qml`** holds its windows and its `IpcHandler` (target: its id). A window exists only while it is open:
   nothing runs, polls or animates while it is closed.
 - **It draws with the family it is worn with.** Worn with iRiS only: `import qs.modules.iris.style` and draw with
-  `IrisStyle.*` and the `Iris*` parts, the way iRiS's own surfaces do. Worn with every family: the shell's kit
-  (`qs.modules.common`: `Appearance.*`, `StyledText`, `MaterialSymbol`, `RippleButton`).
+  `IrisStyle.*` and the `Iris*` parts, the way iRiS's own surfaces do. Worn with every family: `FamilyStyle.*`
+  (`qs.modules.common`: the active family's colours, radii, type, density and motion) and the shell's kit
+  (`StyledText`, `MaterialSymbol`, `RippleButton`). What must be the family's own (its plate and glass, its
+  switches) is a face per family in `faces/<family>/`, loaded by a `Loader` only while that family is active.
 - **Its options live in its file**, a `FileView` with a `JsonAdapter` on `Directories.pluginFile("<id>")`, as the
   template does.
 - **People reach it with the mouse**: the app launcher of every family it is worn with lists it by `plugin.json`'s
