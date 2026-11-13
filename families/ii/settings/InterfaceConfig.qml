@@ -187,6 +187,19 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    icon: "ads_click"
+                    text: Translation.tr("Pinned tools when clicks pass through (%)")
+                    value: Math.round((Config.options?.overlay?.clickthroughOpacity ?? 0.8) * 100)
+                    from: 20
+                    to: 100
+                    stepSize: 5
+                    onValueModified: Config.setNestedValue("overlay.clickthroughOpacity", value / 100)
+                    StyledToolTip {
+                        text: Translation.tr("A pinned tool that lets clicks reach the game fades to this, so the game shows behind it")
+                    }
+                }
+
+                ConfigSpinBox {
                     icon: "monitor_heart"
                     text: Translation.tr("Game Performance background opacity (%)")
                     value: Math.round(root.gamePerformanceBackgroundOpacity() * 100)

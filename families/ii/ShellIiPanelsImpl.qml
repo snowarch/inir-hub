@@ -252,7 +252,7 @@ Item {
     OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; source: Plugins.baseUrl("modules/shared/onScreenKeyboard/OnScreenKeyboard.qml") }
     OnDemandPanelLoader {
         identifier: "iiOverlay"
-        open: GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen
+        open: OverlayContext.wanted
         component: Overlay {}
     }
     OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/overview/Overview.qml") }
