@@ -51,7 +51,9 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
   and the item then stops loading for everyone.
 - **Write the person's settings or a family's state.** No `Config.setNestedValue(…)`, no `Config.options.x = …`, no
   calls that change a family's own data (its follows, its lists, its open panels). A widget's options are its
-  `widget.json` `configKeys`; a component keeps its own in `Directories.pluginFile("<id>")`.
+  `widget.json` `configKeys`; a component keeps its own in `Directories.pluginFile("<id>")`. A setting the person's
+  Settings shows is asked for with `ShellSettings.request({key: value}, "<id>")` and the `settings` permission: the
+  shell checks the value against that row and gives the person an Undo.
 - **Answer for someone else's IPC.** Every `IpcHandler` target starts with the item's id.
 - **Start the shell's binary.** Never `qs`, `quickshell` or `qs -c inir ipc call …`: on iNiR the shell runs on its
   own runtime, not a `qs` on the PATH. Reach the shell, or another item, with `["inir", "<target>", "<function>"]`.
@@ -68,7 +70,7 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
   the use: no scraping of sites that host films, shows, music or games without the rights to them, no DRM
   circumvention. The hub is public; a takedown removes it for everyone.
 - **Declare less than it does.** `permissions` in `hub.json` match the code (`process`, `network`, `files`,
-  `inject`), and `hosts` lists every host it talks to.
+  `inject`, `settings`), and `hosts` lists every host it talks to.
 
 ## When you are stuck
 

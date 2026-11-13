@@ -77,7 +77,8 @@
                     "process",
                     "network",
                     "files",
-                    "inject"
+                    "inject",
+                    "settings"
                 ]
             }
         },
