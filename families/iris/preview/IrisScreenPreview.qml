@@ -386,6 +386,8 @@ ClippingRectangle {
                     width: Math.min(islandBox.width, Number(wornFace.item?.contentWidth ?? 0))
                     height: islandBox.height
                     onLoaded: if (item && item.island !== undefined) item.island = faceSample
+                    // Torn down mid-compile, Qt would create the face in a dead context: let go first.
+                    Component.onDestruction: wornFace.active = false
                 }
 
                 RowLayout {

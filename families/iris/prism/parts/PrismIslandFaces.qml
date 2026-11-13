@@ -119,6 +119,9 @@ Item {
                         sourceComponent: card.modelData.value === "halo" ? haloFace : null
                         source: card.modelData.value === "halo" ? "" : Qt.resolvedUrl("../../bar/island/designs/" + card.modelData.value + "/Face.qml")
                         onLoaded: if (item && item.island !== undefined) item.island = sample
+                        // A card torn down while its face still compiles keeps the Loader alive a moment in a dead
+                        // context, and Qt creates the face there ("invalid context"): let go while it still lives.
+                        Component.onDestruction: face.active = false
                     }
                 }
             }

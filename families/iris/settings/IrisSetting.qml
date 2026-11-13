@@ -1127,6 +1127,8 @@ Item {
                                 source: faceCard.modelData.value === "halo" ? ""
                                     : Qt.resolvedUrl("../bar/island/designs/" + faceCard.modelData.value + "/Face.qml")
                                 onLoaded: if (item && item.island !== undefined) item.island = sample
+                                // Torn down mid-compile, Qt would create the face in a dead context: let go first.
+                                Component.onDestruction: faceLoader.active = false
                             }
                         }
                     }
@@ -1199,9 +1201,11 @@ Item {
                         color: IrisStyle.fillQuiet
                         // A chamfered Design cuts the picture by its own die, as every plate on its field.
                         Loader {
+                            id: designPreview
                             anchors.fill: parent
                             source: designCard.modelData.preview
                             asynchronous: true
+                            Component.onDestruction: designPreview.active = false
                         }
                     }
                     // Hovered, the picture lifts a tone; chosen, it carries a check on its corner (his 10-30: an
