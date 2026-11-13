@@ -277,7 +277,8 @@ Item {
 
     OnDemandPanelLoader {
         identifier: "irisOverlay"
-        open: OverlayContext.wanted
+        // A base before the bench has no `wanted`.
+        open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen)
         requireEnabledPanel: false
         keep: true
         source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml")
