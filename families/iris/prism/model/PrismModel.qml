@@ -165,7 +165,8 @@ Singleton {
             }
             out.push({
                 // Who the row is across rebuilds: the page's delegates keep their row while values change around it.
-                key: [spec.section, spec.group, path, spec.label].join("|"),
+                // A bubble's rows share a label ("Icon", "Where it sits") with every other bubble's: the piece tells them apart.
+                key: [spec.section, spec.group, path, spec.label].concat(spec.piece ? [spec.piece] : []).join("|"),
                 spec: spec,
                 path: path,
                 page: root.pageOf(String(spec.section ?? ""), String(spec.group ?? "")),

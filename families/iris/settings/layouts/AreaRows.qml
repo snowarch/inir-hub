@@ -75,7 +75,8 @@ ColumnLayout {
         const peers = rows.peers
         // Style leads with no group: people arrive with one thing in mind, so every tile is in sight at once and the
         // presets are one of them, opening under it (his 11-02 13:47).
-        const lead = groups.find(group => group.key === "Every day") ?? (peers || ["general", "appearance"].includes(rows.section) ? null : groups[0])
+        // An area in bands (Style, Bubbles) leads with none too: its bands are the way in.
+        const lead = groups.find(group => group.key === "Every day") ?? (peers || rows.section === "general" || (IrisOptions.groupBands[rows.section] ?? []).length > 0 ? null : groups[0])
         const others = groups.filter(group => group !== lead && group.rows.length > 0)
         const tiles = flat && rows.foldHome && others.length >= 2
         const home = tiles && rows.section === "general"
@@ -1076,6 +1077,9 @@ ColumnLayout {
                 const on = switches.filter(spec => { const value = IrisOptions.currentValue(spec); return spec.invert ? !value : Boolean(value) }).length
                 return [on === switches.length ? Translation.tr("All on") : on === 0 ? Translation.tr("Off") : Translation.tr("%1 of %2").arg(on).arg(switches.length)]
             }
+            // A group headed by its own switch, off, says Off (Controls, off with its icon shown for the Trailing bubble, said nothing).
+            const head = island.first?.kind === "switch" && Translation.tr(String(island.first?.label ?? "")).toLowerCase() === island.title.toLowerCase()
+            if (head && island.word(island.first).length === 0) return [Translation.tr("Off")]
             const out = []
             const specs = island.specs.slice(island.namedSwitch ? 1 : 0)
             // The rows it shows first; when they say nothing (an off switch, a list), a value from its fine-tune ones.

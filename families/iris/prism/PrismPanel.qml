@@ -67,13 +67,16 @@ Item {
     readonly property var parts: {
         if (!root.paged) return [root.sections]
         const out = []
-        let part = [], rows = 0
+        let part = [], rows = 0, band = ""
         for (const section of root.layout) {
             const n = section.rows.length
-            if (part.length > 0 && rows + n > 28) { out.push(part); part = []; rows = 0 }
+            // An area in bands turns its parts where its bands turn: a part is one band, or a long band's half.
+            const own = root.bandOf(section.title)
+            if (part.length > 0 && (rows + n > 28 || (root.bands.length > 0 && own !== band))) { out.push(part); part = []; rows = 0 }
+            band = own
             part.push(section)
             rows += n
-            if (rows >= 20) { out.push(part); part = []; rows = 0 }
+            if (rows >= 20 && root.bands.length === 0) { out.push(part); part = []; rows = 0 }
         }
         if (part.length > 0) out.push(part)
         // Each part shows its groups as they read now; a group with nothing to show drops out, its neighbours stay.

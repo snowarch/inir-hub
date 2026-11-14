@@ -147,8 +147,6 @@ Item {
         const left = side("left"), right = side("right"), top = side("top"), bottom = side("bottom")
         return { x: left, y: top, width: Math.max(0, root.width - left - right), height: Math.max(0, root.height - top - bottom) }
     }
-    // The clusters the areas are kept in, named for a layout that prints them (Folio's ruler).
-    readonly property var clusterNames: ["Look", "Desktop", "Tools", "System", "More"]
     // Every area's notes (IrisOptions.notesBySection), taken when Settings has opened and after each config change.
     property var notes: ({})
     readonly property var noteCounts: { const out = {}; for (const id in root.notes) out[id] = root.notes[id].length; return out }

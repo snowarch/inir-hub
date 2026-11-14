@@ -37,14 +37,25 @@ Item {
     readonly property string searchHint: Translation.tr("Search, or say what to change")
 
     readonly property bool compact: root.width < root.u(1200)
-    readonly property var sections: root.host?.sections ?? []
+    // The index is the one map every design reads (IrisOptions.categories): Home, then each category under its name,
+    // the foot last under iNiR's, as Classic's sidebar and Prism's say it.
+    readonly property var sections: {
+        const known = root.host?.sections ?? []
+        const out = known.filter(section => section.id === "general").map(section => ({ id: section.id, title: section.title, icon: section.icon, caption: "" }))
+        for (const category of IrisOptions.categories) {
+            for (const id of category.sections) {
+                const section = known.find(entry => entry.id === id)
+                if (section) out.push({ id: section.id, title: section.title, icon: section.icon, caption: category.foot ? "iNiR" : String(category.title) })
+            }
+        }
+        return out
+    }
     readonly property string section: String(root.host?.section ?? "")
     readonly property bool searching: root.host?.searching ?? false
     readonly property bool paged: Number(root.host?.advancedPage ?? -1) >= 0
     readonly property var area: root.host?.currentSection ?? ({})
     readonly property var noteCounts: root.host?.noteCounts ?? ({})
     readonly property color signal: IrisStyle["signal"] ?? IrisStyle.danger
-    function clusterName(index: int): string { return Translation.tr(String(root.host?.clusterNames?.[index] ?? "")) }
 
     // ── The index.
     Rectangle {
@@ -113,7 +124,7 @@ Item {
                         id: entry
                         required property var modelData
                         required property int index
-                        readonly property bool starts: entry.index > 0 && root.sections[entry.index - 1]?.cluster !== entry.modelData.cluster
+                        readonly property bool starts: entry.index > 0 && root.sections[entry.index - 1]?.caption !== entry.modelData.caption
                         readonly property real keyY: entry.starts ? root.u(34) : 0
                         width: indexColumn.width
                         Item {
@@ -124,7 +135,7 @@ Item {
                                 x: root.u(12)
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: root.u(6)
-                                text: root.clusterName(Number(entry.modelData.cluster))
+                                text: Translation.tr(String(entry.modelData.caption ?? ""))
                                 color: IrisStyle.textTertiary
                                 font.family: IrisStyle.fontMono
                                 font.pixelSize: Math.max(10, IrisStyle.typeCaption)

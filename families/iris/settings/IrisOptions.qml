@@ -1156,8 +1156,11 @@ QtObject {
             rows.push({ section: section, group: group, label: "Where it sits", piece: piece.id,
                 path: path + ".place", visibleWhen: path + ".enable", kind: "zone",
                 fallback: IrisPieces.defaultPlace, choices: IrisPieces.zoneChoices(false) })
+            // Its icon shows while it is on, or while the Trailing bubble wears it (one icon for both).
             if (IrisPieces.iconKinds.includes(piece.id))
-                rows.push(root.iconRow(piece.id, { section: section, group: group, visibleWhen: path + ".enable" }))
+                rows.push(root.iconRow(piece.id, root.trailingKinds.includes(piece.id)
+                    ? { section: section, group: group, showIf: () => Boolean(Config.getNestedValue(path + ".enable", false)) || String(Config.getNestedValue("iris.bar.trailing", "")) === piece.id }
+                    : { section: section, group: group, visibleWhen: path + ".enable" }))
             if (piece.id === "workspaces") {
                 rows.push({ section: "bubbles", group: group, label: "Tap opens", description: "Open the Overview, or grow a workspace switcher from this bubble.", piece: piece.id,
                     path: path + ".opens", visibleWhen: path + ".enable", kind: "choice", fallback: "card",
