@@ -2454,5 +2454,9 @@
   "Beside the Island": "आइलैंड के पास",
   "Every bubble": "हर बबल",
   "Sound and media": "ध्वनि और मीडिया",
-  "Time and apps": "समय और ऐप्स"
+  "Time and apps": "समय और ऐप्स",
+  "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "बैनर कहाँ दिखें। द्वीप से वे उगते हैं और वापस मुड़ जाते हैं; कोने में वे अपने आप तैरते हैं।",
+  "Out of the Island, on whichever edge it lives.": "द्वीप से, वह जिस भी किनारे पर हो।",
+  "Stays %1 s, then slides away.": "%1 सेकंड रहता है, फिर खिसक जाता है।",
+  "Banners float in their corner and slide away.": "बैनर अपने कोने में तैरते हैं और खिसक जाते हैं।"
 }

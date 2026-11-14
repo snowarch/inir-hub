@@ -55,6 +55,30 @@ Item {
     // own plate there, or its words float over the page (10-25).
     readonly property bool overPlace: GlobalStates.settingsOverlayOpen || GlobalStates.wallpaperSelectorOpen
 
+    // Where they gather (`iris.notifications.position`): out of the Island by default, or placed in a corner or the
+    // middle of the top or bottom edge, clear of what that edge keeps (the frame, the Island, bubbles, the dock).
+    readonly property string position: {
+        const value = String(root.options?.position ?? "island")
+        return ["topLeft", "topCenter", "topRight", "bottomLeft", "bottomCenter", "bottomRight"].includes(value) ? value : "island"
+    }
+    readonly property bool placed: root.position !== "island"
+    readonly property bool placedTop: root.position.startsWith("top")
+    // -1 left, 0 middle, 1 right: the side a placed banner grows from and slides in on.
+    readonly property int placedSide: root.position.endsWith("Left") ? -1 : root.position.endsWith("Right") ? 1 : 0
+    readonly property real placedGap: Math.round(12 * root.d)
+    // An expanded Island, or a Dock shown on an empty workspace, can reach past what the edge reserves: a placed
+    // column clears the bodies over its span on its own half of the screen.
+    property var dockShapes: []
+    function bodiesReach(x0: real, x1: real): real {
+        const bodies = (root.islandShapes ?? []).filter(shape => shape.id !== "edge" && !shape.satellite)
+            .concat((root.dockShapes ?? []).filter(shape => shape.id !== "dockEdge"))
+            .filter(shape => shape.x < x1 && shape.x + shape.width > x0
+                && (shape.y + shape.height / 2 < root.height / 2) === root.placedTop)
+        if (bodies.length === 0) return 0
+        return root.placedTop ? Math.max(...bodies.map(shape => shape.y + shape.height))
+            : root.height - Math.min(...bodies.map(shape => shape.y))
+    }
+
     // Each banner is a body of the chassis field, so its material (solid, glass, compositor blur) and
     // its edge are the family's, and it grows out of the Island as one shape before letting go.
     property var bodies: ({})
@@ -98,11 +122,18 @@ Item {
     ListView {
         IrisScrollFeel {}
         id: popupColumn
-        readonly property bool fromBottom: root.designed || !root.barTop
-        x: Math.round(root.designed ? IrisFrame.safeInset("left", root.screenName) + root.designMargin
+        readonly property bool fromBottom: root.placed ? !root.placedTop : root.designed || !root.barTop
+        readonly property real placedX: root.placedSide < 0 ? IrisFrame.safeInset("left", root.screenName) + root.placedGap
+            : root.placedSide > 0 ? root.width - popupColumn.width - IrisFrame.safeInset("right", root.screenName) - root.placedGap
+            : (root.width - popupColumn.width) / 2
+        readonly property real placedInset: Math.max(IrisFrame.safeInset(root.placedTop ? "top" : "bottom", root.screenName),
+            root.bodiesReach(popupColumn.placedX, popupColumn.placedX + popupColumn.width)) + root.placedGap
+        x: Math.round(root.placed ? popupColumn.placedX
+            : root.designed ? IrisFrame.safeInset("left", root.screenName) + root.designMargin
             : root.islandEdge === "left" ? root.sideGap
             : root.islandEdge === "right" ? parent.width - width - root.sideGap : (parent.width - width) / 2)
-        y: Math.round(root.designed ? parent.height - height - IrisFrame.safeInset("bottom", root.screenName) - root.designMargin
+        y: Math.round(root.placed ? (root.placedTop ? popupColumn.placedInset : parent.height - height - popupColumn.placedInset)
+            : root.designed ? parent.height - height - IrisFrame.safeInset("bottom", root.screenName) - root.designMargin
             : root.islandSide ? IrisFrame.safeInset("top", root.screenName) + Math.round(12 * root.d)
             : root.barTop ? Math.max(root.edgeOffset + IrisFrame.band, root.islandClear)
             : parent.height - height - Math.max(root.edgeOffset + IrisFrame.band, root.islandClear))
@@ -162,7 +193,7 @@ Item {
             property real leave: 0
             readonly property bool swiped: Math.abs(banner.swipe) > 1
             readonly property real bloom: Math.min(banner.appear, banner.swiped ? 1 : 1 - banner.leave)
-            readonly property bool meltsIntoIsland: root.island !== null && !root.islandSide && !root.designed
+            readonly property bool meltsIntoIsland: root.island !== null && !root.islandSide && !root.designed && !root.placed
             // Measured a tick later: wrapped text re-measures inside the layout while the plate's height is read.
             readonly property real measuredHeight: root.designed ? (designBanner.item?.implicitHeight ?? 0) : content.implicitHeight + 24 * root.d
             property real fullHeight: banner.measuredHeight
@@ -216,9 +247,13 @@ Item {
                 width: root.designed ? banner.width : Math.round(root.bubbleSize + (banner.width - root.bubbleSize) * banner.bloom)
                 height: root.designed ? banner.fullHeight : Math.round(root.bubbleSize + (banner.fullHeight - root.bubbleSize) * banner.bloom)
                 clip: true
-                x: Math.round((banner.width - width) / 2 + banner.swipe - (root.designed ? (1 - banner.bloom) * 48 * root.d : 0))
+                // Placed in a corner it grows from that side and slides in from the edge beyond it, like a Design's.
+                readonly property int sweep: root.placed ? root.placedSide : root.designed ? -1 : 0
+                x: Math.round((banner.width - width) * (root.placed ? (root.placedSide + 1) / 2 : 0.5) + banner.swipe
+                    + plate.sweep * (1 - banner.bloom) * 48 * root.d)
                 readonly property real islandLift: {
                     void (banner.y + popupColumn.y + popupColumn.contentY + popupColumn.height)
+                    if (root.placed) return root.placedSide !== 0 ? 0 : root.placedTop ? -18 * root.d : 18 * root.d
                     if (!banner.meltsIntoIsland) return root.barTop ? -18 * root.d : 18 * root.d
                     const at = banner.mapToItem(root, 0, 0)
                     return (root.island.y + root.island.height / 2) - (at.y + root.bubbleSize / 2)

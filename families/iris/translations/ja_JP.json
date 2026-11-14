@@ -2454,5 +2454,9 @@
   "Beside the Island": "アイランドの横",
   "Every bubble": "すべてのバブル",
   "Sound and media": "サウンドとメディア",
-  "Time and apps": "時間とアプリ"
+  "Time and apps": "時間とアプリ",
+  "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "バナーの表示位置。アイランドからは伸びて畳まれ、隅では単独で浮かびます。",
+  "Out of the Island, on whichever edge it lives.": "アイランドから。どの端にあっても。",
+  "Stays %1 s, then slides away.": "%1 秒表示したあとスライドして消えます。",
+  "Banners float in their corner and slide away.": "バナーは隅に浮かび、スライドして消えます。"
 }

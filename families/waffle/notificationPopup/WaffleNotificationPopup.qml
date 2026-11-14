@@ -16,7 +16,7 @@ Scope {
     Component.onCompleted: Notifications.ensureInitialized()
     
     // Position from shared notifications config
-    readonly property string position: Config.options?.waffles?.notifications?.position ?? "bottomRight"
+    readonly property string position: Config.options?.waffles?.notifications?.position ?? "topRight"
     readonly property bool isTop: position.startsWith("top")
     readonly property bool isLeft: position.endsWith("Left")
     readonly property var targetScreens: {

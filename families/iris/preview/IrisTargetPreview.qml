@@ -173,8 +173,10 @@ Item {
 
         Body {
             id: banner
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: parent.height * 0.22
+            readonly property string position: String(Config.options?.iris?.notifications?.position ?? "island")
+            readonly property bool placed: ["topLeft", "topCenter", "topRight", "bottomLeft", "bottomCenter", "bottomRight"].includes(banner.position)
+            x: Math.round(banner.position.endsWith("Left") ? 0 : banner.position.endsWith("Right") ? parent.width - width : (parent.width - width) / 2)
+            y: banner.placed && banner.position.startsWith("bottom") ? parent.height * 0.62 : parent.height * 0.22
             width: Math.min(parent.width, Math.round(Number(Config.options?.iris?.notifications?.width ?? 380) * root.d))
             height: Math.round(74 * root.d)
             radius: IrisStyle.radiusPlate
@@ -187,14 +189,15 @@ Item {
                     Layout.fillWidth: true
                     spacing: Math.round(2 * root.d)
                     IrisText { text: Translation.tr("A notification"); font.weight: IrisStyle.weight(Font.DemiBold) }
-                    IrisText { Layout.fillWidth: true; text: Translation.tr("Banners grow out of the Island and fold back into it."); color: IrisStyle.textSecondary; elide: Text.ElideRight }
+                    IrisText { Layout.fillWidth: true; text: banner.placed ? Translation.tr("Banners float in their corner and slide away.")
+                        : Translation.tr("Banners grow out of the Island and fold back into it."); color: IrisStyle.textSecondary; elide: Text.ElideRight }
                 }
             }
         }
         Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: banner.bottom
-            anchors.topMargin: Math.round(28 * root.d)
+            y: banner.placed && banner.position.startsWith("bottom") ? parent.height * 0.22
+                : banner.y + banner.height + Math.round(28 * root.d)
             width: Math.round(250 * root.d)
             height: Math.round(42 * root.d)
             radius: IrisStyle.capsule(height)

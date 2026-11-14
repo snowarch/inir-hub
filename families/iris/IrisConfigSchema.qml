@@ -896,6 +896,7 @@ JsonObject {
         property int width: 380
         property int duration: 4000 // Banner time on screen (ms) when the app does not set one
         property bool fullscreen: true // banners over fullscreen windows; off holds them for Today
+        property string position: "island" // island (grow out of it) | topLeft | topCenter | topRight | bottomLeft | bottomCenter | bottomRight
     }
     property JsonObject osd: JsonObject {
         property int width: 320

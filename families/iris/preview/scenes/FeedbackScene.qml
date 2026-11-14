@@ -19,7 +19,19 @@ PreviewScene {
     readonly property int duration: Math.max(2000, Math.min(12000, Number(feedRoot.opt("iris.notifications.duration", 4000))))
     // In the person's figures and without a dead ".0": "4 s", "4,5 s" in German.
     readonly property string seconds: (feedRoot.duration / 1000).toLocaleString(Translation.locale, "f", feedRoot.duration % 1000 === 0 ? 0 : 1)
-    readonly property real naturalWidth: Math.max(feedRoot.bannerWidth, feedRoot.osdWidth) + Math.round(120 * feedRoot.d)
+    // `iris.notifications.position`: from the Island, or placed on a corner or an edge's middle of a wider stand-in screen.
+    readonly property string position: {
+        const value = String(feedRoot.opt("iris.notifications.position", "island"))
+        return ["topLeft", "topCenter", "topRight", "bottomLeft", "bottomCenter", "bottomRight"].includes(value) ? value : "island"
+    }
+    readonly property bool placed: feedRoot.position !== "island"
+    readonly property bool placedTop: feedRoot.position.startsWith("top")
+    readonly property int placedSide: feedRoot.position.endsWith("Left") ? -1 : feedRoot.position.endsWith("Right") ? 1 : 0
+    readonly property real gap: Math.round(16 * feedRoot.d)
+    readonly property string bannerBody: feedRoot.placed ? Translation.tr("Stays %1 s, then slides away.").arg(feedRoot.seconds)
+        : Translation.tr("Stays %1 s, then folds back into the Island.").arg(feedRoot.seconds)
+    readonly property real naturalWidth: Math.max(feedRoot.bannerWidth, feedRoot.osdWidth)
+        + Math.round((feedRoot.placedSide !== 0 ? 300 : 120) * feedRoot.d)
     readonly property real naturalHeight: Math.round(300 * feedRoot.d)
     IslandPill { id: feedIsland; anchors.horizontalCenter: parent.horizontalCenter; y: IrisFrame.band }
     Plate {
@@ -27,8 +39,11 @@ PreviewScene {
         surface: "cards"
         own: IrisStyle.identity.orange
         opacity: feedRoot.banners ? 1 : 0.3
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: feedIsland.y + feedIsland.height + IrisStyle.weld
+        x: Math.round(feedRoot.placedSide < 0 ? feedRoot.gap
+            : feedRoot.placedSide > 0 ? parent.width - width - feedRoot.gap : (parent.width - width) / 2)
+        y: Math.round(!feedRoot.placed ? feedIsland.y + feedIsland.height + IrisStyle.weld
+            : !feedRoot.placedTop ? parent.height - height - Math.round(52 * feedRoot.d)
+            : feedRoot.placedSide === 0 ? feedIsland.y + feedIsland.height + feedRoot.gap : IrisFrame.band + feedRoot.gap)
         width: feedRoot.bannerWidth
         height: bannerSkin.item ? bannerSkin.item.implicitHeight : Math.round(76 * feedRoot.d)
         radius: IrisStyle.radiusPlate
@@ -50,7 +65,7 @@ PreviewScene {
                 Layout.fillWidth: true
                 spacing: Math.round(2 * feedRoot.d)
                 IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Translation.tr("A notification"); font.weight: IrisStyle.weight(Font.DemiBold) }
-                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); Layout.fillWidth: true; text: Translation.tr("Stays %1 s, then folds back into the Island.").arg(feedRoot.seconds); color: IrisStyle.textSecondary; elide: Text.ElideRight }
+                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); Layout.fillWidth: true; text: feedRoot.bannerBody; color: IrisStyle.textSecondary; elide: Text.ElideRight }
             }
         }
         Rectangle {
@@ -76,13 +91,14 @@ PreviewScene {
         if (!bannerSkin.item) return
         bannerSkin.item.notification = ({ notificationId: -1, appName: "iNiR", appIcon: "", image: "", urgency: "1",
             summary: Translation.tr("A notification"), time: Date.now(), timer: ({ interval: feedRoot.duration }), actions: [],
-            body: Translation.tr("Stays %1 s, then folds back into the Island.").arg(feedRoot.seconds) })
+            body: feedRoot.bannerBody })
     }
     Timer { interval: feedRoot.duration + 600; running: feedRoot.playing && bannerSkin.item !== null; repeat: true; onTriggered: feedRoot.resetNotice() }
     Rectangle {
         id: osdPlate
         anchors.horizontalCenter: parent.horizontalCenter
-        y: bannerPlate.y + bannerPlate.height + Math.round(40 * feedRoot.d)
+        y: feedRoot.placed && !feedRoot.placedTop ? feedIsland.y + feedIsland.height + Math.round(40 * feedRoot.d)
+            : bannerPlate.y + bannerPlate.height + Math.round(40 * feedRoot.d)
         opacity: feedRoot.osd ? 1 : 0.3
         width: osdSkin.item ? osdSkin.item.implicitWidth : feedRoot.osdWidth
         height: osdSkin.item ? osdSkin.item.implicitHeight : Math.round(44 * feedRoot.d)

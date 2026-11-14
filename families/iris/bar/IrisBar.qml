@@ -1502,6 +1502,7 @@ Scope {
                     anchors.fill: parent
                     screenData: barWindow.screen
                     islandShapes: islandLoader.item?.fieldShapes ?? []
+                    dockShapes: dockLoader.item?.bodyShape ?? []
                 }
 
                 Loader {

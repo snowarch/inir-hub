@@ -2454,5 +2454,9 @@
   "Beside the Island": "岛旁",
   "Every bubble": "所有气泡",
   "Sound and media": "声音与媒体",
-  "Time and apps": "时间与应用"
+  "Time and apps": "时间与应用",
+  "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "横幅出现的位置。从岛屿中长出并折回；放在角落时独自浮现。",
+  "Out of the Island, on whichever edge it lives.": "从岛屿中，无论它在哪条边。",
+  "Stays %1 s, then slides away.": "停留 %1 秒，然后滑走。",
+  "Banners float in their corner and slide away.": "横幅浮在所在角落，然后滑走。"
 }

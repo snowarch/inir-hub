@@ -24,7 +24,15 @@ PanelWindow {
     readonly property bool barTop: String(root.barOptions?.position ?? "top") === "top"
     readonly property var popups: (Notifications.popupList ?? []).slice(-3).reverse()
     readonly property real d: IrisStyle.density
-    readonly property real topOffset: (root.barTop
+    // Placed (`iris.notifications.position`) the column keeps its corner or edge middle here too.
+    readonly property string position: {
+        const value = String(root.options?.position ?? "island")
+        return ["topLeft", "topCenter", "topRight", "bottomLeft", "bottomCenter", "bottomRight"].includes(value) ? value : "island"
+    }
+    readonly property bool placed: root.position !== "island"
+    readonly property bool fromBottom: root.placed && root.position.startsWith("bottom")
+    readonly property int placedSide: root.position.endsWith("Left") ? -1 : root.position.endsWith("Right") ? 1 : 0
+    readonly property real topOffset: root.placed ? Math.round(12 * root.d) + IrisFrame.musicReach(root.fromBottom ? "bottom" : "top") : (root.barTop
         ? (Number(root.barOptions?.height ?? 42) + ((root.barOptions?.notch ?? false) ? 0 : Number(root.barOptions?.margin ?? 8) * 2) + 10) * root.d
         : 10 * root.d) + IrisFrame.musicReach("top")
 
@@ -45,7 +53,8 @@ PanelWindow {
     property string replyingTo: ""
     WlrLayershell.keyboardFocus: root.replyingTo.length > 0 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     anchors {
-        top: true
+        top: !root.fromBottom
+        bottom: root.fromBottom
         left: true
         right: true
     }
@@ -53,6 +62,7 @@ PanelWindow {
         left: IrisFrame.band
         right: IrisFrame.band
         top: IrisFrame.band
+        bottom: IrisFrame.band
     }
     readonly property real popupWidth: Math.min(Math.max(260, (root.screen?.width ?? 1920) - 16),
         Math.max(340, Number(root.options?.width ?? 380) * root.d) + 16)
@@ -104,9 +114,11 @@ PanelWindow {
     ListView {
         IrisScrollFeel {}
         id: popupColumn
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: root.topOffset
+        x: Math.round(root.placedSide < 0 ? Math.round(12 * root.d) + IrisFrame.musicReach("left")
+            : root.placedSide > 0 ? parent.width - width - Math.round(12 * root.d) - IrisFrame.musicReach("right")
+            : (parent.width - width) / 2)
+        y: Math.round(root.fromBottom ? parent.height - height - root.topOffset : root.topOffset)
+        verticalLayoutDirection: root.fromBottom ? ListView.BottomToTop : ListView.TopToBottom
         width: Math.min(root.popupWidth - 16, parent.width - 16)
         height: Math.max(1, popupColumn.contentHeight)
         spacing: 8 * root.d
@@ -186,7 +198,7 @@ PanelWindow {
             property real leave: 0
             readonly property bool swiped: Math.abs(banner.swipe) > 1
             readonly property real bloom: Math.min(banner.appear, banner.swiped ? 1 : 1 - banner.leave)
-            readonly property bool meltsIntoIsland: root.barTop && root.island !== null
+            readonly property bool meltsIntoIsland: root.barTop && root.island !== null && !root.placed
             // Measured a tick later: wrapped text re-measures inside the layout while the plate's height is read.
             readonly property real measuredHeight: content.implicitHeight + 24 * root.d
             property real fullHeight: banner.measuredHeight
@@ -238,7 +250,8 @@ PanelWindow {
                 compositorAllowed: true
                 opacity: plate.opacity
                 sceneOrigin: Qt.point(root.margins.left + popupColumn.x + banner.x,
-                    root.margins.top + popupColumn.y + banner.y)
+                    (root.fromBottom ? (root.screen?.height ?? root.height) - root.margins.bottom - root.height
+                        : root.margins.top) + popupColumn.y + banner.y)
                 sceneSize: Qt.size(root.screen?.width ?? 0, root.screen?.height ?? 0)
                 shapes: plate.opacity > 0 ? [{ x: plate.x, y: plate.y, width: plate.width,
                     height: plate.height, radius: plate.radius, paints: true, fuse: 0 }] : []
@@ -248,10 +261,13 @@ PanelWindow {
                 width: Math.round(root.bubbleSize + (banner.width - root.bubbleSize) * banner.bloom)
                 height: Math.round(root.bubbleSize + (banner.fullHeight - root.bubbleSize) * banner.bloom)
                 clip: true
-                x: Math.round((banner.width - width) / 2 + banner.swipe)
+                // Placed in a corner it grows from that side and slides in from the edge beyond it.
+                x: Math.round((banner.width - width) * (root.placedSide + 1) / 2 + banner.swipe
+                    + root.placedSide * (1 - banner.bloom) * 48 * root.d)
                 readonly property real islandLift: banner.meltsIntoIsland
-                    ? (root.island.y + root.island.bubble / 2) - (popupColumn.y + banner.y + root.bubbleSize / 2) : -18 * root.d
-                y: Math.round(banner.meltsIntoIsland ? plate.islandLift * (1 - banner.bloom) : (1 - banner.bloom) * -18 * root.d)
+                    ? (root.island.y + root.island.bubble / 2) - (popupColumn.y + banner.y + root.bubbleSize / 2)
+                    : root.placedSide !== 0 ? 0 : root.fromBottom ? 18 * root.d : -18 * root.d
+                y: Math.round(plate.islandLift * (1 - banner.bloom))
                 opacity: Math.min(1, banner.bloom * 3)
                     * (1 - Math.min(1, Math.abs(banner.swipe) / (banner.width * 0.6)))
                 // Apple's Island: a capsule while it is one line, a deep round once it holds more.

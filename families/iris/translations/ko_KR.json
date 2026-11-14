@@ -2454,5 +2454,9 @@
   "Beside the Island": "아일랜드 옆",
   "Every bubble": "모든 버블",
   "Sound and media": "사운드 및 미디어",
-  "Time and apps": "시간 및 앱"
+  "Time and apps": "시간 및 앱",
+  "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "배너가 나타나는 위치. 아일랜드에서는 자라나 다시 접히고, 모서리에서는 홀로 떠 있습니다.",
+  "Out of the Island, on whichever edge it lives.": "아일랜드에서, 어느 가장자리에 있든.",
+  "Stays %1 s, then slides away.": "%1초 머문 뒤 밀려 사라집니다.",
+  "Banners float in their corner and slide away.": "배너가 모서리에 떠 있다가 밀려 사라집니다."
 }

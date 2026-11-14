@@ -425,7 +425,7 @@ WSettingsPage {
         WSettingsDropdown {
             label: Translation.tr("Popup position")
             icon: "panel-left-expand"
-            currentValue: Config.options?.waffles?.notifications?.position ?? "bottomRight"
+            currentValue: Config.options?.waffles?.notifications?.position ?? "topRight"
             options: [
                 { value: "topLeft", displayName: Translation.tr("Top Left") },
                 { value: "topRight", displayName: Translation.tr("Top Right") },
