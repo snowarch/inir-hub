@@ -391,75 +391,76 @@ IrisWidgetFace {
         }
     }
 
-    Item {
+    Loader {
         anchors.fill: parent
-        visible: !root.resting && root.small && !root.ownStyle
-
-        ClippingRectangle {
-            anchors.fill: parent
-            visible: root.art.length > 0
-            radius: root.radius
-            color: "transparent"
-            IrisImage {
+        active: !root.resting && root.small && !root.ownStyle
+        sourceComponent: Item {
+            ClippingRectangle {
                 anchors.fill: parent
-                source: root.art
-            }
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: parent.height * 0.62
-                gradient: Gradient {
-                    GradientStop { position: 0; color: "transparent" }
-                    GradientStop { position: 1; color: IrisStyle.veilStrong }
+                visible: root.art.length > 0
+                radius: root.radius
+                color: "transparent"
+                IrisImage {
+                    anchors.fill: parent
+                    source: root.art
+                }
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: parent.height * 0.62
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: "transparent" }
+                        GradientStop { position: 1; color: IrisStyle.veilStrong }
+                    }
                 }
             }
-        }
 
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: root.art.length > 0 ? root.dp(14) : 0
-            spacing: root.dp(1)
-            IrisArtwork {
-                visible: root.art.length === 0
-                circular: false
-                radius: root.innerRadius
-                Layout.preferredWidth: root.dp(56)
-                Layout.preferredHeight: root.dp(56)
-            }
-            Item { Layout.fillHeight: true }
-            RowLayout {
-                Layout.fillHeight: false
-                Layout.fillWidth: true
-                spacing: root.dp(8)
-                ColumnLayout {
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: root.art.length > 0 ? root.dp(14) : 0
+                spacing: root.dp(1)
+                IrisArtwork {
+                    visible: root.art.length === 0
+                    circular: false
+                    radius: root.innerRadius
+                    Layout.preferredWidth: root.dp(56)
+                    Layout.preferredHeight: root.dp(56)
+                }
+                Item { Layout.fillHeight: true }
+                RowLayout {
                     Layout.fillHeight: false
                     Layout.fillWidth: true
-                    spacing: 0
-                    FaceText {
-                        face: root
+                    spacing: root.dp(8)
+                    ColumnLayout {
+                        Layout.fillHeight: false
                         Layout.fillWidth: true
-                        text: media.effectiveTitle
-                        color: IrisStyle.onMedia
-                        size: 13
-                        weight: Font.DemiBold
+                        spacing: 0
+                        FaceText {
+                            face: root
+                            Layout.fillWidth: true
+                            text: media.effectiveTitle
+                            color: IrisStyle.onMedia
+                            size: 13
+                            weight: Font.DemiBold
+                        }
+                        FaceText {
+                            face: root
+                            Layout.fillWidth: true
+                            text: media.effectiveArtist
+                            color: IrisStyle.onMediaSecondary
+                            size: 11.5
+                        }
                     }
-                    FaceText {
+                    FaceAction {
                         face: root
-                        Layout.fillWidth: true
-                        text: media.effectiveArtist
-                        color: IrisStyle.onMediaSecondary
-                        size: 11.5
+                        implicitWidth: root.dp(34)
+                        glyph: root.playing ? "pause" : "play_arrow"
+                        name: root.playing ? Translation.tr("Pause") : Translation.tr("Play")
+                        tint: IrisStyle.onMedia
+                        color: IrisStyle.onMediaFill
+                        onActivated: media.togglePlaying()
                     }
-                }
-                FaceAction {
-                    face: root
-                    implicitWidth: root.dp(34)
-                    glyph: root.playing ? "pause" : "play_arrow"
-                    name: root.playing ? Translation.tr("Pause") : Translation.tr("Play")
-                    tint: IrisStyle.onMedia
-                    color: IrisStyle.onMediaFill
-                    onActivated: media.togglePlaying()
                 }
             }
         }
@@ -467,86 +468,32 @@ IrisWidgetFace {
 
     // Medium: the cover is the play key (it settles back while paused), the song, and the lane with its times at
     // the ends and the keys on its centre.
-    RowLayout {
+    Loader {
         anchors.fill: parent
-        visible: !root.resting && root.medium && !root.ownStyle
-        spacing: root.dp(14)
-
-        Item {
-            Layout.preferredWidth: root.height - root.padding * 2
-            Layout.preferredHeight: Layout.preferredWidth
-            IrisArtwork {
-                id: mediumCover
-                anchors.fill: parent
-                source: root.art
-                circular: false
-                radius: root.innerRadius
-                scale: coverTap.pressed ? 0.9 : root.playing ? 1 : 0.94
-                Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
-            }
-            HoverHandler { cursorShape: Qt.PointingHandCursor }
-            TapHandler { id: coverTap; onTapped: media.togglePlaying() }
-        }
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: root.dp(2)
-
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                text: root.source
-                color: root.inkTertiary
-                size: 11
-                weight: Font.DemiBold
-            }
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                text: media.effectiveTitle
-                size: 15
-                weight: Font.DemiBold
-            }
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                text: media.effectiveArtist
-                color: root.inkSecondary
-                size: 12.5
-            }
-            Item { Layout.fillHeight: true }
-            Progress {
-                Layout.fillWidth: true
-                visible: media.effectiveLength > 0
-            }
-            KeysRow {
-                Layout.fillWidth: true
-                Layout.topMargin: root.dp(4)
-                disc: root.dp(30)
-            }
-        }
-    }
-
-    ColumnLayout {
-        anchors.fill: parent
-        visible: !root.resting && root.large && !root.coverLarge && !root.ownStyle
-        spacing: root.dp(12)
-
-        RowLayout {
-            Layout.fillHeight: false
-            Layout.fillWidth: true
+        active: !root.resting && root.medium && !root.ownStyle
+        sourceComponent: RowLayout {
             spacing: root.dp(14)
-            IrisArtwork {
-                source: root.art
-                circular: false
-                radius: root.innerRadius
-                Layout.preferredWidth: root.dp(root.lyricsReady ? 112 : 148)
+
+            Item {
+                Layout.preferredWidth: root.height - root.padding * 2
                 Layout.preferredHeight: Layout.preferredWidth
+                IrisArtwork {
+                    id: mediumCover
+                    anchors.fill: parent
+                    source: root.art
+                    circular: false
+                    radius: root.innerRadius
+                    scale: coverTap.pressed ? 0.9 : root.playing ? 1 : 0.94
+                    Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
+                }
+                HoverHandler { cursorShape: Qt.PointingHandCursor }
+                TapHandler { id: coverTap; onTapped: media.togglePlaying() }
             }
             ColumnLayout {
-                Layout.fillHeight: false
                 Layout.fillWidth: true
+                Layout.fillHeight: true
                 spacing: root.dp(2)
+
                 FaceText {
                     face: root
                     Layout.fillWidth: true
@@ -558,8 +505,168 @@ IrisWidgetFace {
                 FaceText {
                     face: root
                     Layout.fillWidth: true
+                    text: media.effectiveTitle
+                    size: 15
+                    weight: Font.DemiBold
+                }
+                FaceText {
+                    face: root
+                    Layout.fillWidth: true
+                    text: media.effectiveArtist
+                    color: root.inkSecondary
+                    size: 12.5
+                }
+                Item { Layout.fillHeight: true }
+                Progress {
+                    Layout.fillWidth: true
+                    visible: media.effectiveLength > 0
+                }
+                KeysRow {
+                    Layout.fillWidth: true
+                    Layout.topMargin: root.dp(4)
+                    disc: root.dp(30)
+                }
+            }
+        }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: !root.resting && root.large && !root.coverLarge && !root.ownStyle
+        sourceComponent: ColumnLayout {
+            spacing: root.dp(12)
+
+            RowLayout {
+                Layout.fillHeight: false
+                Layout.fillWidth: true
+                spacing: root.dp(14)
+                IrisArtwork {
+                    source: root.art
+                    circular: false
+                    radius: root.innerRadius
+                    Layout.preferredWidth: root.dp(root.lyricsReady ? 112 : 148)
+                    Layout.preferredHeight: Layout.preferredWidth
+                }
+                ColumnLayout {
+                    Layout.fillHeight: false
+                    Layout.fillWidth: true
+                    spacing: root.dp(2)
+                    FaceText {
+                        face: root
+                        Layout.fillWidth: true
+                        text: root.source
+                        color: root.inkTertiary
+                        size: 11
+                        weight: Font.DemiBold
+                    }
+                    FaceText {
+                        face: root
+                        Layout.fillWidth: true
+                        text: IrisFaceData.unwidowed(media.effectiveTitle)
+                        size: 17
+                        weight: Font.DemiBold
+                        wrapMode: Text.Wrap
+                        maximumLineCount: 2
+                    }
+                    FaceText {
+                        face: root
+                        Layout.fillWidth: true
+                        text: media.effectiveArtist
+                        color: root.inkSecondary
+                        size: 13
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: root.dp(4)
+
+                Item { Layout.fillHeight: true }
+                FaceText {
+                    face: root
+                    Layout.fillWidth: true
+                    visible: root.lyricsReady
+                    text: LyricsService.slots[2] ?? ""
+                    color: root.inkTertiary
+                    size: 12.5
+                }
+                FaceText {
+                    face: root
+                    Layout.fillWidth: true
+                    text: IrisFaceData.unwidowed(LyricsService.slots[3] || "♪")
+                    visible: root.lyricsReady
+                    size: 16
+                    weight: Font.DemiBold
+                    wrapMode: Text.Wrap
+                    maximumLineCount: 2
+                }
+                FaceText {
+                    face: root
+                    Layout.fillWidth: true
+                    visible: root.lyricsReady
+                    text: LyricsService.slots[4] ?? ""
+                    color: root.inkTertiary
+                    size: 12.5
+                }
+                Item { Layout.fillHeight: true }
+            }
+
+            Progress {
+                Layout.fillWidth: true
+                visible: media.effectiveLength > 0
+            }
+            KeysRow {
+                Layout.fillWidth: true
+            }
+        }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.coverLarge
+        sourceComponent: Item {
+            ClippingRectangle {
+                anchors.fill: parent
+                radius: root.radius
+                color: "transparent"
+                IrisImage {
+                    anchors.fill: parent
+                    source: root.art
+                }
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: parent.height * 0.6
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: "transparent" }
+                        GradientStop { position: 1; color: IrisStyle.veilStrong }
+                    }
+                }
+            }
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: root.edgePad
+                spacing: root.dp(2)
+
+                Item { Layout.fillHeight: true }
+                FaceText {
+                    face: root
+                    Layout.fillWidth: true
+                    text: root.source
+                    color: IrisStyle.onMediaSecondary
+                    size: 11
+                    weight: Font.DemiBold
+                }
+                FaceText {
+                    face: root
+                    Layout.fillWidth: true
                     text: IrisFaceData.unwidowed(media.effectiveTitle)
-                    size: 17
+                    color: IrisStyle.onMedia
+                    size: 19
                     weight: Font.DemiBold
                     wrapMode: Text.Wrap
                     maximumLineCount: 2
@@ -568,121 +675,20 @@ IrisWidgetFace {
                     face: root
                     Layout.fillWidth: true
                     text: media.effectiveArtist
-                    color: root.inkSecondary
+                    color: IrisStyle.onMediaSecondary
                     size: 13
                 }
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            spacing: root.dp(4)
-
-            Item { Layout.fillHeight: true }
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                visible: root.lyricsReady
-                text: LyricsService.slots[2] ?? ""
-                color: root.inkTertiary
-                size: 12.5
-            }
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                text: IrisFaceData.unwidowed(LyricsService.slots[3] || "♪")
-                visible: root.lyricsReady
-                size: 16
-                weight: Font.DemiBold
-                wrapMode: Text.Wrap
-                maximumLineCount: 2
-            }
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                visible: root.lyricsReady
-                text: LyricsService.slots[4] ?? ""
-                color: root.inkTertiary
-                size: 12.5
-            }
-            Item { Layout.fillHeight: true }
-        }
-
-        Progress {
-            Layout.fillWidth: true
-            visible: media.effectiveLength > 0
-        }
-        KeysRow {
-            Layout.fillWidth: true
-        }
-    }
-
-    Item {
-        anchors.fill: parent
-        visible: root.coverLarge
-
-        ClippingRectangle {
-            anchors.fill: parent
-            radius: root.radius
-            color: "transparent"
-            IrisImage {
-                anchors.fill: parent
-                source: root.art
-            }
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: parent.height * 0.6
-                gradient: Gradient {
-                    GradientStop { position: 0; color: "transparent" }
-                    GradientStop { position: 1; color: IrisStyle.veilStrong }
+                Progress {
+                    Layout.fillWidth: true
+                    Layout.topMargin: root.dp(12)
+                    overMedia: true
+                    visible: media.effectiveLength > 0
                 }
-            }
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: root.edgePad
-            spacing: root.dp(2)
-
-            Item { Layout.fillHeight: true }
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                text: root.source
-                color: IrisStyle.onMediaSecondary
-                size: 11
-                weight: Font.DemiBold
-            }
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                text: IrisFaceData.unwidowed(media.effectiveTitle)
-                color: IrisStyle.onMedia
-                size: 19
-                weight: Font.DemiBold
-                wrapMode: Text.Wrap
-                maximumLineCount: 2
-            }
-            FaceText {
-                face: root
-                Layout.fillWidth: true
-                text: media.effectiveArtist
-                color: IrisStyle.onMediaSecondary
-                size: 13
-            }
-            Progress {
-                Layout.fillWidth: true
-                Layout.topMargin: root.dp(12)
-                overMedia: true
-                visible: media.effectiveLength > 0
-            }
-            KeysRow {
-                Layout.fillWidth: true
-                Layout.topMargin: root.dp(8)
-                overMedia: true
+                KeysRow {
+                    Layout.fillWidth: true
+                    Layout.topMargin: root.dp(8)
+                    overMedia: true
+                }
             }
         }
     }
