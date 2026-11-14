@@ -1351,10 +1351,11 @@ Item {
         interval: Math.max(800, Math.min(5000, Number(root.osdPrefs?.duration ?? 1500))) + 300
         onTriggered: root.clearOsdRequests()
     }
+    // The song's ring and dots move once a second; under a fullscreen window nobody sees them (a game with music on).
     Timer {
         interval: 1000
         repeat: true
-        running: root.playing && !root.ytMusic
+        running: root.playing && !root.ytMusic && !root.suppressed
         onTriggered: root.player?.positionChanged()
     }
     Connections {
