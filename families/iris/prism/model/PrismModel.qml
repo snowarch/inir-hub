@@ -19,9 +19,10 @@ Singleton {
     // The sidebar's captions, in order; a page's group comes from its area's cluster in IrisOptions.
     // The compositor in use has one group under its own name (his 11-10: "todo bajo una sola categoría del compositor
     // en uso"): screens, layout, windows, glass, movement and input, each a page; nothing of it lives anywhere else.
-    readonly property string compositorGroup: CompositorConfig.compositorName.length > 0 ? CompositorConfig.compositorName : "Compositor"
-    readonly property var groups: ["Shell", "Desktop", root.compositorGroup, "Tools", "System", "iNiR"]
-    readonly property var clusterGroups: ({ "-1": "Shell", "0": "Shell", "1": "Desktop", "2": "Tools", "3": "System", "4": "iNiR", "5": root.compositorGroup })
+    // The sidebar's captions are IrisOptions' categories, the same map Classic and Folio draw (his 11-14: "organizado de
+    // forma perfecta en todos sus diseños"): Home alone at the top, the foot under iNiR.
+    function captionOf(category: var): string { return category.foot ? "iNiR" : String(category.title) }
+    readonly property var groups: [""].concat(IrisOptions.categories.map(category => root.captionOf(category)))
 
     // Prism's dress per area: a shorter name where the sidebar wants one, its mark and tint, and the rows the hero says.
     readonly property var dress: ({
@@ -71,7 +72,7 @@ Singleton {
         appearance: [
             { id: "appearance", groups: [] },
             { id: "colour", groups: ["Scheme", "Accent", "Highlight", "Signal", "Colour theme", "Day and night", "Wallpaper tint", "Adaptive", "Dark look", "Ink look", "Light look"] },
-            { id: "surfaces", groups: ["Material", "Glass", "Texture", "Light", "Edges", "Shape", "Frame", "Material per surface", "Menus", "Settings"] },
+            { id: "surfaces", groups: ["Material", "Glass", "Texture", "Light", "Edges", "Shape", "Frame", "Menus"] },
             { id: "typeIcons", groups: ["Text", "Faces", "Icons", "Badges"] },
             { id: "appColours", groups: ["App colours"] }
         ],
@@ -96,14 +97,14 @@ Singleton {
     // Every page: IrisOptions' areas in their order, each with Prism's dress, and Prism's own views where they belong.
     readonly property var pages: {
         const out = []
-        const add = (id, base) => {
+        const add = (id, base, area) => {
             const dress = root.dress[id] ?? {}
             if (dress.needs === "battery" && !Battery.available) return
             const cluster = Number(dress.cluster ?? base?.cluster ?? 4)
             out.push({
                 pageId: id,
                 name: String(dress.name ?? base?.title ?? id),
-                group: root.clusterGroups[String(cluster)] ?? "iNiR",
+                group: area === "general" ? "" : root.captionOf(IrisOptions.categoryOf(area)),
                 glyph: String(dress.glyph ?? base?.icon ?? "circle"),
                 tint: String(dress.tint ?? "grey"),
                 lead: Array.from(dress.lead ?? []),
@@ -116,8 +117,8 @@ Singleton {
         }
         const extras = Object.keys(root.dress).filter(id => root.dress[id].after)
         for (const section of IrisOptions.sections) {
-            for (const chapter of root.chapters[section.id] ?? [{ id: section.id }]) add(chapter.id, section)
-            for (const id of extras.filter(id => root.dress[id].after === section.id)) add(id, null)
+            for (const chapter of root.chapters[section.id] ?? [{ id: section.id }]) add(chapter.id, section, section.id)
+            for (const id of extras.filter(id => root.dress[id].after === section.id)) add(id, null, section.id)
         }
         // The compositor's pages stand together after the desktop's, in their own order, wherever their areas sit.
         const own = out.filter(page => page.cluster === 5).sort((a, b) => a.order - b.order)

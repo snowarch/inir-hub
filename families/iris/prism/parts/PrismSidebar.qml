@@ -208,6 +208,7 @@ Item {
                     readonly property bool here: !PrismState.searching && group.pages.some(page => page.pageId === PrismState.page)
                     width: column.width
                     PrismText {
+                        visible: group.modelData.length > 0
                         topPadding: PrismTheme.dp(18)
                         bottomPadding: PrismTheme.dp(6)
                         text: Translation.tr(group.modelData).toUpperCase()
