@@ -3,8 +3,10 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell.Widgets
 import qs.services
+import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 
 // Home: one show up front (what is trending on AniList) and shelves of anime, films and series under it.
@@ -59,7 +61,9 @@ MediaPage {
     // The hero: the show's banner behind its cover, its name, what it is about, and what to do with it.
     ClippingRectangle {
         id: hero
+        objectName: "hero"
         readonly property var show: root.hero
+        readonly property bool compact: width < Math.round(600 * root.d * Math.min(1.4, IrisStyle.typeScale))
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(250 * root.d)
         visible: hero.show !== null
@@ -70,6 +74,12 @@ MediaPage {
             anchors.fill: parent
             source: String(hero.show?.banner || hero.show?.imageLarge || "")
             fillMode: Image.PreserveAspectCrop
+        }
+        // Keep the words readable even when the catalogue supplies very bright art.
+        Rectangle {
+            anchors.fill: parent
+            visible: root.prism
+            color: Qt.alpha(IrisStyle.darkSurfaceOpaque, 0.46)
         }
         // The words sit on the left: the banner fades into the surface under them.
         Rectangle {
@@ -88,15 +98,29 @@ MediaPage {
             spacing: Math.round(18 * root.d)
 
             ClippingRectangle {
+                id: heroCover
+                visible: !root.prism || !hero.compact
                 Layout.fillHeight: true
                 Layout.preferredWidth: Math.round(height / 1.5)
                 radius: IrisStyle.tileRadius(width * 0.5)
                 color: IrisStyle.fillQuiet
                 IrisImage { anchors.fill: parent; source: String(hero.show?.imageLarge ?? "") }
-                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: CornerState.openShow(hero.show) }
+                MouseArea {
+                    id: coverAction
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    activeFocusOnTab: true
+                    Accessible.role: Accessible.Button
+                    Accessible.name: String(hero.show?.title ?? "")
+                    onClicked: CornerState.openShow(hero.show)
+                    Keys.onReturnPressed: CornerState.openShow(hero.show)
+                    Keys.onSpacePressed: CornerState.openShow(hero.show)
+                }
+                CornerFocusRing { on: coverAction.activeFocus }
             }
 
             ColumnLayout {
+                objectName: "heroText"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 spacing: Math.round(6 * root.d)
@@ -137,15 +161,43 @@ MediaPage {
                     maximumLineCount: 3
                 }
                 RowLayout {
+                    id: actions
+                    objectName: "heroActions"
                     Layout.fillWidth: true
                     spacing: Math.round(8 * root.d)
+                    // The row's own width can be capped by its children; compare the available column instead.
+                    readonly property bool roomy: (parent?.width ?? 0) >= playAction.implicitWidth + spacing + detailsAction.implicitWidth
                     IrisButton {
+                        id: playAction
+                        objectName: "heroPlay"
                         visible: root.prism
                         emphasized: true
                         foreground: IrisStyle.darkSurfaceOpaque
                         colBackground: IrisStyle.inkOnDark
                         colBackgroundHover: Qt.darker(IrisStyle.inkOnDark, 1.12)
-                        text: "▶  " + Translation.tr("Watch")
+                        buttonRadius: height / 2
+                        buttonRadiusPressed: height / 2
+                        implicitWidth: playLabel.implicitWidth + Math.round(30 * root.d)
+                        Accessible.name: Translation.tr("Watch")
+                        Row {
+                            id: playLabel
+                            anchors.centerIn: parent
+                            spacing: Math.round(6 * root.d)
+                            MaterialSymbol {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "play_arrow"
+                                fill: 1
+                                iconSize: Math.round(16 * root.d)
+                                color: playAction.foreground
+                            }
+                            IrisText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Translation.tr("Watch")
+                                color: playAction.foreground
+                                font.pixelSize: IrisStyle.typeLabel
+                                font.weight: IrisStyle.weight(Font.DemiBold)
+                            }
+                        }
                         onClicked: {
                             CornerState.openShow(hero.show)
                             CornerWatch.begin(Object.assign({}, hero.show, { film: hero.show?.type === "Movie" || Number(hero.show?.episodes) === 1 }), { episode: 1 })
@@ -158,16 +210,24 @@ MediaPage {
                         onClicked: CornerState.openShow(hero.show)
                     }
                     IrisButton {
-                        visible: root.prism && parent.width > Math.round(240 * root.d)
+                        id: detailsAction
+                        objectName: "heroDetails"
+                        visible: root.prism && actions.roomy
                         foreground: IrisStyle.inkOnDark
                         colBackground: IrisStyle.veilStrong
                         colBackgroundHover: IrisStyle.veilHeavy
+                        buttonRadius: height / 2
+                        buttonRadiusPressed: height / 2
                         text: Translation.tr("Details")
                         onClicked: CornerState.openShow(hero.show)
                     }
                     IrisIconButton {
-                        visible: root.prism && parent.width <= Math.round(240 * root.d)
+                        visible: root.prism && !actions.roomy
                         materialIcon: "info"
+                        foreground: IrisStyle.inkOnDark
+                        quiet: false
+                        colBackground: IrisStyle.veilStrong
+                        colBackgroundHover: IrisStyle.veilHeavy
                         Accessible.name: Translation.tr("Details")
                         onClicked: CornerState.openShow(hero.show)
                     }

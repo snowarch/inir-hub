@@ -59,7 +59,8 @@ MouseArea {
             text: root.show.kind === "anime" ? "animation" : root.show.kind === "series" ? "tv" : "movie"
             fill: root.prism ? 1 : 0
             iconSize: Math.round(32 * root.d)
-            color: root.prism ? IrisStyle.inkOnAccent : IrisStyle.muted
+            // The placeholder is artwork: its glyph stays light in both schemes.
+            color: root.prism ? IrisStyle.inkOnDark : IrisStyle.muted
         }
         Image {
             id: art
