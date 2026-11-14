@@ -149,6 +149,8 @@ IrisWidgetFace {
             text: root.figure(reading.key)
             size: reading.figureSize
             tone: root.level(reading.key) >= 0.85 ? root.danger : root.ink
+            // Like the lead: a reading sampled every few seconds would roll the whole desktop at rest.
+            rolls: false
         }
         FaceText {
             face: root
