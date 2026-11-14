@@ -38,11 +38,41 @@ function httpsUrl(value) {
         && !/[\x00-\x20\\]/.test(text) && !/%(?![0-9a-f]{2})/i.test(text)
 }
 
+// Provider-returned media must not address local networks by literal address.
+// Hostname resolution and redirects cannot be checked here.
+function mediaUrl(value) {
+    if (!httpsUrl(value)) return false
+    const authority = String(value).slice(8).split(/[/?#]/)[0].toLowerCase()
+    const host = authority.startsWith("[") ? authority.slice(1, authority.indexOf("]")) : authority.split(":")[0]
+    if (host === "localhost" || host.endsWith(".localhost")) return false
+    if (host.includes(":")) {
+        const halves = host.split("::")
+        if (halves.length > 2) return false
+        const left = halves[0] ? halves[0].split(":") : []
+        const right = halves.length === 2 && halves[1] ? halves[1].split(":") : []
+        if (halves.length === 1 && left.length !== 8 || halves.length === 2 && left.length + right.length >= 8) return false
+        const parts = left.concat(Array(8 - left.length - right.length).fill("0"), right).map(part => parseInt(part, 16))
+        if (parts.some(part => !Number.isFinite(part) || part > 65535)) return false
+        if (parts.slice(0, 7).every(part => part === 0) && parts[7] <= 1) return false
+        if ((parts[0] & 0xfe00) === 0xfc00 || (parts[0] & 0xffc0) === 0xfe80) return false
+        // Reject IPv4-mapped IPv6 rather than allowing a local IPv4 address through it.
+        if (parts.slice(0, 5).every(part => part === 0) && parts[5] === 0xffff) return false
+        return true
+    }
+    if (/^(?:0x[0-9a-f]+|[0-9.]+)$/i.test(host)) {
+        const octets = host.split(".")
+        if (octets.length !== 4 || octets.some(part => !/^(0|[1-9][0-9]{0,2})$/.test(part) || Number(part) > 255)) return false
+        const [a, b] = octets.map(Number)
+        return !(a === 0 || a === 10 || a === 127 || a >= 224 || a === 169 && b === 254 || a === 172 && b >= 16 && b <= 31 || a === 192 && b === 168 || a === 100 && b >= 64 && b <= 127)
+    }
+    return true
+}
+
 function subtitlesFrom(body) {
     const result = []
     for (const entry of Array.isArray(body?.subtitles) ? body.subtitles : []) {
         const url = String(entry?.url ?? ""), lang = String(entry?.lang ?? "").toLowerCase()
-        if (!httpsUrl(url) || !/^[a-z]{2,3}$/.test(lang)) continue
+        if (!mediaUrl(url) || !/^[a-z]{2,3}$/.test(lang)) continue
         result.push({ url, lang, name: String(entry.label ?? lang).slice(0, 80) })
     }
     return result
@@ -53,11 +83,11 @@ function streamsFrom(body) {
     const out = []
     for (const item of Array.isArray(body?.streams) ? body.streams : []) {
         const url = String(item?.url ?? "")
-        if (!httpsUrl(url)) continue
+        if (!mediaUrl(url)) continue
         const headers = item.behaviorHints?.proxyHeaders?.request ?? {}
         const referer = String(headers.Referer ?? headers.referer ?? "")
         const name = [item.name, item.title ?? item.description].filter(Boolean).map(text => String(text).split("\n")[0]).join(" · ").slice(0, 80)
-        out.push({ name: name || "Stream", url, referer: httpsUrl(referer) ? referer : "" })
+        out.push({ name: name || "Stream", url, referer: mediaUrl(referer) ? referer : "" })
     }
     return out
 }

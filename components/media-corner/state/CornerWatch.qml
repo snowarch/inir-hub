@@ -146,7 +146,7 @@ Singleton {
     // ── Playing. The address comes from the network: it is only ever an https address after `--`, in a list of arguments.
     // shortcut: mpv is a child of the shell, so `inir restart` closes it; detach it if that gets in the way.
     function play(stream: var): void {
-        if (!Streams.httpsUrl(stream?.url)) return
+        if (!Streams.mediaUrl(stream?.url)) return
         root.error = ""
         if (root.selectedSubtitle?.fileId) {
             const ticket = root._ticket
@@ -172,12 +172,13 @@ Singleton {
         mpv.running = false
     }
     function _start(stream: var): void {
+        if (!Streams.mediaUrl(stream?.url)) return
         const key = Streams.watchKey(root.show, root.episode)
         const resume = root.resumeAt(key)
         // keep-open would keep mpv alive, with no window, on a stream it can't read: it has to end for that to be told.
         const args = ["mpv", "--ytdl=no", "--keep-open=no", "--terminal", "--no-really-quiet", "--no-input-terminal", "--term-status-msg=@@POS ${=time-pos} ${=duration} ${vo-configured}"]
-        if (root.selectedSubtitle && Streams.httpsUrl(root.selectedSubtitle.url)) args.push("--sub-file=" + root.selectedSubtitle.url)
-        if (Streams.httpsUrl(stream.referer)) args.push("--referrer=" + stream.referer)
+        if (root.selectedSubtitle && Streams.mediaUrl(root.selectedSubtitle.url)) args.push("--sub-file=" + root.selectedSubtitle.url)
+        if (Streams.mediaUrl(stream.referer)) args.push("--referrer=" + stream.referer)
         if (resume > 0) args.push("--start=" + Math.floor(resume))
         args.push("--", stream.url)
         root._current = { stream, key, title: root.title, show: { id: root.show.id, kind: root.show.kind, title: root.title, type: root.show.type ?? "", film: Boolean(root.show.film) }, episode: root.episode }
