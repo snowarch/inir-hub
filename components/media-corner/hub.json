@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "summary": "Browse anime, films and series, and watch them from sources you add",
     "authors": [
         "lukatedev"
@@ -35,6 +35,11 @@
         "1.0.1": [
             "Refresh the Hub preview and require iNiR 3.1.1"
         ],
-    "1.1.0": ["Add user-managed sources and optional subtitles"]
+        "1.1.0": [
+            "Add user-managed sources and optional subtitles"
+        ],
+        "1.1.1": [
+            "Opens again: 1.1.0 did not load on any desktop"
+        ]
     }
 }
