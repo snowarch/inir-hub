@@ -105,7 +105,8 @@ Item {
     OnDemandPanelLoader { identifier: "wTaskView"; open: WaffleState.taskViewOpen; source: "./taskview/WaffleTaskView.qml" }
 
     // Shared modules that work with waffle
-    DeferredPanelLoader { identifier: "iiBootGreeting"; component: BootGreeting {} }
+    // Shown once at login when enabled (off by default): loaded only while open, then gone with its wallpaper.
+    DeferredPanelLoader { identifier: "iiBootGreeting"; extraCondition: GlobalStates.bootGreetingOpen; component: BootGreeting {} }
     OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }
     OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; source: Plugins.baseUrl("modules/shared/onScreenKeyboard/OnScreenKeyboard.qml") }
     OnDemandPanelLoader { identifier: "iiOverlay"; open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen); source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml") }

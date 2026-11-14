@@ -147,7 +147,8 @@ Item {
         }
     }
 
-    DeferredPanelLoader { identifier: "iiBootGreeting"; component: BootGreeting {} }
+    // Shown once at login when enabled (off by default): loaded only while open, then gone with its wallpaper.
+    DeferredPanelLoader { identifier: "iiBootGreeting"; extraCondition: GlobalStates.bootGreetingOpen; component: BootGreeting {} }
     OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }
     // Arranging the desktop: the toolbar and the shelf, while the desktop recedes into a card; held a beat after Done
     // so the card can grow back.
