@@ -23,15 +23,26 @@ function manifestInfo(manifest) {
     const resource = stream ?? subtitle
     const types = Array.isArray(resource?.types) ? resource.types : (Array.isArray(manifest?.types) ? manifest.types : [])
     const prefixes = Array.isArray(resource?.idPrefixes) ? resource.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : [])
+    const resourceTypes = r => (Array.isArray(r?.types) ? r.types : (Array.isArray(manifest?.types) ? manifest.types : [])).map(String)
+    const resourcePrefixes = r => (Array.isArray(r?.idPrefixes) ? r.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : [])).map(String)
     return { name: String(manifest.name ?? "").slice(0, 40), types: types.map(String), prefixes: prefixes.map(String),
+             streamTypes: resourceTypes(stream), streamPrefixes: resourcePrefixes(stream),
+             subtitleTypes: resourceTypes(subtitle), subtitlePrefixes: resourcePrefixes(subtitle),
              hasStreams: stream !== undefined, hasSubtitles: subtitle !== undefined }
+}
+
+function httpsUrl(value) {
+    const text = String(value || "")
+    const match = text.match(/^https:\/\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*|\[[0-9a-f:]+\])(?::([0-9]{1,5}))?(?:[/?#][^\s]*)?$/i)
+    return Boolean(match) && (!match[1] || (Number(match[1]) > 0 && Number(match[1]) <= 65535))
+        && !/[\x00-\x20\\]/.test(text) && !/%(?![0-9a-f]{2})/i.test(text)
 }
 
 function subtitlesFrom(body) {
     const result = []
     for (const entry of Array.isArray(body?.subtitles) ? body.subtitles : []) {
         const url = String(entry?.url ?? ""), lang = String(entry?.lang ?? "").toLowerCase()
-        if (!/^https:\/\/[^\s]+$/.test(url) || !/^[a-z]{2,3}$/.test(lang)) continue
+        if (!httpsUrl(url) || !/^[a-z]{2,3}$/.test(lang)) continue
         result.push({ url, lang, name: String(entry.label ?? lang).slice(0, 80) })
     }
     return result
@@ -42,20 +53,22 @@ function streamsFrom(body) {
     const out = []
     for (const item of Array.isArray(body?.streams) ? body.streams : []) {
         const url = String(item?.url ?? "")
-        if (!/^https:\/\/\S+$/.test(url)) continue
+        if (!httpsUrl(url)) continue
         const headers = item.behaviorHints?.proxyHeaders?.request ?? {}
         const referer = String(headers.Referer ?? headers.referer ?? "")
         const name = [item.name, item.title ?? item.description].filter(Boolean).map(text => String(text).split("\n")[0]).join(" · ").slice(0, 80)
-        out.push({ name: name || "Stream", url, referer: /^https:\/\/\S+$/.test(referer) ? referer : "" })
+        out.push({ name: name || "Stream", url, referer: httpsUrl(referer) ? referer : "" })
     }
     return out
 }
 
 // The request path for one video on this add-on, or "" when it can't find it by the ids there are.
 // show: { kind: anime|movie|series, id, film? }; episode: { season?, episode } or null.
-function pathFor(source, show, episode, kitsuId) {
-    const prefixes = Array.isArray(source.prefixes) ? source.prefixes : []
-    const types = Array.isArray(source.types) ? source.types : []
+function pathFor(source, show, episode, kitsuId, resource) {
+    const resourcePrefixes = resource === "subtitles" ? source.subtitlePrefixes : source.streamPrefixes
+    const resourceTypes = resource === "subtitles" ? source.subtitleTypes : source.streamTypes
+    const prefixes = Array.isArray(resourcePrefixes) ? resourcePrefixes : (Array.isArray(source.prefixes) ? source.prefixes : [])
+    const types = Array.isArray(resourceTypes) ? resourceTypes : (Array.isArray(source.types) ? source.types : [])
     const asks = prefix => prefixes.length === 0 || prefixes.includes(prefix)
     const serves = type => types.length === 0 || types.includes(type)
     if (show.kind === "anime") {

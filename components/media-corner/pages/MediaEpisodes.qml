@@ -6,6 +6,7 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 import "../state"
 import "../state/streams.js" as Streams
+import "../state/watch.js" as Watch
 
 // A show's episodes: a series by season (Cinemeta), an anime in hundreds (AniList only gives how many). Each opens Watch.
 ColumnLayout {
@@ -35,6 +36,11 @@ ColumnLayout {
     }
     property int picked: 0
     readonly property int group: Math.min(root.picked, Math.max(0, root.groups.length - 1))
+    readonly property var nextUnseen: root.show?.kind === "series"
+        ? Watch.nextUnseen(root.groups, CornerWatch.progress,
+            episode => Streams.watchKey(root.show, episode),
+            key => CornerWatch.isSeen(key), 0)
+        : null
     onShowChanged: root.picked = 0
 
     visible: root.groups.length > 0
@@ -45,6 +51,11 @@ ColumnLayout {
         text: Translation.tr("Episodes")
         font.pixelSize: IrisStyle.typeHeadline
         font.weight: IrisStyle.weight(Font.Bold)
+    }
+    IrisButton {
+        visible: root.nextUnseen !== null
+        text: Translation.tr("Continue series")
+        onClicked: CornerWatch.begin(root.show, root.nextUnseen)
     }
     Flow {
         Layout.fillWidth: true
@@ -72,6 +83,19 @@ ColumnLayout {
                 label: modelData.title ? `${modelData.episode}. ${modelData.title}` : String(modelData.episode)
                 Accessible.description: Translation.tr("Watch episode %1").arg(modelData.episode)
                 onClicked: CornerWatch.begin(root.show, modelData)
+            }
+        }
+    }
+    Flow {
+        Layout.fillWidth: true
+        spacing: Math.round(6 * root.d)
+        Repeater {
+            model: CornerWatch.busy && CornerWatch.show?.id === root.show?.id ? [] : (root.groups[root.group]?.episodes ?? []).filter(episode => Boolean(CornerWatch.progress[Streams.watchKey(root.show, episode)]?.position))
+            IrisButton {
+                required property var modelData
+                quiet: true
+                text: Translation.tr("Reset episode %1 progress").arg(modelData.episode)
+                onClicked: CornerWatch.resetProgress(Streams.watchKey(root.show, modelData))
             }
         }
     }

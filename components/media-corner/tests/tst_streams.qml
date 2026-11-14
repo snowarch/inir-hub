@@ -16,6 +16,22 @@ TestCase {
     function test_hostHidesTheToken() {
         compare(Streams.hostOf("https://user:pass@a.example.com/secret/manifest.json"), "a.example.com")
     }
+    function test_httpsUrlRejectsMalformedOrNonHttpsDestinations() {
+        verify(Streams.httpsUrl("https://media.example.com/video.m3u8?token=a%2Fb"))
+        verify(Streams.httpsUrl("https://media.example.com:8443/subtitles/file.srt"))
+        verify(Streams.httpsUrl("https://[2001:db8::1]/video.mkv"))
+        verify(!Streams.httpsUrl("http://media.example.com/video"))
+        verify(!Streams.httpsUrl("https://"))
+        verify(!Streams.httpsUrl("https://user:pass@media.example.com/video"))
+        verify(!Streams.httpsUrl("https://media.example.com:0/video"))
+        verify(!Streams.httpsUrl("https://media.example.com:65536/video"))
+        verify(!Streams.httpsUrl("https://media.example.com\\\\video"))
+        verify(!Streams.httpsUrl("https://media.example.com/%2Gvideo"))
+        verify(!Streams.httpsUrl("https://a..example.com/video"))
+        verify(!Streams.httpsUrl("https://a.-b.example.com/video"))
+        compare(Streams.streamsFrom({ streams: [{ url: "https://a..example.com/x.mp4" }, { url: "https://media.example.com:65536/x.mp4" }] }).length, 0)
+        compare(Streams.subtitlesFrom({ subtitles: [{ lang: "en", url: "https://a..example.com/x.srt" }] }).length, 0)
+    }
     function test_manifest() {
         compare(Streams.manifestInfo({ resources: ["catalog"] }), null)
         const plain = Streams.manifestInfo({ name: "A", resources: ["stream"], types: ["movie"], idPrefixes: ["tt"] })
@@ -23,6 +39,14 @@ TestCase {
         const inner = Streams.manifestInfo({ resources: [{ name: "stream", types: ["series"], idPrefixes: ["kitsu"] }] })
         compare(inner.types, ["series"])
         compare(inner.prefixes, ["kitsu"])
+        const mixed = Streams.manifestInfo({ resources: [
+            { name: "stream", types: ["series"], idPrefixes: ["kitsu"] },
+            { name: "subtitles", types: ["movie"], idPrefixes: ["tt"] }
+        ] })
+        compare(Streams.pathFor(mixed, { kind: "movie", id: "tt123" }, null, ""), "")
+        compare(Streams.pathFor(mixed, { kind: "movie", id: "tt123" }, null, "", "subtitles"), "movie/tt123")
+        compare(Streams.pathFor(mixed, { kind: "anime", id: 5 }, { episode: 7 }, "9"), "series/kitsu:9:7")
+        compare(Streams.pathFor(mixed, { kind: "anime", id: 5 }, { episode: 7 }, "9", "subtitles"), "")
     }
     function test_subtitles() {
         const info = Streams.manifestInfo({ resources: ["subtitles"] })

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.services
 import "subtitles.js" as Subtitles
+import "streams.js" as Streams
 
 // Optional direct OpenSubtitles provider. The key never appears in a URL or error.
 Singleton {
@@ -90,7 +91,8 @@ Singleton {
         if (!root.authenticated) { done("", "login"); return }
         root.call("POST", "download", JSON.stringify({ file_id: id }), (body, error) => {
             const link = Subtitles.downloadLink(body)
-            done(link, error || (link ? "" : "invalid"))
+            const valid = Streams.httpsUrl(link)
+            done(valid ? link : "", error || (valid ? "" : "invalid"))
         })
     }
     Timer {
