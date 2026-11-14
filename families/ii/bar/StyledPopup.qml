@@ -11,37 +11,15 @@ LazyLoader {
 
     property Item hoverTarget
     property bool hoverActivates: true
-    property bool closeOnOutsideClick: false
     property bool popupHovered: false
-    default property Item contentItem
+    // What the popup shows, built with its window: a popup not open costs nothing.
+    default property Component content
     property real popupBackgroundMargin: 0
-
-    signal requestClose()
 
     active: root.hoverActivates && hoverTarget && (hoverTarget.containsMouse ?? hoverTarget.buttonHovered ?? false)
     onActiveChanged: {
         if (!root.active)
             root.popupHovered = false;
-    }
-
-    // Fullscreen transparent backdrop for Niri to detect clicks outside
-    // (same pattern as ContextMenu / SysTrayMenu)
-    // Color must be non-zero alpha so the compositor registers it as a surface,
-    // but visually invisible — do not use "transparent" (alpha=0 breaks input)
-    PanelWindow {
-        id: clickOutsideBackdrop
-        visible: root.active && root.closeOnOutsideClick
-        color: Qt.rgba(0, 0, 0, 1/255)
-        exclusiveZone: 0
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.namespace: "quickshell:popup-catcher"
-        WlrLayershell.exclusionMode: ExclusionMode.Ignore
-        anchors { top: true; bottom: true; left: true; right: true }
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.AllButtons
-            onClicked: root.requestClose()
-        }
     }
 
     component: PanelWindow {
@@ -139,8 +117,8 @@ LazyLoader {
                 topMargin: Appearance.sizes.elevationMargin + root.popupBackgroundMargin * (!popupWindow.anchors.top)
                 bottomMargin: Appearance.sizes.elevationMargin + root.popupBackgroundMargin * (!popupWindow.anchors.bottom)
             }
-            implicitWidth: root.contentItem.implicitWidth + margin * 2
-            implicitHeight: root.contentItem.implicitHeight + margin * 2
+            implicitWidth: contentLoader.implicitWidth + margin * 2
+            implicitHeight: contentLoader.implicitHeight + margin * 2
             color: Appearance.regaliaEverywhere ? Appearance.regalia.bg2
                 : Appearance.angelEverywhere ? Appearance.angel.colGlassPopup
                 : Appearance.inirEverywhere ? Appearance.inir.colLayer2
@@ -148,7 +126,11 @@ LazyLoader {
             radius: Appearance.regaliaEverywhere ? Appearance.regalia.roundNormal
                 : Appearance.angelEverywhere ? Appearance.angel.roundingNormal
                 : Appearance.inirEverywhere ? Appearance.inir.roundingNormal : Appearance.rounding.small
-            children: [root.contentItem]
+            Loader {
+                id: contentLoader
+                anchors.centerIn: parent
+                sourceComponent: root.content
+            }
 
             border.width: Appearance.regaliaEverywhere ? 0 : 1
             border.color: Appearance.angelEverywhere ? Appearance.angel.colBorder

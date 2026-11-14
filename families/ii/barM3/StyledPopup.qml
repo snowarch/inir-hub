@@ -15,7 +15,8 @@ LazyLoader {
     property bool closeOnOutsideClick: false
     property bool popupHovered: false
     property int hoverOpenDelay: 400
-    default property Item contentItem
+    // What the popup shows, built with its window: a popup not open costs nothing.
+    default property Component content
     property real popupBackgroundMargin: 0
 
     signal requestClose()
@@ -78,12 +79,15 @@ LazyLoader {
         ? Appearance.sizes.verticalBarWidth + root.m3OuterGap
         : Appearance.sizes.barHeight + root.m3OuterGap
 
-    PanelWindow {
-        id: clickOutsideBackdrop
-        visible: root.active && root.closeOnOutsideClick
+    // A click outside a clicked-open popup closes it. A property: an inline child here would be taken as the
+    // default `content` and never built (it never was: the popup stayed until clicked again).
+    // Under the popup (Top, the popup is Overlay), so a click on the popup stays the popup's.
+    property LazyLoader clickCatcher: LazyLoader {
+        active: root.active && root.closeOnOutsideClick
+        PanelWindow {
         color: Qt.rgba(0, 0, 0, 1 / 255)
         exclusiveZone: 0
-        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "quickshell:m3-popup-catcher"
         WlrLayershell.exclusionMode: ExclusionMode.Ignore
         anchors { top: true; bottom: true; left: true; right: true }
@@ -93,12 +97,11 @@ LazyLoader {
             acceptedButtons: Qt.AllButtons
             onClicked: root.requestClose()
         }
+        }
     }
 
     component: PanelWindow {
         id: popupWindow
-
-        property Item innerContent: root.contentItem
 
         color: "transparent"
         anchors.left: root.barEdge !== "right"
@@ -186,8 +189,8 @@ LazyLoader {
                     + root.popupBackgroundMargin * (!popupWindow.anchors.bottom)
             }
 
-            implicitWidth: (popupWindow.innerContent?.implicitWidth ?? 0) + margin * 2
-            implicitHeight: (popupWindow.innerContent?.implicitHeight ?? 0) + margin * 2
+            implicitWidth: contentLoader.implicitWidth + margin * 2
+            implicitHeight: contentLoader.implicitHeight + margin * 2
 
             color: M3Palette.surfaceContainer
             radius: Appearance.rounding.normal + 4
@@ -217,12 +220,12 @@ LazyLoader {
                 }
             }
 
-            Component.onCompleted: {
-                if (popupWindow.innerContent) {
-                    popupWindow.innerContent.parent = popupBackground
-                    popupWindow.innerContent.anchors.centerIn = popupBackground
-                }
-                shown = true
+            Component.onCompleted: shown = true
+
+            Loader {
+                id: contentLoader
+                anchors.centerIn: parent
+                sourceComponent: root.content
             }
         }
     }

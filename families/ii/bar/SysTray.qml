@@ -94,8 +94,8 @@ Item {
 
     CompositorFocusGrab {
         id: focusGrab
-        active: (root.trayOverflowOpen && overflowPopup.QsWindow?.window !== null) || root.activeMenu !== null
-        windows: [overflowPopup.QsWindow?.window, root.activeMenu]
+        active: (root.trayOverflowOpen && overflowPopup.item !== null) || root.activeMenu !== null
+        windows: [overflowPopup.item, root.activeMenu]
         onCleared: {
             if (root.activeMenu) {
                 root.activeMenu.close();
@@ -165,8 +165,6 @@ Item {
                 hoverActivates: false
                 active: root.trayOverflowOpen && root.unpinnedItems.length > 0
                 popupBackgroundMargin: 0
-                closeOnOutsideClick: false
-                onRequestClose: root.trayOverflowOpen = false
                 onPopupHoveredChanged: root.updateOverflowAutoClose()
                 onActiveChanged: root.updateOverflowAutoClose()
 
