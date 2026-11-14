@@ -12,6 +12,7 @@ import "../state"
 Item {
     id: root
     property bool windowed: false
+    property bool prism: false
     property bool open: false
     property var places: []
     property string section: ""
@@ -74,8 +75,8 @@ Item {
         overlay: !root.windowed
         // A window never samples the wallpaper: its glass would show what is not behind it. An item may not draw into
         // the shell's blur field, so the overlay's glass is the wallpaper's.
-        glass: !root.windowed
-        color: IrisStyle.surface
+        glass: !root.windowed && !root.prism
+        color: root.prism ? IrisStyle.surfaceOpaque : IrisStyle.surface
         light: IrisStyle.surfaceLight("settings", IrisStyle.wallpaperLight)
         radius: root.windowed ? 0 : IrisStyle.surfaceRadius("settings", IrisStyle.radiusPanel)
         width: root.windowed ? root.width : Math.round(Math.min(root.room.width, 1360 * root.d))
@@ -86,6 +87,7 @@ Item {
 
         CornerNav {
             id: nav
+            prism: root.prism
             narrow: root.column
             visible: !root.column || !root.pushed
             places: root.places

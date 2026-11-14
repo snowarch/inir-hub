@@ -4,7 +4,11 @@
     "name": "Media Corner",
     "summary": "Browse anime, films and series and see where they stream",
     "icon": "movie",
-    "version": "1.0.1",
+    "version": "1.1.0",
+    "choices": {
+        "title": "Style",
+        "run": "scripts/choices.py"
+    },
     "parts": {
         "panel": "Panel.qml"
     },

@@ -142,6 +142,8 @@ Singleton {
             id: adapter
             // Over the desktop or in a window of its own.
             property bool windowed: false
+            // Empty means the person has not chosen a style yet.
+            property string style: ""
         }
     }
 }

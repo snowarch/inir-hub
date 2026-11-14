@@ -14,6 +14,7 @@ import "reveal.js" as Reveal
 Rectangle {
     id: root
     property bool narrow: false
+    property bool prism: false
     property bool windowed: false
     // [{ id, title, icon, caption? }]: titles untranslated, a caption opens a group.
     property var places: []
@@ -33,7 +34,7 @@ Rectangle {
             || (id.endsWith(":genres") && root.section.startsWith(id.slice(0, -"genres".length) + "genre:")))
     }
 
-    color: IrisStyle.readingSidebar
+    color: root.prism ? IrisStyle.prismSmoke : IrisStyle.readingSidebar
     clip: true
 
     ColumnLayout {
@@ -71,6 +72,12 @@ Rectangle {
             }
         }
         Item { Layout.fillHeight: true }
+        RowLayout {
+            visible: CornerState.options.style !== "normal" && CornerState.options.style !== "prism"
+            Layout.fillWidth: true
+            IrisButton { text: Translation.tr("Normal"); Layout.fillWidth: true; onClicked: CornerState.set("style", "normal") }
+            IrisButton { text: Translation.tr("Prism"); Layout.fillWidth: true; onClicked: CornerState.set("style", "prism") }
+        }
         IrisIconButton {
             id: hostKey
             Layout.alignment: Qt.AlignHCenter
@@ -118,7 +125,7 @@ Rectangle {
             y: row.washY
             width: parent.width
             height: row.rowHeight
-            radius: IrisStyle.capsule(height)
+            radius: root.prism ? IrisStyle.radiusRow : IrisStyle.capsule(height)
             color: row.selected ? IrisStyle.text : row.containsMouse ? IrisStyle.fillHover : "transparent"
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
             CornerFocusRing { on: row.activeFocus }

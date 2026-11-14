@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "summary": "Browse anime, films and series and see where they stream",
     "authors": [
         "xsteban1410"
@@ -14,7 +14,9 @@
         "catalog"
     ],
     "permissions": [
-        "network"
+        "network",
+        "process",
+        "files"
     ],
     "hosts": [
         "anilist.co",
