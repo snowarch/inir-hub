@@ -17,10 +17,8 @@ import qs.modules.iris.stage
 import qs.modules.iris.lock
 import qs.modules.iris.widgets
 import qs.modules.iris.dock
-import qs.modules.iris.edit
 import qs.modules.iris.notificationPopup
 import qs.modules.iris.palette
-import qs.modules.iris.orbit
 import qs.modules.iris.wallpaper
 import qs.modules.iris.style
 import qs.modules.iris.components as IrisParts
@@ -898,15 +896,17 @@ Scope {
                 smoothing: chassisField.smoothing
             }
             // Arranging the desktop on this output: the shelf and the widget's controls in a window of their own above
-            // the chassis, which recedes into the card meanwhile. Kept until the shelf has played its exit.
-            LazyLoader {
+            // the chassis, which recedes into the card meanwhile. Kept until the shelf has played its exit. Named by
+            // file, never inline, so its forty-odd files compile when arranging first starts rather than with the bar.
+            Loader {
                 id: editDeskLoader
                 property bool lingering: false
                 active: GlobalStates.widgetEditMode || editDeskLoader.lingering
                 onActiveChanged: if (GlobalStates.widgetEditMode) editDeskLoader.lingering = true
-                component: IrisEditDesk {
-                    screen: windowLoader.modelData
-                    onGone: editDeskLoader.lingering = false
+                Component.onCompleted: editDeskLoader.setSource(Qt.resolvedUrl("../edit/IrisEditDesk.qml"), { screen: windowLoader.modelData })
+                Connections {
+                    target: editDeskLoader.item
+                    function onGone() { editDeskLoader.lingering = false }
                 }
             }
             PanelWindow {
@@ -1456,7 +1456,8 @@ Scope {
                     anchors.margins: IrisFrame.band
                     active: Config.ready && GlobalStates.deferredPanelsReady && (Config.options?.iris?.orbit?.enable ?? false)
                     asynchronous: true
-                    sourceComponent: IrisOrbit { screen: barWindow.screen }
+                    // By file: Orbit is off by default and its types compile only for who turns it on.
+                    Component.onCompleted: orbitLoader.setSource(Qt.resolvedUrl("../orbit/IrisOrbit.qml"), { screen: barWindow.screen })
                 }
 
                 IrisBanners {
@@ -1511,7 +1512,14 @@ Scope {
                     }
                     Timer { id: editRelease; interval: 0; onTriggered: editLoader.lingering = editLoader.item?.shown ?? false }
                     active: barWindow.editHere || editLoader.lingering
-                    sourceComponent: IrisEditBar { screenData: barWindow.screen; shapes: barWindow.fieldShapes.concat(stage.pieceShapes, islandLoader.item?.carriedShapes ?? [], dockLoader.item?.editShapes ?? []) }
+                    // By file: the edit bar's types compile when arranging first starts, not with the bar.
+                    Component.onCompleted: editLoader.setSource(Qt.resolvedUrl("../edit/IrisEditBar.qml"), { screenData: barWindow.screen })
+                    Binding {
+                        target: editLoader.item
+                        when: editLoader.item !== null
+                        property: "shapes"
+                        value: barWindow.fieldShapes.concat(stage.pieceShapes, islandLoader.item?.carriedShapes ?? [], dockLoader.item?.editShapes ?? [])
+                    }
                 }
 
                 Loader {
@@ -1530,10 +1538,13 @@ Scope {
                         onTriggered: controlCentreLoader.resident = true
                     }
                     onWantedChanged: if (controlCentreLoader.wanted) controlCentreLoader.resident = true
-                    Component.onCompleted: if (controlCentreLoader.wanted) controlCentreLoader.resident = true
+                    // By file: built on first use or at idle, so its types compile then.
+                    Component.onCompleted: {
+                        controlCentreLoader.setSource(Qt.resolvedUrl("../control/IrisControlCenter.qml"), { screenData: barWindow.screen })
+                        if (controlCentreLoader.wanted) controlCentreLoader.resident = true
+                    }
                     active: (Config.options?.iris?.modules?.controlCenter ?? true) && controlCentreLoader.resident
                     asynchronous: true
-                    sourceComponent: IrisControlCenter { screenData: barWindow.screen }
                 }
             }
             }

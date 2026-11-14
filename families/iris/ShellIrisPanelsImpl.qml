@@ -5,25 +5,17 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
-import qs.modules.iris.notificationPopup
 import qs.modules.iris.onScreenDisplay
-import qs.modules.iris.session
 import qs.modules.iris.polkit
 import qs.modules.iris.style
-import qs.modules.iris.pieces
-import qs.modules.iris.settings
-import qs.modules.iris.studio
-import qs.modules.iris.lock
 import qs.modules.iris.sidebar
 import qs.modules.iris.orbit
-import qs.modules.iris.osk
 import qs.modules.shared.background
 import qs.modules.shared.background.widgets
 import qs.modules.shared.lock
 import qs.modules.shared.overlay
 import qs.modules.iris.state
 import qs.modules.iris.frame
-import qs.modules.iris.prism
 
 Item {
     id: root
@@ -56,7 +48,8 @@ Item {
         property bool requireEnabledPanel: true
         property int closeGraceMs: IrisStyle.revealDuration + 30
         // A panel is built when it opens and let go a while after it closes: reopened within `keepMs` it only shows
-        // again. Built at idle and kept for good (10-26), Settings, both sidebars and the overlay held ~16k objects and
+        // again. Each names its file by `source`, never an inline `component:`, so its types compile on first open
+        // rather than with this file. Built at idle and kept for good (10-26), Settings, both sidebars and the overlay held ~16k objects and
         // ~160 MB from start on a shell that never opened them.
         property bool keep: false
         property int keepMs: 60000
@@ -144,7 +137,7 @@ Item {
         open: GlobalStates.sidebarLeftOpen
         extraCondition: Config.options?.iris?.sidebars?.left?.enable ?? true
         keep: true
-        component: IrisSidebar { side: "left" }
+        source: "./sidebar/IrisSidebarLeft.qml"
     }
 
     OnDemandPanelLoader {
@@ -153,7 +146,7 @@ Item {
         open: GlobalStates.sidebarRightOpen
         extraCondition: Config.options?.iris?.sidebars?.right?.enable ?? true
         keep: true
-        component: IrisSidebar { side: "right" }
+        source: "./sidebar/IrisSidebarRight.qml"
     }
 
     OnDemandPanelLoader {
@@ -164,7 +157,7 @@ Item {
             && (!(Config.options?.enabledPanels ?? []).includes("irisBar")
                 || (CompositorService.isNiri && GameMode.hasFullscreenOnOutput(GlobalStates.focusedScreen?.name ?? "") && !NiriService.inOverview
                     && (Config.options?.iris?.notifications?.fullscreen ?? true)))
-        component: IrisNotificationPopup {}
+        source: "./notificationPopup/IrisNotificationPopup.qml"
     }
 
     OnDemandPanelLoader {
@@ -172,7 +165,7 @@ Item {
         requireEnabledPanel: false
         open: IrisState.studioOpen
         closeGraceMs: IrisStyle.settleDuration + 120
-        component: IrisStudio {}
+        source: "./studio/IrisStudio.qml"
     }
 
     // Settings is come back to: let go after a minute it was rebuilt on almost every visit (the wait he felt, 11-11).
@@ -187,7 +180,7 @@ Item {
         keep: true
         keepMs: root.settingsKeepMs
         closeGraceMs: 0
-        component: PrismWindow {}
+        source: "./prism/PrismWindow.qml"
     }
     // Prism as a window of its own; only the host in use is built.
     OnDemandPanelLoader {
@@ -198,7 +191,7 @@ Item {
         keep: true
         keepMs: root.settingsKeepMs
         closeGraceMs: 0
-        component: PrismFloating {}
+        source: "./prism/PrismFloating.qml"
     }
 
     OnDemandPanelLoader {
@@ -210,7 +203,7 @@ Item {
         keep: true
         keepMs: root.settingsKeepMs
         closeGraceMs: 0
-        component: IrisSettingsOverlay {}
+        source: "./settings/IrisSettingsOverlay.qml"
     }
 
     readonly property bool settingsWindowed: (Config.options?.iris?.appearance?.settingsHost ?? "overlay") === "window"
@@ -222,7 +215,7 @@ Item {
         keep: true
         keepMs: root.settingsKeepMs
         closeGraceMs: 0
-        component: IrisSettingsWindow {}
+        source: "./settings/IrisSettingsWindow.qml"
     }
 
     // The source comes the first time it's wanted and stays: a LazyLoader compiles its source as soon as it has one,
@@ -260,7 +253,7 @@ Item {
         identifier: "irisSessionScreen"
         open: GlobalStates.sessionOpen
         extraCondition: Config.options?.iris?.modules?.sessionScreen ?? true
-        component: IrisSessionScreen {}
+        source: "./session/IrisSessionScreen.qml"
     }
 
     DeferredPanelLoader {
@@ -296,7 +289,7 @@ Item {
         open: GlobalStates.oskOpen
         requireEnabledPanel: false
         closeGraceMs: IrisStyle.settleDuration + 80
-        component: IrisOnScreenKeyboard {}
+        source: "./osk/IrisOnScreenKeyboard.qml"
     }
 
     OnDemandPanelLoader {
@@ -311,7 +304,7 @@ Item {
         identifier: "irisLockRehearsal"
         open: IrisState.lockEdit
         requireEnabledPanel: false
-        component: IrisLockRehearsal {}
+        source: "./lock/IrisLockRehearsal.qml"
     }
 
     // Material's pickers, when Settings › Desktop › Picker names one. Whatever opens the gallery directly (Island,

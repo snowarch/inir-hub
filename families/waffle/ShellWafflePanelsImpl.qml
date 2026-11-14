@@ -1,36 +1,20 @@
 pragma ComponentBehavior: Bound
 
 import qs.modules.shared.bootGreeting
-import qs.modules.shared.cheatsheet
 import qs.modules.shared.lock
 import qs.modules.shared.mascot
-import qs.modules.shared.onScreenKeyboard
-import qs.modules.shared.recordingOsd
-import qs.modules.shared.tilingOverlay
-import qs.modules.shared.overview
 import qs.modules.shared.polkit
 import qs.modules.shared.regionSelector
 import qs.modules.shared.screenCorners
-import qs.modules.shared.sessionScreen
-import qs.modules.shared.shellUpdate
-import qs.modules.shared.wallpaperSelector
-import qs.modules.shared.wallpaperLauncher
 import qs.modules.shared.overlay
 import qs.modules.shared.workspaceStrip
 import qs.modules.shared.clipboard as ClipboardModule
 
-import qs.modules.waffle.actionCenter
 import qs.modules.waffle.altSwitcher as WaffleAltSwitcherModule
 import qs.modules.waffle.background as WaffleBackgroundModule
-import qs.modules.waffle.bar as WaffleBarModule
 import qs.modules.waffle.clipboard as WaffleClipboardModule
-import qs.modules.waffle.notificationCenter
 import qs.modules.waffle.onScreenDisplay as WaffleOSDModule
-import qs.modules.waffle.startMenu
-import qs.modules.waffle.widgets
-import qs.modules.waffle.backdrop as WaffleBackdropModule
 import qs.modules.waffle.notificationPopup as WaffleNotificationPopupModule
-import qs.modules.waffle.taskview as WaffleTaskViewModule
 
 import QtQuick
 import Quickshell
@@ -111,37 +95,37 @@ Item {
     PanelLoader { identifier: "wOnScreenDisplay"; component: WaffleOSDModule.WaffleOSD {} }
 
     // === Deferred panels ===
-    OnDemandPanelLoader { identifier: "wStartMenu"; open: GlobalStates.searchOpen; retainAfterUse: true; component: WaffleStartMenu {} }
-    OnDemandPanelLoader { identifier: "wActionCenter"; open: WaffleState.actionCenterOpen; retainAfterUse: true; component: WaffleActionCenter {} }
-    OnDemandPanelLoader { identifier: "wNotificationCenter"; open: WaffleState.notificationCenterOpen; component: WaffleNotificationCenter {} }
-    OnDemandPanelLoader { identifier: "wWidgets"; open: WaffleState.widgetsOpen && (Config.options?.waffles?.modules?.widgets ?? true); component: WaffleWidgets {} }
+    OnDemandPanelLoader { identifier: "wStartMenu"; open: GlobalStates.searchOpen; retainAfterUse: true; source: "./startMenu/WaffleStartMenu.qml" }
+    OnDemandPanelLoader { identifier: "wActionCenter"; open: WaffleState.actionCenterOpen; retainAfterUse: true; source: "./actionCenter/WaffleActionCenter.qml" }
+    OnDemandPanelLoader { identifier: "wNotificationCenter"; open: WaffleState.notificationCenterOpen; source: "./notificationCenter/WaffleNotificationCenter.qml" }
+    OnDemandPanelLoader { identifier: "wWidgets"; open: WaffleState.widgetsOpen && (Config.options?.waffles?.modules?.widgets ?? true); source: "./widgets/WaffleWidgets.qml" }
     DeferredPanelLoader { identifier: "wLock"; component: Lock {} }
     DeferredPanelLoader { identifier: "wPolkit"; component: Polkit {} }
-    OnDemandPanelLoader { identifier: "wSessionScreen"; open: GlobalStates.sessionOpen; component: SessionScreen {} }
-    OnDemandPanelLoader { identifier: "wTaskView"; open: WaffleState.taskViewOpen; component: WaffleTaskViewModule.WaffleTaskView {} }
+    OnDemandPanelLoader { identifier: "wSessionScreen"; open: GlobalStates.sessionOpen; source: Plugins.baseUrl("modules/shared/sessionScreen/SessionScreen.qml") }
+    OnDemandPanelLoader { identifier: "wTaskView"; open: WaffleState.taskViewOpen; source: "./taskview/WaffleTaskView.qml" }
 
     // Shared modules that work with waffle
     DeferredPanelLoader { identifier: "iiBootGreeting"; component: BootGreeting {} }
-    OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; component: Cheatsheet {} }
-    OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; component: OnScreenKeyboard {} }
-    OnDemandPanelLoader { identifier: "iiOverlay"; open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen); component: Overlay {} }
-    OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; component: Overview {} }
+    OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }
+    OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; source: Plugins.baseUrl("modules/shared/onScreenKeyboard/OnScreenKeyboard.qml") }
+    OnDemandPanelLoader { identifier: "iiOverlay"; open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen); source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml") }
+    OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/overview/Overview.qml") }
 
     DeferredPanelLoader { identifier: "iiRegionSelector"; component: RegionSelector {} }
     DeferredPanelLoader { identifier: "iiScreenCorners"; component: ScreenCorners {} }
 
-    OnDemandPanelLoader { identifier: "iiWallpaperSelector"; open: GlobalStates.wallpaperSelectorOpen; retainAfterUse: true; closeGraceMs: 250; component: WallpaperSelector {} }
-    OnDemandPanelLoader { identifier: "iiWallpaperLauncher"; open: GlobalStates.wallpaperLauncherOpen; retainAfterUse: true; closeGraceMs: 250; component: WallpaperLauncher {} }
-    OnDemandPanelLoader { identifier: "iiCoverflowSelector"; open: GlobalStates.coverflowSelectorOpen; retainAfterUse: true; closeGraceMs: 300; component: WallpaperCoverflow {} }
+    OnDemandPanelLoader { identifier: "iiWallpaperSelector"; open: GlobalStates.wallpaperSelectorOpen; retainAfterUse: true; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperSelector.qml") }
+    OnDemandPanelLoader { identifier: "iiWallpaperLauncher"; open: GlobalStates.wallpaperLauncherOpen; retainAfterUse: true; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/wallpaperLauncher/WallpaperLauncher.qml") }
+    OnDemandPanelLoader { identifier: "iiCoverflowSelector"; open: GlobalStates.coverflowSelectorOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperCoverflow.qml") }
     DeferredPanelLoader { identifier: "iiClipboard"; extraCondition: Config.options?.panelFamily !== "waffle"; component: ClipboardModule.ClipboardPanel {} }
-    OnDemandPanelLoader { identifier: "iiRecordingOsd"; open: RecorderStatus.isRecording; closeGraceMs: 250; component: RecordingOsd {} }
-    OnDemandPanelLoader { identifier: "iiShellUpdate"; open: ShellUpdates.overlayOpen; closeGraceMs: 250; component: ShellUpdateOverlay {} }
+    OnDemandPanelLoader { identifier: "iiRecordingOsd"; open: RecorderStatus.isRecording; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/recordingOsd/RecordingOsd.qml") }
+    OnDemandPanelLoader { identifier: "iiShellUpdate"; open: ShellUpdates.overlayOpen; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/shellUpdate/ShellUpdateOverlay.qml") }
 
     OnDemandPanelLoader {
         identifier: "iiTilingOverlay"
         open: GlobalStates.tilingOverlayPickerOpen || GlobalStates.tilingOverlayOsdOpen
         closeGraceMs: 250
-        component: TilingOverlay {}
+        source: Plugins.baseUrl("modules/shared/tilingOverlay/TilingOverlay.qml")
     }
     DeferredPanelLoader { identifier: "iiWorkspaceStrip"; component: WorkspaceStrip {} }
     DeferredPanelLoader { identifier: "iiMascotCompanion"; extraCondition: (Config.options?.mascot?.enable ?? false) && (Config.options?.mascot?.companion?.enable ?? true); component: MascotCompanion {} }

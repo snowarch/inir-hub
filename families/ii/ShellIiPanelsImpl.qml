@@ -9,7 +9,6 @@ import qs.modules.ii.onScreenDisplay
 import qs.modules.shared.polkit
 import qs.modules.shared.regionSelector
 import qs.modules.shared.screenCorners
-import qs.modules.shared.tilingOverlay
 import qs.modules.shared.overlay
 import qs.modules.shared.workspaceStrip
 
@@ -254,7 +253,7 @@ Item {
         identifier: "iiOverlay"
         // A base before the bench has no `wanted`.
         open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen)
-        component: Overlay {}
+        source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml")
     }
     OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/overview/Overview.qml") }
     DeferredPanelLoader { identifier: "iiPolkit"; component: Polkit {} }
@@ -315,7 +314,7 @@ Item {
         identifier: "iiTilingOverlay"
         open: GlobalStates.tilingOverlayPickerOpen || GlobalStates.tilingOverlayOsdOpen
         closeGraceMs: 250
-        component: TilingOverlay {}
+        source: Plugins.baseUrl("modules/shared/tilingOverlay/TilingOverlay.qml")
     }
 
     OnDemandPanelLoader { identifier: "iiWallpaperSelector"; open: GlobalStates.wallpaperSelectorOpen; retainAfterUse: true; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperSelector.qml") }
