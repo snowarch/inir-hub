@@ -16,6 +16,17 @@ TestCase {
     function test_hostHidesTheToken() {
         compare(Streams.hostOf("https://user:pass@a.example.com/secret/manifest.json"), "a.example.com")
     }
+    function test_addonResponseLimits() {
+        const stream = { url: "https://example.com/video" }
+        const subtitle = { url: "https://example.com/subtitle", lang: "en" }
+        compare(Streams.streamsFrom({ streams: Array(300).fill(stream) }).length, 256)
+        compare(Streams.subtitlesFrom({ subtitles: Array(300).fill(subtitle) }).length, 256)
+        const info = Streams.manifestInfo({ resources: ["stream"], types: Array(200).fill("x".repeat(300)), idPrefixes: Array(200).fill("id") })
+        compare(info.types.length, 128)
+        compare(info.types[0].length, 256)
+        compare(info.prefixes.length, 128)
+        verify(!Streams.mediaUrl("https://example.com/" + "x".repeat(8192)))
+    }
     function test_mediaDestinationsRejectLocalAddresses() {
         const local = ["localhost", "media.localhost", "127.0.0.1", "10.1.2.3", "169.254.1.2", "172.16.0.1", "192.168.1.1", "2130706433", "[::1]", "[fc00::1]", "[fe80::1]", "[::ffff:7f00:1]"]
         for (const host of local) {
@@ -25,7 +36,7 @@ TestCase {
             compare(Streams.subtitlesFrom({ subtitles: [{ url, lang: "en" }] }).length, 0, host)
         }
         verify(Streams.mediaUrl("https://example.com/video"))
-        verify(Streams.mediaUrl("https://8.8.8.8/video"))
+        verify(Streams.mediaUrl("https://public.example.com/video"))
         verify(Streams.mediaUrl("https://[2001:db8::1]/video"))
     }
     function test_httpsUrlRejectsMalformedOrNonHttpsDestinations() {
