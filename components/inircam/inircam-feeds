@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/inir/plugins/inircam.json"
+PIDDIR="${XDG_RUNTIME_DIR:-/tmp}/inircam-feeds"
+mkdir -p "$PIDDIR"
+
+# Quickshell process id for inir shell (frame paths must match CameraFeed.qml)
+QS_PID=$(pgrep -f 'inir-shell.*quickshell/inir' | head -1 || true)
+if [[ -z "$QS_PID" ]]; then
+  QS_PID=$(pgrep -f 'quickshell.*inir' | head -1 || true)
+fi
+QS_PID="${QS_PID:-1859}"
+
+log() { printf '%s %s\n' "$(date -Is)" "$*" >&2; }
+
+kill_feed() {
+  local pidfile="$1"
+  if [[ -f "$pidfile" ]]; then
+    local pid
+    pid=$(cat "$pidfile" 2>/dev/null || true)
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+      kill "$pid" 2>/dev/null || true
+      sleep 0.2
+      kill -9 "$pid" 2>/dev/null || true
+    fi
+    rm -f "$pidfile"
+  fi
+}
+
+start_feed() {
+  local cam_id="$1" quality="$2" url="$3"
+  local frame="/tmp/inircam-feed-${QS_PID}-${cam_id}-${quality}.jpg"
+  local pidfile="$PIDDIR/${cam_id}-${quality}.pid"
+  local logfile="$PIDDIR/${cam_id}-${quality}.log"
+
+  # if already running and healthy, skip
+  if [[ -f "$pidfile" ]]; then
+    local pid
+    pid=$(cat "$pidfile" 2>/dev/null || true)
+    if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+      return 0
+    fi
+  fi
+
+  ffmpeg -hide_banner -loglevel warning -nostdin \
+    -rtsp_transport tcp -timeout 30000000 \
+    -fflags nobuffer -flags low_delay \
+    -i "$url" -an \
+    -vf "fps=8,scale='min(1280,iw)':-2" \
+    -q:v 4 -f image2 -update 1 -y "$frame" \
+    </dev/null >>"$logfile" 2>&1 &
+  echo $! > "$pidfile"
+}
+
+build_rtsp_url() {
+  local url="$1" user="$2" pass="$3"
+  # if credentials already present, return as-is
+  if [[ "$url" =~ ^rtsps?://[^/@]+@ ]]; then
+    printf '%s' "$url"
+    return
+  fi
+  # inject credentials
+  python3 - "$url" "$user" "$pass" <<'PY'
+import sys, urllib.parse
+url, user, pw = sys.argv[1], sys.argv[2], sys.argv[3]
+if not user and not pw:
+    print(url)
+    sys.exit(0)
+m = urllib.parse.urlsplit(url)
+netloc = m.netloc
+auth = urllib.parse.quote(user, safe='')
+if pw:
+    auth += ':' + urllib.parse.quote(pw, safe='')
+netloc = auth + '@' + netloc
+print(urllib.parse.urlunsplit((m.scheme, netloc, m.path, m.query, m.fragment)))
+PY
+}
+
+sync_feeds() {
+  [[ -f "$CONFIG" ]] || return 0
+  local wanted=()
+  # parse cameras from config
+  while IFS=$'\t' read -r id enabled host user pass urlMain urlSub; do
+    [[ "$enabled" == "true" ]] || continue
+    # substream for grid
+    if [[ -n "$urlSub" && "$urlSub" == rtsp* ]]; then
+      local u
+      u=$(build_rtsp_url "$urlSub" "$user" "$pass")
+      wanted+=("${id}|sub|${u}")
+      start_feed "$id" "sub" "$u"
+    fi
+    # main stream for enlarged/wall (start on demand would be better, but keep simple)
+    if [[ -n "$urlMain" && "$urlMain" == rtsp* ]]; then
+      local u
+      u=$(build_rtsp_url "$urlMain" "$user" "$pass")
+      wanted+=("${id}|main|${u}")
+      start_feed "$id" "main" "$u"
+    fi
+  done < <(python3 - "$CONFIG" <<'PY'
+import json, sys
+cfg = json.load(open(sys.argv[1]))
+for c in cfg.get('cameras', []):
+    def s(v): return (v or '').replace('\t',' ').replace('\n',' ')
+    print('\t'.join([
+        s(c.get('id')), 'true' if c.get('enabled', True) else 'false',
+        s(c.get('host')), s(c.get('username')), s(c.get('password')),
+        s(c.get('urlMain') or c.get('url') or ''), s(c.get('urlSub') or '')
+    ]))
+PY
+  )
+
+  # kill feeds not wanted
+  shopt -s nullglob
+  for pf in "$PIDDIR"/*.pid; do
+    local base
+    base=$(basename "$pf" .pid)
+    local keep=0
+    for w in "${wanted[@]:-}"; do
+      [[ -z "$w" ]] && continue
+      local wid="${w%%|*}"; local rest="${w#*|}"; local wq="${rest%%|*}"
+      if [[ "$base" == "${wid}-${wq}" ]]; then keep=1; break; fi
+    done
+    if [[ $keep -eq 0 ]]; then
+      kill_feed "$pf"
+      rm -f "$PIDDIR/${base}.log" 2>/dev/null || true
+    fi
+  done
+}
+
+stop_all() {
+  shopt -s nullglob
+  for pf in "$PIDDIR"/*.pid; do kill_feed "$pf"; done
+}
+
+case "${1:-sync}" in
+  sync) sync_feeds ;;
+  stop) stop_all ;;
+  daemon)
+    trap stop_all EXIT INT TERM
+    while true; do
+      sync_feeds || true
+      # restart dead feeds
+      sleep 10
+    done
+    ;;
+  *)
+    echo "usage: $0 {sync|stop|daemon}" >&2; exit 1
+    ;;
+esac
