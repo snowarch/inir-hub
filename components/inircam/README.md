@@ -32,15 +32,15 @@ Open from iNiR (app launcher / component entry) or via IPC:
 
 ```bash
 # Panel (component)
-qs -p ~/.config/quickshell/inir ipc call inircam toggle
-qs -p ~/.config/quickshell/inir ipc call inircam open
-qs -p ~/.config/quickshell/inir ipc call inircam close
-qs -p ~/.config/quickshell/inir ipc call inircam manage
-qs -p ~/.config/quickshell/inir ipc call inircam add
-qs -p ~/.config/quickshell/inir ipc call inircam addNvr
-qs -p ~/.config/quickshell/inir ipc call inircam discover
-qs -p ~/.config/quickshell/inir ipc call inircam pin "<cameraId>"
-qs -p ~/.config/quickshell/inir ipc call inircam pins
+inir inircam toggle
+inir inircam open
+inir inircam close
+inir inircam manage
+inir inircam add
+inir inircam addNvr
+inir inircam discover
+inir inircam pin "<cameraId>"
+inir inircam pins
 ```
 
 Niri keybind example:

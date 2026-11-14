@@ -48,8 +48,8 @@ Presets and **Reset Organic edge** keep your displays and the on or off switch.
 ## When it pauses
 
 - It follows **Settings › Widgets › Power Saving**. When that pauses desktop widgets on a screen, the band stops too. It also stops during GameMode and on the lock screen.
-- It follows the live wallpaper's pause rule. Behind a fullscreen or covered screen, the band holds still when that rule says the wallpaper should. Set the rule in **iRiS Settings › Desktop › Live wallpapers › Pause**: **Never**, **Behind fullscreen** or **When covered**. The default is **When covered**. Material has no control for it.
+- It follows the live wallpaper's pause rule. Behind a fullscreen or covered screen, the band holds still when that rule says the wallpaper should. Set the rule in **iRiS Settings › Desktop › Live wallpapers › Pause**: **Never**, **Behind fullscreen** or **When covered**. The default is **When covered**. Material has the same choice in its wallpaper settings.
 
 ## In iRiS
 
-**Music on the edges**, under **Now Playing › Frame music**, lets the music drive this band and the iRiS frame.
+In iRiS, **Music on the edges** (group **Frame music**) lets the music drive this band and the frame.

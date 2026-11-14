@@ -51,4 +51,3 @@ Under **Composition**:
 
 ## Settings in the Editorial layout
 
-Settings can open as an Editorial page too. Turn on **Settings › Modules › Settings UI › Overlay mode (live preview)**, then choose **Overlay layout › Editorial**. It keeps the same pages and search.
