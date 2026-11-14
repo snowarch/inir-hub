@@ -1016,11 +1016,17 @@ Scope {
                 // Off the edge the chassis is gone, but its fuse still reaches back onto
                 // the screen and leaves a smudge where the Island used to melt in.
                 readonly property bool islandTucked: islandLoader.tuck > islandLoader.hidden - 1
-                readonly property bool pointerOnIslandBody: canvasHover.hovered
-                    && [islandInput, menuStartInput, menuEndInput].some(area =>
-                        canvasHover.point.position.x >= area.x && canvasHover.point.position.x < area.x + area.width
-                        && canvasHover.point.position.y >= area.y && canvasHover.point.position.y < area.y + area.height)
-                readonly property bool pointerNearIsland: islandEdgeHover.hovered || barWindow.pointerOnIslandBody
+                // Where the pointer is, read from the one handler on the whole surface: a handler of an item's own goes
+                // stale when the input mask changes under a still pointer (Wayland sends it no new enter), and the
+                // Island tucked and came back in a loop under a pointer resting on it (hub #13).
+                function pointerWithin(area: Item): bool {
+                    const p = canvasHover.point.position
+                    return canvasHover.hovered && area !== null
+                        && p.x >= area.x && p.x < area.x + area.width && p.y >= area.y && p.y < area.y + area.height
+                }
+                readonly property bool pointerOnIslandBody: [islandInput, menuStartInput, menuEndInput].some(area => barWindow.pointerWithin(area))
+                readonly property bool pointerNearIsland: (islandEdgeStrip.armed && barWindow.pointerWithin(islandEdgeStrip))
+                    || (islandReach.armed && barWindow.pointerWithin(islandReach)) || barWindow.pointerOnIslandBody
                 onPointerNearIslandChanged: {
                     if (barWindow.pointerNearIsland) {
                         islandHideDelay.stop()
@@ -1093,6 +1099,7 @@ Scope {
                         height: area.height
                     }
                     Region { item: islandEdgeStrip.armed ? islandEdgeStrip : null }
+                    Region { item: islandReach.armed ? islandReach : null }
                     Region { item: dockLoader.item && !dockLoader.item.inputOff ? dockLoader.item.hitItem : null }
                     Region {
                         readonly property var rect: editLoader.item?.hitRect ?? null
@@ -1248,22 +1255,35 @@ Scope {
                     width: area.width
                     height: area.height
                 }
-                // The Island itself is off the edge while hidden, so its own input area
-                // cannot catch the pointer that is supposed to bring it back.
+                // The Island itself is off the edge while hidden, so its own input area cannot catch the pointer that is
+                // supposed to bring it back: the whole edge it lives on does, as a hidden menu bar's (hub #12). The Dock
+                // never shares that edge (IrisFrame.dockEdge).
                 Item {
                     id: islandEdgeStrip
                     readonly property bool armed: barWindow.islandAutoHide
                     readonly property real depth: Math.max(2, IrisFrame.band + 2)
                     readonly property real slack: Math.round(40 * IrisStyle.density)
-                    readonly property real span: (windowLoader.loadedVertical ? islandLoader.height : islandLoader.width) + 2 * islandEdgeStrip.slack
-                    width: windowLoader.loadedVertical ? islandEdgeStrip.depth : islandEdgeStrip.span
-                    height: windowLoader.loadedVertical ? islandEdgeStrip.span : islandEdgeStrip.depth
+                    width: windowLoader.loadedVertical ? islandEdgeStrip.depth : barWindow.width
+                    height: windowLoader.loadedVertical ? barWindow.height : islandEdgeStrip.depth
+                    x: windowLoader.loadedEdge === "right" ? barWindow.width - islandEdgeStrip.depth : 0
+                    y: windowLoader.loadedBottom ? barWindow.height - islandEdgeStrip.depth : 0
+                }
+                // Revealed, from the edge to just past the Island: the pointer on its way down never falls out of the
+                // input region through the margin between them.
+                Item {
+                    id: islandReach
+                    readonly property bool armed: barWindow.islandAutoHide && barWindow.islandRevealed
+                    readonly property real depth: (windowLoader.loadedVertical ? islandLoader.width : islandLoader.height)
+                        + islandLoader.edgeMargin + Math.round(6 * IrisStyle.density)
+                    readonly property real span: (windowLoader.loadedVertical ? islandLoader.height : islandLoader.width)
+                        + 2 * islandEdgeStrip.slack
+                    width: windowLoader.loadedVertical ? islandReach.depth : islandReach.span
+                    height: windowLoader.loadedVertical ? islandReach.span : islandReach.depth
                     x: windowLoader.loadedVertical
-                        ? (windowLoader.loadedEdge === "right" ? barWindow.width - islandEdgeStrip.depth : 0)
+                        ? (windowLoader.loadedEdge === "right" ? barWindow.width - islandReach.depth : 0)
                         : Math.round(islandLoader.x - islandEdgeStrip.slack)
                     y: windowLoader.loadedVertical ? Math.round(islandLoader.y - islandEdgeStrip.slack)
-                        : (windowLoader.loadedBottom ? barWindow.height - islandEdgeStrip.depth : 0)
-                    HoverHandler { id: islandEdgeHover }
+                        : (windowLoader.loadedBottom ? barWindow.height - islandReach.depth : 0)
                 }
                 HoverHandler {
                     id: canvasHover
