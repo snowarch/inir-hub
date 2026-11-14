@@ -442,6 +442,12 @@ Rectangle {
                     property string tabType: modelData.type
                     property int animDistance: 5
                     property var tabLoader: tabLoader
+                    // A tab is built the first time it is shown and kept: building all of them made the sidebar's
+                    // first open 4.9k objects and half a second (the compact layout already loads by section).
+                    readonly property bool current: root.selectedTab === tabItem.tabIndex
+                    property bool seen: false
+                    onCurrentChanged: if (current) seen = true
+                    Component.onCompleted: seen = current
                     // Opacity: show up only when being animated to
                     opacity: (tabStack.currentIndex === tabItem.tabIndex && tabStack.realIndex === tabItem.tabIndex) ? 1 : 0
                     // Y: animate both outgoing and incoming tabs
@@ -463,6 +469,7 @@ Rectangle {
                     Loader {
                         id: tabLoader
                         anchors.fill: parent
+                        active: tabItem.current || tabItem.seen
                         // A hub widget's face loads from its folder and is hidden while its tab is not the one shown.
                         source: modelData.source ?? ""
                         sourceComponent: modelData.source ? null : modelData.widget
