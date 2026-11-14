@@ -94,7 +94,12 @@ Singleton {
             root._outCount--
         }
 
-        const xhr = new XMLHttpRequest()
+        let xhr
+        try { xhr = new XMLHttpRequest() } catch (e) {
+            root.scheduleDeadline()
+            for (const waiting of callbacks) waiting(null, "network")
+            return
+        }
         const ticket = { key, xhr, at: Date.now(), callbacks, done: false }
         root._out[key] = ticket
         root._outCount++
@@ -103,19 +108,26 @@ Singleton {
             if (xhr.readyState !== XMLHttpRequest.DONE || ticket.done) return
             let value = null, error = ""
             if (xhr.status === 200) {
-                try { value = shape(JSON.parse(xhr.responseText)) } catch (e) { error = "bad reply" }
+                // Bound JSON parsing to 1,048,576 UTF-16 code units; XHR has already buffered the reply.
+                if (xhr.responseText.length > 1024 * 1024) error = "bad reply"
+                else try { value = shape(JSON.parse(xhr.responseText)) } catch (e) { error = "bad reply" }
             } else error = xhr.status === 429 ? "busy" : "HTTP " + xhr.status
             if (!error) root._answers[key] = { at: Date.now(), value }
             root._settle(ticket, value, error)
         }
-        xhr.open(body.length > 0 ? "POST" : "GET", url)
-        if (body.length > 0) {
-            xhr.setRequestHeader("Content-Type", "application/json")
-            xhr.setRequestHeader("Accept", "application/json")
+        try {
+            xhr.open(body.length > 0 ? "POST" : "GET", url)
+            if (body.length > 0) {
+                xhr.setRequestHeader("Content-Type", "application/json")
+                xhr.setRequestHeader("Accept", "application/json")
+            }
+            xhr.send(body)
+        } catch (e) {
+            if (!ticket.done) root._settle(ticket, null, "network")
         }
-        xhr.send(body)
     }
     function _settle(ticket: var, value: var, error: string): void {
+        if (ticket.done) return
         ticket.done = true
         delete root._out[ticket.key]
         root._outCount--
