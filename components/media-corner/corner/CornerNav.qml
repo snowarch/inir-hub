@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.services
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
@@ -34,7 +35,13 @@ Rectangle {
             || (id.endsWith(":genres") && root.section.startsWith(id.slice(0, -"genres".length) + "genre:")))
     }
 
-    readonly property color accentInk: IrisStyle.readableAccent(IrisStyle.accent)
+    // The palette may still be loading; compare against the actual rail, not just the chosen scheme.
+    readonly property color accentInk: {
+        const readable = IrisStyle.readableAccent(IrisStyle.accent)
+        if (ColorUtils.contrastRatio(readable, root.color) >= 4.5) return readable
+        if (ColorUtils.contrastRatio(IrisStyle.accent, root.color) >= 4.5) return IrisStyle.accent
+        return IrisStyle.text
+    }
     readonly property var navPlaces: {
         if (!root.prism) return root.places
         const anime = root.section.startsWith("anime:")
