@@ -148,7 +148,7 @@ MediaPage {
                         text: "▶  " + Translation.tr("Watch")
                         onClicked: {
                             CornerState.openShow(hero.show)
-                            CornerWatch.begin(hero.show, { episode: 1 })
+                            CornerWatch.begin(Object.assign({}, hero.show, { film: hero.show?.type === "Movie" || Number(hero.show?.episodes) === 1 }), { episode: 1 })
                         }
                     }
                     IrisButton {

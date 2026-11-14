@@ -112,7 +112,7 @@ MediaPage {
                 // The banner melts into the sheet, so the name under it reads on one ground.
                 gradient: Gradient {
                     GradientStop { position: 0.3; color: "transparent" }
-                    GradientStop { position: 1; color: IrisStyle.surfaceOpaque }
+                    GradientStop { position: 1; color: CornerState.options.style === "prism" ? IrisStyle.veilHeavy : IrisStyle.surfaceOpaque }
                 }
             }
             // On a plate, so it reads over any banner; a narrow window has its own ‹ in the head.

@@ -1,7 +1,7 @@
 # Media Corner
 
 Find any anime, film or series and see where it streams officially, in a Place worn with iRiS. Anime comes from
-AniList, films and series from Cinemeta (Stremio's open catalogue); it plays nothing itself.
+AniList, films and series from Cinemeta (Stremio's open catalogue); user-added sources can be played with mpv.
 
 - Open it: `inir media-corner toggle`, `open` or `close`, or bind it in niri:
   `Mod+Shift+M { spawn "inir" "media-corner" "toggle"; }`.
@@ -21,7 +21,7 @@ AniList, films and series from Cinemeta (Stremio's open catalogue); it plays not
 
 ## Options
 
-The key at the foot of the places opens it over the desktop or in a window of its own.
+The window button switches between the desktop overlay and a window. In Prism it is at the top of the sidebar.
 
 ## Keys
 
@@ -31,6 +31,10 @@ Escape clears the search, steps back (a title, a search, a genre) and then close
 ## Estilo, fuentes y subtítulos
 
 En Community Hub, abre los ajustes de Media Corner y elige **Normal** o **Prism**. Si todavía no hay una elección guardada, al abrir el componente aparecen ambas opciones. El estilo se guarda en la configuración propia del componente.
+
+En Prism, las secciones de anime y películas despliegan su navegación al abrirse. **Watching** ofrece hasta cinco reproducciones recientes; la X quita también el progreso de ese episodio. Las reproducciones anteriores a esta función conservan su progreso, pero aparecen en la lista cuando se reproduzcan de nuevo.
+
+Las carátulas usan una memoria de hasta 24 imágenes decodificadas mientras Media Corner está abierto. Se reutilizan por dirección y tamaño, el componente deja de retenerlas al cerrar y no las guarda en una caché propia en disco (Qt puede mantener su propia caché); los fondos no forman parte de esa memoria.
 
 En **Sources**, añade la dirección HTTPS del manifiesto de un addon Stremio que administres, o una dirección de búsqueda web con `%s` donde se insertará el título. Las búsquedas web se abren en el navegador. Media Corner no incluye addons: revisa las condiciones y derechos de las fuentes que añadas. Una copia privada de la configuración anterior se guarda antes de migrar la lista de fuentes.
 
