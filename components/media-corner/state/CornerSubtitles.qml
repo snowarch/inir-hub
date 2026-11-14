@@ -91,7 +91,7 @@ Singleton {
         if (!root.authenticated) { done("", "login"); return }
         root.call("POST", "download", JSON.stringify({ file_id: id }), (body, error) => {
             const link = Subtitles.downloadLink(body)
-            const valid = Streams.httpsUrl(link)
+            const valid = Streams.mediaUrl(link)
             done(valid ? link : "", error || (valid ? "" : "invalid"))
         })
     }
