@@ -63,7 +63,7 @@ MediaPage {
         id: hero
         objectName: "hero"
         readonly property var show: root.hero
-        readonly property bool compact: width < Math.round(600 * root.d * Math.min(1.4, IrisStyle.typeScale))
+        readonly property bool compact: root.width < Math.round(600 * root.d * Math.min(1.4, IrisStyle.typeScale))
         Layout.fillWidth: true
         Layout.preferredHeight: Math.round(250 * root.d)
         visible: hero.show !== null
@@ -165,8 +165,9 @@ MediaPage {
                     objectName: "heroActions"
                     Layout.fillWidth: true
                     spacing: Math.round(8 * root.d)
-                    // The row's own width can be capped by its children; compare the available column instead.
-                    readonly property bool roomy: (parent?.width ?? 0) >= playAction.implicitWidth + spacing + detailsAction.implicitWidth
+                    // Use the viewport, not a layout width that the two buttons themselves can enlarge.
+                    readonly property real available: Math.max(0, root.width - 36 * root.d - (heroCover.visible ? heroCover.width + 18 * root.d : 0))
+                    readonly property bool roomy: available >= playAction.implicitWidth + spacing + detailsAction.implicitWidth
                     IrisButton {
                         id: playAction
                         objectName: "heroPlay"
