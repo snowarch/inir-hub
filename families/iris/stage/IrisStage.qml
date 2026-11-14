@@ -1853,7 +1853,12 @@ Item {
         enabled: root.cardArmed
         onClicked: root.closeCard()
     }
-    Shortcut { sequence: "Escape"; enabled: root.cardOpen; onActivated: root.closeCard() }
+    // Escape, from the chassis's one Shortcut.
+    function escapeKey(): bool {
+        if (!root.cardOpen) return false
+        root.closeCard()
+        return true
+    }
 
     IrisBodyShadow {
         readonly property var body: card.bodyRect

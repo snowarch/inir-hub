@@ -75,7 +75,12 @@ Item {
     readonly property real edgeRight: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("right", root.screenName)
 
     MouseArea { anchors.fill: parent; onClicked: GlobalStates.controlPanelOpen = false }
-    Shortcut { sequence: "Escape"; onActivated: GlobalStates.controlPanelOpen = false }
+    // Escape, from the chassis's one Shortcut (it lives on built: a Shortcut of its own silenced every other one there).
+    function escapeKey(): bool {
+        if (!root.morphOpen) return false
+        GlobalStates.controlPanelOpen = false
+        return true
+    }
 
     property bool engaged: false
     property real heldTop: 0

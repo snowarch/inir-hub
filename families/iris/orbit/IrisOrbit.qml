@@ -299,13 +299,12 @@ Item {
     onVisibleChanged: if (!visible) root.query = ""
     Component.onCompleted: if (root.wanted) root.opened()
 
-    Shortcut {
-        sequence: "Escape"
-        enabled: root.wanted
-        onActivated: {
-            if (root.query.length > 0) root.query = ""
-            else root.close()
-        }
+    // Escape, from the chassis's one Shortcut: the words first, then Orbit.
+    function escapeKey(): bool {
+        if (!root.wanted) return false
+        if (root.query.length > 0) root.query = ""
+        else root.close()
+        return true
     }
     MouseArea {
         anchors.fill: parent

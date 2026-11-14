@@ -964,6 +964,8 @@ Scope {
                 readonly property bool takesKeys: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
                     || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.here && GlobalStates.searchOpen)
                     || (galleryLoader.item?.morphOpen ?? false) || (orbitLoader.item?.wanted ?? false)
+                    // Editing the bar is modal: the focused screen's chassis holds the keys, so Escape folds and leaves it.
+                    || (barWindow.editHere && (GlobalStates.focusedScreen?.name ?? "") === (barWindow.screen?.name ?? ""))
                 readonly property bool fullscreenHere: GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
                 // The overview draws Top above a fullscreen window, so the chassis is seen there as it is. Only where
                 // Top gets no keys over that window does it climb to Overlay, and only while something in it types.
@@ -1266,16 +1268,19 @@ Scope {
                     }
                 }
 
+                // The chassis's only Escape, front to back. Qt fires no Shortcut while two with one sequence are enabled
+                // in a window (just activatedAmbiguously), so each surface's own Escape here went dead beside any other:
+                // the Control Center's, kept built after its first use, was always on. Surfaces answer in escapeKey().
                 Shortcut {
                     sequence: "Escape"
-                    enabled: barWindow.expanded
-                    onActivated: islandLoader.item.expanded = false
-                }
-
-                Shortcut {
-                    sequence: "Escape"
-                    enabled: barWindow.editHere
-                    onActivated: if (!(editLoader.item?.fold() ?? false)) IrisState.edit = false
+                    enabled: barWindow.takesKeys || barWindow.expanded || barWindow.editHere
+                    onActivated: {
+                        const front = [orbitLoader.item, spotlightLoader.item, galleryLoader.item,
+                            controlCentreLoader.externalOpen ? controlCentreLoader.item : null, stage, dockLoader.item]
+                        if (front.some(surface => surface?.escapeKey?.() ?? false)) return
+                        if (barWindow.editHere) { if (!(editLoader.item?.fold() ?? false)) IrisState.edit = false }
+                        else if (barWindow.expanded) islandLoader.item.expanded = false
+                    }
                 }
 
                 // Never coalesced: the field is the outline of what the items paint,

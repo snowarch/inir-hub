@@ -293,13 +293,12 @@ Item {
         event.accepted = true
     }
 
-    Shortcut {
-        sequence: "Escape"
-        enabled: root.here && GlobalStates.searchOpen
-        onActivated: {
-            if (LauncherSearch.query.length > 0) LauncherSearch.query = ""
-            else GlobalStates.searchOpen = false
-        }
+    // Escape, from the chassis's one Shortcut: the words first, then Spotlight.
+    function escapeKey(): bool {
+        if (!(root.here && GlobalStates.searchOpen)) return false
+        if (LauncherSearch.query.length > 0) LauncherSearch.query = ""
+        else GlobalStates.searchOpen = false
+        return true
     }
 
     MouseArea {

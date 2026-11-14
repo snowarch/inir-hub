@@ -82,10 +82,11 @@ Item {
         enabled: root.armed
         onClicked: GlobalStates.wallpaperSelectorOpen = false
     }
-    Shortcut {
-        sequence: "Escape"
-        enabled: root.morphOpen
-        onActivated: GlobalStates.wallpaperSelectorOpen = false
+    // Escape, from the chassis's one Shortcut.
+    function escapeKey(): bool {
+        if (!root.morphOpen) return false
+        GlobalStates.wallpaperSelectorOpen = false
+        return true
     }
     Shortcut { sequence: "Alt+Left"; enabled: root.morphOpen && engine.source === "library" && engine.canGoBack; onActivated: engine.goBack() }
     Shortcut { sequence: "Alt+Right"; enabled: root.morphOpen && engine.source === "library" && engine.canGoForward; onActivated: engine.goForward() }

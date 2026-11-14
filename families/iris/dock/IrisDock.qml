@@ -126,6 +126,12 @@ Item {
         root.slideAt = root.centreIn(root.slideIds, root.slideApp)
         settleDelay.restart()
     }
+    // Escape, from the chassis's one Shortcut: an open app menu closes.
+    function escapeKey(): bool {
+        if (!window.menuOpen) return false
+        window.menuApp = null
+        return true
+    }
     Connections {
         target: IrisState
         function onDockSlideChanged(): void {
@@ -380,7 +386,6 @@ Item {
                 onPressed: window.menuApp = null
             }
 
-            Shortcut { sequence: "Escape"; enabled: window.menuOpen; onActivated: window.menuApp = null }
             Connections {
                 target: IrisState
                 function onDockMenuRequestChanged(): void {
