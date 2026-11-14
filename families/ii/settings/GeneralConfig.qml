@@ -1149,14 +1149,15 @@ ContentPage {
             ContentSubsection {
                 visible: MaterialThemeLoader.loginScreenInstalled
                 title: Translation.tr("Login screen")
-                tooltip: Translation.tr("Where you sign in after starting the computer. Automatic shows iRiS while you use iRiS.")
+                tooltip: Translation.tr("Where you sign in after starting the computer. Automatic wears the look of the family you use.")
 
                 ConfigSelectionArray {
                     currentValue: Config.options?.lock?.loginScreen ?? "auto"
                     options: [
                         { displayName: Translation.tr("Automatic"), icon: "auto_awesome", value: "auto" },
                         { displayName: Translation.tr("Classic"), icon: "lock", value: "classic" },
-                        { displayName: Translation.tr("iRiS"), icon: "blur_on", value: "iris" }
+                        { displayName: Translation.tr("iRiS"), icon: "blur_on", value: "iris" },
+                        { displayName: Translation.tr("Waffle"), icon: "grid_view", value: "waffle" }
                     ]
                     onSelected: (newValue) => Config.setNestedValue("lock.loginScreen", newValue)
                 }

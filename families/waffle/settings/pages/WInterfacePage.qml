@@ -828,12 +828,13 @@ WSettingsPage {
             visible: MaterialThemeLoader.loginScreenInstalled
             label: Translation.tr("Login screen")
             icon: "key"
-            description: Translation.tr("Where you sign in after starting the computer. Automatic shows iRiS while you use iRiS.")
+            description: Translation.tr("Where you sign in after starting the computer. Automatic wears the look of the family you use.")
             currentValue: Config.options?.lock?.loginScreen ?? "auto"
             options: [
                 { value: "auto", displayName: Translation.tr("Automatic") },
                 { value: "classic", displayName: Translation.tr("Classic") },
-                { value: "iris", displayName: Translation.tr("iRiS") }
+                { value: "iris", displayName: Translation.tr("iRiS") },
+                { value: "waffle", displayName: Translation.tr("Waffle") }
             ]
             onSelected: newValue => Config.setNestedValue("lock.loginScreen", newValue)
         }

@@ -205,8 +205,8 @@ Singleton {
             const row = named.includes(":")
                 ? root.rows.find(row => !row.virtual && row.spec.comp !== undefined && row.spec.comp + ":" + row.spec.key === named && root.shown(row))
                 : root.find(named)
-            // A row with nothing to say yet (a list, an unset name) leaves the line to the next.
-            if (row && String(root.sayNow(row) ?? "").length > 0) out.push(row)
+            // A row hidden now (a style the chosen look lacks) or with nothing to say yet leaves the line to the next.
+            if (row && root.shown(row) && String(root.sayNow(row) ?? "").length > 0) out.push(row)
         }
         return out
     }

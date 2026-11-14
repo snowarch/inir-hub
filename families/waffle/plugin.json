@@ -29,6 +29,18 @@
     "face": "widgets/templates/WaffleCard.qml"
   },
   "configKey": "waffles",
+  "loginScreen": {
+    "look": "waffle",
+    "reads": [
+      "waffles.lock.blur",
+      "waffles.lock.dim",
+      "waffles.lock.clock",
+      "waffles.theming.font.family",
+      "waffles.theming.font.scale",
+      "waffles.background.useMainWallpaper",
+      "waffles.background.wallpaperPath"
+    ]
+  },
   "enabledPanels": [
     "wBar",
     "wBackground",

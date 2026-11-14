@@ -26,7 +26,8 @@ PreviewScene {
     lowest: Math.round(170 * login.d)
 
     // ── What the rows say ──
-    readonly property string screen: String(login.opt("lock.loginScreen", "auto")) === "classic" ? "classic" : "iris"
+    readonly property string screen: ["classic", "waffle"].indexOf(String(login.opt("lock.loginScreen", "auto"))) >= 0
+        ? String(login.opt("lock.loginScreen", "auto")) : "iris"
     readonly property string style: ["cover", "frame", "lens"].indexOf(String(login.opt("lock.loginStyle", "lens"))) >= 0
         ? String(login.opt("lock.loginStyle", "lens")) : "lens"
     readonly property string source: String(login.opt("iris.lock.scene.source", "desktop"))
@@ -151,10 +152,13 @@ PreviewScene {
     Face { lit: login.screen === "iris" && login.style === "frame"; sourceComponent: frameFace }
     Face { lit: login.screen === "iris" && login.style === "lens"; sourceComponent: lensFace }
     Face { lit: login.screen === "classic"; sourceComponent: classicFace }
+    Face { lit: login.screen === "waffle"; sourceComponent: waffleFace }
 
     Caption {
-        glyph: login.screen === "classic" ? "lock_clock" : login.style === "cover" ? "wallpaper" : login.style === "frame" ? "frame_inspect" : "blur_on"
+        glyph: login.screen === "classic" ? "lock_clock" : login.screen === "waffle" ? "grid_view"
+            : login.style === "cover" ? "wallpaper" : login.style === "frame" ? "frame_inspect" : "blur_on"
         text: login.screen === "classic" ? Translation.tr("Classic: the clock, then your password")
+            : login.screen === "waffle" ? Translation.tr("Waffle: the clock, then your face and password")
             : login.style === "cover" ? Translation.tr("Cover: your picture, sharp")
             : login.style === "frame" ? Translation.tr("Frame: your picture, hung in a mat")
             : Translation.tr("Lens: the time cut out of your picture")
@@ -617,6 +621,49 @@ PreviewScene {
                 color: login.app("onSurfaceVariant", IrisStyle.subtext)
                 font.family: "Roboto"
                 font.pixelSize: login.type(15)
+            }
+        }
+    }
+
+    // ── Waffle (WaffleLogin.qml, its lock's curtain): the clock and date over the picture, blurred and lightly veiled ──
+    Component {
+        id: waffleFace
+        Item {
+            id: waffle
+            readonly property color ink: login.app("onSurface", IrisStyle.text)
+            readonly property string family: String(login.opt("waffles.theming.font.family", "")) || "Noto Sans"
+            MultiEffect {
+                anchors.fill: parent
+                visible: login.hasPicture
+                source: login.picture.textureItem
+                blurEnabled: Boolean(login.opt("waffles.lock.blur.enable", true))
+                blur: 0.8
+                // The greeter's own: the lock's radius, capped at 64 for SDDM's Qt.
+                blurMax: Math.max(8, login.px(Math.min(64, Number(login.opt("waffles.lock.blur.radius", 100)))))
+                saturation: 0.5
+                autoPaddingEnabled: false
+            }
+            Rectangle { anchors.fill: parent; color: login.app("background", IrisStyle.veil); opacity: 0.12 }
+            Column {
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: -login.px(60)
+                spacing: login.px(4)
+                IrisText {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Qt.formatTime(login.now, "hh:mm")
+                    color: waffle.ink
+                    font.family: waffle.family
+                    font.pixelSize: login.px(96)
+                    font.weight: Font.Normal
+                }
+                IrisText {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Translation.locale.toString(login.now, "dddd, MMMM d")
+                    color: waffle.ink
+                    font.family: waffle.family
+                    font.pixelSize: login.type(20)
+                    font.weight: Font.Medium
+                }
             }
         }
     }
