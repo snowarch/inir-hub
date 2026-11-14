@@ -94,6 +94,23 @@ MediaPage {
                     font.pixelSize: IrisStyle.typeFootnote
                     elide: Text.ElideRight
                 }
+                IrisText {
+                    Layout.fillWidth: true
+                    visible: String(CornerSources.refreshErrors[row.modelData.url] ?? "").length > 0
+                    text: String(CornerSources.refreshErrors[row.modelData.url] ?? "")
+                    color: IrisStyle.danger
+                    font.pixelSize: IrisStyle.typeFootnote
+                    wrapMode: Text.WordWrap
+                }
+            }
+            IrisIconButton {
+                visible: row.modelData.type === "stremio"
+                materialIcon: "refresh"
+                Accessible.name: Translation.tr("Refresh %1").arg(String(row.modelData.name))
+                onClicked: {
+                    const url = String(row.modelData.url)
+                    CornerSources.refreshAddon(url, error => { CornerSources.refreshErrors = Object.assign({}, CornerSources.refreshErrors, { [url]: error }) })
+                }
             }
             IrisIconButton {
                 materialIcon: "delete"

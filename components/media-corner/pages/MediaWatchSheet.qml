@@ -7,6 +7,7 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 import "../state"
 import "../state/sources.js" as Sources
+import "../state/watch.js" as Watch
 
 // Watch's page, in place of the title: what it found in the person's sources, and how opening mpv is going. As soon as
 // mpv's window is there, CornerWatch closes it (and the overlay). Escape or the arrow leaves it, and stops an opening.
@@ -16,11 +17,24 @@ MediaPage {
     signal followed()
     readonly property var webs: CornerSources.webs
     readonly property bool nothingAdded: CornerSources.list.length === 0
+    property string sourceFilter: ""
+    property bool sortStreams: false
+    readonly property var sourceNames: Watch.sourceNames(CornerWatch.streams)
+    readonly property var displayedStreams: Watch.displayedStreams(CornerWatch.streams, root.sourceFilter, root.sortStreams)
+    readonly property bool sourceFailed: CornerWatch.mappingError || CornerWatch.sourceResults.some(result => result.state === "error")
+    readonly property bool sourceUnidentified: CornerWatch.sourceResults.some(result => result.state === "unidentified")
+    Connections {
+        target: CornerWatch
+        function onShowChanged(): void { root.sourceFilter = ""; root.sortStreams = false }
+        function onEpisodeChanged(): void { root.sourceFilter = ""; root.sortStreams = false }
+    }
     readonly property string status: CornerWatch.mpvMissing ? Translation.tr("mpv isn't installed. Install the package mpv to watch here")
         : CornerWatch.phase === "finding" ? Translation.tr("Looking in your sources…")
         : CornerWatch.phase === "launching" ? (CornerWatch.slow ? Translation.tr("mpv is still opening it…") : Translation.tr("Opening mpv…"))
         : root.nothingAdded ? Translation.tr("You have no sources yet")
-        : CornerWatch.streams.length === 0 && root.webs.length === 0 ? Translation.tr("Your sources have nothing for this")
+        : CornerWatch.streams.length === 0 && root.webs.length === 0 ? (root.sourceFailed ? Translation.tr("Request failed")
+            : root.sourceUnidentified ? Translation.tr("Could not identify this title for this source")
+            : Translation.tr("Your sources have nothing for this"))
         : ""
 
     spacing: Math.round(10 * root.d)
@@ -86,7 +100,7 @@ MediaPage {
     }
     IrisText {
         Layout.fillWidth: true
-        visible: CornerWatch.error.length > 0
+        visible: CornerWatch.error.length > 0 && CornerWatch.error !== Translation.tr("Request failed")
         text: CornerWatch.error
         textFormat: Text.PlainText
         color: IrisStyle.danger
@@ -103,6 +117,21 @@ MediaPage {
         visible: root.nothingAdded
         text: Translation.tr("Add a source")
         onClicked: CornerState.pick("sources")
+    }
+    Repeater {
+        model: CornerWatch.sourceResults
+        IrisText {
+            required property var modelData
+            Layout.fillWidth: true
+            text: String(modelData.name) + ": " + (modelData.state === "waiting" ? Translation.tr("Looking…")
+                : modelData.state === "unidentified" ? Translation.tr("Could not identify this title for this source")
+                : modelData.state === "unsupported" ? Translation.tr("Not available for this title")
+                : modelData.state === "error" ? Translation.tr("Request failed")
+                : Translation.tr("%1 streams").arg(modelData.count))
+            textFormat: Text.PlainText
+            color: IrisStyle.muted
+            wrapMode: Text.WordWrap
+        }
     }
     IrisGroupTitle {
         visible: CornerWatch.subtitles.length > 0
@@ -125,8 +154,31 @@ MediaPage {
             onClicked: CornerWatch.selectedSubtitle = modelData
         }
     }
+    Flow {
+        Layout.fillWidth: true
+        visible: CornerWatch.streams.length > 0 && !CornerWatch.mpvMissing
+        spacing: Math.round(6 * root.d)
+        IrisButton {
+            text: Translation.tr("All sources")
+            quiet: root.sourceFilter !== ""
+            onClicked: root.sourceFilter = ""
+        }
+        Repeater {
+            model: root.sourceNames
+            IrisButton {
+                required property string modelData
+                text: modelData
+                quiet: root.sourceFilter !== modelData
+                onClicked: root.sourceFilter = modelData
+            }
+        }
+        IrisButton {
+            text: root.sortStreams ? Translation.tr("Original order") : Translation.tr("Sort by source and name")
+            onClicked: root.sortStreams = !root.sortStreams
+        }
+    }
     Repeater {
-        model: CornerWatch.mpvMissing ? [] : CornerWatch.streams
+        model: CornerWatch.mpvMissing ? [] : root.displayedStreams
         Choice {
             required property var modelData
             glyph: "play_arrow"

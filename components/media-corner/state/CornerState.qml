@@ -79,16 +79,23 @@ Singleton {
     property var _out: ({})
     property int _outCount: 0
 
-    function ask(url: string, body: string, shape: var, callback: var): void {
+    function ask(url: string, body: string, shape: var, callback: var, force: bool = false): void {
         if (!root.open) return
         const key = url + body
         const hit = root._answers[key]
-        if (hit && Date.now() - hit.at < root.keepMs) { callback(hit.value, ""); return }
+        if (!force && hit && Date.now() - hit.at < root.keepMs) { callback(hit.value, ""); return }
         const out = root._out[key]
-        if (out) { out.callbacks.push(callback); return }
+        if (out && !force) { out.callbacks.push(callback); return }
+        const callbacks = out ? out.callbacks.concat([callback]) : [callback]
+        if (out) {
+            out.done = true
+            out.xhr.abort()
+            delete root._out[key]
+            root._outCount--
+        }
 
         const xhr = new XMLHttpRequest()
-        const ticket = { key, xhr, at: Date.now(), callbacks: [callback], done: false }
+        const ticket = { key, xhr, at: Date.now(), callbacks, done: false }
         root._out[key] = ticket
         root._outCount++
         root.scheduleDeadline()

@@ -124,53 +124,76 @@ Rectangle {
             pad: root.pad
             onSubmitted: root.submitted()
         }
-        Flickable {
+        ListView {
+            id: list
             IrisScrollFeel {}
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.maximumHeight: list.implicitHeight
-            implicitHeight: list.implicitHeight
-            contentHeight: list.implicitHeight
+            Layout.maximumHeight: contentHeight
+            implicitHeight: contentHeight
+            spacing: Math.round(2 * root.d)
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             ScrollBar.vertical: IrisScrollBar {}
-            Column {
-                id: list
-                width: parent.width
-                spacing: Math.round(2 * root.d)
-                Repeater {
-                    model: root.navPlaces
-                    delegate: PlaceRow {}
+            model: {
+                const rows = root.navPlaces.map(place => ({ kind: "place", place }))
+                if (CornerWatch.watchlistLoadFailed) rows.push({ kind: "error" })
+                const wanted = Object.keys(CornerWatch.watchlist)
+                if (wanted.length) rows.push({ kind: "wantedHeader" })
+                for (const key of wanted) rows.push({ kind: "wanted", key })
+                const watching = root.prism ? Object.keys(CornerWatch.progress).filter(key => {
+                    const entry = CornerWatch.progress[key]
+                    return entry && entry.show && (CornerWatch.resumeAt(key) > 0 || entry.position === 0)
+                }).sort((a, b) => CornerWatch.progress[b].at - CornerWatch.progress[a].at).slice(0, 5) : []
+                if (watching.length) rows.push({ kind: "watchingHeader" })
+                for (const key of watching) rows.push({ kind: "watching", key })
+                return rows
+            }
+            delegate: Loader {
+                id: sidebarRow
+                required property var modelData
+                width: list.width
+                sourceComponent: modelData.kind === "place" ? placeRow : modelData.kind === "error" ? errorRow : modelData.kind === "wantedHeader" || modelData.kind === "watchingHeader" ? headerRow : modelData.kind === "wanted" ? wantedRow : watchingRow
+                Component { id: placeRow; PlaceRow { modelData: sidebarRow.modelData.place } }
+                Component {
+                    id: errorRow
+                    RowLayout {
+                        IrisText { Layout.fillWidth: true; text: Translation.tr("Request failed"); color: IrisStyle.danger; wrapMode: Text.WordWrap }
+                        IrisButton { quiet: true; text: Translation.tr("Retry"); onClicked: CornerWatch.retryWatchlistLoad() }
+                    }
                 }
-                IrisText {
-                    visible: root.prism && watchList.count > 0
-                    text: Translation.tr("Watching")
+                Component { id: headerRow; IrisText {
+                    text: Translation.tr(sidebarRow.modelData.kind === "wantedHeader" ? "Want to watch" : "Watching")
                     color: IrisStyle.textTertiary
                     font.pixelSize: 11 * IrisStyle.typeScale
-                    font.letterSpacing: 0.6
+                    font.letterSpacing: sidebarRow.modelData.kind === "watchingHeader" ? 0.6 : 0
                     font.weight: IrisStyle.weight(Font.DemiBold)
-                    font.capitalization: Font.AllUppercase
+                    font.capitalization: sidebarRow.modelData.kind === "watchingHeader" ? Font.AllUppercase : Font.MixedCase
                     leftPadding: Math.round(12 * root.d)
                     topPadding: Math.round(12 * root.d)
-                    bottomPadding: Math.round(4 * root.d)
-                }
-                Repeater {
-                    id: watchList
-                    model: root.prism ? Object.keys(CornerWatch.progress).filter(key => {
-                        const entry = CornerWatch.progress[key]
-                        return entry && entry.show && CornerWatch.resumeAt(key) > 0
-                    }).sort((a, b) => CornerWatch.progress[b].at - CornerWatch.progress[a].at).slice(0, 5) : []
-                    delegate: RowLayout {
-                        id: watched
-                        required property string modelData
-                        width: list.width
+                    bottomPadding: sidebarRow.modelData.kind === "watchingHeader" ? Math.round(4 * root.d) : 0
+                } }
+                Component { id: wantedRow; RowLayout {
+                        IrisButton {
+                            Layout.fillWidth: true
+                            quiet: true
+                            text: String(CornerWatch.watchlist[sidebarRow.modelData.key]?.title ?? "")
+                            onClicked: CornerState.openShow(CornerWatch.watchlist[sidebarRow.modelData.key])
+                        }
+                        IrisIconButton {
+                            materialIcon: "close"
+                            Accessible.name: Translation.tr("Remove")
+                            onClicked: CornerWatch.toggleWatchlist(CornerWatch.watchlist[sidebarRow.modelData.key])
+                        }
+                } }
+                Component { id: watchingRow; RowLayout {
                         HoverHandler { id: watchedHover }
                         IrisButton {
                             Layout.fillWidth: true
                             quiet: true
-                            text: String(CornerWatch.progress[watched.modelData]?.show?.title ?? "")
+                            text: String(CornerWatch.progress[sidebarRow.modelData.key]?.show?.title ?? "")
                             onClicked: {
-                                const entry = CornerWatch.progress[watched.modelData]
+                                const entry = CornerWatch.progress[sidebarRow.modelData.key]
                                 if (!entry?.show) return
                                 CornerState.openShow(entry.show)
                                 CornerWatch.begin(entry.show, entry.episode ?? null)
@@ -180,10 +203,9 @@ Rectangle {
                             materialIcon: "close"
                             opacity: watchedHover.hovered || activeFocus ? 1 : 0
                             Accessible.name: Translation.tr("Remove")
-                            onClicked: CornerWatch.forget(watched.modelData)
+                            onClicked: CornerWatch.forget(sidebarRow.modelData.key)
                         }
-                    }
-                }
+                } }
             }
         }
         Item { Layout.fillHeight: true }
