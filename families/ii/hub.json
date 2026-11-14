@@ -2,6 +2,7 @@
     "$schema": "../../schema/hub.schema.json",
     "version": "2.36.3",
     "changes": {
+        "2.36.3": ["Panels, bar popups and sidebar tabs are built the first time you open them, so the shell starts lighter", "Day and month names follow the shell's language, not the system's", "Widget edit mode opens without flicker: the bars slide away and the card zooms once the desktop is ready", "The bar's Resources stop sampling while a fullscreen game covers it"],
         "2.36.2": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in Settings › Panels › Floating tools", "Text fields open their right-click menu in Material's look, inside the panel, so a sidebar no longer closes under it", "A fresh install starts with no wallpaper or backdrop dim", "The left sidebar leaves no empty gap where a card has nothing to show (weather offline, no wallpapers)"],
         "2.36.1": ["Choosing a file, a folder or a colour opens the shell's own picker in your colours, not a white window", "The colour picker reads the screen on Niri too (no hyprpicker)"],
         "2.36.0": ["Hub widgets show in the sidebars: a card in the left one's Widgets column, a tab in the right one (Settings, Sidebars)", "Hub: a web app you installed gets a button that turns on the sidebar's Web apps tab"],
@@ -67,7 +68,7 @@
         "yande.re",
         "youtube.com"
     ],
-    "minInir": "3.1.1",
+    "minInir": "3.1.2",
     "provides": "modules/ii",
     "preview": "preview.webp"
 }
