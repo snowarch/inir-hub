@@ -135,7 +135,7 @@ It reads what your branch changed since `origin/main` (`--base REF` for another 
 | At most 600 lines in a file the branch adds or changes, outside families. | A file that does one job can be read, reviewed and fixed. |
 | From outside, at most 2500 lines of code in one pull request (translations and docs not counted). | Nobody can review more whole, and what nobody read reaches every desktop that installs it. Send the smallest version that works, then one addition per pull request. |
 | A Design's `design.json` holds only values iRiS reads, in the forms its schema allows (`families/iris/designs/design.schema.json`); the colours it fixes read (text 7:1 on its paper, secondary text 4.5:1, an accent 3:1, ink on a fill 4.5:1); its `parts` are at most `preview`, `islandFace` and `insignia`; it ships no shader. | iRiS reads a Design, never runs one: one set of components serves every Design, and a value it doesn't read would silently do nothing. |
-| Every QML file parses with Qt 6.12, the Qt iNiR runs on (CI). | A file that doesn't parse fails on every desktop that installed it, the moment someone opens it. |
+| Every QML file compiles with Qt 6.12, the Qt iNiR runs on (CI; `qmlcachegen`, which also refuses what parses but does not load, such as a typed default parameter). | A file that doesn't compile fails on every desktop that installed it, the moment someone opens it. |
 
 A literal that is the point (a flag's own red, a gradient's fade) ends its line with why: `// literal: the flag's red`,
 or in iRiS `// iris-literal: the banner's fade`. Token files themselves (a family's `style/` or `looks/` folder) are

@@ -45,22 +45,26 @@ jobs:
         if: ${{ !cancelled() }}
         run: tools/min-inir.sh
       # The Qt iNiR runs on: qs-rs bundles 6.12.0 (qs-rs release.yml QT_VERSION); keep this pin in step with it. A file
-      # that does not parse fails only when someone opens it, on every desktop that installed it.
+      # that does not compile fails only when someone opens it, on every desktop that installed it. The compiler, not
+      # qmllint: a typed default parameter parses and lints clean, and Qt refuses to load it (Media Corner 1.1.0).
       - uses: actions/setup-python@v6
         if: ${{ !cancelled() }}
         with:
           python-version: "3.13"
-      - name: Every QML file parses
+      - name: Every QML file compiles
         if: ${{ !cancelled() }}
         run: |
           pip install --quiet --no-deps "PySide6-Essentials==6.12.0" "shiboken6==6.12.0"
+          cachegen="$(python -c 'import PySide6, os; print(os.path.dirname(PySide6.__file__))')/Qt/libexec/qmlcachegen"
+          out="$RUNNER_TEMP/qmlc"; mkdir -p "$out"
           broken=$(find families components designs widgets templates -name '*.qml' -print0 2>/dev/null |
-            xargs -0 -n 60 -P 4 pyside6-qmllint --bare 2>&1 | grep -a '\[syntax\]' | sort -u || true)
+            QC="$cachegen" OUT="$out" xargs -0 -n 1 -P 4 sh -c '"$QC" --only-bytecode -o "$OUT/$$.qmlc" "$1" 2>&1 || true' _ |
+            sort -u || true)
           if [ -n "$broken" ]; then
-            echo "$broken" | sed -E 's/^Warning: ([^:]+):([0-9]+):[0-9]+: (.*)$/::error file=\1,line=\2::\3/'
+            echo "$broken" | sed -E 's/^Error compiling qml file: ([^:]+):([0-9]+):[0-9]+: (error: )?(.*)$/::error file=\1,line=\2::\4/'
             exit 1
           fi
-          echo "every QML file parses"
+          echo "every QML file compiles"
       - name: Validate every item
         if: ${{ !cancelled() }}
         run: inir hub validate

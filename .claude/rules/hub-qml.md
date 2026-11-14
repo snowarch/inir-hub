@@ -26,6 +26,8 @@ Qt on older installs. A file that fails to load shows nothing and logs errors on
 - Names Qt 6.10 and older reserve are not property, function or id names: `long`, `int`, `short`, `char`, `float`,
   `double`, `native`. Never an `id` called `scale` or `state`, nor own properties named `left`, `top`, `baseline`.
 - The JavaScript engine has no `Object.fromEntries`, `Array.flat`/`flatMap`/`at`, `replaceAll`, `structuredClone`.
+- A typed parameter has no default (`force: bool = false` stops the file loading). Left out by the caller, a `bool`
+  arrives as `false` and an `int` as `0`, but a `string` as the text `"undefined"`: pass every string.
 - No `Qt5Compat.GraphicalEffects` (use `QtQuick.Effects`), no `Qt.createQmlObject`, no `eval`, no QML from a URL.
 
 ## Cost: nothing runs while nobody looks
