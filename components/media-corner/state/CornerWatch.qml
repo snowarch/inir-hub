@@ -69,7 +69,7 @@ Singleton {
             }
         })
     }
-    function _ask(addons: var, kitsu: string, mappingError: bool = false): void {
+    function _ask(addons: var, kitsu: string, mappingError = false): void {
         const ticket = root._ticket
         const streamPaths = addons.map((addon, index) => ({ addon, index, path: Streams.pathFor(addon, root.show, root.episode, kitsu), kind: "stream" }))
         root.sourceResults = Watch.initialSourceResults(streamPaths, root.show?.kind, kitsu, mappingError)
