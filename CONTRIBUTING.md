@@ -301,7 +301,7 @@ that family on their next `inir update`. A change to one keeps everything `inir 
 ## Families, components and Designs: the files
 
 These are shell code: `plugin.json` names the parts the base loads, and `hub.json` says where it links in the shell
-(`provides`, like `modules/iris`). Every folder that holds types carries a `qmldir` listing all of them. Stock
+(`provides`, like `modules/iris`) and which plugins it needs (`requires`: a Design names `iris`). Every folder that holds types carries a `qmldir` listing all of them. Stock
 Quickshell reads those instead of scanning your plugin at every start, and trusts them whole, so a type left out is
 "not a type" for everyone on Quickshell. `inir hub validate --fix` writes the missing ones for you.
 

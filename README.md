@@ -21,12 +21,12 @@ inir hub list                 # everything, ● marks what you have
 inir hub search clock
 inir hub info countdown
 inir hub install countdown
-inir hub update all
+inir hub update               # everything you have
 inir hub remove countdown
 inir hub open countdown       # its page in Settings
 ```
 
-An install puts the item where iNiR already reads it (your widgets, themes and sidebar folders), and a remove takes its files back. Its settings stay, so installing it again picks up where you left it. Before you install, the Hub says what an item can do beyond drawing itself: run commands, talk to the internet, read or write files outside its folder.
+An install puts the item where iNiR already reads it (your widgets, themes and sidebar folders), and a remove takes its files back. Its settings stay, so installing it again picks up where you left it. Before you install, the Hub says what an item can do beyond drawing itself: run commands, talk to the internet, read or write files outside its folder, run scripts inside the site a web app opens.
 
 ## What's here
 
@@ -36,6 +36,7 @@ An install puts the item where iNiR already reads it (your widgets, themes and s
 | Widget | [`widgets/`](widgets) | The Material desktop and sidebars, the iRiS Island, Waffle's Widgets panel (one widget can have a face for each) |
 | Colour theme | [`themes/`](themes) | Material and Waffle, and the apps iNiR themes |
 | iRiS theme | [`iris-themes/`](iris-themes) | A whole iRiS look: material, colour, shape, motion |
+| Design | [`designs/`](designs) | Another iRiS over iRiS's own parts: colour, type, shapes, motion, the Island's face (Prism, AIRISU) |
 | Web app | [`webapps/`](webapps) | A tab in Material's left sidebar |
 | Component | [`components/`](components) | Extras that plug into the shell: a look like `fastfetch`, or a panel worn with the families it names |
 

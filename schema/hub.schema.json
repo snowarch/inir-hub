@@ -95,6 +95,20 @@
             "pattern": "^\\d+\\.\\d+\\.\\d+$",
             "description": "Oldest iNiR it works on"
         },
+        "provides": {
+            "type": "string",
+            "pattern": "^modules/[a-z0-9][a-z0-9-]{0,46}[a-z0-9]$",
+            "description": "Families, components and Designs: where the plugin lands in the shell, always modules/<its id>"
+        },
+        "requires": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]{0,46}[a-z0-9]$"
+            },
+            "description": "Ids of the plugins it needs installed (a Design names the family it dresses)"
+        },
         "preview": {
             "type": "string",
             "pattern": "\\.(webp|png|jpe?g)$",
