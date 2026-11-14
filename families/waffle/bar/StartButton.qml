@@ -37,6 +37,7 @@ AppButton {
 
     BarMenu {
         id: contextMenu
+        anchorHovered: root.hovered
 
         model: [
             {

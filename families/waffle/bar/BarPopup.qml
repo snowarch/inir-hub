@@ -12,7 +12,8 @@ import qs.modules.waffle.looks
 Loader {
     id: root
 
-    required property var contentItem
+    // What the popup shows, built with its window: a closed menu costs nothing (every task button keeps one).
+    required property Component content
     property real padding: Looks.radius.large - Looks.radius.medium
     property bool noSmoothClosing: !(Config.options?.waffles?.tweaks?.smootherMenuAnimations ?? true)
     property bool closeOnFocusLost: true
@@ -211,10 +212,14 @@ Loader {
             border.width: 1
             border.color: Looks.colors.bg2Border
 
-            implicitWidth: root.contentItem.implicitWidth + (root.padding * 2)
-            implicitHeight: root.contentItem.implicitHeight + (root.padding * 2)
+            implicitWidth: contentLoader.implicitWidth + (root.padding * 2)
+            implicitHeight: contentLoader.implicitHeight + (root.padding * 2)
 
-            children: [root.contentItem]
+            Loader {
+                id: contentLoader
+                anchors.centerIn: parent
+                sourceComponent: root.content
+            }
         }
         
         // Hover detection for auto-close - uses HoverHandler which doesn't block events

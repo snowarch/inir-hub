@@ -43,7 +43,7 @@ BarIconButton {
         closeOnHoverLost: false
         padding: 4
 
-        contentItem: ColumnLayout {
+        content: ColumnLayout {
             spacing: 2
             Layout.minimumWidth: 180
 

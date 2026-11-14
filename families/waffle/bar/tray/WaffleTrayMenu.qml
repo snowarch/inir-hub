@@ -19,7 +19,7 @@ BarPopup {
     padding: 2
     visualMargin: 8
 
-    contentItem: Item {
+    content: Item {
         implicitWidth: Math.min(stackView.implicitWidth, 220)
         implicitHeight: stackView.implicitHeight
 
@@ -37,6 +37,12 @@ BarPopup {
             initialItem: SubMenu {
                 handle: root.trayItemMenuHandle
             }
+        }
+
+        // Beside stackView: a submenu it makes finds stackView from here.
+        Component {
+            id: subMenuComponent
+            SubMenu {}
         }
     }
 
@@ -132,10 +138,5 @@ BarPopup {
                 }
             }
         }
-    }
-
-    Component {
-        id: subMenuComponent
-        SubMenu {}
     }
 }

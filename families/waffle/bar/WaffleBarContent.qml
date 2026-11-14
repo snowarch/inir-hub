@@ -47,10 +47,15 @@ Rectangle {
             taskbarContextMenu.active = true
         }
     }
+    // The pointer still on the bar keeps its menu open (it closed 500 ms after the right click).
+    HoverHandler {
+        id: barHover
+    }
 
     BarMenu {
         id: taskbarContextMenu
         anchorItem: contextMenuAnchor
+        anchorHovered: barHover.hovered
         closeOnHoverLostDelay: 500  // Slower close to give time to click
 
         model: [

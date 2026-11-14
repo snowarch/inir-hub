@@ -21,7 +21,7 @@ BarPopup {
     closeOnFocusLost: true
     closeOnHoverLost: true
 
-    contentItem: ColumnLayout {
+    content: ColumnLayout {
         anchors.centerIn: parent
         spacing: 0
 
