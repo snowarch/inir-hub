@@ -51,6 +51,7 @@ QtObject {
             if (reply?.errors) throw new Error(String(reply.errors[0]?.message))
             return shape(reply?.data)
         }, (value, error) => {
+            if (!root) return
             root.down = !error ? "" : error === "busy" ? Translation.tr("AniList is busy, try again in a minute")
                 : !Network.online && error === "HTTP 0" ? Network.offlineReason : Translation.tr("%1 didn't answer (´・ω・`)").arg(root.sourceName)
             callback(value, error)
