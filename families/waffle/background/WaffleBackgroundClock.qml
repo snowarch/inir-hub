@@ -99,7 +99,7 @@ AbstractWidget {
     readonly property int datePixelSize: Math.round(26 * Looks.fontScale * localScale * dateStyleMultiplier * dateScaleFactor)
     readonly property int statusPixelSize: Math.round((clockStyle === "minimal" ? 14 : 16) * Looks.fontScale * localScale)
     readonly property string timeText: Qt.locale().toString(displayClock.date, root.resolveTimePattern())
-    readonly property string dateText: Qt.locale().toString(displayClock.date, root.resolveDatePattern())
+    readonly property string dateText: Translation.locale.toString(displayClock.date, root.resolveDatePattern())
 
     property color _dominantColor: Looks.colors.accent
 

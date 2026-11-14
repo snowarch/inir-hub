@@ -97,7 +97,7 @@ PillSurface {
         Text {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            text: Qt.locale().toString(root.now, "ddd d MMM")
+            text: Translation.locale.toString(root.now, "ddd d MMM")
             color: PillTheme.dim
             font.family: PillTheme.font
             font.pixelSize: 10.5 * root.s

@@ -163,7 +163,7 @@ WBarAttachedPanelContent {
                             font.weight: Font.DemiBold
                         }
                         WText {
-                            text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM d")
+                            text: Translation.locale.toString(DateTime.clock.date, "dddd, MMMM d")
                             font.pixelSize: Looks.font.pixelSize.normal
                             color: Looks.colors.fg1
                         }

@@ -118,7 +118,7 @@ Item {
                 }
                 PrismText {
                     width: parent.width
-                    text: Qt.locale().toString(DateTime.clock.date, "ddd d MMM")
+                    text: Translation.locale.toString(DateTime.clock.date, "ddd d MMM")
                         + (Weather.enabled && Weather.hasData ? "  ·  " + String(Weather.data?.temp ?? "") : "")
                     elide: Text.ElideRight
                     color: PrismTheme.ink3

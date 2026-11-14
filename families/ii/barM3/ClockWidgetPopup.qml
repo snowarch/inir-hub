@@ -25,7 +25,7 @@ StyledPopup {
             Layout.maximumWidth: popupColumn.implicitWidth
 
             StyledText {
-                text: Qt.locale().toString(root.today, " MMMM")
+                text: Translation.locale.toString(root.today, " MMMM")
                 font.pixelSize: Appearance.font.pixelSize.huge
                 font.weight: Font.Bold
                 color: Appearance.colors.colOnLayer1
@@ -75,7 +75,7 @@ StyledPopup {
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
-                            text: Qt.locale().toString(date, "ddd").slice(0, 2)
+                            text: Translation.locale.toString(date, "ddd").slice(0, 2)
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             color: isToday
                                 ? Appearance.colors.colPrimary

@@ -95,8 +95,8 @@ BarButton {
         id: tooltip
         barExtraVisibleCondition: root.shouldShowTooltip
         text: {
-            const dateStr = Qt.locale().toString(DateTime.clock.date, "dddd, MMMM d, yyyy")
-            const timeStr = Qt.locale().toString(DateTime.clock.date, "ddd hh:mm AP")
+            const dateStr = Translation.locale.toString(DateTime.clock.date, "dddd, MMMM d, yyyy")
+            const timeStr = Translation.locale.toString(DateTime.clock.date, "ddd hh:mm AP")
             const notifStr = Notifications.list.length > 0 
                 ? "\n" + Translation.tr("%1 notification(s)").arg(Notifications.list.length)
                 : ""

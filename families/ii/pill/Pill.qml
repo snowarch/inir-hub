@@ -233,7 +233,7 @@ Item {
 
     QtObject {
         id: clock
-        readonly property var loc: Qt.locale()
+        readonly property var loc: Translation.locale
         readonly property var now: sysClock.date
         readonly property string timeFormat: (PillTheme.time12h ? "h:mm" : "HH:mm")
             + (PillTheme.clockSeconds ? ":ss" : "")

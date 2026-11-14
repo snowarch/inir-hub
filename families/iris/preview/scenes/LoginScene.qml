@@ -66,13 +66,13 @@ PreviewScene {
     // The greeter's own date styles (LoginCore.date, from Lock › Type).
     readonly property string date: {
         const style = String(login.opt("iris.lock.type.dateFormat", "long"))
-        if (style === "weekday") return login.sentence(Qt.locale().toString(login.now, "dddd"))
-        if (style === "short") return login.sentence(Qt.locale().toString(login.now, "ddd d MMM"))
+        if (style === "weekday") return login.sentence(Translation.locale.toString(login.now, "dddd"))
+        if (style === "short") return login.sentence(Translation.locale.toString(login.now, "ddd d MMM"))
         if (style === "numeric") return Qt.locale().toString(login.now, Locale.ShortFormat)
-        return login.sentence(Qt.locale().toString(login.now, "dddd, d MMMM"))
+        return login.sentence(Translation.locale.toString(login.now, "dddd, d MMMM"))
     }
-    readonly property string weekday: login.sentence(Qt.locale().toString(login.now, "dddd"))
-    readonly property string dayMonth: Qt.locale().toString(login.now, "d MMMM")
+    readonly property string weekday: login.sentence(Translation.locale.toString(login.now, "dddd"))
+    readonly property string dayMonth: Translation.locale.toString(login.now, "d MMMM")
     readonly property string person: SystemInfo.displayName || SystemInfo.username || Translation.tr("You")
 
     readonly property Item picture: login.custom ? customShot : login.wallpaperView

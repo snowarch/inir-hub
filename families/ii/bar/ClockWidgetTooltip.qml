@@ -6,7 +6,8 @@ import QtQuick.Layouts
 
 StyledPopup {
     id: root
-    property string formattedDate: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM dd, yyyy")
+    // The date as the shell's language writes it in full ("sábado, 14 de noviembre de 2026"), not English order.
+    property string formattedDate: Translation.locale.toString(DateTime.clock.date, Translation.locale.dateFormat(Locale.LongFormat))
     property string formattedTime: DateTime.time
     property string formattedUptime: DateTime.uptime
     property string todosSection: getUpcomingTodos()
