@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "已登录 OpenSubtitles",
     "Sign in to OpenSubtitles in Sources first": "请先在 Sources 中登录 OpenSubtitles",
     "Wait before trying to sign in again": "请稍候再尝试登录",
-    "Could not open the web source": "无法打开网页来源"
+    "Could not open the web source": "无法打开网页来源",
+    "Pause": "暂停",
+    "Resume": "继续",
+    "Seek backward": "向后搜索",
+    "Seek forward": "向前搜索"
 }

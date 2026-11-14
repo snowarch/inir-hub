@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "Accesso a OpenSubtitles effettuato",
     "Sign in to OpenSubtitles in Sources first": "Accedi prima a OpenSubtitles in Sources",
     "Wait before trying to sign in again": "Attendi prima di provare ad accedere di nuovo",
-    "Could not open the web source": "Impossibile aprire la fonte web"
+    "Could not open the web source": "Impossibile aprire la fonte web",
+    "Pause": "Pausa",
+    "Resume": "Riprendi",
+    "Seek backward": "Torna indietro",
+    "Seek forward": "Vai avanti"
 }

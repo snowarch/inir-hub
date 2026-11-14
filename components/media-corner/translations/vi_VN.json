@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "Đã đăng nhập vào OpenSubtitles",
     "Sign in to OpenSubtitles in Sources first": "Trước tiên, hãy đăng nhập vào OpenSubtitles trong Sources",
     "Wait before trying to sign in again": "Hãy đợi trước khi thử đăng nhập lại",
-    "Could not open the web source": "Không thể mở nguồn web"
+    "Could not open the web source": "Không thể mở nguồn web",
+    "Pause": "Tạm dừng",
+    "Resume": "Tiếp tục",
+    "Seek backward": "Tua lùi",
+    "Seek forward": "Tua tới"
 }

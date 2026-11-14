@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "התחברתם אל OpenSubtitles",
     "Sign in to OpenSubtitles in Sources first": "התחברו תחילה אל OpenSubtitles תחת מקורות",
     "Wait before trying to sign in again": "המתינו לפני שתנסו להתחבר שוב",
-    "Could not open the web source": "לא ניתן לפתוח את מקור האינטרנט"
+    "Could not open the web source": "לא ניתן לפתוח את מקור האינטרנט",
+    "Pause": "השהיה",
+    "Resume": "המשך",
+    "Seek backward": "דילוג אחורה",
+    "Seek forward": "דילוג קדימה"
 }

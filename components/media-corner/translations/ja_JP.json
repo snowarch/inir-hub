@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "OpenSubtitlesにサインインしました",
     "Sign in to OpenSubtitles in Sources first": "先にSourcesでOpenSubtitlesにサインインしてください",
     "Wait before trying to sign in again": "再度サインインする前にお待ちください",
-    "Could not open the web source": "Webソースを開けませんでした"
+    "Could not open the web source": "Webソースを開けませんでした",
+    "Pause": "一時停止",
+    "Resume": "再開",
+    "Seek backward": "巻き戻し",
+    "Seek forward": "早送り"
 }

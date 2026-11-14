@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "Вход в OpenSubtitles выполнен",
     "Sign in to OpenSubtitles in Sources first": "Сначала войдите в OpenSubtitles в разделе Sources",
     "Wait before trying to sign in again": "Подождите, прежде чем снова пытаться войти",
-    "Could not open the web source": "Не удалось открыть веб-источник"
+    "Could not open the web source": "Не удалось открыть веб-источник",
+    "Pause": "Пауза",
+    "Resume": "Продолжить",
+    "Seek backward": "Перемотать назад",
+    "Seek forward": "Перемотать вперёд"
 }
