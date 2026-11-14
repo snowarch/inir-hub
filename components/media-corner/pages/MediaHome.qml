@@ -270,7 +270,7 @@ MediaPage {
                 required property var modelData
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.round(196 * root.d)
-                radius: IrisStyle.radiusCard
+                radius: Math.round(24 * root.d)
                 color: IrisStyle.surfaceHighestOpaque
                 border.width: 1
                 border.color: Qt.alpha(IrisStyle.text, 0.08)
