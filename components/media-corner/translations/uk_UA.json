@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "Вхід в OpenSubtitles виконано",
     "Sign in to OpenSubtitles in Sources first": "Спочатку увійдіть в OpenSubtitles у розділі Sources",
     "Wait before trying to sign in again": "Зачекайте, перш ніж спробувати увійти знову",
-    "Could not open the web source": "Не вдалося відкрити вебджерело"
+    "Could not open the web source": "Не вдалося відкрити вебджерело",
+    "Pause": "Пауза",
+    "Resume": "Продовжити",
+    "Seek backward": "Перемотати назад",
+    "Seek forward": "Перемотати вперед"
 }

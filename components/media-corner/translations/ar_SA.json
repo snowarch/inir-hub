@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "تم تسجيل الدخول إلى OpenSubtitles",
     "Sign in to OpenSubtitles in Sources first": "سجّل الدخول إلى OpenSubtitles من «المصادر» أولًا",
     "Wait before trying to sign in again": "انتظر قبل محاولة تسجيل الدخول مجددًا",
-    "Could not open the web source": "تعذّر فتح مصدر الويب"
+    "Could not open the web source": "تعذّر فتح مصدر الويب",
+    "Pause": "إيقاف مؤقت",
+    "Resume": "استئناف",
+    "Seek backward": "رجوع للخلف",
+    "Seek forward": "تقديم للأمام"
 }

@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "Berhasil masuk ke OpenSubtitles",
     "Sign in to OpenSubtitles in Sources first": "Masuk ke OpenSubtitles di Sources terlebih dahulu",
     "Wait before trying to sign in again": "Tunggu sebelum mencoba masuk lagi",
-    "Could not open the web source": "Sumber web tidak dapat dibuka"
+    "Could not open the web source": "Sumber web tidak dapat dibuka",
+    "Pause": "Jeda",
+    "Resume": "Lanjutkan",
+    "Seek backward": "Mundur",
+    "Seek forward": "Maju"
 }

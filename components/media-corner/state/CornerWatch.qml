@@ -31,6 +31,13 @@ Singleton {
     property bool slow: false
     property real position: 0
     property real duration: 0
+    property bool paused: false
+    property bool controlLinked: false
+    property int controlAttempts: 0
+    readonly property string controlPath: {
+        const runtime = String(Quickshell.env("XDG_RUNTIME_DIR") ?? "")
+        return runtime.startsWith("/") && runtime.length < 300 ? `${runtime}/media-corner-mpv-${Quickshell.processId}.sock` : ""
+    }
     readonly property string title: root.show ? String(root.show.title ?? "") : ""
     readonly property bool busy: root.phase === "launching" || root.phase === "playing"
 
@@ -171,12 +178,21 @@ Singleton {
         root._stopping = mpv.running
         mpv.running = false
     }
+    function control(action: string): void {
+        if (!root.controlLinked || !controlSocket.item || !CornerState.open || root.phase !== "playing") return
+        const commands = { pause: ["cycle", "pause"], back: ["seek", -10, "relative"], forward: ["seek", 10, "relative"] }
+        if (!Object.prototype.hasOwnProperty.call(commands, action)) return
+        controlSocket.item.write(JSON.stringify({ command: commands[action] }) + "\n")
+        if (action === "pause") controlSocket.item.write(JSON.stringify({ command: ["get_property", "pause"], request_id: 1 }) + "\n")
+        controlSocket.item.flush()
+    }
     function _start(stream: var): void {
         if (!Streams.mediaUrl(stream?.url)) return
         const key = Streams.watchKey(root.show, root.episode)
         const resume = root.resumeAt(key)
         // keep-open would keep mpv alive, with no window, on a stream it can't read: it has to end for that to be told.
         const args = ["mpv", "--ytdl=no", "--keep-open=no", "--terminal", "--no-really-quiet", "--no-input-terminal", "--term-status-msg=@@POS ${=time-pos} ${=duration} ${vo-configured}"]
+        if (root.controlPath.length) args.push("--input-ipc-server=" + root.controlPath)
         if (root.selectedSubtitle && Streams.mediaUrl(root.selectedSubtitle.url)) args.push("--sub-file=" + root.selectedSubtitle.url)
         if (Streams.mediaUrl(stream.referer)) args.push("--referrer=" + stream.referer)
         if (resume > 0) args.push("--start=" + Math.floor(resume))
@@ -187,6 +203,8 @@ Singleton {
         root.position = 0
         root.duration = 0
         root.slow = false
+        root.paused = false
+        root.controlAttempts = 0
         root.phase = "launching"
         mpv.command = args
         mpv.running = true
@@ -194,6 +212,46 @@ Singleton {
     function _playing(): void {
         root.phase = "playing"
         CornerState.sheet = false
+    }
+    Loader {
+        id: controlSocket
+        active: false
+        sourceComponent: Socket {
+            path: root.controlPath
+            connected: true
+            onConnectionStateChanged: {
+                root.controlLinked = connected
+                if (connected) {
+                    write(JSON.stringify({ command: ["get_property", "pause"], request_id: 1 }) + "\n")
+                    write(JSON.stringify({ command: ["observe_property", 1, "pause"] }) + "\n")
+                    flush()
+                }
+            }
+            parser: SplitParser {
+                onRead: line => {
+                    if (line.length > 4096) return
+                    try {
+                        const reply = JSON.parse(line)
+                        if (reply.request_id === 1 && reply.error === "success" && typeof reply.data === "boolean") root.paused = reply.data
+                        if (reply.event === "property-change" && reply.name === "pause" && typeof reply.data === "boolean") root.paused = reply.data
+                    } catch (e) {}
+                }
+            }
+        }
+    }
+    Timer {
+        interval: 250
+        repeat: true
+        running: CornerState.open && root.phase === "playing" && root.controlPath.length > 0 && !root.controlLinked && root.controlAttempts < 40
+        onTriggered: {
+            root.controlAttempts++
+            controlSocket.active = false
+            controlSocket.active = true
+        }
+    }
+    Connections {
+        target: CornerState
+        function onOpenChanged(): void { if (!CornerState.open) controlSocket.active = false }
     }
     Process {
         id: mpv
@@ -208,6 +266,8 @@ Singleton {
             }
         }
         onExited: code => {
+            controlSocket.active = false
+            root.controlLinked = false
             const played = root.phase === "playing"
             if (played) root._keep()
             if (root._next !== null) {

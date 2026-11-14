@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "OpenSubtitles에 로그인했습니다",
     "Sign in to OpenSubtitles in Sources first": "먼저 Sources에서 OpenSubtitles에 로그인하세요",
     "Wait before trying to sign in again": "다시 로그인하기 전에 잠시 기다리세요",
-    "Could not open the web source": "웹 소스를 열지 못했습니다"
+    "Could not open the web source": "웹 소스를 열지 못했습니다",
+    "Pause": "일시 정지",
+    "Resume": "재개",
+    "Seek backward": "뒤로 탐색",
+    "Seek forward": "앞으로 탐색"
 }

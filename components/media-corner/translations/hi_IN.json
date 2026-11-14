@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "OpenSubtitles में साइन इन हो गया",
     "Sign in to OpenSubtitles in Sources first": "पहले Sources में OpenSubtitles पर साइन इन करें",
     "Wait before trying to sign in again": "दोबारा साइन इन करने से पहले प्रतीक्षा करें",
-    "Could not open the web source": "वेब स्रोत नहीं खुल सका"
+    "Could not open the web source": "वेब स्रोत नहीं खुल सका",
+    "Pause": "रोकें",
+    "Resume": "जारी रखें",
+    "Seek backward": "पीछे जाएँ",
+    "Seek forward": "आगे जाएँ"
 }

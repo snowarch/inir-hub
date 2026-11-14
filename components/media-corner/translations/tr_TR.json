@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "OpenSubtitles hesabına giriş yapıldı",
     "Sign in to OpenSubtitles in Sources first": "Önce Sources bölümünden OpenSubtitles hesabına giriş yapın",
     "Wait before trying to sign in again": "Yeniden giriş yapmayı denemeden önce bekleyin",
-    "Could not open the web source": "Web kaynağı açılamadı"
+    "Could not open the web source": "Web kaynağı açılamadı",
+    "Pause": "Duraklat",
+    "Resume": "Sürdür",
+    "Seek backward": "Geri sar",
+    "Seek forward": "İleri sar"
 }

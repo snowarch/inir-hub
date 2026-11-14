@@ -214,5 +214,9 @@
     "Signed in to OpenSubtitles": "Signed in to OpenSubtitles",
     "Sign in to OpenSubtitles in Sources first": "Sign in to OpenSubtitles in Sources first",
     "Wait before trying to sign in again": "Wait before trying to sign in again",
-    "Could not open the web source": "Could not open the web source"
+    "Could not open the web source": "Could not open the web source",
+    "Pause": "Unikkallarit",
+    "Resume": "Nangiguk",
+    "Seek backward": "Kingumut uterit",
+    "Seek forward": "Siunissamut ingerlagit"
 }
