@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle, Material'ın genel stilini ve saydamlığını kullanır. Kapalıyken: kendi Fluent görünümü.",
   "When covered": "Örtüldüğünde",
   "Behind fullscreen": "Tam ekranın arkasında",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Gizli bir duvar kağıdının kodu çözülmez ve karesini korur."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Gizli bir duvar kağıdının kodu çözülmez ve karesini korur.",
+  "While something plays or is paused": "Bir şey çalarken veya duraklatılmışken",
+  "Media player": "Medya oynatıcı",
+  "Power buttons": "Güç düğmeleri"
 }

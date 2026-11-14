@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle-ip Material-ip ilusilersuutaa tamanut atuuttoq ersarissusialu atortarai. Qamitsillugu: Fluent-imik isikkuminik.",
   "When covered": "Matoqqagaangat",
   "Behind fullscreen": "Fullscreen-ip tunuani",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Tunuliaqut toqqortoq decode-iunnaartarpoq assilissaminillu pigiinnartarluni."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Tunuliaqut toqqortoq decode-iunnaartarpoq assilissaminillu pigiinnartarluni.",
+  "While something plays or is paused": "Immikkut tusarnaarneqartillugu imaluunniit unitsitaatillugu",
+  "Media player": "Media player-i",
+  "Power buttons": "Power buttonit"
 }

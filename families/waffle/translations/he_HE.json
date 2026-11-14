@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle משתמש בסגנון הגלובלי ובשקיפות של Material. כבוי: מראה ה-Fluent שלו.",
   "When covered": "כשמכוסה",
   "Behind fullscreen": "מאחורי מסך מלא",
-  "A hidden wallpaper stops decoding and keeps its frame.": "טפט מוסתר מפסיק לפענח ושומר את הפריים שלו."
+  "A hidden wallpaper stops decoding and keeps its frame.": "טפט מוסתר מפסיק לפענח ושומר את הפריים שלו.",
+  "While something plays or is paused": "בזמן ניגון או השהיה",
+  "Media player": "נגן מדיה",
+  "Power buttons": "כפתורי הפעלה"
 }

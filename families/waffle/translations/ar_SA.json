@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "يستخدم Waffle النمط العام والشفافية من Material. عند الإيقاف: مظهر Fluent الخاص به.",
   "When covered": "عند التغطية",
   "Behind fullscreen": "خلف ملء الشاشة",
-  "A hidden wallpaper stops decoding and keeps its frame.": "الخلفية المخفية تتوقف عن فك الترميز وتحتفظ بإطارها."
+  "A hidden wallpaper stops decoding and keeps its frame.": "الخلفية المخفية تتوقف عن فك الترميز وتحتفظ بإطارها.",
+  "While something plays or is paused": "أثناء التشغيل أو الإيقاف المؤقت",
+  "Media player": "مشغل الوسائط",
+  "Power buttons": "أزرار الطاقة"
 }

@@ -173,6 +173,7 @@ JsonObject {
         property JsonObject widgets: JsonObject {
             property bool weather: true
             property bool media: true
+            property bool lyrics: false // synced lyrics under the player (#307)
             property bool powerButtons: true
             property bool hintText: true
         }

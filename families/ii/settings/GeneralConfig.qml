@@ -1075,6 +1075,17 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    visible: Config.options?.material?.lock?.widgets?.media ?? true
+                    buttonIcon: "lyrics"
+                    text: Translation.tr("Synced lyrics")
+                    checked: Config.options?.material?.lock?.widgets?.lyrics ?? false
+                    onCheckedChanged: Config.setNestedValue("material.lock.widgets.lyrics", checked)
+                    StyledToolTip {
+                        text: Translation.tr("Under the player, once the song has them.")
+                    }
+                }
+
+                SettingsSwitch {
                     buttonIcon: "power_settings_new"
                     text: Translation.tr("Power buttons")
                     checked: Config.options?.material?.lock?.widgets?.powerButtons ?? true

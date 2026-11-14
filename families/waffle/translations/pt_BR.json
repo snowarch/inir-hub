@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "O Waffle usa o estilo global e a transparência do Material. Desligado: seu próprio visual Fluent.",
   "When covered": "Quando coberto",
   "Behind fullscreen": "Atrás da tela cheia",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Um papel de parede oculto para de ser decodificado e mantém o quadro."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Um papel de parede oculto para de ser decodificado e mantém o quadro.",
+  "While something plays or is paused": "Enquanto algo toca ou está pausado",
+  "Media player": "Player de mídia",
+  "Power buttons": "Botões liga / desliga"
 }

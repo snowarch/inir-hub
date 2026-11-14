@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle memakai gaya global dan transparansi Material. Mati: tampilan Fluent miliknya sendiri.",
   "When covered": "Saat tertutup",
   "Behind fullscreen": "Di belakang layar penuh",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Wallpaper yang tersembunyi berhenti didekode dan mempertahankan bingkainya."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Wallpaper yang tersembunyi berhenti didekode dan mempertahankan bingkainya.",
+  "While something plays or is paused": "Saat sesuatu diputar atau dijeda",
+  "Media player": "Pemutar media",
+  "Power buttons": "Tombol daya"
 }

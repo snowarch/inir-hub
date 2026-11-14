@@ -8,6 +8,7 @@ import Quickshell.Services.Mpris
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.shared.mediaControls.components
 import qs.modules.common.widgets
 import qs.modules.common.functions
 import qs.modules.shared.lock
@@ -56,6 +57,7 @@ MouseArea {
     // Widget visibility
     readonly property bool showWeather: Config.options?.waffles?.lock?.widgets?.weather ?? true
     readonly property bool showMedia: Config.options?.waffles?.lock?.widgets?.media ?? true
+    readonly property bool showLyrics: Config.options?.waffles?.lock?.widgets?.lyrics ?? false
     readonly property bool showPowerButtons: Config.options?.waffles?.lock?.widgets?.powerButtons ?? true
     readonly property bool showHintText: Config.options?.waffles?.lock?.widgets?.hintText ?? true
 
@@ -212,6 +214,8 @@ MouseArea {
             spacing: 24
 
             Loader {
+                Layout.alignment: Qt.AlignBottom
+                Layout.bottomMargin: Math.max(0, (80 - implicitHeight) / 2)
                 active: root.showWeather && (Weather.data?.temp?.length ?? 0) > 0
                 visible: active
 
@@ -252,6 +256,7 @@ MouseArea {
             }
 
             Loader {
+                Layout.alignment: Qt.AlignBottom
                 active: root.showMedia &&
                         root.activePlayer !== null &&
                         root.activePlayer.playbackState !== MprisPlaybackState.Stopped &&
@@ -260,8 +265,16 @@ MouseArea {
 
                 sourceComponent: Rectangle {
                     id: mediaWidget
-                    width: Math.max(320, mediaRow.implicitWidth + 32)
-                    height: 80
+                    // Implicit sizes: the Loader and the row follow them, so the card sits on the row's bottom and grows up.
+                    implicitWidth: Math.max(320, mediaRow.implicitWidth + 32)
+                    implicitHeight: 80 + mediaWidget.sheetShown
+                    // Synced lyrics under the player (#307): the sheet opens once the song has them.
+                    readonly property real sheetHeight: root.showLyrics && lyricSheet.hasLyrics ? 112 : 0
+                    property real sheetShown: mediaWidget.sheetHeight
+                    Behavior on sheetShown {
+                        enabled: Looks.transition.enabled
+                        NumberAnimation { duration: Looks.transition.duration.medium; easing.type: Easing.OutCubic }
+                    }
                     radius: Looks.radius.xLarge
                     color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.15)
                     border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.5)
@@ -272,10 +285,34 @@ MouseArea {
                     readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (MprisController.titleOf(player) ?? "")
                     readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (MprisController.artistOf(player) ?? "")
 
+                    PlayerLyrics {
+                        id: lyricSheet
+                        visible: root.showLyrics
+                        showPlaceholder: false
+                        wholeLines: true
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 16
+                        height: Math.max(0, mediaWidget.sheetShown - 16)
+                        opacity: mediaWidget.sheetShown / 112
+                        clip: true
+                        textAlignment: Text.AlignLeft
+                        lineSpacing: 8
+                        baseSize: Looks.font.pixelSize.normal
+                        fontFamily: Looks.font.family.ui
+                        activeScale: 1.12
+                        falloff: 3
+                        activeColor: root.textColor
+                        textColor: Looks.colors.subfg
+                        indicatorColor: Looks.colors.accent
+                    }
+
                     RowLayout {
                         id: mediaRow
                         anchors.fill: parent
                         anchors.margins: 16
+                        anchors.bottomMargin: 16 + mediaWidget.sheetShown
                         spacing: 16
 
                         Rectangle {

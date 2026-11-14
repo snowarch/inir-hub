@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle використовує глобальний стиль і прозорість Material. Вимкнено: власний вигляд Fluent.",
   "When covered": "Коли закриті",
   "Behind fullscreen": "За повноекранним вікном",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Приховані шпалери перестають декодуватися й зберігають кадр."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Приховані шпалери перестають декодуватися й зберігають кадр.",
+  "While something plays or is paused": "Поки щось грає або на паузі",
+  "Media player": "Медіаплеєр",
+  "Power buttons": "Кнопки живлення"
 }

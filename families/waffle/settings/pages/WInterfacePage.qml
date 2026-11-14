@@ -696,6 +696,37 @@ WSettingsPage {
             checked: Config.options?.waffles?.lock?.showLockedText ?? true
             onCheckedChanged: Config.setNestedValue("waffles.lock.showLockedText", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Weather")
+            icon: "weather-sunny"
+            checked: Config.options?.waffles?.lock?.widgets?.weather ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.lock.widgets.weather", checked)
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Media player")
+            icon: "music-note-2"
+            description: Translation.tr("While something plays or is paused")
+            checked: Config.options?.waffles?.lock?.widgets?.media ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.lock.widgets.media", checked)
+        }
+
+        WSettingsSwitch {
+            visible: Config.options?.waffles?.lock?.widgets?.media ?? true
+            label: Translation.tr("Synced lyrics")
+            icon: "text-font"
+            description: Translation.tr("Under the player, once the song has them.")
+            checked: Config.options?.waffles?.lock?.widgets?.lyrics ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.lock.widgets.lyrics", checked)
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Power buttons")
+            icon: "power"
+            checked: Config.options?.waffles?.lock?.widgets?.powerButtons ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.lock.widgets.powerButtons", checked)
+        }
     }
 
     WSettingsCard {

@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle이 Material의 전역 스타일과 투명도를 사용합니다. 끄면: 고유한 Fluent 모양.",
   "When covered": "가려졌을 때",
   "Behind fullscreen": "전체 화면 뒤에서",
-  "A hidden wallpaper stops decoding and keeps its frame.": "가려진 배경화면은 디코딩을 멈추고 프레임을 유지합니다."
+  "A hidden wallpaper stops decoding and keeps its frame.": "가려진 배경화면은 디코딩을 멈추고 프레임을 유지합니다.",
+  "While something plays or is paused": "재생 중이거나 일시 정지된 동안",
+  "Media player": "미디어 플레이어",
+  "Power buttons": "전원 버튼"
 }

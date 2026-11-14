@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle dùng phong cách chung và độ trong suốt của Material. Tắt: giao diện Fluent riêng của nó.",
   "When covered": "Khi bị che",
   "Behind fullscreen": "Sau toàn màn hình",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Hình nền bị che sẽ ngừng giải mã và giữ khung hình."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Hình nền bị che sẽ ngừng giải mã và giữ khung hình.",
+  "While something plays or is paused": "Khi đang phát hoặc tạm dừng",
+  "Media player": "Trình phát đa phương tiện",
+  "Power buttons": "Nút nguồn"
 }

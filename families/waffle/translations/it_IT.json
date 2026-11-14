@@ -560,5 +560,8 @@
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle usa lo stile globale e la trasparenza di Material. Disattivato: il suo aspetto Fluent.",
   "When covered": "Quando coperto",
   "Behind fullscreen": "Dietro lo schermo intero",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Uno sfondo nascosto smette di essere decodificato e tiene il suo fotogramma."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Uno sfondo nascosto smette di essere decodificato e tiene il suo fotogramma.",
+  "While something plays or is paused": "Mentre qualcosa suona o è in pausa",
+  "Media player": "Lettore multimediale",
+  "Power buttons": "Pulsanti di alimentazione"
 }
