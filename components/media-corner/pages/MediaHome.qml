@@ -17,14 +17,26 @@ MediaPage {
     readonly property bool prism: CornerState.options.style === "prism"
 
     property var hero: null
+    property var featuredAnime: null
+    property var featuredFilm: null
     function askHero(): void {
         if (root.hero !== null) return
-        root.anime.page({ sort: "TRENDING_DESC" }, 1, (result, error) => { if (!error) root.hero = result.items[0] ?? null })
+        root.anime.page({ sort: "TRENDING_DESC" }, 1, (result, error) => {
+            if (!root) return
+            if (!error) { root.hero = result.items[0] ?? null; root.featuredAnime = result.items[1] ?? null }
+        })
     }
-    Component.onCompleted: root.askHero()
+    function askFilm(): void {
+        if (root.featuredFilm !== null) return
+        root.movies.page({ kind: "movie" }, 1, (result, error) => {
+            if (!root) return
+            if (!error) root.featuredFilm = result.items[0] ?? null
+        })
+    }
+    Component.onCompleted: { root.askHero(); if (root.prism) root.askFilm() }
     Connections {
         target: CornerState
-        function onAttemptChanged(): void { root.askHero() }
+        function onAttemptChanged(): void { root.askHero(); if (root.prism) root.askFilm() }
     }
 
     readonly property var shelves: [
@@ -40,9 +52,19 @@ MediaPage {
     readonly property string status: root.down.length > 0 ? root.down
         : root.hero === null ? Translation.tr("Asking %1…").arg("AniList") : ""
 
+    IrisText {
+        visible: root.prism
+        Layout.fillWidth: true
+        text: Translation.tr("Home")
+        color: IrisStyle.text
+        font.family: IrisStyle.fontTitle
+        font.pixelSize: IrisStyle.typeTitleLarge
+        font.weight: IrisStyle.weight(Font.Bold)
+    }
+
     RowLayout {
         Layout.fillWidth: true
-        visible: root.status.length > 0
+        visible: root.status.length > 0 && (!root.prism || root.hero !== null || root.down.length > 0)
         spacing: Math.round(12 * root.d)
         IrisText {
             Layout.fillWidth: true
@@ -65,8 +87,8 @@ MediaPage {
         readonly property var show: root.hero
         readonly property bool compact: root.width < Math.round(600 * root.d * Math.min(1.4, IrisStyle.typeScale))
         Layout.fillWidth: true
-        Layout.preferredHeight: Math.round(250 * root.d)
-        visible: hero.show !== null
+        Layout.preferredHeight: Math.round((root.prism ? 232 : 250) * root.d)
+        visible: root.prism || hero.show !== null
         radius: IrisStyle.radiusTile
         color: IrisStyle.fillQuiet
 
@@ -99,7 +121,7 @@ MediaPage {
 
             ClippingRectangle {
                 id: heroCover
-                visible: !root.prism || !hero.compact
+                visible: hero.show !== null && (!root.prism || !hero.compact)
                 Layout.fillHeight: true
                 Layout.preferredWidth: Math.round(height / 1.5)
                 radius: IrisStyle.tileRadius(width * 0.5)
@@ -125,14 +147,14 @@ MediaPage {
                 Layout.fillHeight: true
                 spacing: Math.round(6 * root.d)
                 IrisText {
-                    text: Translation.tr("Trending now")
+                    text: hero.show ? Translation.tr("Trending now") : Translation.tr("Media Corner")
                     color: root.prism ? IrisStyle.inkOnDark : IrisStyle.identity.green
                     font.pixelSize: IrisStyle.typeFootnote
                     font.weight: IrisStyle.weight(Font.Bold)
                 }
                 IrisText {
                     Layout.fillWidth: true
-                    text: String(hero.show?.title ?? "")
+                    text: String(hero.show?.title ?? Translation.tr("Media Corner"))
                     font.family: IrisStyle.fontTitle
                     font.pixelSize: root.prism ? 30 * IrisStyle.typeScale : IrisStyle.typeTitleLarge
                     font.letterSpacing: root.prism ? -0.6 : 0
@@ -153,7 +175,7 @@ MediaPage {
                 IrisText {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    text: String(hero.show?.description ?? "")
+                    text: String(hero.show?.description ?? root.status)
                     color: root.prism ? Qt.alpha(IrisStyle.inkOnDark, 0.56) : IrisStyle.textSecondary
                     font.pixelSize: IrisStyle.typeLabel
                     wrapMode: Text.WordWrap
@@ -171,7 +193,7 @@ MediaPage {
                     IrisButton {
                         id: playAction
                         objectName: "heroPlay"
-                        visible: root.prism
+                        visible: root.prism && hero.show !== null
                         emphasized: true
                         foreground: IrisStyle.darkSurfaceOpaque
                         colBackground: IrisStyle.inkOnDark
@@ -205,7 +227,7 @@ MediaPage {
                         }
                     }
                     IrisButton {
-                        visible: !root.prism
+                        visible: !root.prism && hero.show !== null
                         emphasized: true
                         text: Translation.tr("Details")
                         onClicked: CornerState.openShow(hero.show)
@@ -213,7 +235,7 @@ MediaPage {
                     IrisButton {
                         id: detailsAction
                         objectName: "heroDetails"
-                        visible: root.prism && actions.roomy
+                        visible: root.prism && hero.show !== null && actions.roomy
                         foreground: IrisStyle.inkOnDark
                         colBackground: IrisStyle.veilStrong
                         colBackgroundHover: IrisStyle.veilHeavy
@@ -223,7 +245,7 @@ MediaPage {
                         onClicked: CornerState.openShow(hero.show)
                     }
                     IrisIconButton {
-                        visible: root.prism && !actions.roomy
+                        visible: root.prism && hero.show !== null && !actions.roomy
                         materialIcon: "info"
                         foreground: IrisStyle.inkOnDark
                         quiet: false
@@ -237,6 +259,52 @@ MediaPage {
         }
     }
 
+    RowLayout {
+        visible: root.prism
+        Layout.fillWidth: true
+        spacing: Math.round(8 * root.d)
+        Repeater {
+            model: [root.featuredAnime, root.featuredFilm]
+            delegate: Rectangle {
+                required property var modelData
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.round(150 * root.d)
+                radius: IrisStyle.radiusCard
+                color: IrisStyle.surfaceHighestOpaque
+                border.width: 1
+                border.color: Qt.alpha(IrisStyle.text, 0.08)
+                clip: true
+                IrisImage {
+                    anchors.fill: parent
+                    source: String(modelData?.banner || modelData?.imageLarge || "")
+                    fillMode: Image.PreserveAspectCrop
+                }
+                Rectangle { anchors.fill: parent; color: IrisStyle.artVeilHeavy }
+                IrisText {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.margins: Math.round(18 * root.d)
+                    text: String(modelData?.title ?? root.status)
+                    color: IrisStyle.inkOnDark
+                    font.pixelSize: IrisStyle.typeTitle
+                    font.weight: IrisStyle.weight(Font.Bold)
+                    elide: Text.ElideRight
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: modelData !== null
+                    activeFocusOnTab: enabled
+                    Accessible.role: Accessible.Button
+                    Accessible.name: String(modelData?.title ?? "")
+                    onClicked: CornerState.openShow(modelData)
+                    Keys.onReturnPressed: CornerState.openShow(modelData)
+                    Keys.onSpacePressed: CornerState.openShow(modelData)
+                }
+            }
+        }
+    }
     Repeater {
         model: root.shelves
         MediaRow {
