@@ -15,6 +15,7 @@ Rectangle {
     id: root
     property bool narrow: false
     property bool prism: false
+    property bool railVisible: false
     property bool windowed: false
     // [{ id, title, icon, caption? }]: titles untranslated, a caption opens a group.
     property var places: []
@@ -138,10 +139,10 @@ Rectangle {
             model: {
                 const rows = root.navPlaces.map(place => ({ kind: "place", place }))
                 if (CornerWatch.watchlistLoadFailed) rows.push({ kind: "error" })
-                const wanted = Object.keys(CornerWatch.watchlist)
+                const wanted = root.railVisible ? [] : Object.keys(CornerWatch.watchlist)
                 if (wanted.length) rows.push({ kind: "wantedHeader" })
                 for (const key of wanted) rows.push({ kind: "wanted", key })
-                const watching = root.prism ? Object.keys(CornerWatch.progress).filter(key => {
+                const watching = root.prism && !root.railVisible ? Object.keys(CornerWatch.progress).filter(key => {
                     const entry = CornerWatch.progress[key]
                     return entry && entry.show && (CornerWatch.resumeAt(key) > 0 || entry.position === 0)
                 }).sort((a, b) => CornerWatch.progress[b].at - CornerWatch.progress[a].at).slice(0, 5) : []
