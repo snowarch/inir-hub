@@ -57,8 +57,9 @@ MediaPage {
         Layout.fillWidth: true
         text: Translation.tr("Home")
         color: IrisStyle.text
-        font.family: IrisStyle.fontTitle
-        font.pixelSize: IrisStyle.typeTitleLarge
+        font.family: IrisStyle.fontMain
+        font.pixelSize: 28 * IrisStyle.typeScale
+        font.letterSpacing: -0.4
         font.weight: IrisStyle.weight(Font.Bold)
     }
 
@@ -149,7 +150,7 @@ MediaPage {
                 IrisText {
                     text: hero.show ? Translation.tr("Trending now") : Translation.tr("Media Corner")
                     color: root.prism ? IrisStyle.inkOnDark : IrisStyle.identity.green
-                    font.pixelSize: IrisStyle.typeFootnote
+                    font.pixelSize: 13 * IrisStyle.typeScale
                     font.weight: IrisStyle.weight(Font.Bold)
                 }
                 IrisText {
@@ -169,7 +170,7 @@ MediaPage {
                     text: [hero.show?.year, Translation.tr(String(hero.show?.type ?? "")), (hero.show?.genres ?? []).slice(0, 3).map(g => Translation.tr(g)).join(" · "),
                            Number(hero.show?.score ?? 0) > 0 ? "★ " + Number(hero.show.score).toFixed(1) : ""].filter(x => String(x ?? "").length > 0).join("  ·  ")
                     color: root.prism ? Qt.alpha(IrisStyle.inkOnDark, 0.56) : IrisStyle.textSecondary
-                    font.pixelSize: IrisStyle.typeFootnote
+                    font.pixelSize: 12 * IrisStyle.typeScale
                     elide: Text.ElideRight
                 }
                 IrisText {
@@ -268,7 +269,7 @@ MediaPage {
             delegate: Rectangle {
                 required property var modelData
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.round(150 * root.d)
+                Layout.preferredHeight: Math.round(196 * root.d)
                 radius: IrisStyle.radiusCard
                 color: IrisStyle.surfaceHighestOpaque
                 border.width: 1
@@ -280,16 +281,28 @@ MediaPage {
                     fillMode: Image.PreserveAspectCrop
                 }
                 Rectangle { anchors.fill: parent; color: IrisStyle.artVeilHeavy }
-                IrisText {
+                Column {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     anchors.margins: Math.round(18 * root.d)
-                    text: String(modelData?.title ?? root.status)
-                    color: IrisStyle.inkOnDark
-                    font.pixelSize: IrisStyle.typeTitle
-                    font.weight: IrisStyle.weight(Font.Bold)
-                    elide: Text.ElideRight
+                    spacing: Math.round(4 * root.d)
+                    IrisText {
+                        width: parent.width
+                        text: String(modelData?.title ?? root.status)
+                        color: IrisStyle.inkOnDark
+                        font.pixelSize: IrisStyle.typeTitle
+                        font.weight: IrisStyle.weight(Font.Bold)
+                        elide: Text.ElideRight
+                    }
+                    IrisText {
+                        width: parent.width
+                        visible: modelData !== null
+                        text: [modelData?.year, Translation.tr(String(modelData?.type ?? ""))].filter(value => String(value ?? "").length > 0).join("  ·  ")
+                        color: Qt.alpha(IrisStyle.inkOnDark, 0.7)
+                        font.pixelSize: 12 * IrisStyle.typeScale
+                        elide: Text.ElideRight
+                    }
                 }
                 MouseArea {
                     anchors.fill: parent
