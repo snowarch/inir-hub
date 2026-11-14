@@ -59,7 +59,11 @@ Item {
         orientation: Qt.Vertical
         clip: true
         currentIndex: root.currentPage
-        onCurrentIndexChanged: if (currentIndex !== root.currentPage) root.currentPage = currentIndex
+        // Pages arrive while the view is still 0 px tall, and its list makes each new one current: the panel opened on
+        // the last page. Only a swipe moves the page; once every page exists the view goes back to it.
+        onCurrentIndexChanged: if (contentItem.moving && currentIndex !== root.currentPage) root.currentPage = currentIndex
+        onCountChanged: if (count === root.pages)
+            Qt.callLater(() => swipeView.setCurrentIndex(Math.min(root.currentPage, Math.max(0, root.pages - 1))))
 
         Repeater {
             model: root.pages

@@ -72,9 +72,10 @@ Scope {
             anchors.fill: parent
             presented: WaffleState.notificationCenterOpen
             panelRightAligned: true
+            // Escape closes the content by itself: the state follows, or an invisible panel kept the keyboard.
             onClosed: {
-                if (!WaffleState.notificationCenterOpen)
-                    root.panelMapped = false
+                WaffleState.notificationCenterOpen = false
+                root.panelMapped = false
             }
         }
     }
