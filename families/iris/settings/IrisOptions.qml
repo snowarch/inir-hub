@@ -1073,11 +1073,22 @@ QtObject {
     // A row copied with its getters kept. Object.assign read every getter (a Design's choices, its name) inside the
     // registry's own binding, so the registry rebuilt, and Prism remade each of its rows, whenever one of those values
     // moved: 3 s frozen on a Design switch. The getters now run where the row is drawn.
+    // Plain values are assigned (defineProperty on every key of ~1900 rows cost ~50 ms of the first open); only a
+    // getter, or a value over one, is defined.
     function derive(base: var, extra: var): var {
         const out = {}
+        let accessors = null
         for (const source of [base, extra]) {
-            for (const key of Object.getOwnPropertyNames(source))
-                Object.defineProperty(out, key, Object.assign(Object.getOwnPropertyDescriptor(source, key), { configurable: true, enumerable: true }))
+            for (const key of Object.getOwnPropertyNames(source)) {
+                const d = Object.getOwnPropertyDescriptor(source, key)
+                const accessor = d.get !== undefined || d.set !== undefined
+                if (accessor || (accessors !== null && accessors.has(key))) {
+                    d.configurable = true
+                    d.enumerable = true
+                    Object.defineProperty(out, key, d)
+                    if (accessor) { if (accessors === null) accessors = new Set(); accessors.add(key) } else accessors.delete(key)
+                } else out[key] = d.value
+            }
         }
         return out
     }
@@ -2261,13 +2272,28 @@ QtObject {
     readonly property var homeSuggested: root.homeDefault.concat(["background.autoWallpaper.enable", "iris.dock.autoHide", "iris.appearance.motion", "light.night.colorTemperature", "audio.protection.enable"])
     readonly property var homeCandidates: {
         const out = []
+        const areas = new Map()
         const add = (spec, value) => {
-            const area = root.sectionById(String(spec.section ?? ""))
+            const id = String(spec.section ?? "")
+            if (!areas.has(id)) areas.set(id, root.sectionById(id))
+            const area = areas.get(id)
             const label = String(spec.label ?? "")
             const group = String(spec.group ?? "")
-            out.push({ value: value, label: label, area: String(area?.title ?? ""), group: group !== label ? group : "", icon: String(area?.icon ?? "settings"),
+            const title = String(area?.title ?? "")
+            // Words are built when the sheet searches, once per language: six lookups a row for 1500 rows were
+            // paid by every first open of Settings, which only needs the values.
+            let words = null
+            let wordsOf = null
+            out.push({ value: value, label: label, area: title, group: group !== label ? group : "", icon: String(area?.icon ?? "settings"),
                 get tint() { return area?.tint ?? IrisStyle.identity.gray }, daily: root.homeSuggested.includes(value),
-                search: [label, Translation.tr(label), group, Translation.tr(group), String(area?.title ?? ""), Translation.tr(String(area?.title ?? ""))].concat(spec.keywords ?? []).join(" ").toLowerCase() })
+                get search() {
+                    const catalogue = Translation.activeTranslations
+                    if (words === null || wordsOf !== catalogue) {
+                        words = [label, Translation.tr(label), group, Translation.tr(group), title, Translation.tr(title)].concat(spec.keywords ?? []).join(" ").toLowerCase()
+                        wordsOf = catalogue
+                    }
+                    return words
+                } })
         }
         root.dailySwitches.forEach(spec => add(spec, spec.id))
         const seen = new Set()
@@ -2304,9 +2330,14 @@ QtObject {
             if (spec.path !== undefined) known.add(spec.path)
             look.push(root.placed(root.derive({ section: root.sectionOf(spec) }, spec)))
         }
+        const bySection = Object.create(null)
+        for (const spec of rows.concat(look)) {
+            const list = bySection[spec.section]
+            if (list) list.push(spec); else bySection[spec.section] = [spec]
+        }
         const out = []
         for (const section of root.sectionOrder) {
-            const own = rows.filter(spec => spec.section === section).concat(look.filter(spec => spec.section === section))
+            const own = bySection[section] ?? []
             const order = root.groupOrder[section] ?? []
             const rank = spec => { const at = order.indexOf(String(spec.group ?? "")); return at < 0 ? order.length : at }
             const lookRank = spec => spec.trail ? 2 : String(spec.path ?? "").startsWith("iris.appearance.surfaces.") ? 1 : 0
