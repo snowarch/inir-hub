@@ -34,24 +34,30 @@ CornerBody {
 
     // Hold a small set of decoded posters while this view is alive. Qt shares the
     // decoded image for identical URL and size; banners never enter this cache.
-    property var recentPosters: []
+    readonly property int cachedPosterCount: posterModel.count
     function rememberPoster(url: string): void {
         if (!url || !CornerState.open) return
-        const recent = root.recentPosters.filter(item => item !== url)
-        recent.push(url)
-        root.recentPosters = recent.slice(-24)
+        for (let i = 0; i < posterModel.count; i++) {
+            if (posterModel.get(i).url === url) {
+                if (i < posterModel.count - 1) posterModel.move(i, posterModel.count - 1, 1)
+                return
+            }
+        }
+        if (posterModel.count >= 24) posterModel.remove(0)
+        posterModel.append({ url })
     }
     Connections {
         target: CornerState
-        function onOpenChanged(): void { if (!CornerState.open) root.recentPosters = [] }
+        function onOpenChanged(): void { if (!CornerState.open) posterModel.clear() }
     }
+    ListModel { id: posterModel }
     Item {
         visible: false
         Repeater {
-            model: root.recentPosters
+            model: posterModel
             Image {
-                required property string modelData
-                source: modelData
+                required property string url
+                source: url
                 sourceSize: Qt.size(264, 396)
                 asynchronous: true
                 cache: true

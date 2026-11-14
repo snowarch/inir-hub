@@ -170,7 +170,7 @@ Singleton {
         if (stream.referer) args.push("--referrer=" + stream.referer)
         if (resume > 0) args.push("--start=" + Math.floor(resume))
         args.push("--", stream.url)
-        root._current = { stream, key, title: root.title }
+        root._current = { stream, key, title: root.title, show: { id: root.show.id, kind: root.show.kind, title: root.title, type: root.show.type ?? "" }, episode: root.episode }
         root._startedAt = resume
         root._stopping = false
         root.position = 0
@@ -231,10 +231,16 @@ Singleton {
     property var progress: ({})
     function _keep(): void {
         if (!root._current || root.position <= 0) return
-        root.progress = Object.assign({}, root.progress, { [root._current.key]: { position: root.position, duration: root.duration, at: Date.now() } })
+        root.progress = Object.assign({}, root.progress, { [root._current.key]: { position: root.position, duration: root.duration, at: Date.now(), show: root._current.show, episode: root._current.episode } })
         progressFile.setText(JSON.stringify(root.progress))
     }
     // Where to pick it up: a little before where it stopped, unless it was barely started or is finished.
+    function forget(key: string): void {
+        const next = Object.assign({}, root.progress)
+        delete next[key]
+        root.progress = next
+        progressFile.setText(JSON.stringify(next))
+    }
     function resumeAt(key: string): real {
         const kept = root.progress[key]
         return kept && kept.position > 30 && !root.isSeen(key) ? kept.position - 5 : 0
