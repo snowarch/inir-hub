@@ -9,3 +9,6 @@ MediaRow 1.0 MediaRow.qml
 MediaSearch 1.0 MediaSearch.qml
 MediaTiles 1.0 MediaTiles.qml
 MovieData 1.0 MovieData.qml
+MediaEpisodes 1.0 MediaEpisodes.qml
+MediaSources 1.0 MediaSources.qml
+MediaWatchSheet 1.0 MediaWatchSheet.qml
