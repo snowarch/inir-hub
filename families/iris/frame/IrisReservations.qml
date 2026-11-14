@@ -50,8 +50,6 @@ Variants {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusionMode: ExclusionMode.Normal
             exclusiveZone: Math.max(IrisFrame.reserve(stub.edge, screenScope.chassisPresent, screenScope.outputName), screenScope.sidebarDepth(stub.edge))
-            onExclusiveZoneChanged: IrisFrame.keep(screenScope.outputName, stub.edge, stub.exclusiveZone)
-            Component.onCompleted: IrisFrame.keep(screenScope.outputName, stub.edge, stub.exclusiveZone)
             // One edge only: opposite-edge anchors lose the exclusive zone.
             anchors {
                 top: stub.edge === "top"

@@ -460,23 +460,6 @@ QtObject {
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockDepth)
         return Math.round(root.band + inner)
     }
-    // What each screen's edges keep, as the reservations ask the compositor ("<screen>:<edge>" -> px).
-    property var kept: ({})
-    function keep(screen: string, edge: string, px: real): void {
-        const key = screen + ":" + edge
-        if (root.kept[key] === px) return
-        const next = Object.assign({}, root.kept)
-        next[key] = px
-        root.kept = next
-    }
-    // Past the wall the frame draws on an edge of one screen, how far it keeps that edge only for its pieces, with
-    // nothing between them (no Island, Dock or pinned sidebar there). What lives along an edge (a component) reaches
-    // over it to the wall the person sees instead of stopping at an invisible line. Zero when anything else holds it.
-    function laneOn(edge: string, screen: string): real {
-        if (edge === root.islandEdge || edge === root.dockEdge || !root.piecesReserve || !root.piecesOn(edge, screen)) return 0
-        const held = Number(root.kept[screen + ":" + edge] ?? 0)
-        return Math.abs(held - root.reserve(edge, true, screen)) < 0.5 ? Math.max(0, held - root.wallOn(edge)) : 0
-    }
     // How far the frame holds an edge: on one screen, or wherever bubbles stand (`inset`, for what has no screen).
     function inset(edge: string): real { return root.holdOf(edge, root.piecesAttached && root.pieceEdges.includes(edge)) }
     function insetOn(edge: string, screen: string): real { return root.holdOf(edge, root.piecesOn(edge, screen)) }

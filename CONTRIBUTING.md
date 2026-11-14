@@ -118,7 +118,7 @@ It reads what your branch changed since `origin/main` (`--base REF` for another 
 | No change to `families/` (maintainers only). | The families are the desktop every install gets: what you add to one is a component worn with it. |
 | A new item's id is free in the whole hub, and not `common`, `shared` or `background`. | People install by id, and a plugin lands at `modules/<id>`. |
 | A plugin's `"provides"` is `modules/<id>`; every file `plugin.json` names in `"parts"` exists; `"families"` lists family ids. | The base loads parts by those names; a missing one is a surface that silently never appears. |
-| Outside a family, no `Config.setNestedValue(…)` or `Config.options.x = …`; a setting their Settings shows is asked for through `ShellSettings.request(…)` with the `settings` permission. | The person's settings are theirs: removing your item must leave them as they were, and every change it asks for is one they can take back. |
+| Outside a family, no `Config.setNestedValue(…)` or `Config.options.x = …`. | The person's settings are theirs: removing your item must leave them as they were. |
 | Outside a family, every `IpcHandler` target starts with the item's id. | So it can never answer for the shell or another plugin. |
 | The item validates (`inir hub validate <folder>`): its files, listing, preview and permissions. | What the Hub shows and installs comes from these. |
 | A changed item raises its `version`, in `hub.json` and the native file alike. | Installed copies update only when the version moves, and a published version never changes its contents. |
@@ -325,7 +325,6 @@ Quickshell reads those instead of scanning your plugin at every start, and trust
 | `network` | talks to the internet (`XMLHttpRequest`, `curl`, `fetch`, `WebSocket`) |
 | `files` | reads or writes files outside its folder (`FileView`, `FolderListModel`; in a script, `>` to a file, `cp`, `mv`, `rm`, `ln`, `tee`, `touch`, `mkdir`, `sed -i`, Python's `open(..., "w")`, `os` and `shutil`) |
 | `inject` | (web apps) runs scripts inside the site it opens |
-| `settings` | changes the person's settings through the shell's door (`ShellSettings.request({key: value}, "<id>")`): only rows their Settings shows, only values those rows allow, each change with an Undo |
 
 CI greps for these. Code that does something its `hub.json` does not declare fails; a permission nothing uses is a
 warning. The Hub shows them on the card and before install.
