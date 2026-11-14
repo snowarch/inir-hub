@@ -2450,5 +2450,9 @@
   "1 widget on %1": "1 widget sur %1",
   "%1 widgets on %2": "%1 widgets sur %2",
   "The bubbles tuck into their edges and come back when you rest the pointer there.": "Les bulles se rangent dans leurs bords et reviennent quand vous posez le pointeur à cet endroit.",
-  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "Avec le masquage automatique, les bulles restent visibles sur les espaces de travail sans fenêtre."
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "Avec le masquage automatique, les bulles restent visibles sur les espaces de travail sans fenêtre.",
+  "Beside the Island": "À côté de l'Île",
+  "Every bubble": "Toutes les bulles",
+  "Sound and media": "Son et médias",
+  "Time and apps": "Heure et apps"
 }

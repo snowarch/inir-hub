@@ -2450,5 +2450,9 @@
   "1 widget on %1": "%1 上有 1 个小部件",
   "%1 widgets on %2": "%2 上有 %1 个小部件",
   "The bubbles tuck into their edges and come back when you rest the pointer there.": "气泡会收进各自的边缘，把指针停在那里时又会出现。",
-  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "开启自动隐藏时，在没有窗口的工作区中气泡保持可见。"
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "开启自动隐藏时，在没有窗口的工作区中气泡保持可见。",
+  "Beside the Island": "岛旁",
+  "Every bubble": "所有气泡",
+  "Sound and media": "声音与媒体",
+  "Time and apps": "时间与应用"
 }

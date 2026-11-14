@@ -2450,5 +2450,9 @@
   "1 widget on %1": "1 widget on %1",
   "%1 widgets on %2": "%1 widgets on %2",
   "The bubbles tuck into their edges and come back when you rest the pointer there.": "The bubbles tuck into their edges and come back when you rest the pointer there.",
-  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "When auto-hide is on, keep the bubbles visible on workspaces with no windows."
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "When auto-hide is on, keep the bubbles visible on workspaces with no windows.",
+  "Beside the Island": "Beside the Island",
+  "Every bubble": "Every bubble",
+  "Sound and media": "Sound and media",
+  "Time and apps": "Time and apps"
 }

@@ -2450,5 +2450,9 @@
   "1 widget on %1": "%1의 위젯 1개",
   "%1 widgets on %2": "%2의 위젯 %1개",
   "The bubbles tuck into their edges and come back when you rest the pointer there.": "버블이 가장자리로 숨었다가 포인터를 그곳에 두면 다시 나타납니다.",
-  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "자동 숨기기가 켜져 있으면 창이 없는 작업 공간에서는 버블이 계속 보입니다."
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "자동 숨기기가 켜져 있으면 창이 없는 작업 공간에서는 버블이 계속 보입니다.",
+  "Beside the Island": "아일랜드 옆",
+  "Every bubble": "모든 버블",
+  "Sound and media": "사운드 및 미디어",
+  "Time and apps": "시간 및 앱"
 }

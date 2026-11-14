@@ -86,8 +86,28 @@ Item {
     }
     readonly property int partIndex: Math.max(0, root.parts.findIndex(part => part.some(section => section.title === root.group)))
     readonly property var shownSections: root.parts[root.partIndex] ?? []
-    // The index in the sidebar: every group, with a dot where something differs from the factory.
-    readonly property var groups: root.sections.map(section => ({ title: section.title, changed: section.rows.some(row => PrismModel.changed(row)) }))
+    // The index in the sidebar: every group, with a dot where something differs from the factory. An area that names
+    // bands (Bubbles' ~38 groups) is indexed by band, as Classic and Folio show it; a band opens at its first group.
+    readonly property var bands: PrismModel.chapters[root.page.pageId] ? [] : (IrisOptions.groupBands[root.page.pageId] ?? [])
+    function bandOf(title: string): string {
+        if (root.bands.length === 0) return title
+        const band = root.bands.find(band => band.groups.includes(title)) ?? root.bands.find(band => band.groups.length === 0)
+        return band ? String(band.title) : title
+    }
+    readonly property var groups: {
+        const out = []
+        for (const section of root.sections) {
+            const title = root.bandOf(section.title)
+            const changed = section.rows.some(row => PrismModel.changed(row))
+            const entry = out.find(entry => entry.title === title)
+            if (entry) entry.changed = entry.changed || changed
+            else out.push({ title: title, changed: changed })
+        }
+        return out
+    }
+    function firstOf(entry: string): string {
+        return String(root.sections.find(section => root.bandOf(section.title) === entry)?.title ?? entry)
+    }
     // Where the reader stands: the group whose head has passed a third of the way down the page.
     property string spyGroup: ""
     // The group a press asked for is where the reader stands until the page is scrolled by hand: a short group near
@@ -271,13 +291,13 @@ Item {
             corner: body.radius
             windowed: root.windowed
             groups: root.sections.length > 1 ? root.groups : []
-            currentGroup: root.currentGroup
+            currentGroup: root.bandOf(root.currentGroup)
             onCloseRequested: root.closeRequested()
             onMinimizeRequested: root.minimizeRequested()
             onGrowRequested: root.growRequested()
             onSwitchHost: root.switchHost()
             onReach: row => root.reach(row)
-            onPickGroup: title => root.showGroup(title)
+            onPickGroup: title => root.showGroup(root.firstOf(title))
             onSearchEntered: root.takeFirstHit()
         }
 

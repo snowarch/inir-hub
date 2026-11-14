@@ -2223,16 +2223,31 @@ QtObject {
     // The order a section's groups are listed in: what someone came to change first, the rest as they were declared.
     // Style's tiles in bands under a name (his 11-02: "no se sabe qué se está cambiando"): what the colour is, what the
     // bodies are made of, their shape and type, and what few people touch. A group no band names goes in the last.
-    readonly property var groupBands: ({
-        appearance: [
-            // The three picks that change everything at once, one short row: a preset, the Design, the look's dialect.
-            { title: "Whole look", glyph: "auto_awesome_mosaic", groups: ["Presets", "Design", "Look"] },
-            { title: "Colour", glyph: "palette", groups: ["Scheme", "Accent", "Highlight", "Signal", "Colour theme", "Day and night", "App colours", "Wallpaper tint", "Dark look", "Ink look", "Light look"] },
-            { title: "Material", glyph: "layers", groups: ["Material", "Glass", "Texture", "Light", "Edges"] },
-            { title: "Shape and type", glyph: "rounded_corner", groups: ["Shape", "Frame", "Text", "Faces", "Icons"] },
-            { title: "More", glyph: "tune", groups: [] }
-        ]
-    })
+    // Bubbles' bubbles under what they are (each bubble its own tile, ~38 of them), named by id so a renamed one
+    // never falls out of its band.
+    readonly property var groupBands: {
+        const of = ids => ids.map(id => IrisPieces.labelOf(id))
+        return {
+            bubbles: [
+                { title: "Beside the Island", glyph: "bubble_chart", groups: IrisPieces.slots.map(piece => piece.label) },
+                { title: "Every bubble", glyph: "tune", groups: ["Size", "Behaviour", "Visibility", "On the contour", "Floating"] },
+                { title: "Status", glyph: "monitor_heart", groups: of(["weather", "notifications", "battery", "network", "bluetooth", "vpn", "vitals", "updates"]) },
+                { title: "Quick actions", glyph: "bolt", groups: of(["controls", "focus", "awake", "nightLight", "capture", "keyboard", "wallpaper", "power"]) },
+                { title: "Sound and media", glyph: "music_note", groups: of(["sound", "mic", "media", "visualizer"]) },
+                { title: "Time and apps", glyph: "schedule", groups: of(["clock", "calendar", "tools", "tray", "workspaces"]) },
+                { title: "Cards", glyph: "web_asset", groups: ["Opening bodies", "Cards", "Card contents", "Joining"] },
+                { title: "More", glyph: "more_horiz", groups: [] }
+            ],
+            appearance: [
+                // The three picks that change everything at once, one short row: a preset, the Design, the look's dialect.
+                { title: "Whole look", glyph: "auto_awesome_mosaic", groups: ["Presets", "Design", "Look"] },
+                { title: "Colour", glyph: "palette", groups: ["Scheme", "Accent", "Highlight", "Signal", "Colour theme", "Day and night", "App colours", "Wallpaper tint", "Dark look", "Ink look", "Light look"] },
+                { title: "Material", glyph: "layers", groups: ["Material", "Glass", "Texture", "Light", "Edges"] },
+                { title: "Shape and type", glyph: "rounded_corner", groups: ["Shape", "Frame", "Text", "Faces", "Icons"] },
+                { title: "More", glyph: "tune", groups: [] }
+            ]
+        }
+    }
     readonly property var groupOrder: ({
         controlCenter: ["Control Center", "Hotspot", "VPN"],
         general: ["Every day", "Language & time", "Apps & login", "Shell", "Settings window"],
@@ -2240,9 +2255,8 @@ QtObject {
             "Dark look", "Ink look", "Light look", "Design", "Material", "Glass", "Texture", "Light", "Edges", "Shape",
             "Frame", "Text", "Faces", "Icons", "Menus", "Badges", "Customize", "Previews", "Adaptive"],
         bar: ["Design and modes", "Face", "Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Interaction", "Visibility", "Live activities", "Notices", "Connections"],
-        // The bubbles beside the Island, what every bubble shares, then each bubble under its own name, then their cards.
-        bubbles: IrisPieces.slots.map(piece => piece.label).concat(["Size", "Behaviour", "Visibility", "On the contour", "Floating"],
-            IrisPieces.extras.map(piece => piece.label), ["Opening bodies", "Cards", "Card contents", "Joining"]),
+        // In the order of its bands: the bubbles beside the Island, what every bubble shares, each bubble, their cards.
+        bubbles: [].concat(...root.groupBands.bubbles.map(band => band.groups)),
         dock: ["Notch", "Look", "Icons", "Visibility"],
         desktop: ["Widgets", "Desktop menu"],
         // The screen itself comes first: its picture, then what it runs at, then its colour.

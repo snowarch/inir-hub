@@ -2450,5 +2450,9 @@
   "1 widget on %1": "%1 पर 1 विजेट",
   "%1 widgets on %2": "%2 पर %1 विजेट",
   "The bubbles tuck into their edges and come back when you rest the pointer there.": "बबल अपने किनारों में छिप जाते हैं और वहाँ पॉइंटर रखने पर वापस आ जाते हैं।",
-  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "स्वतः छिपाना चालू होने पर, बिना विंडो वाले वर्कस्पेस पर बबल दिखते रहते हैं।"
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "स्वतः छिपाना चालू होने पर, बिना विंडो वाले वर्कस्पेस पर बबल दिखते रहते हैं।",
+  "Beside the Island": "आइलैंड के पास",
+  "Every bubble": "हर बबल",
+  "Sound and media": "ध्वनि और मीडिया",
+  "Time and apps": "समय और ऐप्स"
 }

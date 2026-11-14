@@ -2450,5 +2450,9 @@
   "1 widget on %1": "%1 üzerinde 1 widget",
   "%1 widgets on %2": "%2 üzerinde %1 widget",
   "The bubbles tuck into their edges and come back when you rest the pointer there.": "Baloncuklar kenarlarına çekilir ve imleci oraya getirdiğinizde geri gelir.",
-  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "Otomatik gizleme açıkken baloncuklar penceresiz çalışma alanlarında görünür kalır."
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "Otomatik gizleme açıkken baloncuklar penceresiz çalışma alanlarında görünür kalır.",
+  "Beside the Island": "Adanın yanında",
+  "Every bubble": "Her balon",
+  "Sound and media": "Ses ve medya",
+  "Time and apps": "Saat ve uygulamalar"
 }

@@ -2450,5 +2450,9 @@
   "1 widget on %1": "Виджетов на %1: 1",
   "%1 widgets on %2": "Виджетов на %2: %1",
   "The bubbles tuck into their edges and come back when you rest the pointer there.": "Пузыри прячутся за свои края и возвращаются, когда вы задерживаете там указатель.",
-  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "При автоскрытии пузыри остаются видимыми на рабочих столах без окон."
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "При автоскрытии пузыри остаются видимыми на рабочих столах без окон.",
+  "Beside the Island": "Рядом с Островом",
+  "Every bubble": "Все пузыри",
+  "Sound and media": "Звук и медиа",
+  "Time and apps": "Время и приложения"
 }

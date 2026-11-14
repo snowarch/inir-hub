@@ -2450,5 +2450,9 @@
   "1 widget on %1": "ווידג'ט אחד ב-%1",
   "%1 widgets on %2": "%1 ווידג'טים ב-%2",
   "The bubbles tuck into their edges and come back when you rest the pointer there.": "הבועות נאספות אל הקצוות שלהן וחוזרות כשמניחים שם את הסמן.",
-  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "כשההסתרה האוטומטית פעילה, הבועות נשארות גלויות בסביבות עבודה ללא חלונות."
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "כשההסתרה האוטומטית פעילה, הבועות נשארות גלויות בסביבות עבודה ללא חלונות.",
+  "Beside the Island": "ליד האי",
+  "Every bubble": "כל בועה",
+  "Sound and media": "צליל ומדיה",
+  "Time and apps": "זמן ואפליקציות"
 }
