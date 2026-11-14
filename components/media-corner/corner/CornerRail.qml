@@ -70,7 +70,7 @@ Rectangle {
             visible: CornerWatch.phase === "playing" || root.recent !== null
             Layout.fillWidth: true
             implicitHeight: card.implicitHeight + Math.round(32 * root.d)
-            radius: IrisStyle.radiusCard
+            radius: Math.round(28 * root.d)
             color: IrisStyle.surfaceHighestOpaque
             border.width: 1
             border.color: Qt.alpha(IrisStyle.text, 0.08)

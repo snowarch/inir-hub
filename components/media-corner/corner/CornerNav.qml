@@ -304,7 +304,7 @@ Rectangle {
                 role: IrisText.Name
                 text: Translation.tr(row.modelData.title)
                 color: row.selected ? (root.prism ? (row.modelData.child ? IrisStyle.text : root.accentInk) : IrisStyle.surfaceOpaque) : (row.modelData.child ? IrisStyle.textSecondary : IrisStyle.text)
-                font.pixelSize: row.modelData.child ? IrisStyle.typeFootnote : IrisStyle.typeLabel
+                font.pixelSize: root.prism ? 13 * IrisStyle.typeScale : row.modelData.child ? IrisStyle.typeFootnote : IrisStyle.typeLabel
                 font.weight: IrisStyle.weight(row.selected ? Font.DemiBold : row.modelData.child ? Font.Normal : Font.DemiBold)
                 elide: Text.ElideRight
             }
