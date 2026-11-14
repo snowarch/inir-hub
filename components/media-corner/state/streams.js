@@ -16,16 +16,18 @@ function hostOf(url) {
 
 // { name, types, prefixes } of a manifest that lists streams; null when it lists none.
 function manifestInfo(manifest) {
-    const resources = Array.isArray(manifest?.resources) ? manifest.resources : []
+    // Limit work and retained metadata from untrusted add-on responses.
+    const resources = Array.isArray(manifest?.resources) ? manifest.resources.slice(0, 128) : []
     const stream = resources.find(r => r === "stream" || r?.name === "stream")
     const subtitle = resources.find(r => r === "subtitles" || r?.name === "subtitles")
     if (stream === undefined && subtitle === undefined) return null
     const resource = stream ?? subtitle
     const types = Array.isArray(resource?.types) ? resource.types : (Array.isArray(manifest?.types) ? manifest.types : [])
     const prefixes = Array.isArray(resource?.idPrefixes) ? resource.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : [])
-    const resourceTypes = r => (Array.isArray(r?.types) ? r.types : (Array.isArray(manifest?.types) ? manifest.types : [])).map(String)
-    const resourcePrefixes = r => (Array.isArray(r?.idPrefixes) ? r.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : [])).map(String)
-    return { name: String(manifest.name ?? "").slice(0, 40), types: types.map(String), prefixes: prefixes.map(String),
+    const limited = values => values.slice(0, 128).map(value => String(value).slice(0, 256))
+    const resourceTypes = r => limited(Array.isArray(r?.types) ? r.types : (Array.isArray(manifest?.types) ? manifest.types : []))
+    const resourcePrefixes = r => limited(Array.isArray(r?.idPrefixes) ? r.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : []))
+    return { name: String(manifest.name ?? "").slice(0, 40), types: limited(types), prefixes: limited(prefixes),
              streamTypes: resourceTypes(stream), streamPrefixes: resourcePrefixes(stream),
              subtitleTypes: resourceTypes(subtitle), subtitlePrefixes: resourcePrefixes(subtitle),
              hasStreams: stream !== undefined, hasSubtitles: subtitle !== undefined }
@@ -41,6 +43,7 @@ function httpsUrl(value) {
 // Provider-returned media must not address local networks by literal address.
 // Hostname resolution and redirects cannot be checked here.
 function mediaUrl(value) {
+    if (String(value || "").length > 8192) return false
     if (!httpsUrl(value)) return false
     const authority = String(value).slice(8).split(/[/?#]/)[0].toLowerCase()
     const host = authority.startsWith("[") ? authority.slice(1, authority.indexOf("]")) : authority.split(":")[0]
@@ -70,7 +73,7 @@ function mediaUrl(value) {
 
 function subtitlesFrom(body) {
     const result = []
-    for (const entry of Array.isArray(body?.subtitles) ? body.subtitles : []) {
+    for (const entry of Array.isArray(body?.subtitles) ? body.subtitles.slice(0, 256) : []) {
         const url = String(entry?.url ?? ""), lang = String(entry?.lang ?? "").toLowerCase()
         if (!mediaUrl(url) || !/^[a-z]{2,3}$/.test(lang)) continue
         result.push({ url, lang, name: String(entry.label ?? lang).slice(0, 80) })
@@ -81,7 +84,7 @@ function subtitlesFrom(body) {
 // [{ name, url, referer }] an add-on answers for one video.
 function streamsFrom(body) {
     const out = []
-    for (const item of Array.isArray(body?.streams) ? body.streams : []) {
+    for (const item of Array.isArray(body?.streams) ? body.streams.slice(0, 256) : []) {
         const url = String(item?.url ?? "")
         if (!mediaUrl(url)) continue
         const headers = item.behaviorHints?.proxyHeaders?.request ?? {}
