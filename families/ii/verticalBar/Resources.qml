@@ -12,7 +12,7 @@ MouseArea {
     implicitWidth: columnLayout.implicitWidth
     hoverEnabled: true
 
-    property QtObject resourceMonitor: ResourceUsageMonitor { target: root }
+    property QtObject resourceMonitor: ResourceUsageMonitor { target: root; pausesUnderFullscreen: true }
 
     ColumnLayout {
         id: columnLayout

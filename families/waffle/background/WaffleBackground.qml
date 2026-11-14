@@ -152,9 +152,10 @@ Variants {
                 panelRoot.beginBlurSuppression(panelRoot._wallpaperTransitionDurationMs)
         }
 
+        // Settled there (GameMode): the window grows to fullscreen over the wallpaper, never over an empty backdrop.
         property bool hasFullscreenWindow: {
             if (CompositorService.isNiri) {
-                return GameMode.hasFullscreenOnOutput(modelData?.name ?? "")
+                return GameMode.fullscreenSettledOn(modelData?.name ?? "")
             }
             return false
         }

@@ -9,7 +9,7 @@ BarWidgetSwitcherArea {
     property bool alwaysShowAllResources: false
     horizontalExtraPadding: 12
 
-    property QtObject resourceMonitor: ResourceUsageMonitor { target: root }
+    property QtObject resourceMonitor: ResourceUsageMonitor { target: root; pausesUnderFullscreen: true }
 
     readonly property bool clickForDetails: Config.options?.material?.bar?.m3?.tooltips?.clickToShow ?? false
     hoverEnabled: true

@@ -12,7 +12,7 @@ MouseArea {
     implicitHeight: Appearance.sizes.barHeight
     hoverEnabled: true
 
-    property QtObject resourceMonitor: ResourceUsageMonitor { target: root }
+    property QtObject resourceMonitor: ResourceUsageMonitor { target: root; pausesUnderFullscreen: true }
 
     RowLayout {
         id: rowLayout

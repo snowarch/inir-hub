@@ -1201,7 +1201,7 @@ Item {
         }
     }
 
-    ResourceUsageMonitor { target: root; active: root.kind === "vitals" }
+    ResourceUsageMonitor { target: root; active: root.kind === "vitals"; pausesUnderFullscreen: true }
 
     Accessible.role: Accessible.Button
     Accessible.name: root.kind === "controls" ? Translation.tr("Quick controls")
