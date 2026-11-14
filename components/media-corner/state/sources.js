@@ -3,8 +3,9 @@
 // Pure source data operations. Persistence and network requests live in the caller.
 function httpUrl(value) {
     const text = String(value || "")
-    return /^https?:\/\/[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?::[0-9]{1,5})?(?:[/?#][^\s]*)?$/i.test(text)
-        && !/[\x00-\x20\\]/.test(text)
+    const match = text.match(/^https?:\/\/(?:[^@\s/?#]+@)?(?:[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?|\[[0-9a-f:]+\])(?::([0-9]{1,5}))?(?:[/?#][^\s]*)?$/i)
+    return Boolean(match) && (!match[1] || Number(match[1]) <= 65535)
+        && !/[\x00-\x20\\]/.test(text) && !/%(?![0-9a-f]{2})/i.test(text)
 }
 
 function webUrl(template, title) {

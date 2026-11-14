@@ -28,7 +28,8 @@ CornerBody {
         { id: "movie:series", title: "Series", icon: "tv" },
         { id: "movie:top", title: "Top films and series", icon: "star" },
         { id: "movie:years", title: "By year", icon: "calendar_month" },
-        { id: "movie:genres", title: "Film and series genres", icon: "category" }
+        { id: "movie:genres", title: "Film and series genres", icon: "category" },
+        { id: "sources", title: "Sources", icon: "extension", caption: "Watching" }
     ]
 
     AnimeData { id: animeData }
@@ -105,7 +106,7 @@ CornerBody {
         onShownChanged: if (shown) seen = true
         Component.onCompleted: if (shown) seen = true
         active: seen
-        visible: shown && CornerState.show === null
+        visible: shown && CornerState.show === null && !CornerState.sheet
         anchors.fill: parent
         anchors.rightMargin: root.closeRoom
     }
@@ -146,13 +147,14 @@ CornerBody {
             onPicked: name => CornerState.pick(root.page.slice(0, 6) + "genre:" + name)
         }
     }
+    Page { shown: root.page === "sources"; sourceComponent: MediaSources {} }
     Loader {
         property bool seen: false
         readonly property bool shown: CornerState.show !== null
         onShownChanged: if (shown) seen = true
         Component.onCompleted: if (shown) seen = true
         active: seen
-        visible: shown
+        visible: shown && !CornerState.sheet
         anchors.fill: parent
         anchors.rightMargin: root.closeRoom
         sourceComponent: MediaDetail {
@@ -160,6 +162,15 @@ CornerBody {
             anime: animeData
             movies: movieData
             // A link opens in the browser: the overlay gets out of its way. A window sits beside it.
+            onFollowed: if (!root.windowed) CornerState.open = false
+        }
+    }
+    Loader {
+        active: CornerState.sheet
+        z: 5
+        anchors.fill: parent
+        anchors.rightMargin: root.closeRoom
+        sourceComponent: MediaWatchSheet {
             onFollowed: if (!root.windowed) CornerState.open = false
         }
     }

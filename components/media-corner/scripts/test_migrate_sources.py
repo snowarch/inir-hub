@@ -22,6 +22,22 @@ class MigrationTest(unittest.TestCase):
             self.assertEqual(migrate(path)["status"], "current")
             self.assertEqual(len(list(path.parent.glob("media-corner.json.pre-sources-*"))), 1)
 
+    def test_missing_sources_is_created(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "media-corner.json"
+            path.write_text('{"windowed":true}')
+            self.assertEqual(migrate(path), {"status": "migrated", "count": 0})
+            data = json.loads(path.read_text())
+            self.assertTrue(data["windowed"])
+            self.assertEqual(json.loads(data["sources"])["sources"], [])
+
+    def test_absent_file(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "inir" / "plugins" / "media-corner.json"
+            self.assertEqual(migrate(path), {"status": "migrated", "count": 0})
+            self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(migrate(path)["status"], "current")
+
     def test_unknown_keeps_original(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "media-corner.json"

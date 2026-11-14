@@ -4,44 +4,42 @@ import json
 import os
 from pathlib import Path
 import sys
-import tempfile
+import signal
 from datetime import datetime, timezone
 
 
 def migrate(path):
-    if not path.exists():
-        return {"status": "absent"}
-    original = path.read_bytes()
-    options = json.loads(original)
+    original = path.read_bytes() if path.exists() else None
+    options = json.loads(original) if original is not None else {}
     if not isinstance(options, dict):
         raise ValueError("invalid options")
-    if "sources" not in options:
-        return {"status": "absent"}
-    value = options["sources"]
+    value = options.get("sources", [])
     value = json.loads(value) if isinstance(value, str) else value
     if isinstance(value, dict) and value.get("schemaVersion") == 1 and isinstance(value.get("sources"), list):
         return {"status": "current", "count": len(value["sources"])}
     if not isinstance(value, list):
         raise ValueError("unrecognized sources format")
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-    backup = path.with_name("media-corner.json.pre-sources-" + stamp)
-    with backup.open("xb") as destination:
-        os.fchmod(destination.fileno(), 0o600)
-        destination.write(original)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if original is not None:
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        backup = path.with_name("media-corner.json.pre-sources-" + stamp)
+        with backup.open("xb") as destination:
+            os.fchmod(destination.fileno(), 0o600)
+            destination.write(original)
     options["sources"] = json.dumps({"schemaVersion": 1, "sources": value}, ensure_ascii=False)
-    temp = None
+    temp = path.with_name("media-corner-migration.tmp")
+    created = False
     try:
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
-                                         prefix="media-corner-", delete=False) as target:
-            temp = Path(target.name)
-            os.fchmod(target.fileno(), 0o600)
+        fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        created = True
+        with os.fdopen(fd, "w", encoding="utf-8") as target:
             json.dump(options, target, ensure_ascii=False, indent=2)
             target.write("\n")
-        if path.read_bytes() != original:
+        if (path.read_bytes() if path.exists() else None) != original:
             raise ValueError("options changed during migration")
         os.replace(temp, path)
     finally:
-        if temp and temp.exists():
+        if created and temp.exists():
             temp.unlink()
     return {"status": "migrated", "count": len(value)}
 
@@ -52,6 +50,9 @@ def main():
 
 
 if __name__ == "__main__":
+    def stop(_signum, _frame):
+        raise SystemExit(1)
+    signal.signal(signal.SIGTERM, stop)
     try:
         main()
     except (OSError, ValueError, UnicodeError) as error:

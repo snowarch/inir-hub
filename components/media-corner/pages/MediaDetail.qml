@@ -6,6 +6,7 @@ import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
 import "../state"
+import "../state/streams.js" as Streams
 
 // One title in full, over the page it was opened from: banner, what it is about, the facts, where it streams
 // officially and what to see next. An anime comes from AniList, a film or series from Cinemeta.
@@ -208,6 +209,33 @@ MediaPage {
         }
     }
 
+    // Watch: in the person's sources, in mpv. One button for what has one video; a show lists its episodes further down.
+    readonly property bool film: root.isAnime ? (root.s.type === "Movie" || Number(root.s.episodes) === 1) : root.s.kind !== "series"
+    readonly property bool playingThis: CornerWatch.busy && CornerWatch.show?.id === root.show?.id
+    RowLayout {
+        Layout.fillWidth: true
+        visible: root.full !== null && (root.film || root.playingThis)
+        spacing: Math.round(12 * root.d)
+        IrisButton {
+            visible: root.film
+            emphasized: true
+            text: CornerWatch.resumeAt(Streams.watchKey(root.s, root.isAnime ? { episode: 1 } : null)) > 0 ? Translation.tr("Continue") : Translation.tr("Watch")
+            onClicked: CornerWatch.begin(Object.assign({}, root.s, { film: root.film }), root.isAnime ? { episode: 1 } : null)
+        }
+        IrisText {
+            Layout.fillWidth: true
+            visible: root.playingThis
+            text: CornerWatch.phase === "playing" ? Translation.tr("Playing in mpv, %1 of %2").arg(Streams.clock(CornerWatch.position)).arg(Streams.clock(CornerWatch.duration)) : Translation.tr("Opening mpv…")
+            color: IrisStyle.textSecondary
+        }
+        IrisButton {
+            visible: root.playingThis
+            quiet: true
+            text: Translation.tr("Stop")
+            onClicked: CornerWatch.stop()
+        }
+    }
+
     RowLayout {
         Layout.fillWidth: true
         visible: root.failed.length > 0 || root.asking
@@ -285,6 +313,9 @@ MediaPage {
         onClicked: root.readMore = !root.readMore
     }
 
+    MediaEpisodes {
+        show: root.film || root.full === null ? null : root.s
+    }
     MediaRow {
         visible: root.isAnime && items.length > 0
         store: root.anime
