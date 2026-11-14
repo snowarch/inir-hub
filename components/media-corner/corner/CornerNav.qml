@@ -9,8 +9,7 @@ import qs.modules.iris.components
 import "../state"
 import "reveal.js" as Reveal
 
-// The Corner's places: the search plate, a glyph and a name for each, the open one an inverted capsule, and at the foot
-// the key that moves it between the desktop and a window. In a narrow window the rows are taller, to push into.
+// The Corner's places. Prism groups the open catalogue beneath its page; Normal keeps the original list.
 Rectangle {
     id: root
     property bool narrow: false
@@ -86,6 +85,27 @@ Rectangle {
                 Accessible.name: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open in a window")
                 onClicked: root.switchHost()
                 StyledToolTip { text: topHostKey.Accessible.name; extraVisibleCondition: topHostKey.buttonHovered }
+            }
+        }
+        RowLayout {
+            visible: root.prism
+            Layout.fillWidth: true
+            Layout.topMargin: Math.round(12 * root.d)
+            Layout.bottomMargin: Math.round(18 * root.d)
+            spacing: Math.round(8 * root.d)
+            MaterialSymbol {
+                text: "movie"
+                fill: 1
+                iconSize: Math.round(20 * root.d)
+                color: IrisStyle.text
+            }
+            IrisText {
+                Layout.fillWidth: true
+                text: Translation.tr("Media Corner")
+                font.pixelSize: IrisStyle.typeHeadline
+                font.weight: IrisStyle.weight(Font.Bold)
+                font.letterSpacing: -0.3
+                elide: Text.ElideRight
             }
         }
         CornerSearch {
@@ -225,11 +245,11 @@ Rectangle {
             width: parent.width - x
             height: row.rowHeight
             radius: root.prism ? IrisStyle.radiusRow : IrisStyle.capsule(height)
-            color: root.prism ? (row.selected ? Qt.alpha(IrisStyle.accent, IrisStyle.light ? 0.13 : 0.16) : row.containsMouse ? IrisStyle.fillHover : "transparent") : row.selected ? IrisStyle.text : row.containsMouse ? IrisStyle.fillHover : "transparent"
+            color: root.prism ? (!row.modelData.child && row.selected ? Qt.alpha(IrisStyle.accent, IrisStyle.light ? 0.13 : 0.16) : row.containsMouse ? IrisStyle.fillHover : "transparent") : row.selected ? IrisStyle.text : row.containsMouse ? IrisStyle.fillHover : "transparent"
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(root.prism ? 160 : 110); easing.type: IrisStyle.feedbackEasing } }
             Rectangle {
-                visible: root.prism && row.selected && !row.modelData.child
-                x: -root.pad
+                visible: root.prism && row.selected && !row.modelData.group
+                x: parent.width - width
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.round(3 * root.d)
                 height: Math.round(18 * root.d)
@@ -239,6 +259,7 @@ Rectangle {
             CornerFocusRing { on: row.activeFocus }
             MaterialSymbol {
                 id: ink
+                visible: !row.modelData.child
                 x: Math.round(12 * root.d)
                 anchors.verticalCenter: parent.verticalCenter
                 text: row.modelData.icon
@@ -247,23 +268,24 @@ Rectangle {
                 color: row.selected ? (root.prism ? root.accentInk : IrisStyle.surfaceOpaque) : IrisStyle.text
             }
             IrisText {
-                x: ink.x + Math.round(30 * root.d)
+                x: row.modelData.child ? Math.round(16 * root.d) : ink.x + Math.round(30 * root.d)
                 width: parent.width - x - Math.round((root.narrow ? 36 : 12) * root.d)
                 anchors.verticalCenter: parent.verticalCenter
                 role: IrisText.Name
                 text: Translation.tr(row.modelData.title)
-                color: row.selected ? (root.prism ? root.accentInk : IrisStyle.surfaceOpaque) : IrisStyle.text
-                font.weight: IrisStyle.weight(row.selected ? Font.Bold : Font.DemiBold)
+                color: row.selected ? (root.prism ? (row.modelData.child ? IrisStyle.text : root.accentInk) : IrisStyle.surfaceOpaque) : (row.modelData.child ? IrisStyle.textSecondary : IrisStyle.text)
+                font.pixelSize: row.modelData.child ? IrisStyle.typeFootnote : IrisStyle.typeLabel
+                font.weight: IrisStyle.weight(row.selected ? Font.DemiBold : row.modelData.child ? Font.Normal : Font.DemiBold)
                 elide: Text.ElideRight
             }
             MaterialSymbol {
-                visible: root.narrow
+                visible: root.narrow && !row.modelData.child
                 anchors.right: parent.right
                 anchors.rightMargin: Math.round(6 * root.d)
                 anchors.verticalCenter: parent.verticalCenter
                 text: "chevron_right"
                 iconSize: Math.round(18 * root.d)
-                color: row.selected ? IrisStyle.surfaceOpaque : IrisStyle.muted
+                color: row.selected ? (root.prism ? root.accentInk : IrisStyle.surfaceOpaque) : IrisStyle.muted
             }
         }
     }
