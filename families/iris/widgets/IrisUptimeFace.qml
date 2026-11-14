@@ -95,80 +95,84 @@ IrisWidgetFace {
         curve: t => root.level(t)
     }
 
-    ColumnLayout {
-        visible: root.small
+    Loader {
         anchors.fill: parent
-        spacing: root.dp(2)
-        FaceHeader {
-            face: root
-            Layout.fillWidth: true
-            glyph: "timelapse"
-            text: Translation.tr("Uptime")
+        active: root.small
+        sourceComponent: ColumnLayout {
+            spacing: root.dp(2)
+            FaceHeader {
+                face: root
+                Layout.fillWidth: true
+                glyph: "timelapse"
+                text: Translation.tr("Uptime")
+            }
+            Lead { figureSize: 34 }
+            Session {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.topMargin: root.dp(6)
+            }
+            Since { Layout.topMargin: root.dp(6) }
         }
-        Lead { figureSize: 34 }
-        Session {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.topMargin: root.dp(6)
-        }
-        Since { Layout.topMargin: root.dp(6) }
     }
 
-    ColumnLayout {
-        visible: !root.small
+    Loader {
         anchors.fill: parent
-        spacing: root.dp(2)
-        FaceHeader {
-            face: root
-            Layout.fillWidth: true
-            glyph: "timelapse"
-            text: Translation.tr("Uptime")
-            trailing: root.medium && root.days > 0 ? Translation.tr("Day %1 of this session").arg(root.widget.sessionDay) : ""
-        }
-        RowLayout {
-            Layout.fillHeight: false
-            Layout.fillWidth: true
-            spacing: root.dp(10)
-            Lead { figureSize: root.large ? 44 : 38 }
-            Item { Layout.fillWidth: true }
-            Since {
-                visible: root.medium && root.widget.showSince
-                Layout.alignment: Qt.AlignBottom
-                Layout.bottomMargin: root.dp(4)
-            }
-        }
-        Session {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.topMargin: root.dp(6)
-        }
-        FaceHours { face: root; marks: root.marks; Layout.fillWidth: true; Layout.topMargin: root.dp(2) }
-        ColumnLayout {
-            Layout.fillHeight: false
-            visible: root.large
-            Layout.fillWidth: true
-            Layout.topMargin: root.dp(12)
-            spacing: root.dp(8)
-            FaceFact {
+        active: !root.small
+        sourceComponent: ColumnLayout {
+            spacing: root.dp(2)
+            FaceHeader {
                 face: root
                 Layout.fillWidth: true
-                glyph: "login"
-                label: Translation.tr("Started")
-                value: (root.sinceYesterday ? root.bootDay + " " : "") + IrisFaceData.clockText(root.boot)
+                glyph: "timelapse"
+                text: Translation.tr("Uptime")
+                trailing: root.medium && root.days > 0 ? Translation.tr("Day %1 of this session").arg(root.widget.sessionDay) : ""
             }
-            FaceFact {
-                face: root
+            RowLayout {
+                Layout.fillHeight: false
                 Layout.fillWidth: true
-                glyph: "today"
-                label: Translation.tr("On today")
-                value: root.span(Math.round((root.nowAt - root.bootAt) * 86400))
+                spacing: root.dp(10)
+                Lead { figureSize: root.large ? 44 : 38 }
+                Item { Layout.fillWidth: true }
+                Since {
+                    visible: root.medium && root.widget.showSince
+                    Layout.alignment: Qt.AlignBottom
+                    Layout.bottomMargin: root.dp(4)
+                }
             }
-            FaceFact {
-                face: root
+            Session {
                 Layout.fillWidth: true
-                glyph: "dns"
-                label: root.days > 0 ? Translation.tr("Session day") : Translation.tr("Machine")
-                value: root.days > 0 ? String(root.widget.sessionDay) : (SystemInfo.hostname || SystemInfo.distroName)
+                Layout.fillHeight: true
+                Layout.topMargin: root.dp(6)
+            }
+            FaceHours { face: root; marks: root.marks; Layout.fillWidth: true; Layout.topMargin: root.dp(2) }
+            ColumnLayout {
+                Layout.fillHeight: false
+                visible: root.large
+                Layout.fillWidth: true
+                Layout.topMargin: root.dp(12)
+                spacing: root.dp(8)
+                FaceFact {
+                    face: root
+                    Layout.fillWidth: true
+                    glyph: "login"
+                    label: Translation.tr("Started")
+                    value: (root.sinceYesterday ? root.bootDay + " " : "") + IrisFaceData.clockText(root.boot)
+                }
+                FaceFact {
+                    face: root
+                    Layout.fillWidth: true
+                    glyph: "today"
+                    label: Translation.tr("On today")
+                    value: root.span(Math.round((root.nowAt - root.bootAt) * 86400))
+                }
+                FaceFact {
+                    face: root
+                    Layout.fillWidth: true
+                    glyph: "dns"
+                    label: root.days > 0 ? Translation.tr("Session day") : Translation.tr("Machine")
+                    value: root.days > 0 ? String(root.widget.sessionDay) : (SystemInfo.hostname || SystemInfo.distroName)
+                }
             }
         }
     }

@@ -227,34 +227,36 @@ IrisWidgetFace {
     }
 
     // Small: the lead reading over its trend, the next one beside its name at the foot.
-    ColumnLayout {
-        visible: root.small && root.leadEntry !== null && !root.barsStyle
+    Loader {
         anchors.fill: parent
-        spacing: root.dp(2)
-        FaceHeader {
-            face: root
-            Layout.fillWidth: true
-            glyph: "monitor_heart"
-            text: root.leadEntry ? root.name(root.leadEntry) : ""
-        }
-        Reading { key: root.leadEntry?.key ?? "cpu"; figureSize: 34 }
-        Trace {
-            visible: root.leadTrends
-            key: root.leadEntry?.key ?? "cpu"
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.topMargin: root.dp(6)
-        }
-        Capacity { visible: !root.leadTrends; Layout.fillWidth: true; Layout.topMargin: root.dp(8) }
-        Item { visible: !root.leadTrends; Layout.fillHeight: true }
-        FaceAside {
-            face: root
-            visible: root.rest.length > 0
-            Layout.topMargin: root.dp(6)
-            label: root.rest.length > 0 ? root.short(root.rest[0]) : ""
-            value: root.rest.length > 0 ? root.figure(root.rest[0].key) : ""
-            unit: root.rest.length > 0 ? root.unit(root.rest[0].key) : ""
-            tone: root.rest.length > 0 && root.level(root.rest[0].key) >= 0.85 ? root.danger : root.ink
+        active: root.small && root.leadEntry !== null && !root.barsStyle
+        sourceComponent: ColumnLayout {
+            spacing: root.dp(2)
+            FaceHeader {
+                face: root
+                Layout.fillWidth: true
+                glyph: "monitor_heart"
+                text: root.leadEntry ? root.name(root.leadEntry) : ""
+            }
+            Reading { key: root.leadEntry?.key ?? "cpu"; figureSize: 34 }
+            Trace {
+                visible: root.leadTrends
+                key: root.leadEntry?.key ?? "cpu"
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.topMargin: root.dp(6)
+            }
+            Capacity { visible: !root.leadTrends; Layout.fillWidth: true; Layout.topMargin: root.dp(8) }
+            Item { visible: !root.leadTrends; Layout.fillHeight: true }
+            FaceAside {
+                face: root
+                visible: root.rest.length > 0
+                Layout.topMargin: root.dp(6)
+                label: root.rest.length > 0 ? root.short(root.rest[0]) : ""
+                value: root.rest.length > 0 ? root.figure(root.rest[0].key) : ""
+                unit: root.rest.length > 0 ? root.unit(root.rest[0].key) : ""
+                tone: root.rest.length > 0 && root.level(root.rest[0].key) >= 0.85 ? root.danger : root.ink
+            }
         }
     }
 
@@ -374,49 +376,51 @@ IrisWidgetFace {
         }
     }
 
-    GridLayout {
-        visible: !root.small && root.leadEntry !== null && !root.barsStyle
+    Loader {
         anchors.fill: parent
-        columns: root.medium ? 2 : 1
-        columnSpacing: root.dp(18)
-        rowSpacing: root.dp(10)
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredWidth: 1
-            spacing: root.dp(2)
-            FaceHeader {
-                face: root
-                Layout.fillWidth: true
-                glyph: "monitor_heart"
-                text: root.leadEntry ? root.name(root.leadEntry) : ""
-            }
-            Reading { key: root.leadEntry?.key ?? "cpu"; figureSize: root.large ? 44 : 36 }
-            Trace {
-                visible: root.leadTrends
-                key: root.leadEntry?.key ?? "cpu"
+        active: !root.small && root.leadEntry !== null && !root.barsStyle
+        sourceComponent: GridLayout {
+            columns: root.medium ? 2 : 1
+            columnSpacing: root.dp(18)
+            rowSpacing: root.dp(10)
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.topMargin: root.dp(6)
-            }
-            Capacity { visible: !root.leadTrends; Layout.fillWidth: true; Layout.topMargin: root.dp(8) }
-            Item { visible: !root.leadTrends; Layout.fillHeight: true }
-        }
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.preferredWidth: 1
-            Layout.alignment: root.medium ? Qt.AlignVCenter : Qt.AlignBottom
-            spacing: root.dp(root.large ? 8 : 4)
-            Repeater {
-                model: root.small ? [] : root.rest.slice(0, root.medium ? 5 : 6)
-                Line {
-                    required property var modelData
-                    required property int index
+                Layout.preferredWidth: 1
+                spacing: root.dp(2)
+                FaceHeader {
+                    face: root
                     Layout.fillWidth: true
-                    Layout.fillHeight: false
-                    entry: modelData
-                    rule: root.large || index > 0
-                    traced: root.large && ["cpu", "mem", "gpu", "temp", "gpuTemp"].includes(modelData.key)
+                    glyph: "monitor_heart"
+                    text: root.leadEntry ? root.name(root.leadEntry) : ""
+                }
+                Reading { key: root.leadEntry?.key ?? "cpu"; figureSize: root.large ? 44 : 36 }
+                Trace {
+                    visible: root.leadTrends
+                    key: root.leadEntry?.key ?? "cpu"
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.topMargin: root.dp(6)
+                }
+                Capacity { visible: !root.leadTrends; Layout.fillWidth: true; Layout.topMargin: root.dp(8) }
+                Item { visible: !root.leadTrends; Layout.fillHeight: true }
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: root.medium ? Qt.AlignVCenter : Qt.AlignBottom
+                spacing: root.dp(root.large ? 8 : 4)
+                Repeater {
+                    model: root.small ? [] : root.rest.slice(0, root.medium ? 5 : 6)
+                    Line {
+                        required property var modelData
+                        required property int index
+                        Layout.fillWidth: true
+                        Layout.fillHeight: false
+                        entry: modelData
+                        rule: root.large || index > 0
+                        traced: root.large && ["cpu", "mem", "gpu", "temp", "gpuTemp"].includes(modelData.key)
+                    }
                 }
             }
         }

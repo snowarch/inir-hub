@@ -99,102 +99,106 @@ IrisWidgetFace {
         }
     }
 
-    ColumnLayout {
-        visible: root.small
+    Loader {
         anchors.fill: parent
-        spacing: root.dp(2)
-        FaceHeader {
-            face: root
-            Layout.fillWidth: true
-            glyph: root.sunKnown ? root.next.glyph : "timelapse"
-            text: root.sunKnown ? root.next.name : Translation.tr("Until midnight")
-            tint: root.warm
-        }
-        Lead { figureSize: 30 }
-        SunPath {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.topMargin: root.dp(6)
-        }
-        Other {
-            visible: root.sunKnown
-            Layout.topMargin: root.dp(6)
+        active: root.small
+        sourceComponent: ColumnLayout {
+            spacing: root.dp(2)
+            FaceHeader {
+                face: root
+                Layout.fillWidth: true
+                glyph: root.sunKnown ? root.next.glyph : "timelapse"
+                text: root.sunKnown ? root.next.name : Translation.tr("Until midnight")
+                tint: root.warm
+            }
+            Lead { figureSize: 30 }
+            SunPath {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.topMargin: root.dp(6)
+            }
+            Other {
+                visible: root.sunKnown
+                Layout.topMargin: root.dp(6)
+            }
         }
     }
 
-    ColumnLayout {
-        visible: !root.small
+    Loader {
         anchors.fill: parent
-        spacing: root.dp(2)
-        FaceHeader {
-            face: root
-            Layout.fillWidth: true
-            glyph: root.daytime ? "light_mode" : "bedtime"
-            text: IrisFaceData.capitalized(Translation.locale.toString(DateTime.clock.date, "dddd d"))
-            tint: root.warm
-        }
-        RowLayout {
-            Layout.fillHeight: false
-            Layout.fillWidth: true
-            spacing: root.dp(10)
-            Lead { figureSize: root.large ? 44 : 38 }
-            Item { Layout.fillWidth: true }
-            // Medium keeps its facts beside the figure; large lists them under the path.
+        active: !root.small
+        sourceComponent: ColumnLayout {
+            spacing: root.dp(2)
+            FaceHeader {
+                face: root
+                Layout.fillWidth: true
+                glyph: root.daytime ? "light_mode" : "bedtime"
+                text: IrisFaceData.capitalized(Translation.locale.toString(DateTime.clock.date, "dddd d"))
+                tint: root.warm
+            }
+            RowLayout {
+                Layout.fillHeight: false
+                Layout.fillWidth: true
+                spacing: root.dp(10)
+                Lead { figureSize: root.large ? 44 : 38 }
+                Item { Layout.fillWidth: true }
+                // Medium keeps its facts beside the figure; large lists them under the path.
+                ColumnLayout {
+                    visible: root.medium && root.sunKnown
+                    Layout.alignment: Qt.AlignBottom
+                    Layout.bottomMargin: root.dp(4)
+                    spacing: 0
+                    Other {
+                        Layout.alignment: Qt.AlignRight
+                        timeSize: 16
+                    }
+                    FaceText {
+                        face: root
+                        Layout.alignment: Qt.AlignRight
+                        text: Translation.tr("Daylight") + " " + root.daylight
+                        color: root.inkTertiary
+                        size: 12
+                    }
+                }
+            }
+            SunPath {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.topMargin: root.dp(6)
+            }
+            FaceHours { face: root; Layout.fillWidth: true; Layout.topMargin: root.dp(2) }
             ColumnLayout {
-                visible: root.medium && root.sunKnown
-                Layout.alignment: Qt.AlignBottom
-                Layout.bottomMargin: root.dp(4)
-                spacing: 0
-                Other {
-                    Layout.alignment: Qt.AlignRight
-                    timeSize: 16
-                }
-                FaceText {
+                Layout.fillHeight: false
+                visible: root.large
+                Layout.fillWidth: true
+                Layout.topMargin: root.dp(12)
+                spacing: root.dp(8)
+                FaceFact {
                     face: root
-                    Layout.alignment: Qt.AlignRight
-                    text: Translation.tr("Daylight") + " " + root.daylight
-                    color: root.inkTertiary
-                    size: 12
+                    tint: root.warm
+                    visible: root.sunKnown
+                    Layout.fillWidth: true
+                    glyph: root.other.glyph
+                    label: root.other.name
+                    value: root.other.time
                 }
-            }
-        }
-        SunPath {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.topMargin: root.dp(6)
-        }
-        FaceHours { face: root; Layout.fillWidth: true; Layout.topMargin: root.dp(2) }
-        ColumnLayout {
-            Layout.fillHeight: false
-            visible: root.large
-            Layout.fillWidth: true
-            Layout.topMargin: root.dp(12)
-            spacing: root.dp(8)
-            FaceFact {
-                face: root
-                tint: root.warm
-                visible: root.sunKnown
-                Layout.fillWidth: true
-                glyph: root.other.glyph
-                label: root.other.name
-                value: root.other.time
-            }
-            FaceFact {
-                face: root
-                tint: root.warm
-                visible: root.sunKnown
-                Layout.fillWidth: true
-                glyph: "light_mode"
-                label: Translation.tr("Daylight")
-                value: root.daylight
-            }
-            FaceFact {
-                face: root
-                tint: root.warm
-                Layout.fillWidth: true
-                glyph: "dark_mode"
-                label: Translation.tr("Moon")
-                value: Weather.moonPhaseName
+                FaceFact {
+                    face: root
+                    tint: root.warm
+                    visible: root.sunKnown
+                    Layout.fillWidth: true
+                    glyph: "light_mode"
+                    label: Translation.tr("Daylight")
+                    value: root.daylight
+                }
+                FaceFact {
+                    face: root
+                    tint: root.warm
+                    Layout.fillWidth: true
+                    glyph: "dark_mode"
+                    label: Translation.tr("Moon")
+                    value: Weather.moonPhaseName
+                }
             }
         }
     }
