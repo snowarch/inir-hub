@@ -170,7 +170,7 @@ Singleton {
         if (stream.referer) args.push("--referrer=" + stream.referer)
         if (resume > 0) args.push("--start=" + Math.floor(resume))
         args.push("--", stream.url)
-        root._current = { stream, key, title: root.title, show: { id: root.show.id, kind: root.show.kind, title: root.title, type: root.show.type ?? "" }, episode: root.episode }
+        root._current = { stream, key, title: root.title, show: { id: root.show.id, kind: root.show.kind, title: root.title, type: root.show.type ?? "", film: Boolean(root.show.film) }, episode: root.episode }
         root._startedAt = resume
         root._stopping = false
         root.position = 0
