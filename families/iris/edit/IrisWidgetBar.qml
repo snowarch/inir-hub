@@ -90,7 +90,8 @@ Item {
     IrisSpring {
         id: presentSpring
         surface: "panels"
-        to: root.entered && root.present ? 1 : 0
+        // Held until the desktop has made the card's parts, so the zoom and the shelf start together on a ready stage.
+        to: root.entered && root.present && DesktopEditStage.prepared(root.outputName) ? 1 : 0
         intent: "auto"
         minimum: 0
     }

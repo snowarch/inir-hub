@@ -405,8 +405,7 @@ Scope {
             // Stay mapped while the pill is still fading out (it hides on an
             // opacity Behavior, not instantly), or unmapping would cut the fade
             // into a pop. Mapping back is immediate, so the fade-in is intact.
-            visible: !GlobalStates.widgetEditMode
-                && (modal || !pill.fsHide || pill.opacity > 0.01)
+            visible: modal || !pill.fsHide || pill.opacity > 0.01
 
             // While a fullscreen window owns this monitor the pill is hidden and
             // must not eat pointer input either.

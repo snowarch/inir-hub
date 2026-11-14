@@ -209,8 +209,9 @@ Item {
     // during play, but once Niri Overview is open the shell must become
     // available again for workspace/navigation interaction.
     readonly property bool compositorOverviewOpen: CompositorService.isNiri && NiriService.inOverview
-    readonly property bool fsHide: (fsCovered || gameHide) && !compositorOverviewOpen
-        && (mode === "rest" || mode === "hover" || mode === "game")
+    // Arranging widgets fades it out of the way too (kept, never rebuilt; its surfaces close with the mode).
+    readonly property bool fsHide: ((fsCovered || gameHide) && !compositorOverviewOpen
+        && (mode === "rest" || mode === "hover" || mode === "game")) || DesktopEditStage.receding
 
     opacity: fsHide ? 0 : 1
     visible: opacity > 0.01

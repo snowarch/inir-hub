@@ -897,9 +897,12 @@ Scope {
             }
             // Arranging the desktop on this output: the shelf and the widget's controls in a window of their own above
             // the chassis, which recedes into the card meanwhile. Kept until the shelf has played its exit. Named by
-            // file, never inline, so its forty-odd files compile when arranging first starts rather than with the bar.
+            // file, never inline, so its forty-odd files compile when arranging first starts rather than with the bar;
+            // compiled off the GUI thread and built across frames, so the chassis and the desktop keep drawing (built
+            // in one go, the first entry held every window 250 ms and the card jumped). The zoom starts once it is in.
             Loader {
                 id: editDeskLoader
+                asynchronous: true
                 property bool lingering: false
                 active: GlobalStates.widgetEditMode || editDeskLoader.lingering
                 onActiveChanged: if (GlobalStates.widgetEditMode) editDeskLoader.lingering = true
@@ -956,6 +959,13 @@ Scope {
                 // desktop under it: the screen as it will be, live, while the shelf's pages change it.
                 readonly property var editCard: DesktopEditStage.cardFor(barWindow.screen?.name ?? "", barWindow.width, barWindow.height)
                 readonly property bool carded: barWindow.editCard.p > 0
+                // On the card the chassis wears the wallpaper's glass (the compositor's cannot follow a transform): the
+                // zoom waits until that backdrop is decoded, or 600 ms at most.
+                readonly property string glassKey: barWindow.hostedOutput + "/glass"
+                readonly property bool glassMaking: GlobalStates.widgetEditMode && !barWindow.carded
+                    && !(chassisField.backdropSource?.ready ?? true)
+                onGlassMakingChanged: DesktopEditStage.setPreparing(barWindow.glassKey, barWindow.glassMaking)
+                Timer { running: barWindow.glassMaking; interval: 600; onTriggered: DesktopEditStage.setPreparing(barWindow.glassKey, false) }
                 readonly property bool presenting: barWindow.pinned || stage.cardPresent
                     || (controlCentreLoader.item?.present ?? false) || barWindow.editHere
                     || (dockLoader.item?.overFullscreen ?? false) || (dockLoader.item?.menuOpen ?? false)
@@ -1335,6 +1345,7 @@ Scope {
                     renderScale: barWindow.carded ? (barWindow.editCard.rest ?? 1) : 1
                     resampled: barWindow.transformKind !== 0
                     providesBackdrop: true
+                    warmBackdrop: GlobalStates.widgetEditMode
                     edgeWave: framePulse.amplitudes
                     waveClock: framePulse.phase
                     frameMusicLevel: framePulse.visibleLevel

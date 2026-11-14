@@ -87,7 +87,7 @@ Scope {
                 property bool mustShow: pointerShow || superShow || interactionHold
                 property bool reservationActive: false
                 exclusionMode: ExclusionMode.Ignore
-                exclusiveZone: !autoHideEnabled ? shownExclusiveZone
+                exclusiveZone: GlobalStates.widgetEditMode ? 0 : !autoHideEnabled ? shownExclusiveZone
                     : (pushWindowsWhenShown && reservationActive ? shownExclusiveZone : 0)
                 WlrLayershell.namespace: "quickshell:bar"
                 // Upstream raised the bar to Overlay only while a Hyprland
@@ -322,7 +322,9 @@ Scope {
                             left: parent.left
                             top: parent.top
                             bottom: undefined
-                            topMargin: barRoot.autoHideEnabled
+                            // Arranging: the whole surface, corners included, goes over its edge (kept, never rebuilt).
+                            topMargin: DesktopEditStage.receding ? -barRoot.implicitHeight
+                                : barRoot.autoHideEnabled
                                 ? (!mustShow ? -Appearance.sizes.barHeight : barRoot.layerGap)
                                 : 0
                             bottomMargin: (Config.options.interactions.deadPixelWorkaround.enable && barRoot.anchors.bottom) * -1
@@ -350,7 +352,8 @@ Scope {
                             PropertyChanges {
                                 target: barContent
                                 anchors.topMargin: 0
-                                anchors.bottomMargin: barRoot.autoHideEnabled
+                                anchors.bottomMargin: DesktopEditStage.receding ? -barRoot.implicitHeight
+                                    : barRoot.autoHideEnabled
                                     ? (!mustShow ? -Appearance.sizes.barHeight : barRoot.layerGap)
                                     : 0
                             }

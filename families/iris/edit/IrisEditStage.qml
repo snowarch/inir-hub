@@ -26,6 +26,9 @@ Item {
     property bool waiting: false
     // The wallpaper's still, for the stage.
     property string still: ""
+    // The stage's still is decoded (or will never be): the desktop holds the zoom until it is.
+    readonly property bool ready: root.side !== "under" || root.still === ""
+        || stageStill.status === Image.Ready || stageStill.status === Image.Error
 
     readonly property real d: IrisStyle.density
     readonly property real p: Math.max(0, Math.min(1, root.card.p))

@@ -74,7 +74,8 @@ Scope {
                 // Loaded by the mode itself: it was already on, no change comes.
                 if (desk.present) desk.enter()
             }
-            Binding { target: desk; property: "p"; value: desk.entered && desk.present ? 1 : 0 }
+            // Held until the desktop has made the card's parts, so the zoom, the toolbar and the shelf start together.
+            Binding { target: desk; property: "p"; value: desk.entered && desk.present && DesktopEditStage.prepared(desk.outputName) ? 1 : 0 }
             onPresentChanged: if (desk.present) desk.enter()
             function enter(): void { desk.seeding = true; seedTimer.restart(); desk.prepare() }
             function prepare(): void {

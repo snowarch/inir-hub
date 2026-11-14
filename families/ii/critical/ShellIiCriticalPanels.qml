@@ -26,8 +26,8 @@ Item {
     MaterialVerbs {}
     CriticalPanelLoader { identifier: "iiBackground"; component: Background { family: "ii" } }
     CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barStock; source: "../bar/Bar.qml" }
-    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barPill && !GlobalStates.widgetEditMode; source: "../pill/PillBar.qml" }
-    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barM3 && !GlobalStates.widgetEditMode; source: "../barM3/M3Bar.qml" }
+    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barPill; source: "../pill/PillBar.qml" }
+    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barM3; source: "../barM3/M3Bar.qml" }
     CriticalPanelLoader { identifier: "iiVerticalBar"; extraCondition: root.barVertical; source: "../verticalBar/VerticalBar.qml" }
     CriticalPanelLoader { identifier: "iiDock"; extraCondition: Config.options?.material?.dock?.enable ?? true; component: Dock {} }
 }

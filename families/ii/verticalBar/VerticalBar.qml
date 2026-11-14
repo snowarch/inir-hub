@@ -36,8 +36,8 @@ Scope {
         }
         LazyLoader {
             id: barLoader
+            // Kept while arranging: the bar slides out over its edge and back, never rebuilt.
             active: GlobalStates.barOpen && !GlobalStates.screenLocked
-                && !GlobalStates.widgetEditMode
             required property ShellScreen modelData
             component: PanelWindow { // Bar window
                 id: barRoot
@@ -77,7 +77,7 @@ Scope {
                     ? Math.ceil(Appearance.sizes.verticalBarWidth * 1.75) : 0
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone:
-                    (GlobalStates.coverflowSelectorOpen || (Config?.options.material.bar.autoHide.enable && (!mustShow || !Config?.options.material.bar.autoHide.pushWindows))) ? 0 :
+                    (GlobalStates.coverflowSelectorOpen || GlobalStates.widgetEditMode || (Config?.options.material.bar.autoHide.enable && (!mustShow || !Config?.options.material.bar.autoHide.pushWindows))) ? 0 :
                     Appearance.sizes.baseVerticalBarWidth + ((Config.options?.material?.bar?.cornerStyle ?? 0) === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
                 WlrLayershell.namespace: "quickshell:verticalBar"
                 // Default Top layer ON PURPOSE: fullscreen surfaces render
@@ -131,7 +131,7 @@ Scope {
                             bottom: parent.bottom
                             left: parent.left
                             right: undefined
-                            leftMargin: ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -Appearance.sizes.verticalBarWidth : 0
+                            leftMargin: DesktopEditStage.receding ? -barRoot.implicitWidth : ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -Appearance.sizes.verticalBarWidth : 0
                             rightMargin: 0
                         }
                         Behavior on anchors.leftMargin {
@@ -156,7 +156,7 @@ Scope {
                             PropertyChanges {
                                 target: barContent
                                 anchors.topMargin: 0
-                                anchors.rightMargin: ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -Appearance.sizes.verticalBarWidth : 0
+                                anchors.rightMargin: DesktopEditStage.receding ? -barRoot.implicitWidth : ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -Appearance.sizes.verticalBarWidth : 0
                             }
                         }
                     }

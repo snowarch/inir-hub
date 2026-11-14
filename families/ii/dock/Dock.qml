@@ -85,15 +85,15 @@ Scope {
             sourceComponent: PanelWindow {
                 id: dockRoot
                 screen: panelLoader.modelData
+                // Arranging: it slides away over its edge (reveal) and is kept, never rebuilt.
                 visible: !GlobalStates.screenLocked
-                    && !GlobalStates.widgetEditMode
 
                 // Shows on a rest at the edge, not on a pass; stays a moment after the pointer slips off.
                 EdgeReveal {
                     id: dockEdge
                     hovered: (Config.options?.material?.dock?.hoverToReveal ?? false) && dockMouseArea.containsMouse
                 }
-                property bool reveal: !GlobalStates.coverflowSelectorOpen
+                property bool reveal: !GlobalStates.coverflowSelectorOpen && !DesktopEditStage.receding
                     && !(GlobalStates.wallpaperLauncherOpen && root.position === "bottom")
                     && GlobalStates.shellEntryReady
                     && (ShellEditSession.active || root.pinned
@@ -250,8 +250,8 @@ Scope {
                         verticalCenter: root.isVertical ? parent.verticalCenter : undefined
                     }
 
-                    property real hideOffset: dockRoot.reveal ? 0 : Config.options?.material?.dock?.hoverToReveal ? (dockRoot.implicitHeight - (Config.options?.material?.dock?.hoverRegionHeight ?? 5)) : (dockRoot.implicitHeight + 1)
-                    property real hideOffsetV: dockRoot.reveal ? 0 : Config.options?.material?.dock?.hoverToReveal ? (dockRoot.implicitWidth - (Config.options?.material?.dock?.hoverRegionHeight ?? 5)) : (dockRoot.implicitWidth + 1)
+                    property real hideOffset: dockRoot.reveal ? 0 : Config.options?.material?.dock?.hoverToReveal && !GlobalStates.widgetEditMode ? (dockRoot.implicitHeight - (Config.options?.material?.dock?.hoverRegionHeight ?? 5)) : (dockRoot.implicitHeight + 1)
+                    property real hideOffsetV: dockRoot.reveal ? 0 : Config.options?.material?.dock?.hoverToReveal && !GlobalStates.widgetEditMode ? (dockRoot.implicitWidth - (Config.options?.material?.dock?.hoverRegionHeight ?? 5)) : (dockRoot.implicitWidth + 1)
                     
                     // Positive margins push content off-screen
                     anchors.topMargin: root.position === "bottom" ? hideOffset : 0

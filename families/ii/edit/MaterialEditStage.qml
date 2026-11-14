@@ -20,6 +20,9 @@ Item {
     property var card: ({ x: 0, y: 0, s: 1, p: 0 })
     property bool waiting: false
     property string still: ""
+    // The stage's still is decoded (or will never be): the desktop holds the zoom until it is.
+    readonly property bool ready: root.side !== "under" || root.still === ""
+        || stageStill.status === Image.Ready || stageStill.status === Image.Error
     readonly property real p: Math.max(0, Math.min(1, root.card.p))
     readonly property real cardX: root.card.x
     readonly property real cardY: root.card.y
@@ -113,6 +116,8 @@ Item {
             id: body
             required property var modelData
             readonly property bool hot: Boolean(root.lit[body.modelData.id])
+            // Grows in with the card: at full size it would stand over the bar while that slides away.
+            opacity: root.p
             x: body.modelData.x
             y: body.modelData.y
             width: body.modelData.w

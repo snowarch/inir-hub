@@ -53,8 +53,8 @@ Scope {
         }
         LazyLoader {
             id: barLoader
+            // Kept while arranging: the bar slides out over its edge and back (BarContent's margins), never rebuilt.
             active: !bar.rebuilding && GlobalStates.barOpen && !GlobalStates.screenLocked
-                && !GlobalStates.widgetEditMode
             required property ShellScreen modelData
             component: PanelWindow { // Bar window
                 id: barRoot
@@ -143,7 +143,7 @@ Scope {
                         && (Config.options?.material?.bar?.visualizer?.organicFit ?? "auto") === "aura"
                     ? Math.ceil(barRoot.panelSurfaceHeight * 1.75) : 0
                 exclusionMode: ExclusionMode.Ignore
-                exclusiveZone: GlobalStates.coverflowSelectorOpen ? 0
+                exclusiveZone: GlobalStates.coverflowSelectorOpen || GlobalStates.widgetEditMode ? 0
                     : !autoHideEnabled ? barRoot.panelSurfaceHeight
                     : (pushWindowsWhenShown && reservationActive ? barRoot.panelSurfaceHeight : 0)
                 WlrLayershell.namespace: "quickshell:bar"
@@ -412,7 +412,7 @@ Scope {
                             left: parent.left
                             top: parent.top
                             bottom: undefined
-                            topMargin: ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -(barRoot.panelSurfaceHeight + barRoot.islandShadowAllowance) : 0
+                            topMargin: DesktopEditStage.receding ? -barRoot.implicitHeight : ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -(barRoot.panelSurfaceHeight + barRoot.islandShadowAllowance) : 0
                             bottomMargin: barRoot.bottomDeadPixelWorkaround ? -1 : 0
                             rightMargin: barRoot.rightDeadPixelWorkaround ? -1 : 0
                         }
@@ -440,7 +440,7 @@ Scope {
                             PropertyChanges {
                                 target: barContent
                                 anchors.topMargin: 0
-                                anchors.bottomMargin: ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -(barRoot.panelSurfaceHeight + barRoot.islandShadowAllowance) : 0
+                                anchors.bottomMargin: DesktopEditStage.receding ? -barRoot.implicitHeight : ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -(barRoot.panelSurfaceHeight + barRoot.islandShadowAllowance) : 0
                             }
                         }
                     }

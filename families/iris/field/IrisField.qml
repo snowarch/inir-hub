@@ -75,6 +75,9 @@ Item {
     // A picture of a screen (Settings' previews) lends its own wallpaper instead: the window's would show what is behind
     // Settings, at the wrong place and scale. Anything with ready, texture and clearTexture, covering this field's scene.
     property Item backdropOverride: null
+    // A compositor-glass field about to fall back on the wallpaper's (the chassis carded while arranging) makes that
+    // backdrop ahead, so its first frame on the card already has the glass.
+    property bool warmBackdrop: false
     readonly property bool wantsBackdrop: root.visible && ((root.framed && root.frameGlass === 1)
         || (root.shapes ?? []).some(shape => root.glassOf(shape) === 1))
     readonly property Item windowHost: root.QsWindow.contentItem ?? null
@@ -84,7 +87,8 @@ Item {
 
     Loader {
         id: backdropLoader
-        active: !root.backdropOverride && ((root.providesBackdrop && root.visible && root.glassCode === 1)
+        active: !root.backdropOverride && ((root.providesBackdrop && root.visible
+                && (root.glassCode === 1 || (root.warmBackdrop && root.glassCode === 2)))
             || (root.wantsBackdrop && !root.sharedBackdrop))
         sourceComponent: IrisGlassSource {
             screen: root.QsWindow.window?.screen ?? null
