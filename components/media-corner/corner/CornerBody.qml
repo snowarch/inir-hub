@@ -101,6 +101,7 @@ Item {
             y: root.column ? Math.round(52 * root.d) : root.paneInset
             width: root.column ? frame.width - 2 * root.paneInset : Math.round(Math.min(Math.max(216 * root.d, frame.width * 0.17), 260 * root.d))
             height: frame.height - y - root.paneInset
+            onCloseRequested: root.closeRequested()
             onPicked: id => root.pick(id)
             onSubmitted: root.pushed = true
             onSwitchHost: {
@@ -128,7 +129,7 @@ Item {
             onClicked: root.back()
         }
         IrisIconButton {
-            visible: !root.windowed
+            visible: !root.windowed && !root.prism
             anchors.right: parent.right
             anchors.rightMargin: IrisStyle.concentricPad(frame.radius, 10 * root.d)
             y: IrisStyle.concentricPad(frame.radius, 10 * root.d)

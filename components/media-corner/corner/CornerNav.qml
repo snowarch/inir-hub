@@ -27,6 +27,7 @@ Rectangle {
     signal picked(string id)
     signal submitted()
     signal switchHost()
+    signal closeRequested()
 
     function isOn(id: string): bool {
         // "anime:genres" is on for each of its genres too ("anime:genre:Drama").
@@ -34,14 +35,59 @@ Rectangle {
             || (id.endsWith(":genres") && root.section.startsWith(id.slice(0, -"genres".length) + "genre:")))
     }
 
-    color: root.prism ? IrisStyle.prismSmoke : IrisStyle.readingSidebar
+    readonly property color accentInk: IrisStyle.readableAccent(IrisStyle.accent)
+    readonly property var navPlaces: {
+        if (!root.prism) return root.places
+        const anime = root.section.startsWith("anime:")
+        const movies = root.section.startsWith("movie:")
+        const result = [root.places[0], { id: "anime:popular", title: "Anime", icon: "animation", group: "anime", caption: "Anime" }]
+        if (anime) result.push(...root.places.slice(1, 7).map(p => Object.assign({}, p, { caption: "", child: true })))
+        result.push({ id: "movie:movies", title: "Films and series", icon: "movie", group: "movie", caption: "Films and series" })
+        if (movies) result.push(...root.places.slice(7, 12).map(p => Object.assign({}, p, { caption: "", child: true })))
+        result.push(root.places[12])
+        return result
+    }
+    color: root.prism ? IrisStyle.surfaceHigh : IrisStyle.readingSidebar
+    border.width: root.prism ? 1 : 0
+    border.color: IrisStyle.hairline
     clip: true
 
+    Rectangle {
+        visible: root.prism
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: Math.round(150 * root.d)
+        gradient: Gradient {
+            GradientStop { position: 0; color: Qt.alpha(IrisStyle.accent, 0.12) }
+            GradientStop { position: 1; color: "transparent" }
+        }
+    }
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: root.pad
         spacing: 0
 
+        RowLayout {
+            visible: root.prism
+            Layout.fillWidth: true
+            Layout.bottomMargin: Math.round(8 * root.d)
+            IrisIconButton {
+                id: closeKey
+                materialIcon: "close"
+                Accessible.name: Translation.tr("Close")
+                onClicked: root.closeRequested()
+                StyledToolTip { text: closeKey.Accessible.name; extraVisibleCondition: closeKey.buttonHovered }
+            }
+            Item { Layout.fillWidth: true }
+            IrisIconButton {
+                id: topHostKey
+                materialIcon: root.windowed ? "layers" : "open_in_new"
+                Accessible.name: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open in a window")
+                onClicked: root.switchHost()
+                StyledToolTip { text: topHostKey.Accessible.name; extraVisibleCondition: topHostKey.buttonHovered }
+            }
+        }
         CornerSearch {
             id: searchPlate
             Layout.fillWidth: true
@@ -66,7 +112,7 @@ Rectangle {
                 width: parent.width
                 spacing: Math.round(2 * root.d)
                 Repeater {
-                    model: root.places
+                    model: root.navPlaces
                     delegate: PlaceRow {}
                 }
             }
@@ -80,6 +126,7 @@ Rectangle {
         }
         IrisIconButton {
             id: hostKey
+            visible: !root.prism
             Layout.alignment: Qt.AlignHCenter
             Layout.topMargin: Math.round(8 * root.d)
             materialIcon: root.windowed ? "layers" : "web_asset"
@@ -92,7 +139,7 @@ Rectangle {
     component PlaceRow: MouseArea {
         id: row
         required property var modelData
-        readonly property bool selected: root.isOn(row.modelData.id)
+        readonly property bool selected: row.modelData.group ? root.section.startsWith(row.modelData.group + ":") : root.isOn(row.modelData.id)
         readonly property real rowHeight: Math.round((root.narrow ? 40 : 34) * root.d * Math.max(1, IrisStyle.typeScale))
         readonly property string caption: Translation.tr(String(row.modelData.caption ?? ""))
         readonly property real washY: row.caption.length > 0 ? Math.round(9 * root.d) + captionText.implicitHeight + Math.round(2 * root.d) : 0
@@ -114,20 +161,31 @@ Rectangle {
             y: Math.round(9 * root.d)
             width: row.width - x
             text: row.caption
-            color: IrisStyle.textTertiary
-            font.family: IrisStyle.fontMono
-            font.pixelSize: IrisStyle.typeCaption
-            font.weight: IrisStyle.weight(Font.Medium)
+            color: root.prism && row.selected ? root.accentInk : IrisStyle.textTertiary
+            font.family: root.prism ? IrisStyle.fontMain : IrisStyle.fontMono
+            font.pixelSize: root.prism ? 11 * IrisStyle.typeScale : IrisStyle.typeCaption
+            font.letterSpacing: root.prism ? 0.6 : 0
+            font.weight: IrisStyle.weight(root.prism ? Font.DemiBold : Font.Medium)
             font.capitalization: Font.AllUppercase
             elide: Text.ElideRight
         }
         Rectangle {
             y: row.washY
-            width: parent.width
+            x: row.modelData.child ? Math.round(16 * root.d) : 0
+            width: parent.width - x
             height: row.rowHeight
             radius: root.prism ? IrisStyle.radiusRow : IrisStyle.capsule(height)
-            color: row.selected ? IrisStyle.text : row.containsMouse ? IrisStyle.fillHover : "transparent"
-            Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+            color: root.prism ? (row.selected && !row.modelData.group ? Qt.alpha(IrisStyle.accent, IrisStyle.light ? 0.13 : 0.16) : row.containsMouse ? IrisStyle.fillHover : "transparent") : row.selected ? IrisStyle.text : row.containsMouse ? IrisStyle.fillHover : "transparent"
+            Behavior on color { ColorAnimation { duration: IrisStyle.duration(root.prism ? 160 : 110); easing.type: IrisStyle.feedbackEasing } }
+            Rectangle {
+                visible: root.prism && row.selected && !row.modelData.child
+                x: -root.pad
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.round(3 * root.d)
+                height: Math.round(18 * root.d)
+                radius: width / 2
+                color: root.accentInk
+            }
             CornerFocusRing { on: row.activeFocus }
             MaterialSymbol {
                 id: ink
@@ -136,7 +194,7 @@ Rectangle {
                 text: row.modelData.icon
                 iconSize: Math.round(18 * root.d)
                 fill: row.selected ? 1 : 0
-                color: row.selected ? IrisStyle.surfaceOpaque : IrisStyle.text
+                color: row.selected ? (root.prism ? root.accentInk : IrisStyle.surfaceOpaque) : IrisStyle.text
             }
             IrisText {
                 x: ink.x + Math.round(30 * root.d)
@@ -144,7 +202,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 role: IrisText.Name
                 text: Translation.tr(row.modelData.title)
-                color: row.selected ? IrisStyle.surfaceOpaque : IrisStyle.text
+                color: row.selected ? (root.prism ? root.accentInk : IrisStyle.surfaceOpaque) : IrisStyle.text
                 font.weight: IrisStyle.weight(row.selected ? Font.Bold : Font.DemiBold)
                 elide: Text.ElideRight
             }
