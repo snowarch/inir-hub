@@ -79,7 +79,7 @@ Singleton {
     property var _out: ({})
     property int _outCount: 0
 
-    function ask(url: string, body: string, shape: var, callback: var, force: bool = false): void {
+    function ask(url: string, body: string, shape: var, callback: var, force = false): void {
         if (!root.open) return
         const key = url + body
         const hit = root._answers[key]
