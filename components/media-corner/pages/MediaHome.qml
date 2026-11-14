@@ -142,6 +142,9 @@ MediaPage {
                     IrisButton {
                         visible: root.prism
                         emphasized: true
+                        foreground: IrisStyle.darkSurfaceOpaque
+                        colBackground: IrisStyle.inkOnDark
+                        colBackgroundHover: Qt.darker(IrisStyle.inkOnDark, 1.12)
                         text: "▶  " + Translation.tr("Watch")
                         onClicked: {
                             CornerState.openShow(hero.show)
@@ -149,8 +152,16 @@ MediaPage {
                         }
                     }
                     IrisButton {
-                        visible: !root.prism || parent.width > Math.round(240 * root.d)
-                        emphasized: !root.prism
+                        visible: !root.prism
+                        emphasized: true
+                        text: Translation.tr("Details")
+                        onClicked: CornerState.openShow(hero.show)
+                    }
+                    IrisButton {
+                        visible: root.prism && parent.width > Math.round(240 * root.d)
+                        foreground: IrisStyle.inkOnDark
+                        colBackground: IrisStyle.veilStrong
+                        colBackgroundHover: IrisStyle.veilHeavy
                         text: Translation.tr("Details")
                         onClicked: CornerState.openShow(hero.show)
                     }

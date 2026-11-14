@@ -115,6 +115,48 @@ Rectangle {
                     model: root.navPlaces
                     delegate: PlaceRow {}
                 }
+                IrisText {
+                    visible: root.prism && watchList.count > 0
+                    text: Translation.tr("Watching")
+                    color: IrisStyle.textTertiary
+                    font.pixelSize: 11 * IrisStyle.typeScale
+                    font.letterSpacing: 0.6
+                    font.weight: IrisStyle.weight(Font.DemiBold)
+                    font.capitalization: Font.AllUppercase
+                    leftPadding: Math.round(12 * root.d)
+                    topPadding: Math.round(12 * root.d)
+                    bottomPadding: Math.round(4 * root.d)
+                }
+                Repeater {
+                    id: watchList
+                    model: root.prism ? Object.keys(CornerWatch.progress).filter(key => {
+                        const entry = CornerWatch.progress[key]
+                        return entry && entry.show && CornerWatch.resumeAt(key) > 0
+                    }).sort((a, b) => CornerWatch.progress[b].at - CornerWatch.progress[a].at).slice(0, 5) : []
+                    delegate: RowLayout {
+                        id: watched
+                        required property string modelData
+                        width: list.width
+                        HoverHandler { id: watchedHover }
+                        IrisButton {
+                            Layout.fillWidth: true
+                            quiet: true
+                            text: String(CornerWatch.progress[watched.modelData]?.show?.title ?? "")
+                            onClicked: {
+                                const entry = CornerWatch.progress[watched.modelData]
+                                if (!entry?.show) return
+                                CornerState.openShow(entry.show)
+                                CornerWatch.begin(entry.show, entry.episode ?? null)
+                            }
+                        }
+                        IrisIconButton {
+                            materialIcon: "close"
+                            opacity: watchedHover.hovered || activeFocus ? 1 : 0
+                            Accessible.name: Translation.tr("Remove")
+                            onClicked: CornerWatch.forget(watched.modelData)
+                        }
+                    }
+                }
             }
         }
         Item { Layout.fillHeight: true }
@@ -170,12 +212,20 @@ Rectangle {
             elide: Text.ElideRight
         }
         Rectangle {
+            visible: root.prism && Boolean(row.modelData.child)
+            x: Math.round(20 * root.d)
+            y: 0
+            width: 1
+            height: row.height
+            color: IrisStyle.hairline
+        }
+        Rectangle {
             y: row.washY
             x: row.modelData.child ? Math.round(16 * root.d) : 0
             width: parent.width - x
             height: row.rowHeight
             radius: root.prism ? IrisStyle.radiusRow : IrisStyle.capsule(height)
-            color: root.prism ? (row.selected && !row.modelData.group ? Qt.alpha(IrisStyle.accent, IrisStyle.light ? 0.13 : 0.16) : row.containsMouse ? IrisStyle.fillHover : "transparent") : row.selected ? IrisStyle.text : row.containsMouse ? IrisStyle.fillHover : "transparent"
+            color: root.prism ? (row.selected ? Qt.alpha(IrisStyle.accent, IrisStyle.light ? 0.13 : 0.16) : row.containsMouse ? IrisStyle.fillHover : "transparent") : row.selected ? IrisStyle.text : row.containsMouse ? IrisStyle.fillHover : "transparent"
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(root.prism ? 160 : 110); easing.type: IrisStyle.feedbackEasing } }
             Rectangle {
                 visible: root.prism && row.selected && !row.modelData.child

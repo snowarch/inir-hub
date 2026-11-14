@@ -102,6 +102,20 @@ ColumnLayout {
             }
             Behavior on contentX { enabled: !shelf.moving; NumberAnimation { duration: IrisStyle.duration(260); easing.type: IrisStyle.feedbackEasing } }
         }
+        // IrisScrollEdge is vertical; this horizontal veil uses the same public
+        // surface role and only appears when more cards are beyond the edge.
+        Rectangle {
+            visible: CornerState.options.style === "prism" && !shelf.atXEnd
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: Math.round(28 * root.d)
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: "transparent" }
+                GradientStop { position: 1; color: IrisStyle.surfaceOpaque }
+            }
+        }
         // Arrows on hover step a shelf's width, for a mouse without a horizontal wheel.
         HoverHandler { id: shelfHover }
         Arrow {
