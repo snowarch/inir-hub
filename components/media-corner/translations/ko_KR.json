@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "%1 새로고침",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 응답 없음 (´・ω・`)",
     "%1 doesn't know this title": "%1에 이 작품이 없습니다",
@@ -144,6 +143,8 @@
     "Winter": "겨울",
     "Year": "년",
     "“%1”": "“%1”",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1, %2화",
     "A site's search address, with %s where the title goes. It opens in your browser.": "사이트의 검색 주소이며 제목 자리에 %s를 넣습니다. 브라우저에서 열립니다.",
     "Add": "추가",

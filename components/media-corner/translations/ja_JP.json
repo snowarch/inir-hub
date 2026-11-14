@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "%1を更新",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 から応答がありません (´・ω・`)",
     "%1 doesn't know this title": "%1 はこの作品を知りません",
@@ -144,6 +143,8 @@
     "Winter": "冬",
     "Year": "年",
     "“%1”": "「%1」",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1、第%2話",
     "A site's search address, with %s where the title goes. It opens in your browser.": "サイトの検索アドレス。タイトルの位置に %s を入れます。ブラウザで開きます。",
     "Add": "追加",

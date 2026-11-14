@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "Muat ulang %1",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 tidak menjawab (´・ω・`)",
     "%1 doesn't know this title": "%1 tidak mengenal judul ini",
@@ -144,6 +143,8 @@
     "Winter": "Musim dingin",
     "Year": "Tahun",
     "“%1”": "“%1”",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1, episode %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Alamat pencarian situs, dengan %s di tempat judul. Terbuka di peramban.",
     "Add": "Tambah",

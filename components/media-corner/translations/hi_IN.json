@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "%1 रीफ़्रेश करें",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 ने जवाब नहीं दिया (´・ω・`)",
     "%1 doesn't know this title": "%1 इस शीर्षक को नहीं जानता",
@@ -144,6 +143,8 @@
     "Winter": "सर्दी",
     "Year": "वर्ष",
     "“%1”": "“%1”",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1, एपिसोड %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "किसी साइट का खोज पता, शीर्षक की जगह %s के साथ। यह ब्राउज़र में खुलता है।",
     "Add": "जोड़ें",

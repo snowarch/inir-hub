@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "Aggiorna %1",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 non ha risposto (´・ω・`)",
     "%1 doesn't know this title": "%1 non conosce questo titolo",
@@ -144,6 +143,8 @@
     "Winter": "Inverno",
     "Year": "Anno",
     "“%1”": "«%1»",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1, episodio %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "L’indirizzo di ricerca di un sito, con %s al posto del titolo. Si apre nel browser.",
     "Add": "Aggiungi",

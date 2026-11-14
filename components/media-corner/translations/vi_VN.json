@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "Làm mới %1",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 không phản hồi (´・ω・`)",
     "%1 doesn't know this title": "%1 không biết tựa này",
@@ -144,6 +143,8 @@
     "Winter": "Mùa đông",
     "Year": "Năm",
     "“%1”": "“%1”",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1, tập %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Địa chỉ tìm kiếm của một trang, với %s ở vị trí tiêu đề. Mở trong trình duyệt.",
     "Add": "Thêm",

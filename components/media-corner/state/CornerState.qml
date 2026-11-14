@@ -79,11 +79,11 @@ Singleton {
     property var _out: ({})
     property int _outCount: 0
 
-    function ask(url: string, body: string, shape: var, callback: var, force: bool = false): void {
+    function ask(url: string, body: string, shape: var, callback: var): void {
         if (!root.open) return
         const key = url + body
         const hit = root._answers[key]
-        if (!force && hit && Date.now() - hit.at < root.keepMs) { callback(hit.value, ""); return }
+        if (hit && Date.now() - hit.at < root.keepMs) { callback(hit.value, ""); return }
         const out = root._out[key]
         if (out) { out.callbacks.push(callback); return }
 
@@ -198,6 +198,8 @@ Singleton {
             id: adapter
             // Over the desktop or in a window of its own.
             property bool windowed: false
+            // Empty means the person has not chosen a style yet.
+            property string style: ""
             property string sources: "[]"
             property string subtitleLanguage: "eng"
             property string subtitleApiKey: ""

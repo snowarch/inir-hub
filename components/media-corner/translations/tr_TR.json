@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "%1 yenile",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 yanıt vermedi (´・ω・`)",
     "%1 doesn't know this title": "%1 bu başlığı bilmiyor",
@@ -144,6 +143,8 @@
     "Winter": "Kış",
     "Year": "Yıl",
     "“%1”": "“%1”",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1, %2. bölüm",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Bir sitenin arama adresi; başlığın geleceği yerde %s olur. Tarayıcıda açılır.",
     "Add": "Ekle",

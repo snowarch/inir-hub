@@ -23,11 +23,7 @@ function manifestInfo(manifest) {
     const resource = stream ?? subtitle
     const types = Array.isArray(resource?.types) ? resource.types : (Array.isArray(manifest?.types) ? manifest.types : [])
     const prefixes = Array.isArray(resource?.idPrefixes) ? resource.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : [])
-    const resourceTypes = r => (Array.isArray(r?.types) ? r.types : (Array.isArray(manifest?.types) ? manifest.types : [])).map(String)
-    const resourcePrefixes = r => (Array.isArray(r?.idPrefixes) ? r.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : [])).map(String)
     return { name: String(manifest.name ?? "").slice(0, 40), types: types.map(String), prefixes: prefixes.map(String),
-             streamTypes: resourceTypes(stream), streamPrefixes: resourcePrefixes(stream),
-             subtitleTypes: resourceTypes(subtitle), subtitlePrefixes: resourcePrefixes(subtitle),
              hasStreams: stream !== undefined, hasSubtitles: subtitle !== undefined }
 }
 
@@ -57,11 +53,9 @@ function streamsFrom(body) {
 
 // The request path for one video on this add-on, or "" when it can't find it by the ids there are.
 // show: { kind: anime|movie|series, id, film? }; episode: { season?, episode } or null.
-function pathFor(source, show, episode, kitsuId, resource) {
-    const resourcePrefixes = resource === "subtitles" ? source.subtitlePrefixes : source.streamPrefixes
-    const resourceTypes = resource === "subtitles" ? source.subtitleTypes : source.streamTypes
-    const prefixes = Array.isArray(resourcePrefixes) ? resourcePrefixes : (Array.isArray(source.prefixes) ? source.prefixes : [])
-    const types = Array.isArray(resourceTypes) ? resourceTypes : (Array.isArray(source.types) ? source.types : [])
+function pathFor(source, show, episode, kitsuId) {
+    const prefixes = Array.isArray(source.prefixes) ? source.prefixes : []
+    const types = Array.isArray(source.types) ? source.types : []
     const asks = prefix => prefixes.length === 0 || prefixes.includes(prefix)
     const serves = type => types.length === 0 || types.includes(type)
     if (show.kind === "anime") {

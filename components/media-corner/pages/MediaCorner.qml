@@ -32,6 +32,32 @@ CornerBody {
         { id: "sources", title: "Sources", icon: "extension", caption: "Watching" }
     ]
 
+    // Hold a small set of decoded posters while this view is alive. Qt shares the
+    // decoded image for identical URL and size; banners never enter this cache.
+    property var recentPosters: []
+    function rememberPoster(url: string): void {
+        if (!url || !CornerState.open) return
+        const recent = root.recentPosters.filter(item => item !== url)
+        recent.push(url)
+        root.recentPosters = recent.slice(-24)
+    }
+    Connections {
+        target: CornerState
+        function onOpenChanged(): void { if (!CornerState.open) root.recentPosters = [] }
+    }
+    Item {
+        visible: false
+        Repeater {
+            model: root.recentPosters
+            Image {
+                required property string modelData
+                source: modelData
+                sourceSize: Qt.size(264, 396)
+                asynchronous: true
+                cache: true
+            }
+        }
+    }
     AnimeData { id: animeData }
     MovieData { id: movieData }
 
@@ -97,7 +123,7 @@ CornerBody {
         function onAttemptChanged(): void { root.askGenres() }
     }
 
-    readonly property int closeRoom: root.windowed ? 0 : Math.round(40 * root.d)
+    readonly property int closeRoom: root.windowed || root.prism ? 0 : Math.round(40 * root.d)
 
     // A page is built when first shown and then kept, with its scroll and its pickers.
     component Page: Loader {

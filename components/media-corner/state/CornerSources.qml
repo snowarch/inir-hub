@@ -29,20 +29,6 @@ Singleton {
     function toggle(index: int): void {
         root._save(root.list.map((s, i) => i === index ? Object.assign({}, s, { on: !s.on }) : s))
     }
-    property var refreshErrors: ({})
-    function refreshAddon(url: string, callback: var): void {
-        CornerState.ask(url, "", manifest => manifest, (manifest, error) => {
-            if (error) { callback(Translation.tr("It doesn't answer")); return }
-            const info = Streams.manifestInfo(manifest)
-            if (info === null) { callback(Translation.tr("It lists no streams")); return }
-            root._save(root.list.map(s => s.type === "stremio" && s.url === url ? Object.assign({}, s, {
-                types: info.types, prefixes: info.prefixes, streamTypes: info.streamTypes, streamPrefixes: info.streamPrefixes,
-                subtitleTypes: info.subtitleTypes, subtitlePrefixes: info.subtitlePrefixes,
-                hasStreams: info.hasStreams, hasSubtitles: info.hasSubtitles
-            }) : s))
-            callback("")
-        }, true)
-    }
     function addWeb(name: string, template: string): string {
         if (!root.data.recognized || root.migrationPending) return Translation.tr("Sources are not ready; try again")
         const label = name.trim(), address = template.trim()
@@ -62,7 +48,7 @@ Singleton {
             if (error) { callback(Translation.tr("It doesn't answer")); return }
             const info = Streams.manifestInfo(manifest)
             if (info === null) { callback(Translation.tr("It lists no streams")); return }
-            root._save(root.list.concat([{ type: "stremio", name: info.name || Streams.hostOf(url), url, on: true, types: info.types, prefixes: info.prefixes, streamTypes: info.streamTypes, streamPrefixes: info.streamPrefixes, subtitleTypes: info.subtitleTypes, subtitlePrefixes: info.subtitlePrefixes, hasStreams: info.hasStreams, hasSubtitles: info.hasSubtitles }]))
+            root._save(root.list.concat([{ type: "stremio", name: info.name || Streams.hostOf(url), url, on: true, types: info.types, prefixes: info.prefixes, hasStreams: info.hasStreams, hasSubtitles: info.hasSubtitles }]))
             callback("")
         })
     }

@@ -23,14 +23,6 @@ TestCase {
         const inner = Streams.manifestInfo({ resources: [{ name: "stream", types: ["series"], idPrefixes: ["kitsu"] }] })
         compare(inner.types, ["series"])
         compare(inner.prefixes, ["kitsu"])
-        const mixed = Streams.manifestInfo({ resources: [
-            { name: "stream", types: ["series"], idPrefixes: ["kitsu"] },
-            { name: "subtitles", types: ["movie"], idPrefixes: ["tt"] }
-        ] })
-        compare(Streams.pathFor(mixed, { kind: "movie", id: "tt123" }, null, ""), "")
-        compare(Streams.pathFor(mixed, { kind: "movie", id: "tt123" }, null, "", "subtitles"), "movie/tt123")
-        compare(Streams.pathFor(mixed, { kind: "anime", id: 5 }, { episode: 7 }, "9"), "series/kitsu:9:7")
-        compare(Streams.pathFor(mixed, { kind: "anime", id: 5 }, { episode: 7 }, "9", "subtitles"), "")
     }
     function test_subtitles() {
         const info = Streams.manifestInfo({ resources: ["subtitles"] })

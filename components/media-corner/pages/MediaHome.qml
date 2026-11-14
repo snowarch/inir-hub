@@ -12,6 +12,7 @@ MediaPage {
     id: root
     required property var anime
     required property var movies
+    readonly property bool prism: CornerState.options.style === "prism"
 
     property var hero: null
     function askHero(): void {
@@ -75,8 +76,8 @@ MediaPage {
             anchors.fill: parent
             gradient: Gradient {
                 orientation: Gradient.Horizontal
-                GradientStop { position: 0; color: IrisStyle.artVeilHeavy }
-                GradientStop { position: 0.55; color: IrisStyle.artVeil }
+                GradientStop { position: 0; color: root.prism ? IrisStyle.veilHeavy : IrisStyle.artVeilHeavy }
+                GradientStop { position: 0.55; color: root.prism ? IrisStyle.veilStrong : IrisStyle.artVeil }
                 GradientStop { position: 1; color: "transparent" }
             }
         }
@@ -101,7 +102,7 @@ MediaPage {
                 spacing: Math.round(6 * root.d)
                 IrisText {
                     text: Translation.tr("Trending now")
-                    color: IrisStyle.identity.green
+                    color: root.prism ? IrisStyle.inkOnDark : IrisStyle.identity.green
                     font.pixelSize: IrisStyle.typeFootnote
                     font.weight: IrisStyle.weight(Font.Bold)
                 }
@@ -109,7 +110,9 @@ MediaPage {
                     Layout.fillWidth: true
                     text: String(hero.show?.title ?? "")
                     font.family: IrisStyle.fontTitle
-                    font.pixelSize: IrisStyle.typeTitleLarge
+                    font.pixelSize: root.prism ? 30 * IrisStyle.typeScale : IrisStyle.typeTitleLarge
+                    font.letterSpacing: root.prism ? -0.6 : 0
+                    color: root.prism ? IrisStyle.inkOnDark : IrisStyle.text
                     font.weight: IrisStyle.weight(Font.Bold)
                     elide: Text.ElideRight
                     maximumLineCount: 2
@@ -119,7 +122,7 @@ MediaPage {
                     Layout.fillWidth: true
                     text: [hero.show?.year, Translation.tr(String(hero.show?.type ?? "")), (hero.show?.genres ?? []).slice(0, 3).map(g => Translation.tr(g)).join(" · "),
                            Number(hero.show?.score ?? 0) > 0 ? "★ " + Number(hero.show.score).toFixed(1) : ""].filter(x => String(x ?? "").length > 0).join("  ·  ")
-                    color: IrisStyle.textSecondary
+                    color: root.prism ? Qt.alpha(IrisStyle.inkOnDark, 0.56) : IrisStyle.textSecondary
                     font.pixelSize: IrisStyle.typeFootnote
                     elide: Text.ElideRight
                 }
@@ -127,16 +130,36 @@ MediaPage {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     text: String(hero.show?.description ?? "")
-                    color: IrisStyle.textSecondary
+                    color: root.prism ? Qt.alpha(IrisStyle.inkOnDark, 0.56) : IrisStyle.textSecondary
                     font.pixelSize: IrisStyle.typeLabel
                     wrapMode: Text.WordWrap
                     elide: Text.ElideRight
                     maximumLineCount: 3
                 }
-                IrisButton {
-                    emphasized: true
-                    text: Translation.tr("Details")
-                    onClicked: CornerState.openShow(hero.show)
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Math.round(8 * root.d)
+                    IrisButton {
+                        visible: root.prism
+                        emphasized: true
+                        text: "▶  " + Translation.tr("Watch")
+                        onClicked: {
+                            CornerState.openShow(hero.show)
+                            CornerWatch.begin(hero.show, { episode: 1 })
+                        }
+                    }
+                    IrisButton {
+                        visible: !root.prism || parent.width > Math.round(240 * root.d)
+                        emphasized: !root.prism
+                        text: Translation.tr("Details")
+                        onClicked: CornerState.openShow(hero.show)
+                    }
+                    IrisIconButton {
+                        visible: root.prism && parent.width <= Math.round(240 * root.d)
+                        materialIcon: "info"
+                        Accessible.name: Translation.tr("Details")
+                        onClicked: CornerState.openShow(hero.show)
+                    }
                 }
             }
         }

@@ -3,7 +3,7 @@
     "version": "1.1.0",
     "summary": "Browse anime, films and series, and watch them from sources you add",
     "authors": [
-        "lukatedev"
+        "xsteban1410"
     ],
     "license": "MIT",
     "tags": [
@@ -14,7 +14,9 @@
         "catalog"
     ],
     "permissions": [
-        "network", "process", "files"
+        "network",
+        "process",
+        "files"
     ],
     "hosts": [
         "anilist.co",
@@ -26,7 +28,10 @@
         "www.youtube.com",
         "cinemeta-catalogs.strem.io",
         "live.metahub.space",
-        "m.media-amazon.com", "kitsu.app", "api.opensubtitles.com", "vip-api.opensubtitles.com"
+        "m.media-amazon.com",
+        "kitsu.app",
+        "api.opensubtitles.com",
+        "vip-api.opensubtitles.com"
     ],
     "minInir": "3.1.1",
     "provides": "modules/media-corner",
@@ -35,6 +40,9 @@
         "1.0.1": [
             "Refresh the Hub preview and require iNiR 3.1.1"
         ],
-    "1.1.0": ["Add user-managed sources and optional subtitles"]
+        "1.1.0": [
+            "Choose Normal or Prism presentation in Community Hub",
+            "Add user-managed sources and optional subtitles"
+        ]
     }
 }

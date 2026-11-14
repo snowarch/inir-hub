@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "Обновить %1",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 не ответил (´・ω・`)",
     "%1 doesn't know this title": "%1 не знает это название",
@@ -144,6 +143,8 @@
     "Winter": "Зима",
     "Year": "Год",
     "“%1”": "«%1»",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1, серия %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Адрес поиска сайта, с %s вместо названия. Открывается в браузере.",
     "Add": "Добавить",

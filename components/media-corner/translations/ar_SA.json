@@ -1,5 +1,4 @@
 {
-    "Refresh %1": "تحديث %1",
     "%1 %2": "%1 %2",
     "%1 didn't answer (´・ω・`)": "%1 لم يستجب (´・ω・`)",
     "%1 doesn't know this title": "%1 لا يعرف هذا العنوان",
@@ -144,6 +143,8 @@
     "Winter": "الشتاء",
     "Year": "سنة",
     "“%1”": "«%1»",
+    "Normal": "Normal",
+    "Prism": "Prism",
     "%1, episode %2": "%1، الحلقة %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "عنوان البحث في موقع، مع %s مكان العنوان. يُفتح في المتصفح.",
     "Add": "إضافة",
