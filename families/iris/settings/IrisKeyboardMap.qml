@@ -446,13 +446,36 @@ Column {
             const to = IrisBinds.comboOf(root.layerMods, root.symAt(code))
             root.moving = null
             if (to !== from.key_combo && !root.bindAt(code)) {
-                moveSaver.from = from.key_combo
-                NiriKeybinds.setBind(to, from.action_raw, from.options ?? "")
+                const was = String(from.key_combo)
+                root.edit([{ combo: to, action: String(from.action_raw ?? ""), options: String(from.options ?? "") }, { combo: was, action: "" }],
+                    [root.stateOf(to, null), root.stateOf(was, from)], "moved")
             }
             root.picked = code
             return
         }
         root.picked = root.picked === code ? "" : code
+    }
+    // An older base has no step queue: there each edit is written alone and has no way back.
+    readonly property bool canStep: typeof NiriKeybinds.applyBinds === "function"
+    // A key as it is now, as a step that writes it back: Umbriel's untouched key goes back by dropping Settings' line.
+    function stateOf(combo: string, bind: var): var {
+        const own = CompositorConfig.own?.keybinds ?? {}
+        if (NiriKeybinds.umbriel && !(combo in own)) return { combo: combo, shipped: true }
+        return bind ? { combo: combo, action: String(bind.action_raw ?? ""), options: String(bind.options ?? "") } : { combo: combo, action: "" }
+    }
+    // One change to the keys, written at once and kept in Settings' history: Ctrl+Z or Undo writes the keys back.
+    function edit(steps: var, back: var, say: string): void {
+        if (!root.canStep) {
+            // One write at a time there: a move saves its new key, then drops the old one.
+            const [first, second] = steps
+            if (second) moveSaver.from = second.combo
+            if (String(first.action ?? "").length > 0) NiriKeybinds.setBind(first.combo, first.action, first.options ?? "")
+            else NiriKeybinds.removeBind(first.combo)
+            return
+        }
+        NiriKeybinds.applyBinds(steps)
+        IrisOptions.remember({ kind: "binds", key: "binds:" + steps.map(step => step.combo).join(","), at: Date.now(), steps: [],
+            glyph: "keyboard", name: steps[0].combo, say: say, back: () => NiriKeybinds.applyBinds(back), again: () => NiriKeybinds.applyBinds(steps) })
     }
     Connections {
         id: moveSaver

@@ -91,11 +91,14 @@ ColumnLayout {
                 readonly property bool on: { Config.revision; return root.isOn(entry.modelData.key) }
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                Layout.preferredHeight: icon.height + name.implicitHeight + Math.round(8 * root.d)
+                // The badge rises past the tile's corner: the tile sits that far down, so it never meets the row above.
+                readonly property int overhang: Math.round(5 * root.d)
+                Layout.preferredHeight: entry.overhang + icon.height + name.implicitHeight + Math.round(8 * root.d)
 
                 Rectangle {
                     id: icon
                     anchors.horizontalCenter: parent.horizontalCenter
+                    y: entry.overhang
                     width: Math.round(46 * root.d)
                     height: width
                     radius: IrisStyle.iconRadius(width)
@@ -125,19 +128,19 @@ ColumnLayout {
                         visible: !icon.skinned
                         anchors.right: parent.right
                         anchors.top: parent.top
-                        anchors.margins: -Math.round(5 * root.d)
+                        anchors.margins: -entry.overhang
                         width: Math.round(18 * root.d)
                         height: width
                         radius: IrisStyle.capsule(width)
-                        color: entry.on ? IrisStyle.surfaceHighest : IrisStyle.accent
-                        border.width: 1
-                        border.color: IrisStyle.surface
+                        // Solid either way, as Apple's edit badges: add in the accent, remove in the ink over its tile.
+                        color: entry.on ? IrisStyle.text : IrisStyle.accent
+                        Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
                         MaterialSymbol {
                             anchors.centerIn: parent
                             text: entry.on ? "remove" : "add"
                             iconSize: Math.round(13 * root.d)
                             font.weight: IrisStyle.weight(Font.Bold)
-                            color: entry.on ? IrisStyle.text : IrisStyle.inkOnAccent
+                            color: entry.on ? IrisStyle.surface : IrisStyle.inkOnAccent
                         }
                     }
                 }

@@ -2479,5 +2479,8 @@
   "Nothing runs on this key with these modifiers.": "На этой клавише с этими модификаторами ничего не запускается.",
   "Or a program to run, as you would type it": "Или программа для запуска, как вы бы её набрали",
   "Run it": "Запустить",
-  "One setting": "Один параметр"
+  "One setting": "Один параметр",
+  "Back to iNiR's": "Вернуть как в iNiR",
+  "iNiR's: %1": "В iNiR: %1",
+  "iNiR leaves it free": "В iNiR свободна"
 }

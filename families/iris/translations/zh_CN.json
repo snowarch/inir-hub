@@ -2479,5 +2479,8 @@
   "Nothing runs on this key with these modifiers.": "此按键与这些修饰键组合时不执行任何操作。",
   "Or a program to run, as you would type it": "或要运行的程序，按你输入的方式",
   "Run it": "运行",
-  "One setting": "1 项设置"
+  "One setting": "1 项设置",
+  "Back to iNiR's": "恢复为 iNiR 的",
+  "iNiR's: %1": "iNiR 中：%1",
+  "iNiR leaves it free": "iNiR 中未分配"
 }

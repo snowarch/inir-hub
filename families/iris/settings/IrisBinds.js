@@ -19,6 +19,8 @@ const _tints = {
     "Media and hardware keys": "pink", "Brightness": "yellow", "Layout": "lavender", "Resize": "red", "Monitors": "blue",
     "Scratchpad (Umbriel)": "lavender", "Other": "gray"
 }
+// An action as written, to tell two apart: spacing and Niri's closing semicolon say nothing.
+function actionKey(raw) { return String(raw ?? "").trim().replace(/;$/, "").replace(/\s+/g, " ") }
 function glyphOf(category) { return _glyphs[category] ?? "keyboard" }
 function tintOf(category) { return _tints[category] ?? "gray" }
 

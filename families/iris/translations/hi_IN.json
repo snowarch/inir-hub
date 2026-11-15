@@ -2479,5 +2479,8 @@
   "Nothing runs on this key with these modifiers.": "इन मॉडिफ़ायर के साथ इस कुंजी पर कुछ नहीं चलता।",
   "Or a program to run, as you would type it": "या चलाने के लिए कोई प्रोग्राम, जैसे आप टाइप करेंगे",
   "Run it": "चलाएँ",
-  "One setting": "एक सेटिंग"
+  "One setting": "एक सेटिंग",
+  "Back to iNiR's": "iNiR वाला वापस",
+  "iNiR's: %1": "iNiR में: %1",
+  "iNiR leaves it free": "iNiR में खाली"
 }

@@ -2479,5 +2479,8 @@
   "Nothing runs on this key with these modifiers.": "Tasti una modifier-inik taakkuninnga atuinngilaq.",
   "Or a program to run, as you would type it": "Imaluunniit programmi aallartittussaq, allattarnerit malillugu",
   "Run it": "Aallartiguk",
-  "One setting": "Aaqqissuussineq ataaseq"
+  "One setting": "Aaqqissuussineq ataaseq",
+  "Back to iNiR's": "iNiR-imut uteqqigit",
+  "iNiR's: %1": "iNiR-imi: %1",
+  "iNiR leaves it free": "iNiR-imi atorneqanngilaq"
 }

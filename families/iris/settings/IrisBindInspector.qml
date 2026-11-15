@@ -25,8 +25,13 @@ Column {
 
     // Umbriel's keys are written by CompositorConfig.bind, which an older base lacks: there the drawing only reads.
     readonly property bool canEdit: NiriKeybinds.umbriel ? typeof CompositorConfig.bind === "function" : CompositorService.niriNative
-    readonly property var bind: root.code.length > 0 && root.map ? root.map.bindAt(root.code) : null
-    readonly property string sym: root.code.length > 0 && root.map ? root.map.symAt(root.code) : ""
+    // What the face says: it follows `code` once the face has faded, so a key pointed at eases in instead of snapping.
+    property string shown: ""
+    property bool fading: false
+    readonly property bool motion: IrisStyle.motionEnabled
+    readonly property bool resting: root.shown.length === 0
+    readonly property var bind: root.shown.length > 0 && root.map ? root.map.bindAt(root.shown) : null
+    readonly property string sym: root.shown.length > 0 && root.map ? root.map.symAt(root.shown) : ""
     readonly property var mods: root.map ? root.map.layerMods : []
     readonly property string combo: root.sym.length > 0 ? IrisBinds.comboOf(root.mods, root.sym) : ""
     readonly property color tint: IrisStyle.identityColor(IrisBinds.tintOf(String(root.bind?.category ?? "")))
@@ -34,7 +39,34 @@ Column {
     property bool asking: false
     property string category: ""
     property string said: ""
-    onCodeChanged: { root.asking = false; root.said = "" }
+    onCodeChanged: {
+        root.asking = false
+        root.said = ""
+        if (!root.motion) { root.shown = root.code; return }
+        // Mid-fade the swap takes the newest key when it lands: a pass across the drawing never stutters.
+        if (!root.fading) swap.restart()
+    }
+    SequentialAnimation {
+        id: swap
+        ScriptAction { script: root.fading = true }
+        NumberAnimation { target: face; property: "opacity"; to: 0; duration: IrisStyle.duration(90); easing.type: Easing.OutQuad }
+        ScriptAction { script: { root.shown = root.code; root.fading = false } }
+        ParallelAnimation {
+            NumberAnimation { target: face; property: "opacity"; to: 1; duration: IrisStyle.duration(220); easing.type: Easing.OutCubic }
+            NumberAnimation { target: face; property: "rise"; from: Math.round(6 * root.d); to: 0; duration: IrisStyle.duration(280); easing.type: Easing.OutCubic }
+        }
+    }
+
+    // What iNiR's own files bind this key to, and whether it left that.
+    readonly property var shipped: {
+        if (root.sym.length === 0 || !root.map) return null
+        const want = IrisBinds.comboKey(root.combo, root.map.modKey)
+        return (NiriKeybinds.shippedBinds ?? []).find(one => !one.commented && IrisBinds.comboKey(one.key_combo, root.map.modKey) === want) ?? null
+    }
+    readonly property bool loaded: (NiriKeybinds.shippedBinds ?? []).length > 0
+    readonly property bool differs: root.loaded && root.sym.length > 0
+        && IrisBinds.actionKey(root.bind?.action_raw) !== IrisBinds.actionKey(root.shipped?.action_raw)
+    readonly property string target: root.bind ? String(root.bind.key_combo) : root.combo
 
     // Every action the config already binds, once, under its category: the picker's vocabulary.
     readonly property var actions: {
@@ -53,8 +85,14 @@ Column {
 
     function choose(raw: string, options: string): void {
         if (root.combo.length === 0) return
-        NiriKeybinds.setBind(root.combo, raw, options)
+        root.map.edit([{ combo: root.target, action: raw, options: options }], [root.map.stateOf(root.target, root.bind)], "changed")
         root.asking = false
+    }
+    function remove(): void {
+        root.map.edit([{ combo: root.target, action: "" }], [root.map.stateOf(root.target, root.bind)], "removed")
+    }
+    function putBack(): void {
+        root.map.edit([{ combo: root.shipped ? String(root.shipped.key_combo) : root.target, shipped: true }], [root.map.stateOf(root.target, root.bind)], "restored")
     }
     function program(text: string): string {
         const line = text.trim()
@@ -74,9 +112,16 @@ Column {
         radius: IrisStyle.radiusTile
         color: IrisStyle.fill
 
+        Item {
+        id: face
+        property real rise: 0
+        width: parent.width
+        height: parent.height
+        y: face.rise
+
         // Nothing pointed at: how the drawing is used.
         IrisText {
-            visible: root.code.length === 0
+            visible: root.resting
             anchors.verticalCenter: parent.verticalCenter
             x: Math.round(18 * root.d)
             width: parent.width - 2 * x
@@ -89,7 +134,7 @@ Column {
 
         Row {
             id: comboRow
-            visible: root.code.length > 0
+            visible: !root.resting
             anchors.verticalCenter: parent.verticalCenter
             x: Math.round(14 * root.d)
             spacing: Math.round(4 * root.d)
@@ -101,6 +146,7 @@ Column {
                     width: Math.max(height, part.implicitWidth + Math.round(18 * root.d))
                     radius: Math.min(IrisStyle.radiusChip, Math.round(8 * root.d))
                     color: root.bind ? ColorUtils.applyAlpha(root.tint, IrisStyle.tintWash) : IrisStyle.fill
+                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(180); easing.type: Easing.OutCubic } }
                     IrisText {
                         id: part
                         anchors.centerIn: parent
@@ -115,7 +161,7 @@ Column {
         }
 
         Column {
-            visible: root.code.length > 0
+            visible: !root.resting
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: comboRow.right
             anchors.leftMargin: Math.round(16 * root.d)
@@ -129,6 +175,24 @@ Column {
                 font.pixelSize: IrisStyle.typeLabel
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
+            }
+            // Left iNiR's: what iNiR's files put here, a dot of the changed accent before it.
+            Row {
+                visible: root.differs && root.bind === null
+                spacing: Math.round(6 * root.d)
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.round(5 * root.d)
+                    height: width
+                    radius: width / 2
+                    color: IrisStyle.accent
+                }
+                IrisText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Translation.tr("iNiR's: %1").arg(String(root.shipped?.description || root.shipped?.action || ""))
+                    color: IrisStyle.textTertiary
+                    font.pixelSize: IrisStyle.typeMeta
+                }
             }
             Row {
                 visible: root.bind !== null
@@ -151,15 +215,17 @@ Column {
                 IrisText {
                     anchors.verticalCenter: parent.verticalCenter
                     width: Math.max(0, parent.width - x)
-                    text: String(root.bind?.action_raw ?? "")
+                    text: !root.differs ? String(root.bind?.action_raw ?? "")
+                        : root.shipped ? Translation.tr("iNiR's: %1").arg(String(root.shipped.description || root.shipped.action || ""))
+                        : Translation.tr("iNiR leaves it free")
                     color: IrisStyle.textTertiary
-                    font.family: IrisStyle.fontMono
+                    font.family: root.differs ? IrisStyle.fontMain : IrisStyle.fontMono
                     font.pixelSize: IrisStyle.typeFootnote
                     elide: Text.ElideRight
                 }
             }
             IrisText {
-                visible: root.bind === null
+                visible: root.bind === null && !root.differs
                 width: parent.width
                 text: root.sticky && root.canEdit ? Translation.tr("Nothing runs on this key with these modifiers. Give it an action.")
                     : Translation.tr("Nothing runs on this key with these modifiers.")
@@ -175,7 +241,13 @@ Column {
             anchors.right: parent.right
             anchors.rightMargin: Math.round(12 * root.d)
             spacing: Math.round(6 * root.d)
-            visible: root.sticky && root.canEdit && root.code.length > 0
+            visible: root.sticky && root.canEdit && !root.resting
+            IrisButton {
+                visible: root.differs && root.map.canStep
+                text: Translation.tr("Back to iNiR's")
+                quiet: true
+                onClicked: root.putBack()
+            }
             IrisButton {
                 visible: root.bind !== null
                 text: Translation.tr("Move")
@@ -187,7 +259,7 @@ Column {
                 text: Translation.tr("Remove")
                 quiet: true
                 danger: true
-                onClicked: NiriKeybinds.removeBind(String(root.bind.key_combo))
+                onClicked: root.remove()
             }
             IrisButton {
                 text: root.bind ? Translation.tr("Change") : Translation.tr("Add")
@@ -197,13 +269,14 @@ Column {
             }
         }
         IrisButton {
-            visible: root.code.length === 0 && root.map?.moving !== null && root.map?.moving !== undefined
+            visible: root.resting && root.map?.moving !== null && root.map?.moving !== undefined
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: Math.round(12 * root.d)
             text: Translation.tr("Cancel")
             quiet: true
             onClicked: root.map.moving = null
+        }
         }
     }
 

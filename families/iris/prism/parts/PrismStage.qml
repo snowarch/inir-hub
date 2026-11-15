@@ -158,13 +158,23 @@ Item {
                             PrismText { anchors.baseline: fact.baseline; text: modelData.label; color: PrismTheme.ink3; font.pixelSize: PrismTheme.small }
                         }
                     }
+                    // A group rested on changes the caption with its scene: it fades across, never snaps.
                     PrismText {
+                        id: captionSaid
+                        readonly property string want: stage.caption
                         visible: root.live && stage.caption.length > 0
                         width: Math.max(0, parent.width - x)
                         elide: Text.ElideRight
-                        text: stage.caption
                         color: PrismTheme.ink2
                         font.pixelSize: PrismTheme.body
+                        Component.onCompleted: captionSaid.text = captionSaid.want
+                        onWantChanged: if (PrismTheme.ms(1) === 0) captionSaid.text = captionSaid.want; else swapSaid.restart()
+                        SequentialAnimation {
+                            id: swapSaid
+                            NumberAnimation { target: captionSaid; property: "opacity"; to: 0; duration: PrismTheme.ms(90); easing.type: Easing.OutQuad }
+                            ScriptAction { script: captionSaid.text = captionSaid.want }
+                            NumberAnimation { target: captionSaid; property: "opacity"; to: 1; duration: PrismTheme.ms(200); easing.type: Easing.OutCubic }
+                        }
                     }
                 }
                 Row {

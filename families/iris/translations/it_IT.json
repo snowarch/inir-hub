@@ -2479,5 +2479,8 @@
   "Nothing runs on this key with these modifiers.": "Nessuna azione su questo tasto con questi modificatori.",
   "Or a program to run, as you would type it": "Oppure un programma da avviare, come lo scriveresti",
   "Run it": "Avvialo",
-  "One setting": "Un'impostazione"
+  "One setting": "Un'impostazione",
+  "Back to iNiR's": "Torna a iNiR",
+  "iNiR's: %1": "In iNiR: %1",
+  "iNiR leaves it free": "Libero in iNiR"
 }

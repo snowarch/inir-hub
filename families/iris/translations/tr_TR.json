@@ -2479,5 +2479,8 @@
   "Nothing runs on this key with these modifiers.": "Bu değiştiricilerle bu tuşta hiçbir şey çalışmıyor.",
   "Or a program to run, as you would type it": "Ya da çalıştırılacak bir program, yazacağınız gibi",
   "Run it": "Çalıştır",
-  "One setting": "Bir ayar"
+  "One setting": "Bir ayar",
+  "Back to iNiR's": "iNiR'ınkine dön",
+  "iNiR's: %1": "iNiR'da: %1",
+  "iNiR leaves it free": "iNiR'da boş"
 }

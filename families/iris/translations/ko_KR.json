@@ -2479,5 +2479,8 @@
   "Nothing runs on this key with these modifiers.": "이 보조 키 조합으로는 이 키에서 실행되는 것이 없습니다.",
   "Or a program to run, as you would type it": "또는 실행할 프로그램 (입력하듯이)",
   "Run it": "실행",
-  "One setting": "설정 1개"
+  "One setting": "설정 1개",
+  "Back to iNiR's": "iNiR 기본값으로",
+  "iNiR's: %1": "iNiR 기본: %1",
+  "iNiR leaves it free": "iNiR에서는 비어 있음"
 }
