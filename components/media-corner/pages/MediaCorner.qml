@@ -29,7 +29,9 @@ CornerBody {
         { id: "movie:top", title: "Top films and series", icon: "star" },
         { id: "movie:years", title: "By year", icon: "calendar_month" },
         { id: "movie:genres", title: "Film and series genres", icon: "category" },
-        { id: "sources", title: "Sources", icon: "extension", caption: "Watching" }
+        { id: "sources", title: "Sources", icon: "extension", caption: "Watching" },
+        { id: "schedule", title: "Upcoming episodes", icon: "event" },
+        { id: "history", title: "Watch history", icon: "history" }
     ]
 
     // Hold a small set of decoded posters while this view is alive. Qt shares the
@@ -180,6 +182,11 @@ CornerBody {
         }
     }
     Page { shown: root.page === "sources"; sourceComponent: MediaSources {} }
+    Page { shown: root.page === "history"; sourceComponent: MediaHistory {} }
+    Page {
+        shown: root.page === "schedule"
+        sourceComponent: MediaSchedule { active: CornerState.open && root.page === "schedule" && CornerState.show === null && !CornerState.sheet }
+    }
     Loader {
         property bool seen: false
         readonly property bool shown: CornerState.show !== null

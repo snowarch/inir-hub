@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell.Widgets
 import qs.services
 import qs.modules.common.widgets
@@ -19,6 +20,8 @@ MouseArea {
     readonly property color tint: root.show.kind === "anime" ? IrisStyle.identity.purple : root.show.kind === "series" ? IrisStyle.identity.blue : IrisStyle.identity.orange
     readonly property string detailLine: [Translation.tr(String(root.show.relation ?? "")), Number(root.show.score ?? 0) > 0 ? "★ " + Number(root.show.score).toFixed(1) : "",
         String(root.show.year ?? "").slice(0, 4), Translation.tr(String(root.show.type ?? ""))].filter(x => x.length > 0).join(" · ")
+    readonly property string statusLabel: ({ RELEASING: Translation.tr("Airing"), FINISHED: Translation.tr("Finished"),
+        NOT_YET_RELEASED: Translation.tr("Not yet aired"), CANCELLED: Translation.tr("Cancelled"), HIATUS: Translation.tr("On hiatus") })[String(root.show.status ?? "")] ?? ""
 
     implicitWidth: Math.round(132 * root.d)
     implicitHeight: cover.height + Math.round(8 * root.d) + caption.implicitHeight
@@ -27,11 +30,28 @@ MouseArea {
     activeFocusOnTab: true
     Accessible.role: Accessible.Button
     Accessible.name: String(root.show.title ?? "")
-    Accessible.description: root.detailLine
+    Accessible.description: [Translation.tr(root.show.kind === "anime" ? "Anime" : root.show.kind === "movie" ? "Movie" : "Series"), root.detailLine, root.statusLabel].filter(x => x.length > 0).join(" · ")
     onClicked: CornerState.openShow(root.show)
     Keys.onReturnPressed: CornerState.openShow(root.show)
     Keys.onSpacePressed: CornerState.openShow(root.show)
     onActiveFocusChanged: if (activeFocus) Reveal.reveal(root)
+
+    ToolTip {
+        visible: (root.containsMouse || root.activeFocus) && titleText.truncated
+        delay: 700
+        contentItem: Text {
+            text: String(root.show.title ?? "")
+            textFormat: Text.PlainText
+            color: IrisStyle.text
+            font.family: IrisStyle.fontMain
+            font.pixelSize: IrisStyle.typeLabel
+            wrapMode: Text.Wrap
+            maximumLineCount: 8
+            elide: Text.ElideRight
+        }
+        width: Math.min(implicitWidth, Math.round(360 * root.d))
+        background: Rectangle { color: IrisStyle.surfaceHighOpaque; radius: IrisStyle.radiusRow }
+    }
 
     ClippingRectangle {
         id: cover
@@ -113,8 +133,10 @@ MouseArea {
         anchors { top: cover.bottom; topMargin: Math.round(8 * root.d); left: parent.left; right: parent.right }
         spacing: 0
         IrisText {
+            id: titleText
             Layout.fillWidth: true
             text: String(root.show.title ?? "")
+            textFormat: Text.PlainText
             elide: Text.ElideRight
             wrapMode: Text.WordWrap
             maximumLineCount: 2
