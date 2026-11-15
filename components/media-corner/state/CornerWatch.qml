@@ -125,7 +125,7 @@ Singleton {
             if (ticket !== root._ticket) return
             if (!error) root.subtitles = root.subtitles.concat(found)
             else if (error === "busy") root.subtitleError = CornerSubtitles.limitedMessage(retryAfter ?? "")
-            else if (error !== "unavailable") root.subtitleError = Translation.tr("Subtitle service is unavailable")
+            else if (error !== "unavailable" && error !== "cancelled") root.subtitleError = Translation.tr("Subtitle service is unavailable")
             if (error) root._subtitleSearchFailed = true
             if (--root._waiting === 0) root._found()
         })
@@ -153,7 +153,7 @@ Singleton {
                 if (ticket !== root._ticket) return
                 if (!error) root.subtitles = root.subtitles.concat(found)
                 else if (error === "busy") root.subtitleError = CornerSubtitles.limitedMessage(retryAfter ?? "")
-                else if (error !== "unavailable") root.subtitleError = Translation.tr("Subtitle service is unavailable")
+                else if (error !== "unavailable" && error !== "cancelled") root.subtitleError = Translation.tr("Subtitle service is unavailable")
                 root._found()
             })
             return
