@@ -171,9 +171,9 @@ Item {
                         onWantChanged: if (PrismTheme.ms(1) === 0) captionSaid.text = captionSaid.want; else swapSaid.restart()
                         SequentialAnimation {
                             id: swapSaid
-                            NumberAnimation { target: captionSaid; property: "opacity"; to: 0; duration: PrismTheme.ms(90); easing.type: Easing.OutQuad }
+                            NumberAnimation { target: captionSaid; property: "opacity"; to: 0; duration: PrismTheme.ms(90); easing.type: IrisStyle.feedbackEasing }
                             ScriptAction { script: captionSaid.text = captionSaid.want }
-                            NumberAnimation { target: captionSaid; property: "opacity"; to: 1; duration: PrismTheme.ms(200); easing.type: Easing.OutCubic }
+                            NumberAnimation { target: captionSaid; property: "opacity"; to: 1; duration: PrismTheme.ms(200); easing.type: IrisStyle.feedbackEasing }
                         }
                     }
                 }
@@ -237,7 +237,7 @@ Item {
                             anchors.margins: PrismTheme.dp(3)
                             radius: PrismTheme.dp(14)
                             color: tap.pressed ? PrismTheme.fillPress : hover.hovered ? PrismTheme.fillHover : "transparent"
-                            Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+                            Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: IrisStyle.feedbackEasing } }
                         }
                         Column {
                             x: PrismTheme.dp(16)

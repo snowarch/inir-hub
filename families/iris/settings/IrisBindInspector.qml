@@ -49,11 +49,11 @@ Column {
     SequentialAnimation {
         id: swap
         ScriptAction { script: root.fading = true }
-        NumberAnimation { target: face; property: "opacity"; to: 0; duration: IrisStyle.duration(90); easing.type: Easing.OutQuad }
+        NumberAnimation { target: face; property: "opacity"; to: 0; duration: IrisStyle.duration(90); easing.type: IrisStyle.feedbackEasing }
         ScriptAction { script: { root.shown = root.code; root.fading = false } }
         ParallelAnimation {
-            NumberAnimation { target: face; property: "opacity"; to: 1; duration: IrisStyle.duration(220); easing.type: Easing.OutCubic }
-            NumberAnimation { target: face; property: "rise"; from: Math.round(6 * root.d); to: 0; duration: IrisStyle.duration(280); easing.type: Easing.OutCubic }
+            NumberAnimation { target: face; property: "opacity"; to: 1; duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing }
+            NumberAnimation { target: face; property: "rise"; from: Math.round(6 * root.d); to: 0; duration: IrisStyle.duration(280); easing.type: IrisStyle.feedbackEasing }
         }
     }
 
@@ -146,7 +146,7 @@ Column {
                     width: Math.max(height, part.implicitWidth + Math.round(18 * root.d))
                     radius: Math.min(IrisStyle.radiusChip, Math.round(8 * root.d))
                     color: root.bind ? ColorUtils.applyAlpha(root.tint, IrisStyle.tintWash) : IrisStyle.fill
-                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(180); easing.type: Easing.OutCubic } }
+                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
                     IrisText {
                         id: part
                         anchors.centerIn: parent
