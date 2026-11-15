@@ -55,6 +55,8 @@ Singleton {
     property bool _fallbackSearched: false
     property var _next: null
     property var _current: null
+    // What plays now ({ key, title, show, episode }), for the views; null when nothing does.
+    readonly property var current: root.busy ? root._current : null
     property real _startedAt: 0
     property bool _stopping: false
     property var _watchCalls: []
@@ -244,21 +246,29 @@ Singleton {
         mpv.running = false
         if (root.phase === "playing" || root.phase === "launching") root.phase = "idle"
     }
-    function control(action: string): void {
-        if (!root.controlLinked || !controlSocket.item || !CornerState.open || root.phase !== "playing") return
-        const commands = { pause: ["cycle", "pause"], back: ["seek", -10, "relative"], forward: ["seek", 10, "relative"],
-            subtitleEarlier: ["add", "sub-delay", -0.5], subtitleLater: ["add", "sub-delay", 0.5], fullscreen: ["cycle", "fullscreen"] }
-        if (!Object.prototype.hasOwnProperty.call(commands, action)) return
-        controlSocket.item.write(JSON.stringify({ command: commands[action] }) + "\n")
-        if (action === "pause") controlSocket.item.write(JSON.stringify({ command: ["get_property", "pause"], request_id: 1 }) + "\n")
+    // The running mpv only, through its own socket: nothing here reaches another player.
+    readonly property bool controllable: root.controlLinked && root.phase === "playing" && CornerState.open
+    function _send(command: var): void {
+        if (!root.controllable || !controlSocket.item) return
+        controlSocket.item.write(JSON.stringify({ command }) + "\n")
         controlSocket.item.flush()
     }
+    function control(action: string): void {
+        const commands = { pause: ["cycle", "pause"], back: ["seek", -10, "relative"], forward: ["seek", 10, "relative"],
+            subtitleEarlier: ["add", "sub-delay", -0.5], subtitleLater: ["add", "sub-delay", 0.5], fullscreen: ["cycle", "fullscreen"] }
+        if (Object.prototype.hasOwnProperty.call(commands, action)) root._send(commands[action])
+    }
+    function setPaused(paused: bool): void { root._send(["set_property", "pause", paused]) }
+    // To a point in seconds, clamped to what mpv said the video lasts.
+    function seek(seconds: real): void {
+        if (!Number.isFinite(seconds)) return
+        const end = root.duration > 0 ? root.duration : seconds
+        root._send(["seek", Math.max(0, Math.min(end, seconds)), "absolute"])
+    }
     function selectTrack(type: string, id: var): void {
-        if (!root.controlLinked || !controlSocket.item || !CornerState.open || root.phase !== "playing") return
         if (type !== "audio" && type !== "sub") return
         if (!(type === "sub" && id === "no") && !root.playbackTracks.some(track => track.type === type && track.id === id)) return
-        controlSocket.item.write(JSON.stringify({ command: ["set_property", type === "audio" ? "aid" : "sid", id] }) + "\n")
-        controlSocket.item.flush()
+        root._send(["set_property", type === "audio" ? "aid" : "sid", id])
     }
     function _start(stream: var, shouldResume: bool): void {
         if (!Streams.mediaUrl(stream?.url)) return
@@ -272,7 +282,7 @@ Singleton {
         if (Streams.mediaUrl(stream.referer)) args.push("--referrer=" + stream.referer)
         if (resume > 0) args.push("--start=" + Math.floor(resume))
         args.push("--", stream.url)
-        root._current = { stream, key, title: root.title, show: { id: root.show.id, kind: root.show.kind, title: root.title, type: root.show.type ?? "", film: Boolean(root.show.film) }, episode: root.episode }
+        root._current = { stream, key, title: root.title, show: { id: root.show.id, kind: root.show.kind, title: root.title, type: root.show.type ?? "", film: Boolean(root.show.film), image: String(root.show.image ?? ""), banner: String(root.show.banner ?? "") }, episode: root.episode }
         root._startedAt = resume
         root._stopping = false
         root.position = 0
@@ -399,6 +409,23 @@ Singleton {
         return Watch.matchesSaved(show, query, [Translation.tr(kind), Translation.tr(String(show.type ?? ""))])
     }
     readonly property var sortedSavedKeys: Watch.sortedSavedKeys(root.watchlist, root.progress, CornerState.options.savedOrder)
+    // The lists every view shows, filtered by the saved search: Want to watch, and Watching (the five latest unless searching).
+    readonly property var wantedKeys: root.sortedSavedKeys.filter(key => root.matchesSaved(root.watchlist[key], CornerState.savedQuery))
+    readonly property var watchingKeys: {
+        const searching = CornerState.savedQuery.trim().length > 0
+        const keys = Object.keys(root.progress).filter(key => root.progress[key]?.show && root.matchesSaved(root.progress[key].show, CornerState.savedQuery))
+            .sort((a, b) => (Number(root.progress[b].at) || 0) - (Number(root.progress[a].at) || 0))
+        return searching ? keys : keys.slice(0, 5)
+    }
+    // The latest thing watched, whatever the search says: what Continue picks up.
+    readonly property var latest: {
+        let best = null
+        for (const key in root.progress) {
+            const entry = root.progress[key]
+            if (entry?.show && (!best || (Number(entry.at) || 0) > (Number(best.entry.at) || 0))) best = { key, entry }
+        }
+        return best
+    }
     property var watchlist: ({})
     property bool watchlistLoaded: false
     property bool watchlistLoadFailed: false

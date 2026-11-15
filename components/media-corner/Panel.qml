@@ -64,5 +64,15 @@ Scope {
         }
         /// Open it on a place: home, anime:popular|airing|trending|top|season|genres, movie:movies|series|top|years|genres, anime:<AniList id> or title:<movie|series>:<IMDb id>
         function go(place: string): void { CornerState.go(place); CornerState.open = true }
+        /// Pause what the Corner plays in mpv (only while the Corner is open: closing it stops mpv)
+        function pause(): void { CornerWatch.setPaused(true) }
+        /// Resume what the Corner plays in mpv
+        function resume(): void { CornerWatch.setPaused(false) }
+        /// Pause or resume what the Corner plays in mpv
+        function togglePause(): void { CornerWatch.control("pause") }
+        /// Stop what the Corner plays in mpv, keeping where it was
+        function stop(): void { CornerWatch.stop() }
+        /// Go to a point, in seconds, of what the Corner plays in mpv
+        function seek(seconds: real): void { CornerWatch.seek(seconds) }
     }
 }
