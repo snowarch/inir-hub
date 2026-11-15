@@ -67,6 +67,19 @@ Singleton {
     })
     function tint(name: string): color { return root.tints[name] ?? root.tints.grey }
 
+    // Each page's art in three colours (`.claude/ref/language`, the Design Archive posters: a ribbon's start, its end
+    // and its core), from its tint: the poster on its top, its folders' backs and its rows' covers say one page.
+    readonly property var palettes: ({
+        blue: ["#1f3dff", "#ff8a1f", "#ffd23d"], violet: ["#5b2bff", "#ff2d55", "#ff8ac8"], // iris-literal: the pages' art, Prism's own
+        pink: ["#ff2d78", "#7a3bff", "#ffb36b"], green: ["#14b85a", "#22c3c9", "#f2e14a"], // iris-literal: the pages' art, Prism's own
+        amber: ["#ff9f0a", "#ff3b30", "#ffe08a"], red: ["#ff3b30", "#ff9f0a", "#5b2bff"], // iris-literal: the pages' art, Prism's own
+        teal: ["#0fb3b8", "#1d4bff", "#f4d23c"], indigo: ["#3f3cff", "#1fb7c9", "#ff5aa5"], // iris-literal: the pages' art, Prism's own
+        orange: ["#ff7a1a", "#ff2d55", "#2f6bff"], grey: ["#8e8e96", "#4a6bff", "#ffb340"] // iris-literal: the pages' art, Prism's own
+    })
+    function palette(name: string): var { return (root.palettes[name] ?? root.palettes.grey).map(hex => Qt.color(hex)) }
+    // The art's paper in light: the posters' warm off-white, a step from the white cards it shows behind.
+    readonly property color paperLight: "#eeeae1" // iris-literal: the art's paper in light, Prism's own
+
     readonly property string fontMain: IrisStyle.fontMain
     readonly property string fontMono: IrisStyle.fontMono
     readonly property string fontNumbers: IrisStyle.fontNumbers.length > 0 ? IrisStyle.fontNumbers : IrisStyle.fontMain
@@ -79,6 +92,8 @@ Singleton {
     readonly property real head: 18 * IrisStyle.typeScale
     readonly property real title: 28 * IrisStyle.typeScale
     readonly property real display: 30 * IrisStyle.typeScale
+    // A page's name on its poster (the posters' titles: one big word over the art's calm floor).
+    readonly property real poster: 52 * IrisStyle.typeScale
 
     readonly property bool motion: IrisStyle.motionEnabled
     function ms(value: int): int { return root.motion ? value : 0 }

@@ -90,106 +90,103 @@ Item {
 
     implicitHeight: card.height
 
-    Rectangle {
+    // The tab holds the number and the name on one line, with air; the art takes the rest of the top.
+    readonly property real rise: PrismTheme.dp(50)
+    readonly property real tabNeed: root.pad + (numberSaid.visible ? numberSaid.implicitWidth + PrismTheme.dp(10) : 0)
+        + titleSaid.implicitWidth + PrismTheme.dp(22)
+    // What the art says (the chip) keeps its room; the tab never squeezes the art under a sliver.
+    readonly property real tabRoom: root.width - (chipBox.visible ? chipBox.width + PrismTheme.dp(28) : PrismTheme.dp(96)) - card.slope
+    PrismFolder {
         id: card
         width: root.width
-        height: body.implicitHeight + root.pad * 2 - PrismTheme.dp(8)
-        radius: PrismTheme.dp(24)
-        color: PrismTheme.card
+        height: body.implicitHeight + root.pad - PrismTheme.dp(8)
+        rise: root.rise
+        tabWidth: Math.min(root.tabNeed, root.tabRoom)
+        tint: root.tint
+        seed: root.number * 2.3 + (root.title.length % 7) * 0.9
+        sayWidth: chipBox.visible ? chipBox.width + PrismTheme.dp(24) : 0
+    }
+
+    // What the group holds now, printed on its art in a smoked glass pill (the Pink Sky card's tags).
+    Rectangle {
+        id: chipBox
+        // Its place among the page's groups only where the tab carries no number already ("01" and "01 / 16").
+        readonly property string say: root.chip.length > 0 ? root.chip : numberSaid.visible ? "" : root.note
+        visible: say.length > 0
+        x: root.width - width - PrismTheme.dp(12)
+        y: Math.round((root.rise - height) / 2)
+        z: 1
+        // Laid out by hand from the text's own width: a Row here fed its width back through the box (polish loop).
+        readonly property bool marked: root.chip.length > 0 && String(root.chipRow?.spec?.chipGlyph ?? "").length > 0
+        readonly property real lead: chipBox.marked ? PrismTheme.dp(15) + PrismTheme.dp(6) : 0
+        width: Math.min(chipBox.lead + chipText.implicitWidth + PrismTheme.dp(26), root.width * 0.42)
+        height: PrismTheme.dp(30)
+        radius: height / 2
+        color: PrismTheme.spot
+        border.width: 1
+        border.color: PrismTheme.spotEdge
+        PrismGlyph {
+            visible: chipBox.marked
+            x: PrismTheme.dp(13)
+            anchors.verticalCenter: parent.verticalCenter
+            text: String(root.chipRow?.spec?.chipGlyph ?? "")
+            iconSize: PrismTheme.dp(15)
+            color: PrismTheme.spotInk2
+        }
+        PrismText {
+            id: chipText
+            x: PrismTheme.dp(13) + chipBox.lead
+            width: chipBox.width - x - PrismTheme.dp(13)
+            anchors.verticalCenter: parent.verticalCenter
+            text: chipBox.say
+            figures: root.chip.length === 0
+            color: PrismTheme.paper
+            font.pixelSize: PrismTheme.small
+            font.weight: Font.DemiBold
+            elide: Text.ElideRight
+        }
     }
 
     Column {
         id: body
         x: root.pad
-        y: root.pad
         width: root.inner
         spacing: 0
 
-        // The head: a mark in the page's tint, the name and its line, the chip.
+        // The head: the number and the name inside the tab, the line under it on the front sheet.
         Item {
             width: parent.width
-            height: Math.max(mark.height, titles.implicitHeight)
-            PrismThumb {
-                id: mark
-                size: PrismTheme.dp(40)
-                glyph: root.glyph
-                tint: root.tint
-                anchors.verticalCenter: parent.verticalCenter
+            height: root.rise + (lineSaid.visible ? lineSaid.implicitHeight + PrismTheme.dp(2) : 0)
+            // Its number on the page, as the strip and the pictures' discs say it.
+            PrismText {
+                id: numberSaid
+                visible: root.number > 0 && root.groups.length > 1
+                anchors.baseline: titleSaid.baseline
+                mono: true
+                text: String(root.number).padStart(2, "0")
+                color: PrismTheme.ink3
+                font.pixelSize: PrismTheme.caption
             }
-            Column {
-                id: titles
-                anchors.left: mark.right
-                anchors.leftMargin: PrismTheme.dp(14)
-                anchors.right: chipBox.visible ? chipBox.left : parent.right
-                anchors.rightMargin: PrismTheme.dp(12)
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: PrismTheme.dp(2)
-                // Its number on the page, as the strip and the pictures' discs say it.
-                Row {
-                    width: parent.width
-                    spacing: PrismTheme.dp(8)
-                    PrismText {
-                        id: numberSaid
-                        visible: root.number > 0 && root.groups.length > 1
-                        anchors.baseline: titleSaid.baseline
-                        mono: true
-                        text: String(root.number).padStart(2, "0")
-                        color: PrismTheme.ink3
-                        font.pixelSize: PrismTheme.caption
-                    }
-                    PrismText {
-                        id: titleSaid
-                        width: parent.width - (numberSaid.visible ? numberSaid.width + parent.spacing : 0)
-                        text: root.title
-                        font.pixelSize: PrismTheme.head
-                        font.weight: Font.Bold
-                        font.letterSpacing: -0.2
-                        wrapMode: Text.WordWrap
-                    }
-                }
-                PrismText {
-                    width: parent.width
-                    visible: root.line.length > 0
-                    text: root.line
-                    color: PrismTheme.ink2
-                    font.pixelSize: PrismTheme.small
-                    wrapMode: Text.WordWrap
-                }
+            PrismText {
+                id: titleSaid
+                x: numberSaid.visible ? numberSaid.implicitWidth + PrismTheme.dp(10) : 0
+                y: Math.round((root.rise - height) / 2) + PrismTheme.dp(3)
+                width: Math.max(0, card.tab - root.pad - x - PrismTheme.dp(14))
+                text: root.title
+                font.pixelSize: PrismTheme.head
+                font.weight: Font.Bold
+                font.letterSpacing: -0.2
+                elide: Text.ElideRight
             }
-            Rectangle {
-                id: chipBox
-                // Its place among the page's groups only where the title carries no number already ("01" and "01 / 16").
-                readonly property string say: root.chip.length > 0 ? root.chip : numberSaid.visible ? "" : root.note
-                visible: say.length > 0
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                // Laid out by hand from the text's own width: a Row here fed its width back through the box (polish loop).
-                readonly property bool marked: root.chip.length > 0 && String(root.chipRow?.spec?.chipGlyph ?? "").length > 0
-                readonly property real lead: chipBox.marked ? PrismTheme.dp(15) + PrismTheme.dp(6) : 0
-                width: Math.min(chipBox.lead + chipText.implicitWidth + PrismTheme.dp(24), root.inner * 0.45)
-                height: PrismTheme.dp(30)
-                radius: height / 2
-                color: root.chip.length > 0 ? PrismTheme.fill : "transparent"
-                PrismGlyph {
-                    visible: chipBox.marked
-                    x: PrismTheme.dp(12)
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: String(root.chipRow?.spec?.chipGlyph ?? "")
-                    iconSize: PrismTheme.dp(15)
-                    color: PrismTheme.ink2
-                }
-                PrismText {
-                    id: chipText
-                    x: PrismTheme.dp(12) + chipBox.lead
-                    width: chipBox.width - x - PrismTheme.dp(12)
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: chipBox.say
-                    figures: root.chip.length === 0
-                    color: root.chip.length > 0 ? PrismTheme.ink : PrismTheme.ink3
-                    font.pixelSize: PrismTheme.small
-                    font.weight: root.chip.length > 0 ? Font.DemiBold : Font.Normal
-                    elide: Text.ElideRight
-                }
+            PrismText {
+                id: lineSaid
+                y: root.rise
+                width: parent.width
+                visible: root.line.length > 0
+                text: root.line
+                color: PrismTheme.ink2
+                font.pixelSize: PrismTheme.small
+                wrapMode: Text.WordWrap
             }
         }
         Item { width: 1; height: root.scened || root.keys ? PrismTheme.dp(18) : PrismTheme.dp(10) }

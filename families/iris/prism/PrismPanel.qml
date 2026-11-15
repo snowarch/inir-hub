@@ -88,7 +88,9 @@ Item {
     readonly property var figures: {
         return root.staged ? PrismModel.figuresOf(root.page.pageId, root.sections.map(section => section.title)) : ({})
     }
-    readonly property bool figured: root.staged && root.sections.some(section => Boolean(root.figures[section.title]))
+    // The words on the page's top: where it stands and its name, or what was asked and Changes.
+    readonly property string topEyebrow: PrismState.searching ? Translation.tr("Search") : root.changesView ? Translation.tr("Yours") : Translation.tr(root.page.group)
+    readonly property string topTitle: PrismState.searching ? "“" + PrismState.asked.trim() + "”" : root.changesView ? Translation.tr("Changes") : Translation.tr(root.page.name)
     // Where a card's picture keeps to while the page is read: under the strip once it shows, else under the top edge.
     readonly property real stickTop: stripBar.shown ? stripBar.y + stripBar.height + PrismTheme.dp(14) : PrismTheme.dp(20)
     readonly property string group: {
@@ -340,28 +342,24 @@ Item {
                 width: centre.width - PrismTheme.dp(64)
                 spacing: 0
 
-                PageTop { width: content.width }
-
-                // Groups that carry their own pictures (his 11-15): the page opens on its first card, its facts and
-                // pills in a bar under its name; a page whose groups have none opens on Prism's still.
-                PrismPageBar {
-                    id: pageBar
-                    visible: root.staged && root.figured && pageBar.says
+                // The page opens on its poster: the page's art, where it stands and its size printed small, its name
+                // big, what it holds now as figures. A search, Changes, Home and Wallpaper keep the words without art.
+                // The poster stands off the window's top edge as the folders under it do.
+                Item { width: 1; height: root.staged ? PrismTheme.dp(14) : 0 }
+                PrismPoster {
                     width: content.width
-                    pills_: false
+                    art: root.staged
                     page: root.page
-                    restorable: PrismModel.restorableOf(root.page.pageId)
-                    onRestore: PrismModel.restore(root.page.pageId)
-                }
-                PrismHero {
-                    visible: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper" && !root.figured
-                    width: content.width
-                    page: root.page
-                    number: PrismModel.index(root.page.pageId) + 1
-                    count: root.sections.reduce((n, section) => n + section.rows.length, 0)
-                    changed: PrismModel.changedOf(root.page.pageId)
-                    restorable: PrismModel.restorableOf(root.page.pageId)
-                    lead: PrismModel.leadOf(root.page)
+                    eyebrow: root.topEyebrow
+                    title: root.topTitle
+                    number: root.staged ? PrismModel.index(root.page.pageId) + 1 : 0
+                    total: PrismModel.ids.length
+                    settings: root.staged ? root.sections.reduce((n, section) => n + section.rows.length, 0) : 0
+                    changed: root.staged ? PrismModel.changedOf(root.page.pageId).length : 0
+                    restorable: root.staged ? PrismModel.restorableOf(root.page.pageId) : 0
+                    pills: root.staged
+                    lead: root.staged ? PrismModel.leadOf(root.page) : []
+                    keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
                     onRestore: PrismModel.restore(root.page.pageId)
                 }
                 // Wallpaper opens on the wallpaper itself: what is worn and the ones to go back to.
@@ -375,7 +373,7 @@ Item {
                         onRestore: PrismModel.restore(root.page.pageId)
                     }
                 }
-                Item { visible: !PrismState.searching && !root.changesView; width: 1; height: root.figured ? PrismTheme.dp(14) : PrismTheme.dp(34) }
+                Item { visible: !PrismState.searching && !root.changesView; width: 1; height: root.staged ? PrismTheme.dp(26) : PrismTheme.dp(12) }
 
                 // Home: the settings touched every day, as tiles that act.
                 Loader {
@@ -500,10 +498,16 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: root.railWidth
             height: parent.height
-            PageTop {
+            PrismPoster {
                 id: hostedTop
                 x: PrismTheme.dp(32)
                 width: parent.width - PrismTheme.dp(64)
+                art: false
+                pills: false
+                page: root.page
+                eyebrow: root.topEyebrow
+                title: root.topTitle
+                keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
             }
             Loader {
                 anchors.top: hostedTop.bottom
@@ -565,8 +569,8 @@ Item {
         PrismRound {
             id: railKey
             visible: root.railFits
-            x: Math.round(body.width - root.railWidth - width - PrismTheme.dp(32))
-            y: stripBar.shown ? Math.round(stripBar.y + (stripBar.height - height) / 2) : PrismTheme.dp(18)
+            x: Math.round(body.width - root.railWidth - width - PrismTheme.dp(32) - (root.staged && !root.hosted ? PrismTheme.dp(22) : 0))
+            y: stripBar.shown ? Math.round(stripBar.y + (stripBar.height - height) / 2) : PrismTheme.dp(root.staged && !root.hosted ? 32 : 18)
             Behavior on y { NumberAnimation { duration: PrismTheme.ms(240); easing.type: IrisStyle.feedbackEasing } }
             z: 5
             glyph: root.railOpen ? "right_panel_close" : "right_panel_open"
@@ -583,42 +587,5 @@ Item {
             y: Math.round(body.height - height - PrismTheme.dp(22))
             z: 20
         }
-    }
-    // The page's top: back and forward, then where it stands and its name.
-    component PageTop: Column {
-        spacing: 0
-        Row {
-            topPadding: PrismTheme.dp(18)
-            spacing: PrismTheme.dp(8)
-            PrismRound { glyph: "chevron_left"; enabled_: PrismState.canBack; onClicked: PrismState.goBack() }
-            PrismRound { glyph: "chevron_right"; enabled_: PrismState.canForward; onClicked: PrismState.goForward() }
-        }
-        Item { width: 1; height: PrismTheme.dp(18) }
-        Item {
-            width: parent.width
-            height: heading.implicitHeight
-            PrismHeading {
-                id: heading
-                width: parent.width - (topPills.visible ? topPills.implicitWidth + PrismTheme.dp(16) : 0)
-                eyebrow: PrismState.searching ? Translation.tr("Search")
-                    : root.changesView ? Translation.tr("Yours") : Translation.tr(root.page.group)
-                title: PrismState.searching ? "“" + PrismState.asked.trim() + "”"
-                    : root.changesView ? Translation.tr("Changes") : Translation.tr(root.page.name)
-            }
-            // A page whose groups wear pictures keeps its pills on its name's line.
-            PrismPageBar {
-                id: topPills
-                visible: root.staged && root.figured && topPills.says
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: -PrismTheme.dp(4)
-                width: topPills.implicitWidth
-                facts_: false
-                page: root.page
-                restorable: PrismModel.restorableOf(root.page.pageId)
-                onRestore: PrismModel.restore(root.page.pageId)
-            }
-        }
-        Item { width: 1; height: PrismTheme.dp(18) }
     }
 }

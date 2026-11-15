@@ -177,6 +177,7 @@ Item {
                         id: thumb
                         anchors.verticalCenter: parent.verticalCenter
                         glyph: change.modelData.glyph
+                        salt: String(change.modelData.label ?? "")
                         tint: PrismModel.page(change.modelData.page).tint
                         size: PrismTheme.dp(38)
                     }

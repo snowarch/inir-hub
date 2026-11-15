@@ -1,10 +1,10 @@
 module qs.modules.iris.prism.parts
+PrismFolder 1.0 PrismFolder.qml
 PrismGlow 1.0 PrismGlow.qml
 PrismSidebar 1.0 PrismSidebar.qml
 PrismNavItem 1.0 PrismNavItem.qml
 PrismHeading 1.0 PrismHeading.qml
-PrismHero 1.0 PrismHero.qml
-PrismPageBar 1.0 PrismPageBar.qml
+PrismPoster 1.0 PrismPoster.qml
 PrismStrip 1.0 PrismStrip.qml
 PrismSpots 1.0 PrismSpots.qml
 PrismSection 1.0 PrismSection.qml
