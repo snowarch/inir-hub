@@ -509,11 +509,11 @@ Item {
                 title: root.topTitle
                 keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
             }
+            // iRiS's own pages keep 16 dp of air each side: given 16 more, their column stands on Prism's.
             Loader {
-                anchors.top: hostedTop.bottom
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
+                readonly property real air: String(root.page.view ?? "").includes("/prism/parts/") ? 0 : PrismTheme.dp(16)
+                anchors { top: hostedTop.bottom; bottom: parent.bottom; left: parent.left; right: parent.right
+                    leftMargin: air; rightMargin: air }
                 active: root.hosted
                 source: root.hosted ? root.page.view : ""
             }
