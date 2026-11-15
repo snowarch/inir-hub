@@ -94,7 +94,8 @@ Singleton {
         if (!root.data.recognized || root.migrationPending) return Translation.tr("Sources are not ready; try again")
         const label = name.trim(), address = template.trim()
         if (label.length === 0) return Translation.tr("Give it a name")
-        if (!Sources.webUrl(address, "test")) return Translation.tr("It starts with https:// and has %s where the title goes")
+        // New ones are https only, as the hint says; older http ones keep working until the person replaces them.
+        if (!address.startsWith("https://") || !Sources.webUrl(address, "test")) return Translation.tr("It starts with https:// and has %s where the title goes")
         root._save(root.list.concat([{ type: "web", name: label.slice(0, 40), template: address, on: true }]))
         return ""
     }
