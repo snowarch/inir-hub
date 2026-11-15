@@ -288,6 +288,9 @@ Column {
                 readonly property bool holding: cap.isMod && root.layerMods.includes(cap.mod)
                 readonly property var bind: root.doing && !cap.isMod ? root.bindAt(cap.code) : null
                 readonly property bool bound: cap.bind !== null
+                // Left iNiR's under this layer: a dot in its corner, as a changed row has.
+                readonly property bool changed: root.doing && !cap.isMod && root.changedCount > 0
+                    && root.changes[IrisBinds.heldKey(root.layerMods, root.symAt(cap.code))] !== undefined
                 readonly property color tint: cap.bound ? IrisStyle.identityColor(IrisBinds.tintOf(String(cap.bind.category ?? ""))) : IrisStyle.fill
                 readonly property bool chosen: root.picked === cap.code
                 readonly property bool pressedNow: root.lit[cap.code] === true
@@ -330,6 +333,16 @@ Column {
                     }
                 }
                 Behavior on color { ColorAnimation { duration: IrisStyle.motionEnabled ? 140 : 0; easing.type: IrisStyle.feedbackEasing } }
+
+                Rectangle {
+                    visible: cap.changed && !cap.isoFoot
+                    x: parent.width - width - Math.round(5 * root.d)
+                    y: Math.round(5 * root.d)
+                    width: Math.round(5 * root.d)
+                    height: width
+                    radius: width / 2
+                    color: cap.holding || cap.chosen || cap.pressedNow ? IrisStyle.inkOnAccent : IrisStyle.accent
+                }
 
                 // ── What it types
                 IrisText {
@@ -454,6 +467,35 @@ Column {
             return
         }
         root.picked = root.picked === code ? "" : code
+    }
+    // Every key whose action left iNiR's, by its combo as a set: { now, was } (either null). Empty until iNiR's binds
+    // are read, so nothing shows as changed before there is something to compare with.
+    readonly property var changes: {
+        const now = {}
+        const was = {}
+        for (const one of NiriKeybinds.allBinds ?? []) {
+            const key = IrisBinds.comboKey(one.key_combo, root.modKey)
+            if (!one.commented && !(key in now)) now[key] = one
+        }
+        for (const one of NiriKeybinds.shippedBinds ?? []) {
+            const key = IrisBinds.comboKey(one.key_combo, root.modKey)
+            if (!one.commented && !(key in was)) was[key] = one
+        }
+        const out = {}
+        if (Object.keys(was).length === 0) return out
+        for (const key of Object.keys(now).concat(Object.keys(was))) {
+            if (key in out) continue
+            if (IrisBinds.actionKey(now[key]?.action_raw) !== IrisBinds.actionKey(was[key]?.action_raw)) out[key] = { now: now[key] ?? null, was: was[key] ?? null }
+        }
+        return out
+    }
+    readonly property int changedCount: Object.keys(root.changes).length
+    // Every changed key back to iNiR's at once: one change, one Ctrl+Z.
+    function restoreKeys(): void {
+        const list = Object.keys(root.changes).map(key => root.changes[key])
+        if (list.length === 0) return
+        const comboOf = one => String((one.was ?? one.now).key_combo)
+        root.edit(list.map(one => ({ combo: comboOf(one), shipped: true })), list.map(one => root.stateOf(comboOf(one), one.now)), "restored")
     }
     // An older base has no step queue: there each edit is written alone and has no way back.
     readonly property bool canStep: typeof NiriKeybinds.applyBinds === "function"

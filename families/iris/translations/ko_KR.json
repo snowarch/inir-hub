@@ -2482,5 +2482,7 @@
   "One setting": "설정 1개",
   "Back to iNiR's": "iNiR 기본값으로",
   "iNiR's: %1": "iNiR 기본: %1",
-  "iNiR leaves it free": "iNiR에서는 비어 있음"
+  "iNiR leaves it free": "iNiR에서는 비어 있음",
+  "Restore 1 key": "키 1개 복원",
+  "Restore %1 keys": "키 %1개 복원"
 }

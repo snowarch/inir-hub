@@ -2482,5 +2482,7 @@
   "One setting": "1 项设置",
   "Back to iNiR's": "恢复为 iNiR 的",
   "iNiR's: %1": "iNiR 中：%1",
-  "iNiR leaves it free": "iNiR 中未分配"
+  "iNiR leaves it free": "iNiR 中未分配",
+  "Restore 1 key": "恢复 1 个按键",
+  "Restore %1 keys": "恢复 %1 个按键"
 }

@@ -2482,5 +2482,7 @@
   "One setting": "1 件の設定",
   "Back to iNiR's": "iNiR の設定に戻す",
   "iNiR's: %1": "iNiR では: %1",
-  "iNiR leaves it free": "iNiR では未割り当て"
+  "iNiR leaves it free": "iNiR では未割り当て",
+  "Restore 1 key": "1 個のキーを戻す",
+  "Restore %1 keys": "%1 個のキーを戻す"
 }

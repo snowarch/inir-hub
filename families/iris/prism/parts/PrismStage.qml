@@ -34,6 +34,8 @@ Item {
 
     readonly property string area: String(root.page?.area ?? "")
     readonly property bool keyboard: root.page?.pageId === "keyboard"
+    // Keys the drawn keyboard says left iNiR's (Keyboard only).
+    readonly property int keysChanged: root.keys && keysStage.item ? keysStage.item.keyMap.changedCount : 0
     // The scene a group shows when resting on its cell (after a breath: a pass across the legend loads nothing).
     property string looking: ""
     property string resting: ""
@@ -104,10 +106,12 @@ Item {
             // Keyboard: the keyboard itself, live, with the layouts under it; Super, Ctrl, Alt or Shift held shows
             // what each key does.
             Loader {
+                id: keysStage
                 active: root.keys
                 visible: active
                 width: root.inner
                 sourceComponent: Item {
+                    readonly property var keyMap: map
                     width: root.inner
                     implicitHeight: map.implicitHeight + 2 * PrismTheme.dp(18)
                     IrisKeyboardMap {
@@ -140,7 +144,7 @@ Item {
             // What the stage shows, the screen's own facts, and the page's two pills; nothing to say, no strip (the
             // still says them on its art).
             Item {
-                visible: !root.still && (root.facts.length > 0 || (root.live && stage.caption.length > 0) || root.restorable > 0 || Boolean(root.page?.show))
+                visible: !root.still && (root.facts.length > 0 || (root.live && stage.caption.length > 0) || root.restorable > 0 || Boolean(root.page?.show) || root.keysChanged > 0)
                 width: root.inner
                 height: visible ? PrismTheme.dp(52) : PrismTheme.dp(4)
                 Row {
@@ -183,6 +187,14 @@ Item {
                     anchors.right: parent.right
                     anchors.rightMargin: PrismTheme.dp(4)
                     spacing: PrismTheme.dp(8)
+                    // The keys left iNiR's: all of them back at once (each one alone from its own panel).
+                    PrismPill {
+                        visible: root.keysChanged > 0
+                        tone: "quiet"
+                        glyph: "keyboard"
+                        text: root.keysChanged === 1 ? Translation.tr("Restore 1 key") : Translation.tr("Restore %1 keys").arg(root.keysChanged)
+                        onClicked: keysStage.item.keyMap.restoreKeys()
+                    }
                     PrismPill {
                         visible: root.restorable > 0
                         tone: "quiet"
