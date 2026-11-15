@@ -62,7 +62,9 @@ function mediaUrl(value) {
         if (parts.slice(0, 5).every(part => part === 0) && parts[5] === 0xffff) return false
         return true
     }
-    if (/^(?:0x[0-9a-f]+|[0-9.]+)$/i.test(host)) {
+    // Any host made only of numeric labels (decimal, octal or hex, as inet_aton reads them) is an address:
+    // only the plain four-octet form is accepted, so 0x7f.1 or 0177.0.0.1 can't reach a local one.
+    if (host.split(".").every(label => /^(?:0x[0-9a-f]*|[0-9]+)$/i.test(label))) {
         const octets = host.split(".")
         if (octets.length !== 4 || octets.some(part => !/^(0|[1-9][0-9]{0,2})$/.test(part) || Number(part) > 255)) return false
         const [a, b] = octets.map(Number)

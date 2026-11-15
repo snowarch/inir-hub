@@ -41,7 +41,7 @@ TestCase {
         verify(!Streams.mediaUrl("https://example.com/" + "x".repeat(8192)))
     }
     function test_mediaDestinationsRejectLocalAddresses() {
-        const local = ["localhost", "media.localhost", "127.0.0.1", "10.1.2.3", "169.254.1.2", "172.16.0.1", "192.168.1.1", "2130706433", "[::1]", "[fc00::1]", "[fe80::1]", "[::ffff:7f00:1]"]
+        const local = ["localhost", "media.localhost", "127.0.0.1", "10.1.2.3", "169.254.1.2", "172.16.0.1", "192.168.1.1", "2130706433", "[::1]", "[fc00::1]", "[fe80::1]", "[::ffff:7f00:1]", "0x7f.0.0.1", "0x7f.1", "0177.0.0.1", "127.1", "[::ffff:127.0.0.1]"]
         for (const host of local) {
             const url = "https://" + host + "/video"
             verify(!Streams.mediaUrl(url), host)

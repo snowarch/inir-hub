@@ -232,6 +232,7 @@ Singleton {
         id: file
         path: Directories.pluginFile("media-corner")
         watchChanges: true
+        // Written in place, not renamed over: the file holds the API key and keeps the 0600 that save_key.py gave it.
         atomicWrites: false
         onLoaded: if (root.open && !migration.running && String(adapter.sources).trim().startsWith("[")) migration.running = true
         onFileChanged: file.reload()
