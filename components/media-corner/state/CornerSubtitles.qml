@@ -56,7 +56,7 @@ Singleton {
             xhr.open(method, root.baseUrl + path)
             xhr.setRequestHeader("Api-Key", CornerState.options.subtitleApiKey)
             if (root.token) xhr.setRequestHeader("Authorization", "Bearer " + root.token)
-            xhr.setRequestHeader("User-Agent", "Media Corner v1.2.0")
+            xhr.setRequestHeader("User-Agent", "Media Corner v1.3.0")
             xhr.setRequestHeader("Accept", "application/json")
             if (body) xhr.setRequestHeader("Content-Type", "application/json")
             timeout.restart()
