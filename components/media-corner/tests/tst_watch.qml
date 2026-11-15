@@ -5,6 +5,101 @@ import "../state/watch.js" as Watch
 TestCase {
     name: "Watch"
 
+    function test_summaryCountsOnlySuppliedEpisodesAndManualMarks() {
+        const episodes = [{ episode: 1 }, { episode: 3 }]
+        const progress = { "1": { position: 95, duration: 100 } }
+        const marks = { "1": false, "3": true, "2": true }
+        const result = Watch.summarizeEpisodes(episodes, progress, marks, episode => String(episode.episode))
+        compare(result.known, 2)
+        compare(result.watched, 1)
+        compare(result.next.episode, 1)
+        const allSeen = Watch.summarizeEpisodes(episodes, progress, { "3": true }, episode => String(episode.episode))
+        compare(allSeen.watched, 2)
+        verify(allSeen.next === null)
+    }
+
+    function test_fullHistoryGroupsAndPreservesEpisodeKeys() {
+        const progress = {
+            e1: { at: 10, show: { kind: "series", id: "tt1", title: "Series" }, episode: { season: 1, episode: 1 } },
+            e2: { at: 20, show: { kind: "series", id: "tt1", title: "Series" }, episode: { season: 1, episode: 2 } },
+            film: { at: 30, show: { kind: "movie", id: "tt2", title: "Film" }, episode: null }
+        }
+        const rows = Watch.historyRows(progress)
+        compare(rows.length, 5)
+        compare(rows[0].title, "Film")
+        compare(rows[1].key, "film")
+        compare(rows[2].title, "Series")
+        compare(rows[3].key, "e2")
+        compare(rows[4].episode.episode, 1)
+    }
+
+    function test_savedOrderingUsesKnownDatesAndOwnTitleActivity() {
+        const saved = { a: { id: 1, kind: "anime", title: "Alpha" }, b: { id: 2, kind: "anime", title: "Beta", addedAt: 20 }, c: { id: "tt1", kind: "series", title: "Charlie", addedAt: 10 } }
+        const progress = { p: { at: 90, show: { id: "tt1", kind: "series" } }, q: { at: 50, show: { id: 2, kind: "anime" } }, r: { at: 999, show: { id: 1, kind: "series" } } }
+        compare(Watch.sortedSavedKeys(saved, progress, "title").join(), "a,b,c")
+        compare(Watch.sortedSavedKeys(saved, progress, "added").join(), "b,c,a")
+        compare(Watch.sortedSavedKeys(saved, progress, "activity").join(), "c,b,a")
+        verify(saved.a.addedAt === undefined)
+    }
+
+    function test_invalidWatchlistIsRejectedWithoutChangingInput() {
+        for (const raw of ["{", "null", "[]", '{"a": 1}', '{"a": null}', '{"a": []}']) {
+            const original = raw
+            let failed = false
+            try { Watch.parseWatchlist(raw) } catch (e) { failed = true }
+            verify(failed, raw)
+            compare(raw, original)
+        }
+        const parsed = Watch.parseWatchlist('{"a":{"id":1,"kind":"anime","title":"Example"}}')
+        compare(parsed.a.id, 1)
+        compare(parsed.a.title, "Example")
+    }
+
+    function test_invalidProgressCannotBeTreatedAsEmpty() {
+        for (const invalid of ["{", "null", "[]", '{"a": 1}', '{"a":{"position":"wrong"}}']) {
+            let failed = false
+            try { Watch.parseProgress(invalid) } catch (e) { failed = true }
+            verify(failed, invalid)
+        }
+        compare(Watch.parseProgress('{"a":{"position":10,"duration":100}}').a.position, 10)
+    }
+
+    function test_nextUnseenFindsManuallyUnmarkedEarlierEpisode() {
+        const episodes = [{ season: 1, episode: 1 }, { season: 1, episode: 2 }]
+        const result = Watch.nextUnseen([{ episodes }], { "1": { at: 10 }, "2": { at: 20 } },
+            episode => String(episode.episode), key => key === "2", 0)
+        compare(result.episode, 1)
+    }
+
+    function test_nextUnseenAdvancesWhenSeasonMarkedManually() {
+        const s1e1 = { season: 1, episode: 1 }, s2e1 = { season: 2, episode: 1 }
+        const result = Watch.nextUnseen([{ episodes: [s1e1] }, { episodes: [s2e1] }], {},
+            episode => `s${episode.season}e${episode.episode}`,
+            key => key === "s1e1", 0)
+        compare(result.season, 2)
+        compare(result.episode, 1)
+    }
+
+    function test_manualSeenOverridesCompletionWithoutChangingProgress() {
+        const progress = { a: { position: 95, duration: 100 }, b: { position: 25, duration: 100 } }
+        verify(Watch.isSeen(progress, {}, "a"))
+        verify(!Watch.isSeen(progress, { a: false }, "a"))
+        verify(Watch.isSeen(progress, { b: true }, "b"))
+        verify(Watch.isSeen(progress, { c: true }, "c"))
+        compare(progress.a.position, 95)
+        compare(progress.b.position, 25)
+        verify(progress.c === undefined)
+    }
+
+    function test_matchesSavedLocallyByTitleKindAndTranslatedFormat() {
+        const show = { title: "Example Film", kind: "movie", type: "Movie" }
+        verify(Watch.matchesSaved(show, " example ", []))
+        verify(Watch.matchesSaved(show, "MOVIE", []))
+        verify(Watch.matchesSaved(show, "película", ["Película"]))
+        verify(!Watch.matchesSaved(show, "series", []))
+        verify(Watch.matchesSaved(show, "", []))
+    }
+
     function test_resetProgressKeepsMetadataWithoutMutatingInput() {
         const original = { "tt1": { position: 125, duration: 600, at: 50, show: { id: "tt1" }, episode: null } }
         const result = Watch.resetProgress(original, "tt1")
@@ -23,7 +118,8 @@ TestCase {
 
     function test_watchlistAddsAndRemovesOwnTitleSnapshot() {
         const show = { id: "tt1", kind: "series", title: "Example", type: "TV", film: false, description: "not needed" }
-        const first = Watch.toggleWatchlist({}, "tt1", show)
+        const first = Watch.toggleWatchlist({}, "tt1", show, 123)
+        compare(first.tt1.addedAt, 123)
         compare(first.tt1.id, "tt1")
         compare(first.tt1.kind, "series")
         compare(first.tt1.title, "Example")
@@ -116,6 +212,16 @@ TestCase {
         compare(nullReply[1].state, "error")
         compare(nullReply[1].count, 0)
         compare(initial[1].state, "waiting")
+        const limited = Watch.updateSourceResult(result, 1, "busy", 0, "120")
+        compare(limited[1].state, "limited")
+        compare(limited[1].retryAfter, "120")
+    }
+
+    function test_sourcePriorityDoesNotDependOnResponseOrder() {
+        let streams = Watch.insertSourceStreams([], [{name: "later"}], 1, "Second")
+        streams = Watch.insertSourceStreams(streams, [{name: "first"}, {name: "next"}], 0, "Alias")
+        compare(streams.map(s => s.name), ["first", "next", "later"])
+        compare(streams.map(s => s.source), ["Alias", "Alias", "Second"])
     }
 
     function test_sourceResultsSeparateMappingFailureFromNoMapping() {

@@ -71,6 +71,13 @@ function mediaUrl(value) {
     return true
 }
 
+// Only bounded numeric ids and language codes are shown in the track selector.
+function playbackTracks(value) {
+    if (!Array.isArray(value)) return []
+    return value.slice(0, 128).filter(track => (track?.type === "audio" || track?.type === "sub") && Number.isSafeInteger(track.id) && track.id > 0)
+        .map(track => ({ id: track.id, type: track.type, lang: /^[a-z]{2,3}$/i.test(String(track.lang ?? "")) ? String(track.lang).toLowerCase() : "" }))
+}
+
 function subtitlesFrom(body) {
     const result = []
     for (const entry of Array.isArray(body?.subtitles) ? body.subtitles.slice(0, 256) : []) {
