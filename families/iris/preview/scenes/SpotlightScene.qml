@@ -44,6 +44,7 @@ PreviewScene {
             spacing: Math.round(6 * spotRoot.d)
             // A plate Design (AIRISU) writes the query large on a ruled line, as its Spotlight does; iRiS keeps its field.
             Item {
+                id: ruled
                 visible: IrisStyle.plateSelection
                 Layout.fillWidth: true
                 implicitHeight: Math.round(46 * spotRoot.d)
@@ -60,6 +61,7 @@ PreviewScene {
                 Rectangle { id: rule; anchors.bottom: parent.bottom; width: parent.width; height: 1; color: IrisStyle.textTertiary }
             }
             Rectangle {
+                id: field
                 visible: !IrisStyle.plateSelection
                 Layout.fillWidth: true
                 implicitHeight: Math.round(40 * spotRoot.d)
@@ -74,6 +76,7 @@ PreviewScene {
                 }
             }
             Row {
+                id: hintRow
                 visible: spotRoot.hints
                 spacing: Math.round(6 * spotRoot.d)
                 Repeater {
@@ -141,6 +144,19 @@ PreviewScene {
         }
     }
     OffState { visible: !spotRoot.on; text: Translation.tr("Spotlight off") }
+
+    // The page's parts: Spotlight whole, its number at the empty end of the field, and the prefixes' shortcuts.
+    spots: {
+        const d = spotRoot.d
+        const px = spotPlate.x + spotColumn.x, py = spotPlate.y + spotColumn.y
+        const query = field.visible ? field : ruled
+        const out = [{ group: "Spotlight", x: px + query.x + query.width - 22 * d, y: py + query.y + query.height / 2,
+            part: Qt.rect(spotPlate.x, spotPlate.y, spotPlate.width, spotPlate.height), radius: spotPlate.radius }]
+        if (hintRow.visible)
+            out.push({ group: "Prefixes", x: px + hintRow.x + hintRow.width + 16 * d, y: py + hintRow.y + hintRow.height / 2,
+                part: Qt.rect(px + hintRow.x - 3 * d, py + hintRow.y - 3 * d, hintRow.width + 6 * d, hintRow.height + 6 * d), radius: 15 * d })
+        return out
+    }
     Caption {
         glyph: spotRoot.fromIsland ? "pill" : "web_asset"
         text: Translation.tr("%1 results").arg(spotRoot.results) + " · " + (spotRoot.fromIsland ? Translation.tr("grows out of the Island") : Translation.tr("floats over the screen"))

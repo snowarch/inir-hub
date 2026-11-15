@@ -70,6 +70,7 @@ PreviewScene {
     }
     // The volume pill over the game.
     Rectangle {
+        id: osdPill
         visible: gameRoot.pill !== "hide"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -92,6 +93,7 @@ PreviewScene {
     }
     // What game mode stops.
     Column {
+        id: stopped
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         anchors.margins: Math.round(14 * gameRoot.d)
@@ -115,6 +117,17 @@ PreviewScene {
                 }
             }
         }
+    }
+    // The page's parts: what shows over a fullscreen game (the banner, else the volume pill) and what game mode stops.
+    spots: {
+        const d = gameRoot.d
+        const out = []
+        const over = gameRoot.banners ? banner : osdPill.visible ? osdPill : null
+        if (over)
+            out.push({ group: "Fullscreen", x: over.x - 18 * d, y: over.y + over.height / 2, part: Qt.rect(over.x, over.y, over.width, over.height), radius: over.radius })
+        out.push({ group: "Game mode", x: stopped.x - 18 * d, y: stopped.y + 14 * d,
+            part: Qt.rect(stopped.x - 4 * d, stopped.y - 4 * d, stopped.width + 8 * d, stopped.height + 8 * d), radius: 18 * d })
+        return out
     }
     Caption {
         glyph: gameRoot.auto ? "sports_esports" : "videogame_asset_off"

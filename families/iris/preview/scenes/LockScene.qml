@@ -80,11 +80,13 @@ PreviewScene {
         }
     }
     ColumnLayout {
+        id: blocks
         visible: !lockPreview.drawn
         anchors.centerIn: parent
         width: parent.width - Math.round(64 * lockPreview.d)
         spacing: Math.round(10 * lockPreview.d)
         IrisText {
+            id: clockText
             visible: lockPreview.opt("iris.lock.blocks.clock.enable", true)
             Layout.alignment: Qt.AlignHCenter
             text: Translation.locale.toString(DateTime.clock.date, lockPreview.format + (lockPreview.opt("iris.lock.type.seconds", false) ? ":ss" : ""))
@@ -95,12 +97,14 @@ PreviewScene {
             color: IrisLockOptions.accentColour
         }
         IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
+            id: dateLine
             visible: lockPreview.opt("iris.lock.blocks.clock.enable", true) && String(lockPreview.opt("iris.lock.type.dateFormat", "long")) !== "none"
             Layout.alignment: Qt.AlignHCenter
             text: Translation.locale.toString(DateTime.clock.date, String(lockPreview.opt("iris.lock.type.dateFormat", "long")) === "short" ? "ddd d MMM" : "dddd d MMMM")
             color: IrisStyle.onMediaSecondary
         }
         RowLayout {
+            id: glance
             visible: lockPreview.opt("iris.lock.blocks.glance.enable", true)
             Layout.alignment: Qt.AlignHCenter
             spacing: Math.round(16 * lockPreview.d)
@@ -109,6 +113,7 @@ PreviewScene {
             IrisBatteryMark { visible: lockPreview.opt("iris.lock.blocks.glance.battery", true); Layout.alignment: Qt.AlignVCenter; markHeight: Math.round(11 * lockPreview.d); level: 0.8; tint: IrisStyle.onMedia; frame: IrisStyle.onMediaTertiary }
         }
         Rectangle {
+            id: session
             visible: lockPreview.opt("iris.lock.blocks.session.enable", true)
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: Number(lockPreview.opt("iris.lock.blocks.session.width", 248)) * 0.65
@@ -118,6 +123,7 @@ PreviewScene {
             MaterialSymbol { anchors.centerIn: parent; text: "lock"; color: IrisStyle.onMedia; iconSize: Math.round(18 * lockPreview.d) }
         }
         IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
+            id: media
             visible: lockPreview.opt("iris.lock.blocks.media.enable", true)
             Layout.alignment: Qt.AlignHCenter
             Layout.maximumWidth: parent.width
@@ -126,5 +132,27 @@ PreviewScene {
             elide: Text.ElideRight
         }
     }
+    // The page's parts as the lock shows them: what lies behind, the clock and its type, the glance, the sign-in field
+    // and what plays. A Design that draws its own lock is pointed at only through the legend.
+    function partOf(item: Item, pad: real): rect {
+        return Qt.rect(blocks.x + item.x - pad, blocks.y + item.y - pad, item.width + 2 * pad, item.height + 2 * pad)
+    }
+    spots: {
+        if (lockPreview.drawn) return []
+        const d = lockPreview.d, gap = 18 * d
+        const out = [{ group: "Scene", x: 22 * d, y: 22 * d, part: Qt.rect(0, 0, lockPreview.width, lockPreview.height), radius: 0 }]
+        const beside = (group, item, pad) => {
+            if (!item.visible || item.width <= 0) return
+            const r = lockPreview.partOf(item, pad)
+            out.push({ group: group, x: r.x + r.width + gap, y: r.y + r.height / 2, part: r, radius: Math.min(r.height / 2, 12 * d) })
+        }
+        beside("Clock", clockText, 4 * d)
+        beside("Type", dateLine, 3 * d)
+        beside("At a glance", glance, 6 * d)
+        beside("Sign in", session, 0)
+        beside("Now playing", media, 3 * d)
+        return out
+    }
+
     Caption { glyph: "lock"; text: Translation.tr("Your lock screen, without locking") }
 }

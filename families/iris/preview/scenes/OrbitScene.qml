@@ -48,12 +48,14 @@ PreviewScene {
             width: parent.width - 2 * x
             spacing: Math.round(8 * orbitRoot.d)
             Repeater {
+                id: workspaces
                 // The neighbours show as much as Neighbours lets them; Hidden leaves the workspace you are on alone.
                 model: orbitRoot.peek > 0 ? [-1, 0, 1] : [0]
                 ClippingRectangle {
                     id: card
                     required property int modelData
                     readonly property bool current: card.modelData === 0
+                    readonly property Item tag: nameTag
                     Layout.fillWidth: true
                     Layout.preferredHeight: card.current ? Math.round(150 * orbitRoot.d) : Math.round(Math.min(70, orbitRoot.peek) * 0.5 * orbitRoot.d)
                     radius: IrisStyle.radiusTile
@@ -83,6 +85,7 @@ PreviewScene {
                         }
                     }
                     Rectangle {
+                        id: nameTag
                         visible: card.current && orbitRoot.on
                         anchors.left: parent.left
                         anchors.top: parent.top
@@ -103,6 +106,7 @@ PreviewScene {
                 }
             }
             Row {
+                id: shelf
                 visible: orbitRoot.recent
                 spacing: Math.round(6 * orbitRoot.d)
                 Repeater {
@@ -119,6 +123,27 @@ PreviewScene {
     }
 
     OffState { visible: !orbitRoot.on; text: Translation.tr("Orbit off") }
+
+    // The page's parts: Orbit whole, the workspace you are on at its size, its name as Look writes it, the shelf.
+    spots: {
+        const d = orbitRoot.d, gap = 16 * d
+        const px = orbitPlate.x + orbitColumn.x, py = orbitPlate.y + orbitColumn.y
+        const out = [{ group: "Orbit", x: orbitPlate.x + orbitPlate.width + gap, y: orbitPlate.y + 18 * d,
+            part: Qt.rect(orbitPlate.x, orbitPlate.y, orbitPlate.width, orbitPlate.height), radius: orbitPlate.radius }]
+        const card = workspaces.count > 0 ? workspaces.itemAt(orbitRoot.peek > 0 ? 1 : 0) : null
+        if (card) {
+            out.push({ group: "Size", x: px + card.x + card.width - 18 * d, y: py + card.y + 18 * d,
+                part: Qt.rect(px + card.x, py + card.y, card.width, card.height), radius: card.radius })
+            const tag = card.tag
+            if (tag && tag.visible)
+                out.push({ group: "Look", x: px + card.x + tag.x + tag.width + gap, y: py + card.y + tag.y + tag.height / 2,
+                    part: Qt.rect(px + card.x + tag.x, py + card.y + tag.y, tag.width, tag.height), radius: tag.radius })
+        }
+        if (shelf.visible)
+            out.push({ group: "Shelf", x: px + shelf.x + shelf.width + gap, y: py + shelf.y + shelf.height / 2,
+                part: Qt.rect(px + shelf.x - 3 * d, py + shelf.y - 3 * d, shelf.width + 6 * d, shelf.height + 6 * d), radius: 8 * d })
+        return out
+    }
 
     Caption {
         glyph: "workspaces"

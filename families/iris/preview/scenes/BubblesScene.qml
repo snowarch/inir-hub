@@ -148,6 +148,15 @@ PreviewScene {
             : bubRoot.rest.y + bubRoot.size * 0.55
     }
 
+    // The page's parts, on the bubbles as they stand (the page's bands): the weather bubble among Status, the sound one
+    // among Sound and media.
+    spots: {
+        const d = bubRoot.d, s = bubRoot.size
+        return [
+            { group: "Status", x: bubRoot.home.x + s / 2, y: bubRoot.home.y + s + 16 * d, part: Qt.rect(bubRoot.home.x, bubRoot.home.y, s, s), radius: s / 2 },
+            { group: "Sound and media", x: bubRoot.bx + s / 2, y: bubRoot.by + s + 16 * d, part: Qt.rect(bubRoot.bx, bubRoot.by, s, s), radius: s / 2 }
+        ]
+    }
     Caption {
         glyph: ["near_me", "back_hand", bubRoot.snap ? "select" : "pan_tool", "touch_app", bubRoot.opensIsland ? "pill" : "web_asset", bubRoot.opensIsland ? "pill" : "web_asset", "undo"][bubRoot.step]
         text: [Translation.tr("A bubble floats over the desktop"),

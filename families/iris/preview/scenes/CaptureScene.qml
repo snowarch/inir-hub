@@ -128,6 +128,15 @@ PreviewScene {
             }
         }
     }
+    // The page's parts: the snip's region and the recording pill.
+    spots: {
+        const d = captureRoot.d
+        return [
+            { group: "Snip", x: region.x + region.width / 2, y: region.y + region.height, part: Qt.rect(region.x, region.y, region.width, region.height),
+                radius: captureRoot.circle ? Math.min(region.width, region.height) / 2 : 8 * d },
+            { group: "Recording", x: record.x - 18 * d, y: record.y + record.height / 2, part: Qt.rect(record.x, record.y, record.width, record.height), radius: record.radius }
+        ]
+    }
     Caption {
         glyph: captureRoot.circle ? "circle" : "screenshot_region"
         text: [captureRoot.circle ? Translation.tr("Circle to search") : captureRoot.snap ? Translation.tr("Snaps to windows") : Translation.tr("Free region"),

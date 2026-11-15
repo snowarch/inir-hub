@@ -238,6 +238,13 @@ PreviewScene {
         onLoaded: item.face = Qt.binding(() => widgetsRoot.standIn)
     }
     OffState { visible: !widgetsRoot.on; text: Translation.tr("Desktop widgets off") }
+    // The page's part: the widgets as the desktop wears them.
+    spots: {
+        const d = widgetsRoot.d
+        return [{ group: "Widgets", x: widgetsRoot.plateX + widgetsRoot.wide + widgetsRoot.gap / 2, y: widgetsRoot.plateY - 14 * d,
+            part: Qt.rect(widgetsRoot.plateX, widgetsRoot.plateY, widgetsRoot.wide + widgetsRoot.gap + widgetsRoot.unit, widgetsRoot.unit),
+            radius: widgetsRoot.plateRadius }]
+    }
     Caption {
         glyph: widgetsRoot.bare ? "avg_pace" : widgetsRoot.glass ? "blur_on" : widgetsRoot.clear ? "select" : "square"
         text: !widgetsRoot.on ? ""

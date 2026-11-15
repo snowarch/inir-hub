@@ -27,13 +27,13 @@ ClippingRectangle {
 
     color: "transparent"
 
-    // Each spot whose group the page shows, with its legend number.
+    // Each spot whose group the page shows, with its legend number: one number an entry, its first spot.
     readonly property var marks: {
         const out = []
         for (const spot of root.spots) {
             const i = root.groups.findIndex(entry => entry.title === spot.group
                 || Array.from(entry.rows ?? []).some(row => row.section === spot.group))
-            if (i < 0) continue
+            if (i < 0 || out.some(mark => mark.number === i + 1)) continue
             out.push(Object.assign({}, spot, { entry: String(root.groups[i].title), number: i + 1, changed: Boolean(root.groups[i].changed) }))
         }
         return out
@@ -181,11 +181,19 @@ ClippingRectangle {
     Rectangle {
         id: chip
         property var mark: null
-        readonly property bool rightward: Number(chip.mark?.x ?? 0) < root.width * 0.62
+        // Away from its part when the number stands beside it (right of the part, the name goes right), never over
+        // what it names; a number on its part takes the side with room.
+        readonly property real markX: Number(chip.mark?.x ?? 0)
+        readonly property var markPart: chip.mark?.part ?? null
+        readonly property bool rightward: chip.markPart && chip.markX >= chip.markPart.x + chip.markPart.width ? true
+            : chip.markPart && chip.markX <= chip.markPart.x ? false
+            : chip.markX < root.width * 0.62
         readonly property string say: chip.mark && typeof root.sayOf === "function" ? String(root.sayOf(String(chip.mark.entry)) ?? "") : ""
         readonly property real gap: PrismTheme.dp(18)
         // Measured from both words, never from the row: the value's own visibility hangs on the room left.
-        width: Math.min(root.width * 0.6, chipName.implicitWidth + (chip.say.length > 0 ? chipRow.spacing + chipSay.implicitWidth : 0) + PrismTheme.dp(24))
+        // The name whole always; the value only where the scene leaves room for it (chipSay).
+        width: Math.min(Math.max(root.width - PrismTheme.dp(12), chipName.implicitWidth + PrismTheme.dp(24)),
+            chipName.implicitWidth + (chip.say.length > 0 ? chipRow.spacing + chipSay.implicitWidth : 0) + PrismTheme.dp(24))
         height: PrismTheme.dp(30)
         radius: height / 2
         color: PrismTheme.spot
@@ -207,8 +215,6 @@ ClippingRectangle {
             spacing: PrismTheme.dp(8)
             PrismText {
                 id: chipName
-                width: Math.min(implicitWidth, chipRow.width)
-                elide: Text.ElideRight
                 text: Translation.tr(String(chip.mark?.entry ?? ""))
                 color: PrismTheme.paper
                 font.pixelSize: PrismTheme.small

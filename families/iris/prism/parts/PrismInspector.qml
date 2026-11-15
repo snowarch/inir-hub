@@ -61,8 +61,9 @@ Item {
         Item {
             id: head
             width: parent.width
-            height: PrismTheme.dp(56)
+            height: Math.max(PrismTheme.dp(56), said.implicitHeight + PrismTheme.dp(16))
             Column {
+                id: said
                 x: PrismTheme.dp(14)
                 anchors.verticalCenter: parent.verticalCenter
                 width: close.x - x - PrismTheme.dp(8)
@@ -78,10 +79,13 @@ Item {
                         font.pixelSize: PrismTheme.caption
                         anchors.baseline: title.baseline
                     }
+                    // A long language takes a second line, never a cut name.
                     PrismText {
                         id: title
-                        width: Math.min(implicitWidth, parent.width - num.width - parent.spacing)
-                        elide: Text.ElideRight
+                        width: parent.width - num.width - parent.spacing
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 3
+                        elide: Text.ElideNone
                         text: Translation.tr(String(root.shown?.title ?? ""))
                         color: PrismTheme.ink
                         font.pixelSize: PrismTheme.head
@@ -91,7 +95,9 @@ Item {
                 PrismText {
                     visible: root.say.length > 0
                     width: parent.width
-                    elide: Text.ElideRight
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 3
+                    elide: Text.ElideNone
                     text: root.say
                     color: PrismTheme.ink2
                     font.pixelSize: PrismTheme.small

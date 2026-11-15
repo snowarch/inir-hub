@@ -130,6 +130,16 @@ PreviewScene {
             color: IrisStyle.accent
         }
     }
+    // The page's parts: the pill as Feedback draws it, and how high the volume climbs (Volume's ear protection).
+    spots: {
+        const d = soundRoot.d
+        const out = [{ group: "Feedback", x: pill.x - 18 * d, y: pill.y + pill.height / 2,
+            part: Qt.rect(pill.x, pill.y, pill.width, pill.height), radius: pill.radius }]
+        const climb = pill.minimal ? Qt.rect(pill.x + ring.x, pill.y + ring.y, ring.width, ring.height)
+            : Qt.rect(pill.x, pill.y, Math.max(pill.height, pill.width * soundRoot.cap), pill.height)
+        out.push({ group: "Volume", x: climb.x + climb.width, y: pill.y - 6 * d, part: climb, radius: pill.minimal ? ring.width / 2 : pill.radius })
+        return out
+    }
     Caption {
         glyph: soundRoot.guard ? "hearing" : "volume_up"
         text: [soundRoot.shown ? (soundRoot.style === "bar" ? Translation.tr("Bar") : soundRoot.style === "minimal" ? Translation.tr("Minimal") : Translation.tr("Capsule"))

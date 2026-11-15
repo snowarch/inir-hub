@@ -97,6 +97,7 @@ PreviewScene {
                 readonly property real fullHeight: ccRoot.packed.rows * unit + Math.max(0, ccRoot.packed.rows - 1) * gap
                 implicitHeight: ccRoot.shownRows * unit + Math.max(0, ccRoot.shownRows - 1) * gap
                 Repeater {
+                    id: tiles
                     model: ccRoot.ids
                     Rectangle {
                         id: block
@@ -107,6 +108,12 @@ PreviewScene {
                         readonly property bool wide: !["media", "level", "levels", "platter"].includes(block.kind) && block.spot.w > 1
                         readonly property bool grouped: block.kind === "levels" || block.kind === "platter"
                         readonly property bool upright: block.spot.h > block.spot.w
+                        // A control drawn inside the platter, by its id (the scene points at it there).
+                        function discOf(id: string): Item {
+                            const i = block.kind === "platter" ? Array.from(IrisControlOptions.platterIds).indexOf(id) : -1
+                            return i >= 0 ? discs.itemAt(i) : null
+                        }
+                        readonly property Item platter: platterGrid
                         visible: block.spot.row + block.spot.h <= ccRoot.shownRows
                         x: Math.round(block.spot.col * (ccGrid.cell + ccGrid.gap))
                         y: Math.round(block.spot.row * (ccGrid.unit + ccGrid.gap))
@@ -126,11 +133,13 @@ PreviewScene {
                         }
                         clip: true
                         Grid {
+                            id: platterGrid
                             visible: block.kind === "platter"
                             anchors.centerIn: parent
                             columns: block.spot.w > 2 ? 4 : 2
                             spacing: Math.round(10 * ccRoot.d)
                             Repeater {
+                                id: discs
                                 model: IrisControlOptions.platterIds
                                 Rectangle {
                                     required property string modelData
@@ -235,6 +244,29 @@ PreviewScene {
         }
     }
     OffState { visible: !ccRoot.on; text: Translation.tr("Control Center off") }
+
+    // The page's parts: the Control Center whole, and the Hotspot and VPN controls where the layout has them, as a
+    // tile of their own or a disc in the platter.
+    spots: {
+        const d = ccRoot.d
+        const gx = ccPlate.x + ccColumn.x + ccGrid.x, gy = ccPlate.y + ccColumn.y + ccGrid.y
+        const out = [{ group: "Control Center", x: ccPlate.x + ccColumn.x + ccTitle.x + ccTitle.width + 16 * d,
+            y: ccPlate.y + ccColumn.y + ccTitle.y + ccTitle.height / 2,
+            part: Qt.rect(ccPlate.x, ccPlate.y, ccPlate.width, ccPlate.height), radius: ccPlate.radius }]
+        for (const [group, id] of [["Hotspot", "hotspot"], ["VPN", "vpn"]]) {
+            for (let i = 0; i < tiles.count; i++) {
+                const block = tiles.itemAt(i)
+                if (!block || !block.visible) continue
+                const disc = block.modelData === id ? null : block.discOf(id)
+                if (block.modelData !== id && !disc) continue
+                const r = disc ? Qt.rect(gx + block.x + block.platter.x + disc.x, gy + block.y + block.platter.y + disc.y, disc.width, disc.height)
+                    : Qt.rect(gx + block.x, gy + block.y, block.width, block.height)
+                out.push({ group: group, x: r.x + r.width - 5 * d, y: r.y + 5 * d, part: r, radius: disc ? disc.radius : block.radius })
+                break
+            }
+        }
+        return out
+    }
     Caption {
         glyph: ccRoot.fromIsland ? "pill" : "web_asset"
         text: (ccRoot.fromIsland ? Translation.tr("Becomes the Island's controls page") : Translation.tr("Hangs from the Island as a panel")) + " · " + (ccRoot.round ? Translation.tr("round") : Translation.tr("tiles"))
