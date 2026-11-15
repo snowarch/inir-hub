@@ -132,11 +132,14 @@ MouseArea {
             wrapMode: Text.WordWrap
             maximumLineCount: 2
             font.pixelSize: IrisStyle.typeLabel
+            // Two lines' room always, so the facts under it line up across a shelf.
+            Layout.minimumHeight: 2 * titleText.contentHeight / Math.max(1, titleText.lineCount)
+            verticalAlignment: Text.AlignTop
         }
         IrisText {
             Layout.fillWidth: true
             text: root.detailLine
-            color: IrisStyle.muted
+            color: IrisStyle.textSecondary
             elide: Text.ElideRight
             font.pixelSize: IrisStyle.typeFootnote
         }
