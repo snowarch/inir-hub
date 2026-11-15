@@ -29,6 +29,26 @@ PreviewScene {
     readonly property real naturalHeight: Math.round(320 * winRoot.d)
     narrowest: Math.round(400 * winRoot.d)
     lowest: Math.round(220 * winRoot.d)
+    // The focused window's parts a person points at: its frame (borders), a corner (shape), its title bar and the
+    // dots in it (closing), and the gap beside it (layout). The page keeps those of its own groups.
+    spots: {
+        const g = winRoot.gaps, w = winRoot.width, h = winRoot.height, d = winRoot.d
+        const fx = Math.round(w * 0.18 + g / 2), fy = Math.round(g + IrisStyle.weld)
+        const fw = Math.round(w * 0.46 - g), fh = Math.round(h - 2 * g - IrisStyle.weld)
+        const ring = winRoot.ring ? winRoot.ringWidth : 0
+        const pad = Math.round(14 * d) + (winRoot.border ? winRoot.borderWidth : 0)
+        const corner = Math.max(Math.round(40 * d), winRoot.corners * 2)
+        const bar = pad + Math.round(24 * d)
+        const gapX = Math.round(w * 0.18)
+        return [
+            { group: "Borders", x: fx + fw, y: Math.round(fy + fh * 0.42), part: Qt.rect(fx - ring, fy - ring, fw + 2 * ring, fh + 2 * ring), radius: winRoot.corners + ring },
+            { group: "Shape", x: fx, y: fy + fh, part: Qt.rect(fx, fy + fh - corner, corner, corner), radius: winRoot.corners },
+            { group: "Closing", x: fx + pad + Math.round(54 * d), y: fy + pad + Math.round(4 * d),
+                part: Qt.rect(fx + pad - Math.round(6 * d), fy + pad - Math.round(6 * d), Math.round(48 * d), Math.round(20 * d)), radius: Math.round(10 * d) },
+            { group: "Title bars", x: fx + fw - Math.round(28 * d), y: fy + Math.round(bar / 2), part: Qt.rect(fx, fy, fw, bar), radius: winRoot.corners },
+            { group: "Layout", x: gapX, y: Math.round(h * 0.5), part: Qt.rect(gapX - g / 2 - Math.round(3 * d), fy, g + Math.round(6 * d), fh), radius: Math.round(4 * d) }
+        ]
+    }
 
     Repeater {
         // The column on the left runs off the screen as Niri's strip does; the focused one sits in the middle.

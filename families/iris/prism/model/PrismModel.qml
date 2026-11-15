@@ -344,6 +344,20 @@ Singleton {
         return IrisOptions.say(row.spec, root.stored(row, value))
     }
     function sayNow(row: var): string { return root.say(row, root.read(row)) }
+    // How a row lays out beside another: a switch, a field (a range, hue, text or a short choice: name over the control
+    // when two share a line or a narrow column), or "" (it needs its own line).
+    function shapeOf(row: var): string {
+        // A delegate asks once more as its list shrinks under it, with no row left.
+        if (!row) return ""
+        const kind = String(row.kind ?? "")
+        if (kind === "switch") return "switch"
+        if (kind === "range" || kind === "hue" || kind === "text") return "field"
+        if (kind === "choice" && !row.spec?.cards && !row.spec?.flags) {
+            const choices = root.choicesOf(row)
+            if (choices.length >= 2 && choices.length <= 4 && !choices.some(choice => choice.swatch !== undefined && choice.swatch !== null)) return "field"
+        }
+        return ""
+    }
     function figure(row: var, value: var): string { return IrisOptions.rangeText(row.spec, value) }
 
     // Pins: the rows the person keeps at hand, Home's list in every Settings.

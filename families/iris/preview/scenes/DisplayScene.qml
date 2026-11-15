@@ -27,6 +27,17 @@ PreviewScene {
     Loop on t { running: displayRoot.playing; rest: 1800 }
     readonly property real dusk: displayRoot.scheduled ? displayRoot.t : 1
     readonly property real tint: (displayRoot.night || displayRoot.scheduled) ? displayRoot.warmth * displayRoot.dusk : 0
+    // Its parts: the bright window (comfort), the warmth's scale or the day's arc (Night Light), the screen itself.
+    spots: {
+        const d = displayRoot.d
+        const warm = displayRoot.scheduled ? Qt.rect(arc.x, arc.y, arc.width, arc.height)
+            : Qt.rect(warmthScale.x, warmthScale.y, warmthScale.width, warmthScale.height)
+        return [
+            { group: "Comfort", x: flash.x + flash.width, y: flash.y, part: Qt.rect(flash.x, flash.y, flash.width, flash.height), radius: IrisStyle.radiusPlate },
+            { group: "Night Light", x: warm.x, y: Math.round(warm.y + warm.height / 2), part: warm, radius: displayRoot.scheduled ? Math.round(14 * d) : warmthScale.radius },
+            { group: "Screen", x: Math.round(24 * d), y: Math.round(24 * d), part: Qt.rect(0, 0, displayRoot.width, displayRoot.height), radius: 0 }
+        ]
+    }
 
     // A bright window opening: soft or blinding.
     Rectangle {

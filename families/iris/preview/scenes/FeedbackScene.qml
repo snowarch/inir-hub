@@ -12,6 +12,18 @@ import qs.modules.iris.preview.parts
 PreviewScene {
     id: feedRoot
     subject: Qt.rect(bannerPlate.x, bannerPlate.y, bannerPlate.width, bannerPlate.height)
+    // Its parts: the banner, the app's mark on it (which apps notify), the Island that keeps quiet (Do Not Disturb).
+    spots: {
+        const d = feedRoot.d, b = bannerPlate, i = feedIsland
+        const mark = Math.round(38 * d), inset = Math.round(14 * d)
+        return [
+            { group: "Banners", x: b.x + b.width, y: b.y, part: Qt.rect(b.x, b.y, b.width, b.height), radius: b.radius },
+            { group: "Apps", x: b.x + inset + mark / 2, y: b.y + b.height,
+                part: Qt.rect(b.x + inset - 4 * d, b.y + (b.height - mark) / 2 - 4 * d, mark + 8 * d, mark + 8 * d), radius: 12 * d },
+            { group: "Do Not Disturb", x: i.x + i.width + Math.round(18 * d), y: i.y + i.height / 2,
+                part: Qt.rect(i.x, i.y, i.width, i.height), radius: i.height / 2 }
+        ]
+    }
     readonly property bool banners: feedRoot.opt("iris.modules.notificationPopup", true)
     readonly property bool osd: feedRoot.opt("iris.modules.osd", true)
     readonly property real bannerWidth: Math.max(340, Math.min(560, Number(feedRoot.opt("iris.notifications.width", 380)))) * feedRoot.d

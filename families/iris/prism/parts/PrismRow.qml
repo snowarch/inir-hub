@@ -22,6 +22,8 @@ Item {
     property bool stacked: false
     property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
+    // What the control at the line's end needs, so a narrow column can give a switch only its own width.
+    readonly property real controlNeed: kind.item?.implicitWidth ?? 0
     property bool flash: false
     // Search and Changes: a press on the row's name or its place opens it where it lives; the control still answers here.
     signal openRequested()

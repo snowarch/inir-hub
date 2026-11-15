@@ -53,6 +53,32 @@ PreviewScene {
     readonly property real plateW: dockRoot.vertical ? dockRoot.thick : dockRoot.length
     readonly property real plateH: dockRoot.vertical ? dockRoot.length : dockRoot.thick
     readonly property real reach: dockRoot.reserve ? dockRoot.restInset + dockRoot.thick + Math.round(10 * dockRoot.d) : IrisFrame.band
+    // Its parts, laid along the dock and across from its edge: the plate (look), an icon (icons), the apps on it, where
+    // it meets the edge (notch) and the edge it lives on (visibility).
+    spots: {
+        if (!dockRoot.enabledDock) return []
+        const d = dockRoot.d, w = dockRoot.width, h = dockRoot.height, edge = dockRoot.edge
+        const at = (along, across) => edge === "bottom" ? Qt.point(along, h - across) : edge === "top" ? Qt.point(along, across)
+            : edge === "left" ? Qt.point(across, along) : Qt.point(w - across, along)
+        const box = (along, across, long, deep) => {
+            const a = at(along, across), b = at(along + long, across + deep)
+            return Qt.rect(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y))
+        }
+        const spot = (group, along, across, part, radius) => { const p = at(along, across); return { group: group, x: p.x, y: p.y, part: part, radius: radius } }
+        const s0 = dockRoot.alongStart, len = dockRoot.length, c0 = Math.max(0, dockRoot.slide), t = dockRoot.thick, icon = dockRoot.icon
+        const step = icon + 10 * d
+        const first = dockRoot.launcher ? 1 : 0
+        const middle = Math.floor(dockRoot.count / 2)
+        const mid = s0 + 8 * d + middle * step
+        return [
+            spot("Look", s0 + len, c0 + t, box(s0, c0, len, t), Math.min(t / 2, 18 * d)),
+            // On the middle icon's inner edge, the icon's own: above the plate it read as the window's.
+            spot("Icons", mid + icon / 2, c0 + 9 * d + icon, box(mid, c0 + 9 * d, icon, icon), icon * 0.25),
+            spot("Apps", s0 - 18 * d, c0 + t / 2, box(s0 + 8 * d + first * step, c0 + 5 * d, Math.max(icon, dockRoot.apps.length * step - 10 * d), t - 10 * d), 12 * d),
+            spot("Notch", s0 + len + 16 * d, Math.max(11 * d, c0 / 2), box(s0 - 10 * d, 0, len + 20 * d, c0 + t / 2), 10 * d),
+            spot("Visibility", dockRoot.span - 28 * d, (c0 + t) / 2, box(0, 0, dockRoot.span, c0 + t + 14 * d), 0)
+        ]
+    }
 
     property int step: 0
     readonly property int steps: dockRoot.count + 3

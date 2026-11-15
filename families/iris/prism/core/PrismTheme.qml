@@ -53,6 +53,11 @@ Singleton {
     // Art stays dark in every scheme, like a record sleeve: the hero, the player, the glass card.
     readonly property color night: "#08080a" // iris-literal: the refraction's black, the same in every scheme
     readonly property color paper: "#ffffff" // iris-literal: light on the art, the same in every scheme
+    // The numbers on a scene's parts and their name chip: smoke over the art, the same in every scheme (Options+).
+    readonly property color spot: Qt.rgba(0.03, 0.03, 0.04, 0.72) // iris-literal: a disc over the scene, readable on light and dark art
+    readonly property color spotInk2: Qt.rgba(1, 1, 1, 0.66) // iris-literal: a value beside the name on that smoke
+    readonly property color spotScrim: Qt.rgba(0, 0, 0, 0.5) // iris-literal: the scene stepping back round the pointed part
+    readonly property color spotShadow: Qt.rgba(0, 0, 0, 0.35) // iris-literal: a disc's lift off the art
 
     // Tints for the row marks: one per page, so a row found by search still says where it lives.
     readonly property var tints: ({

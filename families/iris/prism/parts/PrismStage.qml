@@ -40,7 +40,15 @@ Item {
     property string looking: ""
     property string resting: ""
     Timer { id: dwell; interval: 220; onTriggered: root.looking = root.resting }
-    onPageChanged: { root.looking = ""; root.resting = "" }
+    onPageChanged: { root.looking = ""; root.resting = ""; root.picked = ""; root.legendPointed = ""; root.scenePointed = "" }
+    // A part of the scene pointed at (on the scene or its legend cell) and the group picked there: legend titles.
+    property string scenePointed: ""
+    property string legendPointed: ""
+    readonly property string pointed: root.scenePointed.length > 0 ? root.scenePointed : root.legendPointed
+    property string picked: ""
+    function entryOf(title: string): var { return root.groups.find(entry => String(entry.title) === title) ?? null }
+    readonly property var pickedEntry: root.picked.length > 0 ? root.entryOf(root.picked) : null
+    readonly property bool opened: root.live && root.pickedEntry !== null
 
     // Where a group's scene is found: under the area (appearance/Material) or under the chapter's own name
     // (colour/Scheme), as Classic's and Folio's stages name them.
@@ -60,7 +68,9 @@ Item {
         }
         return stage.sceneFor(own, "").length > 0 ? { section: own, group: "" } : { section: "", group: "" }
     }
-    readonly property var spot: (root.looking.length > 0 ? root.spotOf(root.looking) : null) ?? root.baseSpot
+    // A group picked on the scene keeps its own scene while it is open; else the one rested on, else the page's.
+    readonly property var spot: root.pickedEntry ? (root.spotOf(String(root.pickedEntry.first)) ?? root.baseSpot)
+        : (root.looking.length > 0 ? root.spotOf(root.looking) : null) ?? root.baseSpot
     // What stands on top: the keyboard itself, the live scene, or Prism's still.
     readonly property bool keys: root.keyboard && CompositorConfig.has("input", "keyboard.layout")
     readonly property bool live: !root.keys && stage.available
@@ -87,20 +97,70 @@ Item {
             y: root.pad
             width: root.inner
 
-            IrisGroupPreview {
-                id: stage
+            // The scene, its parts numbered on it, and the group picked there open beside it (under it when narrow).
+            Item {
+                id: sceneRow
                 visible: root.live
+                readonly property real base: Math.round(Math.max(PrismTheme.dp(200), Math.min(PrismTheme.dp(320), root.inner * 0.34)))
+                readonly property bool side: root.inner >= PrismTheme.dp(640)
+                readonly property real gap: PrismTheme.dp(8)
+                readonly property real inspWidth: Math.round(Math.max(PrismTheme.dp(300), Math.min(PrismTheme.dp(380), root.inner * 0.38)))
+                // How far the inspector is open: the scene gives it room as one move (Options+'s side column).
+                property real open: root.opened ? 1 : 0
+                Behavior on open { NumberAnimation { duration: PrismTheme.ms(260); easing.type: Easing.OutCubic } }
+                // Beside the scene the row grows only when the group needs more than the scene's height.
+                readonly property real tall: Math.min(PrismTheme.dp(440), Math.max(sceneRow.base, inspector.need))
                 width: root.inner
-                height: root.live ? Math.round(Math.max(PrismTheme.dp(200), Math.min(PrismTheme.dp(320), root.inner * 0.34))) : 0
-                radius: IrisStyle.concentric(card.radius, root.pad, IrisStyle.radiusChip)
-                framed: false
-                standIn: true
-                captionOutside: true
-                playing: root.active && root.visible && root.live
-                section: root.keys ? "" : String(root.spot.section)
-                group: String(root.spot.group)
-                niriValue: (section, key) => CompositorConfig.value(IrisOptions.settings.find(spec => spec.comp === section && spec.key === key) ?? { comp: section, key: key })
-                niriRevision: CompositorConfig.revision
+                height: !root.live ? 0
+                    : sceneRow.side ? sceneRow.base + sceneRow.open * (sceneRow.tall - sceneRow.base)
+                    : sceneRow.base + sceneRow.open * (sceneRow.gap + Math.min(PrismTheme.dp(420), inspector.need))
+
+                IrisGroupPreview {
+                    id: stage
+                    width: sceneRow.side ? root.inner - sceneRow.open * (sceneRow.inspWidth + sceneRow.gap) : root.inner
+                    height: sceneRow.side ? sceneRow.height : sceneRow.base
+                    radius: IrisStyle.concentric(card.radius, root.pad, IrisStyle.radiusChip)
+                    framed: false
+                    standIn: true
+                    captionOutside: true
+                    // Prism opens each page on it: with the animated previews off it is drawn, held still.
+                    holdsStill: true
+                    playing: root.active && root.visible && root.live
+                    section: root.keys ? "" : String(root.spot.section)
+                    group: String(root.spot.group)
+                    niriValue: (section, key) => CompositorConfig.value(IrisOptions.settings.find(spec => spec.comp === section && spec.key === key) ?? { comp: section, key: key })
+                    niriRevision: CompositorConfig.revision
+                }
+                PrismSpots {
+                    id: spots
+                    width: stage.width
+                    height: stage.height
+                    radius: stage.radius
+                    spots: stage.spots
+                    groups: root.groups
+                    pointed: root.pointed
+                    picked: root.picked
+                    sayOf: title => root.glanceOf(root.entryOf(title)).say
+                    onPoint: title => root.scenePointed = title
+                    onPick: title => root.picked = title
+                }
+                PrismInspector {
+                    id: inspector
+                    visible: sceneRow.open > 0.01
+                    opacity: sceneRow.open
+                    x: sceneRow.side ? root.inner - sceneRow.inspWidth : 0
+                    y: sceneRow.side ? 0 : sceneRow.base + sceneRow.gap
+                    width: sceneRow.side ? sceneRow.inspWidth : root.inner
+                    height: sceneRow.side ? sceneRow.height : sceneRow.height - y
+                    entry: root.pickedEntry
+                    numberOf: title => root.groups.findIndex(entry => String(entry.title) === title) + 1
+                    sayOf: entry => {
+                        const glance = root.glanceOf(entry)
+                        return [glance.say, glance.label].filter(part => part.length > 0).join(" · ")
+                    }
+                    onClose: root.picked = ""
+                    onToCard: title => { root.picked = ""; root.pickGroup(title) }
+                }
             }
 
             // Keyboard: the keyboard itself, live, with the layouts under it; Super, Ctrl, Alt or Shift held shows
@@ -233,6 +293,7 @@ Item {
                         required property int index
                         readonly property bool here: root.currentGroup === String(cell.modelData.title)
                         readonly property var glance: root.glanceOf(cell.modelData)
+                        readonly property string title: String(cell.modelData.title)
                         width: legend.cell
                         height: PrismTheme.dp(72)
                         // A hairline between neighbours on one line, as the reference's columns.
@@ -248,7 +309,8 @@ Item {
                             anchors.fill: parent
                             anchors.margins: PrismTheme.dp(3)
                             radius: PrismTheme.dp(14)
-                            color: tap.pressed ? PrismTheme.fillPress : hover.hovered ? PrismTheme.fillHover : "transparent"
+                            color: tap.pressed ? PrismTheme.fillPress
+                                : hover.hovered || root.pointed === cell.title || root.picked === cell.title ? PrismTheme.fillHover : "transparent"
                             Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: IrisStyle.feedbackEasing } }
                         }
                         Column {
@@ -306,7 +368,14 @@ Item {
                         HoverHandler {
                             id: hover
                             cursorShape: Qt.PointingHandCursor
-                            onHoveredChanged: if (hovered) { root.resting = String(cell.modelData.first); dwell.restart() }
+                            // A group numbered on the scene lights its part there; one that is not shows its own scene.
+                            onHoveredChanged: {
+                                if (!hovered) { if (root.legendPointed === cell.title) root.legendPointed = ""; return }
+                                root.legendPointed = cell.title
+                                if (root.picked.length > 0 || spots.marks.some(mark => mark.entry === cell.title)) return
+                                root.resting = String(cell.modelData.first)
+                                dwell.restart()
+                            }
                         }
                         TapHandler {
                             id: tap

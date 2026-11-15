@@ -23,7 +23,7 @@ ClippingRectangle {
     // Awake for a few seconds after it appears, after any change and while the pointer is on it; then every scene rests on
     // what it shows. Settings left open stops drawing (measured 2026-10-11: a scene looping in an idle Settings cost the
     // shell 16-18 % CPU, closed 1.4 %).
-    readonly property bool awake: wakeTimer.running || sceneHover.hovered
+    readonly property bool awake: root.animated && (wakeTimer.running || sceneHover.hovered)
     function wake(): void { wakeTimer.restart() }
     Timer { id: wakeTimer; interval: 9000; running: true }
     HoverHandler { id: sceneHover }
@@ -46,7 +46,7 @@ ClippingRectangle {
     property bool standIn: false
     readonly property string scene: root.sceneFor(root.section, root.group)
         || (root.standIn ? root.sceneFor(root.section, "") : "")
-    readonly property bool available: (Config.options?.iris?.appearance?.previews ?? true) && root.scene.length > 0
+    readonly property bool available: (root.animated || root.holdsStill) && root.scene.length > 0
     readonly property real wantedHeight: Math.round(Math.min(420 * root.d, Math.max(260 * root.d, Number(root.sceneItem?.naturalHeight ?? 0))))
     // Another group's scene takes the last one's place (DI48-R2): the old one leaves in the first 40 % (fading as it
     // settles back a little), and only then the new one, loaded in the free slot, grows in from just under its size: two
@@ -64,6 +64,21 @@ ClippingRectangle {
         const r = root.sceneItem?.subject ?? Qt.rect(0, 0, 0, 0)
         return r.width > 0 && r.height > 0 ? Qt.rect(r.x * world.k, r.y * world.k, r.width * world.k, r.height * world.k) : Qt.rect(0, 0, 0, 0)
     }
+    // The scene's pointable parts (PreviewScene.spots) in this frame; none while two scenes cross.
+    readonly property var spots: {
+        const k = world.k
+        if (root.cross < 1 || !Array.isArray(root.sceneItem?.spots)) return []
+        return root.sceneItem.spots.filter(spot => spot && String(spot.group ?? "").length > 0).map(spot => {
+            const r = spot.part
+            const has = r !== undefined && r !== null && r.width > 0 && r.height > 0
+            return { group: String(spot.group), x: spot.x * k, y: spot.y * k, radius: Number(spot.radius ?? 0) * k,
+                part: has ? Qt.rect(r.x * k, r.y * k, r.width * k, r.height * k) : null }
+        })
+    }
+    // A host whose page opens on its scene (Prism's stage) draws it with the animated previews off too, held still:
+    // what moves costs, a scene at rest does not, and the page's parts are pointed at on it.
+    property bool holdsStill: false
+    readonly property bool animated: Config.options?.iris?.appearance?.previews ?? true
     onSceneChanged: {
         root.wake()
         const showing = root.onB ? root.sceneB : root.sceneA
@@ -104,7 +119,7 @@ ClippingRectangle {
             return ({ dock: "dock", player: "player", desktop: "widgets", widgets: "widgets", sidebars: "panels", controlCenter: "controlCenter", spotlight: "spotlight", bubbles: "bubbles",
                 bar: "islandEdge", appearance: "fusion", colour: "palette", wallpaper: "gallery", login: "login", motion: "motion", lock: "lock", notifications: "feedback",
                 windows: "windows", orbit: "orbit", general: "general", capture: "capture", sound: "sound", display: "display",
-                keyboard: "keyboard", battery: "battery", gaming: "gaming", anime: "anime", sources: "sources", system: "hub" })[section] ?? ""
+                keyboard: "keyboard", pointer: "pointer", battery: "battery", gaming: "gaming", anime: "anime", sources: "sources", system: "hub" })[section] ?? ""
         const key = section + "/" + group
         return ({
             "sidebars/Focus": "panels", "sidebars/Today": "panels", "sidebars/Panel look": "panels",
@@ -149,7 +164,7 @@ ClippingRectangle {
                 islandInteraction: islandInteractionScene, islandPage: islandPageScene, bubbles: bubblesScene,
                 highlight: highlightScene, login: loginScene, material: materialScene, surfaces: surfacesScene,
                 windows: windowsScene, orbit: orbitScene, general: generalScene, capture: captureScene, sound: soundScene,
-                display: displayScene, keyboard: keyboardScene, battery: batteryScene, gaming: gamingScene, anime: animeScene,
+                display: displayScene, keyboard: keyboardScene, pointer: pointerScene, battery: batteryScene, gaming: gamingScene, anime: animeScene,
                 sources: sourcesScene, hub: hubScene
         })[name] ?? null
     }
@@ -271,6 +286,7 @@ ClippingRectangle {
     Component { id: soundScene; SoundScene { preview: root } }
     Component { id: displayScene; DisplayScene { preview: root } }
     Component { id: keyboardScene; KeyboardScene { preview: root } }
+    Component { id: pointerScene; PointerScene { preview: root } }
     Component { id: batteryScene; BatteryScene { preview: root } }
     Component { id: gamingScene; GamingScene { preview: root } }
     Component { id: animeScene; AnimeScene { preview: root } }

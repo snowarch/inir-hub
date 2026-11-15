@@ -44,16 +44,7 @@ Item {
 
     // Two fields of one part side by side, two switches on one line; the rest alone. A field is what draws its control
     // under its name well: text, a level, a hue, a choice of a few short names.
-    function shapeOf(row: var): string {
-        const kind = String(row.kind ?? "")
-        if (kind === "switch") return "switch"
-        if (kind === "range" || kind === "hue" || kind === "text") return "field"
-        if (kind === "choice" && !row.spec?.cards && !row.spec?.flags) {
-            const choices = PrismModel.choicesOf(row)
-            if (choices.length >= 2 && choices.length <= 4 && !choices.some(choice => choice.swatch !== undefined && choice.swatch !== null)) return "field"
-        }
-        return ""
-    }
+    function shapeOf(row: var): string { return PrismModel.shapeOf(row) }
     readonly property var lines: {
         const out = []
         const list = root.rows

@@ -16,6 +16,10 @@ Item {
     property real lowest: 0
     // Where the piece the scene is about rests, in its own frame: Settings prints its notes beside it. Empty: nowhere in particular.
     property rect subject: Qt.rect(0, 0, 0, 0)
+    // The parts a person can point at, in the scene's own frame: [{ group, x, y, part, radius }], `group` the IrisOptions
+    // group that sets the part, (x, y) where its number sits, `part` the rect lit while it is pointed at (optional),
+    // `radius` that rect's corners. Prism numbers them like the page's legend and opens the group's rows on a press.
+    property var spots: []
     readonly property real d: IrisStyle.density
     readonly property int rev: Config.revision
     // A scene moves while it is seen and awake (IrisGroupPreview.awake), then rests on what it shows.

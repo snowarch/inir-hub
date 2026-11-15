@@ -45,3 +45,4 @@ GamingScene 1.0 GamingScene.qml
 AnimeScene 1.0 AnimeScene.qml
 SourcesScene 1.0 SourcesScene.qml
 HubScene 1.0 HubScene.qml
+PointerScene 1.0 PointerScene.qml
