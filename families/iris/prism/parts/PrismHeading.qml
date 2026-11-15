@@ -2,7 +2,8 @@ import QtQuick
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 
-// The reference's two-line head: a small grey word over a bold title, and "See all" on the right when there is more.
+// A two-line head printed as the collection prints its credits (`.claude/ref/language`): a small mono caps word over a
+// bold title set tight, and "See all" on the right when there is more.
 Item {
     id: root
     property string eyebrow: ""
@@ -21,16 +22,18 @@ Item {
         PrismText {
             width: parent.width
             visible: root.eyebrow.length > 0
-            text: root.eyebrow
-            color: PrismTheme.ink2
-            font.pixelSize: PrismTheme.body
+            text: root.eyebrow.toUpperCase()
+            mono: true
+            color: PrismTheme.ink3
+            font.pixelSize: PrismTheme.caption - 1
+            font.letterSpacing: 0.8
         }
         PrismText {
             width: parent.width
             text: root.title
             font.pixelSize: root.titleSize
             font.weight: Font.Bold
-            font.letterSpacing: -0.4
+            font.letterSpacing: -root.titleSize * 0.03
         }
     }
     PrismText {

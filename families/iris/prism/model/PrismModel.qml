@@ -63,8 +63,8 @@ Singleton {
         lock: { name: "Lock", glyph: "lock", tint: "indigo", lead: ["iris.lock.material", "iris.lock.type.clockFont"] },
         login: { name: "Login", glyph: "login", tint: "violet", lead: ["lock.loginScreen", "lock.loginStyle"] },
         sources: { glyph: "cloud_sync", tint: "blue", lead: ["weather.enable", "calendar.externalSync.enable"] },
-        system: { glyph: "storefront", tint: "pink", lead: [], view: "IrisHubPage.qml" },
-        about: { name: "About", glyph: "info", tint: "grey", lead: [], view: "IrisAboutPage.qml", cluster: 4, after: "system" }
+        system: { glyph: "storefront", tint: "pink", lead: [], view: "PrismHub.qml" },
+        about: { name: "About", glyph: "info", tint: "holo", lead: [], view: "PrismAbout.qml", cluster: 4, after: "system" }
     })
 
     // An area too long for one page is read as several (his 11-07: Style was "un chorizo", 126 rows in 31 groups): each
@@ -111,7 +111,8 @@ Singleton {
                 glyph: String(dress.glyph ?? base?.icon ?? "circle"),
                 tint: String(dress.tint ?? "grey"),
                 lead: Array.from(dress.lead ?? []),
-                view: dress.view ? Qt.resolvedUrl("../../settings/" + dress.view) : "",
+                // A view of Prism's own sits beside its parts; the rest are iRiS Settings' pages, shared with Classic.
+                view: !dress.view ? "" : dress.view.startsWith("Prism") ? Qt.resolvedUrl("../parts/" + dress.view) : Qt.resolvedUrl("../../settings/" + dress.view),
                 subtitle: String(dress.subtitle ?? base?.subtitle ?? ""),
                 order: Number(dress.order ?? 0),
                 cluster: cluster,

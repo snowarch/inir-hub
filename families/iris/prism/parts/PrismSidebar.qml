@@ -207,17 +207,29 @@ Item {
                     // The caption over the open page warms with it: where you are reads at the group's level too.
                     readonly property bool here: !PrismState.searching && group.pages.some(page => page.pageId === PrismState.page)
                     width: column.width
-                    PrismText {
+                    // A divider of the contents (Délavé's index): the area in mono caps and a hairline to the edge.
+                    Item {
                         visible: group.modelData.length > 0
-                        topPadding: PrismTheme.dp(18)
-                        bottomPadding: PrismTheme.dp(6)
-                        text: Translation.tr(group.modelData).toUpperCase()
-                        color: group.here ? PrismTheme.accentInk : PrismTheme.ink3
-                        opacity: group.here ? 0.85 : 1
-                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
-                        font.pixelSize: PrismTheme.caption
-                        font.weight: Font.DemiBold
-                        font.letterSpacing: 0.6
+                        width: group.width
+                        height: caption.height + PrismTheme.dp(24)
+                        PrismText {
+                            id: caption
+                            y: PrismTheme.dp(18)
+                            width: Math.min(implicitWidth, parent.width - PrismTheme.dp(40))
+                            text: Translation.tr(group.modelData).toUpperCase()
+                            mono: true
+                            color: group.here ? PrismTheme.accentInk : PrismTheme.ink3
+                            Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+                            font.pixelSize: PrismTheme.caption - 1
+                            font.letterSpacing: 0.8
+                        }
+                        Rectangle {
+                            x: caption.width + PrismTheme.dp(10)
+                            width: parent.width - x - PrismTheme.dp(18)
+                            y: caption.y + Math.round(caption.height / 2)
+                            height: 1
+                            color: PrismTheme.line
+                        }
                     }
                     Repeater {
                         model: group.pages
@@ -234,6 +246,8 @@ Item {
                                 edge: group.width
                                 glyph: entry.modelData.glyph
                                 text: Translation.tr(entry.modelData.name)
+                                tint: String(entry.modelData.tint ?? "grey")
+                                number: PrismModel.index(entry.modelData.pageId) + 1
                                 current: entry.open
                                 marked: entry.open && !entry.lists
                                 onClicked: PrismState.go(entry.modelData.pageId)
@@ -324,10 +338,10 @@ Item {
                     topPadding: PrismTheme.dp(18)
                     bottomPadding: PrismTheme.dp(6)
                     text: Translation.tr("Pinned").toUpperCase()
+                    mono: true
                     color: PrismTheme.ink3
-                    font.pixelSize: PrismTheme.caption
-                    font.weight: Font.DemiBold
-                    font.letterSpacing: 0.6
+                    font.pixelSize: PrismTheme.caption - 1
+                    font.letterSpacing: 0.8
                 }
                 Repeater {
                     model: ScriptModel { objectProp: "key"; values: pinned.rows }

@@ -2,7 +2,7 @@ import QtQuick
 import qs.services
 import qs.modules.iris.prism.core
 
-// A colour pick in the grammar of Prism's segmented pill: one smoked track, the chosen colour a solid part that says
+// A colour pick in the grammar of Prism's segmented choice: one well, the chosen colour a key of that colour that says
 // its own name, the others discs beside it. A disc under the pointer names itself over the track, inside the row, so
 // nothing hangs into the next line and no disc moves (his 11-07 "no dice que carajo es cada chip", 11-11 "rediseño").
 // `chart` lays every colour out with its name, wrapped to the width: what a long list (themes) needs to be read.
@@ -35,13 +35,12 @@ Item {
     implicitHeight: root.chart ? flow.implicitHeight : PrismTheme.dp(32)
 
     // ── The track.
-    Rectangle {
+    Item {
         id: track
         visible: !root.chart
         width: strip.implicitWidth + root.pad * 2
         height: PrismTheme.dp(32)
-        radius: height / 2
-        color: PrismTheme.fill
+        PrismWell { anchors.fill: parent }
 
         PrismText {
             visible: root.aimed >= 0 && root.aimed !== root.chosenIndex
@@ -73,19 +72,27 @@ Item {
                     width: swatch.chosen ? Math.min(root.nameRoom, word.implicitWidth) + PrismTheme.dp(24) : root.slot
                     height: root.part
                     Behavior on width { NumberAnimation { duration: PrismTheme.ms(240); easing.type: Easing.OutCubic } }
+                    // The chosen colour is a key of that colour with its name printed on it (the keycaps collage).
+                    PrismKey {
+                        visible: swatch.chosen
+                        anchors.fill: parent
+                        face: swatch.colour
+                    }
                     Rectangle {
+                        visible: !swatch.chosen
                         anchors.centerIn: parent
-                        width: swatch.chosen ? parent.width : area.containsMouse ? PrismTheme.dp(22) : PrismTheme.dp(18)
-                        height: swatch.chosen ? parent.height : width
+                        width: area.containsMouse ? PrismTheme.dp(22) : PrismTheme.dp(18)
+                        height: width
                         radius: height / 2
                         color: swatch.colour
                         border.width: root.faint(swatch.colour) ? 1 : 0
                         border.color: Qt.alpha(PrismTheme.ink, 0.2)
-                        Behavior on width { enabled: !swatch.chosen; NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+                        Behavior on width { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
                     }
                     PrismText {
                         id: word
                         anchors.centerIn: parent
+                        anchors.verticalCenterOffset: -PrismTheme.keyLip / 2
                         width: Math.min(implicitWidth, root.nameRoom)
                         opacity: swatch.chosen ? 1 : 0
                         visible: opacity > 0
@@ -117,7 +124,7 @@ Item {
         spacing: PrismTheme.dp(6)
         Repeater {
             model: root.chart ? root.choices : []
-            delegate: Rectangle {
+            delegate: Item {
                 id: chip
                 required property var modelData
                 required property int index
@@ -128,15 +135,17 @@ Item {
                 Accessible.checked: chip.chosen
                 width: dot.width + name.implicitWidth + PrismTheme.dp(30)
                 height: PrismTheme.dp(32)
-                radius: height / 2
-                color: chip.chosen ? chip.colour : chipArea.containsMouse ? PrismTheme.fillHover : PrismTheme.fill
-                border.width: chip.chosen && root.faint(chip.colour) ? 1 : 0
-                border.color: Qt.alpha(PrismTheme.ink, 0.2)
-                Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+                PrismKey {
+                    anchors.fill: parent
+                    face: chip.chosen ? chip.colour : PrismTheme.keyQuiet
+                    hovered: chipArea.containsMouse
+                    down: chipArea.pressed
+                }
                 Rectangle {
                     id: dot
                     x: PrismTheme.dp(8)
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenterOffset: -PrismTheme.keyLip / 2
                     width: PrismTheme.dp(16)
                     height: width
                     radius: width / 2
@@ -155,7 +164,7 @@ Item {
                     id: name
                     anchors.left: dot.right
                     anchors.leftMargin: PrismTheme.dp(8)
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenter: dot.verticalCenter
                     text: Translation.tr(String(chip.modelData.label ?? ""))
                     color: chip.chosen ? root.ink(chip.colour) : chipArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
                     font.pixelSize: PrismTheme.small

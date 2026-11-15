@@ -1,7 +1,7 @@
 import QtQuick
 import qs.modules.iris.prism.core
 
-// A hue as a level: the spectrum is the track and a disc of the hue itself stands on it, ringed in the page's solid.
+// A hue as a fader: the spectrum is its groove and a key of the hue itself stands on it.
 // A drag shows the hue as it goes; release writes it once.
 Item {
     id: root
@@ -35,18 +35,17 @@ Item {
             GradientStop { position: 1; color: Qt.hsva(1, 0.62, 1, 1) } // iris-literal: the hue track
         }
     }
-    Rectangle {
+    // A key in the colour it stands on (the keycaps collage), the fader's cap in shape.
+    PrismKey {
         id: knob
-        width: PrismTheme.dp(22)
-        height: width
-        radius: width / 2
-        anchors.verticalCenter: parent.verticalCenter
+        width: PrismTheme.dp(28)
+        height: PrismTheme.dp(20)
+        radius: PrismTheme.dp(7)
+        y: Math.round((root.height - height) / 2) - PrismTheme.dp(1)
         x: (root.width - width) * Math.max(0, Math.min(1, root.live / 360))
-        color: Qt.hsva(Math.max(0, Math.min(1, root.live / 360)), 0.62, 1, 1) // iris-literal: the knob wears the hue it stands on
-        border.width: PrismTheme.dp(3)
-        border.color: PrismTheme.solid
-        scale: area.pressed ? 1.12 : area.containsMouse ? 1.05 : 1
-        Behavior on scale { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+        face: Qt.hsva(Math.max(0, Math.min(1, root.live / 360)), 0.62, 1, 1) // iris-literal: the key wears the hue it stands on
+        hovered: area.containsMouse
+        down: area.pressed
     }
     MouseArea {
         id: area

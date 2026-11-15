@@ -1,7 +1,8 @@
 import QtQuick
 import qs.modules.iris.prism.core
 
-// A circle with one glyph: back and forward, the bell, the transport. `solid` is the white one that leads.
+// A round key with one glyph: back and forward, the bell, the transport. `solid` is the white one that leads; over art
+// it is smoked glass, a disc at rest when `smoked`.
 Item {
     id: root
     property string glyph: "circle"
@@ -18,20 +19,26 @@ Item {
     implicitWidth: PrismTheme.dp(32)
     implicitHeight: implicitWidth
     opacity: root.enabled_ ? 1 : 0.32
-    scale: area.pressed ? 0.92 : 1
-    Behavior on scale { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+    readonly property bool glass: root.overArt && !root.solid && !root.lit
 
+    PrismKey {
+        visible: !root.glass
+        anchors.fill: parent
+        face: root.solid ? (root.overArt ? PrismTheme.paper : PrismTheme.solid) : root.lit ? PrismTheme.accent : PrismTheme.keyQuiet
+        hovered: root.hovered && root.enabled_
+        down: area.pressed
+    }
     Rectangle {
+        visible: root.glass && (root.smoked || root.hovered)
         anchors.fill: parent
         radius: width / 2
-        color: root.solid ? (root.overArt ? PrismTheme.paper : PrismTheme.solid)
-            : root.lit ? PrismTheme.accent
-            : root.overArt ? Qt.rgba(1, 1, 1, area.pressed ? 0.22 : root.hovered ? 0.16 : root.smoked ? 0.1 : 0) // iris-literal: Prism's own fills and scrims, scheme-aware above
-            : area.pressed ? PrismTheme.fillPress : root.hovered ? PrismTheme.fillHover : PrismTheme.fill
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+        color: area.pressed ? PrismTheme.spotPress : root.hovered ? PrismTheme.spotHover : PrismTheme.spot
+        border.width: 1
+        border.color: PrismTheme.spotEdge
     }
     PrismGlyph {
         anchors.centerIn: parent
+        anchors.verticalCenterOffset: root.glass ? 0 : (area.pressed ? PrismTheme.keyLip / 2 : -PrismTheme.keyLip / 2)
         text: root.glyph
         filled: true
         iconSize: root.glyphSize

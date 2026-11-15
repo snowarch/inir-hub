@@ -304,14 +304,29 @@ Item {
                         // A search's hits come from many groups: a part's caption there would name one group's inside.
                         readonly property bool partStarts: !root.showPage && entry.part.length > 0
                             && (entry.modelData.first === 0 || String(root.rows[entry.modelData.first - 1]?.spec?.part ?? "") !== entry.part)
-                        PrismText {
+                        // A part's head as the specimen sheets print theirs (`.claude/ref/language`, micrographics): its
+                        // name in small mono caps and a hairline running to the card's edge.
+                        Item {
                             visible: entry.partStarts
-                            topPadding: PrismTheme.dp(14)
-                            bottomPadding: PrismTheme.dp(2)
-                            text: Translation.tr(entry.part)
-                            color: PrismTheme.ink3
-                            font.pixelSize: PrismTheme.small
-                            font.weight: Font.DemiBold
+                            width: list.width
+                            height: partName.height + PrismTheme.dp(20)
+                            PrismText {
+                                id: partName
+                                y: PrismTheme.dp(16)
+                                width: Math.min(implicitWidth, parent.width * 0.7)
+                                text: Translation.tr(entry.part).toUpperCase()
+                                mono: true
+                                color: PrismTheme.ink3
+                                font.pixelSize: PrismTheme.caption - 1
+                                font.letterSpacing: 0.8
+                            }
+                            Rectangle {
+                                x: partName.width + PrismTheme.dp(12)
+                                width: parent.width - x
+                                height: 1
+                                y: partName.y + Math.round(partName.height / 2)
+                                color: PrismTheme.line
+                            }
                         }
                         // Two rows of a line are two fixed places, never a Repeater over the line's list: the list is new on
                         // every write, and a Repeater would rebuild a level under the pointer mid-drag.

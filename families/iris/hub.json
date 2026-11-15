@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.89",
+    "version": "2.33.90",
     "changes": {
+      "2.33.90": ["Prism Settings' new look: soft ribbons in your wallpaper's colours, folders whose art glows through frosted glass, keys that sink",
+      "Prism: the Hub in its own pages: popular items as posters, search and kinds, each item with what it reaches, its changes and reactions",
+      "Prism: the sidebar opens on your own card over your wallpaper, and About shows the iNiR mark lit in your colours"],
       "2.33.89": ["Prism Settings: each group is a card with its picture beside it, every part numbered; point at one to see what it holds, press to go there",
       "Prism Settings: every setting says what it does, each group has its own icon, scrolled pages keep a strip of groups (thanks Raell Tech)",
       "Settings › Keyboard draws your keyboard as it types, layouts by country or name; with Super, Ctrl, Alt or Shift each key says its shortcut",

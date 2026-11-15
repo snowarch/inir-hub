@@ -1,54 +1,63 @@
 import QtQuick
 import qs.services
 import qs.modules.iris.prism.core
+import qs.modules.iris.prism.fx
 
-// The reference's OFF/ON pill: a dark track that names the other state faintly, and a knob that carries the word of
-// the state it is in. Off is a white knob, on the person's accent.
+// On and off as an object (`.claude/ref/language`: the Figma toggle's deep well, the rocker's printed I and O): a well
+// cut into the card and a white key with its state printed on it, a bar for on, a ring for off, the same in every
+// language. On, the page's art shows through the well, the three colours of its poster; off, the well is empty and the
+// key rests at the start. Three ways to tell, so no colour alone carries it.
 Item {
     id: root
     property bool checked: false
+    property string tint: "grey"
     signal toggled(bool value)
 
     readonly property real pad: PrismTheme.dp(3)
-    readonly property real knobWidth: Math.max(PrismTheme.dp(44), Math.max(onMetrics.advanceWidth, offMetrics.advanceWidth) + PrismTheme.dp(20))
-    implicitWidth: root.knobWidth * 2 + root.pad * 2
+    readonly property real keyWidth: PrismTheme.dp(34)
+    implicitWidth: PrismTheme.dp(70)
     implicitHeight: PrismTheme.dp(32)
 
-    TextMetrics { id: onMetrics; font.family: PrismTheme.fontMain; font.pixelSize: PrismTheme.caption; font.weight: Font.Bold; text: Translation.tr("On").toUpperCase() }
-    TextMetrics { id: offMetrics; font.family: PrismTheme.fontMain; font.pixelSize: PrismTheme.caption; font.weight: Font.Bold; text: Translation.tr("Off").toUpperCase() }
+    Accessible.role: Accessible.CheckBox
+    Accessible.checkable: true
+    Accessible.checked: root.checked
+    Accessible.name: root.checked ? Translation.tr("On") : Translation.tr("Off")
 
-    Rectangle {
+    PrismWell {
         anchors.fill: parent
+        hovered: area.containsMouse && !root.checked
+    }
+    PrismFlow {
+        anchors.fill: parent
+        anchors.margins: 1
         radius: height / 2
-        color: area.containsMouse ? Qt.darker(PrismTheme.sunk, PrismTheme.light ? 1.04 : 0.8) : PrismTheme.sunk
+        dark: true
+        tint: root.tint
+        seed: 3.7
+        centre: Qt.point(0.4, 0.5)
+        thickness: 1.3
+        opacity: root.checked ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
     }
-    // The word the knob is not on.
-    PrismText {
-        x: root.checked ? root.pad : root.width - root.pad - root.knobWidth
-        width: root.knobWidth
-        height: root.height
-        horizontalAlignment: Text.AlignHCenter
-        text: (root.checked ? offMetrics.text : onMetrics.text)
-        color: PrismTheme.ink3
-        font.pixelSize: PrismTheme.caption
-        font.weight: Font.Bold
-    }
-    Rectangle {
-        id: knob
+    PrismKey {
         x: root.checked ? root.width - root.pad - width : root.pad
         y: root.pad
-        width: root.knobWidth
+        width: root.keyWidth
         height: root.height - root.pad * 2
-        radius: height / 2
-        color: root.checked ? PrismTheme.accent : PrismTheme.paper
-        Behavior on x { NumberAnimation { duration: PrismTheme.ms(260); easing.type: Easing.OutBack; easing.overshoot: 0.9 } }
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
-        PrismText {
+        face: PrismTheme.paper
+        hovered: area.containsMouse
+        down: area.pressed
+        Behavior on x { NumberAnimation { duration: PrismTheme.ms(240); easing.type: Easing.OutCubic } }
+        Rectangle {
             anchors.centerIn: parent
-            text: root.checked ? onMetrics.text : offMetrics.text
-            color: root.checked ? PrismTheme.inkAccent : "#000000" // iris-literal: black on the white knob in every scheme
-            font.pixelSize: PrismTheme.caption
-            font.weight: Font.Bold
+            width: root.checked ? PrismTheme.dp(2) : PrismTheme.dp(9)
+            height: PrismTheme.dp(9)
+            radius: root.checked ? 1 : width / 2
+            color: root.checked ? PrismTheme.night : "transparent"
+            border.width: root.checked ? 0 : PrismTheme.dp(1.5)
+            border.color: PrismTheme.night
+            opacity: root.checked ? 0.78 : 0.42
         }
     }
     MouseArea {

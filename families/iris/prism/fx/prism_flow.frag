@@ -1,6 +1,8 @@
 #version 440
-// Prism's art material (his 11-15 references, `.claude/ref/language`): a soft ribbon of colour flowing across the
-// box, printed with grain like a risograph poster. Dark: light added over the night. Light: pigment on paper.
+// Prism's art material (his 11-15 references, `.claude/ref/language`): a ribbon of colour flowing across the box,
+// blurred like the posters' airbrush: a wide bloom round a soft body, never a hard edge or a dithered one, with a film
+// grain fine enough to read as paper and to keep the bloom from banding. Dark: light added over the night. Light:
+// pigment on paper.
 // One static pass: it draws again only when a size, a colour or the seed changes.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
@@ -11,11 +13,12 @@ layout(std140, binding = 0) uniform buf {
     vec4 c1;       // the ribbon's start
     vec4 c2;       // its end
     vec4 c3;       // its core
-    vec4 paper;    // rgb, a = 1 dark (light added), 0 light (pigment)
+    vec4 paper;    // rgb, a = 1 dark (light added), 0 light (pigment), 2 bare (the colour alone, no ground: a glow over a sheet)
     vec4 shape;    // seed, focus x, focus y (0..1), thickness
     vec4 radii;    // corners: top-left, top-right, bottom-right, bottom-left (px)
     float grain;
     float fade;    // from this fraction of the height down the ribbon fades out (1: never), so words below read
+    float side;    // over this fraction of the width from the left the ribbon fades in (0: a hard start)
 } u;
 
 float hash(vec2 p) {
@@ -52,9 +55,10 @@ void main() {
     float reach = max(aspect * 0.46, 0.9);
     float mass = exp(-pow((p.x - fx) / reach, 2.0));
 
-    float body = exp(-d * d * 2.4) * mass;
-    float haze = exp(-d * d * 0.55) * mass * 0.32;
-    float core = exp(-d * d * 9.0) * mass;
+    // Three widths of one blur: the body, a wide bloom round it and a soft core, so its edge melts as a lens's would.
+    float body = exp(-d * d * 1.5) * mass;
+    float haze = exp(-d * d * 0.36) * mass * 0.34;
+    float core = exp(-d * d * 4.5) * mass;
 
     // Colour along the ribbon, bent by the distance from its core; the core takes the third colour in places.
     float along = clamp((p.x - fx) / (reach * 1.6) + 0.5 + 0.18 * d, 0.0, 1.0);
@@ -63,10 +67,11 @@ void main() {
     colour = mix(colour, u.c3.rgb, core * 0.6 * pulse);
 
     float amount = clamp(body + haze, 0.0, 1.0) * (1.0 - 0.92 * smoothstep(u.fade, u.fade + 0.3, qt_TexCoord0.y));
-    // Grain: the edges of the colour dither into specks (risograph), and a fine noise over everything.
-    float n = hash(floor(px) + s * 17.0);
-    amount = clamp(amount + (n - 0.5) * 1.6 * amount * (1.0 - amount), 0.0, 1.0);
-    float speck = (hash(floor(px) * 1.37 + 3.1) - 0.5) * u.grain;
+    amount *= smoothstep(0.0, max(u.side, 1e-4), qt_TexCoord0.x);
+    amount = amount * amount * (3.0 - 2.0 * amount);
+    // Film grain: two octaves averaged so no single pixel stands out, strongest in the colour, a trace on the ground.
+    float n = 0.5 * (hash(floor(px) + s * 17.0) + hash(floor(px * 0.5) * 1.37 + 3.1));
+    float speck = (n - 0.5) * u.grain * (0.3 + 0.7 * amount);
 
     vec3 rgb;
     if (u.paper.a > 0.5) {
@@ -82,5 +87,11 @@ void main() {
 
     float edge = cornerBox(px - u.size * 0.5, u.size * 0.5, u.radii);
     float alpha = clamp(0.5 - edge, 0.0, 1.0);
+    if (u.paper.a > 1.5) {
+        // Bare: only the colour, as much of it as the ribbon holds, over whatever lies below.
+        float a = clamp(amount + speck * amount, 0.0, 1.0) * alpha;
+        fragColor = vec4(colour * a, a) * u.qt_Opacity;
+        return;
+    }
     fragColor = vec4(rgb * alpha, alpha) * u.qt_Opacity;
 }

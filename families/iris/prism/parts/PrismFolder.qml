@@ -66,4 +66,25 @@ Item {
             }
         }
     }
+
+    // The front sheet is frosted (folders-glass): the art behind it glows through its top, blurred, and dies away
+    // before the first row. The same ribbon a step lower, so the light that shows is the light behind the step.
+    PrismFlow {
+        x: root.tab
+        y: root.rise
+        width: root.width - x
+        height: Math.min(PrismTheme.dp(96), Math.max(0, root.height - root.rise))
+        tint: root.tint
+        seed: root.seed
+        centre: Qt.point(Math.max(0.15, Math.min(0.7, (root.artWidth - root.sayWidth) / Math.max(1, width) * 0.55)), -0.1)
+        thickness: 0.5
+        fade: 0.08
+        side: 0.3
+        bare: true
+        opacity: PrismTheme.light ? 0.3 : 0.42
+        topRightRadius: root.shoulder
+        topLeftRadius: 0
+        bottomLeftRadius: 0
+        bottomRightRadius: 0
+    }
 }

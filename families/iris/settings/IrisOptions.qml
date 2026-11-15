@@ -424,11 +424,10 @@ QtObject {
     }
     // What a row reads with nothing set: a compositor row asks the compositor when it knows (Umbriel's own files and
     // defaults), the rest keeps the row's fallback.
+    // A compositor row's factory is the compositor's shipped file alone: a screen's mode or a keyboard layout has none,
+    // so it is never "changed" for being set (its `fallback` is only what to show when nothing is read).
     function factory(spec: var): var {
-        if (spec.comp && spec.comp !== "blur") {
-            const known = CompositorConfig.factory(spec)
-            if (known !== undefined) return known
-        }
+        if (spec.comp && spec.comp !== "blur") return CompositorConfig.factory(spec)
         return spec.fallback
     }
     function resettable(spec: var): bool {

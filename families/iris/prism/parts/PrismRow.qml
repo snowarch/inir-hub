@@ -36,6 +36,8 @@ Item {
     readonly property bool restorable: PrismModel.restorable(root.row)
     readonly property bool locked: PrismModel.locked(root.row)
     readonly property string note: PrismModel.note(root.row)
+    // The page's art colours what the row's controls show through (a switch's well, a fader's groove).
+    readonly property string tint: String(PrismModel.page(root.row.page)?.tint ?? "grey")
     // Read from the row's spec each time: a description that follows live state (a compositor's refusal) stays current.
     readonly property string about: String(root.spec.description ?? root.row.detail ?? "")
     readonly property bool hovered: hover.hovered
@@ -63,6 +65,9 @@ Item {
     // Past what the line's end holds they are laid out under it, each with its name.
     readonly property bool manySwatches: root.swatched && (root.choices.length - 1) * PrismTheme.dp(26) + PrismTheme.dp(96) > root.controlWidth
     readonly property bool listed: root.kind === "pieces" || Boolean(root.spec.flags)
+    // A drawing whose name is its card's (Displays' "Screen" under the "Screen" tab) is shown without saying it again.
+    readonly property bool namedByCard: root.kind === "list" && Boolean(root.spec.view) && !root.showPage
+        && String(root.row.section ?? "") === String(root.row.label ?? "")
     // What goes under the line, if anything.
     readonly property string below: {
         if (root.listed) return "pieces"
@@ -85,7 +90,8 @@ Item {
         if (root.kind === "designs") return "now"
         if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "now"
         if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
-        if (root.kind === "choice" && root.choices.length > 0) return "choice"
+        // One way only (a screen with one mode) is a fact, not a choice: it is said, never offered.
+        if (root.kind === "choice" && root.choices.length > 1) return "choice"
         if (root.kind === "choice" || root.kind === "list" || root.listed) return "now"
         return ""
     }
@@ -114,7 +120,8 @@ Item {
     Item {
         id: line
         width: parent.width
-        height: root.stacked
+        visible: !root.namedByCard
+        height: root.namedByCard ? PrismTheme.dp(4) : root.stacked
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
             : Math.max(PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
         opacity: root.locked ? 0.45 : 1
@@ -320,6 +327,7 @@ Item {
     Component {
         id: switchKind
         PrismSwitch {
+            tint: root.tint
             checked: Boolean(root.value)
             onToggled: value => PrismModel.write(root.row, value)
         }
@@ -334,7 +342,7 @@ Item {
             stepSize: Number(root.spec.step ?? 1)
             value: Number(root.value ?? 0)
             home: PrismModel.home(root.row)
-            glyph: root.row.glyph ?? ""
+            tint: root.tint
             label: PrismModel.figure(root.row, slider.live)
             onMoved: value => PrismModel.preview(root.row, value)
             onCommitted: value => PrismModel.write(root.row, value)

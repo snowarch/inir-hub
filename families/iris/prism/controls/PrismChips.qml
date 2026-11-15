@@ -2,7 +2,8 @@ import QtQuick
 import qs.services
 import qs.modules.iris.prism.core
 
-// A folded choice laid out in place under its row: every option a chip, the chosen one solid.
+// A folded choice laid out in place under its row: every option a key with its name printed on it, the chosen one
+// solid (`.claude/ref/language`: the keycaps collage).
 Flow {
     id: root
     property var choices: []
@@ -17,20 +18,20 @@ Flow {
             required property var modelData
             readonly property bool chosen: JSON.stringify(modelData.value) === JSON.stringify(root.current)
             implicitWidth: label.implicitWidth + PrismTheme.dp(28)
-            implicitHeight: PrismTheme.dp(30)
-            Rectangle {
+            implicitHeight: PrismTheme.dp(32)
+            PrismKey {
                 anchors.fill: parent
-                radius: height / 2
-                color: chip.chosen ? PrismTheme.solid : area.pressed ? PrismTheme.fillPress : area.containsMouse ? PrismTheme.fillHover : PrismTheme.fill
-                Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
-            }
-            PrismText {
-                id: label
-                anchors.centerIn: parent
-                text: Translation.tr(chip.modelData.label)
-                font.pixelSize: PrismTheme.small
-                font.weight: Font.DemiBold
-                color: chip.chosen ? PrismTheme.inkSolid : PrismTheme.ink
+                face: chip.chosen ? PrismTheme.solid : PrismTheme.keyQuiet
+                hovered: area.containsMouse
+                down: area.pressed
+                PrismText {
+                    id: label
+                    anchors.centerIn: parent
+                    text: Translation.tr(chip.modelData.label)
+                    font.pixelSize: PrismTheme.small
+                    font.weight: Font.DemiBold
+                    color: chip.chosen ? PrismTheme.inkSolid : PrismTheme.ink
+                }
             }
             MouseArea {
                 id: area

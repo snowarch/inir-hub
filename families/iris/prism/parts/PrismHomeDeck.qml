@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import Quickshell.Widgets
+import QtQuick.Effects
+import QtQuick.Shapes
 import qs
 import qs.services
 import qs.modules.common
@@ -8,9 +9,9 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
-// Home's two widgets, in the grammar of the Apple widget set: the wallpaper itself, large, with a shuffle and the way
-// to the gallery; and Sound & light, the two levels a person reaches for most, as Prism's lying pills. They act on
-// the desktop at once: nothing here is a setting to look for.
+// Home's two widgets: the wallpaper itself as art cut by a shape, with a shuffle and the way to the gallery; and Sound
+// & light, the two levels a person reaches for most, as Prism's faders. They act on the desktop at once: nothing here
+// is a setting to look for.
 Item {
     id: root
     readonly property bool stacked: root.width < PrismTheme.dp(560)
@@ -24,27 +25,65 @@ Item {
     // A screen that answers with a level (a nested or virtual output reads "ready" with none).
     readonly property bool dims: Boolean(root.monitor?.ready) && Number.isFinite(Number(root.monitor?.brightness))
 
-    // The wallpaper, edge to edge: its name over a shade at the foot, shuffle and the gallery as smoked circles.
-    ClippingRectangle {
+    // The wallpaper as art cut by a shape (`.claude/ref/language`, landing-art-cut): a band from the left that steps
+    // down into a round lobe at the right. What it is sits in the room the cut leaves: its name in the lower notch, the
+    // folder's count in the upper one, the shuffle and the gallery as keys on the lobe.
+    Item {
         id: wall
         width: root.stacked ? root.width : Math.round((root.width - PrismTheme.dp(10)) * 0.58)
         height: root.cardHeight
-        radius: PrismTheme.dp(24)
-        color: PrismTheme.night
-        Image {
+        readonly property real band: Math.round(height * 0.56)
+        readonly property real lobeTop: Math.round(height * 0.34)
+        readonly property real turn: Math.round(width * 0.58)
+        readonly property real fillet: PrismTheme.dp(20)
+        readonly property real lobe: (height - wall.lobeTop) / 2
+        readonly property int count: Number(Wallpapers.folderModel?.count ?? 0)
+
+        Item {
             anchors.fill: parent
-            source: Wallpapers.stillUrlFor(root.wallPath)
-            sourceSize.width: PrismTheme.dp(720)
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            scale: wallArea.containsMouse ? 1.03 : 1
-            Behavior on scale { NumberAnimation { duration: PrismTheme.ms(420); easing.type: Easing.OutCubic } }
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: cut
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1
+            }
+            Rectangle { anchors.fill: parent; color: PrismTheme.night }
+            Image {
+                anchors.fill: parent
+                source: Wallpapers.stillUrlFor(root.wallPath)
+                sourceSize.width: PrismTheme.dp(720)
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                scale: wallArea.containsMouse ? 1.03 : 1
+                Behavior on scale { NumberAnimation { duration: PrismTheme.ms(420); easing.type: Easing.OutCubic } }
+            }
         }
-        Rectangle {
+        Shape {
+            id: cut
             anchors.fill: parent
-            gradient: Gradient {
-                GradientStop { position: 0.35; color: Qt.alpha(PrismTheme.night, 0) }
-                GradientStop { position: 1; color: Qt.alpha(PrismTheme.night, 0.78) }
+            visible: false
+            layer.enabled: true
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+                strokeWidth: -1
+                strokeColor: "transparent"
+                fillColor: "white"
+                startX: wall.band / 2; startY: 0
+                PathLine { x: wall.turn - wall.fillet; y: 0 }
+                PathArc { x: wall.turn; y: wall.fillet; radiusX: wall.fillet; radiusY: wall.fillet }
+                PathLine { x: wall.turn; y: wall.lobeTop - wall.fillet }
+                PathArc { x: wall.turn + wall.fillet; y: wall.lobeTop; radiusX: wall.fillet; radiusY: wall.fillet; direction: PathArc.Counterclockwise }
+                PathLine { x: wall.width - wall.lobe; y: wall.lobeTop }
+                PathArc { x: wall.width; y: wall.lobeTop + wall.lobe; radiusX: wall.lobe; radiusY: wall.lobe }
+                PathArc { x: wall.width - wall.lobe; y: wall.height; radiusX: wall.lobe; radiusY: wall.lobe }
+                PathLine { x: wall.turn + wall.fillet; y: wall.height }
+                PathArc { x: wall.turn; y: wall.height - wall.fillet; radiusX: wall.fillet; radiusY: wall.fillet }
+                PathLine { x: wall.turn; y: wall.band + wall.fillet }
+                PathArc { x: wall.turn - wall.fillet; y: wall.band; radiusX: wall.fillet; radiusY: wall.fillet; direction: PathArc.Counterclockwise }
+                PathLine { x: wall.band / 2; y: wall.band }
+                PathArc { x: 0; y: wall.band / 2; radiusX: wall.band / 2; radiusY: wall.band / 2 }
+                PathArc { x: wall.band / 2; y: 0; radiusX: wall.band / 2; radiusY: wall.band / 2 }
             }
         }
         MouseArea {
@@ -56,35 +95,60 @@ Item {
             Accessible.name: Translation.tr("Wallpaper")
             onClicked: PrismState.go("wallpaper")
         }
+        // The lower notch: what it is, printed small, and its name.
         Column {
-            anchors.left: parent.left
-            anchors.leftMargin: PrismTheme.dp(20)
-            anchors.right: wallKeys.left
-            anchors.rightMargin: PrismTheme.dp(12)
+            x: PrismTheme.dp(4)
+            width: wall.turn - wall.fillet - PrismTheme.dp(12)
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: PrismTheme.dp(18)
-            spacing: PrismTheme.dp(2)
+            anchors.bottomMargin: PrismTheme.dp(4)
+            spacing: PrismTheme.dp(3)
             PrismText {
-                text: PrismModel.wallpaperKind(root.wallPath)
-                color: Qt.alpha(PrismTheme.paper, 0.7)
-                font.pixelSize: PrismTheme.small
+                text: PrismModel.wallpaperKind(root.wallPath).toUpperCase()
+                mono: true
+                color: PrismTheme.ink3
+                font.pixelSize: PrismTheme.caption - 1
+                font.letterSpacing: 0.8
             }
             PrismText {
                 width: parent.width
                 text: root.wallName
                 elide: Text.ElideRight
-                color: PrismTheme.paper
                 font.pixelSize: PrismTheme.head
                 font.weight: Font.Bold
-                font.letterSpacing: -0.2
+                font.letterSpacing: -PrismTheme.head * 0.03
+            }
+        }
+        // The upper notch: how many there are to go through.
+        Column {
+            visible: wall.count > 0
+            x: wall.turn + wall.fillet + PrismTheme.dp(12)
+            y: Math.round((wall.lobeTop - height) / 2) - PrismTheme.dp(2)
+            spacing: PrismTheme.dp(2)
+            PrismText {
+                text: String(wall.count)
+                figures: true
+                font.pixelSize: PrismTheme.title
+                font.weight: Font.Bold
+                font.letterSpacing: -0.6
+            }
+            PrismText {
+                // A long word takes a second line in the notch, never a cut one.
+                width: Math.min(implicitWidth, wall.width - wall.turn - wall.fillet - PrismTheme.dp(16))
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                text: Translation.tr("Wallpapers").toUpperCase()
+                mono: true
+                color: PrismTheme.ink3
+                font.pixelSize: PrismTheme.caption - 1
+                font.letterSpacing: 0.8
             }
         }
         Row {
             id: wallKeys
             anchors.right: parent.right
-            anchors.rightMargin: PrismTheme.dp(16)
+            anchors.rightMargin: PrismTheme.dp(18)
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: PrismTheme.dp(16)
+            anchors.bottomMargin: PrismTheme.dp(18)
             spacing: PrismTheme.dp(8)
             PrismRound {
                 overArt: true
@@ -112,7 +176,7 @@ Item {
         width: root.stacked ? root.width : root.width - wall.width - PrismTheme.dp(10)
         height: root.cardHeight
         radius: PrismTheme.dp(24)
-        color: PrismTheme.fill
+        color: PrismTheme.card
 
         Column {
             anchors.fill: parent
@@ -120,19 +184,22 @@ Item {
             spacing: PrismTheme.dp(12)
             Item {
                 width: parent.width
-                height: PrismTheme.dp(34)
+                height: PrismTheme.dp(44)
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 0
+                    spacing: PrismTheme.dp(3)
                     PrismText {
-                        text: Translation.tr("Now")
-                        color: PrismTheme.ink2
-                        font.pixelSize: PrismTheme.small
+                        text: Translation.tr("Now").toUpperCase()
+                        mono: true
+                        color: PrismTheme.ink3
+                        font.pixelSize: PrismTheme.caption - 1
+                        font.letterSpacing: 0.8
                     }
                     PrismText {
                         text: Translation.tr("Sound & light")
-                        font.pixelSize: PrismTheme.row
+                        font.pixelSize: PrismTheme.head
                         font.weight: Font.Bold
+                        font.letterSpacing: -PrismTheme.head * 0.03
                     }
                 }
                 // Mute answers in place: the circle goes solid while the sound is off.

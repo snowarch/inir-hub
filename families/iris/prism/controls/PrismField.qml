@@ -1,7 +1,8 @@
 import QtQuick
 import qs.modules.iris.prism.core
+import qs.modules.iris.style
 
-// Words typed into a pill; Enter or leaving it writes them.
+// Words typed into a well; Enter or leaving it writes them.
 Item {
     id: root
     property string text: ""
@@ -18,22 +19,12 @@ Item {
     implicitHeight: PrismTheme.dp(32)
     onTextChanged: if (!input.activeFocus) input.text = root.text
 
-    // A pill lit from its left, as light falls on glass: brighter where the glyph sits, fading to the page; a hairline of
-    // light on its top edge. Focus lifts it and draws the spectrum along its foot, the beam of the hero.
-    property real lift: input.activeFocus ? 1 : area.containsMouse ? 0.5 : 0
-    Behavior on lift { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
-    Rectangle {
+    // Words typed into a well cut into the card (`.claude/ref/language`); focus draws the spectrum along its foot, light
+    // bending at an edge (glass-spectral), never a fill.
+    PrismWell {
         id: pill
         anchors.fill: parent
-        radius: height / 2
-        gradient: Gradient {
-            orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: Qt.alpha(PrismTheme.ink, 0.1 + 0.05 * root.lift) }
-            GradientStop { position: 0.55; color: Qt.alpha(PrismTheme.ink, 0.045 + 0.03 * root.lift) }
-            GradientStop { position: 1; color: Qt.alpha(PrismTheme.ink, 0.02 + 0.02 * root.lift) }
-        }
-        border.width: 1
-        border.color: Qt.alpha(PrismTheme.ink, 0.07 + 0.05 * root.lift)
+        hovered: area.containsMouse || input.activeFocus
     }
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -46,10 +37,10 @@ Item {
         gradient: Gradient {
             orientation: Gradient.Horizontal
             GradientStop { position: 0; color: "transparent" }
-            GradientStop { position: 0.2; color: PrismTheme.tint("red") }
-            GradientStop { position: 0.4; color: PrismTheme.tint("orange") }
-            GradientStop { position: 0.6; color: PrismTheme.tint("green") }
-            GradientStop { position: 0.8; color: PrismTheme.tint("blue") }
+            GradientStop { position: 0.2; color: IrisStyle.prismStops[6] }
+            GradientStop { position: 0.4; color: IrisStyle.prismStops[5] }
+            GradientStop { position: 0.6; color: IrisStyle.prismStops[3] }
+            GradientStop { position: 0.8; color: IrisStyle.prismStops[1] }
             GradientStop { position: 1; color: "transparent" }
         }
     }

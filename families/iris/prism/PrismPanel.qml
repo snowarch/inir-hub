@@ -352,7 +352,7 @@ Item {
                     page: root.page
                     eyebrow: root.topEyebrow
                     title: root.topTitle
-                    number: root.staged ? PrismModel.index(root.page.pageId) + 1 : 0
+                    number: !PrismState.searching && !root.changesView ? PrismModel.index(root.page.pageId) + 1 : 0
                     total: PrismModel.ids.length
                     settings: root.staged ? root.sections.reduce((n, section) => n + section.rows.length, 0) : 0
                     changed: root.staged ? PrismModel.changedOf(root.page.pageId).length : 0
@@ -587,5 +587,13 @@ Item {
             y: Math.round(body.height - height - PrismTheme.dp(22))
             z: 20
         }
+    }
+
+    // The window's glass edge, over its columns; a window of its own has its frame from the compositor.
+    PrismRim {
+        anchors.fill: body
+        visible: !root.windowed
+        radius: body.radius
+        tint: String(root.page?.tint ?? "grey")
     }
 }

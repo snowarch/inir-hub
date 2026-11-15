@@ -18,3 +18,14 @@ PrismNextGroup 1.0 PrismNextGroup.qml
 PrismIslandFaces 1.0 PrismIslandFaces.qml
 PrismHomeDeck 1.0 PrismHomeDeck.qml
 PrismWallpaperHero 1.0 PrismWallpaperHero.qml
+PrismProfile 1.0 PrismProfile.qml
+PrismRim 1.0 PrismRim.qml
+PrismAbout 1.0 PrismAbout.qml
+PrismHubArt 1.0 PrismHubArt.qml
+PrismHubAction 1.0 PrismHubAction.qml
+PrismHubCard 1.0 PrismHubCard.qml
+PrismHub 1.0 PrismHub.qml
+PrismHubSources 1.0 PrismHubSources.qml
+PrismHubKey 1.0 PrismHubKey.qml
+PrismHubReact 1.0 PrismHubReact.qml
+PrismHubItem 1.0 PrismHubItem.qml

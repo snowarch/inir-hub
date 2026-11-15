@@ -1,8 +1,9 @@
 import QtQuick
 import qs.modules.iris.prism.core
 
-// The reference's pills: `solid` is the white Play pill, `dark` the smoked View Playlist one over art, `quiet` a fill
-// on Prism's own page. A glyph leads when given.
+// Pills (`.claude/ref/language`): `solid` is the white key that acts, `art` the same white over art in every scheme,
+// `quiet` a key on Prism's own page; each stands on its lip and sinks when pressed. `dark` is the smoked glass that
+// says a value over art. A glyph leads when given.
 Item {
     id: root
     property string text: ""
@@ -12,26 +13,35 @@ Item {
     signal clicked()
 
     readonly property bool hovered: area.containsMouse
-    readonly property color background: root.tone === "art" ? PrismTheme.paper : root.tone === "solid" ? PrismTheme.solid
-        : root.tone === "dark" ? Qt.rgba(1, 1, 1, area.pressed ? 0.2 : root.hovered ? 0.16 : 0.1) // iris-literal: Prism's own fills and scrims, scheme-aware above
-        : area.pressed ? PrismTheme.fillPress : root.hovered ? PrismTheme.fillHover : PrismTheme.fill
+    readonly property color face: root.tone === "art" ? PrismTheme.paper : root.tone === "solid" ? PrismTheme.solid : PrismTheme.keyQuiet
     readonly property color ink: root.tone === "art" ? PrismTheme.night : root.tone === "solid" ? PrismTheme.inkSolid : root.tone === "dark" ? PrismTheme.paper : PrismTheme.ink
 
     implicitHeight: PrismTheme.dp(34)
     implicitWidth: row.implicitWidth + PrismTheme.dp(root.glyph.length > 0 ? 30 : 36)
     opacity: root.enabled_ ? 1 : 0.38
-    scale: area.pressed ? 0.97 : 1
-    Behavior on scale { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
 
+    PrismKey {
+        id: key
+        visible: root.tone !== "dark"
+        anchors.fill: parent
+        face: root.face
+        hovered: root.hovered
+        down: area.pressed
+    }
     Rectangle {
+        visible: root.tone === "dark"
         anchors.fill: parent
         radius: height / 2
-        color: root.background
+        color: area.pressed ? PrismTheme.spotPress : root.hovered ? PrismTheme.spotHover : PrismTheme.spot
+        border.width: 1
+        border.color: PrismTheme.spotEdge
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
     }
     Row {
         id: row
         anchors.centerIn: parent
+        // On a key the words ride its cap, a lip above the foot, and sink with it.
+        anchors.verticalCenterOffset: root.tone === "dark" ? 0 : (area.pressed ? PrismTheme.keyLip / 2 : -PrismTheme.keyLip / 2)
         spacing: PrismTheme.dp(6)
         PrismGlyph {
             visible: root.glyph.length > 0

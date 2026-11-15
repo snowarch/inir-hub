@@ -1,5 +1,6 @@
 import QtQuick
 import qs.modules.iris.prism.core
+import qs.modules.iris.style
 
 // A Settings design drawn small, as its panes stand: blocks in the box's own units (0..1), each a tone of ink, the
 // accent or the spectrum. `lit` draws it on the solid card of the chosen design.
@@ -29,10 +30,10 @@ Item {
     Gradient {
         id: spectrum
         orientation: Gradient.Horizontal
-        GradientStop { position: 0; color: PrismTheme.tint("red") }
-        GradientStop { position: 0.3; color: PrismTheme.tint("orange") }
-        GradientStop { position: 0.55; color: PrismTheme.tint("green") }
-        GradientStop { position: 0.8; color: PrismTheme.tint("blue") }
-        GradientStop { position: 1; color: PrismTheme.tint("violet") }
+        GradientStop { position: 0; color: IrisStyle.prismStops[6] }
+        GradientStop { position: 0.3; color: IrisStyle.prismStops[5] }
+        GradientStop { position: 0.55; color: IrisStyle.prismStops[3] }
+        GradientStop { position: 0.8; color: IrisStyle.prismStops[1] }
+        GradientStop { position: 1; color: IrisStyle.prismStops[0] }
     }
 }

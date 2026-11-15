@@ -2,8 +2,9 @@ import QtQuick
 import qs.services
 import qs.modules.iris.prism.core
 
-// One of a few: a segmented pill whose chosen part is the solid white of the reference. Past four choices or past its
-// room it folds to the chosen name and a chevron; `open` then asks the row to lay the chips out under it, in place.
+// One of a few (`.claude/ref/language`: the keycaps, the printed index tags): the names printed in a well, the chosen
+// one a solid key that glides there. Past four choices or past its room it folds to a key with the chosen name and a
+// chevron; `open` then asks the row to lay the chips out under it, in place.
 Item {
     id: root
     property var choices: []
@@ -29,10 +30,15 @@ Item {
 
     FontMetrics { id: metrics; font.family: PrismTheme.fontMain; font.pixelSize: PrismTheme.small; font.weight: Font.DemiBold }
 
-    Rectangle {
+    PrismWell {
+        visible: !root.folded
         anchors.fill: parent
-        radius: height / 2
-        color: root.folded && foldArea.containsMouse ? PrismTheme.fillHover : PrismTheme.fill
+    }
+    PrismKey {
+        visible: root.folded
+        anchors.fill: parent
+        hovered: foldArea.containsMouse
+        down: foldArea.pressed
     }
 
     // Unfolded: the segments, a white thumb sliding under the chosen one.
@@ -44,13 +50,13 @@ Item {
         readonly property var widths: root.names.map(name => metrics.font && metrics.advanceWidth(name) + root.slotPad * 2)
         readonly property var starts: { let at = 0; return widths.map(w => { const s = at; at += w; return s }) }
         readonly property real scaleX: widths.length > 0 ? width / widths.reduce((a, b) => a + b, 0) : 1
-        Rectangle {
+        PrismKey {
+            id: thumb
             visible: root.chosen >= 0
             x: (segments.starts[root.chosen] ?? 0) * segments.scaleX
             width: (segments.widths[root.chosen] ?? 0) * segments.scaleX
             height: parent.height
-            radius: height / 2
-            color: PrismTheme.solid
+            face: PrismTheme.solid
             Behavior on x { NumberAnimation { duration: PrismTheme.ms(240); easing.type: Easing.OutCubic } }
             Behavior on width { NumberAnimation { duration: PrismTheme.ms(240); easing.type: Easing.OutCubic } }
         }
@@ -64,6 +70,7 @@ Item {
                 height: segments.height
                 PrismText {
                     anchors.centerIn: parent
+                    anchors.verticalCenterOffset: parent.index === root.chosen ? -PrismTheme.keyLip / 2 : 0
                     text: parent.modelData
                     font.pixelSize: PrismTheme.small
                     font.weight: Font.DemiBold
@@ -85,6 +92,7 @@ Item {
         id: foldRow
         visible: root.folded
         anchors.centerIn: parent
+        anchors.verticalCenterOffset: -PrismTheme.keyLip / 2
         spacing: PrismTheme.dp(4)
         PrismText {
             anchors.verticalCenter: parent.verticalCenter

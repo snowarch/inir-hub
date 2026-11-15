@@ -15,3 +15,5 @@ PrismHue 1.0 PrismHue.qml
 PrismCurve 1.0 PrismCurve.qml
 PrismPieces 1.0 PrismPieces.qml
 PrismIcons 1.0 PrismIcons.qml
+PrismKey 1.0 PrismKey.qml
+PrismWell 1.0 PrismWell.qml

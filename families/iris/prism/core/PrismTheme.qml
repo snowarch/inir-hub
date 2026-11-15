@@ -55,30 +55,57 @@ Singleton {
     readonly property color paper: "#ffffff" // iris-literal: light on the art, the same in every scheme
     // The numbers on a scene's parts and their name chip: smoke over the art, the same in every scheme (Options+).
     readonly property color spot: Qt.rgba(0.03, 0.03, 0.04, 0.72) // iris-literal: a disc over the scene, readable on light and dark art
+    // Frosted glass over a picture (the profile card's sheet): the picture's light comes through, darkened to hold white words.
+    readonly property color glassSheet: Qt.rgba(0.05, 0.05, 0.07, 0.42) // iris-literal: a frosted sheet over art, the same in every scheme
+    readonly property color spotHover: Qt.rgba(0.03, 0.03, 0.04, 0.8) // iris-literal: the smoke deepening under the pointer
+    readonly property color spotPress: Qt.rgba(0.03, 0.03, 0.04, 0.88) // iris-literal: the smoke pressed
     readonly property color spotEdge: Qt.rgba(1, 1, 1, 0.24) // iris-literal: the smoke disc's rim, so it holds on a dark window
     readonly property color spotInk2: Qt.rgba(1, 1, 1, 0.66) // iris-literal: a value beside the name on that smoke
     readonly property color spotScrim: Qt.rgba(0, 0, 0, 0.5) // iris-literal: the scene stepping back round the pointed part
     readonly property color spotShadow: Qt.rgba(0, 0, 0, 0.35) // iris-literal: a disc's lift off the art
 
-    // Tints for the row marks: one per page, so a row found by search still says where it lives.
-    readonly property var tints: ({
-        blue: "#4289fd", violet: "#a259ff", pink: "#ff3d8b", green: "#26c25a", amber: "#ffaa1d", // iris-literal: the refraction's spectrum, reused as page tints
-        red: "#ff453a", teal: "#30c6c8", indigo: "#6e6bff", orange: "#ff8a1f", grey: "#8e8e93" // iris-literal: the refraction's spectrum, reused as page tints
-    })
+    // The one colour that keeps its own meaning whatever the desktop's colours: red for what removes or failed.
+    readonly property var tints: ({ red: "#ff453a", grey: "#8e8e93" }) // iris-literal: danger and its quiet fallback
     function tint(name: string): color { return root.tints[name] ?? root.tints.grey }
 
     // Each page's art in three colours (`.claude/ref/language`, the Design Archive posters: a ribbon's start, its end
-    // and its core), from its tint: the poster on its top, its folders' backs and its rows' covers say one page.
-    readonly property var palettes: ({
-        blue: ["#1f3dff", "#ff8a1f", "#ffd23d"], violet: ["#5b2bff", "#ff2d55", "#ff8ac8"], // iris-literal: the pages' art, Prism's own
-        pink: ["#ff2d78", "#7a3bff", "#ffb36b"], green: ["#14b85a", "#22c3c9", "#f2e14a"], // iris-literal: the pages' art, Prism's own
-        amber: ["#ff9f0a", "#ff3b30", "#ffe08a"], red: ["#ff3b30", "#ff9f0a", "#5b2bff"], // iris-literal: the pages' art, Prism's own
-        teal: ["#0fb3b8", "#1d4bff", "#f4d23c"], indigo: ["#3f3cff", "#1fb7c9", "#ff5aa5"], // iris-literal: the pages' art, Prism's own
-        orange: ["#ff7a1a", "#ff2d55", "#2f6bff"], grey: ["#8e8e96", "#4a6bff", "#ffb340"] // iris-literal: the pages' art, Prism's own
-    })
-    function palette(name: string): var { return (root.palettes[name] ?? root.palettes.grey).map(hex => Qt.color(hex)) }
+    // and its core), all from one place (his 11-15: the wallpaper's colours, or a contrast to the person's accent): the
+    // accent, the highlight and the wallpaper's own light, set at one glowing lightness in OKLCH. A colour too near
+    // another gives way to the accent's opposite, so a ribbon always travels across a contrast; with no hue to read
+    // (a grey wallpaper and accent) the art keeps the posters' blue and amber. A page's tint only orders the three
+    // (start, end, core), so pages differ and every one of them wears the desktop's colours.
+    readonly property var artHues: {
+        const hueOf = c => Qt.color(c).hslSaturation < 0.12 ? -1 : IrisStyle.oklchHue(Qt.color(c))
+        const apart = (x, y) => { const d = Math.abs(x - y) % 360; return Math.min(d, 360 - d) }
+        // iris-literal: the posters' blue, used only when the desktop gives no hue
+        const a = hueOf(IrisStyle.baseAccent) < 0 ? 264 : hueOf(IrisStyle.baseAccent)
+        let b = hueOf(IrisStyle.secondaryAccent)
+        if (b < 0 || apart(a, b) < 45) b = (a + 165) % 360
+        let c = hueOf(IrisStyle.wallpaperLight)
+        if (c < 0 || apart(c, a) < 35 || apart(c, b) < 35) c = (a + 300) % 360
+        return [a, b, c]
+    }
+    readonly property var artOrders: ({ blue: [0, 1, 2], violet: [0, 2, 1], pink: [1, 0, 2], green: [2, 0, 1], amber: [1, 2, 0],
+        red: [2, 1, 0], teal: [2, 0, 1], indigo: [0, 2, 1], orange: [1, 0, 2], grey: [0, 1, 2], holo: [0, 1, 2] })
+    function palette(name: string): var {
+        const order = root.artOrders[name] ?? root.artOrders.grey
+        // Light over the night glows bright; pigment on paper sits a step deeper so it still reads as ink.
+        return order.map((index, place) => IrisStyle.oklch(root.light ? 0.6 : 0.66 + (place === 2 ? 0.1 : 0), place === 2 ? 0.14 : 0.2, root.artHues[index]))
+    }
     // The art's paper in light: the posters' warm off-white, a step from the white cards it shows behind.
     readonly property color paperLight: "#eeeae1" // iris-literal: the art's paper in light, Prism's own
+
+    // Things you touch are objects (`.claude/ref/language`: the keycaps, the tactile faders, the Figma toggle's well).
+    // A key is a cap on its own side: the side shows under it as a lip, a hairline of light runs on its top. A well is
+    // cut into the card: dark, its lower lip catching light; light, its upper lip in shade. Solid layers, never a
+    // gradient (his 11-07).
+    readonly property real keyLip: root.dp(2)
+    readonly property color keyQuiet: root.light ? "#f1f1f4" : "#242428" // iris-literal: a quiet key's cap, a step off the card
+    readonly property color wellEdge: root.light ? "#cbcbd1" : "#2b2b30" // iris-literal: the well's lit (dark) or shaded (light) lip
+    function lum(c: color): real { return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b }
+    function keySide(face: color): color { return root.lum(face) > 0.6 ? Qt.darker(face, 1.34) : Qt.darker(face, 2.6) }
+    function keyRim(face: color): color { return root.lum(face) > 0.6 ? face : Qt.lighter(face, 1.4) }
+    function keyHover(face: color): color { return root.lum(face) > 0.6 ? Qt.darker(face, 1.06) : Qt.lighter(face, 1.22) }
 
     readonly property string fontMain: IrisStyle.fontMain
     readonly property string fontMono: IrisStyle.fontMono

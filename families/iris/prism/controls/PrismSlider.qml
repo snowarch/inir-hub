@@ -1,9 +1,9 @@
 import QtQuick
 import qs.modules.common.widgets
 import qs.modules.iris.prism.core
+import qs.modules.iris.prism.fx
 
-// A level as the reference's white-fill pill, lying down: the fill is the value, the glyph rides at its start and the
-// figure at the end. A drag previews; release commits. The wheel steps once a notch (fine wheels and touchpads add up
+// A level as a fader. A drag previews; release commits. The wheel steps once a notch (fine wheels and touchpads add up
 // to one), previews each step and commits once when the burst stops, as a release would.
 Item {
     id: root
@@ -13,6 +13,7 @@ Item {
     property real stepSize: 1
     property string glyph: ""
     property string label: ""
+    property string tint: "grey"
     signal moved(real value)
     signal committed(real value)
 
@@ -43,42 +44,106 @@ Item {
     // The factory value: a drag passing it holds there, so it can always be found again; the wheel steps freely.
     property real home: NaN
     function at(x: real): real {
-        const raw = root.from + (x / root.width) * (root.to - root.from)
+        const raw = root.from + Math.max(0, Math.min(1, (x - root.lead - root.capWidth / 2) / Math.max(1, root.travel))) * (root.to - root.from)
         if (Number.isFinite(root.home) && Math.abs(raw - root.home) < (root.to - root.from) * 0.02) return root.home
         return root.snap(raw)
     }
 
-    Rectangle {
+    // The fader (`.claude/ref/language`: the tactile sliders): a groove cut into the card with its scale printed under
+    // it, the page's art filling it up to a white cap with a grip, the figure printed at the end. The factory value's
+    // tick stands taller, so it can be found again by eye as well as by the drag that holds there.
+    readonly property real capWidth: PrismTheme.dp(28)
+    readonly property real figureRoom: Math.max(PrismTheme.dp(46), figure.implicitWidth) + PrismTheme.dp(12)
+    // A glyph, when given (the home deck's volume), leads before the groove.
+    readonly property real lead: root.glyph.length > 0 ? PrismTheme.dp(26) : 0
+    readonly property real grooveWidth: Math.max(root.capWidth * 2, root.width - root.figureRoom - root.lead)
+    readonly property real travel: root.grooveWidth - root.capWidth
+    readonly property real middle: PrismTheme.dp(12)
+
+    PrismGlyph {
+        visible: root.glyph.length > 0
+        y: root.middle - height / 2
+        text: root.glyph
+        filled: true
+        iconSize: PrismTheme.dp(16)
+        color: PrismTheme.ink2
+    }
+    PrismWell {
         id: track
-        anchors.fill: parent
-        radius: height / 2
-        color: area.containsMouse || root.held ? PrismTheme.fillHover : PrismTheme.fill
+        x: root.lead
+        y: root.middle - height / 2
+        width: root.grooveWidth
+        height: PrismTheme.dp(8)
+        hovered: area.containsMouse || root.held
+    }
+    // The art runs the groove's whole length and shows up to the cap, so its colours stay put while the cap moves.
+    Item {
+        x: track.x
+        y: track.y
+        width: cap.x - track.x + cap.width / 2
+        height: track.height
         clip: true
-        Rectangle {
-            width: Math.max(track.height, track.width * root.share)
+        PrismFlow {
+            width: track.width
             height: track.height
-            radius: track.radius
-            color: PrismTheme.solid
-            opacity: root.share > 0 ? 1 : 0.0
-            Behavior on width { enabled: !root.held; NumberAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
+            radius: height / 2
+            dark: true
+            tint: root.tint
+            seed: 1.3
+            centre: Qt.point(0.5, 0.5)
+            thickness: 2.4
         }
     }
-    // Ink that crosses the fill flips with it: one copy clipped to the fill, one to the rest.
-    Item {
-        id: inkOn
-        width: Math.max(track.height, track.width * root.share)
-        height: root.height
-        clip: true
-        PrismGlyph { x: PrismTheme.dp(10); anchors.verticalCenter: parent.verticalCenter; text: root.glyph; iconSize: PrismTheme.dp(16); filled: true; color: PrismTheme.inkSolid; visible: root.glyph.length > 0 }
-        PrismText { x: root.width - width - PrismTheme.dp(12); anchors.verticalCenter: parent.verticalCenter; text: root.label; figures: true; font.weight: Font.DemiBold; color: PrismTheme.inkSolid; font.pixelSize: PrismTheme.small }
+    Repeater {
+        model: 11
+        delegate: Rectangle {
+            required property int index
+            x: Math.round(root.lead + root.capWidth / 2 + root.travel * index / 10)
+            y: track.y + track.height + PrismTheme.dp(5)
+            width: 1
+            height: index % 5 === 0 ? PrismTheme.dp(5) : PrismTheme.dp(3)
+            color: PrismTheme.ink3
+            opacity: 0.7
+        }
     }
-    Item {
-        x: inkOn.width
-        width: root.width - x
-        height: root.height
-        clip: true
-        PrismGlyph { x: PrismTheme.dp(10) - parent.x; anchors.verticalCenter: parent.verticalCenter; text: root.glyph; iconSize: PrismTheme.dp(16); filled: true; color: PrismTheme.ink2; visible: root.glyph.length > 0 }
-        PrismText { x: root.width - width - PrismTheme.dp(12) - parent.x; anchors.verticalCenter: parent.verticalCenter; text: root.label; figures: true; font.weight: Font.DemiBold; color: PrismTheme.ink; font.pixelSize: PrismTheme.small }
+    Rectangle {
+        readonly property real share: root.to > root.from ? (root.home - root.from) / (root.to - root.from) : 0
+        visible: Number.isFinite(root.home) && share >= 0 && share <= 1
+        x: Math.round(root.lead + root.capWidth / 2 + root.travel * share)
+        y: track.y + track.height + PrismTheme.dp(4)
+        width: 1
+        height: PrismTheme.dp(7)
+        color: PrismTheme.ink
+    }
+    PrismKey {
+        id: cap
+        x: root.lead + root.travel * root.share
+        y: root.middle - height / 2 - PrismTheme.dp(1)
+        width: root.capWidth
+        height: PrismTheme.dp(20)
+        radius: PrismTheme.dp(7)
+        face: PrismTheme.paper
+        hovered: area.containsMouse
+        down: root.held
+        Behavior on x { enabled: !root.held; NumberAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
+        Row {
+            anchors.centerIn: parent
+            spacing: PrismTheme.dp(3)
+            Repeater {
+                model: 2
+                delegate: Rectangle { width: 1; height: PrismTheme.dp(8); color: PrismTheme.night; opacity: 0.32 }
+            }
+        }
+    }
+    PrismText {
+        id: figure
+        x: root.width - width
+        y: root.middle - height / 2
+        text: root.label
+        figures: true
+        font.pixelSize: PrismTheme.small
+        font.weight: Font.DemiBold
+        color: root.held ? PrismTheme.ink : PrismTheme.ink2
     }
     MouseArea {
         id: area
