@@ -1396,6 +1396,9 @@ QtObject {
     }
 
     function identityColor(name: string): color { return root.identity[name] ?? root.identity.lavender }
+    // A category's tint washed over a plate (a bound key, its combo's caps): enough to tell categories apart at a
+    // glance, never louder than the sign printed on it.
+    readonly property real tintWash: root.light ? 0.2 : 0.26
 
     readonly property real shapeScale: root.preset.shape * root.tweak("shape", 0.3, 1.6)
     // Large containers stop growing well before a pill, so content keeps a concentric margin.

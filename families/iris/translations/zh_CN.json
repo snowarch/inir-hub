@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "允许"
+  "Allow": "允许",
+  "What keys type": "按键输入的字符",
+  "Ins": "Ins",
+  "Pick the key it moves to": "选择要移到的按键",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "指向按键可查看其功能，选中即可更改。按住键盘上的按键也可以。",
+  "Nothing runs on this key with these modifiers. Give it an action.": "此按键与这些修饰键组合时不执行任何操作。为它指定一个操作。",
+  "Nothing runs on this key with these modifiers.": "此按键与这些修饰键组合时不执行任何操作。",
+  "Or a program to run, as you would type it": "或要运行的程序，按你输入的方式",
+  "Run it": "运行",
+  "One setting": "1 项设置"
 }

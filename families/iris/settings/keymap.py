@@ -51,14 +51,18 @@ def keys_of(layout, variant, options, group):
     keymap = lib.xkb_keymap_new_from_names(context, ctypes.byref(names), 0)
     if not keymap:
         lib.xkb_context_unref(context)
-        return None
+        return None, {}
     group = max(0, min(group, lib.xkb_keymap_num_layouts(keymap) - 1))
     buf = ctypes.create_string_buffer(64)
     keys = {}
+    # Every named key's code, so a key pressed on the drawing's own window lights its place (Qt's native scan code is
+    # this XKB keycode under Wayland).
+    codes = {}
     for code in range(lib.xkb_keymap_min_keycode(keymap), lib.xkb_keymap_max_keycode(keymap) + 1):
         name = lib.xkb_keymap_key_get_name(keymap, code)
         if not name:
             continue
+        codes.setdefault(name.decode(), code)
         levels = []
         for level in range(min(4, lib.xkb_keymap_num_levels_for_key(keymap, code, group))):
             syms = ctypes.POINTER(ctypes.c_uint32)()
@@ -74,7 +78,7 @@ def keys_of(layout, variant, options, group):
             keys[name.decode()] = levels
     lib.xkb_keymap_unref(keymap)
     lib.xkb_context_unref(context)
-    return keys
+    return keys, codes
 
 
 def rules_file():
@@ -130,7 +134,7 @@ def main():
         layout_list = [e["layout"] for e in found if e] or ["us"]
         variant_list = [e["variant"] for e in found if e] or [""]
     variant_list += [""] * (len(layout_list) - len(variant_list))
-    keys = keys_of(",".join(layout_list), ",".join(variant_list[:len(layout_list)]), options, int(group or 0))
+    keys, codes = keys_of(",".join(layout_list), ",".join(variant_list[:len(layout_list)]), options, int(group or 0))
     if keys is None:
         print("no keymap for that layout", file=sys.stderr)
         sys.exit(1)
@@ -153,6 +157,7 @@ def main():
             suggested.append(entry)
     print(json.dumps({
         "keys": keys,
+        "codes": codes,
         "iso": any(text and text not in plain for text in side),
         "using": [{"layout": l, "variant": v} for l, v in zip(layout_list, variant_list)],
         "layouts": [{k: entry[k] for k in ("layout", "variant", "name")} for entry in layouts],

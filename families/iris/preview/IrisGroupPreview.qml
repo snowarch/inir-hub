@@ -36,6 +36,8 @@ ClippingRectangle {
     property string caption: ""
     // The host prints the caption beside the stage: inside it a chip would sit on what it describes.
     property bool captionOutside: false
+    // The hairline round the scene; a host whose plate already frames it (Prism's stage card) leaves it off.
+    property bool framed: true
     // Niri's values for the scenes that draw them (windows, keyboard, the screen); Settings passes its reader in.
     property var niriValue: null
     property int niriRevision: 0
@@ -116,6 +118,7 @@ ClippingRectangle {
             "colour/Colour theme": "palette", "colour/Scheme": "palette", "colour/Accent": "palette", "colour/Highlight": "highlight",
             "colour/App colours": "palette", "colour/Dark look": "palette", "colour/Ink look": "palette", "colour/Light look": "palette",
             "colour/Wallpaper tint": "palette",
+            "appearance/App colours": "palette", "windows/Layout": "windows",
             "login/Login Screen": "login",
             "desktop/Desktop menu": "menus",
             "motion/Motion": "motion", "motion/Curve": "motion", "motion/Timing": "motion",
@@ -222,6 +225,7 @@ ClippingRectangle {
         radius: root.radius
         color: "transparent"
         // A chamfered Design cuts the frame with its own die; this rule would run on through the cut corners.
+        visible: root.framed
         border.width: 1
         border.color: IrisStyle.border
     }

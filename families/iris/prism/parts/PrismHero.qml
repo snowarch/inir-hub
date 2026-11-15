@@ -17,6 +17,8 @@ Item {
     property int restorable: 0
     property var changed: []
     property var lead: []          // rows whose values make the title
+    // Its corners: its own on a page, concentric inside the stage's card.
+    property real corner: PrismTheme.dp(24)
     signal restore()
 
     implicitHeight: PrismTheme.dp(232)
@@ -25,7 +27,7 @@ Item {
     PrismRefraction {
         id: art
         anchors.fill: parent
-        cornerRadius: PrismTheme.dp(24)
+        cornerRadius: root.corner
         cardRadius: PrismTheme.dp(16)
         // The card stands left of the right edge so the spectrum has room to leave it, as in the reference.
         card: Qt.rect(root.width * 0.7 - root.cardSide / 2, (root.height - root.cardSide) / 2 + PrismTheme.dp(10), root.cardSide, root.cardSide)

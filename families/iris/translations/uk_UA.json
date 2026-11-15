@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "Дозволити"
+  "Allow": "Дозволити",
+  "What keys type": "Що друкують клавіші",
+  "Ins": "Ins",
+  "Pick the key it moves to": "Виберіть клавішу, на яку перенести",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Наведіть на клавішу, щоб побачити, що вона робить, виберіть її, щоб змінити. Утримувати клавіші на клавіатурі теж можна.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "На цій клавіші з цими модифікаторами нічого не запускається. Призначте дію.",
+  "Nothing runs on this key with these modifiers.": "На цій клавіші з цими модифікаторами нічого не запускається.",
+  "Or a program to run, as you would type it": "Або програма для запуску, як ви б її набрали",
+  "Run it": "Запустити",
+  "One setting": "Один параметр"
 }

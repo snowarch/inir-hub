@@ -103,8 +103,8 @@ Item {
             const title = root.bandOf(section.title)
             const changed = section.rows.some(row => PrismModel.changed(row))
             const entry = out.find(entry => entry.title === title)
-            if (entry) entry.changed = entry.changed || changed
-            else out.push({ title: title, changed: changed })
+            if (entry) { entry.changed = entry.changed || changed; entry.rows = entry.rows.concat(section.rows) }
+            else out.push({ title: title, changed: changed, first: section.title, rows: Array.from(section.rows) })
         }
         return out
     }
@@ -332,8 +332,26 @@ Item {
 
                 PageTop { width: content.width }
 
+                // A page with a scene opens on its stage: the scene, then every group numbered with what it holds now.
+                PrismStage {
+                    id: stageCard
+                    readonly property bool wanted: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper" && root.page.pageId !== "general"
+                    visible: stageCard.wanted && stageCard.staged
+                    width: content.width
+                    page: root.page
+                    groups: root.groups
+                    currentGroup: root.bandOf(root.currentGroup)
+                    restorable: PrismModel.restorableOf(root.page.pageId)
+                    number: PrismModel.index(root.page.pageId) + 1
+                    count: root.sections.reduce((n, section) => n + section.rows.length, 0)
+                    changed: PrismModel.changedOf(root.page.pageId)
+                    lead: PrismModel.leadOf(root.page)
+                    active: root.active && stageCard.wanted
+                    onPickGroup: title => root.showGroup(root.firstOf(title))
+                    onRestore: PrismModel.restore(root.page.pageId)
+                }
                 PrismHero {
-                    visible: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper"
+                    visible: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper" && !stageCard.visible
                     width: content.width
                     page: root.page
                     number: PrismModel.index(root.page.pageId) + 1

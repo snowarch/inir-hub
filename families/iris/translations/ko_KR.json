@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "허용"
+  "Allow": "허용",
+  "What keys type": "키가 입력하는 문자",
+  "Ins": "Ins",
+  "Pick the key it moves to": "옮길 키를 고르세요",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "키를 가리키면 하는 일을 볼 수 있고, 고르면 바꿀 수 있습니다. 키보드의 키를 누르고 있어도 됩니다.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "이 보조 키 조합으로는 이 키에서 실행되는 것이 없습니다. 동작을 지정하세요.",
+  "Nothing runs on this key with these modifiers.": "이 보조 키 조합으로는 이 키에서 실행되는 것이 없습니다.",
+  "Or a program to run, as you would type it": "또는 실행할 프로그램 (입력하듯이)",
+  "Run it": "실행",
+  "One setting": "설정 1개"
 }

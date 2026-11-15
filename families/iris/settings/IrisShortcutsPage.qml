@@ -10,6 +10,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.components
 import qs.modules.iris.style
+import "IrisBinds.js" as IrisBinds
 
 Flickable {
     IrisScrollFeel {}
@@ -33,26 +34,8 @@ Flickable {
     function displayCategoryName(name: string): string {
         return name === "ii Shell" ? Translation.tr("iNiR Shell") : name
     }
-    function categoryGlyph(name: string): string {
-        const glyphs = {
-            "System": "settings_power", "ii Shell": "auto_awesome", "iNiR Shell": "auto_awesome",
-            "Window Switcher": "swap_horiz", "Screenshots": "screenshot_region", "Applications": "apps",
-            "Window Management": "web_asset", "Focus": "center_focus_strong", "Move Windows": "open_with",
-            "Workspaces": "grid_view", "Media": "volume_up", "Brightness": "light_mode",
-            "Layout": "dashboard_customize", "Resize": "photo_size_select_large", "Monitors": "monitor",
-            "Region Tools": "screenshot_region", "Other": "more_horiz"
-        }
-        return glyphs[name] ?? "keyboard"
-    }
-    function categoryTint(name: string): color {
-        const tints = {
-            "System": "gray", "ii Shell": "purple", "iNiR Shell": "purple", "Window Switcher": "indigo",
-            "Screenshots": "orange", "Region Tools": "orange", "Applications": "blue", "Window Management": "sky",
-            "Focus": "teal", "Move Windows": "green", "Workspaces": "indigo", "Media": "pink",
-            "Brightness": "yellow", "Layout": "lavender", "Resize": "red", "Monitors": "blue", "Other": "gray"
-        }
-        return IrisStyle.identityColor(tints[name] ?? "gray")
-    }
+    function categoryGlyph(name: string): string { return IrisBinds.glyphOf(name) }
+    function categoryTint(name: string): color { return IrisStyle.identityColor(IrisBinds.tintOf(name)) }
     function parseCombo(combo: string): var {
         if (!combo || combo.length === 0) return { mods: [], key: "" }
         const parts = combo.split("+")
@@ -74,7 +57,7 @@ Flickable {
                     const b = NiriKeybinds.allBinds[i] ?? {}
                     const parsed = root.parseCombo(b.key_combo ?? "")
                     return { mods: parsed.mods, key: parsed.key, action: b.description ?? b.action ?? "", disabled: b.commented ?? false,
-                        keyCombo: b.key_combo ?? "", actionRaw: b.action ?? "", optionsStr: b.options ?? "" }
+                        keyCombo: b.key_combo ?? "", actionRaw: b.action_raw ?? b.action ?? "", optionsStr: b.options ?? "" }
                 })
                 : (category.children?.[0]?.keybinds ?? []).map(item => ({ mods: item.mods ?? [], key: item.key ?? "", action: item.comment ?? "",
                     disabled: false, keyCombo: "", actionRaw: "", optionsStr: "" }))
@@ -127,6 +110,15 @@ Flickable {
         x: Math.round((root.width - width) / 2)
         y: Math.round(6 * root.d)
         spacing: 14 * root.d
+
+        // The keyboard first, on what Mod does: every key's bind at a glance, changed where it sits.
+        IrisKeyboardMap {
+            Layout.fillWidth: true
+            Layout.bottomMargin: Math.round(6 * root.d)
+            visible: root.hasEnriched
+            startHeld: ["Mod"]
+            choosing: false
+        }
 
         Rectangle {
             Layout.fillWidth: true

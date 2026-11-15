@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "Разрешить"
+  "Allow": "Разрешить",
+  "What keys type": "Что печатают клавиши",
+  "Ins": "Ins",
+  "Pick the key it moves to": "Выберите клавишу, на которую перенести",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Наведите на клавишу, чтобы увидеть, что она делает, выберите её, чтобы изменить. Удерживать клавиши на клавиатуре тоже можно.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "На этой клавише с этими модификаторами ничего не запускается. Назначьте действие.",
+  "Nothing runs on this key with these modifiers.": "На этой клавише с этими модификаторами ничего не запускается.",
+  "Or a program to run, as you would type it": "Или программа для запуска, как вы бы её набрали",
+  "Run it": "Запустить",
+  "One setting": "Один параметр"
 }

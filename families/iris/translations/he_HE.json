@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "לאפשר"
+  "Allow": "לאפשר",
+  "What keys type": "מה המקשים מקלידים",
+  "Ins": "Ins",
+  "Pick the key it moves to": "בחר את המקש שאליו הוא עובר",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "הצבע על מקש כדי לראות מה הוא עושה, ובחר בו כדי לשנות אותו. גם החזקת המקשים במקלדת עובדת.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "שום דבר לא פועל במקש הזה עם המקשים המשנים האלה. תן לו פעולה.",
+  "Nothing runs on this key with these modifiers.": "שום דבר לא פועל במקש הזה עם המקשים המשנים האלה.",
+  "Or a program to run, as you would type it": "או תוכנה להפעלה, כפי שהיית מקליד אותה",
+  "Run it": "הפעל",
+  "One setting": "הגדרה אחת"
 }

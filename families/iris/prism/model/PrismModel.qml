@@ -103,6 +103,8 @@ Singleton {
             const cluster = Number(dress.cluster ?? base?.cluster ?? 4)
             out.push({
                 pageId: id,
+                // The IrisOptions area it draws from: its stage's scenes are named by it.
+                area: area,
                 name: String(dress.name ?? base?.title ?? id),
                 group: area === "general" ? "" : root.captionOf(IrisOptions.categoryOf(area)),
                 glyph: String(dress.glyph ?? base?.icon ?? "circle"),
@@ -179,7 +181,9 @@ Singleton {
                 kind: String(spec.kind ?? ""),
                 glyph: root.coverOf(spec),
                 get choices() { return spec.choices ?? [] },
-                keywords: Array.from(spec.keywords ?? [])
+                keywords: Array.from(spec.keywords ?? []),
+                // Drawn by the page's stage (the keyboard), not again among the rows; search still finds it.
+                onStage: String(spec.view ?? "").endsWith("IrisKeyboardMap.qml")
             })
         }
         // One home per option (his 11-10: "cosas que están repetidas por cualquier lado"): where IrisOptions lists
@@ -206,7 +210,7 @@ Singleton {
                 ? root.rows.find(row => !row.virtual && row.spec.comp !== undefined && row.spec.comp + ":" + row.spec.key === named && root.shown(row))
                 : root.find(named)
             // A row hidden now (a style the chosen look lacks) or with nothing to say yet leaves the line to the next.
-            if (row && root.shown(row) && String(root.sayNow(row) ?? "").length > 0) out.push(row)
+            if (row && row.page === page.pageId && root.shown(row) && String(root.sayNow(row) ?? "").length > 0) out.push(row)
         }
         return out
     }
@@ -229,7 +233,7 @@ Singleton {
         const _ = root.revision
         return row.virtual ? true : IrisOptions.shown(row.spec)
     }
-    function rowsOf(id: string): var { return root.rows.filter(row => row.page === id && root.shown(row)) }
+    function rowsOf(id: string): var { return root.rows.filter(row => row.page === id && !row.onStage && root.shown(row)) }
     // A page's groups, in IrisOptions' order, each with the rows it shows now.
     function sectionsOf(id: string): var {
         const out = []
@@ -245,7 +249,7 @@ Singleton {
         const _ = root.revision
         const out = []
         for (const row of root.rows) {
-            if (row.page !== id || !(row.virtual || IrisOptions.fits(row.spec))) continue
+            if (row.page !== id || row.onStage || !(row.virtual || IrisOptions.fits(row.spec))) continue
             let group = out.find(entry => entry.title === row.section)
             if (!group) { group = { title: row.section, rows: [] }; out.push(group) }
             group.rows.push(row)

@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "İzin ver"
+  "Allow": "İzin ver",
+  "What keys type": "Tuşların yazdıkları",
+  "Ins": "Ins",
+  "Pick the key it moves to": "Taşınacağı tuşu seçin",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Ne yaptığını görmek için bir tuşun üzerine gelin, değiştirmek için seçin. Klavyenizdeki tuşları basılı tutmak da işe yarar.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "Bu değiştiricilerle bu tuşta hiçbir şey çalışmıyor. Ona bir eylem verin.",
+  "Nothing runs on this key with these modifiers.": "Bu değiştiricilerle bu tuşta hiçbir şey çalışmıyor.",
+  "Or a program to run, as you would type it": "Ya da çalıştırılacak bir program, yazacağınız gibi",
+  "Run it": "Çalıştır",
+  "One setting": "Bir ayar"
 }

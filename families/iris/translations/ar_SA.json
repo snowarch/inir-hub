@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "سماح"
+  "Allow": "سماح",
+  "What keys type": "ما تكتبه المفاتيح",
+  "Ins": "Ins",
+  "Pick the key it moves to": "اختر المفتاح الذي ينتقل إليه",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "أشر إلى مفتاح لترى ما يفعله، واختره لتغييره. الضغط المستمر على مفاتيح لوحة المفاتيح يعمل أيضًا.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "لا شيء يعمل على هذا المفتاح مع هذه المعدِّلات. امنحه إجراءً.",
+  "Nothing runs on this key with these modifiers.": "لا شيء يعمل على هذا المفتاح مع هذه المعدِّلات.",
+  "Or a program to run, as you would type it": "أو برنامج لتشغيله، كما تكتبه",
+  "Run it": "شغّله",
+  "One setting": "إعداد واحد"
 }

@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "Permitir"
+  "Allow": "Permitir",
+  "What keys type": "Lo que escriben las teclas",
+  "Ins": "Insert",
+  "Pick the key it moves to": "Elige la tecla a la que se mueve",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Señala una tecla para ver qué hace y elígela para cambiarla. También puedes mantener presionadas las teclas de tu teclado.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "Nada se ejecuta con esta tecla y estos modificadores. Dale una acción.",
+  "Nothing runs on this key with these modifiers.": "Nada se ejecuta con esta tecla y estos modificadores.",
+  "Or a program to run, as you would type it": "O un programa para ejecutar, tal como lo escribirías",
+  "Run it": "Ejecutarlo",
+  "One setting": "Un ajuste"
 }

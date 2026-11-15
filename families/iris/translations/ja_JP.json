@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "許可"
+  "Allow": "許可",
+  "What keys type": "キーが入力する文字",
+  "Ins": "Ins",
+  "Pick the key it moves to": "移動先のキーを選んでください",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "キーにポインタを合わせると動作が表示され、選ぶと変更できます。キーボードのキーを押したままにしても使えます。",
+  "Nothing runs on this key with these modifiers. Give it an action.": "この修飾キーとの組み合わせでは何も実行されません。アクションを割り当ててください。",
+  "Nothing runs on this key with these modifiers.": "この修飾キーとの組み合わせでは何も実行されません。",
+  "Or a program to run, as you would type it": "または実行するプログラム (入力するとおりに)",
+  "Run it": "実行",
+  "One setting": "1 件の設定"
 }

@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "अनुमति दें"
+  "Allow": "अनुमति दें",
+  "What keys type": "कुंजियाँ क्या टाइप करती हैं",
+  "Ins": "Ins",
+  "Pick the key it moves to": "वह कुंजी चुनें जिस पर इसे ले जाना है",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "कोई कुंजी क्या करती है यह देखने के लिए उस पर पॉइंटर रखें, बदलने के लिए उसे चुनें। अपने कीबोर्ड की कुंजियाँ दबाए रखना भी काम करता है।",
+  "Nothing runs on this key with these modifiers. Give it an action.": "इन मॉडिफ़ायर के साथ इस कुंजी पर कुछ नहीं चलता। इसे कोई क्रिया दें।",
+  "Nothing runs on this key with these modifiers.": "इन मॉडिफ़ायर के साथ इस कुंजी पर कुछ नहीं चलता।",
+  "Or a program to run, as you would type it": "या चलाने के लिए कोई प्रोग्राम, जैसे आप टाइप करेंगे",
+  "Run it": "चलाएँ",
+  "One setting": "एक सेटिंग"
 }

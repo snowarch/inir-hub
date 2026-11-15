@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "Alt Gr",
   "Super": "Super",
-  "Allow": "Erlauben"
+  "Allow": "Erlauben",
+  "What keys type": "Was die Tasten tippen",
+  "Ins": "Einfg",
+  "Pick the key it moves to": "Wähle die Taste, auf die es wandert",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Zeig auf eine Taste, um zu sehen, was sie tut, und wähle sie, um sie zu ändern. Die Tasten deiner Tastatur gedrückt zu halten geht auch.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "Mit diesen Modifikatoren läuft auf dieser Taste nichts. Gib ihr eine Aktion.",
+  "Nothing runs on this key with these modifiers.": "Mit diesen Modifikatoren läuft auf dieser Taste nichts.",
+  "Or a program to run, as you would type it": "Oder ein Programm, so wie du es eintippen würdest",
+  "Run it": "Ausführen",
+  "One setting": "Eine Einstellung"
 }

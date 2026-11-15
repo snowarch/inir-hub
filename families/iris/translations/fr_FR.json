@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "Alt Gr",
   "Super": "Super",
-  "Allow": "Autoriser"
+  "Allow": "Autoriser",
+  "What keys type": "Ce que tapent les touches",
+  "Ins": "Inser",
+  "Pick the key it moves to": "Choisissez la touche où le déplacer",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Survolez une touche pour voir ce qu'elle fait, choisissez-la pour la changer. Maintenir les touches de votre clavier marche aussi.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "Rien ne se lance sur cette touche avec ces modificateurs. Donnez-lui une action.",
+  "Nothing runs on this key with these modifiers.": "Rien ne se lance sur cette touche avec ces modificateurs.",
+  "Or a program to run, as you would type it": "Ou un programme à lancer, tel que vous le taperiez",
+  "Run it": "Le lancer",
+  "One setting": "Un réglage"
 }

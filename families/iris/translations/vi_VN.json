@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "Cho phép"
+  "Allow": "Cho phép",
+  "What keys type": "Phím gõ ra gì",
+  "Ins": "Ins",
+  "Pick the key it moves to": "Chọn phím để chuyển đến",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Trỏ vào một phím để xem nó làm gì, chọn nó để thay đổi. Giữ các phím trên bàn phím cũng được.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "Không có gì chạy trên phím này với các phím bổ trợ này. Hãy gán cho nó một hành động.",
+  "Nothing runs on this key with these modifiers.": "Không có gì chạy trên phím này với các phím bổ trợ này.",
+  "Or a program to run, as you would type it": "Hoặc một chương trình để chạy, như bạn sẽ gõ",
+  "Run it": "Chạy",
+  "One setting": "Một cài đặt"
 }

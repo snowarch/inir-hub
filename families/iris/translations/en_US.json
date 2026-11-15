@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "Allow"
+  "Allow": "Allow",
+  "What keys type": "What keys type",
+  "Ins": "Ins",
+  "Pick the key it moves to": "Pick the key it moves to",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "Nothing runs on this key with these modifiers. Give it an action.",
+  "Nothing runs on this key with these modifiers.": "Nothing runs on this key with these modifiers.",
+  "Or a program to run, as you would type it": "Or a program to run, as you would type it",
+  "Run it": "Run it",
+  "One setting": "One setting"
 }

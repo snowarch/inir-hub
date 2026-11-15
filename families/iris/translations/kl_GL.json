@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "Akuersissutigiuk"
+  "Allow": "Akuersissutigiuk",
+  "What keys type": "Tastit allattagaat",
+  "Ins": "Ins",
+  "Pick the key it moves to": "Tasti nuuffigisaa toqqaruk",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Tastimut tikkuarit suliaa takuniarlugu, allanngortinniarlugu toqqaruk. Tastit tigummiinnarnissaat aamma atorsinnaavoq.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "Tasti una modifier-inik taakkuninnga atuinngilaq. Suliassamik tunniuk.",
+  "Nothing runs on this key with these modifiers.": "Tasti una modifier-inik taakkuninnga atuinngilaq.",
+  "Or a program to run, as you would type it": "Imaluunniit programmi aallartittussaq, allattarnerit malillugu",
+  "Run it": "Aallartiguk",
+  "One setting": "Aaqqissuussineq ataaseq"
 }

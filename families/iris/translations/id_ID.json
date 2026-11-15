@@ -2470,5 +2470,14 @@
   "Alt": "Alt",
   "AltGr": "AltGr",
   "Super": "Super",
-  "Allow": "Izinkan"
+  "Allow": "Izinkan",
+  "What keys type": "Yang diketik tombol",
+  "Ins": "Ins",
+  "Pick the key it moves to": "Pilih tombol tujuan pemindahan",
+  "Point at a key to see what it does, pick it to change it. Holding the keys on your keyboard works too.": "Arahkan ke tombol untuk melihat fungsinya, pilih untuk mengubahnya. Menahan tombol di keyboard juga bisa.",
+  "Nothing runs on this key with these modifiers. Give it an action.": "Tidak ada yang berjalan di tombol ini dengan pengubah ini. Beri tindakan.",
+  "Nothing runs on this key with these modifiers.": "Tidak ada yang berjalan di tombol ini dengan pengubah ini.",
+  "Or a program to run, as you would type it": "Atau program untuk dijalankan, seperti yang akan kamu ketik",
+  "Run it": "Jalankan",
+  "One setting": "Satu pengaturan"
 }
