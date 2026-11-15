@@ -2459,5 +2459,16 @@
   "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "横幅出现的位置。从岛屿中长出并折回；放在角落时独自浮现。",
   "Out of the Island, on whichever edge it lives.": "从岛屿中，无论它在哪条边。",
   "Stays %1 s, then slides away.": "停留 %1 秒，然后滑走。",
-  "Banners float in their corner and slide away.": "横幅浮在所在角落，然后滑走。"
+  "Banners float in their corner and slide away.": "横幅浮在所在角落，然后滑走。",
+  "What each key types": "每个键输入的内容",
+  "Find a layout by its name": "按名称查找键盘布局",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "%1 上的工作区左右并排，因此窗口从上到下堆叠：这是它们打开时的高度。",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 有自己的设置：%2。无论你在这里选什么，那里的新窗口都会这样打开。",
+  "Like the rest": "与其他屏幕相同",
+  "New windows on this screen": "此屏幕上的新窗口",
+  "Ctrl": "Ctrl",
+  "Alt": "Alt",
+  "AltGr": "AltGr",
+  "Super": "Super",
+  "Allow": "允许"
 }

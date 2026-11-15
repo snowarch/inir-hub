@@ -3221,5 +3221,10 @@
   "When covered": "Matoqqagaangat",
   "Behind fullscreen": "Fullscreen-ip tunuani",
   "A hidden wallpaper stops decoding and keeps its frame.": "Tunuliaqut toqqortoq decode-iunnaartarpoq assilissaminillu pigiinnartarluni.",
-  "Show in the sidebar": "Sidebar-imi takutiguk"
+  "Show in the sidebar": "Sidebar-imi takutiguk",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "%1-mi suliffiit sanileriipput, taamaattumik igalaat qummut ammut ilioqqapput: tassa ammarnerminni portussusaat.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1-p nammineq naleqarpoq: %2. Maani sumik qinikkaluaraanni igalaat nutaat tassani taamatut ammartarput.",
+  "Like the rest": "Allatut",
+  "How tall new windows open on this screen": "Igalaat nutaat saqqummersitsivimmi uani qanoq portutigisumik ammartarnersut",
+  "How wide new windows open on this screen": "Igalaat nutaat saqqummersitsivimmi uani qanoq silitsigisumik ammartarnersut"
 }

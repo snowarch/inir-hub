@@ -3221,5 +3221,10 @@
   "When covered": "Örtüldüğünde",
   "Behind fullscreen": "Tam ekranın arkasında",
   "A hidden wallpaper stops decoding and keeps its frame.": "Gizli bir duvar kağıdının kodu çözülmez ve karesini korur.",
-  "Show in the sidebar": "Kenar çubuğunda göster"
+  "Show in the sidebar": "Kenar çubuğunda göster",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "%1 üzerinde çalışma alanları yan yana durur, bu yüzden pencereler yukarıdan aşağı dizilir: açıldıkları yükseklik budur.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 kendi değerini tutuyor: %2. Burada ne seçersen seç, yeni pencereler orada böyle açılır.",
+  "Like the rest": "Diğerleri gibi",
+  "How tall new windows open on this screen": "Bu ekranda yeni pencerelerin açıldığı yükseklik",
+  "How wide new windows open on this screen": "Bu ekranda yeni pencerelerin açıldığı genişlik"
 }

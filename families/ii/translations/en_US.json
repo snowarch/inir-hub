@@ -3221,5 +3221,10 @@
   "When covered": "When covered",
   "Behind fullscreen": "Behind fullscreen",
   "A hidden wallpaper stops decoding and keeps its frame.": "A hidden wallpaper stops decoding and keeps its frame.",
-  "Show in the sidebar": "Show in the sidebar"
+  "Show in the sidebar": "Show in the sidebar",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 keeps its own: %2. It opens new windows that way whatever you choose here.",
+  "Like the rest": "Like the rest",
+  "How tall new windows open on this screen": "How tall new windows open on this screen",
+  "How wide new windows open on this screen": "How wide new windows open on this screen"
 }

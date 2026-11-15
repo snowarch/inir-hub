@@ -24,6 +24,7 @@ IrisEffects 1.0 IrisEffects.qml
 IrisDisplayScale 1.0 IrisDisplayScale.qml
 IrisDisplayWorkspaces 1.0 IrisDisplayWorkspaces.qml
 IrisHotCorners 1.0 IrisHotCorners.qml
+IrisKeyboardMap 1.0 IrisKeyboardMap.qml
 IrisLayoutModes 1.0 IrisLayoutModes.qml
 IrisLayoutWidth 1.0 IrisLayoutWidth.qml
 IrisDockPinned 1.0 IrisDockPinned.qml

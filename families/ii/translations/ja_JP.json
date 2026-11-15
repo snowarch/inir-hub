@@ -3221,5 +3221,10 @@
   "When covered": "覆われたとき",
   "Behind fullscreen": "全画面の背後",
   "A hidden wallpaper stops decoding and keeps its frame.": "隠れた壁紙はデコードを止め、そのフレームを保ちます。",
-  "Show in the sidebar": "サイドバーに表示"
+  "Show in the sidebar": "サイドバーに表示",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "%1 ではワークスペースが横に並ぶため、ウィンドウは上から下へ積み重なります。これは開くときの高さです。",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 は独自の値を持っています: %2。ここで何を選んでも、そこでは新しいウィンドウがその大きさで開きます。",
+  "Like the rest": "ほかと同じにする",
+  "How tall new windows open on this screen": "この画面で新しいウィンドウが開く高さ",
+  "How wide new windows open on this screen": "この画面で新しいウィンドウが開く幅"
 }

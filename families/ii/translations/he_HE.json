@@ -3221,5 +3221,10 @@
   "When covered": "כשמכוסה",
   "Behind fullscreen": "מאחורי מסך מלא",
   "A hidden wallpaper stops decoding and keeps its frame.": "טפט מוסתר מפסיק לפענח ושומר את הפריים שלו.",
-  "Show in the sidebar": "הצג בסרגל הצד"
+  "Show in the sidebar": "הצג בסרגל הצד",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "ב־%1 שולחנות העבודה עומדים זה לצד זה, ולכן החלונות שם נערמים מלמעלה למטה: זה הגובה שבו הם נפתחים.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "ל־%1 יש ערך משלו: %2. חלונות חדשים נפתחים שם כך, לא משנה מה תבחרו כאן.",
+  "Like the rest": "כמו האחרים",
+  "How tall new windows open on this screen": "באיזה גובה נפתחים חלונות חדשים במסך הזה",
+  "How wide new windows open on this screen": "באיזה רוחב נפתחים חלונות חדשים במסך הזה"
 }

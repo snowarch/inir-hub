@@ -2459,5 +2459,16 @@
   "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "Onde os banners aparecem. Da Ilha, eles saem dela e voltam a se dobrar; num canto, flutuam sozinhos.",
   "Out of the Island, on whichever edge it lives.": "Da Ilha, em qualquer borda em que ela esteja.",
   "Stays %1 s, then slides away.": "Fica %1 s e depois desliza para fora.",
-  "Banners float in their corner and slide away.": "Os banners flutuam no canto e deslizam para fora."
+  "Banners float in their corner and slide away.": "Os banners flutuam no canto e deslizam para fora.",
+  "What each key types": "O que cada tecla digita",
+  "Find a layout by its name": "Encontre um layout pelo nome",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "Em %1 as áreas de trabalho ficam lado a lado, então as janelas se empilham de cima para baixo: esta é a altura com que abrem.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 tem o seu próprio: %2. Lá as janelas novas abrem assim, seja o que for que você escolher aqui.",
+  "Like the rest": "Como as outras",
+  "New windows on this screen": "Janelas novas nesta tela",
+  "Ctrl": "Ctrl",
+  "Alt": "Alt",
+  "AltGr": "AltGr",
+  "Super": "Super",
+  "Allow": "Permitir"
 }

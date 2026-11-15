@@ -3221,5 +3221,10 @@
   "When covered": "عند التغطية",
   "Behind fullscreen": "خلف ملء الشاشة",
   "A hidden wallpaper stops decoding and keeps its frame.": "الخلفية المخفية تتوقف عن فك الترميز وتحتفظ بإطارها.",
-  "Show in the sidebar": "إظهار في الشريط الجانبي"
+  "Show in the sidebar": "إظهار في الشريط الجانبي",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "على %1 تقع مساحات العمل جنبًا إلى جنب، لذا تتكدس النوافذ هناك من الأعلى إلى الأسفل: هذا هو ارتفاعها عند فتحها.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "لـ %1 قيمته الخاصة: %2. تُفتح النوافذ الجديدة هناك هكذا مهما اخترت هنا.",
+  "Like the rest": "مثل البقية",
+  "How tall new windows open on this screen": "ارتفاع النوافذ الجديدة عند فتحها على هذه الشاشة",
+  "How wide new windows open on this screen": "عرض النوافذ الجديدة عند فتحها على هذه الشاشة"
 }

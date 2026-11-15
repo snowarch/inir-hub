@@ -2459,5 +2459,16 @@
   "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "Bildirimlerin göründüğü yer. Ada'dan büyüyüp geri katlanırlar; bir köşede kendi başlarına süzülürler.",
   "Out of the Island, on whichever edge it lives.": "Ada'dan, hangi kenarda olursa olsun.",
   "Stays %1 s, then slides away.": "%1 sn kalır, sonra kayarak gider.",
-  "Banners float in their corner and slide away.": "Bildirimler köşelerinde süzülür ve kayarak gider."
+  "Banners float in their corner and slide away.": "Bildirimler köşelerinde süzülür ve kayarak gider.",
+  "What each key types": "Her tuşun yazdığı",
+  "Find a layout by its name": "Bir düzeni adıyla bul",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "%1 üzerinde çalışma alanları yan yana durur, bu yüzden pencereler yukarıdan aşağı dizilir: açıldıkları yükseklik budur.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 kendi değerini tutuyor: %2. Burada ne seçersen seç, yeni pencereler orada böyle açılır.",
+  "Like the rest": "Diğerleri gibi",
+  "New windows on this screen": "Bu ekranda yeni pencereler",
+  "Ctrl": "Ctrl",
+  "Alt": "Alt",
+  "AltGr": "AltGr",
+  "Super": "Super",
+  "Allow": "İzin ver"
 }

@@ -3221,5 +3221,10 @@
   "When covered": "被遮住时",
   "Behind fullscreen": "全屏后面",
   "A hidden wallpaper stops decoding and keeps its frame.": "被遮住的壁纸会停止解码并保留画面。",
-  "Show in the sidebar": "在侧边栏中显示"
+  "Show in the sidebar": "在侧边栏中显示",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "%1 上的工作区左右并排，因此窗口从上到下堆叠：这是它们打开时的高度。",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 有自己的设置：%2。无论你在这里选什么，那里的新窗口都会这样打开。",
+  "Like the rest": "与其他屏幕相同",
+  "How tall new windows open on this screen": "此屏幕上新窗口打开的高度",
+  "How wide new windows open on this screen": "此屏幕上新窗口打开的宽度"
 }

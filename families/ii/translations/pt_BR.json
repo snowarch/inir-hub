@@ -3221,5 +3221,10 @@
   "When covered": "Quando coberto",
   "Behind fullscreen": "Atrás da tela cheia",
   "A hidden wallpaper stops decoding and keeps its frame.": "Um papel de parede oculto para de ser decodificado e mantém o quadro.",
-  "Show in the sidebar": "Mostrar na barra lateral"
+  "Show in the sidebar": "Mostrar na barra lateral",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "Em %1 as áreas de trabalho ficam lado a lado, então as janelas se empilham de cima para baixo: esta é a altura com que abrem.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 tem o seu próprio: %2. Lá as janelas novas abrem assim, seja o que for que você escolher aqui.",
+  "Like the rest": "Como as outras",
+  "How tall new windows open on this screen": "Altura com que as janelas novas abrem nesta tela",
+  "How wide new windows open on this screen": "Largura com que as janelas novas abrem nesta tela"
 }

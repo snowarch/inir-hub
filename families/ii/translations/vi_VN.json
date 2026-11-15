@@ -3221,5 +3221,10 @@
   "When covered": "Khi bị che",
   "Behind fullscreen": "Sau toàn màn hình",
   "A hidden wallpaper stops decoding and keeps its frame.": "Hình nền bị che sẽ ngừng giải mã và giữ khung hình.",
-  "Show in the sidebar": "Hiện trong thanh bên"
+  "Show in the sidebar": "Hiện trong thanh bên",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "Trên %1 các không gian làm việc nằm cạnh nhau, nên cửa sổ ở đó xếp từ trên xuống dưới: đây là chiều cao khi chúng mở.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 giữ giá trị riêng: %2. Cửa sổ mới ở đó mở như vậy dù bạn chọn gì ở đây.",
+  "Like the rest": "Như các màn hình khác",
+  "How tall new windows open on this screen": "Chiều cao cửa sổ mới khi mở trên màn hình này",
+  "How wide new windows open on this screen": "Chiều rộng cửa sổ mới khi mở trên màn hình này"
 }

@@ -19,6 +19,8 @@ Singleton {
     readonly property color rail: root.light ? "#ebebee" : "#161618" // iris-literal: Prism's side columns
     readonly property color raised: root.light ? "#ffffff" : "#1e1e21" // iris-literal: circles and fields standing on a rail
     readonly property color sunk: root.light ? "#e2e2e6" : "#050506" // iris-literal: a switch's track, darker than the page
+    // A group's card (Raell Tech's page, his 11-14): a step above the middle column, under the fields' own fill.
+    readonly property color card: root.light ? "#ffffff" : "#18181b" // iris-literal: Prism's group card, between canvas and raised
     readonly property color line: root.light ? Qt.rgba(0, 0, 0, 0.08) : Qt.rgba(1, 1, 1, 0.065) // iris-literal: Prism's own fills and scrims, scheme-aware above
     readonly property color fill: root.light ? Qt.rgba(0, 0, 0, 0.045) : Qt.rgba(1, 1, 1, 0.055) // iris-literal: Prism's own fills and scrims, scheme-aware above
     readonly property color fillHover: root.light ? Qt.rgba(0, 0, 0, 0.075) : Qt.rgba(1, 1, 1, 0.09) // iris-literal: Prism's own fills and scrims, scheme-aware above

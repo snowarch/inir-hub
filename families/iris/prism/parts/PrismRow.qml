@@ -10,14 +10,16 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
-// One setting as a line of the reference's table: its number, a cover, its name, what it does, the control, and a pin.
-// What needs room (a folded choice's chips, the layout cards, pieces, a piece's marks, a curve, a list the row edits
-// in place, a gallery) is laid out under the line, in place. Every kind of iRiS Settings row has its Prism face here.
+// One setting inside its group's card: its name and what it does, the control, and a pin. What needs room (a folded
+// choice's chips, the layout cards, pieces, a piece's marks, a curve, a list the row edits in place, a gallery) is laid
+// out under the line, in place. Every kind of iRiS Settings row has its Prism face here.
+// Two faces (Raell Tech's page, his 11-14): a line (name at the left, control at the right) and, for two fields side by
+// side in a card, `stacked` (name over the control, which takes the whole width).
 Item {
     id: root
     required property var row
-    property int number: 1
     property bool showPage: false   // search and Changes say where a row lives
+    property bool stacked: false
     property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
     property bool flash: false
@@ -87,10 +89,9 @@ Item {
     implicitHeight: line.height + (slot.active ? slot.height + PrismTheme.dp(16) : 0)
     Behavior on implicitHeight { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutCubic } }
     HoverHandler { id: hover }
-    // Hover is the reference's chart row (his 11-07, after a square slab and then a glow he disliked): a quiet rounded
-    // plate in Prism's own fill that floats between the hairlines and stands a little past the row's sides, on the line
-    // alone (a gallery or chips under it stay clear), and the row's number lights up in ink. A row just found flashes
-    // the plate in the accent. The row no longer clips: only what is laid out under the line does (`fold`).
+    // Hover is a quiet rounded plate in Prism's own fill that stands a little past the row's sides, on the line alone (a
+    // gallery or chips under it stay clear); the card's padding holds it. A row just found flashes the plate in the
+    // accent. The row never clips: only what is laid out under the line does (`fold`).
     Rectangle {
         id: plate
         x: -PrismTheme.dp(10)
@@ -99,7 +100,8 @@ Item {
         height: line.height - PrismTheme.dp(6)
         radius: PrismTheme.dp(14)
         color: root.flash ? Qt.alpha(PrismTheme.accent, 0.16) : PrismTheme.fill // iris-literal: the found row's flash
-        opacity: root.flash || root.hovered ? 1 : 0
+        // A view drawn under its name (the keyboard) is the thing itself: a plate over the name alone read as a stray bar.
+        opacity: root.flash || (root.hovered && root.below !== "view") ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(root.flash ? 120 : root.hovered ? 140 : 420); easing.type: Easing.OutCubic } }
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(420); easing.type: Easing.OutCubic } }
@@ -108,19 +110,20 @@ Item {
     Item {
         id: line
         width: parent.width
-        height: Math.max(PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
+        height: root.stacked
+            ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
+            : Math.max(PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
         opacity: root.locked ? 0.45 : 1
 
-        PrismText {
-            id: number
-            width: PrismTheme.dp(30)
-            anchors.verticalCenter: parent.verticalCenter
-            text: String(root.number).padStart(2, "0")
-            figures: true
-            color: root.changed ? PrismTheme.accent : root.hovered ? PrismTheme.ink : PrismTheme.ink3
-            Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
-            font.pixelSize: PrismTheme.small
-            font.weight: root.changed ? Font.Bold : Font.Normal
+        // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
+        Rectangle {
+            visible: root.changed
+            x: -PrismTheme.dp(16)
+            width: PrismTheme.dp(3)
+            height: PrismTheme.dp(16)
+            radius: width / 2
+            y: name.y + PrismTheme.dp(2)
+            color: PrismTheme.accent
         }
         MouseArea {
             id: placeArea
@@ -135,26 +138,21 @@ Item {
             Accessible.name: Translation.tr("Open %1").arg(Translation.tr(root.row.label))
             onClicked: root.openRequested()
         }
-        PrismThumb {
-            id: thumb
-            anchors.left: number.right
-            anchors.verticalCenter: parent.verticalCenter
-            glyph: root.row.glyph ?? "circle"
-            tint: PrismModel.page(root.row.page).tint
-        }
         Column {
             id: name
-            anchors.left: thumb.right
-            anchors.leftMargin: PrismTheme.dp(14)
-            anchors.right: root.aboutShown ? about.left : control.left
-            anchors.rightMargin: PrismTheme.dp(16)
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.right: root.stacked ? tail.left : root.aboutShown ? about.left : control.left
+            anchors.rightMargin: root.stacked ? PrismTheme.dp(4) : PrismTheme.dp(16)
+            y: root.stacked ? PrismTheme.dp(12) : Math.round((parent.height - height) / 2)
             spacing: PrismTheme.dp(2)
             PrismText {
                 width: parent.width
                 text: Translation.tr(root.row.label)
                 font.pixelSize: PrismTheme.row
                 font.weight: Font.DemiBold
+                // A long language takes a second line, never a cut name ("Apps em tela cheia desenham direto…", 11-14).
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
                 elide: Text.ElideRight
             }
             PrismText {
@@ -164,7 +162,7 @@ Item {
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
                 wrapMode: Text.WordWrap
-                maximumLineCount: 2
+                maximumLineCount: 3
                 elide: Text.ElideRight
             }
             // Where a found row lives, said as a path that goes there: the page, its group, an arrow on hover.
@@ -225,14 +223,16 @@ Item {
 
         Item {
             id: control
-            width: root.controlWidth
-            height: parent.height
-            anchors.right: tail.left
-            anchors.rightMargin: PrismTheme.dp(8)
+            // Stacked: under the name, as wide as the row.
+            x: root.stacked ? 0 : parent.width - tail.width - PrismTheme.dp(8) - width
+            y: root.stacked ? name.y + name.height + PrismTheme.dp(10) : 0
+            width: root.stacked ? parent.width : root.controlWidth
+            height: root.stacked ? (kind.item ? kind.item.height : 0) : parent.height
             enabled: !root.locked
             Loader {
                 id: kind
-                anchors.right: parent.right
+                anchors.right: root.stacked ? undefined : parent.right
+                anchors.left: root.stacked ? parent.left : undefined
                 anchors.verticalCenter: parent.verticalCenter
                 active: root.inline.length > 0
                 sourceComponent: ({ switch: switchKind, range: rangeKind, hue: hueKind, text: textKind, action: actionKind,
@@ -244,7 +244,7 @@ Item {
         Row {
             id: tail
             anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
+            y: root.stacked ? PrismTheme.dp(8) : Math.round((parent.height - height) / 2)
             spacing: 0
             width: PrismTheme.dp(56)
             layoutDirection: Qt.RightToLeft
@@ -318,7 +318,7 @@ Item {
         id: rangeKind
         PrismSlider {
             id: slider
-            width: Math.min(PrismTheme.dp(240), root.controlWidth)
+            width: root.stacked ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
             from: Number(root.spec.min ?? 0)
             to: Number(root.spec.max ?? 100)
             stepSize: Number(root.spec.step ?? 1)
@@ -333,7 +333,7 @@ Item {
     Component {
         id: hueKind
         PrismHue {
-            width: Math.min(PrismTheme.dp(240), root.controlWidth)
+            width: root.stacked ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
             value: Number(root.value ?? 0)
             onMoved: value => PrismModel.preview(root.row, value)
             onCommitted: value => PrismModel.write(root.row, value)
@@ -342,6 +342,7 @@ Item {
     Component {
         id: choiceKind
         PrismChoice {
+            width: root.stacked ? root.controlWidth : implicitWidth
             choices: root.choices
             current: root.value
             room: root.controlWidth
@@ -362,7 +363,7 @@ Item {
     Component {
         id: textKind
         PrismField {
-            width: Math.min(PrismTheme.dp(220), root.controlWidth)
+            width: root.stacked ? root.controlWidth : Math.min(PrismTheme.dp(220), root.controlWidth)
             text: String(root.value ?? "")
             placeholder: Translation.tr(String(root.spec.placeholder ?? ""))
             onCommitted: text => PrismModel.write(root.row, text.trim())

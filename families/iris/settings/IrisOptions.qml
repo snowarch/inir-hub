@@ -30,6 +30,9 @@ QtObject {
     function same(a: var, b: var): bool {
         return JSON.stringify(root.plain(a)) === JSON.stringify(root.plain(b))
     }
+    // The layout in use named in the shell's language, as the drawn keyboard read it; its card's chip says it (the
+    // compositor names it in English).
+    property string keyboardSaid: ""
     // The Organic wave's curated scenes, as one bundle over every key any of them sets (a key a scene leaves out is kept).
     readonly property var waveKeys: {
         const keys = []
@@ -1819,6 +1822,8 @@ QtObject {
         { tune: true, section: "windows", group: "Room for iRiS", label: "Today, when kept open", path: "iris.sidebars.right.reserveSpace", kind: "switch", fallback: true, keywords: ["reserve", "space", "sidebar", "panel"] },
         { section: "windows", group: "Closing", label: "Confirm before closing windows", description: "Asks before the close-window shortcut closes an app.", path: "closeConfirm.enabled", kind: "switch", fallback:false },
 
+        // The keyboard drawn from the layout in use, its country's layouts one tap away (Raell Tech's page, his 11-14).
+        { tune: false, section: "keyboard", group: "Keyboard", label: "What each key types", kind: "list", bare: true, view: Qt.resolvedUrl("IrisKeyboardMap.qml"), showIf: () => CompositorConfig.has("input", "keyboard.layout"), chip: () => root.keyboardSaid || String((NiriService.keyboardLayoutNames ?? [])[NiriService.currentKeyboardLayoutIndex] ?? ""), chipGlyph: "language", keywords: ["keyboard", "layout", "keys", "language", "abnt", "qwerty", "azerty", "teclado", "distribucion", "idioma", "teclas"] },
         { section: "keyboard", group: "Keyboard", comp: "input", key: "keyboard.layout", label: "Layout", description: "XKB layouts, comma separated: us,es", kind: "text", placeholder: "us", fallback: "", keywords: ["niri", "keyboard", "layout", "xkb", "teclado", "idioma"] },
         { tune: true, section: "keyboard", group: "Keyboard", comp: "input", key: "keyboard.variant", label: "Variant", kind: "text", placeholder: "intl", fallback: "" },
         { tune: true, section: "keyboard", group: "Keyboard", comp: "input", key: "keyboard.options", label: "Options", description: "Such as caps:escape or grp:alt_shift_toggle.", kind: "text", placeholder: "caps:escape", fallback: "" },

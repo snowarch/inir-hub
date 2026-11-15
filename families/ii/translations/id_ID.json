@@ -3221,5 +3221,10 @@
   "When covered": "Saat tertutup",
   "Behind fullscreen": "Di belakang layar penuh",
   "A hidden wallpaper stops decoding and keeps its frame.": "Wallpaper yang tersembunyi berhenti didekode dan mempertahankan bingkainya.",
-  "Show in the sidebar": "Tampilkan di bilah sisi"
+  "Show in the sidebar": "Tampilkan di bilah sisi",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "Di %1 ruang kerja berdampingan, jadi jendela di sana bertumpuk dari atas ke bawah: setinggi inilah jendela terbuka.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 punya nilainya sendiri: %2. Jendela baru di sana terbuka begitu, apa pun pilihanmu di sini.",
+  "Like the rest": "Seperti yang lain",
+  "How tall new windows open on this screen": "Setinggi apa jendela baru terbuka di layar ini",
+  "How wide new windows open on this screen": "Selebar apa jendela baru terbuka di layar ini"
 }

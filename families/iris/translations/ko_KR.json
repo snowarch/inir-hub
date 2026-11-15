@@ -2459,5 +2459,16 @@
   "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "배너가 나타나는 위치. 아일랜드에서는 자라나 다시 접히고, 모서리에서는 홀로 떠 있습니다.",
   "Out of the Island, on whichever edge it lives.": "아일랜드에서, 어느 가장자리에 있든.",
   "Stays %1 s, then slides away.": "%1초 머문 뒤 밀려 사라집니다.",
-  "Banners float in their corner and slide away.": "배너가 모서리에 떠 있다가 밀려 사라집니다."
+  "Banners float in their corner and slide away.": "배너가 모서리에 떠 있다가 밀려 사라집니다.",
+  "What each key types": "각 키가 입력하는 문자",
+  "Find a layout by its name": "이름으로 자판 배열 찾기",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "%1에서는 작업 공간이 나란히 있어 창이 위에서 아래로 쌓입니다. 창이 열리는 높이입니다.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1에는 자체 값이 있습니다: %2. 여기서 무엇을 고르든 그 화면의 새 창은 그렇게 열립니다.",
+  "Like the rest": "다른 화면과 같게",
+  "New windows on this screen": "이 화면의 새 창",
+  "Ctrl": "Ctrl",
+  "Alt": "Alt",
+  "AltGr": "AltGr",
+  "Super": "Super",
+  "Allow": "허용"
 }

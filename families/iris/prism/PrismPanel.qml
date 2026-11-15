@@ -412,8 +412,9 @@ Item {
                         PrismSection {
                             visible: parent.hits.length > 0
                             width: parent.width
-                            eyebrow: PrismState.searching ? Translation.tr("Settings") : Translation.tr("From the factory profile")
+                            line: PrismState.searching ? Translation.tr("Settings") : Translation.tr("From the factory profile")
                             title: Translation.tr("%1 found").arg(parent.hits.length)
+                            glyph: PrismState.searching ? "search" : "history"
                             rows: found.hits.slice(0, found.built)
                             showPage: true
                             onReach: row => root.reach(row)
@@ -435,16 +436,14 @@ Item {
                         width: content.width
                         PrismSection {
                             width: parent.width
-                            // The page's name stands once over the page: every group repeating it was noise (his 11-10).
-                            eyebrow: ""
                             title: Translation.tr(sectionBox.modelData.title)
+                            glyph: String(sectionBox.modelData.glyph ?? root.page.glyph)
+                            tint: root.page.tint
                             rows: sectionBox.modelData.rows
-                            heads: sectionBox.index === 0
-                            firstNumber: 1
                             flashPath: root.flashPath
                             note: root.paged ? String(root.sections.findIndex(section => section.title === sectionBox.modelData.title) + 1).padStart(2, "0") + " / " + String(root.sections.length).padStart(2, "0") : ""
                         }
-                        Item { width: 1; height: PrismTheme.dp(36) }
+                        Item { width: 1; height: PrismTheme.dp(18) }
                     }
                 }
 

@@ -3221,5 +3221,10 @@
   "When covered": "Когда закрыты",
   "Behind fullscreen": "За полноэкранным окном",
   "A hidden wallpaper stops decoding and keeps its frame.": "Скрытые обои перестают декодироваться и сохраняют кадр.",
-  "Show in the sidebar": "Показать на боковой панели"
+  "Show in the sidebar": "Показать на боковой панели",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "На %1 рабочие столы стоят рядом, поэтому окна там складываются сверху вниз: такой высоты они открываются.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "У %1 своё значение: %2. Новые окна там открываются так, что бы вы ни выбрали здесь.",
+  "Like the rest": "Как у остальных",
+  "How tall new windows open on this screen": "Какой высоты открываются новые окна на этом экране",
+  "How wide new windows open on this screen": "Какой ширины открываются новые окна на этом экране"
 }

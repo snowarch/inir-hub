@@ -3221,5 +3221,10 @@
   "When covered": "ढके जाने पर",
   "Behind fullscreen": "फ़ुलस्क्रीन के पीछे",
   "A hidden wallpaper stops decoding and keeps its frame.": "छिपा वॉलपेपर डिकोड होना बंद कर देता है और अपना फ़्रेम रखता है।",
-  "Show in the sidebar": "साइडबार में दिखाएँ"
+  "Show in the sidebar": "साइडबार में दिखाएँ",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "%1 पर कार्यस्थान अगल-बगल हैं, इसलिए वहाँ विंडो ऊपर से नीचे जमती हैं: यह उनके खुलने की ऊँचाई है।",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "%1 का अपना मान है: %2। आप यहाँ जो भी चुनें, वहाँ नई विंडो ऐसे ही खुलती हैं।",
+  "Like the rest": "बाकी की तरह",
+  "How tall new windows open on this screen": "इस स्क्रीन पर नई विंडो कितनी ऊँची खुलती हैं",
+  "How wide new windows open on this screen": "इस स्क्रीन पर नई विंडो कितनी चौड़ी खुलती हैं"
 }

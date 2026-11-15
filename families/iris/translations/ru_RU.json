@@ -2459,5 +2459,16 @@
   "Where banners appear. From the Island they grow out of it and fold back in; in a corner they float on their own.": "Где появляются баннеры. Из Острова они вырастают и складываются обратно; в углу парят сами по себе.",
   "Out of the Island, on whichever edge it lives.": "Из Острова, на каком бы краю он ни был.",
   "Stays %1 s, then slides away.": "Держится %1 с, затем уезжает.",
-  "Banners float in their corner and slide away.": "Баннеры парят в своём углу и уезжают."
+  "Banners float in their corner and slide away.": "Баннеры парят в своём углу и уезжают.",
+  "What each key types": "Что печатает каждая клавиша",
+  "Find a layout by its name": "Найти раскладку по названию",
+  "Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.": "На %1 рабочие столы стоят рядом, поэтому окна там складываются сверху вниз: такой высоты они открываются.",
+  "%1 keeps its own: %2. It opens new windows that way whatever you choose here.": "У %1 своё значение: %2. Новые окна там открываются так, что бы вы ни выбрали здесь.",
+  "Like the rest": "Как у остальных",
+  "New windows on this screen": "Новые окна на этом экране",
+  "Ctrl": "Ctrl",
+  "Alt": "Alt",
+  "AltGr": "AltGr",
+  "Super": "Super",
+  "Allow": "Разрешить"
 }
