@@ -6,10 +6,9 @@ import Quickshell.Wayland
 import qs.services
 import qs.modules.common
 import qs.modules.iris.components
-import qs.modules.iris.frame
 import qs.modules.iris.style
 
-// Which screen is which: each real screen says its name in its middle and lights its edge in the accent, over
+// Which screen is which: each real screen says its name on a plate in its middle, over
 // everything, never taking a click. `only` names one screen (the one just picked on the desk); empty names them all.
 Variants {
     id: root
@@ -43,23 +42,12 @@ Variants {
             Component.onCompleted: risen = true
             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(220); easing.type: Easing.OutCubic } }
 
-            // The screen's own edge, in the accent.
-            Rectangle {
-                anchors.fill: parent
-                radius: IrisFrame.cornerRadius
-                color: "transparent"
-                border.width: Math.round(4 * sign.d)
-                border.color: IrisStyle.accent
-            }
-
             Rectangle {
                 anchors.centerIn: parent
                 width: plate.implicitWidth + Math.round(64 * sign.d)
                 height: plate.implicitHeight + Math.round(44 * sign.d)
                 radius: IrisStyle.radiusPlate
                 color: IrisStyle.surfaceHighestOpaque
-                border.width: 1
-                border.color: IrisStyle.hairline
 
                 Column {
                     id: plate

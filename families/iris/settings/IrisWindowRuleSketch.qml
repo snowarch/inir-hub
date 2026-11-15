@@ -94,8 +94,6 @@ Column {
                 radius: root.open === "fullscreen" ? 0 : Math.round(6 * root.d) // iris-literal: a window drawn at the sketch's scale
                 color: IrisStyle.surfaceHighestOpaque
                 opacity: Number(root.rule?.opacity ?? 1)
-                border.width: root.open === "floating" ? 1 : 0
-                border.color: IrisStyle.hairline
                 Behavior on x { NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.OutCubic } }
                 Behavior on y { NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.OutCubic } }
                 Behavior on width { NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.OutCubic } }
