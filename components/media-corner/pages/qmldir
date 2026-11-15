@@ -14,5 +14,7 @@ MediaEpisodes 1.0 MediaEpisodes.qml
 MediaSources 1.0 MediaSources.qml
 MediaWatchSheet 1.0 MediaWatchSheet.qml
 MediaSchedule 1.0 MediaSchedule.qml
-PlaybackTracks 1.0 PlaybackTracks.qml
 MediaHistory 1.0 MediaHistory.qml
+HomeHero 1.0 HomeHero.qml
+HomeCard 1.0 HomeCard.qml
+HomePlaces 1.0 HomePlaces.qml

@@ -29,7 +29,7 @@ CornerBody {
         { id: "movie:top", title: "Top films and series", icon: "star" },
         { id: "movie:years", title: "By year", icon: "calendar_month" },
         { id: "movie:genres", title: "Film and series genres", icon: "category" },
-        { id: "sources", title: "Sources", icon: "extension", caption: "Watching" },
+        { id: "sources", title: "Sources", icon: "extension", caption: "Library" },
         { id: "schedule", title: "Upcoming episodes", icon: "event" },
         { id: "history", title: "Watch history", icon: "history" }
     ]
@@ -60,7 +60,7 @@ CornerBody {
             Image {
                 required property string url
                 source: url
-                sourceSize: Qt.size(264, 396)
+                sourceSize: Qt.size(264, 396) // literal: the size MediaPoster decodes at
                 asynchronous: true
                 cache: true
             }
@@ -131,8 +131,6 @@ CornerBody {
         function onAttemptChanged(): void { root.askGenres() }
     }
 
-    readonly property int closeRoom: root.windowed || root.prism ? 0 : Math.round(40 * root.d)
-
     // A page is built when first shown and then kept, with its scroll and its pickers.
     component Page: Loader {
         property bool shown: false
@@ -142,7 +140,6 @@ CornerBody {
         active: seen
         visible: shown && CornerState.show === null && !CornerState.sheet
         anchors.fill: parent
-        anchors.rightMargin: root.closeRoom
     }
     // One grid per catalogue, so each keeps its own list and pickers. A hidden one holds its last place and asks nothing.
     component GridPage: Page {
@@ -195,7 +192,6 @@ CornerBody {
         active: seen
         visible: shown && !CornerState.sheet
         anchors.fill: parent
-        anchors.rightMargin: root.closeRoom
         sourceComponent: MediaDetail {
             compact: root.column
             anime: animeData
@@ -208,7 +204,6 @@ CornerBody {
         active: CornerState.sheet
         z: 5
         anchors.fill: parent
-        anchors.rightMargin: root.closeRoom
         sourceComponent: MediaWatchSheet {
             onFollowed: if (!root.windowed) CornerState.open = false
         }
