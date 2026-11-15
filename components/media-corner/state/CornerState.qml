@@ -39,26 +39,44 @@ Singleton {
         adapter[name] = value
     }
 
+    // Titles stepped back from, newest last: › opens them again until something new is opened.
+    property var ahead: []
+    readonly property bool canGoBack: root.sheet || root.trail.length > 0 || root.query.length > 0 || root.place.includes(":genre:")
+    readonly property bool canGoForward: root.ahead.length > 0 && !root.sheet
+
     function pick(wanted: string): void {
         root.sheet = false
         root.place = wanted
         // «See all» of a search opens that search whole: it keeps what was typed.
         if (!wanted.includes(":search")) root.query = ""
         root.trail = []
+        root.ahead = []
     }
     function search(text: string): void {
         if (text === root.query) return
         root.query = text
         root.trail = []
+        root.ahead = []
         if (root.place.includes(":search")) root.place = "home"
     }
     function openShow(title: var): void {
-        if (title) root.trail = root.trail.concat([title])
+        if (!title) return
+        root.trail = root.trail.concat([title])
+        root.ahead = []
+    }
+    function forward(): bool {
+        if (!root.canGoForward) return false
+        root.trail = root.trail.concat([root.ahead[root.ahead.length - 1]])
+        root.ahead = root.ahead.slice(0, -1)
+        return true
     }
     // One step back: the title, the search, then from a genre to its list. False when there is nothing left to undo.
     function back(): bool {
         if (root.sheet) root.sheet = false
-        else if (root.trail.length > 0) root.trail = root.trail.slice(0, -1)
+        else if (root.trail.length > 0) {
+            root.ahead = root.ahead.concat([root.trail[root.trail.length - 1]])
+            root.trail = root.trail.slice(0, -1)
+        }
         else if (root.query.length > 0) root.search("")
         else if (root.place.includes(":genre:")) root.place = root.place.replace(/:genre:.*$/, ":genres")
         else return false
