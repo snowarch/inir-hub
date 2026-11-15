@@ -132,7 +132,13 @@ Item {
                     delegate: PrismRow {
                         id: line
                         required property int index
-                        row: root.rows[line.index]
+                        // Another group with fewer rows: the rows past its end are read once more before the Repeater
+                        // drops them, and keep the row they had instead of none (a TypeError in each binding).
+                        readonly property var now: root.rows[line.index]
+                        property var kept: null
+                        Component.onCompleted: line.kept = line.now
+                        onNowChanged: if (line.now) line.kept = line.now
+                        row: line.now ?? line.kept
                         width: list.width
                         stacked: PrismModel.shapeOf(line.row) === "field"
                         aboutWidth: 0
