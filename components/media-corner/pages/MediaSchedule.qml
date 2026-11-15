@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 
 // A fresh, user-requested snapshot of saved anime (CornerSchedule); no work continues when hidden.
@@ -14,11 +15,7 @@ ColumnLayout {
     readonly property real d: IrisStyle.density
     Binding { target: CornerSchedule; property: "active"; value: root.active }
     Component.onDestruction: CornerSchedule.active = false
-    IrisText {
-        text: Translation.tr("Upcoming episodes")
-        font.pixelSize: IrisStyle.typeHeadline
-        font.weight: IrisStyle.weight(Font.Bold)
-    }
+    CornerHeading { page: true; eyebrow: Translation.tr("Library"); title: Translation.tr("Upcoming episodes") }
     IrisButton { text: Translation.tr("Refresh schedule"); enabled: !CornerSchedule.loading; onClicked: CornerSchedule.refresh() }
     IrisText { visible: CornerSchedule.loading; text: Translation.tr("Loading…") }
     IrisText { visible: CornerSchedule.failure.length > 0; text: CornerSchedule.failure; color: IrisStyle.danger; wrapMode: Text.WordWrap; Layout.fillWidth: true }
