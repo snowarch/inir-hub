@@ -40,7 +40,7 @@ Rectangle {
                 spacing: 0
                 IrisText {
                     Layout.fillWidth: true
-                    text: root.hour < 5 || root.hour >= 20 ? Translation.tr("Good evening") : root.hour < 12 ? Translation.tr("Good morning") : Translation.tr("Good afternoon")
+                    text: root.hour < 5 || root.hour >= 18 ? Translation.tr("Good evening") : root.hour < 12 ? Translation.tr("Good morning") : Translation.tr("Good afternoon")
                     color: IrisStyle.textSecondary
                     font.pixelSize: IrisStyle.typeMeta
                 }

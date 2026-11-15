@@ -101,8 +101,10 @@ MediaPage {
     Rectangle {
         Layout.fillWidth: true
         implicitHeight: intro.implicitHeight + Math.round(32 * root.d)
-        radius: IrisStyle.radiusTile
-        color: IrisStyle.fillQuiet
+        radius: IrisStyle.radiusCard
+        color: CornerSkin.card
+        border.width: CornerSkin.edgeWidth
+        border.color: CornerSkin.edge
         ColumnLayout {
             id: intro
             anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: Math.round(16 * root.d); rightMargin: Math.round(16 * root.d) }
@@ -110,8 +112,8 @@ MediaPage {
             IrisText {
                 Layout.fillWidth: true
                 text: Translation.tr("What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.")
-                color: IrisStyle.muted
-                font.pixelSize: IrisStyle.typeFootnote
+                color: IrisStyle.textSecondary
+                font.pixelSize: IrisStyle.typeMeta
                 wrapMode: Text.WordWrap
             }
         }
