@@ -79,6 +79,12 @@ SourcesCard {
     LanguageChoice { optionName: "subtitleLanguage"; heading: Translation.tr("Preferred subtitle language") }
     LanguageChoice { optionName: "subtitleFallbackLanguage"; heading: Translation.tr("Fallback subtitle language"); optional: true }
 
+    IrisText {
+        Layout.fillWidth: true
+        Layout.topMargin: Math.round(6 * sub.d)
+        text: Translation.tr("OpenSubtitles API key (optional)")
+        font.weight: IrisStyle.weight(Font.DemiBold)
+    }
     RowLayout {
         Layout.fillWidth: true
         IrisField {
