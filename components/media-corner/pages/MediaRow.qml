@@ -4,10 +4,12 @@ import QtQuick.Layouts
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 
 // A shelf: its name, «See all», and a row of posters. It asks its store (AniList or Cinemeta) for one page of `filter`,
-// or lists `local` as it is. An empty shelf hides itself, so a page only shows what has something in it.
+// or lists `local` as it is. While it asks it shows the shape of its posters; when it fails it says so with Retry; an
+// answer with nothing in it hides the shelf, so a page only shows what has something in it.
 ColumnLayout {
     id: root
     required property var store
@@ -47,40 +49,52 @@ ColumnLayout {
     Timer { id: loadLater; interval: 0; onTriggered: root.load() }
     Connections {
         target: CornerState
+        enabled: root.visible
         function onAttemptChanged(): void { if (root.failed) root.load() }
     }
+    readonly property bool asking: root.local === null && root.filter !== null && !root.settled
 
     Layout.fillWidth: true
-    visible: root.items.length > 0
+    visible: root.items.length > 0 || root.asking || root.failed
     spacing: Math.round(8 * root.d)
 
+    CornerHeading {
+        eyebrow: root.note
+        title: root.title
+        link: root.allPlace.length > 0 && !root.failed ? Translation.tr("See all") : ""
+        onLinkClicked: CornerState.pick(root.allPlace)
+    }
     RowLayout {
+        visible: root.failed
         Layout.fillWidth: true
-        spacing: Math.round(8 * root.d)
-        IrisText {
-            text: root.title
-            font.pixelSize: IrisStyle.typeHeadline
-            font.weight: IrisStyle.weight(Font.Bold)
-        }
         IrisText {
             Layout.fillWidth: true
-            text: root.note
-            color: IrisStyle.muted
-            font.pixelSize: IrisStyle.typeFootnote
-            elide: Text.ElideRight
+            text: Translation.tr("%1 didn't answer (´・ω・`)").arg(root.store.sourceName)
+            color: IrisStyle.danger
+            wrapMode: Text.WordWrap
         }
-        IrisButton {
-            visible: root.allPlace.length > 0
-            quiet: true
-            text: Translation.tr("See all")
-            onClicked: CornerState.pick(root.allPlace)
-        }
+        IrisButton { quiet: true; text: Translation.tr("Retry"); onClicked: root.load() }
     }
 
     Item {
         Layout.fillWidth: true
         // A poster's height: a 2:3 cover, the gap and two lines of title over one of detail.
         implicitHeight: Math.round(132 * root.d * 1.5 + 8 * root.d) + Math.ceil(2 * IrisStyle.typeLabel * 1.35 + IrisStyle.typeFootnote * 1.4)
+        visible: !root.failed
+        // The shape of what is coming, so the page doesn't jump when it comes.
+        Row {
+            visible: root.asking
+            spacing: Math.round(14 * root.d)
+            Repeater {
+                model: 8
+                Rectangle {
+                    width: Math.round(132 * root.d)
+                    height: Math.round(width * 1.5)
+                    radius: IrisStyle.radiusTile
+                    color: CornerSkin.plate
+                }
+            }
+        }
         ListView {
             id: shelf
             anchors.fill: parent
@@ -105,7 +119,7 @@ ColumnLayout {
         // IrisScrollEdge is vertical; this horizontal veil uses the same public
         // surface role and only appears when more cards are beyond the edge.
         Rectangle {
-            visible: CornerState.options.style === "prism" && !shelf.atXEnd
+            visible: !shelf.atXEnd && shelf.count > 0
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
