@@ -163,9 +163,10 @@ Item {
                 text: Translation.tr(root.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
+                // A narrow column (the inspector) takes every line a long language needs: what it does is never cut.
                 wrapMode: Text.WordWrap
-                maximumLineCount: 3
-                elide: Text.ElideRight
+                maximumLineCount: 6
+                elide: Text.ElideNone
             }
             // Where a found row lives, said as a path that goes there: the page, its group, an arrow on hover.
             Row {
@@ -228,7 +229,9 @@ Item {
             // Stacked: under the name, as wide as the row.
             x: root.stacked ? 0 : parent.width - tail.width - PrismTheme.dp(8) - width
             y: root.stacked ? name.y + name.height + PrismTheme.dp(10) : 0
-            width: root.stacked ? parent.width : root.controlWidth
+            // A switch is never narrower than its own pill: a paired row gives it 64 px, and the pill's words ("AUS AN",
+            // "إيقاف تشغيل") ran under the name, seen once right-to-left text sat against that edge.
+            width: root.stacked ? parent.width : root.inline === "switch" ? Math.max(root.controlWidth, root.controlNeed) : root.controlWidth
             height: root.stacked ? (kind.item ? kind.item.height : 0) : parent.height
             enabled: !root.locked
             Loader {
