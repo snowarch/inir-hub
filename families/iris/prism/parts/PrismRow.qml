@@ -40,7 +40,9 @@ Item {
     readonly property string about: String(root.spec.description ?? root.row.detail ?? "")
     readonly property bool hovered: hover.hovered
     property bool open: false
-    readonly property bool aboutShown: root.aboutWidth > 0 && root.about.length > 0
+    // A row named like its card says what it does in its name's place: the card's head already says the name.
+    readonly property bool echoes: !root.showPage && root.about.length > 0 && String(root.row.label) === String(root.row.section ?? "")
+    readonly property bool aboutShown: root.aboutWidth > 0 && root.about.length > 0 && !root.echoes
 
     // A colour pick: every choice (but at most one, a "custom") carries the colour it gives.
     readonly property bool swatched: root.kind === "choice" && root.choices.length > 1
@@ -149,9 +151,10 @@ Item {
             spacing: PrismTheme.dp(2)
             PrismText {
                 width: parent.width
-                text: Translation.tr(root.row.label)
-                font.pixelSize: PrismTheme.row
-                font.weight: Font.DemiBold
+                text: Translation.tr(root.echoes ? root.about : root.row.label)
+                color: root.echoes ? PrismTheme.ink2 : PrismTheme.ink
+                font.pixelSize: root.echoes ? PrismTheme.small : PrismTheme.row
+                font.weight: root.echoes ? Font.Normal : Font.DemiBold
                 // A long language takes a second line, never a cut name ("Apps em tela cheia desenham direto…", 11-14).
                 wrapMode: Text.WordWrap
                 maximumLineCount: 2
@@ -159,7 +162,7 @@ Item {
             }
             PrismText {
                 width: parent.width
-                visible: text.length > 0 && !root.showPage && !root.aboutShown
+                visible: text.length > 0 && !root.showPage && !root.aboutShown && !root.echoes
                 text: Translation.tr(root.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small

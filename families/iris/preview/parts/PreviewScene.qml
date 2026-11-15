@@ -14,6 +14,9 @@ Item {
     // is laid out at the drawn size and shrunk only below these. 0: that side is shrunk whole from its natural size.
     property real narrowest: 0
     property real lowest: 0
+    // The height it reads best at in a Settings card, its parts whole and nothing empty under them (the Island's top edge
+    // left two thirds of a 260 px card black). 0: the card's own.
+    property real cardHeight: 0
     // Where the piece the scene is about rests, in its own frame: Settings prints its notes beside it. Empty: nowhere in particular.
     property rect subject: Qt.rect(0, 0, 0, 0)
     // The parts a person can point at, in the scene's own frame: [{ group, x, y, part, radius }], `group` the IrisOptions

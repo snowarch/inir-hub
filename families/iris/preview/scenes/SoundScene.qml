@@ -136,7 +136,10 @@ PreviewScene {
         const out = [{ group: "Feedback", x: pill.x - 18 * d, y: pill.y + pill.height / 2,
             part: Qt.rect(pill.x, pill.y, pill.width, pill.height), radius: pill.radius }]
         const climb = pill.minimal ? Qt.rect(pill.x + ring.x, pill.y + ring.y, ring.width, ring.height)
-            : Qt.rect(pill.x, pill.y, Math.max(pill.height, pill.width * soundRoot.cap), pill.height)
+            // Up to the ear guard's cap when it holds the climb lower; else the level and its figure, past the glyph that
+            // stays the capsule's own (a hole ending at 92 % cut through the number).
+            : soundRoot.guard && soundRoot.limit < 0.92 ? Qt.rect(pill.x, pill.y, Math.max(pill.height, pill.width * soundRoot.cap), pill.height)
+            : Qt.rect(pill.x + pill.height, pill.y, Math.max(0, pill.width - pill.height), pill.height)
         out.push({ group: "Volume", x: climb.x + climb.width, y: pill.y - 6 * d, part: climb, radius: pill.minimal ? ring.width / 2 : pill.radius })
         return out
     }

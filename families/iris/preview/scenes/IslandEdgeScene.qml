@@ -16,6 +16,8 @@ PreviewScene {
     readonly property real naturalHeight: Math.round(320 * edgeRoot.d)
     narrowest: Math.round(200 * edgeRoot.d)
     lowest: Math.round(110 * edgeRoot.d)
+    // Along a top or bottom edge the Island and what hangs under it fill a band; down a side it needs the height.
+    cardHeight: edgeRoot.edge === "left" || edgeRoot.edge === "right" ? 0 : Math.round(170 * edgeRoot.d)
     readonly property string edge: IrisFrame.islandEdge
     readonly property string layout: String(edgeRoot.opt("iris.bar.layout", "island"))
     readonly property bool spans: edgeRoot.layout === "full" || (edgeRoot.layout === "menubar" && edgeRoot.edge !== "left" && edgeRoot.edge !== "right")

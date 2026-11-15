@@ -38,5 +38,12 @@ function sceneFor(section, group) {
         "sidebars/Panel look": "panels",
         "notifications/Banners": "feedback", "sound/Feedback": "feedback",
         "player/Player": "player", "player/Bubble": "player",
+        "display/Night Light": "display", "display/Comfort": "display",
     })[key] ?? ""
+}
+
+// Whether a page's own scene may stand in for a group with none of its own. Display's draws Night Light and bright
+// flashes: the Screen card draws the screens themselves in its rows, and a warm window there misread as the screen.
+function standsIn(section) {
+    return section !== "display"
 }

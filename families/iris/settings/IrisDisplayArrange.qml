@@ -11,7 +11,8 @@ import qs.modules.iris.style
 // Settings › Display › Screen with two screens or more: the desk as it is. Every screen at its own shape, size and
 // place, wearing its wallpaper; one is dragged to where it stands and comes to rest against the nearest edge of
 // another (CompositorConfig.settle), which is where the pointer crosses. A press picks the screen the rows below
-// change. Screens that are off wait under the desk.
+// change, and says its name on the real screen for a moment (IrisDisplayIdentify); "Identify" names them all, and so
+// does carrying one. Screens that are off wait under the desk.
 Column {
     id: root
 
@@ -33,6 +34,16 @@ Column {
     // Where the screen in the hand would rest, as CompositorConfig.settle answers.
     property var landing: null
     property string heldName: ""
+    // Which real screens say their name now: one by its name, "*" every one, "" none.
+    property string naming: ""
+    // The names fade before they go (gone takes them after the fade).
+    property bool unnaming: false
+    function name(who: string): void {
+        root.naming = who
+        root.unnaming = false
+        gone.stop()
+        unname.restart()
+    }
     readonly property var chosen: CompositorConfig.output
     readonly property string facts: {
         const out = root.chosen
@@ -44,6 +55,25 @@ Column {
     }
 
     spacing: Math.round(10 * root.d)
+
+    Timer {
+        id: unname
+        interval: 2600
+        onTriggered: {
+            if (root.heldName.length > 0) { root.naming = "*"; return }
+            root.unnaming = true
+            gone.restart()
+        }
+    }
+    Timer {
+        id: gone
+        interval: IrisStyle.duration(240)
+        onTriggered: { root.naming = ""; root.unnaming = false }
+    }
+    LazyLoader {
+        active: root.naming.length > 0 && root.visible
+        IrisDisplayIdentify { only: root.naming === "*" ? "" : root.naming; leaving: root.unnaming }
+    }
 
     Rectangle {
         id: desk
@@ -168,6 +198,7 @@ Column {
                         press.moved = false
                         screen.forceActiveFocus()
                         CompositorConfig.applyDisplay("screen", screen.modelData)
+                        root.name(screen.modelData)
                     }
                     onPositionChanged: mouse => {
                         if (!press.pressed) return
@@ -176,6 +207,9 @@ Column {
                         if (!press.moved && Math.hypot(dx, dy) < 6) return
                         press.moved = true
                         root.heldName = screen.modelData
+                        root.naming = "*"
+                        root.unnaming = false
+                        gone.stop()
                         screen.carryX = dx
                         screen.carryY = dy
                         root.landing = CompositorConfig.settle(root.rects, screen.modelData, screen.rect.x + dx / root.unit, screen.rect.y + dy / root.unit)
@@ -186,9 +220,10 @@ Column {
                         root.heldName = ""
                         screen.carryX = 0
                         screen.carryY = 0
+                        if (press.moved) unname.restart()
                         if (press.moved && landing) CompositorConfig.arrange(landing)
                     }
-                    onCanceled: { root.landing = null; root.heldName = ""; screen.carryX = 0; screen.carryY = 0 }
+                    onCanceled: { root.landing = null; root.heldName = ""; screen.carryX = 0; screen.carryY = 0; unname.restart() }
                 }
             }
         }
@@ -198,7 +233,7 @@ Column {
         width: root.width
         spacing: Math.round(10 * root.d)
         Column {
-            width: parent.width - (waiting.visible ? waiting.width + parent.spacing : 0)
+            width: parent.width - (waiting.visible ? waiting.width + parent.spacing : 0) - identify.width - parent.spacing
             spacing: Math.round(2 * root.d)
             IrisText {
                 width: parent.width
@@ -260,6 +295,13 @@ Column {
                     }
                 }
             }
+        }
+        IrisButton {
+            id: identify
+            anchors.verticalCenter: parent.verticalCenter
+            text: Translation.tr("Identify")
+            quiet: true
+            onClicked: root.name("*")
         }
     }
 }

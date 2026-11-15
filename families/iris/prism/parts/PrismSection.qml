@@ -158,7 +158,8 @@ Item {
             }
             Rectangle {
                 id: chipBox
-                readonly property string say: root.chip.length > 0 ? root.chip : root.note
+                // Its place among the page's groups only where the title carries no number already ("01" and "01 / 16").
+                readonly property string say: root.chip.length > 0 ? root.chip : numberSaid.visible ? "" : root.note
                 visible: say.length > 0
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
@@ -244,7 +245,7 @@ Item {
                     IrisGroupPreview {
                         id: scene
                         width: root.figureWidth
-                        height: root.figureHeight
+                        height: scene.cardHeight > 0 ? Math.min(root.figureHeight, Math.max(PrismTheme.dp(120), scene.cardHeight)) : root.figureHeight
                         radius: PrismTheme.dp(16)
                         framed: false
                         captionOutside: true

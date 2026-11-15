@@ -348,6 +348,7 @@ Item {
                     id: pageBar
                     visible: root.staged && root.figured && pageBar.says
                     width: content.width
+                    pills_: false
                     page: root.page
                     restorable: PrismModel.restorableOf(root.page.pageId)
                     onRestore: PrismModel.restore(root.page.pageId)
@@ -593,12 +594,30 @@ Item {
             PrismRound { glyph: "chevron_right"; enabled_: PrismState.canForward; onClicked: PrismState.goForward() }
         }
         Item { width: 1; height: PrismTheme.dp(18) }
-        PrismHeading {
+        Item {
             width: parent.width
-            eyebrow: PrismState.searching ? Translation.tr("Search")
-                : root.changesView ? Translation.tr("Yours") : Translation.tr(root.page.group)
-            title: PrismState.searching ? "“" + PrismState.asked.trim() + "”"
-                : root.changesView ? Translation.tr("Changes") : Translation.tr(root.page.name)
+            height: heading.implicitHeight
+            PrismHeading {
+                id: heading
+                width: parent.width - (topPills.visible ? topPills.implicitWidth + PrismTheme.dp(16) : 0)
+                eyebrow: PrismState.searching ? Translation.tr("Search")
+                    : root.changesView ? Translation.tr("Yours") : Translation.tr(root.page.group)
+                title: PrismState.searching ? "“" + PrismState.asked.trim() + "”"
+                    : root.changesView ? Translation.tr("Changes") : Translation.tr(root.page.name)
+            }
+            // A page whose groups wear pictures keeps its pills on its name's line.
+            PrismPageBar {
+                id: topPills
+                visible: root.staged && root.figured && topPills.says
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: -PrismTheme.dp(4)
+                width: topPills.implicitWidth
+                facts_: false
+                page: root.page
+                restorable: PrismModel.restorableOf(root.page.pageId)
+                onRestore: PrismModel.restore(root.page.pageId)
+            }
         }
         Item { width: 1; height: PrismTheme.dp(18) }
     }

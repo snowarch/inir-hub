@@ -60,6 +60,7 @@ ClippingRectangle {
     readonly property real leaving: Math.min(1, root.cross / 0.4)
     readonly property real arriving: 1 - Math.pow(1 - Math.max(0, (root.cross - 0.4) / 0.6), 3)
     readonly property Item sceneItem: root.onB ? loaderB.item : loaderA.item
+    readonly property real cardHeight: Number(root.sceneItem?.cardHeight ?? 0)
     // The scene's subject in this preview's frame (the world is scaled from its top left).
     readonly property rect subject: {
         const r = root.sceneItem?.subject ?? Qt.rect(0, 0, 0, 0)

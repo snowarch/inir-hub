@@ -7,22 +7,26 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
-// Under a page's name, where its groups carry their own pictures: the screen's own facts at the left (Display), the
-// page's two pills at the right (Restore defaults quiet, the page's show solid). Nothing to say, no bar.
+// Where a page's groups carry their own pictures: the page's two pills on its name's line (Restore defaults quiet, the
+// page's show solid; `facts: false`), the screen's own facts in a bar under it (Display; `pills: false`). A bar of one
+// pill alone under the name left a 44 px band empty. Nothing to say, no bar.
 Item {
     id: root
     property var page: null
     property int restorable: 0
+    property bool facts_: true
+    property bool pills_: true
     signal restore()
 
-    readonly property var facts: PrismModel.factsOf(String(root.page?.pageId ?? ""))
-    readonly property bool says: root.facts.length > 0 || root.restorable > 0 || Boolean(root.page?.show)
+    readonly property var facts: root.facts_ ? PrismModel.factsOf(String(root.page?.pageId ?? "")) : []
+    readonly property bool says: root.facts.length > 0 || root.pills_ && (root.restorable > 0 || Boolean(root.page?.show))
     implicitHeight: root.says ? PrismTheme.dp(44) : 0
+    implicitWidth: root.facts_ ? 0 : pills.width
     visible: root.says
 
     Row {
         anchors.verticalCenter: parent.verticalCenter
-        width: pills.x - PrismTheme.dp(16)
+        width: (root.pills_ ? pills.x : parent.width) - PrismTheme.dp(16)
         spacing: PrismTheme.dp(18)
         clip: true
         Repeater {
@@ -37,6 +41,7 @@ Item {
     }
     Row {
         id: pills
+        visible: root.pills_
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
         spacing: PrismTheme.dp(8)

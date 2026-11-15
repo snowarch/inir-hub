@@ -351,11 +351,13 @@ Singleton {
     function figureOf(id: string, group: string): var {
         const keyRow = root.rows.find(row => row.onStage && row.page === id && row.section === group && root.shown(row))
         if (keyRow) return { keys: true, row: keyRow }
+        // A group whose row draws its own picture (App rules' window) wears none: the page's goes to the next card.
+        if (root.rows.some(row => row.page === id && row.section === group && row.spec?.drawn === true && root.shown(row))) return null
         const area = String(root.page(id)?.area ?? "")
         if (SceneMap.sceneFor(area, group).length > 0) return { section: area, group: group }
         if (id !== area && SceneMap.sceneFor(id, group).length > 0) return { section: id, group: group }
-        if (id === area && SceneMap.sceneFor(area, "").length > 0) return { section: area, group: "" }
-        return id !== area && SceneMap.sceneFor(id, "").length > 0 ? { section: id, group: "" } : null
+        if (id === area && SceneMap.standsIn(area) && SceneMap.sceneFor(area, "").length > 0) return { section: area, group: "" }
+        return id !== area && SceneMap.standsIn(id) && SceneMap.sceneFor(id, "").length > 0 ? { section: id, group: "" } : null
     }
     // Which card of a page wears which picture: each picture once, on the first card it belongs to (three cards of
     // one page under the same drawing read as a repeat; the first one's numbers lead to the others).
