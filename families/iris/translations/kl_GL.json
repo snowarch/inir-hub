@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "Ataasiarlugu tooruinnarlugu isikkoq tamaat aaqqissorneqarpoq; Ctrl+Z-mik utertinneqarpoq. Ataani tiilit eqqortumik aaqqissuussipput.",
   "Hide the side column": "Ammut saneqquttoq toqqoruk",
   "Show the side column": "Ammut saneqquttoq takutiguk",
-  "Its switch below turns it back on, where it stood.": "Ataani ikitsissutaa inissisimaffiani ikitseqqissavaa.",
   "Screens turned off wait on the right.": "Qarasaasiat qamisat talerpimmi utaqqipput.",
-  "Drag a screen to where it stands on your desk.": "Qarasaasiaq nerrivinni inissisimaffianut nussuguk.",
   "Your own": "Nammineq",
   "Press a corner to choose what happens when the pointer rests there.": "Kiaa tooruk tikkuussissutip tassani unittoqarnerani qanoq pisoqassanersoq toqqassallugu.",
   "Columns on an endless strip.": "Ammut saneqquttut tukimut naanngitsumi.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "Qarasaasiaq touch panel-ip pissuseqarpai.",
   "Warms the screen to rest your eyes at night.": "Qarasaasiaq eqqarsaatigalugu taartitsivoq unnuaq.",
   "Quiets the shell so games get the most.": "Shell-ip nuunneqarpoq, game-it sukkanerpaamik isigiffigisaat.",
-  "Titled “%1”": "Qulequtaq “%1”",
   "No app has a rule yet": "Appi piumasaqarnersoq aallaqqaataanngilaq",
   "One app": "Appi ataaseq"
 }

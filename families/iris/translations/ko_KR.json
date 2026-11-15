@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "한 번의 탭으로 전체 모양을 정하고, Ctrl+Z로 되돌립니다. 아래 타일로 세부 조정합니다.",
   "Hide the side column": "사이드 열 숨기기",
   "Show the side column": "사이드 열 보기",
-  "Its switch below turns it back on, where it stood.": "아래 스위치를 켜면 원래 자리에서 다시 켜집니다.",
   "Screens turned off wait on the right.": "꺼진 화면은 오른쪽에서 대기합니다.",
-  "Drag a screen to where it stands on your desk.": "화면을 책상 위 실제 위치로 끌어 놓으세요.",
   "Your own": "나만의 설정",
   "Press a corner to choose what happens when the pointer rests there.": "모서리를 눌러 포인터가 그곳에 머물 때 일어날 일을 고르세요.",
   "Columns on an endless strip.": "끝없는 띠 위의 열.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "터치 패널이 속한 화면.",
   "Warms the screen to rest your eyes at night.": "밤에 눈이 쉬도록 화면을 따뜻하게 합니다.",
   "Quiets the shell so games get the most.": "게임이 최대한 성능을 내도록 셸을 조용히 합니다.",
-  "Titled “%1”": "제목 “%1”",
   "No app has a rule yet": "아직 규칙이 있는 앱이 없습니다",
   "One app": "앱 1개"
 }

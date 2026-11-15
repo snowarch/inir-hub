@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "Одно касание задаёт весь вид; Ctrl+Z отменяет. Плитки ниже уточняют его.",
   "Hide the side column": "Скрыть боковую колонку",
   "Show the side column": "Показать боковую колонку",
-  "Its switch below turns it back on, where it stood.": "Его переключатель ниже снова включит его на прежнем месте.",
   "Screens turned off wait on the right.": "Выключенные экраны ждут справа.",
-  "Drag a screen to where it stands on your desk.": "Перетащите экран туда, где он стоит на вашем столе.",
   "Your own": "Своя",
   "Press a corner to choose what happens when the pointer rests there.": "Нажмите на угол, чтобы выбрать, что происходит, когда указатель задерживается там.",
   "Columns on an endless strip.": "Колонки на бесконечной ленте.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "Экран, которому принадлежит сенсорная панель.",
   "Warms the screen to rest your eyes at night.": "Делает экран теплее, чтобы глаза отдыхали ночью.",
   "Quiets the shell so games get the most.": "Утихомиривает оболочку, чтобы играм досталось больше.",
-  "Titled “%1”": "С заголовком «%1»",
   "No app has a rule yet": "Ни у одного приложения пока нет правила",
   "One app": "Одно приложение"
 }

@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.modules.common
+import qs.modules.common.functions
 
 // The Windows 11 dropdown: a model of {displayName, value}, as wide as its widest option.
 ComboBox {
@@ -78,7 +79,8 @@ ComboBox {
                 id: popupBg
                 anchors.fill: parent
                 radius: Looks.settings.radiusLarge
-                color: Looks.colors.bgPanelFooter
+                // Solid: Settings is an opaque window, and a see-through list let the rows under it read through.
+                color: ColorUtils.applyAlpha(Looks.colors.bgPanelFooter, 1)
                 border.width: 1
                 border.color: Looks.settings.strokeStrong
             }

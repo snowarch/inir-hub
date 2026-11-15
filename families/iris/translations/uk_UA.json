@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "Один дотик задає весь вигляд; Ctrl+Z скасовує. Плитки нижче уточнюють його.",
   "Hide the side column": "Сховати бічну колонку",
   "Show the side column": "Показати бічну колонку",
-  "Its switch below turns it back on, where it stood.": "Його перемикач нижче знову ввімкне його на попередньому місці.",
   "Screens turned off wait on the right.": "Вимкнені екрани чекають праворуч.",
-  "Drag a screen to where it stands on your desk.": "Перетягніть екран туди, де він стоїть на вашому столі.",
   "Your own": "Своя",
   "Press a corner to choose what happens when the pointer rests there.": "Натисніть на кут, щоб вибрати, що стається, коли вказівник там зупиняється.",
   "Columns on an endless strip.": "Колонки на нескінченній стрічці.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "Екран, якому належить сенсорна панель.",
   "Warms the screen to rest your eyes at night.": "Робить екран теплішим, щоб очі відпочивали вночі.",
   "Quiets the shell so games get the most.": "Втихомирює оболонку, щоб іграм дісталося більше.",
-  "Titled “%1”": "Із заголовком «%1»",
   "No app has a rule yet": "Жодного застосунку ще немає правила",
   "One app": "Один застосунок"
 }

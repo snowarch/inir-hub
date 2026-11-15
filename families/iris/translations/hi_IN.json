@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "एक टैप पूरा रूप बदल देता है; Ctrl+Z उसे वापस लेता है। नीचे की टाइलें उसे बारीकी से सेट करती हैं।",
   "Hide the side column": "साइड कॉलम छिपाएँ",
   "Show the side column": "साइड कॉलम दिखाएँ",
-  "Its switch below turns it back on, where it stood.": "नीचे का स्विच इसे फिर से वहीं चालू कर देता है जहाँ यह था।",
   "Screens turned off wait on the right.": "बंद स्क्रीन दाईं ओर इंतज़ार करती हैं।",
-  "Drag a screen to where it stands on your desk.": "स्क्रीन को अपनी मेज़ पर उसकी असली जगह तक खींचें।",
   "Your own": "आपकी अपनी",
   "Press a corner to choose what happens when the pointer rests there.": "कोई कोना दबाएँ और चुनें कि पॉइंटर वहाँ रुकने पर क्या हो।",
   "Columns on an endless strip.": "अंतहीन पट्टी पर कॉलम।",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "वह स्क्रीन जिसका टच पैनल है।",
   "Warms the screen to rest your eyes at night.": "रात में आँखों को आराम देने के लिए स्क्रीन को गर्म रंगत देता है।",
   "Quiets the shell so games get the most.": "शेल को शांत करता है, ताकि गेम को सबसे ज़्यादा संसाधन मिलें।",
-  "Titled “%1”": "शीर्षक “%1”",
   "No app has a rule yet": "अभी किसी ऐप का नियम नहीं है",
   "One app": "एक ऐप"
 }

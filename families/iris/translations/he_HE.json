@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "נגיעה אחת קובעת את כל המראה; Ctrl+Z מבטל. האריחים למטה מכווננים אותו.",
   "Hide the side column": "הסתרת העמודה הצדדית",
   "Show the side column": "הצגת העמודה הצדדית",
-  "Its switch below turns it back on, where it stood.": "המתג שלו למטה מדליק אותו שוב, במקום שבו עמד.",
   "Screens turned off wait on the right.": "מסכים כבויים ממתינים מימין.",
-  "Drag a screen to where it stands on your desk.": "גררו מסך למקום שבו הוא עומד על השולחן שלכם.",
   "Your own": "משלכם",
   "Press a corner to choose what happens when the pointer rests there.": "לחצו על פינה כדי לבחור מה קורה כשהסמן נח שם.",
   "Columns on an endless strip.": "עמודות על רצועה אינסופית.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "המסך שאליו שייך לוח המגע.",
   "Warms the screen to rest your eyes at night.": "מחמם את המסך כדי להקל על העיניים בלילה.",
   "Quiets the shell so games get the most.": "משקיט את המעטפת כדי שהמשחקים יקבלו את המירב.",
-  "Titled “%1”": "בכותרת “%1”",
   "No app has a rule yet": "אין עדיין יישום עם כלל",
   "One app": "יישום אחד"
 }

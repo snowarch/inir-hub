@@ -20,3 +20,6 @@ WShellLayoutPage 1.0 WShellLayoutPage.qml
 WShortcutsPage 1.0 WShortcutsPage.qml
 WWorkspaceStripPage 1.0 WWorkspaceStripPage.qml
 WGlyphArtSettings 1.0 WGlyphArtSettings.qml
+WDisplayPage 1.0 WDisplayPage.qml
+WWindowsPage 1.0 WWindowsPage.qml
+WDevicesPage 1.0 WDevicesPage.qml

@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "Um toque define todo o visual; Ctrl+Z desfaz. Os blocos abaixo fazem o ajuste fino.",
   "Hide the side column": "Ocultar a coluna lateral",
   "Show the side column": "Mostrar a coluna lateral",
-  "Its switch below turns it back on, where it stood.": "O interruptor abaixo a liga de novo, onde estava.",
   "Screens turned off wait on the right.": "As telas desligadas esperam à direita.",
-  "Drag a screen to where it stands on your desk.": "Arraste uma tela até onde ela fica na sua mesa.",
   "Your own": "A sua",
   "Press a corner to choose what happens when the pointer rests there.": "Pressione um canto para escolher o que acontece quando o ponteiro para ali.",
   "Columns on an endless strip.": "Colunas em uma faixa sem fim.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "A tela à qual um painel de toque pertence.",
   "Warms the screen to rest your eyes at night.": "Aquece a tela para descansar os olhos à noite.",
   "Quiets the shell so games get the most.": "Acalma o shell para os jogos renderem ao máximo.",
-  "Titled “%1”": "Com o título “%1”",
   "No app has a rule yet": "Nenhum app tem regra ainda",
   "One app": "Um app"
 }

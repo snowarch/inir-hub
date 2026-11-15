@@ -130,15 +130,37 @@ ApplicationWindow {
             desc: Translation.tr("Widgets, themes and web apps"),
             icon: "store-microsoft",
             component: Qt.resolvedUrl("pages/WHubPage.qml")
+        },
+        {
+            key: "display",
+            name: Translation.tr("Display"),
+            desc: Translation.tr("Arrangement, scale, resolution, colour, workspaces"),
+            icon: "desktop-edit",
+            component: Qt.resolvedUrl("pages/WDisplayPage.qml")
+        },
+        {
+            key: "windows",
+            name: Translation.tr("Windows"),
+            desc: Translation.tr("Layout, app rules, borders, movement"),
+            icon: "window-multiple",
+            component: Qt.resolvedUrl("pages/WWindowsPage.qml")
+        },
+        {
+            key: "devices",
+            name: Translation.tr("Devices"),
+            desc: Translation.tr("Keyboard, mouse, trackpad, pen, touch"),
+            icon: "phone-desktop",
+            component: Qt.resolvedUrl("pages/WDevicesPage.qml")
         }
     ]
     
     // the pane shows these; a category with one page opens it, more show their link cards (Windows' Settings IA)
     readonly property var categories: [
         { name: Translation.tr("Home"), icon: "widgets", tint: "#0067C0", tintDark: "#60CDFF", pages: [0] },
-        { name: Translation.tr("System"), icon: "desktop", tint: "#0067C0", tintDark: "#4CC2FF", pages: [1, 11, 12], hero: "system" },
+        { name: Translation.tr("System"), icon: "desktop", tint: "#0067C0", tintDark: "#4CC2FF", pages: [1, 19, 11, 12], hero: "system" },
         { name: Translation.tr("Personalization"), icon: "paint-bucket", tint: "#C239B3", tintDark: "#F08CE4", pages: [3, 4, 2, 8, 5, 14], hero: "desktop" },
-        { name: Translation.tr("Windows & layout"), icon: "apps", tint: "#8764B8", tintDark: "#C6A8F5", pages: [6, 7, 17, 13, 16] },
+        { name: Translation.tr("Windows & layout"), icon: "apps", tint: "#8764B8", tintDark: "#C6A8F5", pages: [20, 6, 7, 17, 13, 16] },
+        { name: Translation.tr("Devices"), icon: "phone-desktop", tint: "#0078D4", tintDark: "#4CC2FF", pages: [21] },
         { name: Translation.tr("Keyboard & shortcuts"), icon: "keyboard", tint: "#038387", tintDark: "#4FD8D8", pages: [9] },
         { name: Translation.tr("AI"), icon: "wand", tint: "#CA5010", tintDark: "#FFA266", pages: [15] },
         { name: Translation.tr("Hub"), icon: "store-microsoft", tint: "#107C10", tintDark: "#6CCB5F", pages: [18] },

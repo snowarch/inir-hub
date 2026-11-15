@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "نقرة واحدة تضبط المظهر كله؛ و Ctrl+Z تتراجع عنها. المربعات أدناه تضبطه بدقة.",
   "Hide the side column": "إخفاء العمود الجانبي",
   "Show the side column": "إظهار العمود الجانبي",
-  "Its switch below turns it back on, where it stood.": "مفتاحها أدناه يعيد تشغيلها في مكانها.",
   "Screens turned off wait on the right.": "الشاشات المطفأة تنتظر على اليمين.",
-  "Drag a screen to where it stands on your desk.": "اسحب الشاشة إلى موضعها على مكتبك.",
   "Your own": "خاصتك",
   "Press a corner to choose what happens when the pointer rests there.": "اضغط زاوية لتختار ما يحدث عندما يستقر المؤشر هناك.",
   "Columns on an endless strip.": "أعمدة على شريط لا ينتهي.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "الشاشة التي تنتمي إليها لوحة اللمس.",
   "Warms the screen to rest your eyes at night.": "يدفئ الشاشة لإراحة عينيك ليلًا.",
   "Quiets the shell so games get the most.": "يُهدئ الواجهة ليمنح الألعاب أقصى أداء.",
-  "Titled “%1”": "بعنوان “%1”",
   "No app has a rule yet": "لا يوجد تطبيق له قاعدة بعد",
   "One app": "تطبيق واحد"
 }

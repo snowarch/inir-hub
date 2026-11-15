@@ -49,7 +49,6 @@ NiriConfig 1.0 NiriConfig.qml
 AppRulesCard 1.0 AppRulesCard.qml
 CompositorPage 1.0 CompositorPage.qml
 CompositorRow 1.0 CompositorRow.qml
-CompositorRows 1.0 CompositorRows.qml
 OrbitConfig 1.0 OrbitConfig.qml
 QuickConfig 1.0 QuickConfig.qml
 RegaliaStyleEditor 1.0 RegaliaStyleEditor.qml

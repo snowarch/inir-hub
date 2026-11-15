@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "Tek dokunuş tüm görünümü ayarlar; Ctrl+Z geri alır. Aşağıdaki kutular ince ayar yapar.",
   "Hide the side column": "Yan sütunu gizle",
   "Show the side column": "Yan sütunu göster",
-  "Its switch below turns it back on, where it stood.": "Aşağıdaki anahtarı onu durduğu yerde yeniden açar.",
   "Screens turned off wait on the right.": "Kapalı ekranlar sağda bekler.",
-  "Drag a screen to where it stands on your desk.": "Bir ekranı masanızda durduğu yere sürükleyin.",
   "Your own": "Size özel",
   "Press a corner to choose what happens when the pointer rests there.": "İmleç bir köşede durduğunda ne olacağını seçmek için o köşeye basın.",
   "Columns on an endless strip.": "Sonsuz bir şeritte sütunlar.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "Bir dokunmatik panelin ait olduğu ekran.",
   "Warms the screen to rest your eyes at night.": "Geceleri gözlerini dinlendirmek için ekranı ısıtır.",
   "Quiets the shell so games get the most.": "Oyunlar en iyisini alsın diye kabuğu sakinleştirir.",
-  "Titled “%1”": "Başlığı “%1”",
   "No app has a rule yet": "Henüz kuralı olan bir uygulama yok",
   "One app": "Bir uygulama"
 }

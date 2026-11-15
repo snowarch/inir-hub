@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "Satu ketukan mengatur seluruh tampilan; Ctrl+Z membatalkannya. Ubin di bawah menyempurnakannya.",
   "Hide the side column": "Sembunyikan kolom samping",
   "Show the side column": "Tampilkan kolom samping",
-  "Its switch below turns it back on, where it stood.": "Sakelarnya di bawah menyalakannya lagi, di tempat semula.",
   "Screens turned off wait on the right.": "Layar yang dimatikan menunggu di kanan.",
-  "Drag a screen to where it stands on your desk.": "Seret layar ke tempatnya di meja Anda.",
   "Your own": "Milik Anda",
   "Press a corner to choose what happens when the pointer rests there.": "Tekan sudut untuk memilih apa yang terjadi saat penunjuk berhenti di sana.",
   "Columns on an endless strip.": "Kolom pada strip tanpa akhir.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "Layar tempat panel sentuh berada.",
   "Warms the screen to rest your eyes at night.": "Menghangatkan layar agar mata beristirahat di malam hari.",
   "Quiets the shell so games get the most.": "Menenangkan shell agar game mendapat yang terbaik.",
-  "Titled “%1”": "Berjudul “%1”",
   "No app has a rule yet": "Belum ada aplikasi yang punya aturan",
   "One app": "Satu aplikasi"
 }

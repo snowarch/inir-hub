@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "ワンタップで外観全体を設定し、Ctrl+Z で元に戻せます。下のタイルで微調整できます。",
   "Hide the side column": "サイド列を隠す",
   "Show the side column": "サイド列を表示",
-  "Its switch below turns it back on, where it stood.": "下のスイッチで、元の位置のまま再びオンになります。",
   "Screens turned off wait on the right.": "オフの画面は右側で待機します。",
-  "Drag a screen to where it stands on your desk.": "画面を机の上の実際の位置へドラッグします。",
   "Your own": "自分の設定",
   "Press a corner to choose what happens when the pointer rests there.": "角を押して、ポインターがそこに止まったときの動作を選びます。",
   "Columns on an endless strip.": "果てしない帯の上に並ぶ列。",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "タッチパネルが属する画面。",
   "Warms the screen to rest your eyes at night.": "夜に目を休めるため画面を暖色にします。",
   "Quiets the shell so games get the most.": "ゲームが力を出し切れるよう、シェルを静かにします。",
-  "Titled “%1”": "タイトルは「%1」",
   "No app has a rule yet": "ルールのあるアプリはまだありません",
   "One app": "アプリ 1 件"
 }

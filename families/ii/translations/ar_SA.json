@@ -3205,9 +3205,6 @@
   "Use the classic design (v2.33)": "استخدم التصميم الكلاسيكي (v2.33)",
   "Show every setting": "اعرض كل الإعدادات",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "الكلاسيكي هو نافذة الإعدادات في v2.33: ترويسة فيها البحث، وقائمة صفحات ضيقة، وكل قسم في بطاقته. كل الصفحات والخيارات موجودة في التصميمين.",
-  "Always waiting": "جاهزة دائمًا",
   "Screens, workspaces, layout, windows, input": "الشاشات ومساحات العمل والتخطيط والنوافذ والإدخال",
-  "Show in the sidebar": "إظهار في الشريط الجانبي",
-  "How tall new windows open on this screen": "ارتفاع النوافذ الجديدة عند فتحها على هذه الشاشة",
-  "How wide new windows open on this screen": "عرض النوافذ الجديدة عند فتحها على هذه الشاشة"
+  "Show in the sidebar": "إظهار في الشريط الجانبي"
 }

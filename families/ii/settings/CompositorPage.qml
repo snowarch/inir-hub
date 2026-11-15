@@ -47,7 +47,6 @@ ContentPage {
     readonly property bool sideways: root.display("workspace-axis") === "horizontal"
 
     Component.onCompleted: CompositorConfig.ensure()
-    CompositorRows { id: rows }
 
     NoticeBox {
         Layout.fillWidth: true
@@ -106,7 +105,7 @@ ContentPage {
                 }
             }
             Repeater {
-                model: ScriptModel { values: rows.of("Screen"); objectProp: "key" }
+                model: ScriptModel { values: CompositorRows.of("Screen"); objectProp: "key" }
                 CompositorRow {}
             }
         }
@@ -174,10 +173,10 @@ ContentPage {
         expanded: true
         icon: "palette"
         title: Translation.tr("Colour")
-        visible: rows.of("Colour").length > 0
+        visible: CompositorRows.of("Colour").length > 0
         SettingsGroup {
             Repeater {
-                model: ScriptModel { values: rows.of("Colour"); objectProp: "key" }
+                model: ScriptModel { values: CompositorRows.of("Colour"); objectProp: "key" }
                 CompositorRow {}
             }
         }
@@ -198,13 +197,13 @@ ContentPage {
                         { displayName: Translation.tr("Main and stack"), value: "master", icon: "view_quilt" },
                         { displayName: Translation.tr("Floating"), value: "stacking", icon: "filter_none" }
                     ]
-                    currentValue: rows.layoutMode()
+                    currentValue: CompositorRows.layoutMode()
                     onSelected: newValue => CompositorConfig.set({ comp: "layout", key: "mode", fallback: "scrolling" }, newValue)
                 }
             }
             ContentSubsection {
                 title: Translation.tr("New windows open")
-                visible: { CompositorConfig.revision; return CompositorConfig.has("layout", "new-width") && rows.layoutMode() === "scrolling" }
+                visible: { CompositorConfig.revision; return CompositorConfig.has("layout", "new-width") && CompositorRows.layoutMode() === "scrolling" }
                 ConfigSelectionArray {
                     options: root.widths
                     currentValue: { CompositorConfig.revision; return root.nearest(root.widths, Number(CompositorConfig.value({ comp: "layout", key: "new-width", fallback: 0.5 }))) }
@@ -232,7 +231,7 @@ ContentPage {
                 }
             }
             Repeater {
-                model: ScriptModel { values: rows.of("Layout"); objectProp: "key" }
+                model: ScriptModel { values: CompositorRows.of("Layout"); objectProp: "key" }
                 CompositorRow {}
             }
         }
@@ -258,7 +257,7 @@ ContentPage {
         SettingsCardSection {
             id: card
             required property var modelData
-            readonly property var mine: rows.of(card.modelData.group)
+            readonly property var mine: CompositorRows.of(card.modelData.group)
             expanded: true
             icon: card.modelData.icon
             title: card.modelData.title
@@ -288,7 +287,7 @@ ContentPage {
                 CompositorRow {}
             }
             Repeater {
-                model: ScriptModel { values: rows.of("Hot corners"); objectProp: "key" }
+                model: ScriptModel { values: CompositorRows.of("Hot corners"); objectProp: "key" }
                 CompositorRow {}
             }
         }

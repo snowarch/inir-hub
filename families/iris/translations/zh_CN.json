@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "轻点一下即可设定整体外观；Ctrl+Z 撤销。下方的磁贴用于微调。",
   "Hide the side column": "隐藏侧栏",
   "Show the side column": "显示侧栏",
-  "Its switch below turns it back on, where it stood.": "下方的开关可让它在原位置重新开启。",
   "Screens turned off wait on the right.": "已关闭的屏幕在右侧等待。",
-  "Drag a screen to where it stands on your desk.": "将屏幕拖到它在桌上的实际位置。",
   "Your own": "自定义",
   "Press a corner to choose what happens when the pointer rests there.": "按下一个角，选择指针停在那里时发生什么。",
   "Columns on an endless strip.": "无尽长条上的列。",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "触摸面板所属的屏幕。",
   "Warms the screen to rest your eyes at night.": "夜间让屏幕变暖，让眼睛休息。",
   "Quiets the shell so games get the most.": "让 Shell 安静下来，把性能留给游戏。",
-  "Titled “%1”": "标题为“%1”",
   "No app has a rule yet": "还没有应用设置规则",
   "One app": "1 个应用"
 }

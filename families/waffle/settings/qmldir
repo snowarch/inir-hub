@@ -20,3 +20,8 @@ WMascotPoseGallery 1.0 WMascotPoseGallery.qml
 WNiriAnimationPresets 1.0 WNiriAnimationPresets.qml
 WaffleSettingsApp 1.0 WaffleSettingsApp.qml
 WTaskbarPreview 1.0 WTaskbarPreview.qml
+WCompositorRow 1.0 WCompositorRow.qml
+WDisplayArrangement 1.0 WDisplayArrangement.qml
+WScreenIdentify 1.0 WScreenIdentify.qml
+WAppRulesCard 1.0 WAppRulesCard.qml
+WCompositorGroup 1.0 WCompositorGroup.qml

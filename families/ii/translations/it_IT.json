@@ -3205,9 +3205,6 @@
   "Use the classic design (v2.33)": "Usa il design classico (v2.33)",
   "Show every setting": "Mostra tutte le impostazioni",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Classico è la finestra Impostazioni della v2.33: un'intestazione con la ricerca, un elenco stretto di pagine e ogni sezione nella sua scheda. Tutte le pagine e le opzioni ci sono in entrambi.",
-  "Always waiting": "Sempre pronti",
   "Screens, workspaces, layout, windows, input": "Schermi, aree di lavoro, layout, finestre, input",
-  "Show in the sidebar": "Mostra nella barra laterale",
-  "How tall new windows open on this screen": "Quanto sono alte le nuove finestre su questo schermo",
-  "How wide new windows open on this screen": "Quanto sono larghe le nuove finestre su questo schermo"
+  "Show in the sidebar": "Mostra nella barra laterale"
 }

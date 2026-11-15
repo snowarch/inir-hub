@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "Một chạm đặt toàn bộ giao diện; Ctrl+Z hoàn tác. Các ô bên dưới tinh chỉnh nó.",
   "Hide the side column": "Ẩn cột bên",
   "Show the side column": "Hiện cột bên",
-  "Its switch below turns it back on, where it stood.": "Công tắc bên dưới sẽ bật lại nó, ở đúng chỗ cũ.",
   "Screens turned off wait on the right.": "Các màn hình đã tắt chờ ở bên phải.",
-  "Drag a screen to where it stands on your desk.": "Kéo màn hình đến đúng vị trí của nó trên bàn bạn.",
   "Your own": "Của riêng bạn",
   "Press a corner to choose what happens when the pointer rests there.": "Nhấn vào một góc để chọn điều xảy ra khi con trỏ dừng ở đó.",
   "Columns on an endless strip.": "Các cột trên một dải vô tận.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "Màn hình mà một tấm cảm ứng thuộc về.",
   "Warms the screen to rest your eyes at night.": "Làm ấm màn hình để mắt được nghỉ vào ban đêm.",
   "Quiets the shell so games get the most.": "Làm dịu shell để game được nhiều tài nguyên nhất.",
-  "Titled “%1”": "Tiêu đề “%1”",
   "No app has a rule yet": "Chưa có ứng dụng nào có quy tắc",
   "One app": "1 ứng dụng"
 }

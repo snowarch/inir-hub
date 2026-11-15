@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.waffle.looks
 
 // Font family picker with search - Windows 11 style
@@ -107,7 +108,8 @@ WSettingsRow {
                         id: popupBg
                         anchors.fill: parent
                         radius: Looks.settings.radiusLarge
-                        color: Looks.colors.bgPanelFooter
+                        // Solid: Settings is an opaque window, and a see-through list let the rows under it read through.
+                        color: ColorUtils.applyAlpha(Looks.colors.bgPanelFooter, 1)
                         border.width: 1
                         border.color: Looks.settings.strokeStrong
                     }

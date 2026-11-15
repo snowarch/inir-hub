@@ -22,9 +22,7 @@
   "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.": "One tap sets the whole look; Ctrl+Z takes it back. The tiles below fine-tune it.",
   "Hide the side column": "Hide the side column",
   "Show the side column": "Show the side column",
-  "Its switch below turns it back on, where it stood.": "Its switch below turns it back on, where it stood.",
   "Screens turned off wait on the right.": "Screens turned off wait on the right.",
-  "Drag a screen to where it stands on your desk.": "Drag a screen to where it stands on your desk.",
   "Your own": "Your own",
   "Press a corner to choose what happens when the pointer rests there.": "Press a corner to choose what happens when the pointer rests there.",
   "Columns on an endless strip.": "Columns on an endless strip.",
@@ -2651,7 +2649,6 @@
   "The screen a touch panel belongs to.": "The screen a touch panel belongs to.",
   "Warms the screen to rest your eyes at night.": "Warms the screen to rest your eyes at night.",
   "Quiets the shell so games get the most.": "Quiets the shell so games get the most.",
-  "Titled “%1”": "Titled “%1”",
   "No app has a rule yet": "No app has a rule yet",
   "One app": "One app"
 }

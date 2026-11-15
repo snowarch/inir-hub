@@ -33,6 +33,31 @@ SettingsCardSection {
     function nameOf(app: string): string {
         return AppSearch.cleanAppName(AppSearch.lookupDesktopEntry(app)?.name) || app
     }
+    function iconOf(app: string): string {
+        const entry = AppSearch.lookupDesktopEntry(app)
+        return entry ? AppSearch.getIconSource(entry.icon, "") : AppSearch.getIconSource(app, "")
+    }
+    function workspaceName(ws: var): string {
+        return typeof ws === "number" ? Translation.tr("Workspace %1").arg(ws) : String(ws ?? "")
+    }
+    function screenName(name: string): string {
+        return CompositorConfig.screenName(CompositorConfig.outputs.find(out => out.name === name) ?? { name: name })
+    }
+    // The rule in a line, under its drawing: what differs from a window of any other app.
+    function sayOf(rule: var): string {
+        if (!rule) return ""
+        const parts = []
+        const open = root.opens.find(entry => entry.value === rule.open && entry.value.length > 0)
+        if (open) parts.push(open.displayName)
+        const width = root.widths.find(entry => Math.abs(entry.value - Number(rule.width ?? 0)) < 0.01 && entry.value > 0)
+        if (width && rule.open !== "maximized" && rule.open !== "fullscreen") parts.push(width.displayName)
+        if (String(rule.workspace ?? "").length > 0) parts.push(root.workspaceName(rule.workspace))
+        if (String(rule.screen ?? "").length > 0) parts.push(root.screenName(rule.screen))
+        if (Number(rule.opacity ?? 1) < 1) parts.push(`${Math.round(Number(rule.opacity) * 100)} %`)
+        if (rule.hidden) parts.push(Translation.tr("Left out of captures"))
+        if (String(rule.title ?? "").length > 0) parts.push(Translation.tr("Titled “%1”").arg(rule.title))
+        return parts.join(" · ") || Translation.tr("As usual")
+    }
     function change(patch: var): void {
         const app = root.showing
         root.rules.put(app, Object.assign({ app: app, title: "", open: "", workspace: "", screen: "", opacity: 1, hidden: false, width: 0, extra: ({}) }, root.rules.rule(app) ?? {}, patch))
@@ -152,6 +177,79 @@ SettingsCardSection {
             Layout.fillWidth: true
             visible: root.current !== null
             spacing: 4
+
+            // The rule drawn: the screen, the workspace and the window as it opens, moving to each new value.
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.bottomMargin: 8
+                spacing: 6
+                WindowRuleSketch {
+                    id: sketch
+                    Layout.fillWidth: true
+                    Layout.maximumWidth: 420
+                    Layout.preferredHeight: Math.round(Math.min(width, 420) * 0.56)
+                    Layout.alignment: Qt.AlignHCenter
+                    rule: root.current
+                    icon: root.iconOf(root.showing)
+                    radius: Appearance.rounding.normal
+                    windowRadius: Appearance.rounding.verysmall
+                    windowColor: Appearance.colors.colSurfaceContainerHighest
+                    lineColor: Appearance.colors.colOutlineVariant
+                    duration: Appearance.animation.elementMove.duration
+                    easing: Appearance.animation.elementMove.type
+                    curve: Appearance.animation.elementMove.bezierCurve
+
+                    // Left out of captures: the window says so on its corner.
+                    Rectangle {
+                        visible: root.current?.hidden === true
+                        x: sketch.window.x + sketch.window.width - width - 6
+                        y: sketch.window.y + 6
+                        width: 24
+                        height: 24
+                        radius: 12
+                        color: Appearance.colors.colSurfaceContainerLow
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            text: "visibility_off"
+                            iconSize: 14
+                            color: Appearance.colors.colOnSurface
+                        }
+                    }
+                    // Names only the drawing cannot show: a named workspace, a screen of its own.
+                    Row {
+                        x: 6
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 6
+                        spacing: 4
+                        Repeater {
+                            model: root.current ? [String(root.current.workspace ?? "").length > 0 && typeof root.current.workspace !== "number" ? String(root.current.workspace) : "",
+                                String(root.current.screen ?? "").length > 0 ? root.screenName(root.current.screen) : ""].filter(text => text.length > 0) : []
+                            Rectangle {
+                                required property string modelData
+                                width: tag.implicitWidth + 12
+                                height: 20
+                                radius: 10
+                                color: Appearance.colors.colSurfaceContainerLow
+                                StyledText {
+                                    id: tag
+                                    anchors.centerIn: parent
+                                    text: parent.modelData
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    color: Appearance.colors.colOnSurface
+                                }
+                            }
+                        }
+                    }
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                    font.pixelSize: Appearance.font.pixelSize.smaller
+                    color: Appearance.colors.colSubtext
+                    text: root.nameOf(root.showing) + " · " + root.sayOf(root.current)
+                }
+            }
 
             ContentSubsection {
                 title: Translation.tr("Opens")
