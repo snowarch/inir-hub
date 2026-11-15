@@ -376,6 +376,7 @@ Item {
             case "xbps": return AppCatalog.hasFlatpak ? "xbps + flatpak" : "xbps"
             case "apt": return AppCatalog.hasFlatpak ? "apt + flatpak" : "apt"
             case "dnf": return AppCatalog.hasFlatpak ? "dnf + flatpak" : "dnf"
+            case "moss": return AppCatalog.hasFlatpak ? "moss + flatpak" : "moss"
             case "unknown": return Translation.tr("Detecting...")
             default: return pm
         }
