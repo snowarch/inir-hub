@@ -4,6 +4,19 @@ import "../state/streams.js" as Streams
 
 // Run with: QT_QPA_PLATFORM=offscreen /usr/lib/qt6/bin/qmltestrunner -input components/media-corner/tests/tst_streams.qml
 TestCase {
+    function test_playbackTracks() {
+        const tracks = Streams.playbackTracks([
+            {id: 1, type: "audio", lang: "EN", title: "<b>unsafe</b>"},
+            {id: 2, type: "sub", lang: "<img>"},
+            {id: 3, type: "video"}, {id: "4", type: "audio"}, {id: -1, type: "sub"}
+        ])
+        compare(tracks.length, 2)
+        compare(tracks[0].id, 1)
+        compare(tracks[0].lang, "en")
+        compare(tracks[1].lang, "")
+        compare(tracks[0].title, undefined)
+        compare(Streams.playbackTracks(null).length, 0)
+    }
     name: "Streams"
 
     function test_baseOf() {

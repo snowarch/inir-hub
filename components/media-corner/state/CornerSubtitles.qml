@@ -5,6 +5,7 @@ import Quickshell
 import qs.services
 import "subtitles.js" as Subtitles
 import "streams.js" as Streams
+import "http.js" as Http
 
 // Optional direct OpenSubtitles provider. The key never appears in a URL or error.
 Singleton {
@@ -18,6 +19,9 @@ Singleton {
     property var callback: null
     property var cache: ({})
     property string cacheKey: ""
+    function limitedMessage(retryAfter: string): string {
+        return Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "")
+    }
     function cancel(): void {
         timeout.stop()
         if (root.request) { const old = root.request; root.request = null; old.abort() }
@@ -39,7 +43,11 @@ Singleton {
             if (xhr.status >= 200 && xhr.status < 300) {
                 try { data = JSON.parse(xhr.responseText) } catch (e) { error = "invalid" }
             } else error = Subtitles.statusError(xhr.status)
-            cb(data, error)
+            let retryAfter = ""
+            if (error === "busy") {
+                try { retryAfter = Http.retryAfter(xhr.getResponseHeader("Retry-After")) } catch (e) {}
+            }
+            cb(data, error, retryAfter)
         }
         try {
             xhr.open(method, root.baseUrl + path)
@@ -64,13 +72,20 @@ Singleton {
         root.token = ""
         root.baseUrl = "https://api.opensubtitles.com/api/v1/"
         root.loginError = ""
-        root.call("POST", "login", JSON.stringify({username: username, password: password}), (body, error) => {
+        root.call("POST", "login", JSON.stringify({username: username, password: password}), (body, error, retryAfter) => {
             const host = String(body?.base_url ?? "api.opensubtitles.com").replace(/^https?:\/\//, "").replace(/\/$/, "")
             if (!error && body?.token && (host === "api.opensubtitles.com" || host === "vip-api.opensubtitles.com")) {
                 root.token = String(body.token)
                 root.baseUrl = "https://" + host + "/api/v1/"
-            } else root.loginError = Translation.tr("Could not sign in to OpenSubtitles")
+            } else root.loginError = error === "busy" ? root.limitedMessage(retryAfter ?? "") : Translation.tr("Could not sign in to OpenSubtitles")
         })
+    }
+    function signOut(): void {
+        root.cancel()
+        root.token = ""
+        root.baseUrl = "https://api.opensubtitles.com/api/v1/"
+        root.loginError = ""
+        root.cache = ({})
     }
     function search(imdb: string, language: string, episode: var, done: var): void {
         if (!/^tt\d+$/.test(imdb) || !/^[a-z]{2,3}$/.test(language)) { done([], "unavailable"); return }
@@ -81,18 +96,18 @@ Singleton {
         const key = imdb + ":" + language + extra
         const hit = root.cache[key]
         if (hit && Date.now() - hit.at < 600000) { done(hit.items, ""); return }
-        root.call("GET", "subtitles?imdb_id=" + imdb.slice(2) + "&languages=" + language + extra, "", (body, error) => {
+        root.call("GET", "subtitles?imdb_id=" + imdb.slice(2) + "&languages=" + language + extra, "", (body, error, retryAfter) => {
             const items = Subtitles.searchResults(body, language)
             if (!error) root.cache[key] = { at: Date.now(), items: items }
-            done(items, error)
+            done(items, error, retryAfter)
         })
     }
     function download(id: int, done: var): void {
         if (!root.authenticated) { done("", "login"); return }
-        root.call("POST", "download", JSON.stringify({ file_id: id }), (body, error) => {
+        root.call("POST", "download", JSON.stringify({ file_id: id }), (body, error, retryAfter) => {
             const link = Subtitles.downloadLink(body)
             const valid = Streams.mediaUrl(link)
-            done(valid ? link : "", error || (valid ? "" : "invalid"))
+            done(valid ? link : "", error || (valid ? "" : "invalid"), retryAfter)
         })
     }
     Timer {
@@ -104,5 +119,5 @@ Singleton {
             if (cb) cb(null, "timeout")
         }
     }
-    Connections { target: CornerState; function onOpenChanged(): void { if (!CornerState.open) { root.cancel(); root.token = ""; root.loginError = "" } } }
+    Connections { target: CornerState; function onOpenChanged(): void { if (!CornerState.open) root.signOut() } }
 }

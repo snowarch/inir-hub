@@ -26,6 +26,16 @@ function validSource(source) {
     return false
 }
 
+// Keep personal preferences when a reviewed manifest replaces the previous one.
+function applyManifest(old, info, url, checkedAt, fallbackName) {
+    const changes = { name: info.name || fallbackName, types: info.types, prefixes: info.prefixes,
+        streamTypes: info.streamTypes, streamPrefixes: info.streamPrefixes, subtitleTypes: info.subtitleTypes,
+        subtitlePrefixes: info.subtitlePrefixes, hasStreams: info.hasStreams, hasSubtitles: info.hasSubtitles, checkedAt }
+    if (old?.hasStreams === false && info.hasStreams) changes.streamsEnabled = false
+    if (old?.hasSubtitles === false && info.hasSubtitles) changes.subtitlesEnabled = false
+    return Object.assign({}, old || { type: "stremio", url, on: true }, changes)
+}
+
 // Accept v1.1's JSON string/array and versioned records. Return a new value, without mutating the input.
 function migrate(input) {
     let value = input
