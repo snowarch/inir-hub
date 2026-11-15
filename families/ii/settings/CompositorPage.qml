@@ -71,6 +71,13 @@ ContentPage {
         visible: CompositorConfig.outputs.length > 0
 
         SettingsGroup {
+            RippleButtonWithIcon {
+                visible: root.several
+                materialIcon: "screen_search_desktop"
+                mainText: Translation.tr("Identify")
+                onClicked: identify.show()
+                ScreenIdentify { id: identify }
+            }
             ContentSubsection {
                 title: Translation.tr("Screen")
                 visible: root.several
@@ -230,6 +237,8 @@ ContentPage {
             }
         }
     }
+
+    AppRulesCard {}
 
     Repeater {
         model: [

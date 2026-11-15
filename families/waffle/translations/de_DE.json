@@ -558,10 +558,5 @@
   "%1 monitors": "%1 Monitore",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "niri startet sie bei der Anmeldung, nicht iNiR, deshalb laufen sie weiter, wenn die Shell neu startet.",
   "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle trägt den globalen Stil und die Transparenz von Material. Aus: sein eigener Fluent-Look.",
-  "When covered": "Wenn verdeckt",
-  "Behind fullscreen": "Hinter Vollbild",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Ein verdecktes Hintergrundbild hört auf zu dekodieren und behält sein Bild.",
-  "While something plays or is paused": "Während etwas läuft oder pausiert ist",
-  "Media player": "Mediaplayer",
-  "Power buttons": "Power-Tasten"
+  "While something plays or is paused": "Während etwas läuft oder pausiert ist"
 }

@@ -1414,6 +1414,14 @@ ContentPage {
                 wrapMode: Text.WordWrap
             }
 
+            RippleButtonWithIcon {
+                visible: root.outputList.length > 1
+                materialIcon: "screen_search_desktop"
+                mainText: Translation.tr("Identify")
+                onClicked: identify.show()
+                ScreenIdentify { id: identify }
+            }
+
             ContentSubsection {
                 title: Translation.tr("Monitor")
                 visible: root.outputList.length > 1
@@ -2175,6 +2183,14 @@ ContentPage {
             }
         }
     }
+
+        }
+    }
+
+    SettingsTaskLoader {
+        requested: root.activeSection === "rules"
+        sourceComponent: Component {
+    AppRulesCard { settingsTaskSection: "rules" }
         }
     }
 
