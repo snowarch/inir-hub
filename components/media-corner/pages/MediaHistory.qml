@@ -65,7 +65,7 @@ ColumnLayout {
                     width: row.width
                     quiet: true
                     readonly property string caption: episode ? Translation.tr("Episode %1").arg(episode.episode) + (episode.season ? " · " + Translation.tr("Season %1").arg(episode.season) : "") : Translation.tr("Film")
-                    Accessible.name: caption
+                    Accessible.name: row.modelData.title + " · " + caption
                     implicitHeight: Math.round(44 * root.d)
                     IrisText {
                         anchors.fill: parent
