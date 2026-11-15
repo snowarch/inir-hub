@@ -1,6 +1,8 @@
 import QtQuick
 import Quickshell
 import qs.services
+import qs.modules.iris.style
+import qs.modules.iris.preview
 import qs.modules.iris.settings
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
@@ -11,9 +13,23 @@ import qs.modules.iris.prism.controls
 // the card is wide enough, two fields in a row (text, levels, short choices) stand side by side with the name over the
 // control, and two switches share a line; everything else takes the card's whole width. A part of the group gets its
 // own caption.
+// A group with a picture wears it in its card (his 11-15, Raell's keyboard and mouse in their own cards): the scene
+// beside the rows, its part lit and numbered like the page's strip, following the rows down while the card is read so
+// what a control changes stays in sight; narrow, it stands over the rows. The drawn keyboard heads its card whole.
 Item {
     id: root
     property string title: ""
+    // The picture: { section, group } of a scene, { keys, row } for the drawn keyboard, or null (PrismModel.figureOf).
+    property var figure: null
+    // The page's groups as the strip numbers them, and this card's entry among them (a band's title on banded pages).
+    property var groups: []
+    property string entry: ""
+    readonly property int number: root.groups.findIndex(group => String(group.title) === root.entry) + 1
+    // Where the page's visible top stands in this card's frame, and how tall the page is: the picture keeps in sight.
+    property real viewTop: 0
+    property real viewHeight: 0
+    property bool active: true
+    signal goGroup(string title)
     // Under the title: what the card holds (search: where the rows come from).
     property string line: ""
     property string glyph: "tune"
@@ -28,15 +44,27 @@ Item {
 
     readonly property real pad: PrismTheme.dp(24)
     readonly property real inner: root.width - root.pad * 2
+
+    // ── The picture's place: beside the rows where both fit, else over them.
+    readonly property bool keys: Boolean(root.figure?.keys)
+    readonly property bool scened: !root.showPage && !root.keys && root.figure !== null && root.figure !== undefined
+    readonly property bool beside: root.scened && root.inner >= PrismTheme.dp(720)
+    readonly property real figureWidth: root.beside ? Math.round(Math.max(PrismTheme.dp(300), Math.min(PrismTheme.dp(420), root.inner * 0.4))) : root.inner
+    readonly property real figureHeight: root.beside ? Math.round(root.figureWidth * 0.66)
+        : Math.round(Math.max(PrismTheme.dp(180), Math.min(PrismTheme.dp(260), root.inner * 0.42)))
+    readonly property real rowsWidth: root.beside ? root.inner - root.figureWidth - PrismTheme.dp(28) : root.inner
+    readonly property bool seen: root.viewTop < root.height && root.viewTop + root.viewHeight > 0
+
     readonly property real gap: PrismTheme.dp(28)
-    readonly property bool twoUp: !root.showPage && root.inner >= PrismTheme.dp(640)
-    readonly property real half: Math.floor((root.inner - root.gap) / 2)
+    readonly property bool twoUp: !root.showPage && root.rowsWidth >= PrismTheme.dp(640)
+    readonly property real half: Math.floor((root.rowsWidth - root.gap) / 2)
     // The chart's grey column only where the room holds it; otherwise what a row does sits under its name.
-    readonly property real aboutWidth: root.inner < PrismTheme.dp(900) ? 0 : Math.min(PrismTheme.dp(260), root.inner * 0.28)
-    readonly property real controlWidth: Math.min(PrismTheme.dp(300), root.inner * 0.4)
+    readonly property real aboutWidth: root.rowsWidth < PrismTheme.dp(900) ? 0 : Math.min(PrismTheme.dp(260), root.rowsWidth * 0.28)
+    readonly property real controlWidth: Math.min(PrismTheme.dp(300), root.rowsWidth * 0.4)
 
     // What the chip says: the first row that names its group's state now (the keyboard's layout), else the note.
-    readonly property var chipRow: root.rows.find(row => typeof row.spec?.chip === "function") ?? null
+    readonly property var chipRow: root.rows.find(row => typeof row.spec?.chip === "function")
+        ?? (root.keys && typeof root.figure.row?.spec?.chip === "function" ? root.figure.row : null)
     readonly property string chip: {
         const _ = PrismModel.revision
         return root.chipRow ? String(root.chipRow.spec.chip() ?? "") : ""
@@ -96,13 +124,28 @@ Item {
                 anchors.rightMargin: PrismTheme.dp(12)
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: PrismTheme.dp(2)
-                PrismText {
+                // Its number on the page, as the strip and the pictures' discs say it.
+                Row {
                     width: parent.width
-                    text: root.title
-                    font.pixelSize: PrismTheme.head
-                    font.weight: Font.Bold
-                    font.letterSpacing: -0.2
-                    wrapMode: Text.WordWrap
+                    spacing: PrismTheme.dp(8)
+                    PrismText {
+                        id: numberSaid
+                        visible: root.number > 0 && root.groups.length > 1
+                        anchors.baseline: titleSaid.baseline
+                        mono: true
+                        text: String(root.number).padStart(2, "0")
+                        color: PrismTheme.ink3
+                        font.pixelSize: PrismTheme.caption
+                    }
+                    PrismText {
+                        id: titleSaid
+                        width: parent.width - (numberSaid.visible ? numberSaid.width + parent.spacing : 0)
+                        text: root.title
+                        font.pixelSize: PrismTheme.head
+                        font.weight: Font.Bold
+                        font.letterSpacing: -0.2
+                        wrapMode: Text.WordWrap
+                    }
                 }
                 PrismText {
                     width: parent.width
@@ -148,59 +191,160 @@ Item {
                 }
             }
         }
-        Item { width: 1; height: PrismTheme.dp(10) }
+        Item { width: 1; height: root.scened || root.keys ? PrismTheme.dp(18) : PrismTheme.dp(10) }
 
-        // A write changes Config.revision and with it every row list; the model keys lines by their rows' `key` so a
-        // value changing keeps every row's delegate (a plain array rebuilt the whole page on each click, and a handler
-        // still running in a row that was gone read "root is not defined").
-        Repeater {
-            model: ScriptModel { objectProp: "key"; values: root.lines }
-            delegate: Column {
-                id: entry
-                required property var modelData
-                required property int index
+        // The drawn keyboard heads its card whole; the keys left iNiR's go back at once from under it.
+        Loader {
+            active: root.keys
+            visible: active
+            width: body.width
+            sourceComponent: Column {
                 width: body.width
-                readonly property string part: String(entry.modelData.rows[0].spec?.part ?? "")
-                // A search's hits come from many groups: a part's caption there would name one group's inside.
-                readonly property bool partStarts: !root.showPage && entry.part.length > 0
-                    && (entry.modelData.first === 0 || String(root.rows[entry.modelData.first - 1]?.spec?.part ?? "") !== entry.part)
-                PrismText {
-                    visible: entry.partStarts
-                    topPadding: PrismTheme.dp(14)
-                    bottomPadding: PrismTheme.dp(2)
-                    text: Translation.tr(entry.part)
-                    color: PrismTheme.ink3
-                    font.pixelSize: PrismTheme.small
-                    font.weight: Font.DemiBold
+                spacing: PrismTheme.dp(10)
+                IrisKeyboardMap {
+                    id: keyMap
+                    width: parent.width
                 }
-                // Two rows of a line are two fixed places, never a Repeater over the line's list: the list is new on
-                // every write, and a Repeater would rebuild a level under the pointer mid-drag.
-                Row {
-                    readonly property bool paired: entry.modelData.rows.length > 1
-                    readonly property bool stackedPair: paired && entry.modelData.shape === "field"
-                    spacing: root.gap
-                    PrismRow {
-                        width: parent.paired ? root.half : body.width
-                        row: entry.modelData.rows[0]
-                        stacked: parent.stackedPair
-                        showPage: root.showPage
-                        aboutWidth: parent.paired ? 0 : root.aboutWidth
-                        controlWidth: parent.stackedPair ? root.half : parent.paired ? PrismTheme.dp(64) : root.controlWidth
-                        flash: root.flashPath === row.path
-                        onOpenRequested: root.reach(row)
+                Item {
+                    visible: keyMap.changedCount > 0
+                    width: parent.width
+                    height: visible ? PrismTheme.dp(36) : 0
+                    PrismPill {
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        tone: "quiet"
+                        glyph: "keyboard"
+                        text: keyMap.changedCount === 1 ? Translation.tr("Restore 1 key") : Translation.tr("Restore %1 keys").arg(keyMap.changedCount)
+                        onClicked: keyMap.restoreKeys()
                     }
-                    Loader {
-                        id: second
-                        active: parent.paired
-                        visible: active
-                        readonly property bool stackedPair: parent.stackedPair
-                        sourceComponent: PrismRow {
-                            width: root.half
-                            row: entry.modelData.rows[1]
-                            stacked: second.stackedPair
-                            aboutWidth: 0
-                            controlWidth: second.stackedPair ? root.half : PrismTheme.dp(64)
-                            flash: root.flashPath === row.path
+                }
+                Item { width: 1; height: PrismTheme.dp(8) }
+            }
+        }
+
+        // The rows, and the picture beside them (or over them).
+        Item {
+            id: stage
+            width: body.width
+            readonly property real pictureHeight: !root.scened ? 0 : pictureBox.item ? pictureBox.item.implicitHeight : root.figureHeight
+            height: root.beside ? Math.max(list.implicitHeight, stage.pictureHeight)
+                : root.scened ? stage.pictureHeight + PrismTheme.dp(14) + list.implicitHeight : list.implicitHeight
+
+            Loader {
+                id: pictureBox
+                active: root.scened
+                visible: active
+                x: root.beside ? body.width - root.figureWidth : 0
+                // Beside the rows it keeps to the page's visible top while the card is read, never past its rows' end.
+                y: !root.beside ? 0 : Math.round(Math.max(0, Math.min(stage.height - stage.pictureHeight,
+                    root.viewTop - body.y - stage.y)))
+                sourceComponent: Item {
+                    width: root.figureWidth
+                    implicitHeight: scene.height + (caption.visible ? PrismTheme.dp(8) + caption.implicitHeight : 0)
+                    IrisGroupPreview {
+                        id: scene
+                        width: root.figureWidth
+                        height: root.figureHeight
+                        radius: PrismTheme.dp(16)
+                        framed: false
+                        captionOutside: true
+                        // Prism draws it with the animated previews off too, held still: a picture at rest costs nothing.
+                        holdsStill: true
+                        playing: root.active && root.seen
+                        section: String(root.figure?.section ?? "")
+                        group: String(root.figure?.group ?? "")
+                        niriValue: (section, key) => CompositorConfig.value(IrisOptions.settings.find(spec => spec.comp === section && spec.key === key) ?? { comp: section, key: key })
+                        niriRevision: CompositorConfig.revision
+                    }
+                    // Its part lit, the others numbered quietly: pointing at one names it, a press goes to its card.
+                    PrismSpots {
+                        id: marks
+                        property string hovering: ""
+                        width: scene.width
+                        height: scene.height
+                        radius: scene.radius
+                        spots: scene.spots
+                        groups: root.groups
+                        pointed: marks.hovering
+                        picked: root.entry
+                        sayOf: title => PrismModel.glanceOf(root.groups.find(group => String(group.title) === title)).say
+                        onPoint: title => marks.hovering = title
+                        onPick: title => { if (title.length > 0 && title !== root.entry) root.goGroup(title) }
+                    }
+                    PrismText {
+                        id: caption
+                        y: scene.height + PrismTheme.dp(8)
+                        width: parent.width
+                        text: scene.caption
+                        visible: text.length > 0
+                        color: PrismTheme.ink2
+                        font.pixelSize: PrismTheme.small
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 2
+                        elide: Text.ElideNone
+                    }
+                }
+            }
+
+            Column {
+                id: list
+                y: root.beside || !root.scened ? 0 : stage.pictureHeight + PrismTheme.dp(14)
+                width: root.rowsWidth
+                spacing: 0
+
+                // A write changes Config.revision and with it every row list; the model keys lines by their rows' `key` so a
+                // value changing keeps every row's delegate (a plain array rebuilt the whole page on each click, and a handler
+                // still running in a row that was gone read "root is not defined").
+                Repeater {
+                    model: ScriptModel { objectProp: "key"; values: root.lines }
+                    delegate: Column {
+                        id: entry
+                        required property var modelData
+                        required property int index
+                        width: list.width
+                        readonly property string part: String(entry.modelData.rows[0].spec?.part ?? "")
+                        // A search's hits come from many groups: a part's caption there would name one group's inside.
+                        readonly property bool partStarts: !root.showPage && entry.part.length > 0
+                            && (entry.modelData.first === 0 || String(root.rows[entry.modelData.first - 1]?.spec?.part ?? "") !== entry.part)
+                        PrismText {
+                            visible: entry.partStarts
+                            topPadding: PrismTheme.dp(14)
+                            bottomPadding: PrismTheme.dp(2)
+                            text: Translation.tr(entry.part)
+                            color: PrismTheme.ink3
+                            font.pixelSize: PrismTheme.small
+                            font.weight: Font.DemiBold
+                        }
+                        // Two rows of a line are two fixed places, never a Repeater over the line's list: the list is new on
+                        // every write, and a Repeater would rebuild a level under the pointer mid-drag.
+                        Row {
+                            readonly property bool paired: entry.modelData.rows.length > 1
+                            readonly property bool stackedPair: paired && entry.modelData.shape === "field"
+                            spacing: root.gap
+                            PrismRow {
+                                width: parent.paired ? root.half : list.width
+                                row: entry.modelData.rows[0]
+                                stacked: parent.stackedPair
+                                showPage: root.showPage
+                                aboutWidth: parent.paired ? 0 : root.aboutWidth
+                                controlWidth: parent.stackedPair ? root.half : parent.paired ? PrismTheme.dp(64) : root.controlWidth
+                                flash: root.flashPath === row.path
+                                onOpenRequested: root.reach(row)
+                            }
+                            Loader {
+                                id: second
+                                active: parent.paired
+                                visible: active
+                                readonly property bool stackedPair: parent.stackedPair
+                                sourceComponent: PrismRow {
+                                    width: root.half
+                                    row: entry.modelData.rows[1]
+                                    stacked: second.stackedPair
+                                    aboutWidth: 0
+                                    controlWidth: second.stackedPair ? root.half : PrismTheme.dp(64)
+                                    flash: root.flashPath === row.path
+                                }
+                            }
                         }
                     }
                 }

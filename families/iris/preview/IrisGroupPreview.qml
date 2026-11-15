@@ -9,6 +9,7 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.preview.scenes
 import qs.modules.iris.preview.parts
+import "IrisSceneMap.js" as SceneMap
 
 // The live preview a Settings group shows above its rows: picks the group's scene (preview/scenes, built from the parts
 // in preview/parts), decodes the wallpaper once for it and scales it to the frame.
@@ -114,44 +115,7 @@ ClippingRectangle {
 
     // Two sizes, never one per width: a page settling passes its scene through several widths, and each asked for a decode.
     function decodeFor(width: real): size { return Qt.size(width * 2 <= 1024 ? 1024 : 2048, 0) }
-    function sceneFor(section: string, group: string): string {
-        if (group.length === 0)
-            return ({ dock: "dock", player: "player", desktop: "widgets", widgets: "widgets", sidebars: "panels", controlCenter: "controlCenter", spotlight: "spotlight", bubbles: "bubbles",
-                bar: "islandEdge", appearance: "fusion", colour: "palette", wallpaper: "gallery", login: "login", motion: "motion", lock: "lock", notifications: "feedback",
-                windows: "windows", orbit: "orbit", general: "general", capture: "capture", sound: "sound", display: "display",
-                keyboard: "keyboard", pointer: "pointer", battery: "battery", gaming: "gaming", anime: "anime", sources: "sources", system: "hub" })[section] ?? ""
-        const key = section + "/" + group
-        return ({
-            "sidebars/Focus": "panels", "sidebars/Today": "panels", "sidebars/Panel look": "panels",
-            "bar/Visibility": "islandReserve", "bar/Interaction": "islandInteraction",
-            "bar/Shape": "islandEdge", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
-            "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Glass": "glass", "appearance/Edges": "glass",
-            "appearance/Menus": "menus", "general/Settings window": "settings",
-            "appearance/Texture": "texture", "appearance/Material": "material", "appearance/Design": "fusion",
-            "appearance/Adaptive": "fusion",
-            "appearance/Faces": "typography", "appearance/Text": "typography", "appearance/Frame": "frame",
-            "colour/Colour theme": "palette", "colour/Scheme": "palette", "colour/Accent": "palette", "colour/Highlight": "highlight",
-            "colour/App colours": "palette", "colour/Dark look": "palette", "colour/Ink look": "palette", "colour/Light look": "palette",
-            "colour/Wallpaper tint": "palette",
-            "appearance/App colours": "palette", "windows/Layout": "windows",
-            "login/Login Screen": "login",
-            "desktop/Desktop menu": "menus",
-            "motion/Motion": "motion", "motion/Curve": "motion", "motion/Timing": "motion",
-            "motion/Touch": "motion",
-            "player/Frame music": "frame", "player/Frame response": "frame", "player/Frame finish": "frame",
-            "lock/Scene": "lock", "lock/Type": "lock", "lock/Clock": "lock", "lock/At a glance": "lock",
-            "lock/Now playing": "lock", "lock/Activity": "lock", "lock/Sign in": "lock", "lock/Status": "lock",
-            "bar/Desktop page": "islandPage", "bar/Pages": "islandPage", "bar/Player page": "islandPage",
-            "bubbles/Behaviour": "bubbles", "bubbles/Floating": "bubbles", "bubbles/On the contour": "bubbles", "bubbles/Size": "bubbles",
-            "bubbles/Cards": "cards", "bubbles/Card contents": "cards", "bubbles/Joining": "joining", "bubbles/Tray": "tray",
-            "dock/Visibility": "dock", "dock/Icons": "dock", "dock/Look": "dock",
-            "desktop/Widgets": "widgets", "wallpaper/Overview backdrop": "backdrop", "wallpaper/Wallpaper gallery": "gallery",
-            "spotlight/Spotlight": "spotlight", "controlCenter/Control Center": "controlCenter",
-            "sidebars/Panel look": "panels",
-            "notifications/Banners": "feedback", "sound/Feedback": "feedback",
-            "player/Player": "player", "player/Bubble": "player",
-        })[key] ?? ""
-    }
+    function sceneFor(section: string, group: string): string { return SceneMap.sceneFor(section, group) }
 
     function componentFor(name: string): var {
         return ({

@@ -234,10 +234,12 @@ Item {
             width: root.stacked ? parent.width : root.inline === "switch" ? Math.max(root.controlWidth, root.controlNeed) : root.controlWidth
             height: root.stacked ? (kind.item ? kind.item.height : 0) : parent.height
             enabled: !root.locked
+            // Placed by x, never by anchors that come and go: a delegate that held a field (stacked, anchored on both
+            // sides) kept that width once its anchor let go, and the next row's switch stretched across its name (11-15).
             Loader {
                 id: kind
-                anchors.right: root.stacked ? undefined : parent.right
-                anchors.left: root.stacked ? parent.left : undefined
+                // From the item's own width: the Loader's follows it a step later, and reading that looped.
+                x: root.stacked ? 0 : parent.width - (kind.item ? kind.item.width : 0)
                 anchors.verticalCenter: parent.verticalCenter
                 active: root.inline.length > 0
                 sourceComponent: ({ switch: switchKind, range: rangeKind, hue: hueKind, text: textKind, action: actionKind,

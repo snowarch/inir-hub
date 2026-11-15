@@ -6,6 +6,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.iris.settings
 import qs.modules.iris.prism.core
+import "../../preview/IrisSceneMap.js" as SceneMap
 
 // Prism's one model, drawn from iRiS Settings' one registry (IrisOptions): every area is a page, every row of it a
 // line of the chart, read, written, undone and said exactly as Classic and Folio do. What Prism adds is its dress:
@@ -344,6 +345,47 @@ Singleton {
         return IrisOptions.say(row.spec, root.stored(row, value))
     }
     function sayNow(row: var): string { return root.say(row, root.read(row)) }
+    // The picture a group's card wears beside its rows (Raell Tech's page: the keyboard in its card, the mouse in its):
+    // the group's own scene, else the page's, numbered with its part lit; the drawn keyboard where a row of the group is
+    // drawn by it. null: the card is its rows alone. Names as IrisGroupPreview takes them ({ section, group }).
+    function figureOf(id: string, group: string): var {
+        const keyRow = root.rows.find(row => row.onStage && row.page === id && row.section === group && root.shown(row))
+        if (keyRow) return { keys: true, row: keyRow }
+        const area = String(root.page(id)?.area ?? "")
+        if (SceneMap.sceneFor(area, group).length > 0) return { section: area, group: group }
+        if (id !== area && SceneMap.sceneFor(id, group).length > 0) return { section: id, group: group }
+        if (id === area && SceneMap.sceneFor(area, "").length > 0) return { section: area, group: "" }
+        return id !== area && SceneMap.sceneFor(id, "").length > 0 ? { section: id, group: "" } : null
+    }
+    // Which card of a page wears which picture: each picture once, on the first card it belongs to (three cards of
+    // one page under the same drawing read as a repeat; the first one's numbers lead to the others).
+    function figuresOf(id: string, titles: var): var {
+        const out = ({}), worn = []
+        for (const title of titles) {
+            const figure = root.figureOf(id, title)
+            const scene = figure ? (figure.keys ? "keys" : SceneMap.sceneFor(figure.section, figure.group)) : ""
+            if (!figure || worn.includes(scene)) { out[title] = null; continue }
+            worn.push(scene)
+            out[title] = figure
+        }
+        return out
+    }
+    // What a group holds now in one line: its own chip (the keyboard's layout), else the first value it chooses, with
+    // that value's name beside it; a group of only actions or lists says how many settings it holds.
+    function glanceOf(entry: var): var {
+        const _ = root.revision
+        const rows = Array.from(entry?.rows ?? [])
+        const chipRow = rows.find(row => typeof row.spec?.chip === "function")
+        const chip = chipRow ? String(chipRow.spec.chip() ?? "") : ""
+        if (chip.length > 0) return { say: chip, label: "" }
+        for (const row of rows) {
+            if (!["choice", "switch", "range"].includes(String(row.kind))) continue
+            const said = String(root.sayNow(row) ?? "")
+            // A row named like its group says only its value: "On Notch" under Notch said the name twice.
+            if (said.length > 0) return { say: said, label: row.label === entry.title ? "" : Translation.tr(row.label) }
+        }
+        return { say: "", label: rows.length === 1 ? Translation.tr("One setting") : Translation.tr("%1 settings").arg(rows.length) }
+    }
     // How a row lays out beside another: a switch, a field (a range, hue, text or a short choice: name over the control
     // when two share a line or a narrow column), or "" (it needs its own line).
     function shapeOf(row: var): string {

@@ -2,8 +2,8 @@
     "$schema": "../../schema/hub.schema.json",
     "version": "2.33.89",
     "changes": {
-      "2.33.89": ["Prism Settings: each page opens on its stage, every group numbered on its scene; point at a part to see its setting, press to change it",
-      "Prism Settings: each group is a card with what it holds now, every setting says in a line what it does, and a page scrolled past its stage keeps it as a strip (thanks Raell Tech)",
+      "2.33.89": ["Prism Settings: each group is a card with its picture beside it, every part numbered; point at one to see what it holds, press to go there",
+      "Prism Settings: every setting says what it does, each group has its own icon, scrolled pages keep a strip of groups (thanks Raell Tech)",
       "Settings › Keyboard draws your keyboard as it types, layouts by country or name; with Super, Ctrl, Alt or Shift each key says its shortcut",
       "Settings › Keyboard: pick a key to give, move or free its shortcut; a changed one wears a dot and goes back in a press, Ctrl+Z undoes",
       "Niri: a compositor setting you changed is marked and Restore defaults puts iNiR's value back, as on Umbriel",

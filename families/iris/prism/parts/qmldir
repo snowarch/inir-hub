@@ -4,10 +4,9 @@ PrismSidebar 1.0 PrismSidebar.qml
 PrismNavItem 1.0 PrismNavItem.qml
 PrismHeading 1.0 PrismHeading.qml
 PrismHero 1.0 PrismHero.qml
-PrismStage 1.0 PrismStage.qml
+PrismPageBar 1.0 PrismPageBar.qml
 PrismStrip 1.0 PrismStrip.qml
 PrismSpots 1.0 PrismSpots.qml
-PrismInspector 1.0 PrismInspector.qml
 PrismSection 1.0 PrismSection.qml
 PrismRow 1.0 PrismRow.qml
 PrismThumb 1.0 PrismThumb.qml

@@ -469,7 +469,8 @@ Column {
         root.picked = root.picked === code ? "" : code
     }
     // Every key whose action left iNiR's, by its combo as a set: { now, was } (either null). Empty until iNiR's binds
-    // are read, so nothing shows as changed before there is something to compare with.
+    // and the person's binds are both read, so nothing shows as changed before there is something to compare (a
+    // config that failed to read said every key of iNiR's had left it).
     readonly property var changes: {
         const now = {}
         const was = {}
@@ -482,7 +483,7 @@ Column {
             if (!one.commented && !(key in was)) was[key] = one
         }
         const out = {}
-        if (Object.keys(was).length === 0) return out
+        if (Object.keys(was).length === 0 || Object.keys(now).length === 0) return out
         for (const key of Object.keys(now).concat(Object.keys(was))) {
             if (key in out) continue
             if (IrisBinds.actionKey(now[key]?.action_raw) !== IrisBinds.actionKey(was[key]?.action_raw)) out[key] = { now: now[key] ?? null, was: was[key] ?? null }

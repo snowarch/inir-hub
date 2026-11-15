@@ -83,6 +83,14 @@ Item {
         return out.map(titles => root.sections.filter(section => titles.some(entry => entry.title === section.title)))
             .filter(shown => shown.length > 0)
     }
+    // A page drawn as cards with pictures (not Home, Wallpaper, a search or Changes): which card wears which.
+    readonly property bool staged: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper" && root.page.pageId !== "general"
+    readonly property var figures: {
+        return root.staged ? PrismModel.figuresOf(root.page.pageId, root.sections.map(section => section.title)) : ({})
+    }
+    readonly property bool figured: root.staged && root.sections.some(section => Boolean(root.figures[section.title]))
+    // Where a card's picture keeps to while the page is read: under the strip once it shows, else under the top edge.
+    readonly property real stickTop: stripBar.shown ? stripBar.y + stripBar.height + PrismTheme.dp(14) : PrismTheme.dp(20)
     readonly property string group: {
         const chosen = String(PrismState.groupOf[root.page.pageId] ?? "")
         return root.sections.some(section => section.title === chosen) ? chosen : String(root.sections[0]?.title ?? "")
@@ -334,26 +342,18 @@ Item {
 
                 PageTop { width: content.width }
 
-                // A page with a scene opens on its stage: the scene, then every group numbered with what it holds now.
-                PrismStage {
-                    id: stageCard
-                    readonly property bool wanted: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper" && root.page.pageId !== "general"
-                    visible: stageCard.wanted && stageCard.staged
+                // Groups that carry their own pictures (his 11-15): the page opens on its first card, its facts and
+                // pills in a bar under its name; a page whose groups have none opens on Prism's still.
+                PrismPageBar {
+                    id: pageBar
+                    visible: root.staged && root.figured && pageBar.says
                     width: content.width
                     page: root.page
-                    groups: root.groups
-                    currentGroup: root.bandOf(root.currentGroup)
                     restorable: PrismModel.restorableOf(root.page.pageId)
-                    number: PrismModel.index(root.page.pageId) + 1
-                    count: root.sections.reduce((n, section) => n + section.rows.length, 0)
-                    changed: PrismModel.changedOf(root.page.pageId)
-                    lead: PrismModel.leadOf(root.page)
-                    active: root.active && stageCard.wanted
-                    onPickGroup: title => root.showGroup(root.firstOf(title))
                     onRestore: PrismModel.restore(root.page.pageId)
                 }
                 PrismHero {
-                    visible: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper" && !stageCard.visible
+                    visible: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper" && !root.figured
                     width: content.width
                     page: root.page
                     number: PrismModel.index(root.page.pageId) + 1
@@ -374,7 +374,7 @@ Item {
                         onRestore: PrismModel.restore(root.page.pageId)
                     }
                 }
-                Item { visible: !PrismState.searching && !root.changesView; width: 1; height: PrismTheme.dp(34) }
+                Item { visible: !PrismState.searching && !root.changesView; width: 1; height: root.figured ? PrismTheme.dp(14) : PrismTheme.dp(34) }
 
                 // Home: the settings touched every day, as tiles that act.
                 Loader {
@@ -442,7 +442,9 @@ Item {
                     }
                 }
 
-                Item { id: groupsAt; width: 1; height: 0 }
+                // Where the groups begin. A pixel tall: a Column leaves an item of no height at y 0, and the strip read
+                // the page as scrolled past its top from the start.
+                Item { id: groupsAt; width: 1; height: 1 }
 
                 // Groups keyed by title: a write rebuilds the list, never the groups on screen.
                 Repeater {
@@ -452,10 +454,17 @@ Item {
                         id: sectionBox
                         required property var modelData
                         required property int index
-                        visible: sectionBox.modelData.rows.length > 0
+                        visible: sectionBox.modelData.rows.length > 0 || Boolean(root.figures[sectionBox.modelData.title]?.keys)
                         width: content.width
                         PrismSection {
                             width: parent.width
+                            figure: root.figures[sectionBox.modelData.title] ?? null
+                            groups: root.groups
+                            entry: root.bandOf(sectionBox.modelData.title)
+                            viewTop: centre.contentY + root.stickTop - content.y - sectionBox.y
+                            viewHeight: centre.height - root.stickTop
+                            active: root.active
+                            onGoGroup: title => root.showGroup(root.firstOf(title))
                             title: Translation.tr(sectionBox.modelData.title)
                             glyph: String(sectionBox.modelData.glyph ?? root.page.glyph)
                             tint: root.page.tint
@@ -521,15 +530,15 @@ Item {
             bottomRightRadius: root.railWidth > 0 ? 0 : body.radius
         }
 
-        // Scrolled past the stage, the page keeps it as a strip: every group one press away, the open one lit.
+        // Scrolled past the page's top, the page keeps its groups as a strip: every group one press away, the open one lit.
         PrismStrip {
             id: stripBar
-            readonly property bool wanted: stageCard.visible && root.groups.length > 1
+            readonly property bool wanted: root.staged && root.groups.length > 1
             x: centre.x + content.x
             y: PrismTheme.dp(12)
             // It ends before the side column's key, which comes down into its line while it shows.
             width: (railKey.visible ? railKey.x - PrismTheme.dp(10) : centre.x + content.x + content.width) - x
-            shown: stripBar.wanted && centre.visible && centre.contentY > stageCard.y + stageCard.height - PrismTheme.dp(24)
+            shown: stripBar.wanted && centre.visible && centre.contentY > groupsAt.y - PrismTheme.dp(24)
             page: root.page
             groups: root.groups
             currentGroup: root.bandOf(root.currentGroup)

@@ -8,26 +8,27 @@ import qs.modules.iris.style
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 
-// The page's parts on its scene, numbered like its legend (Logitech Options+, `.claude/ref/iris-prism/pin-options-plus-parts.jpg`):
-// each part a number on the drawing; pointed at (the number or the part itself) it turns white, names its group and
-// what it holds now beside it, and the rest of the scene steps back round the part; a press opens the group's rows
-// beside the scene. Lies over the scene at its size and corners; draws nothing where the scene names no part.
+// A card's picture, its parts numbered as the page's strip numbers its groups (Logitech Options+,
+// `.claude/ref/iris-prism/pin-options-plus-parts.jpg`): the card's own number white, the others quiet. Pointed at (the
+// number or the part itself) a part's name and what it holds now show beside it and the rest of the picture steps back
+// round it; a press on another group's part goes to that group's card. At rest the picture is clean: nothing lights by
+// itself. Lies over the scene at its size and corners; draws nothing where the scene names no part.
 ClippingRectangle {
     id: root
-    // The scene's spots in this frame (IrisGroupPreview.spots) and the page's legend entries ({ title, rows, changed }).
+    // The scene's spots in this frame (IrisGroupPreview.spots) and the page's groups ({ title, rows, changed }).
     property var spots: []
     property var groups: []
-    // What is pointed at from anywhere (here or the legend) and the group open beside the scene: entry titles.
+    // The group pointed at here and the card's own group: entry titles.
     property string pointed: ""
     property string picked: ""
-    // What an entry holds now, in a few words (the legend's glance).
+    // What a group holds now, in a few words (PrismModel.glanceOf).
     property var sayOf: null
     signal point(string title)
     signal pick(string title)
 
     color: "transparent"
 
-    // Each spot whose group the page shows, with its legend number: one number an entry, its first spot.
+    // Each spot whose group the page shows, with its number on the page: one number a group, its first spot.
     readonly property var marks: {
         const out = []
         for (const spot of root.spots) {
@@ -70,7 +71,7 @@ ClippingRectangle {
     // ── The part pointed at stays lit, the rest of the scene steps back: a scrim with a hole the part's shape. Moving to
     // another part the hole glides there (from where it stands to the new part); the same part moving with the scene's
     // size is followed as it is, frame by frame.
-    readonly property string lit: root.pointed.length > 0 ? root.pointed : root.picked
+    readonly property string lit: root.pointed
     readonly property var litMark: root.marks.find(mark => mark.entry === root.lit && mark.part) ?? null
     Rectangle {
         id: scrim
@@ -137,7 +138,7 @@ ClippingRectangle {
             x: Math.round(Number(disc.mark?.x ?? 0) - width / 2)
             y: Math.round(Number(disc.mark?.y ?? 0) - height / 2)
             scale: disc.lit ? 1.18 : 1
-            opacity: root.picked.length > 0 && !disc.lit ? 0.5 : 1
+            opacity: root.picked.length > 0 && !disc.lit ? 0.85 : 1
             Behavior on scale { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
             Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
             RectangularShadow {
@@ -152,6 +153,8 @@ ClippingRectangle {
                 anchors.fill: parent
                 radius: width / 2
                 color: disc.lit ? PrismTheme.paper : PrismTheme.spot
+                border.width: disc.lit ? 0 : 1
+                border.color: PrismTheme.spotEdge
                 Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
             }
             PrismText {
@@ -162,7 +165,7 @@ ClippingRectangle {
                 font.pixelSize: PrismTheme.caption
                 font.weight: Font.DemiBold
             }
-            // Changed from iNiR's: the legend's accent dot, on the number's shoulder.
+            // Changed from iNiR's: the strip's accent dot, on the number's shoulder.
             Rectangle {
                 visible: Boolean(disc.mark?.changed)
                 x: parent.width - width * 0.75
@@ -220,7 +223,7 @@ ClippingRectangle {
                 font.pixelSize: PrismTheme.small
                 font.weight: Font.DemiBold
             }
-            // The value goes whole or not at all, as in the legend.
+            // The value goes whole or not at all.
             PrismText {
                 id: chipSay
                 visible: chip.say.length > 0 && implicitWidth <= chipRow.width - chipName.width - chipRow.spacing

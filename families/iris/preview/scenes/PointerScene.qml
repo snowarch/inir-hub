@@ -89,6 +89,15 @@ PreviewScene {
         iconSize: Math.round(pointerRoot.cursorSize * 1.3 * pointerRoot.d) // the glyph draws its arrow in about three quarters of its box
         color: IrisStyle.onMedia
     }
+    // Its dark rim, as every cursor theme draws it: white alone vanished over a light window.
+    MaterialSymbol {
+        x: arrow.x
+        y: arrow.y
+        text: arrow.text
+        fill: 0
+        iconSize: arrow.iconSize
+        color: Qt.rgba(0, 0, 0, 0.82) // iris-literal: a cursor's rim is black in every theme
+    }
 
     // The corners that do something: a quarter lit, with what resting there does.
     Repeater {
