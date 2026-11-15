@@ -7,7 +7,7 @@ import "../state"
 
 ColumnLayout {
     id: root
-    visible: CornerWatch.phase === "playing" && CornerWatch.controlLinked
+    visible: CornerWatch.controllable
     function options(type: string): var {
         const tracks = CornerWatch.playbackTracks.filter(track => track.type === type).map(track => ({
             value: track.id,
