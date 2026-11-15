@@ -1,6 +1,6 @@
 import QtQuick
 import QtTest
-import "../pages/schedule.js" as Schedule
+import "../state/schedule.js" as Schedule
 
 TestCase {
     name: "Schedule"

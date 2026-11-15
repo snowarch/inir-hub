@@ -8,7 +8,6 @@ import qs.services
 import qs.modules.common
 import "streams.js" as Streams
 import "watch.js" as Watch
-import "http.js" as Http
 import "subtitles.js" as Subtitles
 
 // Watching a title: it asks the person's add-ons, lets them pick, and plays in mpv while the Corner is open.
@@ -135,7 +134,7 @@ Singleton {
                 if (task.kind === "stream") root.sourceResults = Watch.updateSourceResult(root.sourceResults, task.index, error, found?.length ?? 0, retryAfter)
                 if (error && task.kind === "stream") root.error = Translation.tr("Request failed")
                 if (error && task.kind === "subtitles") root._subtitleSearchFailed = true
-                if (error === "busy" && task.kind === "subtitles") root.subtitleError = Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "")
+                if (error === "busy" && task.kind === "subtitles") root.subtitleError = CornerState.limitedText(retryAfter ?? "")
                 else if (!error && task.kind === "stream") root.streams = Watch.insertSourceStreams(root.streams, found, task.index, CornerSources.displayName(task.addon))
                 else if (!error) root.subtitles = root.subtitles.concat(found.map(s => Object.assign({ source: CornerSources.displayName(task.addon) }, s)))
                 if (--root._waiting === 0) root._found()

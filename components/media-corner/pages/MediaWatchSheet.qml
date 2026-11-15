@@ -9,7 +9,6 @@ import "../state"
 import "../state/sources.js" as Sources
 import "../state/watch.js" as Watch
 import "../state/streams.js" as Streams
-import "../state/http.js" as Http
 import "../state/subtitles.js" as Subtitles
 
 // Watch's page, in place of the title: what it found in the person's sources, and how opening mpv is going. As soon as
@@ -182,7 +181,7 @@ MediaPage {
             text: String(modelData.name) + ": " + (modelData.state === "waiting" ? Translation.tr("Looking…")
                 : modelData.state === "unidentified" ? Translation.tr("Could not identify this title for this source")
                 : modelData.state === "unsupported" ? Translation.tr("Not available for this title")
-                : modelData.state === "limited" ? Translation.tr("The provider limited requests; try again later") + (modelData.retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(modelData.retryAfter)) : "")
+                : modelData.state === "limited" ? CornerState.limitedText(modelData.retryAfter ?? "")
                 : modelData.state === "error" ? Translation.tr("Request failed")
                 : Translation.tr("%1 streams").arg(modelData.count))
             textFormat: Text.PlainText

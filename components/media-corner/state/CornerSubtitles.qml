@@ -20,7 +20,7 @@ Singleton {
     property var cache: ({})
     property string cacheKey: ""
     function limitedMessage(retryAfter: string): string {
-        return Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "")
+        return CornerState.limitedText(retryAfter)
     }
     function cancel(): void {
         timeout.stop()

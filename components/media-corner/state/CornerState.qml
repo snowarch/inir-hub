@@ -81,6 +81,17 @@ Singleton {
     property var _out: ({})
     property int _outCount: 0
 
+    // A failure in words, the same everywhere: a limit with its wait, offline, or a source that didn't answer.
+    function limitedText(retryAfter: string): string {
+        return Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "")
+    }
+    function failureText(source: string, error: string, retryAfter: string): string {
+        if (!error) return ""
+        if (error === "busy") return source + ": " + root.limitedText(retryAfter)
+        if (!Network.online && error === "HTTP 0") return Network.offlineReason
+        return Translation.tr("%1 didn't answer (´・ω・`)").arg(source)
+    }
+
     // Detach one caller; abort the request only when nobody else is waiting for it.
     function cancelAsk(callback: var): void {
         if (!callback) return

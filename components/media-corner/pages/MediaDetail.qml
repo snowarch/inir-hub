@@ -36,13 +36,13 @@ MediaPage {
         if (id === undefined) return
         root.failed = ""
         if (root.isAnime)
-            root.anime.detail(Number(id), (result, error) => { if (root.show?.id === id) root.took(result, error, root.anime) })
+            root.anime.detail(Number(id), (result, error, message) => { if (root.show?.id === id) root.took(result, error, message, root.anime) })
         else
-            root.movies.detail(String(root.show?.kind ?? "movie"), String(id), (result, error) => { if (root.show?.id === id) root.took(result, error, root.movies) })
+            root.movies.detail(String(root.show?.kind ?? "movie"), String(id), (result, error, message) => { if (root.show?.id === id) root.took(result, error, message, root.movies) })
     }
-    function took(result: var, error: string, store: var): void {
+    function took(result: var, error: string, message: string, store: var): void {
         if (!error && result) { root.full = result; root.failed = "" }
-        else if (root.full === null) root.failed = error ? store.down : Translation.tr("%1 doesn't know this title").arg(store.sourceName)
+        else if (root.full === null) root.failed = error ? message : Translation.tr("%1 doesn't know this title").arg(store.sourceName)
     }
     function follow(url: string): void {
         Qt.openUrlExternally(url)

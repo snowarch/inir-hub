@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.services
 import "../state"
-import "../state/http.js" as Http
 
 // What the Media Corner asks AniList: pages of shows, the genres and one show in full. Adult titles stay out.
 QtObject {
@@ -10,7 +9,7 @@ QtObject {
     // Which catalogue it is, for the pages that take either.
     readonly property bool anime: true
     readonly property string sourceName: "AniList"
-    // Why its last answer failed, in words; empty while it answers.
+    // Why its last answer failed, in words; empty while it answers. A page reads its own failure from the callback.
     property string down: ""
     readonly property string base: "https://graphql.anilist.co"
     readonly property int perPage: 30
@@ -53,9 +52,10 @@ QtObject {
             return shape(reply?.data)
         }, (value, error, retryAfter) => {
             if (!root) return
-            root.down = !error ? "" : error === "busy" ? root.sourceName + ": " + Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "")
-                : !Network.online && error === "HTTP 0" ? Network.offlineReason : Translation.tr("%1 didn't answer (´・ω・`)").arg(root.sourceName)
-            callback(value, error)
+            // Each caller hears its own failure; `down` only tells how the catalogue answered last.
+            const message = CornerState.failureText(root.sourceName, error, retryAfter ?? "")
+            root.down = message
+            callback(value, error, message)
         })
     }
 
