@@ -2,9 +2,9 @@
   "id": "inircam",
   "kind": "component",
   "name": "InirCam",
-  "summary": "Desktop camera panel with live RTSP/ONVIF feeds, grid/wall/enlarged views, and pinned cameras",
+  "summary": "Live camera panel: RTSP feeds, grid, wall, enlarged views and pins",
   "icon": "videocam",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "provides": "modules/inircam",
   "parts": {
     "panel": "Panel.qml"
