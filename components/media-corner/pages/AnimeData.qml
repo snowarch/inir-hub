@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.services
 import "../state"
+import "../state/http.js" as Http
 
 // What the Media Corner asks AniList: pages of shows, the genres and one show in full. Adult titles stay out.
 QtObject {
@@ -50,9 +51,9 @@ QtObject {
         CornerState.ask(root.base, JSON.stringify({ query, variables }), reply => {
             if (reply?.errors) throw new Error(String(reply.errors[0]?.message))
             return shape(reply?.data)
-        }, (value, error) => {
+        }, (value, error, retryAfter) => {
             if (!root) return
-            root.down = !error ? "" : error === "busy" ? Translation.tr("AniList is busy, try again in a minute")
+            root.down = !error ? "" : error === "busy" ? root.sourceName + ": " + Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "")
                 : !Network.online && error === "HTTP 0" ? Network.offlineReason : Translation.tr("%1 didn't answer (´・ω・`)").arg(root.sourceName)
             callback(value, error)
         })

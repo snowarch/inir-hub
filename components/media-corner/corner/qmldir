@@ -5,3 +5,5 @@ CornerRail 1.0 CornerRail.qml
 CornerOverlay 1.0 CornerOverlay.qml
 CornerSearch 1.0 CornerSearch.qml
 CornerWindow 1.0 CornerWindow.qml
+SavedFilter 1.0 SavedFilter.qml
+SavedSort 1.0 SavedSort.qml

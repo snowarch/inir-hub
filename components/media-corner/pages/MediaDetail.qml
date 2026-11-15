@@ -219,6 +219,20 @@ MediaPage {
         onClicked: CornerWatch.toggleWatchlist(Object.assign({}, root.s, { film: root.film }))
     }
     RowLayout {
+        visible: CornerWatch.seenMarksLoadFailed
+        Layout.fillWidth: true
+        IrisText { Layout.fillWidth: true; text: Translation.tr("Could not load watched marks"); color: IrisStyle.danger; wrapMode: Text.WordWrap }
+        IrisButton { quiet: true; text: Translation.tr("Retry"); onClicked: CornerWatch.retrySeenMarks() }
+    }
+    IrisButton {
+        visible: root.full !== null
+        quiet: true
+        enabled: CornerWatch.seenMarksLoaded
+        readonly property string seenKey: Streams.watchKey(root.s, root.film && root.isAnime ? { episode: 1 } : null)
+        text: CornerWatch.isSeen(seenKey) ? Translation.tr("Mark as unwatched") : Translation.tr("Mark as watched")
+        onClicked: CornerWatch.setSeen(seenKey, !CornerWatch.isSeen(seenKey))
+    }
+    RowLayout {
         Layout.fillWidth: true
         visible: root.full !== null && (root.film || root.playingThis)
         spacing: Math.round(12 * root.d)
@@ -246,6 +260,38 @@ MediaPage {
             text: Translation.tr("Stop")
             onClicked: CornerWatch.stop()
         }
+    }
+
+    RowLayout {
+        Layout.fillWidth: true
+        visible: root.playingThis && CornerWatch.phase === "playing"
+        IrisIconButton {
+            materialIcon: "remove"
+            enabled: CornerWatch.controlLinked
+            Accessible.name: Translation.tr("Show subtitles earlier")
+            onClicked: CornerWatch.control("subtitleEarlier")
+        }
+        IrisText {
+            text: Translation.tr("Subtitle delay: %1 s").arg(CornerWatch.subtitleDelay.toFixed(1))
+            color: IrisStyle.textSecondary
+        }
+        IrisIconButton {
+            materialIcon: "add"
+            enabled: CornerWatch.controlLinked
+            Accessible.name: Translation.tr("Show subtitles later")
+            onClicked: CornerWatch.control("subtitleLater")
+        }
+        IrisIconButton {
+            materialIcon: CornerWatch.fullscreen ? "fullscreen_exit" : "fullscreen"
+            enabled: CornerWatch.controlLinked
+            Accessible.name: CornerWatch.fullscreen ? Translation.tr("Exit fullscreen") : Translation.tr("Fullscreen")
+            onClicked: CornerWatch.control("fullscreen")
+        }
+    }
+
+    PlaybackTracks {
+        Layout.fillWidth: true
+        visible: root.playingThis && CornerWatch.phase === "playing" && CornerWatch.controlLinked
     }
 
     RowLayout {
