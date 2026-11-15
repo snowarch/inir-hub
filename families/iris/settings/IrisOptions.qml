@@ -439,7 +439,7 @@ QtObject {
     }
     // A range reads in its display unit, with as many decimals as its step needs there.
     function rangeText(spec: var, value: var): string {
-        if (spec.zeroLabel && Number(value) === 0) return String(spec.zeroLabel)
+        if (spec.zeroLabel && Number(value) === 0) return Translation.tr(String(spec.zeroLabel))
         const scale = Number(spec.scale ?? 1)
         const shownStep = Math.abs(Number(spec.step ?? 1) * scale)
         const decimals = shownStep > 0 && shownStep < 1 ? Math.min(2, Math.ceil(-Math.log10(shownStep) - 1e-9)) : 0
