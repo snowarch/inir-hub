@@ -60,6 +60,7 @@ MediaPage {
     Timer { id: loadLater; interval: 0; onTriggered: root.load() }
     Connections {
         target: CornerState
+        enabled: root.visible
         function onAttemptChanged(): void { if (root.failed.length > 0) root.load() }
     }
 

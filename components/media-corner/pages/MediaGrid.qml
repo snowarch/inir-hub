@@ -53,6 +53,8 @@ Item {
     Timer { id: moreLater; interval: 0; onTriggered: root.more() }
     Connections {
         target: CornerState
+        // Only a page on screen asks again: hidden ones behind it stay quiet.
+        enabled: root.visible
         function onAttemptChanged(): void {
             if (root.items.length === 0) root.reload()
             else if (root.error.length > 0) root.more()

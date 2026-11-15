@@ -36,6 +36,7 @@ MediaPage {
     Component.onCompleted: { root.askHero(); if (root.prism) root.askFilm() }
     Connections {
         target: CornerState
+        enabled: root.visible
         function onAttemptChanged(): void { root.askHero(); if (root.prism) root.askFilm() }
     }
 
