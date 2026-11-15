@@ -153,7 +153,9 @@ Item {
     // Where a group's head comes to rest: clear of the blurred edge at the top, its eyebrow whole. The page's first
     // group keeps the page's own top over it when both fit.
     function headOf(box: Item): real {
-        const y = box.y + content.y - centreEdge.reach - PrismTheme.dp(6)
+        // Past the stage its strip stands over the page's top: the head rests under it.
+        const clear = stripBar.wanted ? stripBar.y + stripBar.height + PrismTheme.dp(12) : centreEdge.reach + PrismTheme.dp(6)
+        const y = box.y + content.y - clear
         return box.index === 0 && root.partIndex === 0 && y < centre.height * 0.55 ? 0 : y
     }
     function glide(y: real): void {
@@ -519,6 +521,23 @@ Item {
             bottomRightRadius: root.railWidth > 0 ? 0 : body.radius
         }
 
+        // Scrolled past the stage, the page keeps it as a strip: every group one press away, the open one lit.
+        PrismStrip {
+            id: stripBar
+            readonly property bool wanted: stageCard.visible && root.groups.length > 1
+            x: centre.x + content.x
+            y: PrismTheme.dp(12)
+            // It ends before the side column's key, which comes down into its line while it shows.
+            width: (railKey.visible ? railKey.x - PrismTheme.dp(10) : centre.x + content.x + content.width) - x
+            shown: stripBar.wanted && centre.visible && centre.contentY > stageCard.y + stageCard.height - PrismTheme.dp(24)
+            page: root.page
+            groups: root.groups
+            currentGroup: root.bandOf(root.currentGroup)
+            restorable: PrismModel.restorableOf(root.page.pageId)
+            onPickGroup: title => root.showGroup(root.firstOf(title))
+            onRestore: PrismModel.restore(root.page.pageId)
+        }
+
         PrismRail {
             id: rail
             x: Math.round(body.width - rail.width * root.railShown)
@@ -534,9 +553,11 @@ Item {
         // The side column's own key, at the page's top corner where the column begins: it folds it away and brings it
         // back, and stays in reach however far the page is read.
         PrismRound {
+            id: railKey
             visible: root.railFits
             x: Math.round(body.width - root.railWidth - width - PrismTheme.dp(32))
-            y: PrismTheme.dp(18)
+            y: stripBar.shown ? Math.round(stripBar.y + (stripBar.height - height) / 2) : PrismTheme.dp(18)
+            Behavior on y { NumberAnimation { duration: PrismTheme.ms(240); easing.type: IrisStyle.feedbackEasing } }
             z: 5
             glyph: root.railOpen ? "right_panel_close" : "right_panel_open"
             Accessible.role: Accessible.Button

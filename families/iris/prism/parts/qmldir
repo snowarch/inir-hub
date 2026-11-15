@@ -5,6 +5,7 @@ PrismNavItem 1.0 PrismNavItem.qml
 PrismHeading 1.0 PrismHeading.qml
 PrismHero 1.0 PrismHero.qml
 PrismStage 1.0 PrismStage.qml
+PrismStrip 1.0 PrismStrip.qml
 PrismSection 1.0 PrismSection.qml
 PrismRow 1.0 PrismRow.qml
 PrismThumb 1.0 PrismThumb.qml
