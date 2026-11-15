@@ -17,7 +17,7 @@ function qmlFunction(name) {
         end++
     }
     assert.equal(depth, 0, `Unclosed QML function ${name}`)
-    return `root.${name} = function(${match[1].replace(/: (?:string|var|bool)/g, '')}) {${source.slice(start, end - 1)}}`
+    return `root.${name} = function(${match[1].replace(/: (?:string|var|bool|real|int)/g, '')}) {${source.slice(start, end - 1)}}`
 }
 function exitHandler() {
     const process = source.indexOf('        id: mpv\n')
@@ -35,7 +35,7 @@ function exitHandler() {
 }
 function harness() {
     let callback = null, canceled = [], kept = 0, starts = []
-    const root = { _ticket: 0, _watchCalls: [], _stopping: false, _next: null, phase: 'choosing', subtitleChoiceMade: true, progressLoaded: true, selectedSubtitle: null,
+    const root = { duration: 0, _ticket: 0, _watchCalls: [], _stopping: false, _next: null, phase: 'choosing', subtitleChoiceMade: true, progressLoaded: true, selectedSubtitle: null,
         _keep: () => { kept++ }, _start: (stream, resume) => starts.push({ stream, resume }), _ask: () => {} }
     const mpv = { running: false }
     const CornerState = { open: true, sheet: true, options: { subtitleApiKey: '' }, ask: (url, body, shape, done) => { callback = done }, cancelAsk: done => canceled.push(done) }
@@ -43,8 +43,9 @@ function harness() {
     const writes = []
     const controlSocket = { item: { write: data => writes.push(JSON.parse(data)), flush() {} } }
     const context = { root, mpv, mpvCheck: {}, controlSocket, CornerState, CornerSubtitles, CornerSources: { addons: [], subtitles: [] }, Streams: { mediaUrl: value => !!value }, Translation: { tr: value => value } }
+    Object.defineProperty(root, 'controllable', { get: () => Boolean(root.controlLinked) && root.phase === 'playing' && CornerState.open })
     vm.createContext(context)
-    for (const name of ['_cancelWatchCalls', '_watchAsk', 'begin', 'cancel', 'play', 'stop', 'selectTrack']) vm.runInContext(qmlFunction(name), context)
+    for (const name of ['_cancelWatchCalls', '_watchAsk', 'begin', 'cancel', 'play', 'stop', '_send', 'selectTrack', 'setPaused', 'seek']) vm.runInContext(qmlFunction(name), context)
     vm.runInContext(exitHandler(), context)
     return { root, mpv, get callback() { return callback }, get canceled() { return canceled }, get kept() { return kept }, starts, writes }
 }
@@ -134,5 +135,19 @@ const stream = { url: 'fixture-video' }
     assert.equal(h.kept, 1)
     assert.equal(h.root.error, 'mpv stopped with an error. Try another stream')
     assert.equal(h.root.phase, 'choosing')
+}
+{
+    const h = harness()
+    h.root.phase = 'playing'
+    h.root.controlLinked = true
+    h.root.duration = 100
+    h.root.seek(250)
+    h.root.seek(-5)
+    h.root.seek(NaN)
+    h.root.setPaused(true)
+    assert.deepEqual(h.writes.map(item => item.command), [['seek', 100, 'absolute'], ['seek', 0, 'absolute'], ['set_property', 'pause', true]])
+    h.root.phase = 'launching'
+    h.root.seek(10)
+    assert.equal(h.writes.length, 3, 'nothing is sent before mpv plays')
 }
 console.log('Playback lifecycle fixtures passed')
