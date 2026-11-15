@@ -103,7 +103,8 @@ Item {
         rise: root.rise
         tabWidth: Math.min(root.tabNeed, root.tabRoom)
         tint: root.tint
-        seed: root.number * 2.3 + (root.title.length % 7) * 0.9
+        // Its own art: the group's name and place drawn into the seed, so no two folders anywhere share a ribbon.
+        seed: root.number * 2.3 + Array.from(root.title).reduce((n, letter) => (n * 31 + letter.charCodeAt(0)) % 9973, 7) * 0.013
         sayWidth: chipBox.visible ? chipBox.width + PrismTheme.dp(24) : 0
     }
 

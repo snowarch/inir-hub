@@ -1,2 +1,3 @@
 module qs.modules.iris.prism.fx
 PrismFlow 1.0 PrismFlow.qml
+PrismAura 1.0 PrismAura.qml

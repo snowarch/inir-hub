@@ -7,6 +7,7 @@ import qs.modules.iris.components
 import qs.modules.iris.settings
 import qs.modules.iris.style
 import qs.modules.iris.prism.core
+import qs.modules.iris.prism.fx
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 import qs.modules.iris.prism.parts
@@ -164,7 +165,7 @@ Item {
     // group keeps the page's own top over it when both fit.
     function headOf(box: Item): real {
         // Past the stage its strip stands over the page's top: the head rests under it.
-        const clear = stripBar.wanted ? stripBar.y + stripBar.height + PrismTheme.dp(12) : centreEdge.reach + PrismTheme.dp(6)
+        const clear = stripBar.wanted ? stripBar.y + stripBar.height + PrismTheme.dp(12) : PrismTheme.dp(42)
         const y = box.y + content.y - clear
         return box.index === 0 && root.partIndex === 0 && y < centre.height * 0.55 ? 0 : y
     }
@@ -298,6 +299,9 @@ Item {
         radius: root.windowed ? 0 : PrismTheme.dp(28)
         color: PrismTheme.canvas
         clip: true
+
+        // The page's colour in the air of the whole panel, under every column (his 11-15).
+        PrismAura { id: air; anchors.fill: parent; key: String(root.page?.pageId ?? ""); tint: String(root.page?.tint ?? "grey"); radius: body.radius }
 
         PrismSidebar {
             id: sidebar
@@ -519,20 +523,17 @@ Item {
             }
         }
 
-        // Rows leaving the top soften into a blur and fade into the page, and so does the foot while rows wait past it.
-        IrisScrollEdge {
-            id: centreEdge
-            visible: centre.visible
-            flick: centre
-            anchors.fill: centre
-            reach: PrismTheme.dp(36)
-            veil: PrismTheme.canvas
-            // The veil alone: the blurred band read the page into a texture and blurred it on every scrolled frame,
-            // which is what a weak GPU felt as a page scrolling at few frames (11-11).
-            blurs: false
-            // Its ends meet the body's round corners unless the rail stands there.
-            topRightRadius: root.railWidth > 0 ? 0 : body.radius
-            bottomRightRadius: root.railWidth > 0 ? 0 : body.radius
+        // Rows leaving the top or waiting past the foot melt into the air: the same air again over each edge, fading
+        // along it, so no flat band of canvas cuts the colour (nothing rendered offscreen, 11-11).
+        Repeater {
+            model: [1, -1]
+            delegate: PrismAura {
+                required property int modelData
+                x: centre.x; y: modelData > 0 ? 0 : body.height - height; width: centre.width; height: PrismTheme.dp(36)
+                visible: centre.visible && (modelData > 0 ? centre.contentY > 1 : centre.contentY + centre.height < centre.contentHeight - 1)
+                fadeDir: modelData; frameSize: Qt.size(body.width, body.height); origin: Qt.point(x, y)
+                key: air.key; tint: air.tint; radius: body.radius
+            }
         }
 
         // Scrolled past the page's top, the page keeps its groups as a strip: every group one press away, the open one lit.

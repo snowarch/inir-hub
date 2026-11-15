@@ -35,8 +35,9 @@ Item {
         tint: root.tint
         seed: root.seed
         // The ribbon gathers between the step and the words.
-        centre: Qt.point(Math.max(0.15, Math.min(0.7, (root.artWidth - root.sayWidth) / Math.max(1, width) * 0.55)), 0.42)
-        thickness: 0.34
+        centre: Qt.point(Math.max(0.15, Math.min(0.7, (root.artWidth - root.sayWidth) / Math.max(1, width) * 0.55)), 0.46)
+        // Thick enough to read as a diffused field of colour, not a line of neon.
+        thickness: 0.58
         topRightRadius: root.radius
         topLeftRadius: 0
         bottomLeftRadius: 0

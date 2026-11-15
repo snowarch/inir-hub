@@ -362,10 +362,13 @@ Singleton {
     }
     // Which card of a page wears which picture: each picture once, on the first card it belongs to (three cards of
     // one page under the same drawing read as a repeat; the first one's numbers lead to the others).
+    // Previews off leaves only the drawn keyboard, which is a control, not a picture.
     function figuresOf(id: string, titles: var): var {
         const out = ({}), worn = []
+        const pictures = Config.options?.iris?.appearance?.previews !== false
         for (const title of titles) {
-            const figure = root.figureOf(id, title)
+            const found = root.figureOf(id, title)
+            const figure = found && (pictures || found.keys) ? found : null
             const scene = figure ? (figure.keys ? "keys" : SceneMap.sceneFor(figure.section, figure.group)) : ""
             if (!figure || worn.includes(scene)) { out[title] = null; continue }
             worn.push(scene)
