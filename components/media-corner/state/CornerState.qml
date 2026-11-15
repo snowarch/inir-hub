@@ -88,7 +88,7 @@ Singleton {
         const anime = wanted.match(/^anime:(\d+)$/)
         if (title) root.openShow({ id: title[2], kind: title[1] })
         else if (anime) root.openShow({ id: Number(anime[1]), kind: "anime" })
-        else if (/^(home|sources|anime:(popular|airing|trending|top|season|genres|genre:.+)|movie:(movies|series|top|years|genres|genre:.+))$/.test(wanted)) root.pick(wanted)
+        else if (/^(home|sources|history|schedule|anime:(popular|airing|trending|top|season|genres|genre:.+)|movie:(movies|series|top|years|genres|genre:.+))$/.test(wanted)) root.pick(wanted)
     }
 
     // ── Asking the network. An answer is kept ten minutes, one question is out once, and one that never comes back
