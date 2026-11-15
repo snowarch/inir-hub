@@ -157,14 +157,15 @@ Column {
                             Rectangle { width: Math.round(frame.width * 0.7); height: Math.round(4 * root.d); radius: IrisStyle.capsule(height); color: IrisStyle.textTertiary }
                             Rectangle { width: Math.round(frame.width * 0.56); height: Math.round(4 * root.d); radius: IrisStyle.capsule(height); color: IrisStyle.textTertiary }
                         }
-                        // Scanlines: an old screen's lines across the window.
+                        // Scanlines as Umbriel draws them (effects/window/scanlines): one line in three, 15 % darker.
+                        // Faint on purpose: on a dark window they barely show, and the drawing does not promise more.
                         Column {
                             visible: root.worn("window") === "scanlines"
                             anchors.fill: parent
                             spacing: Math.max(2, Math.round(2 * root.d))
                             Repeater {
                                 model: Math.ceil(frame.height / Math.max(3, Math.round(3 * root.d)))
-                                Rectangle { width: frame.width; height: 1; color: "#000000"; opacity: 0.32 } // iris-literal: the scanline's own black
+                                Rectangle { width: frame.width; height: 1; color: "#000000"; opacity: 0.15 } // iris-literal: the scanline's own black
                             }
                         }
                     }

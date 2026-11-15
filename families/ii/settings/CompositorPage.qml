@@ -32,6 +32,19 @@ ContentPage {
     function nearest(list: var, value: real): var {
         return list.find(pick => Math.abs(Number(pick.value) - value) < 0.02)?.value ?? null
     }
+    // A screen's own width wins over Layout's (Umbriel: output over [layout]): Layout names each such screen.
+    readonly property var ownWidths: { CompositorConfig.revision; return CompositorConfig.outputs.filter(entry => Number(entry.new_width ?? 0) >= 0.1) }
+    function widthName(value: real): string {
+        return root.widths.find(pick => Math.abs(Number(pick.value) - value) < 0.02)?.displayName ?? `${Math.round(value * 100)} %`
+    }
+    function followRest(name: string): void {
+        const keep = CompositorConfig.selectedOutput
+        CompositorConfig.applyDisplay("screen", name)
+        CompositorConfig.applyDisplay("new-width", 0)
+        CompositorConfig.applyDisplay("screen", keep)
+    }
+    // Workspaces side by side turn the strip: a new window takes the screen's width and this share of its height.
+    readonly property bool sideways: root.display("workspace-axis") === "horizontal"
 
     Component.onCompleted: CompositorConfig.ensure()
     CompositorRows { id: rows }
@@ -139,8 +152,8 @@ ContentPage {
                 onCheckedChanged: if (loops.checked !== (root.display("cyclic") === true)) CompositorConfig.applyDisplay("cyclic", loops.checked)
             }
             ContentSubsection {
-                title: Translation.tr("New windows open")
-                visible: root.shows("new-width")
+                title: root.sideways ? Translation.tr("How tall new windows open on this screen") : Translation.tr("How wide new windows open on this screen")
+                visible: root.shows("new-width") && root.several
                 ConfigSelectionArray {
                     options: [{ displayName: Translation.tr("Like the rest"), value: 0 }].concat(root.widths)
                     currentValue: root.nearest(root.widths, Number(root.display("new-width")) || 0) ?? 0
@@ -189,6 +202,26 @@ ContentPage {
                     options: root.widths
                     currentValue: { CompositorConfig.revision; return root.nearest(root.widths, Number(CompositorConfig.value({ comp: "layout", key: "new-width", fallback: 0.5 }))) }
                     onSelected: newValue => CompositorConfig.set({ comp: "layout", key: "new-width", fallback: 0.5 }, newValue)
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    visible: root.sideways
+                    wrapMode: Text.WordWrap
+                    color: Appearance.colors.colSubtext
+                    text: Translation.tr("Workspaces sit side by side on %1, so windows there stack top to bottom: this is how tall they open.").arg(CompositorConfig.screenName(root.out))
+                }
+                Repeater {
+                    model: ScriptModel { values: root.ownWidths; objectProp: "name" }
+                    NoticeBox {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        materialIcon: "monitor"
+                        text: Translation.tr("%1 keeps its own: %2. It opens new windows that way whatever you choose here.").arg(CompositorConfig.screenName(modelData)).arg(root.widthName(Number(modelData.new_width)))
+                        RippleButton {
+                            buttonText: Translation.tr("Like the rest")
+                            onClicked: root.followRest(String(modelData.name))
+                        }
+                    }
                 }
             }
             Repeater {
