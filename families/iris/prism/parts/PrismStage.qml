@@ -271,9 +271,10 @@ Item {
                                     font.pixelSize: PrismTheme.small
                                     font.weight: Font.Medium
                                 }
+                                // The value's name goes whole or not at all: cut ("Expandir al pasar el p…") it said less
+                                // than nothing.
                                 PrismText {
-                                    width: Math.max(0, parent.width - said.width - parent.spacing)
-                                    elide: Text.ElideRight
+                                    visible: implicitWidth <= parent.width - said.width - parent.spacing
                                     text: cell.glance.label
                                     color: PrismTheme.ink3
                                     font.pixelSize: PrismTheme.small
