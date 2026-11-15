@@ -6,6 +6,7 @@ import Quickshell
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 
 // One page for every list: a search, Popular, Top rated, a genre, a season or a year. Posters in a grid; the next page
@@ -107,25 +108,10 @@ Item {
                     Accessible.name: Translation.tr("Previous")
                     onClicked: root.step(-1)
                 }
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: root.spec?.title ?? ""
-                        font.family: IrisStyle.fontTitle
-                        font.pixelSize: IrisStyle.typeTitle
-                        font.weight: IrisStyle.weight(Font.Bold)
-                        elide: Text.ElideRight
-                    }
-                    IrisText {
-                        Layout.fillWidth: true
-                        visible: text.length > 0
-                        text: root.spec?.subtitle ?? ""
-                        color: IrisStyle.muted
-                        font.pixelSize: IrisStyle.typeFootnote
-                        elide: Text.ElideRight
-                    }
+                CornerHeading {
+                    page: true
+                    eyebrow: root.spec?.subtitle ?? ""
+                    title: root.spec?.title ?? ""
                 }
                 IrisIconButton {
                     visible: root.spec?.stepper ?? false

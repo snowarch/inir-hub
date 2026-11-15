@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 
 // What the search field finds, on both catalogues at once: anime on AniList, films and series on Cinemeta, a shelf
@@ -20,14 +21,7 @@ MediaPage {
     readonly property string down: Array.from(new Set([animeRow.failed ? root.anime.down : "", filmRow.failed || seriesRow.failed ? root.movies.down : ""])).filter(text => text.length > 0).join("  ·  ")
     onQueryChanged: root.contentY = 0
 
-    IrisText {
-        Layout.fillWidth: true
-        text: Translation.tr("Results for “%1”").arg(root.query)
-        font.family: IrisStyle.fontTitle
-        font.pixelSize: IrisStyle.typeTitle
-        font.weight: IrisStyle.weight(Font.Bold)
-        elide: Text.ElideRight
-    }
+    CornerHeading { page: true; eyebrow: Translation.tr("Search"); title: Translation.tr("Results for “%1”").arg(root.query) }
     MediaRow {
         id: animeRow
         store: root.anime
