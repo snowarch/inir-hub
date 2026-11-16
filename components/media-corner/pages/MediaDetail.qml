@@ -102,7 +102,7 @@ MediaPage {
             id: banner
             width: parent.width
             height: Math.round((root.compact ? 170 : 240) * root.d)
-            radius: IrisStyle.radiusCard
+            radius: CornerSkin.cardRadius
             color: CornerSkin.card
             IrisImage {
                 anchors.fill: parent

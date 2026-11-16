@@ -12,6 +12,8 @@ SourcesCard {
     id: root
     eyebrow: Translation.tr("Appearance")
     title: Translation.tr("Style")
+    glyph: "palette"
+    tint: IrisStyle.identity.purple
     RowLayout {
         Layout.fillWidth: true
         spacing: Math.round(10 * root.d)
@@ -24,12 +26,16 @@ SourcesCard {
         }
         CornerPill {
             label: Translation.tr("Normal")
-            tone: CornerState.options.style === "normal" ? "solid" : "quiet"
+            glyph: "article"
+            // The same choice as the switch over the page: the style in use on a plate, the other bare.
+            tone: CornerState.options.style === "normal" ? (CornerSkin.prism ? "solid" : "quiet") : "bare"
             onClicked: CornerState.set("style", "normal")
         }
         CornerPill {
             label: Translation.tr("Prism")
-            tone: CornerState.options.style === "prism" ? "solid" : "quiet"
+            glyph: "flare"
+            // The same choice as the switch over the page: the style in use on a plate, the other bare.
+            tone: CornerState.options.style === "prism" ? (CornerSkin.prism ? "solid" : "quiet") : "bare"
             onClicked: CornerState.set("style", "prism")
         }
     }

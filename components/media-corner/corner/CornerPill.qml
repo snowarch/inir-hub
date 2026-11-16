@@ -4,17 +4,17 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 
 // A capsule action: `solid` is the main one (white in Prism, the accent in Normal), `quiet` sits on the page, `art`
-// reads over a picture.
+// reads over a picture, `bare` is an option not taken (a segment beside the chosen one).
 IrisButton {
     id: root
     property string glyph: ""
     property string label: ""
     property string tone: "quiet"
     readonly property real d: IrisStyle.density
-    readonly property color ink: root.tone === "solid" ? CornerSkin.inkOnSolid : root.tone === "art" ? IrisStyle.inkOnDark : IrisStyle.text
+    readonly property color ink: root.tone === "solid" ? CornerSkin.inkOnSolid : root.tone === "art" ? IrisStyle.inkOnDark : root.tone === "bare" ? IrisStyle.muted : IrisStyle.text
     foreground: root.ink
-    colBackground: root.tone === "solid" ? CornerSkin.solid : root.tone === "art" ? IrisStyle.veilStrong : CornerSkin.plate
-    colBackgroundHover: root.tone === "solid" ? Qt.tint(CornerSkin.solid, IrisStyle.fillQuiet) : root.tone === "art" ? IrisStyle.veilHeavy : IrisStyle.fillHover
+    colBackground: root.tone === "solid" ? CornerSkin.solid : root.tone === "art" ? IrisStyle.veilStrong : root.tone === "bare" ? "transparent" : CornerSkin.plate
+    colBackgroundHover: root.tone === "solid" ? Qt.tint(CornerSkin.solid, IrisStyle.fillQuiet) : root.tone === "art" ? IrisStyle.veilHeavy : root.tone === "bare" ? IrisStyle.fillQuiet : IrisStyle.fillHover
     buttonRadius: height / 2
     buttonRadiusPressed: height / 2
     implicitHeight: Math.round(36 * root.d)
