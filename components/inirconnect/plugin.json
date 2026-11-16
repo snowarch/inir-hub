@@ -1,0 +1,29 @@
+{
+    "id": "inirconnect",
+    "kind": "component",
+    "name": "iNiRConnect",
+    "summary": "Phone status, wireless pairing, KDE Connect actions and live ADB/scrcpy control",
+    "description": "Manage your Android device from iNiR: live ADB & KDE Connect telemetry (battery, network, signal), wireless pairing, screen mirroring via scrcpy, screenshots, screen recording, wake/unlock, find phone, and file browsing.",
+    "icon": "smartphone",
+    "preview": "preview.webp",
+    "version": "1.0.0",
+    "author": "ltar",
+    "license": "MIT",
+    "minInir": "2.33.0",
+    "provides": "modules/inirconnect",
+    "parts": {
+        "panel": "Panel.qml"
+    },
+    "choices": {
+        "title": "Opciones en la shell",
+        "run": "choices.sh"
+    },
+    "families": [
+        "iris",
+        "ii",
+        "waffle"
+    ],
+    "permissions": [
+        "process"
+    ]
+}

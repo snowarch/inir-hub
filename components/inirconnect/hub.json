@@ -1,0 +1,30 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "changes": {
+        "1.0.0": [
+            "Initial release: live ADB & KDE Connect controls, wireless QR pairing, screen mirror, and morphing layout"
+        ]
+    },
+    "summary": "Phone status, wireless pairing, KDE Connect actions and live ADB/scrcpy control",
+    "description": "Manage your Android device from iNiR: live ADB and KDE Connect telemetry (battery, network, signal), wireless QR pairing, screen mirroring via scrcpy, screenshot, screen recording, unlock, locate phone, and file browsing.",
+    "authors": [
+        "ltar"
+    ],
+    "license": "MIT",
+    "tags": [
+        "android",
+        "phone",
+        "scrcpy",
+        "adb",
+        "kdeconnect",
+        "companion"
+    ],
+    "permissions": [
+        "process",
+        "files"
+    ],
+    "minInir": "2.33.0",
+    "provides": "modules/inirconnect",
+    "preview": "preview.webp"
+}
