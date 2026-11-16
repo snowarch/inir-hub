@@ -227,8 +227,11 @@ AbstractBackgroundWidget {
             color: ColorUtils.applyAlpha(root.widgetInk, 0.62)
         }
     }
+    // A long language shrinks the line a little before it would ever be cut.
     component Detail: StyledText {
         elide: Text.ElideRight
+        fontSizeMode: Text.HorizontalFit
+        minimumPixelSize: root.px(Appearance.font.pixelSize.smaller * 0.8)
         font.pixelSize: root.px(Appearance.font.pixelSize.small)
         color: ColorUtils.applyAlpha(root.widgetInk, 0.58)
     }
