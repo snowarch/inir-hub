@@ -196,8 +196,8 @@ PrismFile {
                                 width: parent.width
                                 text: tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData)
                                 elide: Text.ElideRight
-                                color: tile.legend
-                                opacity: 0.66
+                                // On a lit cap the legend's own ink at caption size; on a quiet one the page's second ink.
+                                color: tile.on ? tile.legend : PrismTheme.ink2
                                 font.pixelSize: PrismTheme.caption
                             }
                         }
