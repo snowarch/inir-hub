@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 个驱动器",
+  "%1 free": "剩余 %1",
+  "1 drive": "1 个驱动器",
+  "Couldn't read the drives: df gave no answer": "无法读取驱动器：df 没有返回结果",
+  "Drives": "驱动器",
+  "Free": "可用",
+  "Free on %1": "%1 可用",
+  "Home": "主目录",
+  "Instrument": "Instrument",
+  "No drive to show": "没有可显示的驱动器",
+  "Reading the drives…": "正在读取驱动器…",
+  "Shape": "形状",
+  "Shape of the icon": "图标形状",
+  "Storage": "存储",
+  "Style": "样式",
+  "System": "系统",
+  "free": "可用",
+  "of %1": "共 %1"
+}

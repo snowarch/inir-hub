@@ -1,0 +1,20 @@
+{
+  "%1 drives": "дисков: %1",
+  "%1 free": "свободно %1",
+  "1 drive": "1 диск",
+  "Couldn't read the drives: df gave no answer": "Не удалось прочитать диски: df не дала ответа",
+  "Drives": "Диски",
+  "Free": "Свободно",
+  "Free on %1": "Свободно на %1",
+  "Home": "Домашний",
+  "Instrument": "Instrument",
+  "No drive to show": "Нет дисков для показа",
+  "Reading the drives…": "Чтение дисков…",
+  "Shape": "Форма",
+  "Shape of the icon": "Форма значка",
+  "Storage": "Хранилище",
+  "Style": "Стиль",
+  "System": "Системный",
+  "free": "свободно",
+  "of %1": "из %1"
+}

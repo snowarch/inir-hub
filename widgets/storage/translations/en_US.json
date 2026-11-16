@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 drives",
+  "%1 free": "%1 free",
+  "1 drive": "1 drive",
+  "Couldn't read the drives: df gave no answer": "Couldn't read the drives: df gave no answer",
+  "Drives": "Drives",
+  "Free": "Free",
+  "Free on %1": "Free on %1",
+  "Home": "Home",
+  "Instrument": "Instrument",
+  "No drive to show": "No drive to show",
+  "Reading the drives…": "Reading the drives…",
+  "Shape": "Shape",
+  "Shape of the icon": "Shape of the icon",
+  "Storage": "Storage",
+  "Style": "Style",
+  "System": "System",
+  "free": "free",
+  "of %1": "of %1"
+}

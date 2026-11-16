@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 sürücü",
+  "%1 free": "%1 boş",
+  "1 drive": "1 sürücü",
+  "Couldn't read the drives: df gave no answer": "Sürücüler okunamadı: df yanıt vermedi",
+  "Drives": "Sürücüler",
+  "Free": "Boş",
+  "Free on %1": "%1 üzerinde boş",
+  "Home": "Ana dizin",
+  "Instrument": "Instrument",
+  "No drive to show": "Gösterilecek sürücü yok",
+  "Reading the drives…": "Sürücüler okunuyor…",
+  "Shape": "Şekil",
+  "Shape of the icon": "Simgenin şekli",
+  "Storage": "Depolama",
+  "Style": "Stil",
+  "System": "Sistem",
+  "free": "boş",
+  "of %1": "toplam %1"
+}

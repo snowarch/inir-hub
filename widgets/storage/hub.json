@@ -1,0 +1,20 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "What is left on every drive, and the one about to fill first",
+    "description": "Every mounted drive with what is left on it and a bar of what it holds, named by its label (System and Home when it has none). A drive past nine tenths turns to the warning colour and the card leads with it. Reads df once a minute, only while the card is seen.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "MIT",
+    "tags": [
+        "storage",
+        "disk",
+        "system"
+    ],
+    "permissions": [
+        "process"
+    ],
+    "minInir": "3.1.0",
+    "preview": "preview.webp"
+}

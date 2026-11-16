@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 ổ đĩa",
+  "%1 free": "Còn trống %1",
+  "1 drive": "1 ổ đĩa",
+  "Couldn't read the drives: df gave no answer": "Không đọc được ổ đĩa: df không trả về kết quả",
+  "Drives": "Ổ đĩa",
+  "Free": "Còn trống",
+  "Free on %1": "Còn trống trên %1",
+  "Home": "Thư mục nhà",
+  "Instrument": "Instrument",
+  "No drive to show": "Không có ổ đĩa để hiển thị",
+  "Reading the drives…": "Đang đọc ổ đĩa…",
+  "Shape": "Hình dạng",
+  "Shape of the icon": "Hình dạng biểu tượng",
+  "Storage": "Bộ nhớ",
+  "Style": "Kiểu",
+  "System": "Hệ thống",
+  "free": "còn trống",
+  "of %1": "trên tổng %1"
+}

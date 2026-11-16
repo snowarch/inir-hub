@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 unidades",
+  "%1 free": "%1 libres",
+  "1 drive": "1 unidad",
+  "Couldn't read the drives: df gave no answer": "No se pudieron leer las unidades: df no dio respuesta",
+  "Drives": "Unidades",
+  "Free": "Libre",
+  "Free on %1": "Libre en %1",
+  "Home": "Inicio",
+  "Instrument": "Instrument",
+  "No drive to show": "No hay unidades para mostrar",
+  "Reading the drives…": "Leyendo las unidades…",
+  "Shape": "Forma",
+  "Shape of the icon": "Forma del icono",
+  "Storage": "Almacenamiento",
+  "Style": "Estilo",
+  "System": "Sistema",
+  "free": "libre",
+  "of %1": "de %1"
+}

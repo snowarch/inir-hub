@@ -1,0 +1,39 @@
+{
+    "name": "Storage",
+    "icon": "hard_drive",
+    "version": "1.0.0",
+    "author": "snowarch",
+    "description": "Every drive this computer has mounted: what is left on each and a bar of what it holds. A drive past nine tenths turns to the warning colour, and the card leads with it. Under iRiS it wears the iRiS, Prism or Material design.",
+    "category": "system",
+    "main": "Storage.qml",
+    "iris": {
+        "desktop": {
+            "iris": "IrisStorage.qml",
+            "prism": "PrismStorage.qml"
+        }
+    },
+    "sizes": [
+        "medium",
+        "small",
+        "large"
+    ],
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "showBackground": true,
+        "backgroundOpacity": 0.16,
+        "borderWidth": 1,
+        "borderOpacity": 0.2,
+        "cornerRadius": -1,
+        "useBlur": false,
+        "x": 240,
+        "y": 240,
+        "style": "shape",
+        "shape": "Cookie4Sided"
+    },
+    "configKeys": {},
+    "options": []
+}

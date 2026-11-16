@@ -1,0 +1,20 @@
+{
+  "%1 drives": "드라이브 %1개",
+  "%1 free": "%1 남음",
+  "1 drive": "드라이브 1개",
+  "Couldn't read the drives: df gave no answer": "드라이브를 읽을 수 없습니다: df가 응답하지 않았습니다",
+  "Drives": "드라이브",
+  "Free": "남은 공간",
+  "Free on %1": "%1의 남은 공간",
+  "Home": "홈",
+  "Instrument": "Instrument",
+  "No drive to show": "표시할 드라이브가 없습니다",
+  "Reading the drives…": "드라이브를 읽는 중…",
+  "Shape": "모양",
+  "Shape of the icon": "아이콘 모양",
+  "Storage": "저장공간",
+  "Style": "스타일",
+  "System": "시스템",
+  "free": "남음",
+  "of %1": "총 %1"
+}

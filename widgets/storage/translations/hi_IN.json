@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 ड्राइव",
+  "%1 free": "%1 खाली",
+  "1 drive": "1 ड्राइव",
+  "Couldn't read the drives: df gave no answer": "ड्राइव पढ़ी नहीं जा सकीं: df से कोई जवाब नहीं मिला",
+  "Drives": "ड्राइव",
+  "Free": "खाली",
+  "Free on %1": "%1 पर खाली",
+  "Home": "होम",
+  "Instrument": "Instrument",
+  "No drive to show": "दिखाने के लिए कोई ड्राइव नहीं",
+  "Reading the drives…": "ड्राइव पढ़ी जा रही हैं…",
+  "Shape": "आकार",
+  "Shape of the icon": "आइकन का आकार",
+  "Storage": "स्टोरेज",
+  "Style": "शैली",
+  "System": "सिस्टम",
+  "free": "खाली",
+  "of %1": "कुल %1"
+}

@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 כוננים",
+  "%1 free": "%1 פנויים",
+  "1 drive": "כונן אחד",
+  "Couldn't read the drives: df gave no answer": "לא ניתן לקרוא את הכוננים: df לא החזירה תשובה",
+  "Drives": "כוננים",
+  "Free": "פנוי",
+  "Free on %1": "פנוי ב-%1",
+  "Home": "תיקיית הבית",
+  "Instrument": "Instrument",
+  "No drive to show": "אין כונן להצגה",
+  "Reading the drives…": "קורא את הכוננים…",
+  "Shape": "צורה",
+  "Shape of the icon": "צורת הסמל",
+  "Storage": "אחסון",
+  "Style": "סגנון",
+  "System": "מערכת",
+  "free": "פנוי",
+  "of %1": "מתוך %1"
+}

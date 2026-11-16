@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 Laufwerke",
+  "%1 free": "%1 frei",
+  "1 drive": "1 Laufwerk",
+  "Couldn't read the drives: df gave no answer": "Laufwerke konnten nicht gelesen werden: df hat keine Antwort geliefert",
+  "Drives": "Laufwerke",
+  "Free": "Frei",
+  "Free on %1": "Frei auf %1",
+  "Home": "Home",
+  "Instrument": "Instrument",
+  "No drive to show": "Kein Laufwerk zum Anzeigen",
+  "Reading the drives…": "Laufwerke werden gelesen…",
+  "Shape": "Form",
+  "Shape of the icon": "Form des Symbols",
+  "Storage": "Speicher",
+  "Style": "Stil",
+  "System": "System",
+  "free": "frei",
+  "of %1": "von %1"
+}

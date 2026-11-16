@@ -1,0 +1,13 @@
+{
+	"id": "storage",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/storage/",
+	"order": 25,
+	"groups": [
+		{
+			"label": "Widgets",
+			"pages": [
+				"STORAGE"
+			]
+		}
+	]
+}

@@ -1,0 +1,20 @@
+{
+  "%1 drives": "%1 drive",
+  "%1 free": "%1 kosong",
+  "1 drive": "1 drive",
+  "Couldn't read the drives: df gave no answer": "Tidak dapat membaca drive: df tidak memberi jawaban",
+  "Drives": "Drive",
+  "Free": "Kosong",
+  "Free on %1": "Kosong di %1",
+  "Home": "Home",
+  "Instrument": "Instrument",
+  "No drive to show": "Tidak ada drive untuk ditampilkan",
+  "Reading the drives…": "Membaca drive…",
+  "Shape": "Bentuk",
+  "Shape of the icon": "Bentuk ikon",
+  "Storage": "Penyimpanan",
+  "Style": "Gaya",
+  "System": "Sistem",
+  "free": "kosong",
+  "of %1": "dari %1"
+}

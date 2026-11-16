@@ -1,0 +1,20 @@
+{
+  "%1 drives": "ドライブ %1 台",
+  "%1 free": "空き %1",
+  "1 drive": "ドライブ 1 台",
+  "Couldn't read the drives: df gave no answer": "ドライブを読み取れません: df が応答しませんでした",
+  "Drives": "ドライブ",
+  "Free": "空き",
+  "Free on %1": "%1 の空き容量",
+  "Home": "ホーム",
+  "Instrument": "Instrument",
+  "No drive to show": "表示するドライブがありません",
+  "Reading the drives…": "ドライブを読み取っています…",
+  "Shape": "形",
+  "Shape of the icon": "アイコンの形",
+  "Storage": "ストレージ",
+  "Style": "スタイル",
+  "System": "システム",
+  "free": "空き",
+  "of %1": "全 %1"
+}
