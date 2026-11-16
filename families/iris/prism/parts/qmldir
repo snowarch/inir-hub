@@ -28,3 +28,4 @@ PrismHubSources 1.0 PrismHubSources.qml
 PrismHubKey 1.0 PrismHubKey.qml
 PrismHubReact 1.0 PrismHubReact.qml
 PrismHubItem 1.0 PrismHubItem.qml
+PrismHostedPage 1.0 PrismHostedPage.qml

@@ -324,8 +324,7 @@ Item {
             onSearchEntered: root.takeFirstHit()
         }
 
-        // Over the compositor's blur nothing can be drawn again above the strip, so the rows stop at its middle there
-        // (a scissor, no layer): sharp text never scrolls in the air over it. The page itself keeps its place.
+        // Over the compositor's blur the rows stop at the strip's middle (a scissor): none scrolls sharp in the air above it.
         Item {
             id: scroller
             readonly property real cut: stripBar.shown && PrismTheme.glassBlur ? stripBar.y + stripBar.height / 2 : 0
@@ -517,48 +516,18 @@ Item {
             }
         }
 
-        // A page iRiS draws itself: Prism gives it the title and the room; the view scrolls on its own.
-        Item {
-            id: hostedBox
+        // A page iRiS draws itself: Prism gives it the title and the room.
+        PrismHostedPage {
             visible: root.hosted
             anchors.left: sidebar.right
             anchors.right: parent.right
             anchors.rightMargin: root.railWidth
             height: parent.height
-            PrismPoster {
-                id: hostedTop
-                x: PrismTheme.dp(32)
-                width: parent.width - PrismTheme.dp(64)
-                art: false
-                pills: false
-                page: root.page
-                eyebrow: root.topEyebrow
-                title: root.topTitle
-                keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
-            }
-            // iRiS's own pages keep 16 dp of air each side: given 16 more, their column stands on Prism's.
-            Loader {
-                id: hostedView
-                // Not named "air": the panel's PrismAura holds that id, and an id wins over a property (the page was 0 wide).
-                readonly property real inset: String(root.page.view ?? "").includes("/prism/parts/") ? 0 : PrismTheme.dp(16)
-                x: inset
-                y: hostedTop.height
-                width: parent.width - inset * 2
-                height: parent.height - hostedTop.height
-                active: root.hosted
-                source: root.hosted ? root.page.view : ""
-                // iRiS's own pages print their marks as Prism's covers, so a hosted list reads as the rail does.
-                onLoaded: if (item && ("markDelegate" in item)) item.markDelegate = hostedMark
-                Component {
-                    id: hostedMark
-                    PrismThumb {
-                        size: PrismTheme.dp(28)
-                        glyph: String(parent?.glyph ?? "circle")
-                        salt: String(parent?.name ?? "")
-                        tint: String(root.page?.tint ?? "grey")
-                    }
-                }
-            }
+            hosted: root.hosted
+            page: root.page
+            eyebrow: root.topEyebrow
+            title: root.topTitle
+            keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
         }
 
         // Rows leaving the top or past the foot melt into the air drawn again over each edge (nothing offscreen, 11-11).
