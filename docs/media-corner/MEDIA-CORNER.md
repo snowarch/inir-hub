@@ -22,8 +22,8 @@ Media Corner is based on iRiS's Settings window, in the layout of the same name:
 Classic and Folio share the page: the trending shows on one card, Every day's tiles, Yours and the Library rows.
 Prism has its own: a hero, a deck of two cards and the places of every day.
 
-Switch between them with the switch at the top (Classic and Folio), in **Sources › Appearance**, or in Community
-Hub. You keep your place, the open title and what is playing.
+Switch between them with the switch at the top right (Classic and Folio show it), in **Sources › Appearance**
+(every style), or in Community Hub. You keep your place, the open title and what is playing.
 
 ## Pages
 
