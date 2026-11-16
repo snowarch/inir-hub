@@ -65,6 +65,13 @@ that is wrong, as in `gitlab:code.example.org/you`.
 | Month | This calendar month as a sheet, each day shaded by what it holds, today outlined |
 | Today | Today's count in a Material shape, beside the week so far, the streak and the busiest day |
 
+| | |
+| --- | --- |
+| ![Squares](../../docs/dev-stats/shots/look-grid.webp) | ![Instrument](../../docs/dev-stats/shots/look-instrument.webp) |
+| ![Bars](../../docs/dev-stats/shots/look-weeks.webp) | ![Month](../../docs/dev-stats/shots/look-month.webp) |
+
+![Today](../../docs/dev-stats/shots/look-today.webp)
+
 The person's global widget design wins over the setting: with iNstrument or Readout chosen for the desktop, every
 face draws the Instrument look.
 
