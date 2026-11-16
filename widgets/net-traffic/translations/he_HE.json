@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "%1 נכנסו בדקה זו",
+  "%1 in, %2 out this minute": "%1 נכנסו, %2 יצאו בדקה זו",
+  "Bits match how an internet plan is sold": "ביטים תואמים לאופן שבו נמכרות חבילות אינטרנט",
+  "Ethernet": "Ethernet",
+  "In": "נכנס",
+  "Instrument": "מד",
+  "Measuring…": "מודד…",
+  "Minute": "דקה",
+  "Mobile": "סלולרי",
+  "Network": "רשת",
+  "No connection. Traffic shows here once you connect": "אין חיבור. התעבורה תופיע כאן ברגע שתתחבר",
+  "Out": "יוצא",
+  "Peak": "שיא",
+  "Peak %1": "שיא %1",
+  "Shape": "צורה",
+  "Shape of the link": "צורת הקישור",
+  "Speeds in": "מהירויות ביחידות",
+  "Style": "סגנון",
+  "This minute": "הדקה הזו",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

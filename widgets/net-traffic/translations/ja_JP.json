@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "この1分で %1",
+  "%1 in, %2 out this minute": "この1分で受信 %1、送信 %2",
+  "Bits match how an internet plan is sold": "ビットはインターネット回線の販売表記と同じ単位です",
+  "Ethernet": "イーサネット",
+  "In": "受信",
+  "Instrument": "計器",
+  "Measuring…": "計測中…",
+  "Minute": "1分間",
+  "Mobile": "モバイル",
+  "Network": "ネットワーク",
+  "No connection. Traffic shows here once you connect": "接続されていません。接続すると通信量がここに表示されます",
+  "Out": "送信",
+  "Peak": "ピーク",
+  "Peak %1": "ピーク %1",
+  "Shape": "形",
+  "Shape of the link": "リンクの形",
+  "Speeds in": "速度の単位",
+  "Style": "スタイル",
+  "This minute": "この1分",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "tamanna minuttini %1",
+  "%1 in, %2 out this minute": "tamanna minuttini %1 akuerineqarpoq, %2 tikkuutigineqarpoq",
+  "Bits match how an internet plan is sold": "Bitit internetip akileraarutaasa tunineqarnerannut assingusarput",
+  "Ethernet": "Ethernet",
+  "In": "Akuerineqarpoq",
+  "Instrument": "Instrumentit",
+  "Measuring…": "Missingersuutigineqarpoq…",
+  "Minute": "Minutsi",
+  "Mobile": "Mobil",
+  "Network": "Network",
+  "No connection. Traffic shows here once you connect": "Attaveqarneq ilaanngilaq. Attaveqarfiginerit kingorna tikkuaatit tamanna takuneqarsinnaapput",
+  "Out": "Tikkuutigineqarpoq",
+  "Peak": "Qaffasinnerpaaq",
+  "Peak %1": "Qaffasinnerpaaq %1",
+  "Shape": "Imaqa",
+  "Shape of the link": "Attaveqarfiup imaqa",
+  "Speeds in": "Saneqqat tassaniilluni",
+  "Style": "Ilusilersuineq",
+  "This minute": "Tamanna minuttini",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

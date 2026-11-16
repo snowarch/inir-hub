@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "%1 in dieser Minute",
+  "%1 in, %2 out this minute": "%1 empfangen, %2 gesendet in dieser Minute",
+  "Bits match how an internet plan is sold": "Bits entsprechen der Angabe bei Internettarifen",
+  "Ethernet": "Ethernet",
+  "In": "Eingang",
+  "Instrument": "Instrument",
+  "Measuring…": "Messung läuft…",
+  "Minute": "Minute",
+  "Mobile": "Mobil",
+  "Network": "Netzwerk",
+  "No connection. Traffic shows here once you connect": "Keine Verbindung. Der Datenverkehr erscheint hier, sobald du dich verbindest",
+  "Out": "Ausgang",
+  "Peak": "Spitze",
+  "Peak %1": "Spitze %1",
+  "Shape": "Form",
+  "Shape of the link": "Form der Verbindung",
+  "Speeds in": "Geschwindigkeit in",
+  "Style": "Stil",
+  "This minute": "Diese Minute",
+  "VPN": "VPN",
+  "Wi-Fi": "WLAN"
+}

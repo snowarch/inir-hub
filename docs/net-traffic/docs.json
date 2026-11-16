@@ -1,0 +1,13 @@
+{
+	"id": "net-traffic",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/net-traffic/",
+	"order": 24,
+	"groups": [
+		{
+			"label": "Widgets",
+			"pages": [
+				"NETWORK"
+			]
+		}
+	]
+}

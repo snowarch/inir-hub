@@ -1,0 +1,55 @@
+{
+    "name": "Network",
+    "icon": "swap_vert",
+    "version": "1.0.0",
+    "author": "snowarch",
+    "description": "What comes in and goes out of your connection, second by second, and its last minute as a horizon: in above the line, out below it, on one scale. Names the link (Wi-Fi, Ethernet, VPN). Under iRiS it wears the iRiS, Prism or Material design.",
+    "category": "system",
+    "main": "Traffic.qml",
+    "iris": {
+        "desktop": {
+            "iris": "IrisTraffic.qml",
+            "prism": "PrismTraffic.qml"
+        }
+    },
+    "sizes": [
+        "medium",
+        "small",
+        "large"
+    ],
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "showBackground": true,
+        "backgroundOpacity": 0.16,
+        "borderWidth": 1,
+        "borderOpacity": 0.2,
+        "cornerRadius": -1,
+        "useBlur": false,
+        "x": 240,
+        "y": 240,
+        "style": "shape",
+        "shape": "Cookie9Sided",
+        "unit": "bytes"
+    },
+    "configKeys": {
+        "unit": {
+            "type": "string",
+            "default": "bytes",
+            "label": "Speeds in bytes (bytes) or bits (bits)"
+        }
+    },
+    "options": [
+        {
+            "key": "unit",
+            "label": "Speeds in",
+            "description": "Bits match how an internet plan is sold",
+            "type": "choice",
+            "default": "bytes",
+            "choices": [["bytes", "MB/s"], ["bits", "Mb/s"]]
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "इस मिनट में %1",
+  "%1 in, %2 out this minute": "इस मिनट में %1 प्राप्त, %2 भेजा गया",
+  "Bits match how an internet plan is sold": "बिट्स वैसे ही हैं जैसे इंटरनेट प्लान बेचे जाते हैं",
+  "Ethernet": "ईथरनेट",
+  "In": "प्राप्त",
+  "Instrument": "उपकरण",
+  "Measuring…": "माप रहे हैं…",
+  "Minute": "मिनट",
+  "Mobile": "मोबाइल",
+  "Network": "नेटवर्क",
+  "No connection. Traffic shows here once you connect": "कोई कनेक्शन नहीं। कनेक्ट होते ही ट्रैफ़िक यहाँ दिखेगा",
+  "Out": "भेजा",
+  "Peak": "शिखर",
+  "Peak %1": "शिखर %1",
+  "Shape": "आकार",
+  "Shape of the link": "लिंक का आकार",
+  "Speeds in": "गति इकाई",
+  "Style": "शैली",
+  "This minute": "यह मिनट",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

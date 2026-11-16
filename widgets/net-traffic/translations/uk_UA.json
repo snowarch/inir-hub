@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "%1 за цю хвилину",
+  "%1 in, %2 out this minute": "%1 отримано, %2 надіслано за цю хвилину",
+  "Bits match how an internet plan is sold": "Біти, як у тарифах інтернет-провайдерів",
+  "Ethernet": "Ethernet",
+  "In": "Отримано",
+  "Instrument": "Прилад",
+  "Measuring…": "Вимірювання…",
+  "Minute": "Хвилина",
+  "Mobile": "Мобільний",
+  "Network": "Мережа",
+  "No connection. Traffic shows here once you connect": "Немає з’єднання. Трафік з’явиться тут, щойно ви під’єднаєтеся",
+  "Out": "Надіслано",
+  "Peak": "Пік",
+  "Peak %1": "Пік %1",
+  "Shape": "Форма",
+  "Shape of the link": "Форма з’єднання",
+  "Speeds in": "Швидкість у",
+  "Style": "Стиль",
+  "This minute": "Ця хвилина",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "이번 1분간 %1 수신",
+  "%1 in, %2 out this minute": "이번 1분간 수신 %1, 송신 %2",
+  "Bits match how an internet plan is sold": "인터넷 요금제가 판매되는 방식과 같은 비트 단위입니다",
+  "Ethernet": "이더넷",
+  "In": "수신",
+  "Instrument": "계기판",
+  "Measuring…": "측정 중…",
+  "Minute": "1분",
+  "Mobile": "모바일",
+  "Network": "네트워크",
+  "No connection. Traffic shows here once you connect": "연결되지 않았습니다. 연결하면 트래픽이 여기에 표시됩니다",
+  "Out": "송신",
+  "Peak": "최고",
+  "Peak %1": "최고 %1",
+  "Shape": "모양",
+  "Shape of the link": "연결 모양",
+  "Speeds in": "속도 단위",
+  "Style": "스타일",
+  "This minute": "이번 1분",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "%1 خلال هذه الدقيقة",
+  "%1 in, %2 out this minute": "%1 وارد، %2 صادر خلال هذه الدقيقة",
+  "Bits match how an internet plan is sold": "البت يطابق طريقة بيع باقات الإنترنت",
+  "Ethernet": "إيثرنت",
+  "In": "وارد",
+  "Instrument": "أداة قياس",
+  "Measuring…": "جارٍ القياس…",
+  "Minute": "الدقيقة",
+  "Mobile": "الجوال",
+  "Network": "الشبكة",
+  "No connection. Traffic shows here once you connect": "لا يوجد اتصال. تظهر الحركة هنا بعد الاتصال",
+  "Out": "صادر",
+  "Peak": "الذروة",
+  "Peak %1": "الذروة %1",
+  "Shape": "شكل",
+  "Shape of the link": "شكل الرابط",
+  "Speeds in": "السرعات بوحدة",
+  "Style": "النمط",
+  "This minute": "هذه الدقيقة",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

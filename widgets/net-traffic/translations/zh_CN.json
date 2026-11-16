@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "本分钟接收 %1",
+  "%1 in, %2 out this minute": "本分钟接收 %1，发送 %2",
+  "Bits match how an internet plan is sold": "比特单位与网络套餐的标称方式一致",
+  "Ethernet": "以太网",
+  "In": "接收",
+  "Instrument": "仪表",
+  "Measuring…": "测量中…",
+  "Minute": "本分钟",
+  "Mobile": "移动网络",
+  "Network": "网络",
+  "No connection. Traffic shows here once you connect": "未连接。连接后流量会显示在这里",
+  "Out": "发送",
+  "Peak": "峰值",
+  "Peak %1": "峰值 %1",
+  "Shape": "形状",
+  "Shape of the link": "连接形状",
+  "Speeds in": "速率单位",
+  "Style": "样式",
+  "This minute": "本分钟",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

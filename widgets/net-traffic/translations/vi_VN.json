@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "%1 trong phút này",
+  "%1 in, %2 out this minute": "Nhận %1, gửi %2 trong phút này",
+  "Bits match how an internet plan is sold": "Bit khớp với cách các gói internet được bán",
+  "Ethernet": "Ethernet",
+  "In": "Nhận",
+  "Instrument": "Đồng hồ đo",
+  "Measuring…": "Đang đo…",
+  "Minute": "Phút",
+  "Mobile": "Di động",
+  "Network": "Mạng",
+  "No connection. Traffic shows here once you connect": "Chưa kết nối. Lưu lượng sẽ hiển thị ở đây khi bạn kết nối",
+  "Out": "Gửi",
+  "Peak": "Cao nhất",
+  "Peak %1": "Cao nhất %1",
+  "Shape": "Hình dạng",
+  "Shape of the link": "Hình dạng liên kết",
+  "Speeds in": "Tốc độ theo",
+  "Style": "Kiểu",
+  "This minute": "Phút này",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

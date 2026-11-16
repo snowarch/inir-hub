@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "Bu dakikada %1 gelen",
+  "%1 in, %2 out this minute": "Bu dakikada %1 gelen, %2 giden",
+  "Bits match how an internet plan is sold": "Bit, internet paketlerinin satış biçimiyle aynıdır",
+  "Ethernet": "Ethernet",
+  "In": "Gelen",
+  "Instrument": "Gösterge",
+  "Measuring…": "Ölçülüyor…",
+  "Minute": "Dakika",
+  "Mobile": "Mobil",
+  "Network": "Ağ",
+  "No connection. Traffic shows here once you connect": "Bağlantı yok. Bağlandığınızda trafik burada görünür",
+  "Out": "Giden",
+  "Peak": "Zirve",
+  "Peak %1": "Zirve %1",
+  "Shape": "Şekil",
+  "Shape of the link": "Bağlantının şekli",
+  "Speeds in": "Hızlar birimi",
+  "Style": "Stil",
+  "This minute": "Bu dakika",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

@@ -1,0 +1,23 @@
+{
+  "%1 in this minute": "%1 за эту минуту",
+  "%1 in, %2 out this minute": "%1 принято, %2 отправлено за эту минуту",
+  "Bits match how an internet plan is sold": "Биты, как в тарифах интернет-провайдеров",
+  "Ethernet": "Ethernet",
+  "In": "Приём",
+  "Instrument": "Прибор",
+  "Measuring…": "Измерение…",
+  "Minute": "Минута",
+  "Mobile": "Мобильная",
+  "Network": "Сеть",
+  "No connection. Traffic shows here once you connect": "Нет подключения. Трафик появится здесь, когда вы подключитесь",
+  "Out": "Отправка",
+  "Peak": "Пик",
+  "Peak %1": "Пик %1",
+  "Shape": "Форма",
+  "Shape of the link": "Форма соединения",
+  "Speeds in": "Скорость в",
+  "Style": "Стиль",
+  "This minute": "Эта минута",
+  "VPN": "VPN",
+  "Wi-Fi": "Wi-Fi"
+}

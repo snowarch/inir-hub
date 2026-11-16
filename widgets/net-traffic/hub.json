@@ -1,0 +1,21 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Your connection's traffic in and out, live, with its last minute drawn",
+    "description": "The rate coming in leads, what goes out follows, and the last minute is a horizon: in above the line, out below it, on one scale so they compare. Names the link the traffic takes (Wi-Fi, Ethernet, VPN), with the minute's peak and what it moved. Reads the kernel's counters once a second, only while it is on screen.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "MIT",
+    "tags": [
+        "network",
+        "traffic",
+        "speed",
+        "system"
+    ],
+    "permissions": [
+        "files"
+    ],
+    "minInir": "3.1.0",
+    "preview": "preview.webp"
+}
