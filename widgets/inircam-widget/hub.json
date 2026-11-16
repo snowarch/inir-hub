@@ -1,10 +1,14 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "changes": {
         "1.0.0": [
             "Your cameras on the desktop, in the colours of the wallpaper behind them",
             "Installed with the camera panel, which owns the cameras and the frames"
+        ],
+        "1.0.1": [
+            "A refresh button in the header, and Try again when the panel is not answering",
+            "The gear opens the panel's manage view, and a button that cannot be delivered says so"
         ]
     },
     "summary": "The camera panel's cameras, as a grid on the desktop",

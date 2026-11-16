@@ -59,6 +59,7 @@ AbstractBackgroundWidget {
     property var cameras: []
     property bool ready: false
     property bool answered: false
+    property bool refreshing: false
     property int frameTick: 0
 
     readonly property int pad: Math.round(12 * root.scaleFactor)
@@ -76,9 +77,13 @@ AbstractBackgroundWidget {
     Process {
         id: teller
         running: false
+        // A button the person pressed: if it cannot be delivered, the card says so.
+        property bool reporting: false
+        onExited: (code) => { if (code !== 0 && teller.reporting) root.panelSilent() }
     }
 
-    function tell(verb, args) {
+    function tell(verb, args, report) {
+        teller.reporting = report === true
         teller.command = ["inir", "inircam", verb].concat(args ?? [])
         teller.running = false
         teller.running = true
@@ -97,6 +102,7 @@ AbstractBackgroundWidget {
     }
 
     function refresh() {
+        root.refreshing = true
         listCall.command = ["inir", "inircam", "cameras"]
         listCall.running = false
         listCall.running = true
@@ -126,6 +132,7 @@ AbstractBackgroundWidget {
         }
         root.cameras = out
         root.answered = true
+        root.refreshing = false
         root.ready = true
     }
 
@@ -134,6 +141,7 @@ AbstractBackgroundWidget {
     function panelSilent() {
         root.cameras = []
         root.answered = false
+        root.refreshing = false
         root.ready = true
     }
 
@@ -185,8 +193,8 @@ AbstractBackgroundWidget {
 
     function openCamera(cameraId) {
         if (root.clickAction === "none") return
-        if (root.clickAction === "toggle") return root.tell("toggle", [])
-        root.tell("pin", [cameraId])
+        if (root.clickAction === "toggle") return root.tell("toggle", [], true)
+        root.tell("pin", [cameraId], true)
     }
 
     // ── Look ─────────────────────────────────────────────────
@@ -202,14 +210,15 @@ AbstractBackgroundWidget {
         anchors.fill: parent
         anchors.margins: root.pad
 
-        // The name, how many, and the way into the panel.
-        Row {
+        // The name, how many, a way to ask again, and the way into the panel.
+        Item {
             id: header
             width: parent.width
             height: root.headerHeight
-            spacing: Math.round(6 * root.scaleFactor)
 
             MaterialSymbol {
+                id: headerIcon
+                anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 text: "videocam"
                 iconSize: Math.round(16 * root.scaleFactor)
@@ -217,8 +226,11 @@ AbstractBackgroundWidget {
             }
 
             StyledText {
+                anchors.left: headerIcon.right
+                anchors.leftMargin: Math.round(6 * root.scaleFactor)
+                anchors.right: actions.left
+                anchors.rightMargin: Math.round(6 * root.scaleFactor)
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - Math.round(60 * root.scaleFactor)
                 text: Translation.tr("Cameras")
                 color: root.widgetInk
                 font.pixelSize: Math.round(Appearance.font.pixelSize.small * root.scaleFactor)
@@ -226,24 +238,46 @@ AbstractBackgroundWidget {
                 elide: Text.ElideRight
             }
 
-            StyledText {
+            Row {
+                id: actions
+                anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                visible: root.showCount && root.cameras.length > 0
-                text: String(root.cameras.length)
-                color: root.widgetInkMuted
-                font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
-            }
+                spacing: Math.round(8 * root.scaleFactor)
 
-            MaterialSymbol {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "tune"
-                iconSize: Math.round(14 * root.scaleFactor)
-                color: root.widgetInkMuted
-                MouseArea {
-                    anchors.fill: parent
-                    anchors.margins: -4
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.tell("manage", [])
+                StyledText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.showCount && root.cameras.length > 0
+                    text: String(root.cameras.length)
+                    color: root.widgetInkMuted
+                    font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
+                }
+
+                // Ask the panel again right now, instead of waiting for the next refresh.
+                MaterialSymbol {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "refresh"
+                    iconSize: Math.round(14 * root.scaleFactor)
+                    color: root.refreshing ? root.widgetInk : root.widgetInkMuted
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.refresh()
+                    }
+                }
+
+                // The panel's own manage view: the same place its gear goes.
+                MaterialSymbol {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "tune"
+                    iconSize: Math.round(14 * root.scaleFactor)
+                    color: root.widgetInkMuted
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.tell("manage", [], true)
+                    }
                 }
             }
         }
@@ -331,8 +365,9 @@ AbstractBackgroundWidget {
             }
         }
 
-        // Nothing to show yet: say what to do about it.
+        // Nothing to show yet: say what to do about it, and let the person ask again.
         Column {
+            id: emptyState
             anchors.centerIn: parent
             spacing: Math.round(2 * root.scaleFactor)
             visible: root.ready && root.cameras.length === 0
@@ -362,6 +397,20 @@ AbstractBackgroundWidget {
                     : Translation.tr("Check that the Cameras panel is installed and up to date")
                 color: root.widgetInkMuted
                 font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
+            }
+            StyledText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: root.refreshing ? Translation.tr("Asking…") : Translation.tr("Try again")
+                color: root.widgetInkMuted
+                font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
+                font.underline: !root.refreshing
+
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -4
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.refresh()
+                }
             }
         }
     }
