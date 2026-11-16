@@ -54,7 +54,7 @@ Item {
 
                 IrisText {
                     Layout.fillWidth: true
-                    text: `Dispositivos (${AndroidState.devices.length})`
+                    text: `${Translation.tr("Devices")} (${AndroidState.devices.length})`
                     color: IrisStyle.text
                     font.family: IrisStyle.fontTitle
                     font.pixelSize: IrisStyle.typeLabel
@@ -62,7 +62,7 @@ Item {
                 }
 
                 IrisButton {
-                    text: "Buscar en red"
+                    text: Translation.tr("Scan network")
                     onClicked: AndroidState.rescanNetwork()
                 }
 
@@ -78,7 +78,7 @@ Item {
             IrisText {
                 visible: AndroidState.devices.length === 0
                 Layout.fillWidth: true
-                text: "No se detectaron dispositivos por USB, ADB inalámbrico ni KDE Connect."
+                text: Translation.tr("No devices detected via USB, Wireless ADB, or KDE Connect.")
                 color: IrisStyle.subtext
                 font.pixelSize: IrisStyle.typeMeta
                 wrapMode: Text.WordWrap

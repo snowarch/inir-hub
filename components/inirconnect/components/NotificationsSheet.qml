@@ -61,8 +61,8 @@ Item {
                 IrisText {
                     Layout.fillWidth: true
                     text: AndroidState.phoneNotifications.length > 0
-                        ? `Notificaciones del teléfono (${AndroidState.phoneNotifications.length})`
-                        : "Notificaciones del teléfono"
+                        ? `${Translation.tr("Phone notifications")} (${AndroidState.phoneNotifications.length})`
+                        : Translation.tr("Phone notifications")
                     color: IrisStyle.text
                     font.family: IrisStyle.fontTitle
                     font.pixelSize: IrisStyle.typeBody
@@ -87,7 +87,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        Accessible.name: "Enviar notificación de prueba"
+                        Accessible.name: Translation.tr("Send test notification")
                         onClicked: AndroidState.pingDevice()
                     }
                 }
@@ -123,7 +123,7 @@ Item {
                 IrisField {
                     id: pingField
                     Layout.fillWidth: true
-                    placeholderText: "Mensaje a enviar a tu teléfono..."
+                    placeholderText: Translation.tr("Message to send to your phone...")
                     onAccepted: {
                         if (text.trim().length > 0) {
                             AndroidState.pingDevice(text.trim())
@@ -133,11 +133,11 @@ Item {
                 }
 
                 IrisButton {
-                    text: "Enviar"
+                    text: Translation.tr("Send")
                     implicitHeight: Math.round(32 * root.d)
                     emphasized: true
                     onClicked: {
-                        const msg = pingField.text.trim().length > 0 ? pingField.text.trim() : "¡Notificación de prueba desde tu PC!"
+                        const msg = pingField.text.trim().length > 0 ? pingField.text.trim() : Translation.tr("Test notification from PC!")
                         AndroidState.pingDevice(msg)
                         pingField.text = ""
                     }
@@ -249,7 +249,7 @@ Item {
 
                         IrisText {
                             Layout.fillWidth: true
-                            text: "Sin notificaciones activas en tu teléfono"
+                            text: Translation.tr("No active notifications on your phone")
                             color: IrisStyle.text
                             font.pixelSize: IrisStyle.typeCaption
                             font.weight: IrisStyle.weight(Font.Bold)
@@ -259,7 +259,7 @@ Item {
                     IrisText {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
-                        text: "Si tienes notificaciones en tu móvil y no aparecen:\n1. Abre la app KDE Connect en tu teléfono (" + AndroidState.deviceName + ").\n2. Entra a Complementos y activa 'Sincronización de notificaciones'.\n3. En los Ajustes de Android, concede el permiso de 'Acceso a notificaciones' a KDE Connect."
+                        text: Translation.tr("If your notifications do not show up:\n1. Open KDE Connect on your phone (%1).\n2. Go to Plugin settings and enable 'Notification sync'.\n3. In Android Settings, grant 'Notification access' to KDE Connect.").arg(AndroidState.deviceName)
                         color: IrisStyle.subtext
                         font.pixelSize: Math.max(9, Math.round(10 * root.d))
                     }

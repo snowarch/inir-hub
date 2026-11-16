@@ -55,8 +55,8 @@ Item {
                 IrisText {
                     Layout.fillWidth: true
                     text: AndroidState.connected
-                        ? `Enviar a ${AndroidState.deviceName}`
-                        : "Enviar archivo o texto"
+                        ? `${Translation.tr("Send to")} ${AndroidState.deviceName}`
+                        : Translation.tr("Send file or text")
                     color: IrisStyle.text
                     font.family: IrisStyle.fontTitle
                     font.pixelSize: IrisStyle.typeLabel
@@ -65,12 +65,12 @@ Item {
 
                 IrisButton {
                     emphasized: true
-                    text: "Elegir archivo..."
+                    text: Translation.tr("Choose file...")
                     onClicked: AndroidState.shareFileDialog()
                 }
 
                 IrisButton {
-                    text: "Abrir carpetas"
+                    text: Translation.tr("Browse folders")
                     onClicked: AndroidState.browseFiles()
                 }
             }
@@ -105,7 +105,7 @@ Item {
                         IrisText {
                             anchors.verticalCenter: parent.verticalCenter
                             visible: shareInput.text.length === 0 && !shareInput.activeFocus
-                            text: "Pega una ruta (/ruta/archivo), enlace URL o texto..."
+                            text: Translation.tr("Paste a path (/path/file), URL link, or text...")
                             color: IrisStyle.muted
                             font.pixelSize: IrisStyle.typeMeta
                         }
@@ -114,7 +114,7 @@ Item {
 
                 IrisButton {
                     enabled: shareInput.text.trim().length > 0
-                    text: "Enviar"
+                    text: Translation.tr("Send")
                     onClicked: {
                         AndroidState.sendTextOrPath(shareInput.text.trim())
                         shareInput.text = ""
@@ -124,7 +124,7 @@ Item {
 
             IrisText {
                 visible: AndroidState.recentFiles.length > 0
-                text: "ARCHIVOS RECIENTES (CLIC PARA ENVIAR)"
+                text: Translation.tr("RECENT FILES (CLICK TO SEND)")
                 color: IrisStyle.subtext
                 font.family: IrisStyle.fontLabel
                 font.pixelSize: IrisStyle.typeCaption

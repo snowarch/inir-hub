@@ -35,16 +35,16 @@ ColumnLayout {
 
         Repeater {
             model: [
-                { icon: "notifications", label: "Notificaciones", active: AndroidState.notificationsOpen, act: () => AndroidState.toggleSheet("notifications") },
-                { icon: "send_to_mobile", label: "Mandar aviso", active: false, act: () => AndroidState.pingDevice() },
-                { icon: "upload_file", label: "Enviar archivo", active: AndroidState.shareOpen, act: () => AndroidState.shareFile() },
-                { icon: "folder_open", label: "Explorar archivos", active: false, act: () => AndroidState.browseFiles() },
-                { icon: "notifications_active", label: "Sonar teléfono", active: false, act: () => AndroidState.findPhone() },
-                { icon: "content_paste_go", label: "Portapapeles", active: false, act: () => AndroidState.sendClipboard() },
-                { icon: "screenshot", label: "Captura", active: false, act: () => AndroidState.takeScreenshot() },
-                { icon: "fiber_manual_record", label: AndroidState.recording ? "Detener" : "Grabar pantalla", active: AndroidState.recording, act: () => AndroidState.toggleRecording() },
-                { icon: "visibility", label: "Mantener activo", active: AndroidState.keepAwake, act: () => AndroidState.toggleKeepAwake() },
-                { icon: "visibility_off", label: "Pantalla apagada", active: false, act: () => AndroidState.turnScreenOff() }
+                { icon: "notifications", label: Translation.tr("Notifications"), active: AndroidState.notificationsOpen, act: () => AndroidState.toggleSheet("notifications") },
+                { icon: "send_to_mobile", label: Translation.tr("Send alert"), active: false, act: () => AndroidState.pingDevice() },
+                { icon: "upload_file", label: Translation.tr("Send file"), active: AndroidState.shareOpen, act: () => AndroidState.shareFile() },
+                { icon: "folder_open", label: Translation.tr("Browse files"), active: false, act: () => AndroidState.browseFiles() },
+                { icon: "notifications_active", label: Translation.tr("Ring phone"), active: false, act: () => AndroidState.findPhone() },
+                { icon: "content_paste_go", label: Translation.tr("Clipboard"), active: false, act: () => AndroidState.sendClipboard() },
+                { icon: "screenshot", label: Translation.tr("Screenshot"), active: false, act: () => AndroidState.takeScreenshot() },
+                { icon: "fiber_manual_record", label: AndroidState.recording ? Translation.tr("Stop") : Translation.tr("Record screen"), active: AndroidState.recording, act: () => AndroidState.toggleRecording() },
+                { icon: "visibility", label: Translation.tr("Keep awake"), active: AndroidState.keepAwake, act: () => AndroidState.toggleKeepAwake() },
+                { icon: "visibility_off", label: Translation.tr("Screen off"), active: false, act: () => AndroidState.turnScreenOff() }
             ]
 
             delegate: Item {
