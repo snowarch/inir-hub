@@ -1,0 +1,9 @@
+HeaderBar 1.0 HeaderBar.qml
+StatusCards 1.0 StatusCards.qml
+PhoneMirror 1.0 PhoneMirror.qml
+QuickActions 1.0 QuickActions.qml
+WirelessSheet 1.0 WirelessSheet.qml
+DeviceSheet 1.0 DeviceSheet.qml
+ShareSheet 1.0 ShareSheet.qml
+NotificationsSheet 1.0 NotificationsSheet.qml
+MediaCard 1.0 MediaCard.qml
