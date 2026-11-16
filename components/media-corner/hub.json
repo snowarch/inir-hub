@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "summary": "Browse anime, films and series, and watch them from sources you add",
     "authors": [
         "lukatedev"
@@ -41,6 +41,12 @@
             "Refresh the Hub preview and require iNiR 3.1.1"
         ],
         "1.1.0": ["Add user-managed sources and optional subtitles"],
-    "1.2.0": ["Choose Normal or Prism presentation in Community Hub"]
+        "1.2.0": [
+            "Choose Normal or Prism presentation in Community Hub"
+        ],
+        "1.2.1": [
+            "Watch history, upcoming episodes and seen marks",
+            "Saved filters, audio and subtitle tracks, and a clear note when a catalogue limits requests"
+        ]
     }
 }

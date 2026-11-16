@@ -4,7 +4,7 @@
     "name": "Media Corner",
     "summary": "Browse anime, films and series and see where they stream",
     "icon": "movie",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "choices": {
         "title": "Style",
         "run": "scripts/choices.sh"
