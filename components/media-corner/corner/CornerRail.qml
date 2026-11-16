@@ -34,7 +34,8 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: Math.round(10 * root.d)
+            spacing: Math.round(12 * root.d)
+            CornerMark { size: Math.round(44 * root.d) }
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 0
