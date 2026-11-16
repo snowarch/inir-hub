@@ -5,6 +5,7 @@ import Quickshell.Widgets
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 import "../state/streams.js" as Streams
 
@@ -36,13 +37,13 @@ MediaPage {
         if (id === undefined) return
         root.failed = ""
         if (root.isAnime)
-            root.anime.detail(Number(id), (result, error) => { if (root.show?.id === id) root.took(result, error, root.anime) })
+            root.anime.detail(Number(id), (result, error, message) => { if (root.show?.id === id) root.took(result, error, message, root.anime) })
         else
-            root.movies.detail(String(root.show?.kind ?? "movie"), String(id), (result, error) => { if (root.show?.id === id) root.took(result, error, root.movies) })
+            root.movies.detail(String(root.show?.kind ?? "movie"), String(id), (result, error, message) => { if (root.show?.id === id) root.took(result, error, message, root.movies) })
     }
-    function took(result: var, error: string, store: var): void {
+    function took(result: var, error: string, message: string, store: var): void {
         if (!error && result) { root.full = result; root.failed = "" }
-        else if (root.full === null) root.failed = error ? store.down : Translation.tr("%1 doesn't know this title").arg(store.sourceName)
+        else if (root.full === null) root.failed = error ? message : Translation.tr("%1 doesn't know this title").arg(store.sourceName)
     }
     function follow(url: string): void {
         Qt.openUrlExternally(url)
@@ -60,6 +61,7 @@ MediaPage {
     Timer { id: loadLater; interval: 0; onTriggered: root.load() }
     Connections {
         target: CornerState
+        enabled: root.visible
         function onAttemptChanged(): void { if (root.failed.length > 0) root.load() }
     }
 
@@ -100,8 +102,8 @@ MediaPage {
             id: banner
             width: parent.width
             height: Math.round((root.compact ? 170 : 240) * root.d)
-            radius: IrisStyle.radiusTile
-            color: IrisStyle.fillQuiet
+            radius: IrisStyle.radiusCard
+            color: CornerSkin.card
             IrisImage {
                 anchors.fill: parent
                 source: String(root.s.banner || root.s.imageLarge || "")
@@ -112,23 +114,7 @@ MediaPage {
                 // The banner melts into the sheet, so the name under it reads on one ground.
                 gradient: Gradient {
                     GradientStop { position: 0.3; color: "transparent" }
-                    GradientStop { position: 1; color: CornerState.options.style === "prism" ? IrisStyle.veilHeavy : IrisStyle.surfaceOpaque }
-                }
-            }
-            // On a plate, so it reads over any banner; a narrow window has its own ‹ in the head.
-            Rectangle {
-                visible: !root.compact
-                anchors { left: parent.left; top: parent.top; margins: Math.round(10 * root.d) }
-                width: backButton.width + Math.round(4 * root.d)
-                height: width
-                radius: width / 2
-                color: IrisStyle.artVeilHeavy
-                IrisIconButton {
-                    id: backButton
-                    anchors.centerIn: parent
-                    materialIcon: "arrow_back"
-                    Accessible.name: Translation.tr("Back")
-                    onClicked: CornerState.back()
+                    GradientStop { position: 1; color: CornerSkin.page }
                 }
             }
         }
@@ -212,11 +198,39 @@ MediaPage {
     // Watch: in the person's sources, in mpv. One button for what has one video; a show lists its episodes further down.
     readonly property bool film: root.isAnime ? (root.s.type === "Movie" || Number(root.s.episodes) === 1) : root.s.kind !== "series"
     readonly property bool playingThis: CornerWatch.busy && CornerWatch.show?.id === root.show?.id
-    IrisButton {
-        visible: root.full !== null
-        quiet: true
-        text: CornerWatch.watchlist[Streams.watchKey(root.s, null)] ? Translation.tr("Remove from want to watch") : Translation.tr("Want to watch")
-        onClicked: CornerWatch.toggleWatchlist(Object.assign({}, root.s, { film: root.film }))
+    // What to do with it, from the poster's own data: a page that failed to load in full still offers all of it.
+    readonly property string mainKey: Streams.watchKey(root.s, root.isAnime ? { episode: 1 } : null)
+    readonly property string seenKey: Streams.watchKey(root.s, root.film && root.isAnime ? { episode: 1 } : null)
+    Flow {
+        Layout.fillWidth: true
+        visible: root.show !== null
+        spacing: Math.round(8 * root.d)
+        CornerPill {
+            visible: root.film && !root.playingThis
+            tone: "solid"
+            glyph: "play_arrow"
+            label: CornerWatch.resumeAt(root.mainKey) > 0 ? Translation.tr("Continue") : Translation.tr("Watch")
+            onClicked: CornerWatch.begin(Object.assign({}, root.s, { film: root.film }), root.isAnime ? { episode: 1 } : null)
+        }
+        CornerPill {
+            readonly property bool saved: Boolean(CornerWatch.watchlist[Streams.watchKey(root.s, null)])
+            tone: root.film ? "quiet" : "solid"
+            glyph: saved ? "bookmark_remove" : "bookmark_add"
+            label: saved ? Translation.tr("Remove from want to watch") : Translation.tr("Want to watch")
+            onClicked: CornerWatch.toggleWatchlist(Object.assign({}, root.s, { film: root.film }))
+        }
+        CornerPill {
+            enabled: CornerWatch.seenMarksLoaded
+            glyph: CornerWatch.isSeen(root.seenKey) ? "visibility_off" : "check_circle"
+            label: CornerWatch.isSeen(root.seenKey) ? Translation.tr("Mark as unwatched") : Translation.tr("Mark as watched")
+            onClicked: CornerWatch.setSeen(root.seenKey, !CornerWatch.isSeen(root.seenKey))
+        }
+        CornerPill {
+            visible: root.film && !root.playingThis && Boolean(CornerWatch.progress[root.mainKey]?.position)
+            glyph: "restart_alt"
+            label: Translation.tr("Reset progress")
+            onClicked: CornerWatch.resetProgress(root.mainKey)
+        }
     }
     RowLayout {
         visible: CornerWatch.seenMarksLoadFailed
@@ -224,74 +238,13 @@ MediaPage {
         IrisText { Layout.fillWidth: true; text: Translation.tr("Could not load watched marks"); color: IrisStyle.danger; wrapMode: Text.WordWrap }
         IrisButton { quiet: true; text: Translation.tr("Retry"); onClicked: CornerWatch.retrySeenMarks() }
     }
-    IrisButton {
-        visible: root.full !== null
-        quiet: true
-        enabled: CornerWatch.seenMarksLoaded
-        readonly property string seenKey: Streams.watchKey(root.s, root.film && root.isAnime ? { episode: 1 } : null)
-        text: CornerWatch.isSeen(seenKey) ? Translation.tr("Mark as unwatched") : Translation.tr("Mark as watched")
-        onClicked: CornerWatch.setSeen(seenKey, !CornerWatch.isSeen(seenKey))
-    }
-    RowLayout {
+    // What mpv plays of it: the same card as the rail's, with its keys.
+    PlaybackCard {
         Layout.fillWidth: true
-        visible: root.full !== null && (root.film || root.playingThis)
-        spacing: Math.round(12 * root.d)
-        IrisButton {
-            visible: root.film
-            emphasized: true
-            text: CornerWatch.resumeAt(Streams.watchKey(root.s, root.isAnime ? { episode: 1 } : null)) > 0 ? Translation.tr("Continue") : Translation.tr("Watch")
-            onClicked: CornerWatch.begin(Object.assign({}, root.s, { film: root.film }), root.isAnime ? { episode: 1 } : null)
-        }
-        IrisButton {
-            visible: root.film && !root.playingThis && Boolean(CornerWatch.progress[Streams.watchKey(root.s, root.isAnime ? { episode: 1 } : null)]?.position)
-            quiet: true
-            text: Translation.tr("Reset progress")
-            onClicked: CornerWatch.resetProgress(Streams.watchKey(root.s, root.isAnime ? { episode: 1 } : null))
-        }
-        IrisText {
-            Layout.fillWidth: true
-            visible: root.playingThis
-            text: CornerWatch.phase === "playing" ? Translation.tr("Playing in mpv, %1 of %2").arg(Streams.clock(CornerWatch.position)).arg(Streams.clock(CornerWatch.duration)) : Translation.tr("Opening mpv…")
-            color: IrisStyle.textSecondary
-        }
-        IrisButton {
-            visible: root.playingThis
-            quiet: true
-            text: Translation.tr("Stop")
-            onClicked: CornerWatch.stop()
-        }
-    }
-
-    RowLayout {
-        Layout.fillWidth: true
-        visible: root.playingThis && CornerWatch.phase === "playing"
-        IrisIconButton {
-            materialIcon: "remove"
-            enabled: CornerWatch.controlLinked
-            Accessible.name: Translation.tr("Show subtitles earlier")
-            onClicked: CornerWatch.control("subtitleEarlier")
-        }
-        IrisText {
-            text: Translation.tr("Subtitle delay: %1 s").arg(CornerWatch.subtitleDelay.toFixed(1))
-            color: IrisStyle.textSecondary
-        }
-        IrisIconButton {
-            materialIcon: "add"
-            enabled: CornerWatch.controlLinked
-            Accessible.name: Translation.tr("Show subtitles later")
-            onClicked: CornerWatch.control("subtitleLater")
-        }
-        IrisIconButton {
-            materialIcon: CornerWatch.fullscreen ? "fullscreen_exit" : "fullscreen"
-            enabled: CornerWatch.controlLinked
-            Accessible.name: CornerWatch.fullscreen ? Translation.tr("Exit fullscreen") : Translation.tr("Fullscreen")
-            onClicked: CornerWatch.control("fullscreen")
-        }
-    }
-
-    PlaybackTracks {
-        Layout.fillWidth: true
-        visible: root.playingThis && CornerWatch.phase === "playing" && CornerWatch.controlLinked
+        Layout.maximumWidth: Math.round(560 * root.d)
+        visible: root.playingThis
+        large: false
+        playingOnly: true
     }
 
     RowLayout {
@@ -301,7 +254,7 @@ MediaPage {
         IrisText {
             Layout.fillWidth: true
             text: root.asking ? Translation.tr("Asking %1…").arg(root.isAnime ? root.anime.sourceName : root.movies.sourceName) : root.failed
-            color: IrisStyle.muted
+            color: root.asking ? IrisStyle.muted : IrisStyle.danger
             font.pixelSize: IrisStyle.typeLabel
             wrapMode: Text.WordWrap
         }

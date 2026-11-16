@@ -25,19 +25,9 @@ MediaPage {
     spacing: Math.round(14 * root.d)
 
     ColumnLayout {
+        Layout.fillWidth: true
         spacing: 0
-        IrisText {
-            text: root.title
-            font.family: IrisStyle.fontTitle
-            font.pixelSize: IrisStyle.typeTitle
-            font.weight: IrisStyle.weight(Font.Bold)
-        }
-        IrisText {
-            visible: text.length > 0
-            text: root.subtitle
-            color: IrisStyle.muted
-            font.pixelSize: IrisStyle.typeFootnote
-        }
+        CornerHeading { page: true; eyebrow: root.subtitle; title: root.title }
     }
     RowLayout {
         visible: root.names.length === 0

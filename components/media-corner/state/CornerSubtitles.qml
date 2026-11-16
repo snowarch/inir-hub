@@ -20,7 +20,7 @@ Singleton {
     property var cache: ({})
     property string cacheKey: ""
     function limitedMessage(retryAfter: string): string {
-        return Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "")
+        return CornerState.limitedText(retryAfter)
     }
     function cancel(): void {
         timeout.stop()
@@ -28,7 +28,10 @@ Singleton {
         root.callback = null
     }
     function call(method: string, path: string, body: string, done: var): void {
+        // One request at a time: the one it replaces is told, so nobody waits on an answer that won't come.
+        const replaced = root.callback
         root.cancel()
+        if (replaced) replaced(null, "cancelled")
         if (!CornerState.open || !CornerState.options.subtitleApiKey) { done(null, "unavailable"); return }
         const xhr = new XMLHttpRequest()
         root.request = xhr
@@ -53,7 +56,7 @@ Singleton {
             xhr.open(method, root.baseUrl + path)
             xhr.setRequestHeader("Api-Key", CornerState.options.subtitleApiKey)
             if (root.token) xhr.setRequestHeader("Authorization", "Bearer " + root.token)
-            xhr.setRequestHeader("User-Agent", "Media Corner v1.1.0")
+            xhr.setRequestHeader("User-Agent", "Media Corner v1.2.0")
             xhr.setRequestHeader("Accept", "application/json")
             if (body) xhr.setRequestHeader("Content-Type", "application/json")
             timeout.restart()

@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 import "../state/streams.js" as Streams
 import "../state/watch.js" as Watch
@@ -51,11 +52,7 @@ ColumnLayout {
     Layout.fillWidth: true
     spacing: Math.round(8 * root.d)
 
-    IrisText {
-        text: Translation.tr("Episodes")
-        font.pixelSize: IrisStyle.typeHeadline
-        font.weight: IrisStyle.weight(Font.Bold)
-    }
+    CornerHeading { eyebrow: Translation.tr("Watch"); title: Translation.tr("Episodes") }
     IrisButton {
         visible: root.nextUnseen !== null
         text: Translation.tr("Continue series")

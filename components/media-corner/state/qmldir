@@ -2,3 +2,4 @@ singleton CornerState 1.0 CornerState.qml
 singleton CornerSources 1.0 CornerSources.qml
 singleton CornerWatch 1.0 CornerWatch.qml
 singleton CornerSubtitles 1.0 CornerSubtitles.qml
+singleton CornerSchedule 1.0 CornerSchedule.qml

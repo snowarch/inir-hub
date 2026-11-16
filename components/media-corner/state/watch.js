@@ -77,7 +77,7 @@ function historyRows(progress) {
     for (const group of Object.values(groups).sort((a, b) => b.at - a.at || String(a.show.title ?? "").localeCompare(String(b.show.title ?? "")))) {
         rows.push({ heading: true, title: String(group.show.title ?? "") })
         group.entries.sort((a, b) => (Number(b.entry.at) || 0) - (Number(a.entry.at) || 0) || a.key.localeCompare(b.key))
-        for (const item of group.entries) rows.push({ heading: false, key: item.key, episode: item.entry.episode ?? null })
+        for (const item of group.entries) rows.push({ heading: false, key: item.key, title: String(group.show.title ?? ""), episode: item.entry.episode ?? null })
     }
     return rows
 }

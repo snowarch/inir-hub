@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "summary": "Browse anime, films and series, and watch them from sources you add",
     "authors": [
         "lukatedev"
@@ -47,6 +47,14 @@
         "1.2.1": [
             "Watch history, upcoming episodes and seen marks",
             "Saved filters, audio and subtitle tracks, and a clear note when a catalogue limits requests"
+        ],
+        "1.3.0": [
+            "Normal and Prism share every feature: the rail with Yours and what plays, the home hero and deck, the mini player",
+            "Prism follows iRiS Settings: grouped places, back and forward, eyebrow titles, cards and pills",
+            "Seek, pause and stop mpv from the Corner and by IPC",
+            "Watch in one step, with subtitles preselected in a menu",
+            "Shelves show loading and failure; title actions work when the full page does not load",
+            "Fixes: lost progress, local host filter, stalled Watch after a sign-in, hidden pages asking again"
         ]
     }
 }

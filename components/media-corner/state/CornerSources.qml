@@ -6,7 +6,6 @@ import Quickshell
 import qs.services
 import "streams.js" as Streams
 import "sources.js" as Sources
-import "http.js" as Http
 
 // The sources the person added. The Corner ships none: a Stremio add-on is added by its manifest's address, a web source
 // by a URL with %s where the title goes. They are kept as JSON text in the Corner's options file.
@@ -65,7 +64,7 @@ Singleton {
         const received = (manifest, error, retryAfter) => {
             root.previewCallback = null
             if (error) {
-                const reason = error === "busy" ? Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "") : Translation.tr("It doesn't answer")
+                const reason = error === "busy" ? CornerState.limitedText(retryAfter ?? "") : Translation.tr("It doesn't answer")
                 callback(null, reason); return
             }
             let info = Streams.manifestInfo(manifest)
@@ -94,7 +93,8 @@ Singleton {
         if (!root.data.recognized || root.migrationPending) return Translation.tr("Sources are not ready; try again")
         const label = name.trim(), address = template.trim()
         if (label.length === 0) return Translation.tr("Give it a name")
-        if (!Sources.webUrl(address, "test")) return Translation.tr("It starts with https:// and has %s where the title goes")
+        // New ones are https only, as the hint says; older http ones keep working until the person replaces them.
+        if (!address.startsWith("https://") || !Sources.webUrl(address, "test")) return Translation.tr("It starts with https:// and has %s where the title goes")
         root._save(root.list.concat([{ type: "web", name: label.slice(0, 40), template: address, on: true }]))
         return ""
     }

@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 import "../state/watch.js" as Watch
 
@@ -11,11 +12,7 @@ ColumnLayout {
     id: root
     readonly property real d: IrisStyle.density
     readonly property var rows: Watch.historyRows(CornerWatch.progress)
-    IrisText {
-        text: Translation.tr("Watch history")
-        font.pixelSize: IrisStyle.typeHeadline
-        font.weight: IrisStyle.weight(Font.Bold)
-    }
+    CornerHeading { page: true; eyebrow: Translation.tr("Library"); title: Translation.tr("Watch history") }
     IrisText {
         visible: CornerWatch.progressLoaded && root.rows.length === 0
         Layout.fillWidth: true
@@ -65,7 +62,7 @@ ColumnLayout {
                     width: row.width
                     quiet: true
                     readonly property string caption: episode ? Translation.tr("Episode %1").arg(episode.episode) + (episode.season ? " · " + Translation.tr("Season %1").arg(episode.season) : "") : Translation.tr("Film")
-                    Accessible.name: caption
+                    Accessible.name: row.modelData.title + " · " + caption
                     implicitHeight: Math.round(44 * root.d)
                     IrisText {
                         anchors.fill: parent

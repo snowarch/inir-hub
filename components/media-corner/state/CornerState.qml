@@ -39,26 +39,44 @@ Singleton {
         adapter[name] = value
     }
 
+    // Titles stepped back from, newest last: › opens them again until something new is opened.
+    property var ahead: []
+    readonly property bool canGoBack: root.sheet || root.trail.length > 0 || root.query.length > 0 || root.place.includes(":genre:")
+    readonly property bool canGoForward: root.ahead.length > 0 && !root.sheet
+
     function pick(wanted: string): void {
         root.sheet = false
         root.place = wanted
         // «See all» of a search opens that search whole: it keeps what was typed.
         if (!wanted.includes(":search")) root.query = ""
         root.trail = []
+        root.ahead = []
     }
     function search(text: string): void {
         if (text === root.query) return
         root.query = text
         root.trail = []
+        root.ahead = []
         if (root.place.includes(":search")) root.place = "home"
     }
     function openShow(title: var): void {
-        if (title) root.trail = root.trail.concat([title])
+        if (!title) return
+        root.trail = root.trail.concat([title])
+        root.ahead = []
+    }
+    function forward(): bool {
+        if (!root.canGoForward) return false
+        root.trail = root.trail.concat([root.ahead[root.ahead.length - 1]])
+        root.ahead = root.ahead.slice(0, -1)
+        return true
     }
     // One step back: the title, the search, then from a genre to its list. False when there is nothing left to undo.
     function back(): bool {
         if (root.sheet) root.sheet = false
-        else if (root.trail.length > 0) root.trail = root.trail.slice(0, -1)
+        else if (root.trail.length > 0) {
+            root.ahead = root.ahead.concat([root.trail[root.trail.length - 1]])
+            root.trail = root.trail.slice(0, -1)
+        }
         else if (root.query.length > 0) root.search("")
         else if (root.place.includes(":genre:")) root.place = root.place.replace(/:genre:.*$/, ":genres")
         else return false
@@ -70,7 +88,7 @@ Singleton {
         const anime = wanted.match(/^anime:(\d+)$/)
         if (title) root.openShow({ id: title[2], kind: title[1] })
         else if (anime) root.openShow({ id: Number(anime[1]), kind: "anime" })
-        else if (/^(home|sources|anime:(popular|airing|trending|top|season|genres|genre:.+)|movie:(movies|series|top|years|genres|genre:.+))$/.test(wanted)) root.pick(wanted)
+        else if (/^(home|sources|history|schedule|anime:(popular|airing|trending|top|season|genres|genre:.+)|movie:(movies|series|top|years|genres|genre:.+))$/.test(wanted)) root.pick(wanted)
     }
 
     // ── Asking the network. An answer is kept ten minutes, one question is out once, and one that never comes back
@@ -80,6 +98,17 @@ Singleton {
     property var _answers: ({})
     property var _out: ({})
     property int _outCount: 0
+
+    // A failure in words, the same everywhere: a limit with its wait, offline, or a source that didn't answer.
+    function limitedText(retryAfter: string): string {
+        return Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "")
+    }
+    function failureText(source: string, error: string, retryAfter: string): string {
+        if (!error) return ""
+        if (error === "busy") return source + ": " + root.limitedText(retryAfter)
+        if (!Network.online && error === "HTTP 0") return Network.offlineReason
+        return Translation.tr("%1 didn't answer (´・ω・`)").arg(source)
+    }
 
     // Detach one caller; abort the request only when nobody else is waiting for it.
     function cancelAsk(callback: var): void {
@@ -232,6 +261,7 @@ Singleton {
         id: file
         path: Directories.pluginFile("media-corner")
         watchChanges: true
+        // Written in place, not renamed over: the file holds the API key and keeps the 0600 that save_key.py gave it.
         atomicWrites: false
         onLoaded: if (root.open && !migration.running && String(adapter.sources).trim().startsWith("[")) migration.running = true
         onFileChanged: file.reload()

@@ -7,3 +7,11 @@ CornerSearch 1.0 CornerSearch.qml
 CornerWindow 1.0 CornerWindow.qml
 SavedFilter 1.0 SavedFilter.qml
 SavedSort 1.0 SavedSort.qml
+singleton CornerSkin 1.0 CornerSkin.qml
+CornerHeading 1.0 CornerHeading.qml
+CornerPill 1.0 CornerPill.qml
+CornerRound 1.0 CornerRound.qml
+CornerRow 1.0 CornerRow.qml
+PlaybackTracks 1.0 PlaybackTracks.qml
+PlaybackCard 1.0 PlaybackCard.qml
+LibraryList 1.0 LibraryList.qml

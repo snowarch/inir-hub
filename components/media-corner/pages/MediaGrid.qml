@@ -6,6 +6,7 @@ import Quickshell
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../corner"
 import "../state"
 
 // One page for every list: a search, Popular, Top rated, a genre, a season or a year. Posters in a grid; the next page
@@ -53,6 +54,8 @@ Item {
     Timer { id: moreLater; interval: 0; onTriggered: root.more() }
     Connections {
         target: CornerState
+        // Only a page on screen asks again: hidden ones behind it stay quiet.
+        enabled: root.visible
         function onAttemptChanged(): void {
             if (root.items.length === 0) root.reload()
             else if (root.error.length > 0) root.more()
@@ -74,10 +77,10 @@ Item {
         const ticket = root._ticket
         root.error = ""
         root.loading = true
-        root.store.page(root.asked, root.pageNumber + 1, (result, error) => {
+        root.store.page(root.asked, root.pageNumber + 1, (result, error, message) => {
             if (ticket !== root._ticket) return
             root.loading = false
-            if (error) { root.error = root.store.down; return }
+            if (error) { root.error = message; return }
             root.pageNumber++
             // A title can come back on the next page when the order shifts mid-scroll.
             const seen = new Set(root.items.map(s => s.id))
@@ -105,25 +108,10 @@ Item {
                     Accessible.name: Translation.tr("Previous")
                     onClicked: root.step(-1)
                 }
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: root.spec?.title ?? ""
-                        font.family: IrisStyle.fontTitle
-                        font.pixelSize: IrisStyle.typeTitle
-                        font.weight: IrisStyle.weight(Font.Bold)
-                        elide: Text.ElideRight
-                    }
-                    IrisText {
-                        Layout.fillWidth: true
-                        visible: text.length > 0
-                        text: root.spec?.subtitle ?? ""
-                        color: IrisStyle.muted
-                        font.pixelSize: IrisStyle.typeFootnote
-                        elide: Text.ElideRight
-                    }
+                CornerHeading {
+                    page: true
+                    eyebrow: root.spec?.subtitle ?? ""
+                    title: root.spec?.title ?? ""
                 }
                 IrisIconButton {
                     visible: root.spec?.stepper ?? false
