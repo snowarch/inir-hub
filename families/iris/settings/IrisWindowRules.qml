@@ -114,8 +114,9 @@ ColumnLayout {
     Rectangle {
         id: plate
         Layout.fillWidth: true
-        // Until the rules are read, Add would write nothing: the line above says why.
-        visible: root.rules?.ready ?? true
+        // Until the rules are read, Add would write nothing: the line above says why. With none yet (the chip says
+        // "None"), the apps open now are the offer.
+        visible: (root.rules?.ready ?? true) && root.list.length > 0
         implicitHeight: strip.implicitHeight + Math.round(24 * root.d)
         radius: IrisStyle.radiusCard
         color: IrisStyle.fillQuiet
@@ -139,17 +140,16 @@ ColumnLayout {
             Piece {
                 glyph: root.adding ? "close" : "add"
                 title: root.adding ? Translation.tr("Cancel") : Translation.tr("Add")
-                line: root.list.length === 0 && !root.adding ? Translation.tr("No app has a rule yet") : ""
                 lit: root.adding
                 onPressed: { root.adding = !root.adding; root.picked = "" }
             }
         }
     }
 
-    // Adding: the apps open now, or an app id typed out (an app that is not running).
+    // Adding (and while no app has a rule): the apps open now, or an app id typed out (an app that is not running).
     ColumnLayout {
         Layout.fillWidth: true
-        visible: root.adding
+        visible: (root.rules?.ready ?? true) && (root.adding || root.list.length === 0)
         spacing: Math.round(8 * root.d)
         IrisText {
             text: root.running.length > 0 ? Translation.tr("Open now") : Translation.tr("Open the app to pick it here, or type its app id.")
