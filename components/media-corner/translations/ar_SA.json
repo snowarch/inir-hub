@@ -202,7 +202,6 @@
     "Winter": "الشتاء",
     "Year": "سنة",
     "“%1”": "«%1»",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1، الحلقة %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "عنوان البحث في موقع، مع %s مكان العنوان. يُفتح في المتصفح.",
@@ -312,7 +311,7 @@
     "Good morning": "صباح الخير",
     "Leave it to me": "سأختار بنفسي",
     "Library": "المكتبة",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "يتبع Normal ألوان iRiS وزجاجها؛ أما Prism فشبه أسود، والأبيض لما اخترته.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "مستوحى من إعدادات iRiS: يأتي Classic وFolio بألوان iRiS، وPrism شبه أسود والأبيض لما اخترته.",
     "Now playing": "قيد التشغيل",
     "Paused": "متوقف مؤقتًا",
     "Save": "حفظ",
@@ -326,5 +325,7 @@
     "Find something to watch": "ابحث عن شيء لتشاهده",
     "Nothing playing": "لا شيء قيد التشغيل",
     "Press Watch on any title": "اضغط مشاهدة على أي عنوان",
-    "What to watch today": "ماذا تشاهد اليوم"
+    "What to watch today": "ماذا تشاهد اليوم",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

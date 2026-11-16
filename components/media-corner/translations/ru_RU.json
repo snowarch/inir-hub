@@ -202,7 +202,6 @@
     "Winter": "Зима",
     "Year": "Год",
     "“%1”": "«%1»",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, серия %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Адрес поиска сайта, с %s вместо названия. Открывается в браузере.",
@@ -312,7 +311,7 @@
     "Good morning": "Доброе утро",
     "Leave it to me": "Выберу сам",
     "Library": "Библиотека",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal следует цветам и стеклу iRiS; Prism почти чёрный, а выбранное — белым.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "По мотивам настроек iRiS: Classic и Folio в цветах iRiS, Prism почти чёрный, а выбранное — белым.",
     "Now playing": "Сейчас играет",
     "Paused": "На паузе",
     "Save": "Сохранить",
@@ -326,5 +325,7 @@
     "Find something to watch": "Найти, что посмотреть",
     "Nothing playing": "Ничего не играет",
     "Press Watch on any title": "Нажмите «Смотреть» у любого тайтла",
-    "What to watch today": "Что посмотреть сегодня"
+    "What to watch today": "Что посмотреть сегодня",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

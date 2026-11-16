@@ -202,7 +202,6 @@
     "Winter": "Winter",
     "Year": "Year",
     "“%1”": "“%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, episode %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "A site's search address, with %s where the title goes. It opens in your browser.",
@@ -312,7 +311,7 @@
     "Good morning": "Good morning",
     "Leave it to me": "Leave it to me",
     "Library": "Library",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.",
     "Now playing": "Now playing",
     "Paused": "Paused",
     "Save": "Save",
@@ -326,5 +325,7 @@
     "Find something to watch": "Find something to watch",
     "Nothing playing": "Nothing playing",
     "Press Watch on any title": "Press Watch on any title",
-    "What to watch today": "What to watch today"
+    "What to watch today": "What to watch today",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

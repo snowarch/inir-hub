@@ -202,7 +202,6 @@
     "Winter": "Winter",
     "Year": "Jahr",
     "“%1”": "„%1“",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, Folge %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Die Suchadresse einer Website, mit %s an der Stelle des Titels. Sie öffnet sich im Browser.",
@@ -312,7 +311,7 @@
     "Good morning": "Guten Morgen",
     "Leave it to me": "Ich wähle selbst",
     "Library": "Bibliothek",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal folgt den Farben und dem Glas von iRiS; Prism ist fast schwarz, mit Weiß für das Gewählte.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "Angelehnt an die Einstellungen von iRiS: Classic und Folio in den Farben von iRiS, Prism fast schwarz, mit Weiß für das Gewählte.",
     "Now playing": "Läuft gerade",
     "Paused": "Pausiert",
     "Save": "Speichern",
@@ -326,5 +325,7 @@
     "Find something to watch": "Etwas zum Anschauen finden",
     "Nothing playing": "Nichts läuft",
     "Press Watch on any title": "Bei einem Titel auf Ansehen drücken",
-    "What to watch today": "Was heute läuft"
+    "What to watch today": "Was heute läuft",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

@@ -202,7 +202,6 @@
     "Winter": "Зима",
     "Year": "Рік",
     "“%1”": "«%1»",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, серія %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Адреса пошуку сайту, з %s замість назви. Відкривається в браузері.",
@@ -312,7 +311,7 @@
     "Good morning": "Доброго ранку",
     "Leave it to me": "Оберу сам",
     "Library": "Бібліотека",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal слідує кольорам і склу iRiS; Prism майже чорний, а вибране — білим.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "За мотивами налаштувань iRiS: Classic і Folio в кольорах iRiS, Prism майже чорний, а вибране — білим.",
     "Now playing": "Зараз грає",
     "Paused": "На паузі",
     "Save": "Зберегти",
@@ -326,5 +325,7 @@
     "Find something to watch": "Знайти, що подивитися",
     "Nothing playing": "Нічого не грає",
     "Press Watch on any title": "Натисніть «Дивитися» в будь-якому тайтлі",
-    "What to watch today": "Що подивитися сьогодні"
+    "What to watch today": "Що подивитися сьогодні",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

@@ -202,7 +202,6 @@
     "Winter": "Ukioq",
     "Year": "Ukioq",
     "“%1”": "“%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, episode %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "A site's search address, with %s where the title goes. It opens in your browser.",
@@ -312,7 +311,7 @@
     "Good morning": "Ullaakkut inuulluaqqusillunga",
     "Leave it to me": "Nammineq toqqassaanga",
     "Library": "Atuagaateqarfik",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal iRiS-ip qalipaataanik igalaaminernillu malinnippoq; Prism qernertuarpoq, toqqakkat qaqortumik.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "iRiS-ip aaqqissuussinera tunngavigalugu: Classic aamma Folio iRiS-ip qalipaataani, Prism qernertuarpoq, toqqakkat qaqortumik.",
     "Now playing": "Maanna aallartinneqarpoq",
     "Paused": "Unitsinneqarpoq",
     "Save": "Toqqoruk",
@@ -326,5 +325,7 @@
     "Find something to watch": "Isiginnaagassamik ujarlerit",
     "Nothing playing": "Aallartinneqartoqanngilaq",
     "Press Watch on any title": "Atuagassami Isiginnaarit tooruk",
-    "What to watch today": "Ullumi isiginnaagassat"
+    "What to watch today": "Ullumi isiginnaagassat",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

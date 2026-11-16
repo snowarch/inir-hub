@@ -202,7 +202,6 @@
     "Winter": "Musim dingin",
     "Year": "Tahun",
     "“%1”": "“%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, episode %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Alamat pencarian situs, dengan %s di tempat judul. Terbuka di peramban.",
@@ -312,7 +311,7 @@
     "Good morning": "Selamat pagi",
     "Leave it to me": "Saya pilih sendiri",
     "Library": "Pustaka",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal mengikuti warna dan kaca iRiS; Prism hampir hitam, dengan putih untuk yang dipilih.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "Berdasarkan Pengaturan iRiS: Classic dan Folio dengan warna iRiS, Prism hampir hitam dengan putih untuk yang dipilih.",
     "Now playing": "Sedang diputar",
     "Paused": "Dijeda",
     "Save": "Simpan",
@@ -326,5 +325,7 @@
     "Find something to watch": "Cari tontonan",
     "Nothing playing": "Tidak ada yang diputar",
     "Press Watch on any title": "Tekan Tonton pada judul mana pun",
-    "What to watch today": "Tontonan hari ini"
+    "What to watch today": "Tontonan hari ini",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }
