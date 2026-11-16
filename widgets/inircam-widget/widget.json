@@ -1,0 +1,70 @@
+{
+    "name": "Cameras",
+    "icon": "videocam",
+    "version": "1.0.0",
+    "author": "yukazakiri",
+    "description": "The cameras from the camera panel, as a grid on the desktop. The panel does the work: this card asks it for the list, asks it to keep the frames running while the card is on screen, and paints what it writes. Click a tile to pin that camera.",
+    "category": "media",
+    "main": "InircamWidget.qml",
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "showBackground": true,
+        "backgroundOpacity": 0.16,
+        "borderWidth": 1,
+        "borderOpacity": 0.2,
+        "cornerRadius": -1,
+        "useBlur": false,
+        "x": 320,
+        "y": 180,
+        "columns": 2,
+        "showCount": true,
+        "click": "pin"
+    },
+    "configKeys": {
+        "columns": {
+            "type": "int",
+            "default": 2,
+            "label": "Columns",
+            "description": "How many tiles across. 1 to 4.",
+            "min": 1,
+            "max": 4,
+            "step": 1
+        },
+        "showCount": {
+            "type": "bool",
+            "default": true,
+            "label": "Show camera count"
+        },
+        "click": {
+            "type": "string",
+            "default": "pin",
+            "label": "Click action",
+            "description": "What clicking a tile does.",
+            "options": [
+                {
+                    "label": "Pin the camera",
+                    "value": "pin"
+                },
+                {
+                    "label": "Open the panel",
+                    "value": "toggle"
+                },
+                {
+                    "label": "Nothing",
+                    "value": "none"
+                }
+            ]
+        }
+    },
+    "resizableAxes": {
+        "uniform": "widgetScale"
+    },
+    "defaultSize": {
+        "width": 320,
+        "height": 210
+    }
+}

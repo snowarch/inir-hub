@@ -1,0 +1,28 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "changes": {
+        "1.0.0": [
+            "Your cameras on the desktop, in the colours of the wallpaper behind them",
+            "Installed with the camera panel, which owns the cameras and the frames"
+        ]
+    },
+    "summary": "The camera panel's cameras, as a grid on the desktop",
+    "description": "A desktop card for the Cameras panel. It shows the cameras the panel knows about, keeps the frames running only while the card is on screen, and pins a camera when you click it. Installing the Cameras panel installs this card with it.",
+    "authors": [
+        "yukazakiri"
+    ],
+    "license": "MIT",
+    "tags": [
+        "camera",
+        "rtsp",
+        "video",
+        "widget"
+    ],
+    "permissions": [
+        "process",
+        "files"
+    ],
+    "minInir": "3.1.0",
+    "preview": "preview.webp"
+}
