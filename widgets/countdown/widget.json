@@ -1,16 +1,20 @@
 {
     "name": "Countdown",
     "icon": "hourglass_bottom",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "author": "snowarch",
-    "description": "Days left until a date you care about. The figure sits in a Material shape you pick, and a wavy bar shows how much of the wait has gone by. Also a card in Material's sidebars, a line on the iRiS Island and a card in Waffle's Widgets panel.",
+    "description": "Days left until a date you care about. On the desktop in three sizes: the figure in a Material shape you pick with a wavy bar for the wait, or under iRiS its iRiS and Prism cards with the wait as a ruler whose tick for today is lit. Also a card in Material's sidebars, a line on the iRiS Island and a card in Waffle's Widgets panel.",
     "category": "time",
     "main": "Countdown.qml",
     "iris": {
         "main": "IrisCountdown.qml",
         "slots": [
             "island.desktop"
-        ]
+        ],
+        "desktop": {
+            "iris": "IrisCountdownCard.qml",
+            "prism": "PrismCountdown.qml"
+        }
     },
     "waffle": {
         "main": "WaffleCountdown.qml"
@@ -22,6 +26,11 @@
             "sidebar.right"
         ]
     },
+    "sizes": [
+        "medium",
+        "small",
+        "large"
+    ],
     "defaultConfig": {
         "placementStrategy": "free",
         "widgetScale": 100,
@@ -51,12 +60,5 @@
             "default": "2027-01-01",
             "label": "Date: YYYY-MM-DD, or YYYY-MM-DDTHH:MM"
         }
-    },
-    "resizableAxes": {
-        "uniform": "widgetScale"
-    },
-    "defaultSize": {
-        "width": 320,
-        "height": 132
     }
 }

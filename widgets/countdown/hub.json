@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "changes": {
+        "1.2.0": ["The desktop card in three sizes: small, medium and large", "Under iRiS it wears the family's widget designs: iRiS and Prism cards whose ruler lights today's tick on the wait"],
         "1.1.0": ["A card in Material's left sidebar, and a tab you can turn on for the right sidebar"]
     },
     "summary": "Days left until a date you care about, in every family",

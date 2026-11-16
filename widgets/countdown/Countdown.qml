@@ -30,9 +30,8 @@ AbstractBackgroundWidget {
     defaultConfig: ({ placementStrategy: "free", widgetScale: 100, widgetOpacity: 100, colorMode: "auto", dim: 0, style: "shape", shape: "Cookie9Sided", showProgress: true, showBackground: true, backgroundOpacity: 0.16, borderWidth: 1, borderOpacity: 0.2, cornerRadius: -1, useBlur: false, x: 240, y: 240 })
     // Its ink is read from the wallpaper under it (or from the plate, when there is one).
     needsColText: true
-    resizableAxes: ({ uniform: "widgetScale" })
-    resizeMinWidth: 220
-    resizeMinHeight: 100
+    resizeMinWidth: 150
+    resizeMinHeight: 150
 
     // ── Look ─────────────────────────────────────────────────
     readonly property bool instrument: root.widgetSharedDesign === "instrument" || root.widgetSharedDesign === "readout"
@@ -81,241 +80,262 @@ AbstractBackgroundWidget {
         : root.reading.valid ? root.widgetSemanticOnContainer(root.widgetPrimaryRole)
         : root.widgetInk
 
-    // ── Geometry: everything derives from the scale ──────────
-    readonly property int pad: Math.round(16 * root.scaleFactor)
-    readonly property int shapeSize: Math.round(100 * root.scaleFactor)
-    readonly property int infoWidth: Math.round(172 * root.scaleFactor)
-    readonly property int instrumentMargin: Math.round(14 * root.scaleFactor)
-    implicitWidth: root.instrument ? Math.round(270 * root.scaleFactor)
-        : root.pad * 2 + root.shapeSize + Math.round(16 * root.scaleFactor) + root.infoWidth
-    implicitHeight: root.instrument ? instrumentBody.implicitHeight + root.instrumentMargin * 2
-        : root.shapeSize + root.pad * 2
+    // ── What every face reads ───────────────────────────────
+    readonly property string caption: Countdown.caption(root.reading)
+    readonly property string dateLine: Countdown.dateLine(root.target, root.dateText)
+    readonly property string shortDate: Countdown.shortDate(root.target)
+    readonly property string waitedLine: Countdown.waitedLine(root.waited)
+
+    // ── Geometry: a size class draws in its cell (176 small, 368 wide, 368 tall large); an older iNiR without size
+    // classes keeps the one card, from the scale ──
+    readonly property real k: Math.max(0.4, Math.min(root.width / (root.isSmall ? 176 : 368), root.height / (root.isLarge ? 368 : 176)))
+    readonly property real s: root.sized ? root.k : root.scaleFactor
+    function px(v: real): int { return Math.round(v * root.s) }
+    // Small and large stand the shape over the words, centred; medium sets them side by side.
+    readonly property bool stacked: root.sized && (root.isSmall || root.isLarge)
+    readonly property int pad: root.px(root.isSmall ? 14 : 16)
+    readonly property int shapeSize: root.px(!root.sized ? 100 : root.isSmall ? 92 : root.isLarge ? 176 : 120)
+    readonly property int instrumentMargin: root.px(14)
+    // Only an older iNiR without size classes reads these; a class's cell sets the box (and `k` reads the box).
+    implicitWidth: root.sized ? root.footprintWidth : Math.round((root.instrument ? 270 : 336) * root.scaleFactor)
+    implicitHeight: root.sized ? root.footprintHeight : Math.round((root.instrument ? 150 : 132) * root.scaleFactor)
 
     // The plate every built-in widget sits on: the user's design, opacity, outline, blur and corners.
     WidgetSurface {
         anchors.fill: parent
         widget: root
-        shown: !root.instrument && (root.backgroundOpacity > 0 || root.borderWidth > 0 || root.effectiveBlur)
+        shown: !root.instrument && !root.familyFaced && (root.backgroundOpacity > 0 || root.borderWidth > 0 || root.effectiveBlur)
         surfaceColor: root.widgetInk
         surfaceAccent: root.widgetAccent3
     }
 
     // ── Shape ────────────────────────────────────────────────
-    Item {
+    // Built only while it is the face shown: under a family's design the family's face draws instead.
+    Loader {
         anchors.fill: parent
-        opacity: root.instrument ? 0 : 1
-        visible: opacity > 0
-        Behavior on opacity {
-            enabled: root.animationsActive
-            NumberAnimation { duration: Appearance.animation.elementMoveFast.duration }
-        }
+        active: !root.instrument && !root.familyFaced
+        sourceComponent: Item {
+            id: face
 
-        Item {
-            id: shapeBox
-            x: root.pad
-            anchors.verticalCenter: parent.verticalCenter
-            width: root.shapeSize
-            height: root.shapeSize
+            Item {
+                id: shapeBox
+                x: root.stacked ? Math.round((face.width - width) / 2) : root.pad + (root.sized ? root.px(4) : 0)
+                y: root.stacked ? root.px(root.isSmall ? 14 : 28) : Math.round((face.height - height) / 2)
+                width: root.shapeSize
+                height: root.shapeSize
 
-            // Changing the shape morphs it (ShapeCanvas springs between the two outlines).
-            MaterialShape {
-                anchors.fill: parent
-                implicitSize: root.shapeSize
-                shape: DesktopWidgetShapes.shapeForName(root.arrived ? "SoftBurst" : root.reading.valid ? root.shapeName : "Cookie4Sided")
-                color: root.shapeFill
-            }
-
-            StyledText {
-                anchors.centerIn: parent
-                width: Math.round(root.shapeSize * 0.7)
-                height: Math.round(root.shapeSize * 0.5)
-                visible: root.reading.valid && !root.arrived
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                // "83" fills the shape; "11h 40m" shrinks to fit it instead of spilling out.
-                fontSizeMode: Text.Fit
-                minimumPixelSize: Math.round(12 * root.scaleFactor)
-                text: root.reading.figure
-                color: root.shapeInk
-                font.family: root.widgetNumbersFamily
-                font.pixelSize: Math.round(root.shapeSize * 0.42)
-                font.weight: Font.Bold
-                font.features: ({ "tnum": 1 })
-            }
-
-            MaterialSymbol {
-                anchors.centerIn: parent
-                visible: !root.reading.valid || root.arrived
-                text: root.arrived ? "celebration" : "edit_calendar"
-                fill: 1
-                iconSize: Math.round(root.shapeSize * 0.4)
-                color: root.shapeInk
-            }
-        }
-
-        ColumnLayout {
-            x: shapeBox.x + shapeBox.width + Math.round(16 * root.scaleFactor)
-            width: root.infoWidth
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Math.round(2 * root.scaleFactor)
-
-            // Eyebrow: the accent glyph and what it counts down to.
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Math.round(6 * root.scaleFactor)
-                MaterialSymbol {
-                    text: "hourglass_bottom"
-                    fill: 1
-                    iconSize: Math.round(Appearance.font.pixelSize.small * root.scaleFactor)
-                    color: root.widgetAccent3Visible
+                // Changing the shape morphs it (ShapeCanvas springs between the two outlines).
+                MaterialShape {
+                    anchors.fill: parent
+                    implicitSize: root.shapeSize
+                    shape: DesktopWidgetShapes.shapeForName(root.arrived ? "SoftBurst" : root.reading.valid ? root.shapeName : "Cookie4Sided")
+                    color: root.shapeFill
                 }
+
                 StyledText {
-                    Layout.fillWidth: true
-                    text: root.label
-                    elide: Text.ElideRight
-                    font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
-                    font.weight: Font.DemiBold
-                    font.capitalization: root.widgetCapitalization
-                    font.letterSpacing: Math.round(1 * root.scaleFactor)
-                    color: ColorUtils.applyAlpha(root.widgetInk, 0.66)
-                }
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                Layout.topMargin: Math.round(2 * root.scaleFactor)
-                text: Countdown.caption(root.reading)
-                elide: Text.ElideRight
-                font.family: root.widgetTitleFamily
-                font.pixelSize: Math.round(Appearance.font.pixelSize.huge * root.widgetTitleScale * root.scaleFactor)
-                font.weight: root.widgetTitleWeight
-                font.letterSpacing: root.widgetTitleTracking
-                color: root.widgetInk
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                text: root.reading.valid ? Countdown.dateLine(root.target, root.dateText) : "Choose one in its settings"
-                // The hint may wrap (it is the only line under the title then); the date never needs to.
-                wrapMode: Text.WordWrap
-                maximumLineCount: 2
-                elide: Text.ElideRight
-                font.pixelSize: Math.round(Appearance.font.pixelSize.small * root.scaleFactor)
-                color: ColorUtils.applyAlpha(root.widgetInk, 0.58)
-            }
-
-            // How much of the wait has gone by, since the day the date was set.
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.topMargin: Math.round(8 * root.scaleFactor)
-                visible: root.barShown
-                spacing: Math.round(8 * root.scaleFactor)
-
-                StyledProgressBar {
-                    Layout.fillWidth: true
-                    valueBarHeight: Math.max(3, Math.round(4 * root.scaleFactor))
-                    valueBarGap: Math.max(3, Math.round(4 * root.scaleFactor))
-                    wavy: true
-                    // The wave holds still: a desktop widget never animates for decoration.
-                    animateWave: false
-                    waveFrequency: 4
-                    value: Math.max(0.02, root.waited)
-                    highlightColor: root.widgetAccentVisible
-                    trackColor: ColorUtils.applyAlpha(root.widgetInk, 0.16)
-                }
-                StyledText {
-                    text: Math.round(root.waited * 100) + "%"
+                    anchors.centerIn: parent
+                    width: Math.round(root.shapeSize * 0.7)
+                    height: Math.round(root.shapeSize * 0.5)
+                    visible: root.reading.valid && !root.arrived
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    // "83" fills the shape; "11h 40m" shrinks to fit it instead of spilling out.
+                    fontSizeMode: Text.Fit
+                    minimumPixelSize: root.px(12)
+                    text: root.reading.figure
+                    color: root.shapeInk
                     font.family: root.widgetNumbersFamily
-                    font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
-                    font.weight: Font.DemiBold
+                    font.pixelSize: Math.round(root.shapeSize * 0.42)
+                    font.weight: Font.Bold
                     font.features: ({ "tnum": 1 })
-                    color: ColorUtils.applyAlpha(root.widgetInk, 0.66)
+                }
+
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    visible: !root.reading.valid || root.arrived
+                    text: root.arrived ? "celebration" : "edit_calendar"
+                    fill: 1
+                    iconSize: Math.round(root.shapeSize * 0.4)
+                    color: root.shapeInk
+                }
+            }
+
+            ColumnLayout {
+                id: info
+                readonly property int align: root.stacked ? Text.AlignHCenter : Text.AlignLeft
+                x: root.stacked ? root.pad : shapeBox.x + shapeBox.width + root.px(root.sized ? 20 : 16)
+                y: root.stacked ? shapeBox.y + shapeBox.height + root.px(root.isSmall ? 8 : 18)
+                    : Math.round((face.height - height) / 2)
+                width: face.width - x - root.pad
+                spacing: root.px(2)
+
+                // Eyebrow: the accent glyph and what it counts down to.
+                RowLayout {
+                    Layout.fillWidth: !root.stacked
+                    Layout.maximumWidth: info.width
+                    Layout.alignment: root.stacked ? Qt.AlignHCenter : Qt.AlignLeft
+                    spacing: root.px(6)
+                    MaterialSymbol {
+                        text: "hourglass_bottom"
+                        fill: 1
+                        iconSize: root.px(Appearance.font.pixelSize.small)
+                        color: root.widgetAccent3Visible
+                    }
+                    StyledText {
+                        Layout.fillWidth: !root.stacked
+                        Layout.maximumWidth: info.width - root.px(Appearance.font.pixelSize.small + 6)
+                        text: root.label
+                        elide: Text.ElideRight
+                        font.pixelSize: root.px(Appearance.font.pixelSize.smaller)
+                        font.weight: Font.DemiBold
+                        font.capitalization: root.widgetCapitalization
+                        font.letterSpacing: root.isSmall ? 0 : root.px(1)
+                        color: ColorUtils.applyAlpha(root.widgetInk, 0.66)
+                    }
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    Layout.topMargin: root.px(2)
+                    horizontalAlignment: info.align
+                    text: root.caption
+                    // "left today" in a small card shrinks a little before it would be cut.
+                    fontSizeMode: Text.HorizontalFit
+                    minimumPixelSize: root.px(12)
+                    font.family: root.widgetTitleFamily
+                    font.pixelSize: root.px((root.isSmall ? Appearance.font.pixelSize.larger : Appearance.font.pixelSize.huge)
+                        * root.widgetTitleScale * (root.isLarge ? 1.3 : 1))
+                    font.weight: root.widgetTitleWeight
+                    font.letterSpacing: root.widgetTitleTracking
+                    color: root.widgetInk
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    visible: !root.isSmall
+                    horizontalAlignment: info.align
+                    text: root.reading.valid ? root.dateLine : "Choose one in its settings"
+                    // The hint may wrap (it is the only line under the title then); the date never needs to.
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
+                    font.pixelSize: root.px(Appearance.font.pixelSize.small)
+                    color: ColorUtils.applyAlpha(root.widgetInk, 0.58)
+                }
+
+                // How much of the wait has gone by, since the day the date was set.
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.topMargin: root.px(root.isLarge ? 14 : 8)
+                    visible: root.barShown && !root.isSmall
+                    spacing: root.px(8)
+
+                    StyledProgressBar {
+                        Layout.fillWidth: true
+                        valueBarHeight: Math.max(3, root.px(4))
+                        valueBarGap: Math.max(3, root.px(4))
+                        wavy: true
+                        // The wave holds still: a desktop widget never animates for decoration.
+                        animateWave: false
+                        waveFrequency: root.isLarge ? 6 : 4
+                        value: Math.max(0.02, root.waited)
+                        highlightColor: root.widgetAccentVisible
+                        trackColor: ColorUtils.applyAlpha(root.widgetInk, 0.16)
+                    }
+                    StyledText {
+                        text: Math.round(root.waited * 100) + "%"
+                        font.family: root.widgetNumbersFamily
+                        font.pixelSize: root.px(Appearance.font.pixelSize.smaller)
+                        font.weight: Font.DemiBold
+                        font.features: ({ "tnum": 1 })
+                        color: ColorUtils.applyAlpha(root.widgetInk, 0.66)
+                    }
                 }
             }
         }
     }
 
     // ── iNstrument ───────────────────────────────────────────
-    // A countdown is a bounded wait, so it reads on a linear scale, never on a fake dial.
-    ColumnLayout {
-        id: instrumentBody
+    // A countdown is a bounded wait, so it reads on a linear scale, never on a fake dial. Small drops the fields.
+    Loader {
         anchors.fill: parent
         anchors.margins: root.instrumentMargin
-        opacity: root.instrument ? 1 : 0
-        visible: opacity > 0
-        spacing: Math.round(6 * root.scaleFactor)
-        Behavior on opacity {
-            enabled: root.animationsActive
-            NumberAnimation { duration: Appearance.animation.elementMoveFast.duration }
-        }
+        active: root.instrument && !root.familyFaced
+        sourceComponent: ColumnLayout {
+            id: instrumentBody
+            spacing: root.px(6)
 
-        InstrumentLabel {
-            Layout.fillWidth: true
-            text: "Countdown / " + root.label
-            color: root.widgetAccentVisible
-            scaleFactor: root.scaleFactor
-            strong: true
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Math.round(8 * root.scaleFactor)
-            StyledText {
-                Layout.maximumWidth: instrumentBody.width * 0.62
-                text: root.reading.valid ? (root.arrived ? "Today" : root.reading.figure) : "--"
-                elide: Text.ElideRight
-                font.family: root.widgetNumbersFamily
-                font.pixelSize: Math.round(44 * root.scaleFactor)
-                font.weight: root.widgetEditorial ? Appearance.editorial.titleWeight : Font.Bold
-                font.features: ({ "tnum": 1 })
-                font.letterSpacing: -1
-                color: root.arrived ? root.widgetAccentVisible : root.widgetInk
-            }
             InstrumentLabel {
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignBaseline
-                visible: root.reading.valid && !root.arrived
-                text: root.reading.past ? root.reading.unit : root.reading.unit === "left" ? "left today" : root.reading.unit + " left"
-                color: root.widgetInkMuted
-                scaleFactor: root.scaleFactor
-                size: 11
+                text: "Countdown / " + root.label
+                color: root.widgetAccentVisible
+                scaleFactor: root.s
                 strong: true
             }
-        }
 
-        InstrumentScale {
-            Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(10 * root.scaleFactor)
-            visible: root.barShown
-            fraction: root.waited
-            divisions: 32
-            ink: root.widgetInk
-            accent: root.widgetAccentVisible
-            animated: root.animationsActive
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.topMargin: Math.round(2 * root.scaleFactor)
-            spacing: Math.round(14 * root.scaleFactor)
-            InstrumentField {
+            RowLayout {
                 Layout.fillWidth: true
-                label: "Date"
-                value: root.target ? Countdown.dateLine(root.target, root.dateText) : "Not set"
-                ink: root.widgetInk
-                muted: root.widgetInkMuted
-                family: root.widgetNumbersFamily
-                scaleFactor: root.scaleFactor
+                spacing: root.px(8)
+                StyledText {
+                    Layout.maximumWidth: instrumentBody.width * 0.62
+                    text: root.reading.valid ? (root.arrived ? "Today" : root.reading.figure) : "--"
+                    fontSizeMode: Text.HorizontalFit
+                    minimumPixelSize: root.px(20)
+                    font.family: root.widgetNumbersFamily
+                    font.pixelSize: root.px(root.isLarge ? 72 : 44)
+                    font.weight: root.widgetEditorial ? Appearance.editorial.titleWeight : Font.Bold
+                    font.features: ({ "tnum": 1 })
+                    font.letterSpacing: -1
+                    color: root.arrived ? root.widgetAccentVisible : root.widgetInk
+                }
+                InstrumentLabel {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignBaseline
+                    visible: root.reading.valid && !root.arrived
+                    text: root.reading.past ? root.reading.unit : root.reading.unit === "left" ? "left today" : root.reading.unit + " left"
+                    color: root.widgetInkMuted
+                    scaleFactor: root.s
+                    size: 11
+                    strong: true
+                }
             }
-            InstrumentField {
-                Layout.preferredWidth: Math.round(70 * root.scaleFactor)
+
+            InstrumentScale {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.px(10)
                 visible: root.barShown
-                label: "Waited"
-                value: Math.round(root.waited * 100) + "%"
+                fraction: root.waited
+                divisions: root.isSmall ? 16 : 32
                 ink: root.widgetInk
-                muted: root.widgetInkMuted
-                family: root.widgetNumbersFamily
-                scaleFactor: root.scaleFactor
+                accent: root.widgetAccentVisible
+                animated: root.animationsActive
+            }
+
+            Item { Layout.fillHeight: true; visible: root.isLarge }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: root.px(2)
+                visible: !root.isSmall
+                spacing: root.px(14)
+                InstrumentField {
+                    Layout.fillWidth: true
+                    label: "Date"
+                    value: root.target ? root.dateLine : "Not set"
+                    ink: root.widgetInk
+                    muted: root.widgetInkMuted
+                    family: root.widgetNumbersFamily
+                    scaleFactor: root.s
+                }
+                InstrumentField {
+                    Layout.preferredWidth: root.px(70)
+                    visible: root.barShown
+                    label: "Waited"
+                    value: Math.round(root.waited * 100) + "%"
+                    ink: root.widgetInk
+                    muted: root.widgetInkMuted
+                    family: root.widgetNumbersFamily
+                    scaleFactor: root.s
+                }
             }
         }
     }

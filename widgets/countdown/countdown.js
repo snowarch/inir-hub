@@ -70,3 +70,13 @@ function caption(reading) {
         return reading.unit.length > 0 ? reading.unit : "Today"
     return reading.unit === "left" ? "left today" : `${reading.unit} left`
 }
+
+// "1 Jan": the day a face's flap or head names, short enough for a small card.
+function shortDate(target) {
+    return target ? Qt.locale("en_US").toString(target, "d MMM") : ""
+}
+
+// The share of the wait gone, said in words for the face's foot: "62% of the wait gone".
+function waitedLine(waited) {
+    return waited >= 0 ? `${Math.round(waited * 100)}% of the wait gone` : ""
+}
