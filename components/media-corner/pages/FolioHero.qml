@@ -11,7 +11,7 @@ import "../corner"
 import "../state"
 import "../state/streams.js" as Streams
 
-// Normal's hero, as Folio's wallpaper card: the show's art blurred behind it, its picture on the left, what it is and
+// Classic's and Folio's hero, as Folio's wallpaper card: the show's art blurred behind it, its picture on the left, what it is and
 // its actions on the right, and under it a strip of what else trends, with All at its end. A thumbnail puts its show
 // up front.
 ClippingRectangle {

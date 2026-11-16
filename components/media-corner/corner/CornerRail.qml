@@ -10,7 +10,7 @@ import qs.modules.iris.components
 import "../state"
 
 // The right rail, as in iRiS's Settings: a greeting, what is yours (Want to watch, Watching) and, at its foot, what mpv
-// plays. Normal and Prism both have it once the Corner is wide enough; narrower, the places column holds Yours and the
+// plays. Prism has it once the Corner is wide enough; narrower, the places column holds Yours and the
 // mini player holds what plays.
 Rectangle {
     id: root
