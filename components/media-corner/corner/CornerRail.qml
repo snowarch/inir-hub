@@ -18,7 +18,7 @@ Rectangle {
     signal sourcesRequested()
 
     color: CornerSkin.column
-    radius: IrisStyle.radiusPanel
+    radius: CornerSkin.prism ? IrisStyle.radiusPanel : IrisStyle.radiusTile
     border.width: CornerSkin.edgeWidth
     border.color: CornerSkin.edge
     clip: true
@@ -83,9 +83,39 @@ Rectangle {
         }
 
         PlaybackCard {
+            id: player
             Layout.fillWidth: true
             // The picture only where the rail has height for it.
             large: root.height >= Math.round(720 * root.d)
+        }
+        // Before anything was ever played: what the card will hold, and how to start.
+        Rectangle {
+            visible: !player.visible
+            Layout.fillWidth: true
+            implicitHeight: idle.implicitHeight + 2 * Math.round(18 * root.d)
+            radius: CornerSkin.cardRadius
+            color: CornerSkin.card
+            border.width: CornerSkin.edgeWidth
+            border.color: CornerSkin.edge
+            RowLayout {
+                id: idle
+                anchors.fill: parent
+                anchors.margins: Math.round(18 * root.d)
+                spacing: Math.round(12 * root.d)
+                Rectangle {
+                    Layout.preferredWidth: Math.round(44 * root.d)
+                    Layout.preferredHeight: Math.round(44 * root.d)
+                    radius: width / 2
+                    color: CornerSkin.plate
+                    MaterialSymbol { anchors.centerIn: parent; text: "play_arrow"; fill: 1; iconSize: Math.round(22 * root.d); color: IrisStyle.textSecondary }
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Math.round(2 * root.d)
+                    IrisText { Layout.fillWidth: true; text: Translation.tr("Nothing playing"); font.weight: IrisStyle.weight(Font.DemiBold); elide: Text.ElideRight }
+                    IrisText { Layout.fillWidth: true; text: Translation.tr("Press Watch on any title"); color: IrisStyle.textSecondary; font.pixelSize: IrisStyle.typeMeta; wrapMode: Text.WordWrap }
+                }
+            }
         }
     }
 }
