@@ -128,7 +128,8 @@ Item {
             visible: !root.column || !root.pushed
             places: root.places
             section: root.section
-            hint: root.searchHint
+            // The column is narrow for the long hint; the field over the page (Folio) has room for it.
+            hint: Translation.tr("Search titles")
             radius: root.paneRadius
             outerRadius: frame.radius
             pad: root.panePad
