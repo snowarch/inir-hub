@@ -17,6 +17,7 @@ Singleton {
     // The three columns, each a step apart as in the reference: the side rails a touch lighter than the middle.
     readonly property color canvas: root.light ? "#f5f5f7" : "#0f0f11" // iris-literal: Prism's middle column, its own neutral
     readonly property color rail: root.light ? "#ebebee" : "#161618" // iris-literal: Prism's side columns
+    readonly property color railGlass: root.light ? "#c7ebebee" : "#b3161618" // iris-literal: the side column as glass, the panel's air showing through
     readonly property color raised: root.light ? "#ffffff" : "#1e1e21" // iris-literal: circles and fields standing on a rail
     readonly property color sunk: root.light ? "#e2e2e6" : "#050506" // iris-literal: a switch's track, darker than the page
     // A group's card (Raell Tech's page, his 11-14): a step above the middle column, under the fields' own fill.
@@ -99,7 +100,7 @@ Singleton {
     // A key is a cap on its own side: the side shows under it as a lip, a hairline of light runs on its top. A well is
     // cut into the card: dark, its lower lip catching light; light, its upper lip in shade. Solid layers, never a
     // gradient (his 11-07).
-    readonly property real keyLip: root.dp(2)
+    readonly property real keyLip: 0 // his 11-15: keys stand flat, no stepped side
     readonly property color keyQuiet: root.light ? "#f1f1f4" : "#242428" // iris-literal: a quiet key's cap, a step off the card
     readonly property color wellEdge: root.light ? "#cbcbd1" : "#2b2b30" // iris-literal: the well's lit (dark) or shaded (light) lip
     function lum(c: color): real { return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b }

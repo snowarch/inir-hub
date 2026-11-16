@@ -32,7 +32,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: PrismTheme.rail
+        color: PrismTheme.railGlass
         topLeftRadius: root.corner
         bottomLeftRadius: root.corner
     }
