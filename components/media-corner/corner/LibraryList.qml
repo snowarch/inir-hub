@@ -27,13 +27,19 @@ ColumnLayout {
         return Translation.tr(show?.kind === "anime" ? "Anime" : show?.kind === "movie" ? "Movie" : "Series")
     }
 
-    SavedFilter { Layout.fillWidth: true }
-    SavedSort { Layout.fillWidth: true }
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: Math.round(6 * root.d)
+        SavedFilter { Layout.fillWidth: true }
+        SavedSort {}
+    }
 
     CornerHeading {
         Layout.topMargin: Math.round(6 * root.d)
         eyebrow: Translation.tr("Yours")
         title: Translation.tr("Want to watch")
+        glyph: "bookmark"
+        tint: IrisStyle.identity.yellow
         link: CornerWatch.wantedKeys.length > root.fold && !CornerState.savedQuery.trim() ? (root.unfolded ? Translation.tr("Show less") : Translation.tr("See all")) : ""
         onLinkClicked: root.unfolded = !root.unfolded
     }
@@ -79,6 +85,8 @@ ColumnLayout {
         Layout.topMargin: Math.round(10 * root.d)
         eyebrow: Translation.tr("Yours")
         title: Translation.tr("Watching")
+        glyph: "play_circle"
+        tint: IrisStyle.identity.green
         link: Translation.tr("See all")
         onLinkClicked: CornerState.pick("history")
     }
