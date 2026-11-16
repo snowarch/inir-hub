@@ -15,6 +15,8 @@ MouseArea {
     id: root
     required property var show
     readonly property real d: IrisStyle.density
+    readonly property bool prism: CornerState.options.style === "prism"
+    readonly property color tint: root.show.kind === "anime" ? IrisStyle.identity.purple : root.show.kind === "series" ? IrisStyle.identity.blue : IrisStyle.identity.orange
     readonly property string detailLine: [Translation.tr(String(root.show.relation ?? "")), Number(root.show.score ?? 0) > 0 ? "★ " + Number(root.show.score).toFixed(1) : "",
         String(root.show.year ?? "").slice(0, 4), Translation.tr(String(root.show.type ?? ""))].filter(x => x.length > 0).join(" · ")
 
@@ -36,24 +38,43 @@ MouseArea {
         width: root.width
         height: Math.round(root.width * 1.5)
         // A card's corner, not a pill's: half a tile's radius at this size.
-        radius: IrisStyle.tileRadius(width * 0.5)
+        radius: root.prism ? width * 0.24 : IrisStyle.tileRadius(width * 0.5)
         color: IrisStyle.fillQuiet
         // A small lift on hover, once; nothing moves at rest.
         scale: root.containsMouse ? 1.04 : 1
         Behavior on scale { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
 
+        Rectangle {
+            anchors.fill: parent
+            visible: root.prism && art.status !== Image.Ready
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.lighter(root.tint, 1.18) }
+                GradientStop { position: 1; color: Qt.darker(root.tint, 1.25) }
+            }
+        }
         // Stands in until the cover is there, and for one that never comes.
         MaterialSymbol {
             anchors.centerIn: parent
             visible: art.status !== Image.Ready
-            text: "movie"
+            text: root.show.kind === "anime" ? "animation" : root.show.kind === "series" ? "tv" : "movie"
+            fill: root.prism ? 1 : 0
             iconSize: Math.round(32 * root.d)
-            color: IrisStyle.muted
+            // The placeholder is artwork: its glyph stays light in both schemes.
+            color: root.prism ? IrisStyle.inkOnDark : IrisStyle.muted
         }
-        IrisImage {
+        Image {
             id: art
             anchors.fill: parent
             source: String(root.show.image ?? "")
+            sourceSize: Qt.size(264, 396)
+            asynchronous: true
+            cache: true
+            fillMode: Image.PreserveAspectCrop
+            onStatusChanged: if (status === Image.Ready) {
+                let node = root.parent
+                while (node && !node.rememberPoster) node = node.parent
+                if (node) node.rememberPoster(String(source))
+            }
         }
         // Under the pointer: a veil and what a click does, the show's page.
         Rectangle {

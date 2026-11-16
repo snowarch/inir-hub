@@ -12,6 +12,7 @@ import "../state"
 Item {
     id: root
     property bool windowed: false
+    property bool prism: false
     property bool open: false
     property var places: []
     property string section: ""
@@ -74,8 +75,8 @@ Item {
         overlay: !root.windowed
         // A window never samples the wallpaper: its glass would show what is not behind it. An item may not draw into
         // the shell's blur field, so the overlay's glass is the wallpaper's.
-        glass: !root.windowed
-        color: IrisStyle.surface
+        glass: !root.windowed && !root.prism
+        color: root.prism ? IrisStyle.surfaceOpaque : IrisStyle.surface
         light: IrisStyle.surfaceLight("settings", IrisStyle.wallpaperLight)
         radius: root.windowed ? 0 : IrisStyle.surfaceRadius("settings", IrisStyle.radiusPanel)
         width: root.windowed ? root.width : Math.round(Math.min(root.room.width, 1360 * root.d))
@@ -86,6 +87,8 @@ Item {
 
         CornerNav {
             id: nav
+            prism: root.prism
+            railVisible: rail.visible
             narrow: root.column
             visible: !root.column || !root.pushed
             places: root.places
@@ -97,8 +100,9 @@ Item {
             pad: root.panePad
             x: root.paneInset
             y: root.column ? Math.round(52 * root.d) : root.paneInset
-            width: root.column ? frame.width - 2 * root.paneInset : Math.round(Math.min(Math.max(216 * root.d, frame.width * 0.17), 260 * root.d))
+            width: root.column ? frame.width - 2 * root.paneInset : root.prism ? Math.round(232 * root.d) : Math.round(Math.min(Math.max(216 * root.d, frame.width * 0.17), 260 * root.d))
             height: frame.height - y - root.paneInset
+            onCloseRequested: root.closeRequested()
             onPicked: id => root.pick(id)
             onSubmitted: root.pushed = true
             onSwitchHost: {
@@ -112,8 +116,16 @@ Item {
             visible: !root.column || root.pushed
             x: root.column ? root.paneInset + Math.round(12 * root.d) : nav.x + nav.width + Math.round(20 * root.d)
             y: root.column ? Math.round(52 * root.d) : IrisStyle.concentricPad(frame.radius, 16 * root.d)
-            width: frame.width - x - IrisStyle.concentricPad(frame.radius, 18 * root.d)
+            width: frame.width - x - IrisStyle.concentricPad(frame.radius, 18 * root.d) - (rail.visible ? rail.width + Math.round(20 * root.d) : 0)
             height: frame.height - y - Math.round(8 * root.d)
+        }
+        CornerRail {
+            id: rail
+            visible: root.prism && !root.column && frame.width >= Math.round(1080 * root.d)
+            x: frame.width - width - root.paneInset
+            y: root.paneInset
+            width: Math.round(300 * root.d)
+            height: frame.height - 2 * root.paneInset
         }
 
         // The narrow window's way back to the places.
@@ -126,7 +138,7 @@ Item {
             onClicked: root.back()
         }
         IrisIconButton {
-            visible: !root.windowed
+            visible: !root.windowed && !root.prism
             anchors.right: parent.right
             anchors.rightMargin: IrisStyle.concentricPad(frame.radius, 10 * root.d)
             y: IrisStyle.concentricPad(frame.radius, 10 * root.d)

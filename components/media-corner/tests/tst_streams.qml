@@ -16,6 +16,45 @@ TestCase {
     function test_hostHidesTheToken() {
         compare(Streams.hostOf("https://user:pass@a.example.com/secret/manifest.json"), "a.example.com")
     }
+    function test_addonResponseLimits() {
+        const stream = { url: "https://example.com/video" }
+        const subtitle = { url: "https://example.com/subtitle", lang: "en" }
+        compare(Streams.streamsFrom({ streams: Array(300).fill(stream) }).length, 256)
+        compare(Streams.subtitlesFrom({ subtitles: Array(300).fill(subtitle) }).length, 256)
+        const info = Streams.manifestInfo({ resources: ["stream"], types: Array(200).fill("x".repeat(300)), idPrefixes: Array(200).fill("id") })
+        compare(info.types.length, 128)
+        compare(info.types[0].length, 256)
+        compare(info.prefixes.length, 128)
+        verify(!Streams.mediaUrl("https://example.com/" + "x".repeat(8192)))
+    }
+    function test_mediaDestinationsRejectLocalAddresses() {
+        const local = ["localhost", "media.localhost", "127.0.0.1", "10.1.2.3", "169.254.1.2", "172.16.0.1", "192.168.1.1", "2130706433", "[::1]", "[fc00::1]", "[fe80::1]", "[::ffff:7f00:1]"]
+        for (const host of local) {
+            const url = "https://" + host + "/video"
+            verify(!Streams.mediaUrl(url), host)
+            compare(Streams.streamsFrom({ streams: [{ url }] }).length, 0, host)
+            compare(Streams.subtitlesFrom({ subtitles: [{ url, lang: "en" }] }).length, 0, host)
+        }
+        verify(Streams.mediaUrl("https://example.com/video"))
+        verify(Streams.mediaUrl("https://public.example.com/video"))
+        verify(Streams.mediaUrl("https://[2001:db8::1]/video"))
+    }
+    function test_httpsUrlRejectsMalformedOrNonHttpsDestinations() {
+        verify(Streams.httpsUrl("https://media.example.com/video.m3u8?token=a%2Fb"))
+        verify(Streams.httpsUrl("https://media.example.com:8443/subtitles/file.srt"))
+        verify(Streams.httpsUrl("https://[2001:db8::1]/video.mkv"))
+        verify(!Streams.httpsUrl("http://media.example.com/video"))
+        verify(!Streams.httpsUrl("https://"))
+        verify(!Streams.httpsUrl("https://user:pass@media.example.com/video"))
+        verify(!Streams.httpsUrl("https://media.example.com:0/video"))
+        verify(!Streams.httpsUrl("https://media.example.com:65536/video"))
+        verify(!Streams.httpsUrl("https://media.example.com\\\\video"))
+        verify(!Streams.httpsUrl("https://media.example.com/%2Gvideo"))
+        verify(!Streams.httpsUrl("https://a..example.com/video"))
+        verify(!Streams.httpsUrl("https://a.-b.example.com/video"))
+        compare(Streams.streamsFrom({ streams: [{ url: "https://a..example.com/x.mp4" }, { url: "https://media.example.com:65536/x.mp4" }] }).length, 0)
+        compare(Streams.subtitlesFrom({ subtitles: [{ lang: "en", url: "https://a..example.com/x.srt" }] }).length, 0)
+    }
     function test_manifest() {
         compare(Streams.manifestInfo({ resources: ["catalog"] }), null)
         const plain = Streams.manifestInfo({ name: "A", resources: ["stream"], types: ["movie"], idPrefixes: ["tt"] })

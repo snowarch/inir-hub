@@ -79,16 +79,28 @@ Singleton {
     property var _out: ({})
     property int _outCount: 0
 
-    function ask(url: string, body: string, shape: var, callback: var, force: bool = false): void {
+    function ask(url: string, body: string, shape: var, callback: var, force = false): void {
         if (!root.open) return
         const key = url + body
         const hit = root._answers[key]
         if (!force && hit && Date.now() - hit.at < root.keepMs) { callback(hit.value, ""); return }
         const out = root._out[key]
-        if (out) { out.callbacks.push(callback); return }
+        if (out && !force) { out.callbacks.push(callback); return }
+        const callbacks = out ? out.callbacks.concat([callback]) : [callback]
+        if (out) {
+            out.done = true
+            out.xhr.abort()
+            delete root._out[key]
+            root._outCount--
+        }
 
-        const xhr = new XMLHttpRequest()
-        const ticket = { key, xhr, at: Date.now(), callbacks: [callback], done: false }
+        let xhr
+        try { xhr = new XMLHttpRequest() } catch (e) {
+            root.scheduleDeadline()
+            for (const waiting of callbacks) waiting(null, "network")
+            return
+        }
+        const ticket = { key, xhr, at: Date.now(), callbacks, done: false }
         root._out[key] = ticket
         root._outCount++
         root.scheduleDeadline()
@@ -96,19 +108,26 @@ Singleton {
             if (xhr.readyState !== XMLHttpRequest.DONE || ticket.done) return
             let value = null, error = ""
             if (xhr.status === 200) {
-                try { value = shape(JSON.parse(xhr.responseText)) } catch (e) { error = "bad reply" }
+                // Bound JSON parsing to 1,048,576 UTF-16 code units; XHR has already buffered the reply.
+                if (xhr.responseText.length > 1024 * 1024) error = "bad reply"
+                else try { value = shape(JSON.parse(xhr.responseText)) } catch (e) { error = "bad reply" }
             } else error = xhr.status === 429 ? "busy" : "HTTP " + xhr.status
             if (!error) root._answers[key] = { at: Date.now(), value }
             root._settle(ticket, value, error)
         }
-        xhr.open(body.length > 0 ? "POST" : "GET", url)
-        if (body.length > 0) {
-            xhr.setRequestHeader("Content-Type", "application/json")
-            xhr.setRequestHeader("Accept", "application/json")
+        try {
+            xhr.open(body.length > 0 ? "POST" : "GET", url)
+            if (body.length > 0) {
+                xhr.setRequestHeader("Content-Type", "application/json")
+                xhr.setRequestHeader("Accept", "application/json")
+            }
+            xhr.send(body)
+        } catch (e) {
+            if (!ticket.done) root._settle(ticket, null, "network")
         }
-        xhr.send(body)
     }
     function _settle(ticket: var, value: var, error: string): void {
+        if (ticket.done) return
         ticket.done = true
         delete root._out[ticket.key]
         root._outCount--
@@ -198,6 +217,8 @@ Singleton {
             id: adapter
             // Over the desktop or in a window of its own.
             property bool windowed: false
+            // Empty means the person has not chosen a style yet.
+            property string style: ""
             property string sources: "[]"
             property string subtitleLanguage: "eng"
             property string subtitleApiKey: ""

@@ -112,7 +112,7 @@ MediaPage {
                 // The banner melts into the sheet, so the name under it reads on one ground.
                 gradient: Gradient {
                     GradientStop { position: 0.3; color: "transparent" }
-                    GradientStop { position: 1; color: IrisStyle.surfaceOpaque }
+                    GradientStop { position: 1; color: CornerState.options.style === "prism" ? IrisStyle.veilHeavy : IrisStyle.surfaceOpaque }
                 }
             }
             // On a plate, so it reads over any banner; a narrow window has its own ‹ in the head.
@@ -212,6 +212,12 @@ MediaPage {
     // Watch: in the person's sources, in mpv. One button for what has one video; a show lists its episodes further down.
     readonly property bool film: root.isAnime ? (root.s.type === "Movie" || Number(root.s.episodes) === 1) : root.s.kind !== "series"
     readonly property bool playingThis: CornerWatch.busy && CornerWatch.show?.id === root.show?.id
+    IrisButton {
+        visible: root.full !== null
+        quiet: true
+        text: CornerWatch.watchlist[Streams.watchKey(root.s, null)] ? Translation.tr("Remove from want to watch") : Translation.tr("Want to watch")
+        onClicked: CornerWatch.toggleWatchlist(Object.assign({}, root.s, { film: root.film }))
+    }
     RowLayout {
         Layout.fillWidth: true
         visible: root.full !== null && (root.film || root.playingThis)
@@ -221,6 +227,12 @@ MediaPage {
             emphasized: true
             text: CornerWatch.resumeAt(Streams.watchKey(root.s, root.isAnime ? { episode: 1 } : null)) > 0 ? Translation.tr("Continue") : Translation.tr("Watch")
             onClicked: CornerWatch.begin(Object.assign({}, root.s, { film: root.film }), root.isAnime ? { episode: 1 } : null)
+        }
+        IrisButton {
+            visible: root.film && !root.playingThis && Boolean(CornerWatch.progress[Streams.watchKey(root.s, root.isAnime ? { episode: 1 } : null)]?.position)
+            quiet: true
+            text: Translation.tr("Reset progress")
+            onClicked: CornerWatch.resetProgress(Streams.watchKey(root.s, root.isAnime ? { episode: 1 } : null))
         }
         IrisText {
             Layout.fillWidth: true

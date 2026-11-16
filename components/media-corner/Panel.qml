@@ -32,7 +32,7 @@ Scope {
 
     LazyLoader {
         active: root.resident && !root.windowed
-        CornerOverlay { open: CornerState.open; body: MediaCorner {} }
+        CornerOverlay { open: CornerState.open; body: MediaView {} }
     }
     LazyLoader {
         active: root.resident && root.windowed
@@ -40,7 +40,7 @@ Scope {
             title: "iNiR Media Corner"
             open: CornerState.open
             onCloseRequested: CornerState.open = false
-            body: MediaCorner { windowed: true }
+            body: MediaView { windowed: true }
         }
     }
 

@@ -16,26 +16,66 @@ function hostOf(url) {
 
 // { name, types, prefixes } of a manifest that lists streams; null when it lists none.
 function manifestInfo(manifest) {
-    const resources = Array.isArray(manifest?.resources) ? manifest.resources : []
+    // Limit work and retained metadata from untrusted add-on responses.
+    const resources = Array.isArray(manifest?.resources) ? manifest.resources.slice(0, 128) : []
     const stream = resources.find(r => r === "stream" || r?.name === "stream")
     const subtitle = resources.find(r => r === "subtitles" || r?.name === "subtitles")
     if (stream === undefined && subtitle === undefined) return null
     const resource = stream ?? subtitle
     const types = Array.isArray(resource?.types) ? resource.types : (Array.isArray(manifest?.types) ? manifest.types : [])
     const prefixes = Array.isArray(resource?.idPrefixes) ? resource.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : [])
-    const resourceTypes = r => (Array.isArray(r?.types) ? r.types : (Array.isArray(manifest?.types) ? manifest.types : [])).map(String)
-    const resourcePrefixes = r => (Array.isArray(r?.idPrefixes) ? r.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : [])).map(String)
-    return { name: String(manifest.name ?? "").slice(0, 40), types: types.map(String), prefixes: prefixes.map(String),
+    const limited = values => values.slice(0, 128).map(value => String(value).slice(0, 256))
+    const resourceTypes = r => limited(Array.isArray(r?.types) ? r.types : (Array.isArray(manifest?.types) ? manifest.types : []))
+    const resourcePrefixes = r => limited(Array.isArray(r?.idPrefixes) ? r.idPrefixes : (Array.isArray(manifest?.idPrefixes) ? manifest.idPrefixes : []))
+    return { name: String(manifest.name ?? "").slice(0, 40), types: limited(types), prefixes: limited(prefixes),
              streamTypes: resourceTypes(stream), streamPrefixes: resourcePrefixes(stream),
              subtitleTypes: resourceTypes(subtitle), subtitlePrefixes: resourcePrefixes(subtitle),
              hasStreams: stream !== undefined, hasSubtitles: subtitle !== undefined }
 }
 
+function httpsUrl(value) {
+    const text = String(value || "")
+    const match = text.match(/^https:\/\/(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*|\[[0-9a-f:]+\])(?::([0-9]{1,5}))?(?:[/?#][^\s]*)?$/i)
+    return Boolean(match) && (!match[1] || (Number(match[1]) > 0 && Number(match[1]) <= 65535))
+        && !/[\x00-\x20\\]/.test(text) && !/%(?![0-9a-f]{2})/i.test(text)
+}
+
+// Provider-returned media must not address local networks by literal address.
+// Hostname resolution and redirects cannot be checked here.
+function mediaUrl(value) {
+    if (String(value || "").length > 8192) return false
+    if (!httpsUrl(value)) return false
+    const authority = String(value).slice(8).split(/[/?#]/)[0].toLowerCase()
+    const host = authority.startsWith("[") ? authority.slice(1, authority.indexOf("]")) : authority.split(":")[0]
+    if (host === "localhost" || host.endsWith(".localhost")) return false
+    if (host.includes(":")) {
+        const halves = host.split("::")
+        if (halves.length > 2) return false
+        const left = halves[0] ? halves[0].split(":") : []
+        const right = halves.length === 2 && halves[1] ? halves[1].split(":") : []
+        if (halves.length === 1 && left.length !== 8 || halves.length === 2 && left.length + right.length >= 8) return false
+        const parts = left.concat(Array(8 - left.length - right.length).fill("0"), right).map(part => parseInt(part, 16))
+        if (parts.some(part => !Number.isFinite(part) || part > 65535)) return false
+        if (parts.slice(0, 7).every(part => part === 0) && parts[7] <= 1) return false
+        if ((parts[0] & 0xfe00) === 0xfc00 || (parts[0] & 0xffc0) === 0xfe80) return false
+        // Reject IPv4-mapped IPv6 rather than allowing a local IPv4 address through it.
+        if (parts.slice(0, 5).every(part => part === 0) && parts[5] === 0xffff) return false
+        return true
+    }
+    if (/^(?:0x[0-9a-f]+|[0-9.]+)$/i.test(host)) {
+        const octets = host.split(".")
+        if (octets.length !== 4 || octets.some(part => !/^(0|[1-9][0-9]{0,2})$/.test(part) || Number(part) > 255)) return false
+        const [a, b] = octets.map(Number)
+        return !(a === 0 || a === 10 || a === 127 || a >= 224 || a === 169 && b === 254 || a === 172 && b >= 16 && b <= 31 || a === 192 && b === 168 || a === 100 && b >= 64 && b <= 127)
+    }
+    return true
+}
+
 function subtitlesFrom(body) {
     const result = []
-    for (const entry of Array.isArray(body?.subtitles) ? body.subtitles : []) {
+    for (const entry of Array.isArray(body?.subtitles) ? body.subtitles.slice(0, 256) : []) {
         const url = String(entry?.url ?? ""), lang = String(entry?.lang ?? "").toLowerCase()
-        if (!/^https:\/\/[^\s]+$/.test(url) || !/^[a-z]{2,3}$/.test(lang)) continue
+        if (!mediaUrl(url) || !/^[a-z]{2,3}$/.test(lang)) continue
         result.push({ url, lang, name: String(entry.label ?? lang).slice(0, 80) })
     }
     return result
@@ -44,13 +84,13 @@ function subtitlesFrom(body) {
 // [{ name, url, referer }] an add-on answers for one video.
 function streamsFrom(body) {
     const out = []
-    for (const item of Array.isArray(body?.streams) ? body.streams : []) {
+    for (const item of Array.isArray(body?.streams) ? body.streams.slice(0, 256) : []) {
         const url = String(item?.url ?? "")
-        if (!/^https:\/\/\S+$/.test(url)) continue
+        if (!mediaUrl(url)) continue
         const headers = item.behaviorHints?.proxyHeaders?.request ?? {}
         const referer = String(headers.Referer ?? headers.referer ?? "")
         const name = [item.name, item.title ?? item.description].filter(Boolean).map(text => String(text).split("\n")[0]).join(" · ").slice(0, 80)
-        out.push({ name: name || "Stream", url, referer: /^https:\/\/\S+$/.test(referer) ? referer : "" })
+        out.push({ name: name || "Stream", url, referer: mediaUrl(referer) ? referer : "" })
     }
     return out
 }

@@ -7,6 +7,7 @@ import Quickshell.Io
 import qs.services
 import qs.modules.common
 import "streams.js" as Streams
+import "watch.js" as Watch
 
 // Watching a title: it asks the person's add-ons, lets them pick, and plays in mpv while the Corner is open.
 // A position alone doesn't count: mpv reports 0 for a stream it then can't read.
@@ -18,6 +19,8 @@ Singleton {
     property var show: null
     property var episode: null
     property var streams: []
+    property var sourceResults: []
+    property bool mappingError: false
     property var subtitles: []
     property var selectedSubtitle: null
     property string subtitleError: ""
@@ -28,6 +31,13 @@ Singleton {
     property bool slow: false
     property real position: 0
     property real duration: 0
+    property bool paused: false
+    property bool controlLinked: false
+    property int controlAttempts: 0
+    readonly property string controlPath: {
+        const runtime = String(Quickshell.env("XDG_RUNTIME_DIR") ?? "")
+        return runtime.startsWith("/") && runtime.length < 300 ? `${runtime}/media-corner-mpv-${Quickshell.processId}.sock` : ""
+    }
     readonly property string title: root.show ? String(root.show.title ?? "") : ""
     readonly property bool busy: root.phase === "launching" || root.phase === "playing"
 
@@ -44,6 +54,8 @@ Singleton {
         root.show = title
         root.episode = chosen
         root.streams = []
+        root.sourceResults = []
+        root.mappingError = false
         root.subtitles = []
         root.selectedSubtitle = null
         root.subtitleError = ""
@@ -58,13 +70,17 @@ Singleton {
         const ticket = root._ticket
         const query = `filter[externalSite]=anilist/anime&filter[externalId]=${Number(title.id)}&include=item`
         CornerState.ask("https://kitsu.app/api/edge/mappings?" + query, "", body => Streams.kitsuIdFrom(body), (kitsu, error) => {
-            if (ticket === root._ticket) root._ask(addons, error ? "" : kitsu)
+            if (ticket === root._ticket) {
+                root.mappingError = Boolean(error)
+                root._ask(addons, error ? "" : kitsu, Boolean(error))
+            }
         })
     }
-    function _ask(addons: var, kitsu: string): void {
+    function _ask(addons: var, kitsu: string, mappingError = false): void {
         const ticket = root._ticket
-        const streamPaths = addons.map(addon => ({ addon, path: Streams.pathFor(addon, root.show, root.episode, kitsu), kind: "stream" }))
-        const subtitlePaths = CornerSources.subtitles.map(addon => ({ addon, path: Streams.pathFor(addon, root.show, root.episode, kitsu), kind: "subtitles" }))
+        const streamPaths = addons.map((addon, index) => ({ addon, index, path: Streams.pathFor(addon, root.show, root.episode, kitsu), kind: "stream" }))
+        root.sourceResults = Watch.initialSourceResults(streamPaths, root.show?.kind, kitsu, mappingError)
+        const subtitlePaths = CornerSources.subtitles.map(addon => ({ addon, path: Streams.pathFor(addon, root.show, root.episode, kitsu, "subtitles"), kind: "subtitles" }))
         const paths = streamPaths.concat(subtitlePaths).filter(p => p.path.length > 0)
         const direct = Boolean(CornerState.options.subtitleApiKey) && /^tt\d+$/.test(String(root.show?.id ?? ""))
         root._waiting = paths.length + (direct ? 1 : 0)
@@ -79,7 +95,8 @@ Singleton {
         for (const task of paths) {
             CornerState.ask(`${Streams.baseOf(task.addon.url)}/${task.kind}/${task.path}.json`, "", body => task.kind === "stream" ? Streams.streamsFrom(body) : Streams.subtitlesFrom(body), (found, error) => {
                 if (ticket !== root._ticket) return
-                if (error && task.kind === "stream") root.error = Translation.tr("%1 didn't answer (´・ω・`)").arg(task.addon.name)
+                if (task.kind === "stream") root.sourceResults = Watch.updateSourceResult(root.sourceResults, task.index, error, found?.length ?? 0)
+                if (error && task.kind === "stream") root.error = Translation.tr("Request failed")
                 else if (!error && task.kind === "stream") root.streams = root.streams.concat(found.map(s => Object.assign({ source: task.addon.name }, s)))
                 else if (!error) root.subtitles = root.subtitles.concat(found.map(s => Object.assign({ source: task.addon.name }, s)))
                 if (--root._waiting === 0) root._found()
@@ -136,7 +153,7 @@ Singleton {
     // ── Playing. The address comes from the network: it is only ever an https address after `--`, in a list of arguments.
     // shortcut: mpv is a child of the shell, so `inir restart` closes it; detach it if that gets in the way.
     function play(stream: var): void {
-        if (!/^https:\/\//.test(String(stream?.url ?? ""))) return
+        if (!Streams.mediaUrl(stream?.url)) return
         root.error = ""
         if (root.selectedSubtitle?.fileId) {
             const ticket = root._ticket
@@ -161,21 +178,33 @@ Singleton {
         root._stopping = mpv.running
         mpv.running = false
     }
+    function control(action: string): void {
+        if (!root.controlLinked || !controlSocket.item || !CornerState.open || root.phase !== "playing") return
+        const commands = { pause: ["cycle", "pause"], back: ["seek", -10, "relative"], forward: ["seek", 10, "relative"] }
+        if (!Object.prototype.hasOwnProperty.call(commands, action)) return
+        controlSocket.item.write(JSON.stringify({ command: commands[action] }) + "\n")
+        if (action === "pause") controlSocket.item.write(JSON.stringify({ command: ["get_property", "pause"], request_id: 1 }) + "\n")
+        controlSocket.item.flush()
+    }
     function _start(stream: var): void {
+        if (!Streams.mediaUrl(stream?.url)) return
         const key = Streams.watchKey(root.show, root.episode)
         const resume = root.resumeAt(key)
         // keep-open would keep mpv alive, with no window, on a stream it can't read: it has to end for that to be told.
         const args = ["mpv", "--ytdl=no", "--keep-open=no", "--terminal", "--no-really-quiet", "--no-input-terminal", "--term-status-msg=@@POS ${=time-pos} ${=duration} ${vo-configured}"]
-        if (root.selectedSubtitle) args.push("--sub-file=" + root.selectedSubtitle.url)
-        if (stream.referer) args.push("--referrer=" + stream.referer)
+        if (root.controlPath.length) args.push("--input-ipc-server=" + root.controlPath)
+        if (root.selectedSubtitle && Streams.mediaUrl(root.selectedSubtitle.url)) args.push("--sub-file=" + root.selectedSubtitle.url)
+        if (Streams.mediaUrl(stream.referer)) args.push("--referrer=" + stream.referer)
         if (resume > 0) args.push("--start=" + Math.floor(resume))
         args.push("--", stream.url)
-        root._current = { stream, key, title: root.title }
+        root._current = { stream, key, title: root.title, show: { id: root.show.id, kind: root.show.kind, title: root.title, type: root.show.type ?? "", film: Boolean(root.show.film) }, episode: root.episode }
         root._startedAt = resume
         root._stopping = false
         root.position = 0
         root.duration = 0
         root.slow = false
+        root.paused = false
+        root.controlAttempts = 0
         root.phase = "launching"
         mpv.command = args
         mpv.running = true
@@ -183,6 +212,46 @@ Singleton {
     function _playing(): void {
         root.phase = "playing"
         CornerState.sheet = false
+    }
+    Loader {
+        id: controlSocket
+        active: false
+        sourceComponent: Socket {
+            path: root.controlPath
+            connected: true
+            onConnectionStateChanged: {
+                root.controlLinked = connected
+                if (connected) {
+                    write(JSON.stringify({ command: ["get_property", "pause"], request_id: 1 }) + "\n")
+                    write(JSON.stringify({ command: ["observe_property", 1, "pause"] }) + "\n")
+                    flush()
+                }
+            }
+            parser: SplitParser {
+                onRead: line => {
+                    if (line.length > 4096) return
+                    try {
+                        const reply = JSON.parse(line)
+                        if (reply.request_id === 1 && reply.error === "success" && typeof reply.data === "boolean") root.paused = reply.data
+                        if (reply.event === "property-change" && reply.name === "pause" && typeof reply.data === "boolean") root.paused = reply.data
+                    } catch (e) {}
+                }
+            }
+        }
+    }
+    Timer {
+        interval: 250
+        repeat: true
+        running: CornerState.open && root.phase === "playing" && root.controlPath.length > 0 && !root.controlLinked && root.controlAttempts < 40
+        onTriggered: {
+            root.controlAttempts++
+            controlSocket.active = false
+            controlSocket.active = true
+        }
+    }
+    Connections {
+        target: CornerState
+        function onOpenChanged(): void { if (!CornerState.open) controlSocket.active = false }
     }
     Process {
         id: mpv
@@ -197,6 +266,8 @@ Singleton {
             }
         }
         onExited: code => {
+            controlSocket.active = false
+            root.controlLinked = false
             const played = root.phase === "playing"
             if (played) root._keep()
             if (root._next !== null) {
@@ -227,14 +298,60 @@ Singleton {
         onTriggered: root._keep()
     }
 
+    // A separate local list of titles the person wants to watch.
+    property var watchlist: ({})
+    property bool watchlistLoaded: false
+    property bool watchlistLoadFailed: false
+    property var pendingWatchlistToggles: []
+    function toggleWatchlist(show: var): void {
+        const key = Streams.watchKey(show, null)
+        root.watchlist = Watch.toggleWatchlist(root.watchlist, key, show)
+        if (root.watchlistLoaded) watchlistFile.setText(JSON.stringify(root.watchlist))
+        else root.pendingWatchlistToggles = root.pendingWatchlistToggles.concat([show])
+    }
+    function finishWatchlistLoad(value: var): void {
+        let list = value
+        for (const show of root.pendingWatchlistToggles)
+            list = Watch.toggleWatchlist(list, Streams.watchKey(show, null), show)
+        const changed = root.pendingWatchlistToggles.length > 0
+        root.pendingWatchlistToggles = []
+        root.watchlist = list
+        root.watchlistLoaded = true
+        root.watchlistLoadFailed = false
+        if (changed) watchlistFile.setText(JSON.stringify(list))
+    }
+    function retryWatchlistLoad(): void {
+        root.watchlistLoadFailed = false
+        watchlistFile.reload()
+    }
+    FileView {
+        id: watchlistFile
+        path: Directories.stateUserPath + "/media-corner-watchlist.json"
+        printErrors: false
+        onLoaded: { try { root.finishWatchlistLoad(JSON.parse(watchlistFile.text()) ?? {}) } catch (e) { root.finishWatchlistLoad({}) } }
+        onLoadFailed: error => { if (error === FileViewError.FileNotFound) root.finishWatchlistLoad({}); else root.watchlistLoadFailed = true }
+    }
+
     // ── Progress: id or id:season:episode → { position, duration, at }.
     property var progress: ({})
     function _keep(): void {
         if (!root._current || root.position <= 0) return
-        root.progress = Object.assign({}, root.progress, { [root._current.key]: { position: root.position, duration: root.duration, at: Date.now() } })
+        root.progress = Object.assign({}, root.progress, { [root._current.key]: { position: root.position, duration: root.duration, at: Date.now(), show: root._current.show, episode: root._current.episode } })
         progressFile.setText(JSON.stringify(root.progress))
     }
     // Where to pick it up: a little before where it stopped, unless it was barely started or is finished.
+    function forget(key: string): void {
+        const next = Object.assign({}, root.progress)
+        delete next[key]
+        root.progress = next
+        progressFile.setText(JSON.stringify(next))
+    }
+    function resetProgress(key: string): void {
+        const next = Watch.resetProgress(root.progress, key)
+        if (next === root.progress) return
+        root.progress = next
+        progressFile.setText(JSON.stringify(root.progress))
+    }
     function resumeAt(key: string): real {
         const kept = root.progress[key]
         return kept && kept.position > 30 && !root.isSeen(key) ? kept.position - 5 : 0
