@@ -16,6 +16,8 @@ Inspired by [OmaCam](https://github.com/entroit/omacam) (MIT, Entroit).
 
 RTSP and RTSPS are drawn by `inircam-feeds`, a small helper that runs `ffmpeg` and keeps a fresh JPEG per camera for the panel to show. That path is used because Qt Multimedia's FFmpeg/VAAPI backend fails on some machines with `Invalid data found` or EGL texture errors, and a JPEG that is always ready never shows a broken video surface.
 
+The frames live in `$XDG_RUNTIME_DIR/inircam`, a folder only you can read (mode 700), and the pullers run only while the panel or a pinned camera is on screen. Camera passwords travel in a 0600 file and the puller starts non-dumpable, so they do not show up in `ps` for anyone else.
+
 Everything else (HTTP, MJPEG) plays through Qt Multimedia.
 
 Grid tiles use the substream when a camera has one, and enlarged and wall views use the main stream.
@@ -74,7 +76,7 @@ The pin button in the panel, or `inir inircam pin <cameraId>`, gives a camera it
 
 ## If a camera will not show
 
-- **Stuck on “Connecting…”**: check the camera answers (`ffprobe -rtsp_transport tcp "<url>"`), run **Test connection** in the panel, and look at `$XDG_RUNTIME_DIR/inircam-feeds/*.log` when you use the feed helper by hand.
+- **Stuck on “Connecting…”**: check the camera answers (`ffprobe -rtsp_transport tcp "<url>"`), run **Test connection** in the panel, and look at `$XDG_RUNTIME_DIR/inircam/feeds/*.log`.
 - **One camera fails, the rest work**: brands disagree about substream paths and codecs; try another subtype or path.
 - **Feeds stop after a while**: an RTSP session can drop. The panel restarts its pullers as it needs them; a restart of the panel also clears a stuck feed.
 - **An NVR refuses a stream**: many allow only a few sessions at once, so too many main streams can make later ones time out.

@@ -108,28 +108,44 @@ Scope {
     Probe { id: cameraProbe }
 
     // RTSP feeds use external ffmpeg frame pullers (reliable across backends).
-    // Sync pullers when cameras change and keep them alive while the component is active.
+    // Pullers run only while the panel or a pinned camera is on screen; at rest
+    // the shell keeps no stream open.
     readonly property string feedHelper: Qt.resolvedUrl("inircam-feeds").toString().replace(/^file:\/\//, "")
+    readonly property bool feedsNeeded: root.open || pins.pins.length > 0
+
     Process {
         id: feedSync
         running: false
     }
-    function syncFeeds() {
+
+    function runFeedHelper(verb) {
         if (!root.feedHelper || root.feedHelper.indexOf("inircam-feeds") === -1) return
-        feedSync.command = ["sh", "-c", 'test -x "$1" && "$1" sync || true', "sh", root.feedHelper]
+        const script = verb === "sync"
+            ? 'test -x "$1" && exec "$1" sync "$2"'
+            : 'test -x "$1" && exec "$1" stop'
+        feedSync.command = ["sh", "-c", script, "sh", root.feedHelper, String(Quickshell.processId)]
         feedSync.running = false
         feedSync.running = true
     }
+
+    function syncFeeds() { root.runFeedHelper("sync") }
+    function stopFeeds() { root.runFeedHelper("stop") }
+
+    onFeedsNeededChanged: {
+        if (root.feedsNeeded) root.syncFeeds()
+        else root.stopFeeds()
+    }
+
+    // Keeps a puller alive after an RTSP drop, and only while something shows it.
     Timer {
         interval: 15000
         repeat: true
-        running: true
-        triggeredOnStart: true
+        running: root.feedsNeeded
         onTriggered: root.syncFeeds()
     }
     Connections {
         target: store
-        function onCamerasChanged() { root.syncFeeds() }
+        function onCamerasChanged() { if (root.feedsNeeded) root.syncFeeds() }
     }
 
     /// The camera panel: open or close it, open a camera, pin it to the desktop.
