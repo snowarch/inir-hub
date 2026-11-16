@@ -9,16 +9,21 @@ sources you add. Anime comes from AniList; films and series from Cinemeta, Strem
 - Niri keybind: `Mod+Shift+M { spawn "inir" "media-corner" "toggle"; }`
 - The window key at the top right switches between the desktop overlay and a window of its own.
 
-## Two styles, the same features
+## Three styles, the same features
 
-Media Corner is laid out like iRiS's Settings window, in the mode of the same name:
+Media Corner is based on iRiS's Settings window, in the layout of the same name:
 
-- **Normal** follows Settings' Folio: places down the left, the search over the page, the style switch at the top
-  right. Home has the trending shows on one card, Every day's tiles, Yours and the Library rows.
-- **Prism** follows Settings' Prism: near-black, white for what is chosen, and a right rail with Yours and the player.
+| Style | Looks like |
+|---|---|
+| **Classic** | The places on a card with the search on top, each with its glyph in colour; the page's name over it |
+| **Folio** | The places down the left under captions, the search over the page |
+| **Prism** | Near-black, white for what is chosen, and a right rail with Yours and the player |
 
-Switch between them with the switch at the top (Normal), or in **Sources › Appearance**. You keep your place, the
-open title and what is playing.
+Classic and Folio share the page: the trending shows on one card, Every day's tiles, Yours and the Library rows.
+Prism has its own: a hero, a deck of two cards and the places of every day.
+
+Switch between them with the switch at the top (Classic and Folio), in **Sources › Appearance**, or in Community
+Hub. You keep your place, the open title and what is playing.
 
 ## Pages
 
