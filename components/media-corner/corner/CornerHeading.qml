@@ -6,26 +6,28 @@ import qs.modules.iris.components
 
 // A page's or a section's name, the way iRiS's Settings writes it in each style.
 // Prism: a small eyebrow over a bold title, a quiet link on the right.
-// Normal (Folio): a page's title over its subtitle; a section's glyph and title in its tint, the note after it, and
-// the link as a pill.
+// Classic and Folio: a page's title over its subtitle; a section's glyph and title in its tint, the note after it, and
+// the link as a pill. Classic names the page over it already, so a page heading keeps only its subtitle there.
 RowLayout {
     id: root
     property string eyebrow: ""
     property string title: ""
-    // A section's glyph and tint in Normal.
+    // A section's glyph and tint in Classic and Folio.
     property string glyph: "label"
     property color tint: IrisStyle.identity.gray
     // «See all», «Edit»…; empty hides it.
     property string link: ""
     // The page's own title is larger than a section's.
     property bool page: false
+    // A page title that says more than the place's name (a season, a year): Classic keeps it too.
+    property bool keep: false
     signal linkClicked()
     readonly property real d: IrisStyle.density
     readonly property bool folio: !CornerSkin.prism
     Layout.fillWidth: true
     spacing: Math.round(8 * root.d)
 
-    // Prism, and a Normal page: words stacked.
+    // Prism, and a Classic or Folio page: words stacked.
     ColumnLayout {
         visible: !root.folio || root.page
         Layout.fillWidth: true
@@ -41,6 +43,7 @@ RowLayout {
         }
         IrisText {
             Layout.fillWidth: true
+            visible: !(CornerSkin.classic && root.page && !root.keep)
             text: root.title
             textFormat: Text.PlainText
             font.family: IrisStyle.fontTitle
@@ -58,7 +61,7 @@ RowLayout {
             elide: Text.ElideRight
         }
     }
-    // A Normal section: Settings' group title.
+    // A Classic or Folio section: Settings' group title.
     IrisGroupTitle {
         visible: root.folio && !root.page
         text: root.title

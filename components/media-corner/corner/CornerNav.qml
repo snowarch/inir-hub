@@ -13,12 +13,14 @@ import "reveal.js" as Reveal
 // The Corner's places, as iRiS's Settings lists its pages in each style.
 // Prism: its name, a search pill, and groups under caps captions whose rows open beneath them while one of theirs is
 // shown; without the rail beside the page, Yours (Want to watch, Watching) follows the places here.
-// Normal (Folio): every place under its caption, the one you are in on a light pill; the search sits over the page.
+// Folio: every place under its caption, the one you are in on a light pill; the search sits over the page.
+// Classic: a card with the search on top and every place with its glyph on a tinted squircle; groups are set apart by
+// a gap, Library by a hairline.
 Rectangle {
     id: root
     property bool narrow: false
     property bool railVisible: false
-    // [{ id, title, icon, caption?, group? }]: titles untranslated; a caption starts a group.
+    // [{ id, title, icon, tint?, caption?, group? }]: titles untranslated; a caption starts a group.
     property var places: []
     property string section: ""
     property string hint: ""
@@ -56,7 +58,7 @@ Rectangle {
         return result
     }
     color: CornerSkin.column
-    border.width: CornerSkin.edgeWidth
+    border.width: CornerSkin.columnEdge
     border.color: CornerSkin.edge
     clip: true
 
@@ -95,7 +97,8 @@ Rectangle {
             }
             CornerSearch {
                 id: searchPlate
-                visible: CornerSkin.prism
+                visible: !CornerSkin.folio
+                Layout.topMargin: CornerSkin.classic ? Math.round(2 * root.d) : 0
                 Layout.fillWidth: true
                 Layout.bottomMargin: Math.round(8 * root.d)
                 hint: root.hint
@@ -109,15 +112,20 @@ Rectangle {
             }
             // The first time it opens: which look to wear. Sources › Appearance changes it later.
             ColumnLayout {
-                visible: CornerState.options.style !== "normal" && CornerState.options.style !== "prism"
+                visible: !["classic", "folio", "normal", "prism"].includes(CornerState.options.style)
                 Layout.fillWidth: true
                 Layout.topMargin: Math.round(14 * root.d)
                 spacing: Math.round(6 * root.d)
                 IrisText { Layout.fillWidth: true; text: Translation.tr("Style"); color: IrisStyle.textTertiary; font.pixelSize: IrisStyle.typeMeta }
-                RowLayout {
-                    Layout.fillWidth: true
-                    CornerPill { Layout.fillWidth: true; label: Translation.tr("Normal"); onClicked: CornerState.set("style", "normal") }
-                    CornerPill { Layout.fillWidth: true; label: Translation.tr("Prism"); onClicked: CornerState.set("style", "prism") }
+                Repeater {
+                    model: CornerSkin.looks
+                    CornerPill {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        glyph: modelData.glyph
+                        label: Translation.tr(modelData.label)
+                        onClicked: CornerState.set("style", modelData.id)
+                    }
                 }
             }
             LibraryList {
@@ -135,9 +143,13 @@ Rectangle {
         readonly property bool child: Boolean(row.modelData.child)
         // A group is lit while one of its rows is shown; its row is the plate.
         readonly property bool selected: row.isGroup ? CornerState.query.length === 0 && root.section.startsWith(row.modelData.group + ":") : root.isOn(row.modelData.id)
-        readonly property real rowHeight: Math.round((root.narrow ? 40 : 34) * root.d * Math.max(1, IrisStyle.typeScale))
+        readonly property real rowHeight: Math.round((root.narrow ? 40 : CornerSkin.classic ? 30 : 34) * root.d * Math.max(1, IrisStyle.typeScale))
         readonly property string caption: Translation.tr(String(row.modelData.caption ?? ""))
-        readonly property real washY: row.caption.length > 0 ? Math.round(12 * root.d) + captionText.implicitHeight + Math.round(4 * root.d) : 0
+        // Classic sets a group apart without words: a gap, and a hairline before Library.
+        readonly property bool parted: CornerSkin.classic && row.caption.length > 0
+        readonly property bool lined: row.parted && row.modelData.id === "sources"
+        readonly property real washY: row.parted ? Math.round((row.lined ? 17 : 10) * root.d)
+            : row.caption.length > 0 ? Math.round(12 * root.d) + captionText.implicitHeight + Math.round(4 * root.d) : 0
         implicitHeight: row.washY + row.rowHeight
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
@@ -149,9 +161,17 @@ Rectangle {
         Keys.onReturnPressed: row.activate()
         Keys.onSpacePressed: row.activate()
         onActiveFocusChanged: if (activeFocus) Reveal.reveal(row)
+        Rectangle {
+            visible: row.lined
+            x: Math.round(6 * root.d)
+            y: Math.round(8 * root.d)
+            width: row.width - 2 * x
+            height: 1
+            color: IrisStyle.hairline
+        }
         IrisText {
             id: captionText
-            visible: row.caption.length > 0
+            visible: row.caption.length > 0 && !CornerSkin.classic
             x: Math.round(12 * root.d)
             y: Math.round(12 * root.d)
             width: row.width - x
@@ -171,11 +191,11 @@ Rectangle {
             x: row.child ? Math.round(16 * root.d) : 0
             width: row.width - x
             height: row.rowHeight
-            radius: CornerSkin.prism ? IrisStyle.radiusRow : height / 2
+            radius: CornerSkin.folio ? height / 2 : IrisStyle.radiusRow
             color: plate.lit ? CornerSkin.rowOn : row.containsMouse ? IrisStyle.fillHover : "transparent"
             readonly property color ink: plate.lit ? CornerSkin.rowOnInk : IrisStyle.text
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
-            // The mark of where you are: Settings' white bar on the right in Prism, the accent in Normal.
+            // The mark of where you are: Settings' white bar on the right in Prism, a plate elsewhere.
             Rectangle {
                 visible: plate.lit && CornerSkin.prism
                 x: parent.width - width
@@ -186,9 +206,21 @@ Rectangle {
                 color: CornerSkin.prism ? CornerSkin.solid : root.accentInk
             }
             CornerFocusRing { on: row.activeFocus }
+            IrisSquircle {
+                id: squircle
+                visible: CornerSkin.classic && !row.child
+                x: Math.round(8 * root.d)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.round(22 * root.d)
+                height: width
+                tint: IrisStyle.identity[String(row.modelData.tint ?? "gray")] ?? IrisStyle.identity.gray
+                glyph: row.modelData.icon
+                // Plated as Settings plates its marks.
+                plain: IrisStyle.settingsPlainMarks
+            }
             MaterialSymbol {
                 id: ink
-                visible: !row.child
+                visible: !row.child && !CornerSkin.classic
                 x: Math.round(12 * root.d)
                 anchors.verticalCenter: parent.verticalCenter
                 text: row.modelData.icon
@@ -197,13 +229,13 @@ Rectangle {
                 color: plate.ink
             }
             IrisText {
-                x: row.child ? Math.round(14 * root.d) : ink.x + Math.round(30 * root.d)
+                x: row.child ? Math.round(14 * root.d) : CornerSkin.classic ? squircle.x + squircle.width + Math.round(11 * root.d) : ink.x + Math.round(30 * root.d)
                 width: parent.width - x - Math.round((root.narrow ? 36 : 12) * root.d)
                 anchors.verticalCenter: parent.verticalCenter
                 text: Translation.tr(row.modelData.title)
                 color: row.child && !row.selected ? IrisStyle.textSecondary : plate.ink
                 font.pixelSize: row.child ? IrisStyle.typeMeta : IrisStyle.typeLabel
-                font.weight: IrisStyle.weight(row.selected || (!row.child && CornerSkin.prism) ? Font.DemiBold : Font.Normal)
+                font.weight: IrisStyle.weight(row.selected || (!row.child && !CornerSkin.folio) ? Font.DemiBold : Font.Normal)
                 elide: Text.ElideRight
             }
             MaterialSymbol {

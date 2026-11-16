@@ -9,8 +9,9 @@ import "../state"
 
 // The Media Corner's body, laid out as iRiS's Settings in the style worn (CornerSkin).
 // Prism: the places on the left, the page under ‹ › and the window keys, and Yours with what plays on a right rail
-// when there is room. Normal (Folio): the places down the whole left side; over the page ‹ ›, the search, and on the
-// right the style switch and the window keys; what plays rides at the foot of the page.
+// when there is room. Folio: the places down the whole left side; over the page ‹ ›, the search, and on the right the
+// style switch and the window keys. Classic: the places on a card with the search; over the page ‹ ›, its name, and
+// the switch as glyphs. Without the rail, what plays rides at the foot of the page.
 // A window too narrow for both holds the places, then the page pushed over them.
 Item {
     id: root
@@ -46,6 +47,19 @@ Item {
         CornerState.set("windowed", !root.windowed)
     }
 
+    // Classic names the page over it, as Settings does: the place, the open title's kind, a search or Watch.
+    readonly property string pageTitle: {
+        if (CornerState.sheet) return Translation.tr("Watch")
+        const show = CornerState.show
+        if (show) return Translation.tr(show.kind === "anime" ? "Anime" : show.kind === "series" ? "Series" : "Movie")
+        if (CornerState.query.length > 0) return CornerState.place.includes(":search") ? Translation.tr("Search")
+            : Translation.tr("Results for “%1”").arg(CornerState.query)
+        const genre = root.section.match(/:genre:(.+)$/)
+        if (genre) return Translation.tr(genre[1])
+        const place = root.places.find(item => item.id === root.section)
+        return place ? Translation.tr(place.title) : ""
+    }
+
     readonly property int paneInset: Math.round(8 * root.d)
     readonly property int paneRadius: IrisStyle.concentric(frame.radius, root.paneInset, IrisStyle.radiusTile)
     readonly property int panePad: IrisStyle.concentricPad(root.paneRadius, 10 * root.d)
@@ -77,7 +91,7 @@ Item {
         sequence: "Ctrl+F"
         enabled: root.open
         onActivated: {
-            if (CornerSkin.prism) { root.pushed = false; nav.search.focusField() }
+            if (!CornerSkin.folio) { root.pushed = false; nav.search.focusField() }
             else topSearch.focusField()
         }
     }
@@ -122,13 +136,15 @@ Item {
             y: root.column ? topBar.y + topBar.height + Math.round(6 * root.d) : root.paneInset
             width: root.column ? frame.width - 2 * root.paneInset
                 : CornerSkin.prism ? Math.round(Math.min(Math.max(220 * root.d, frame.width * 0.18), 256 * root.d))
+                : CornerSkin.classic ? Math.round(Math.min(Math.max(236 * root.d, frame.width * 0.18), 260 * root.d))
                 : Math.round(Math.min(Math.max(244 * root.d, frame.width * 0.19), 300 * root.d))
             height: frame.height - y - root.paneInset
             onPicked: id => root.pick(id)
             onSubmitted: root.pushed = true
         }
 
-        // ‹ › and the window keys over the page, as Settings has them; in Normal the search and the style too.
+        // ‹ › and the window keys over the page, as Settings has them; in Classic and Folio the style too, and
+        // Folio's search or Classic's page name.
         Item {
             id: topBar
             readonly property real start: root.column ? root.paneInset : nav.x + nav.width + root.gap
@@ -151,9 +167,21 @@ Item {
                     enabled: CornerState.canGoForward
                     onClicked: CornerState.forward()
                 }
+                IrisText {
+                    visible: CornerSkin.classic
+                    anchors.verticalCenter: parent.verticalCenter
+                    leftPadding: Math.round(8 * root.d)
+                    width: Math.min(implicitWidth, topBar.width - keys.width - Math.round(110 * root.d))
+                    text: root.pageTitle
+                    textFormat: Text.PlainText
+                    font.family: IrisStyle.fontTitle
+                    font.pixelSize: IrisStyle.typeTitleLarge
+                    font.weight: IrisStyle.weight(Font.Bold)
+                    elide: Text.ElideRight
+                }
                 CornerSearch {
                     id: topSearch
-                    visible: !CornerSkin.prism
+                    visible: CornerSkin.folio
                     anchors.verticalCenter: parent.verticalCenter
                     width: Math.min(Math.round(320 * root.d * Math.max(1, IrisStyle.typeScale)), topBar.width - keys.width - Math.round(100 * root.d))
                     implicitHeight: Math.round(36 * root.d)
@@ -167,7 +195,7 @@ Item {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Math.round(6 * root.d)
-                StyleSwitch { visible: !CornerSkin.prism && !root.column }
+                StyleSwitch { visible: !CornerSkin.prism && !root.column; glyphOnly: CornerSkin.classic }
                 ChromeKey {
                     glyph: root.windowed ? "layers" : "open_in_new"
                     name: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open in a window")
@@ -212,7 +240,7 @@ Item {
         }
     }
 
-    // A round key of the window's chrome, with its name on hover: bare in Prism, on a quiet plate in Normal.
+    // A round key of the window's chrome, with its name on hover: bare in Prism, on a quiet plate in Classic and Folio.
     component ChromeKey: IrisButton {
         id: key
         required property string glyph
@@ -231,7 +259,8 @@ Item {
     // Settings' layout switch, for the Corner's two styles.
     component StyleSwitch: Rectangle {
         id: styles
-        readonly property var looks: [{ id: "normal", glyph: "article", label: Translation.tr("Normal") }, { id: "prism", glyph: "flare", label: Translation.tr("Prism") }]
+        // Classic shows the glyphs alone, Folio their names too.
+        property bool glyphOnly: false
         anchors.verticalCenter: parent.verticalCenter
         implicitWidth: lookRow.implicitWidth + Math.round(6 * root.d)
         implicitHeight: Math.round(36 * root.d)
@@ -244,18 +273,19 @@ Item {
             anchors.centerIn: parent
             spacing: Math.round(2 * root.d)
             Repeater {
-                model: styles.looks
+                model: CornerSkin.looks
                 IrisButton {
                     id: look
                     required property var modelData
-                    readonly property bool on: CornerState.options.style === look.modelData.id
+                    readonly property bool on: CornerSkin.look === look.modelData.id
                     implicitHeight: Math.round(30 * root.d)
-                    implicitWidth: lookLabel.implicitWidth + Math.round(24 * root.d)
+                    implicitWidth: styles.glyphOnly ? Math.round(34 * root.d) : lookLabel.implicitWidth + Math.round(24 * root.d)
                     buttonRadius: height / 2
                     buttonRadiusPressed: height / 2
                     colBackground: look.on ? IrisStyle.fill : "transparent"
                     colBackgroundHover: look.on ? IrisStyle.fill : IrisStyle.fillQuiet
-                    Accessible.name: look.modelData.label
+                    Accessible.name: Translation.tr(look.modelData.label)
+                    StyledToolTip { text: Translation.tr(look.modelData.label); extraVisibleCondition: styles.glyphOnly && look.buttonHovered }
                     onClicked: CornerState.set("style", look.modelData.id)
                     Row {
                         id: lookLabel
@@ -263,8 +293,9 @@ Item {
                         spacing: Math.round(6 * root.d)
                         MaterialSymbol { anchors.verticalCenter: parent.verticalCenter; text: look.modelData.glyph; iconSize: Math.round(16 * root.d); color: look.on ? IrisStyle.text : IrisStyle.muted }
                         IrisText {
+                            visible: !styles.glyphOnly
                             anchors.verticalCenter: parent.verticalCenter
-                            text: look.modelData.label
+                            text: Translation.tr(look.modelData.label)
                             color: look.on ? IrisStyle.text : IrisStyle.muted
                             font.pixelSize: IrisStyle.typeMeta
                             font.weight: IrisStyle.weight(Font.Medium)

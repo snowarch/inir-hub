@@ -110,6 +110,7 @@ Item {
                 }
                 CornerHeading {
                     page: true
+                    keep: root.spec?.stepper ?? false
                     eyebrow: root.spec?.subtitle ?? ""
                     title: root.spec?.title ?? ""
                 }
