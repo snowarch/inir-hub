@@ -215,6 +215,8 @@ Singleton {
         const fits = row => {
             if (!row || row.page !== id || row.kind === "switch" || row.kind === "action" || !root.shown(row) || out.includes(row)) return false
             const say = String(root.sayNow(row) ?? "")
+            // A bare number ("0" for Speed) says nothing alone on a poster: a figure there carries its unit or a word.
+            if (/^[\d\s.,−-]+$/.test(say)) return false
             return say.length > 0 && say.length <= 16 && !said().includes(say)
         }
         for (const lead of Array.from(page?.lead ?? [])) {
