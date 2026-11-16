@@ -212,10 +212,12 @@ Singleton {
     // with it a new Radio): nothing is left to stop this one, so it stops itself, for good: while a later reload
     // scans, a copy left behind would otherwise take its IPC back.
     readonly property string folder: String(Qt.resolvedUrl("."))
+    // `present` never reads `retired`, so retiring from its handler is no binding loop.
+    readonly property bool present: !CustomWidgets.ready
+        || CustomWidgets.widgets.some(w => w.id === "radio" && String(w.qmlPath).indexOf(root.folder) === 0)
     property bool retired: false
-    readonly property bool installed: !root.retired && (!CustomWidgets.ready
-        || CustomWidgets.widgets.some(w => w.id === "radio" && String(w.qmlPath).indexOf(root.folder) === 0))
-    onInstalledChanged: if (!root.installed) { root.retired = true; player.stop(); root.closeTuner() }
+    readonly property bool installed: !root.retired && root.present
+    onPresentChanged: if (!root.present && !root.retired) { root.retired = true; player.stop(); root.closeTuner() }
 
     RadioBrowser { id: browser }
     RadioPlayer {
