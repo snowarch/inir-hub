@@ -2641,5 +2641,6 @@
   "The next episode airing, and the time left.": "即将播出的下一集与剩余时间。",
   "Search, pick an episode and pick up where you left.": "搜索、选择一集，并从上次停下的地方继续。",
   "%1 panel off": "%1 面板已关闭",
-  "Frosted slabs · the spectrum only on what each widget draws": "磨砂板 · 光谱只落在每个小组件绘制的内容上"
+  "Frosted slabs · the spectrum only on what each widget draws": "磨砂板 · 光谱只落在每个小组件绘制的内容上",
+  "Can't read the compositor's config, so app rules can't be set here.": "无法读取合成器的配置，因此无法在此设置应用规则。"
 }

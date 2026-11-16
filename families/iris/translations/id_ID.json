@@ -2641,5 +2641,6 @@
   "The next episode airing, and the time left.": "Episode anime berikutnya dan sisa waktunya.",
   "Search, pick an episode and pick up where you left.": "Cari, pilih episode, lanjutkan dari terakhir.",
   "%1 panel off": "Panel %1 mati",
-  "Frosted slabs · the spectrum only on what each widget draws": "Lempeng buram · spektrum hanya pada yang digambar tiap widget"
+  "Frosted slabs · the spectrum only on what each widget draws": "Lempeng buram · spektrum hanya pada yang digambar tiap widget",
+  "Can't read the compositor's config, so app rules can't be set here.": "Konfigurasi compositor tidak dapat dibaca, jadi aturan aplikasi tidak bisa diatur di sini."
 }

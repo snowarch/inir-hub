@@ -2641,5 +2641,6 @@
   "The next episode airing, and the time left.": "Le prochain épisode diffusé et le temps restant.",
   "Search, pick an episode and pick up where you left.": "Cherchez, choisissez un épisode, reprenez où vous étiez.",
   "%1 panel off": "Panneau %1 désactivé",
-  "Frosted slabs · the spectrum only on what each widget draws": "Plaques givrées · le spectre seulement sur ce que dessine chaque widget"
+  "Frosted slabs · the spectrum only on what each widget draws": "Plaques givrées · le spectre seulement sur ce que dessine chaque widget",
+  "Can't read the compositor's config, so app rules can't be set here.": "Impossible de lire la configuration du compositeur : les règles d'apps ne peuvent pas être définies ici."
 }

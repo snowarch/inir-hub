@@ -107,12 +107,15 @@ ColumnLayout {
         font.pixelSize: IrisStyle.typeMeta
         color: root.rules?.error ? IrisStyle.danger : IrisStyle.subtext
         text: root.rules?.error ? Translation.tr("The compositor did not take that change: %1").arg(root.rules.error)
+            : root.rules?.unread ? Translation.tr("Can't read the compositor's config, so app rules can't be set here.")
             : root.rules && !root.rules.ready ? Translation.tr("Reading the compositor's rules…") : ""
     }
 
     Rectangle {
         id: plate
         Layout.fillWidth: true
+        // Until the rules are read, Add would write nothing: the line above says why.
+        visible: root.rules?.ready ?? true
         implicitHeight: strip.implicitHeight + Math.round(24 * root.d)
         radius: IrisStyle.radiusCard
         color: IrisStyle.fillQuiet
@@ -136,8 +139,7 @@ ColumnLayout {
             Piece {
                 glyph: root.adding ? "close" : "add"
                 title: root.adding ? Translation.tr("Cancel") : Translation.tr("Add")
-                // While the rules are still read, "none yet" would be a guess.
-                line: root.list.length === 0 && !root.adding && (root.rules?.ready ?? true) ? Translation.tr("No app has a rule yet") : ""
+                line: root.list.length === 0 && !root.adding ? Translation.tr("No app has a rule yet") : ""
                 lit: root.adding
                 onPressed: { root.adding = !root.adding; root.picked = "" }
             }

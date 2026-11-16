@@ -2641,5 +2641,6 @@
   "The next episode airing, and the time left.": "Tập anime sắp chiếu tiếp theo và thời gian còn lại.",
   "Search, pick an episode and pick up where you left.": "Tìm kiếm, chọn tập và xem tiếp từ chỗ dừng.",
   "%1 panel off": "Bảng %1 đã tắt",
-  "Frosted slabs · the spectrum only on what each widget draws": "Tấm kính mờ · quang phổ chỉ trên những gì mỗi widget vẽ"
+  "Frosted slabs · the spectrum only on what each widget draws": "Tấm kính mờ · quang phổ chỉ trên những gì mỗi widget vẽ",
+  "Can't read the compositor's config, so app rules can't be set here.": "Không đọc được cấu hình của compositor nên không thể đặt quy tắc ứng dụng ở đây."
 }

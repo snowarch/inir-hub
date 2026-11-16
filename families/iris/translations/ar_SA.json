@@ -2641,5 +2641,6 @@
   "The next episode airing, and the time left.": "الحلقة التالية في البث والوقت المتبقي.",
   "Search, pick an episode and pick up where you left.": "ابحث، واختر حلقة، وتابع من حيث توقفت.",
   "%1 panel off": "لوحة %1 مطفأة",
-  "Frosted slabs · the spectrum only on what each widget draws": "ألواح زجاج مصنفر · الطيف فقط على ما يرسمه كل عنصر"
+  "Frosted slabs · the spectrum only on what each widget draws": "ألواح زجاج مصنفر · الطيف فقط على ما يرسمه كل عنصر",
+  "Can't read the compositor's config, so app rules can't be set here.": "تعذّرت قراءة إعدادات المُركِّب، لذا لا يمكن ضبط قواعد التطبيقات من هنا."
 }

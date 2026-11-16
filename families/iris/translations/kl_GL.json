@@ -2641,5 +2641,6 @@
   "The next episode airing, and the time left.": "Anime-p tulliuttoq episode-ia piffissarlu ingerlasoq.",
   "Search, pick an episode and pick up where you left.": "Ujarlerit, episode toqqarit aamma unitsiffigisatit ingerlaqqiffiguk.",
   "%1 panel off": "%1 panel qamippoq",
-  "Frosted slabs · the spectrum only on what each widget draws": "Pladet tarrajuttut · qalipaatit widget-ip titartagaani kisimi"
+  "Frosted slabs · the spectrum only on what each widget draws": "Pladet tarrajuttut · qalipaatit widget-ip titartagaani kisimi",
+  "Can't read the compositor's config, so app rules can't be set here.": "Compositorip aaqqissuussinera atuarneqarsinnaanngilaq, taamaattumik app-inut maleruagassat maani aaqqissorneqarsinnaanngillat."
 }

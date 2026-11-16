@@ -2641,5 +2641,6 @@
   "The next episode airing, and the time left.": "Следующая серия в эфире и сколько осталось.",
   "Search, pick an episode and pick up where you left.": "Ищите, выбирайте серию и продолжайте с места остановки.",
   "%1 panel off": "Панель «%1» выключена",
-  "Frosted slabs · the spectrum only on what each widget draws": "Матовые пластины · спектр только на том, что рисует виджет"
+  "Frosted slabs · the spectrum only on what each widget draws": "Матовые пластины · спектр только на том, что рисует виджет",
+  "Can't read the compositor's config, so app rules can't be set here.": "Не удаётся прочитать конфигурацию композитора, поэтому правила приложений здесь задать нельзя."
 }

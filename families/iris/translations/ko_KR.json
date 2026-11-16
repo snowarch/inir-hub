@@ -2641,5 +2641,6 @@
   "The next episode airing, and the time left.": "다음 방영 에피소드와 남은 시간.",
   "Search, pick an episode and pick up where you left.": "검색하고 에피소드를 고르고 본 데서 이어 봅니다.",
   "%1 panel off": "%1 패널 꺼짐",
-  "Frosted slabs · the spectrum only on what each widget draws": "반투명 판 · 스펙트럼은 각 위젯이 그리는 것에만"
+  "Frosted slabs · the spectrum only on what each widget draws": "반투명 판 · 스펙트럼은 각 위젯이 그리는 것에만",
+  "Can't read the compositor's config, so app rules can't be set here.": "컴포지터 설정을 읽을 수 없어 여기서 앱 규칙을 지정할 수 없습니다."
 }
