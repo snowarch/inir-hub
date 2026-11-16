@@ -86,28 +86,22 @@ Item {
                             font.weight: Font.DemiBold
                             color: changeArea.containsMouse ? PrismTheme.accent : PrismTheme.ink
                         }
+                        // A value it cannot name leaves the name alone, never a glyph over an empty line.
                         Row {
+                            id: said
+                            readonly property string value: PrismModel.sayNow(change.modelData)
+                            visible: said.value.length > 0
                             width: parent.width
                             spacing: PrismTheme.dp(4)
                             PrismGlyph { anchors.verticalCenter: parent.verticalCenter; text: PrismModel.page(change.modelData.page).glyph; iconSize: PrismTheme.dp(12); color: PrismTheme.ink3 }
                             PrismText {
                                 width: parent.width - PrismTheme.dp(16)
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: PrismModel.sayNow(change.modelData)
+                                text: said.value
                                 color: PrismTheme.ink2
                                 font.pixelSize: PrismTheme.small
                             }
                         }
-                    }
-                    PrismText {
-                        id: rank
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        visible: false // his 11-15: no numbering
-                        mono: true
-                        color: PrismTheme.ink3
-                        font.pixelSize: PrismTheme.caption - 1
-                        font.letterSpacing: 0.6
                     }
                     MouseArea {
                         id: changeArea
