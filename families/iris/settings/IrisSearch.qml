@@ -256,12 +256,13 @@ Singleton {
         return entry
     }
 
-    // A desktop widget found by name: shown on the desktop when it is there, added first when it is not. Arranging
-    // is where a widget is found, so this enters it and selects the widget.
+    // A desktop widget found by name: shown on the desktop when it is there, added to this screen first when it is
+    // not. Arranging is where a widget is found, so this enters it and selects the widget.
     function findWidget(key: string, on: bool): void {
-        if (!on) DesktopWidgetLayout.setGloballyEnabled(key, true)
+        const output = GlobalStates.focusedScreen?.name ?? ""
+        if (!on) IrisFaceData.setWidgetOn(output, key, true)
         GlobalStates.setWidgetEditMode(true)
-        GlobalStates.selectDesktopWidget((GlobalStates.focusedScreen?.name ?? "") + "::" + key)
+        GlobalStates.selectDesktopWidget(output + "::" + key)
     }
     function widgetEntries(): var {
         const output = GlobalStates.focusedScreen?.name ?? ""

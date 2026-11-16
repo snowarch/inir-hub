@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "每个工具底板的不透明度；固定的工具可单独设置。",
   "Pinned tools that let clicks through": "可点击穿透的固定工具",
   "Their opacity, so the game shows behind them.": "它们的不透明度，让游戏在后方可见。",
-  "Zoom in on open": "打开时缩放"
+  "Zoom in on open": "打开时缩放",
+  "1 widget on every screen": "每个屏幕上有 1 个小部件",
+  "%1 widgets on every screen": "每个屏幕上有 %1 个小部件",
+  "1 widget on %1": "%1 上有 1 个小部件",
+  "%1 widgets on %2": "%2 上有 %1 个小部件",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "气泡会收进各自的边缘，把指针停在那里时又会出现。",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "开启自动隐藏时，在没有窗口的工作区中气泡保持可见。"
 }

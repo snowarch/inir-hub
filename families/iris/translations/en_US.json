@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "How solid each tool's plate is; a pinned tool can set its own.",
   "Pinned tools that let clicks through": "Pinned tools that let clicks through",
   "Their opacity, so the game shows behind them.": "Their opacity, so the game shows behind them.",
-  "Zoom in on open": "Zoom in on open"
+  "Zoom in on open": "Zoom in on open",
+  "1 widget on every screen": "1 widget on every screen",
+  "%1 widgets on every screen": "%1 widgets on every screen",
+  "1 widget on %1": "1 widget on %1",
+  "%1 widgets on %2": "%1 widgets on %2",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "The bubbles tuck into their edges and come back when you rest the pointer there.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "When auto-hide is on, keep the bubbles visible on workspaces with no windows."
 }

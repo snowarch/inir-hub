@@ -40,6 +40,17 @@ Singleton {
     readonly property var otherEntries: root.ordered.filter(key => !DesktopWidgetRegistry.entry(key).lock)
         .map(key => root.entryOf(key, false))
 
+    // The screens desktop widgets show on (Settings › Displays › Widgets on; none chosen: all of them). With two or more
+    // the gallery and search put a widget on one of them; with one, its own switch turns it on or off.
+    readonly property var widgetScreens: {
+        Config.revision
+        return Quickshell.screens.map(screen => String(screen?.name ?? "")).filter(name => name && DesktopWidgetLayout.outputAllowed(name))
+    }
+    function setWidgetOn(output: string, key: string, on: bool): void {
+        if (output && root.widgetScreens.length > 1) DesktopWidgetLayout.setEnabled(output, key, on)
+        else DesktopWidgetLayout.setGloballyEnabled(key, on)
+    }
+
     // The last two words travel together, so a wrapped line never ends on a lone word ("...shows / here").
     function unwidowed(text: string): string {
         const value = String(text ?? "")

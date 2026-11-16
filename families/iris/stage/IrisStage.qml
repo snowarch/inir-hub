@@ -563,10 +563,10 @@ Item {
         }
         root.allSlots.forEach((slot, i) => {
             const r = root.rects[i]
-            if (r) out.push({ id: "bubble-" + slot, name: Translation.tr("Bubble"), x: r.x, y: r.y, w: r.size, h: r.size,
+            if (r && !root.tuckGone(root.sideOf(slot))) out.push({ id: "bubble-" + slot, name: Translation.tr("Bubble"), x: r.x, y: r.y, w: r.size, h: r.size,
                 radius: Math.round(IrisStyle.pieceRadius(r.size)) })
         })
-        for (const plate of root.plates)
+        for (const plate of root.plates.filter(plate => !root.tuckGone(root.plateSide(plate))))
             out.push({ id: "bubbles-" + plate.zone, name: Translation.tr("Bubbles"), x: plate.x, y: plate.y,
                 w: plate.width, h: plate.height, radius: Math.round(Math.min(plate.width, plate.height) / 2) })
         const dock = root.dockBody
@@ -807,7 +807,7 @@ Item {
         const seen = {}
         for (let i = 0; i < root.allSlots.length; i++) {
             const slot = root.allSlots[i]
-            if (!root.rects[i]) continue
+            if (!root.rects[i] || root.tuckGone(root.sideOf(slot))) continue
             const key = root.plateFor(slot) ? "plate:" + root.plateKey(slot) : slot
             if (seen[key]) continue
             seen[key] = true
@@ -850,9 +850,11 @@ Item {
         const sides = []
         const lines = []
         for (const plate of root.plates) {
-            lines.push({ shape: root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
-                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), id: "plate:" + plate.zone }, plate.zone, false),
-                side: plate.side ?? IrisFrame.edgeOf(plate.zone) })
+            const side = root.plateSide(plate)
+            if (root.tuckGone(side)) continue
+            lines.push({ shape: root.tucked(root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
+                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), id: "plate:" + plate.zone }, plate.zone, false), side),
+                side: side })
         }
         for (let i = 0; i < root.allSlots.length; i++) {
             const slot = root.allSlots[i]
@@ -860,9 +862,11 @@ Item {
             if (!rect || root.plateFor(slot)) continue
             const carriedSlot = root.ownerSlot(slot)
             if (root.drag?.slot === carriedSlot || (landing.running && landing.slot === carriedSlot)) continue
-            lines.push({ shape: root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size,
-                radius: IrisStyle.pieceRadius(rect.size), id: "piece:" + slot }, root.placeName(slot), true),
-                side: IrisFrame.edgeOf(root.placeName(slot)) })
+            const side = root.sideOf(slot)
+            if (root.tuckGone(side)) continue
+            lines.push({ shape: root.tucked(root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size,
+                radius: IrisStyle.pieceRadius(rect.size), id: "piece:" + slot }, root.placeName(slot), true), side),
+                side: side })
         }
         const runs = root.joinRuns(lines)
         const alias = runs.alias
@@ -901,16 +905,124 @@ Item {
         }
         return out
     }
+    // What takes the pointer: an auto-hidden edge's reveal strip first (the input regions are counted), then what is out.
     readonly property var hitRects: {
         const out = []
-        for (const plate of root.plates) out.push(plate)
+        for (const edge of [tuckTop, tuckBottom, tuckLeft, tuckRight]) if (edge.strip) out.push(edge.strip)
+        for (const plate of root.plates) if (root.tuckShown(root.plateSide(plate))) out.push(plate)
         for (let i = 0; i < root.allSlots.length; i++) {
             const rect = root.rects[i]
-            if (!rect || root.plateFor(root.allSlots[i])) continue
+            if (!rect || root.plateFor(root.allSlots[i]) || !root.tuckShown(root.sideOf(root.allSlots[i]))) continue
             out.push({ x: rect.x, y: rect.y, width: rect.size, height: rect.size })
         }
         return out
     }
+
+    // Auto-hide (iris.bubbles.autoHide): the bubbles on each edge tuck past it together and come back when the pointer
+    // rests on that edge, the way the Island and the Dock do. A bubble placed freely over the desktop has no edge and stays.
+    readonly property bool autoHide: Boolean(root.options?.autoHide ?? false) && root.bubblesHere
+    readonly property bool workspaceEmpty: {
+        if (!root.autoHide || !(root.options?.revealOnEmpty ?? true) || !CompositorService.isNiri) return false
+        const active = (NiriService.allWorkspaces ?? []).find(ws => ws.output === root.screenName && ws.is_active)
+        return active !== undefined && !(NiriService.windows ?? []).some(w => w.workspace_id === active.id)
+    }
+    // The bubble whose menu is open: its edge stays out while the menu does.
+    property string menuSlot: ""
+    readonly property bool tuckHeld: root.workspaceEmpty || root.drag !== null || landing.running || root.cardPresent
+        || root.controlSlot.length > 0 || root.menuSlot.length > 0 || IrisState.edit
+    function sideOf(slot: string): string { return IrisFrame.edgeOf(root.placeName(slot)) }
+    function plateSide(plate: var): string { return plate.side ?? IrisFrame.edgeOf(plate.zone) }
+    // Per edge, what rests on it: how far it travels to leave the screen, and the stretch that brings it back.
+    readonly property var edgeRest: {
+        const out = {}
+        if (!root.autoHide) return out
+        const note = (side, x, y, w, h) => {
+            if (side.length === 0) return
+            const rest = out[side] ?? (out[side] = { depth: 0, lo: Infinity, hi: -Infinity, boxes: [] })
+            const inner = side === "top" ? y + h : side === "bottom" ? root.height - y : side === "left" ? x + w : root.width - x
+            rest.depth = Math.max(rest.depth, inner + Math.round(16 * root.d))
+            const along = IrisFrame.vertical(side)
+            rest.lo = Math.min(rest.lo, along ? y : x)
+            rest.hi = Math.max(rest.hi, along ? y + h : x + w)
+            rest.boxes.push({ x: x, y: y, width: w, height: h })
+        }
+        for (const plate of root.plates) note(root.plateSide(plate), plate.x, plate.y, plate.width, plate.height)
+        root.allSlots.forEach((slot, i) => {
+            const rect = root.rects[i]
+            if (rect && !root.plateFor(slot)) note(root.sideOf(slot), rect.x, rect.y, rect.size, rect.size)
+        })
+        return out
+    }
+    function edgeTuck(side: string): var {
+        return side === "top" ? tuckTop : side === "bottom" ? tuckBottom : side === "left" ? tuckLeft : side === "right" ? tuckRight : null
+    }
+    function tuckShown(side: string): bool { return root.edgeTuck(side)?.revealed ?? true }
+    function tuckGone(side: string): bool { return root.edgeTuck(side)?.gone ?? false }
+    function tuckShift(side: string): point {
+        const shift = root.edgeTuck(side)?.shift ?? 0
+        return side === "top" ? Qt.point(0, -shift) : side === "bottom" ? Qt.point(0, shift)
+            : side === "left" ? Qt.point(-shift, 0) : Qt.point(side === "right" ? shift : 0, 0)
+    }
+    function tucked(shape: var, side: string): var {
+        const shift = root.tuckShift(side)
+        shape.x += shift.x
+        shape.y += shift.y
+        return shape
+    }
+    readonly property var goneSides: ["top", "bottom", "left", "right"].filter(side => root.tuckGone(side))
+    onGoneSidesChanged: bodiesSettle.restart()
+    // Where the pointer is on the chassis, from its one window-wide hover (IrisBar's canvasHover): a handler of the stage's
+    // own over the whole output took the hover from the Island's edge strip beneath it.
+    property bool pointerIn: false
+    property point pointerAt: Qt.point(-1, -1)
+    component EdgeTuck: Item {
+        id: edge
+        required property string side
+        readonly property var rest: root.edgeRest[edge.side] ?? null
+        property bool intent: false
+        readonly property bool revealed: edge.rest === null || root.tuckHeld || edge.intent
+        property real tuck: edge.revealed ? 0 : 1
+        Behavior on tuck { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+        readonly property bool gone: edge.tuck >= 1
+        // The last depth stays while the bubbles come back after auto-hide is switched off.
+        property real depth: 0
+        onRestChanged: if (edge.rest) edge.depth = edge.rest.depth
+        readonly property real shift: edge.depth * edge.tuck
+        // The bubbles are off the screen while hidden: a strip along the edge, wider than their stretch, catches the pointer.
+        readonly property var strip: {
+            if (!edge.rest) return null
+            const deep = Math.max(2, IrisFrame.band + 2)
+            const slack = Math.round(40 * root.d)
+            const along = IrisFrame.vertical(edge.side)
+            const lo = Math.max(0, edge.rest.lo - slack)
+            const hi = Math.min(along ? root.height : root.width, edge.rest.hi + slack)
+            if (edge.side === "top") return { x: lo, y: 0, width: hi - lo, height: deep }
+            if (edge.side === "bottom") return { x: lo, y: root.height - deep, width: hi - lo, height: deep }
+            if (edge.side === "left") return { x: 0, y: lo, width: deep, height: hi - lo }
+            return { x: root.width - deep, y: lo, width: deep, height: hi - lo }
+        }
+        readonly property bool near: {
+            if (!edge.strip || !root.pointerIn) return false
+            const at = root.pointerAt
+            const inside = box => at.x >= box.x && at.x < box.x + box.width && at.y >= box.y && at.y < box.y + box.height
+            return inside(edge.strip) || (edge.revealed && (edge.rest?.boxes ?? []).some(inside))
+        }
+        onNearChanged: {
+            if (edge.near) {
+                hideDelay.stop()
+                if (!edge.intent) revealDwell.restart()
+            } else {
+                revealDwell.stop()
+                hideDelay.restart()
+            }
+        }
+        Timer { id: revealDwell; interval: 110; onTriggered: edge.intent = true }
+        Timer { id: hideDelay; interval: 420; onTriggered: if (!edge.near) edge.intent = false }
+    }
+    EdgeTuck { id: tuckTop; side: "top" }
+    EdgeTuck { id: tuckBottom; side: "bottom" }
+    EdgeTuck { id: tuckLeft; side: "left" }
+    EdgeTuck { id: tuckRight; side: "right" }
 
     function dockCatches(zone: string, x: real, y: real): bool {
         if (!root.dockOn) return false
@@ -1140,9 +1252,20 @@ Item {
         height: width
         x: bubble.floating ? bubble.rect.x : 0
         y: bubble.floating ? bubble.rect.y : 0
-        visible: bubble.floating
+        readonly property string side: root.sideOf(bubble.slot)
+        readonly property point tuck: root.tuckShift(bubble.side)
+        transform: Translate { x: bubble.tuck.x; y: bubble.tuck.y }
+        visible: bubble.floating && !root.tuckGone(bubble.side)
         property bool placed: false
-        Component.onDestruction: if (root.controlIntentSlot === bubble.slot) root.controlIntentSlot = ""
+        readonly property bool menuUp: pieceMenu.active || trayMenu.opened
+        onMenuUpChanged: {
+            if (bubble.menuUp) root.menuSlot = bubble.slot
+            else if (root.menuSlot === bubble.slot) root.menuSlot = ""
+        }
+        Component.onDestruction: {
+            if (root.controlIntentSlot === bubble.slot) root.controlIntentSlot = ""
+            if (root.menuSlot === bubble.slot) root.menuSlot = ""
+        }
         Component.onCompleted: bubble.settle()
         onFloatingChanged: bubble.settle()
         function settle(): void {

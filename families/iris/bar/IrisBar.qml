@@ -1489,6 +1489,8 @@ Scope {
                     anchors.fill: parent
                     modelData: barWindow.screen
                     suppressed: barWindow.canvasSuppressed
+                    pointerIn: stage.autoHide && canvasHover.hovered
+                    pointerAt: stage.autoHide ? canvasHover.point.position : Qt.point(-1, -1)
                 }
 
                 Loader {

@@ -738,6 +738,9 @@ JsonObject {
         // An edge carrying bubbles takes its space from the desktop, like
         // the Island's edge does, so nothing is covered by them.
         property bool reserve: true
+        // The bubbles tuck into their edges and come back when the pointer rests there, like the Island and the Dock.
+        property bool autoHide: false
+        property bool revealOnEmpty: true // Keep them visible on an empty workspace while auto-hide is on
         // Apps carried out of the Dock, each one a quick-launch bubble:
         // { appId, place, fx, fy }, placed like any other piece.
         property list<var> apps: []

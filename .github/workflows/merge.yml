@@ -168,6 +168,15 @@ jobs:
               [ -f "hub/$f" ] || continue
               printf '\n\n===== %s (the hub rules) =====\n' "$f"; cat "hub/$f"
             done
+            # A maintainer's earlier requests on this pull request are instructions too (trusted by who wrote them):
+            # without them the reviewer could merge a push that met the rules it reads but not what was asked (11-13).
+            asks=$(gh api --paginate "repos/$REPO/issues/$PR/comments" --jq '.[]
+              | select(.user.type != "Bot" and (.author_association | IN("OWNER", "MEMBER", "COLLABORATOR")))
+              | select(.body | startswith("/review") | not)
+              | "--- \(.user.login), \(.created_at):\n\(.body)\n"')
+            if [ -n "$asks" ]; then
+              printf '\n\n===== Maintainers'"'"' requests on this pull request (each one not met by the last push is an issue) =====\n%s\n' "$asks"
+            fi
           } > system.txt
           # data: the pull request as its author wrote it, the diff, every text file of the item with line numbers
           {

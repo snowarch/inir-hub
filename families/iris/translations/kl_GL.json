@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "Atortut tamarmik tunuliaqutaasa qanoq issutsinerat; pin-iusoq namminerisaminik pisinnaavoq.",
   "Pinned tools that let clicks through": "Pin-iusut click-it ingerlatittartut",
   "Their opacity, so the game shows behind them.": "Ersittussusiat, pinnguaat tunuani takuneqarsinnaaqqullugu.",
-  "Zoom in on open": "Ammarneqarnerani angilliguk"
+  "Zoom in on open": "Ammarneqarnerani angilliguk",
+  "1 widget on every screen": "Widget-i 1 skærmini tamani",
+  "%1 widgets on every screen": "Widget-it %1 skærmini tamani",
+  "1 widget on %1": "Widget-i 1 %1-mi",
+  "%1 widgets on %2": "Widget-it %1 %2-mi",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "Bubble-t killinut toqqortarput, tikkuut tassunga inissikkukku uterlutik.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "Nammineq toqqorneqartarnera atuutsillugu, bubble-t suliffiusumi igalaaqanngitsumi takuneqarsinnaapput."
 }
