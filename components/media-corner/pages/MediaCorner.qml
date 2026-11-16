@@ -16,22 +16,23 @@ CornerBody {
     onCloseRequested: CornerState.open = false
     section: root.page
     searchHint: Translation.tr("Search anime, films and series")
+    // tint: the identity colour of its glyph where places wear one (Classic).
     places: [
-        { id: "home", title: "Home", icon: "home" },
-        { id: "anime:popular", title: "Popular anime", icon: "local_fire_department", caption: "Anime" },
-        { id: "anime:airing", title: "Airing now", icon: "live_tv" },
-        { id: "anime:trending", title: "Trending", icon: "trending_up" },
-        { id: "anime:top", title: "Top anime", icon: "star" },
-        { id: "anime:season", title: "This season", icon: "eco" },
-        { id: "anime:genres", title: "Anime genres", icon: "category" },
-        { id: "movie:movies", title: "Films", icon: "movie", caption: "Films and series" },
-        { id: "movie:series", title: "Series", icon: "tv" },
-        { id: "movie:top", title: "Top films and series", icon: "star" },
-        { id: "movie:years", title: "By year", icon: "calendar_month" },
-        { id: "movie:genres", title: "Film and series genres", icon: "category" },
-        { id: "sources", title: "Sources", icon: "extension", caption: "Library" },
-        { id: "schedule", title: "Upcoming episodes", icon: "event" },
-        { id: "history", title: "Watch history", icon: "history" }
+        { id: "home", tint: "gray", title: "Home", icon: "home" },
+        { id: "anime:popular", tint: "red", title: "Popular anime", icon: "local_fire_department", caption: "Anime" },
+        { id: "anime:airing", tint: "purple", title: "Airing now", icon: "live_tv" },
+        { id: "anime:trending", tint: "pink", title: "Trending", icon: "trending_up" },
+        { id: "anime:top", tint: "yellow", title: "Top anime", icon: "star" },
+        { id: "anime:season", tint: "green", title: "This season", icon: "eco" },
+        { id: "anime:genres", tint: "indigo", title: "Anime genres", icon: "category" },
+        { id: "movie:movies", tint: "orange", title: "Films", icon: "movie", caption: "Films and series" },
+        { id: "movie:series", tint: "blue", title: "Series", icon: "tv" },
+        { id: "movie:top", tint: "yellow", title: "Top films and series", icon: "star" },
+        { id: "movie:years", tint: "teal", title: "By year", icon: "calendar_month" },
+        { id: "movie:genres", tint: "indigo", title: "Film and series genres", icon: "category" },
+        { id: "sources", tint: "gray", title: "Sources", icon: "extension", caption: "Library" },
+        { id: "schedule", tint: "indigo", title: "Upcoming episodes", icon: "event" },
+        { id: "history", tint: "green", title: "Watch history", icon: "history" }
     ]
 
     // Hold a small set of decoded posters while this view is alive. Qt shares the

@@ -101,7 +101,7 @@ MediaPage {
     Rectangle {
         Layout.fillWidth: true
         implicitHeight: intro.implicitHeight + Math.round(32 * root.d)
-        radius: IrisStyle.radiusCard
+        radius: CornerSkin.cardRadius
         color: CornerSkin.card
         border.width: CornerSkin.edgeWidth
         border.color: CornerSkin.edge
@@ -111,7 +111,7 @@ MediaPage {
             spacing: Math.round(4 * root.d)
             IrisText {
                 Layout.fillWidth: true
-                text: Translation.tr("What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.")
+                text: Translation.tr("Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.")
                 color: IrisStyle.textSecondary
                 font.pixelSize: IrisStyle.typeMeta
                 wrapMode: Text.WordWrap
@@ -361,6 +361,8 @@ MediaPage {
         Layout.fillWidth: true
         eyebrow: Translation.tr("Add")
         title: Translation.tr("Add a Stremio add-on")
+        glyph: "extension"
+        tint: IrisStyle.identity.orange
         ColumnLayout {
             Layout.fillWidth: true
             spacing: Math.round(10 * root.d)
@@ -393,6 +395,8 @@ MediaPage {
         Layout.fillWidth: true
         eyebrow: Translation.tr("Add")
         title: Translation.tr("Add a web source")
+        glyph: "public"
+        tint: IrisStyle.identity.teal
         ColumnLayout {
             Layout.fillWidth: true
             spacing: Math.round(10 * root.d)

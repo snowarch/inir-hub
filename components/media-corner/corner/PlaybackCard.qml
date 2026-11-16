@@ -42,7 +42,7 @@ Rectangle {
 
     visible: root.hasContent && (root.playing || !root.playingOnly)
     implicitHeight: body.implicitHeight + 2 * Math.round(14 * root.d)
-    radius: IrisStyle.radiusCard
+    radius: CornerSkin.cardRadius
     color: CornerSkin.card
     border.width: CornerSkin.edgeWidth
     border.color: CornerSkin.edge

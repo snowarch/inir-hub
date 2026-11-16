@@ -6,6 +6,9 @@ from pathlib import Path
 import sys
 import tempfile
 
+# The styles, named as iRiS's Settings names the layouts each one follows.
+STYLES = {"classic": "Classic", "folio": "Folio", "prism": "Prism"}
+
 
 def main():
     config = Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config")))
@@ -14,13 +17,14 @@ def main():
         with path.open(encoding="utf-8") as source:
             options = json.load(source)
         if not isinstance(options, dict):
-            raise ValueError("La configuración no es un objeto JSON")
+            raise ValueError("the options file is not a JSON object")
     except FileNotFoundError:
         options = {}
-    style = options.get("style", "")
+    # "normal" was Folio's name before Classic came.
+    style = {"normal": "folio"}.get(options.get("style", ""), options.get("style", ""))
     if len(sys.argv) > 1 and sys.argv[1] == "toggle":
-        if len(sys.argv) != 3 or sys.argv[2] not in ("normal", "prism"):
-            raise ValueError("Estilo desconocido")
+        if len(sys.argv) != 3 or sys.argv[2] not in STYLES:
+            raise ValueError("unknown style")
         style = sys.argv[2]
         options["style"] = style
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -36,10 +40,7 @@ def main():
                 temp.unlink(missing_ok=True)
                 raise
         os.replace(temp, path)
-    print(json.dumps([
-        {"id": "normal", "label": "Normal", "on": style == "normal"},
-        {"id": "prism", "label": "Prism", "on": style == "prism"},
-    ]))
+    print(json.dumps([{"id": key, "label": label, "on": style == key} for key, label in STYLES.items()]))
 
 
 if __name__ == "__main__":
