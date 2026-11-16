@@ -15,6 +15,7 @@ import qs.modules.iris.prism.controls
 Item {
     id: root
     readonly property bool stacked: root.width < PrismTheme.dp(560)
+    property string tint: "grey"
     readonly property real cardHeight: PrismTheme.dp(196)
     implicitHeight: root.stacked ? root.cardHeight * 2 + PrismTheme.dp(10) : root.cardHeight
 
@@ -169,50 +170,31 @@ Item {
         }
     }
 
-    // Sound & light: the output's volume and the screen's brightness, each a pill that moves the real thing.
-    Rectangle {
+    // Sound & light: the output's volume and the screen's brightness, each a fader that moves the real thing, in a
+    // folder as every group is (his 11-16); mute stands on its art.
+    PrismFile {
         x: root.stacked ? 0 : wall.width + PrismTheme.dp(10)
         y: root.stacked ? wall.height + PrismTheme.dp(10) : 0
         width: root.stacked ? root.width : root.width - wall.width - PrismTheme.dp(10)
         height: root.cardHeight
-        radius: PrismTheme.dp(24)
-        color: PrismTheme.card
+        title: Translation.tr("Sound & light")
+        tint: root.tint
+        turn: 1
+        seed: 5.3
+        // Mute answers in place: the disc goes white while the sound is off.
+        tools: PrismRound {
+            visible: Audio.ready
+            overArt: true
+            smoked: true
+            lit: Boolean(Audio.sink?.audio?.muted)
+            glyph: Audio.sink?.audio?.muted ? "volume_off" : "volume_up"
+            Accessible.name: Translation.tr("Mute")
+            onClicked: Audio.toggleMute()
+        }
 
         Column {
-            anchors.fill: parent
-            anchors.margins: PrismTheme.dp(18)
-            spacing: PrismTheme.dp(12)
-            Item {
-                width: parent.width
-                height: PrismTheme.dp(44)
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: PrismTheme.dp(3)
-                    PrismText {
-                        text: Translation.tr("Now").toUpperCase()
-                        mono: true
-                        color: PrismTheme.ink3
-                        font.pixelSize: PrismTheme.caption - 1
-                        font.letterSpacing: 0.8
-                    }
-                    PrismText {
-                        text: Translation.tr("Sound & light")
-                        font.pixelSize: PrismTheme.head
-                        font.weight: Font.Bold
-                        font.letterSpacing: -PrismTheme.head * 0.03
-                    }
-                }
-                // Mute answers in place: the circle goes solid while the sound is off.
-                PrismRound {
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: Audio.ready
-                    lit: Boolean(Audio.sink?.audio?.muted)
-                    glyph: Audio.sink?.audio?.muted ? "volume_off" : "volume_up"
-                    Accessible.name: Translation.tr("Mute")
-                    onClicked: Audio.toggleMute()
-                }
-            }
+            width: parent.width
+            spacing: PrismTheme.dp(10)
             PrismSlider {
                 id: volume
                 width: parent.width

@@ -33,8 +33,6 @@ Item {
         anchors.fill: parent
         radius: width / 2
         color: area.pressed ? PrismTheme.spotPress : root.hovered ? PrismTheme.spotHover : PrismTheme.spot
-        border.width: 1
-        border.color: PrismTheme.spotEdge
     }
     PrismGlyph {
         anchors.centerIn: parent

@@ -88,8 +88,6 @@ Item {
         anchors.fill: parent
         radius: PrismTheme.dp(22)
         color: PrismTheme.bar
-        border.width: PrismTheme.glass ? 1 : 0
-        border.color: PrismTheme.rim
         // Presses and the pointer stop here, never reaching a row hidden under it; the wheel goes on to the page.
         MouseArea { anchors.fill: parent; hoverEnabled: true; onWheel: wheel => wheel.accepted = false }
     }

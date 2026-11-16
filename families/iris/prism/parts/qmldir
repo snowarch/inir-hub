@@ -1,5 +1,6 @@
 module qs.modules.iris.prism.parts
 PrismFolder 1.0 PrismFolder.qml
+PrismFile 1.0 PrismFile.qml
 PrismGlow 1.0 PrismGlow.qml
 PrismSidebar 1.0 PrismSidebar.qml
 PrismNavItem 1.0 PrismNavItem.qml
@@ -19,7 +20,6 @@ PrismIslandFaces 1.0 PrismIslandFaces.qml
 PrismHomeDeck 1.0 PrismHomeDeck.qml
 PrismWallpaperHero 1.0 PrismWallpaperHero.qml
 PrismProfile 1.0 PrismProfile.qml
-PrismRim 1.0 PrismRim.qml
 PrismAbout 1.0 PrismAbout.qml
 PrismHubArt 1.0 PrismHubArt.qml
 PrismHubAction 1.0 PrismHubAction.qml

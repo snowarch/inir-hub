@@ -14,12 +14,14 @@ import qs.modules.iris.prism.controls
 // first colour, so a row of keys reads like the collage, loud and held together by shape and type; off, the quiet cap.
 // A press sinks the key and acts: a switch flips, a choice steps to the next, anything else opens its row. The list is
 // the classic Home's (`iris.appearance.settingsHome`), so both Settings show the same; Edit takes keys off and offers
-// the daily ones to add, in place.
-Column {
+// the daily ones to add, in place. The keys lie in a folder as every group does (his 11-16); Edit stands on its art.
+PrismFile {
     id: root
     signal reach(var row)
     property bool editing: false
-    spacing: 0
+    title: Translation.tr("Every day")
+    turn: 2
+    seed: 8.1
 
     readonly property var ids: {
         const _ = PrismModel.revision
@@ -63,19 +65,15 @@ Column {
     }
     function setIds(list: var): void { Config.setNestedValue("iris.appearance.settingsHome", list) }
 
-    PrismHeading {
-        width: root.width
-        eyebrow: Translation.tr("%1 settings").arg(root.tiles.length)
-        title: Translation.tr("Every day")
-        titleSize: PrismTheme.head
-        link: root.editing ? Translation.tr("Done") : Translation.tr("Edit")
-        onLinkClicked: root.editing = !root.editing
+    tools: PrismPill {
+        tone: "dark"
+        text: root.editing ? Translation.tr("Done") : Translation.tr("Edit")
+        onClicked: root.editing = !root.editing
     }
-    Item { width: 1; height: PrismTheme.dp(12) }
 
     Flow {
         id: grid
-        width: root.width
+        width: root.innerWidth
         spacing: PrismTheme.dp(8)
         readonly property int columns: Math.max(2, Math.floor((width + spacing) / (PrismTheme.dp(150) + spacing)))
         readonly property real tileWidth: Math.floor((width - (columns - 1) * spacing) / columns)

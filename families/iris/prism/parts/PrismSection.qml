@@ -125,8 +125,6 @@ Item {
         height: PrismTheme.dp(30)
         radius: height / 2
         color: PrismTheme.spot
-        border.width: 1
-        border.color: PrismTheme.spotEdge
         PrismGlyph {
             visible: chipBox.marked
             x: PrismTheme.dp(13)
@@ -241,19 +239,6 @@ Item {
                 sourceComponent: Item {
                     width: root.figureWidth
                     implicitHeight: scene.height + (caption.visible ? PrismTheme.dp(8) + caption.implicitHeight : 0)
-                    // A plate of glass round the picture: light on its upper rim, never a flat outline (glass-spectral).
-                    Rectangle {
-                        x: -1
-                        y: -1
-                        width: scene.width + 2
-                        height: scene.height + 2
-                        radius: scene.radius + 1
-                        gradient: Gradient {
-                            GradientStop { position: 0; color: PrismTheme.frostLight }
-                            GradientStop { position: 0.45; color: PrismTheme.frostShade }
-                            GradientStop { position: 1; color: PrismTheme.frostEdge }
-                        }
-                    }
                     IrisGroupPreview {
                         id: scene
                         width: root.figureWidth

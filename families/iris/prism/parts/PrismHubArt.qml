@@ -87,7 +87,6 @@ Item {
             width: root.width
             height: root.sheetHeight
             color: PrismTheme.glassSheet
-            Rectangle { width: parent.width; height: 1; color: PrismTheme.spotEdge }
         }
     }
 }

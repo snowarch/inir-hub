@@ -66,8 +66,6 @@ Item {
                     height: PrismTheme.dp(24)
                     radius: height / 2
                     color: PrismTheme.spot
-                    border.width: 1
-                    border.color: PrismTheme.spotEdge
                     PrismText {
                         id: tag
                         anchors.centerIn: parent
@@ -115,7 +113,6 @@ Item {
             width: art.width
             height: PrismTheme.dp(88)
             color: PrismTheme.glassSheet
-            Rectangle { width: parent.width; height: 1; color: PrismTheme.spotEdge }
 
             Column {
                 x: PrismTheme.dp(24)

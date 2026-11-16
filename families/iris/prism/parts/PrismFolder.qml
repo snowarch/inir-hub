@@ -30,10 +30,10 @@ Item {
     // The back sheet. It starts under the step and goes down past the front's shoulder, so the round corner there
     // shows art behind it as a real folder's would. A page holds many folders under one loud poster: the back rests
     // quieter and greyer than the poster (his 11-16: every card's colour pulled the eye), and over the desktop's glass
-    // it is a frosted sheet with the light inside it, so the blur behind reads through it as through the rest.
+    // it is smoke with the light inside it (white frost in light), so the blur behind reads through it as through the rest.
     PrismFlow {
         bare: PrismTheme.glass
-        frostColour: PrismTheme.light ? Qt.rgba(1, 1, 1, 0.42) : Qt.rgba(1, 1, 1, 0.03) // iris-literal: the back sheet's frost, a step under the front's
+        frostColour: PrismTheme.light ? Qt.rgba(1, 1, 1, 0.42) : Qt.rgba(0, 0, 0, 0.18) // iris-literal: the back sheet's smoke, under the front's
         strength: PrismTheme.light ? 0.58 : 0.66
         mute: 0.22
         x: root.tab - PrismTheme.dp(4)
@@ -54,15 +54,15 @@ Item {
         cut: PrismTheme.glass ? Qt.vector4d(PrismTheme.dp(4), root.slope, root.rise, root.shoulder) : Qt.vector4d(0, 0, 0, 0)
     }
 
-    // The front sheet: the tab, a soft step down to the front's edge, its round shoulder, then the card. Over glass a
-    // frosted sheet with a thread of light along its edge (glass-card-pink-sky).
+    // The front sheet: the tab, a soft step down to the front's edge, its round shoulder, then the card. No outline:
+    // its fill alone sets it off (his 11-16).
     Shape {
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             fillColor: root.sheet
-            strokeColor: PrismTheme.glass ? PrismTheme.rim : "transparent"
-            strokeWidth: PrismTheme.glass ? 1 : 0
+            strokeColor: "transparent"
+            strokeWidth: -1
             PathSvg {
                 readonly property real w: root.width
                 readonly property real h: Math.max(root.height, root.rise + root.radius * 2)

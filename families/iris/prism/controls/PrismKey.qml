@@ -1,9 +1,9 @@
 import QtQuick
 import qs.modules.iris.prism.core
 
-// A key as an object (`.claude/ref/language`: keycap-glass, keycaps-collage, the tactile faders): a cap standing on
-// its own side, which shows under it as a lip, and a hairline of light along its top. Pointed at, the cap warms a step;
-// pressed, it sinks onto its side. What the key carries is laid on its cap and sinks with it.
+// A key as an object (`.claude/ref/language`: keycap-glass, keycaps-collage): a cap, its fill alone setting it off,
+// never an outline (his 11-16). Pointed at, the cap lifts a step; pressed, it sinks a little. What the key carries is
+// laid on its cap and sinks with it.
 Item {
     id: root
     property color face: PrismTheme.keyQuiet
@@ -12,31 +12,14 @@ Item {
     property real radius: height / 2
     default property alias contents: cap.data
 
-    readonly property real lip: PrismTheme.keyLip
-
     Rectangle {
-        y: root.lip
-        width: root.width
-        height: root.height - root.lip
+        id: body
+        anchors.fill: parent
         radius: root.radius
-        color: PrismTheme.keySide(root.face)
-    }
-    Rectangle {
-        id: rim
-        y: root.down ? root.lip : 0
-        width: root.width
-        height: root.height - root.lip
-        radius: root.radius
-        color: PrismTheme.keyRim(root.face)
-        Behavior on y { NumberAnimation { duration: PrismTheme.ms(90); easing.type: Easing.OutCubic } }
-        Rectangle {
-            y: 1
-            width: parent.width
-            height: parent.height - 1
-            radius: root.radius
-            color: root.hovered && !root.down ? PrismTheme.keyHover(root.face) : root.face
-            Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
-        }
+        scale: root.down ? 0.96 : 1
+        color: root.hovered && !root.down ? PrismTheme.keyHover(root.face) : root.face
+        Behavior on scale { NumberAnimation { duration: PrismTheme.ms(90); easing.type: Easing.OutCubic } }
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
         Item {
             id: cap
             anchors.fill: parent

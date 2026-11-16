@@ -62,38 +62,26 @@ Item {
             maskThresholdMin: 0.5
             maskSpreadAtMin: 1
         }
+        // The same smoked sheet as the profile's, inset and concentric with the card, no outline (his 11-16).
         Rectangle {
             id: sheet
-            x: PrismTheme.dp(8)
-            width: parent.width - PrismTheme.dp(16)
+            x: PrismTheme.dp(10)
+            width: parent.width - PrismTheme.dp(20)
             height: Math.min(parent.height * 0.6, PrismTheme.dp(138))
-            y: parent.height - height - PrismTheme.dp(8)
-            radius: PrismTheme.dp(18)
-            color: Qt.rgba(0.07, 0.07, 0.09, 0.42) // iris-literal: Prism's own ink over its art, the same in every scheme
-            // Glass catches light on its top edge only, brightest in the middle: a rim, never an outline.
-            Rectangle {
-                x: sheet.radius * 0.6
-                y: 0
-                width: sheet.width - x * 2
-                height: 1
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: "transparent" }
-                    GradientStop { position: 0.5; color: Qt.rgba(1, 1, 1, 0.26) } // iris-literal: Prism's own ink over its art, the same in every scheme
-                    GradientStop { position: 1; color: "transparent" }
-                }
-            }
+            y: parent.height - height - PrismTheme.dp(10)
+            radius: PrismTheme.dp(14)
+            color: PrismTheme.glassSheet
         }
     }
-    Rectangle { id: shape; anchors.fill: parent; radius: PrismTheme.dp(22); visible: false; layer.enabled: true }
+    Rectangle { id: shape; anchors.fill: parent; radius: PrismTheme.dp(24); visible: false; layer.enabled: true }
     Rectangle { id: sheetShape; width: sheet.width; height: sheet.height; radius: sheet.radius; visible: false; layer.enabled: true }
 
     // Idle: a cover-sized note and the two lines, the size of a change row.
     Rectangle {
         visible: !root.playing
         anchors.fill: parent
-        radius: PrismTheme.dp(18)
-        color: PrismTheme.fill
+        radius: PrismTheme.dp(24)
+        color: PrismTheme.card
         PrismThumb {
             id: note
             x: PrismTheme.dp(13)

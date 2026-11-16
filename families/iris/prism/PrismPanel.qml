@@ -388,9 +388,9 @@ Item {
                     width: content.width
                     sourceComponent: Column {
                         width: content.width
-                        PrismHomeDeck { width: parent.width }
-                        Item { width: 1; height: PrismTheme.dp(34) }
-                        PrismHome { width: parent.width; onReach: row => root.reach(row) }
+                        PrismHomeDeck { width: parent.width; tint: String(root.page?.tint ?? "grey") }
+                        Item { width: 1; height: PrismTheme.dp(24) }
+                        PrismHome { width: parent.width; tint: String(root.page?.tint ?? "grey"); onReach: row => root.reach(row) }
                         Item { width: 1; height: PrismTheme.dp(40) }
                     }
                 }
@@ -605,13 +605,5 @@ Item {
             y: Math.round(body.height - height - PrismTheme.dp(22))
             z: 20
         }
-    }
-
-    // The window's glass edge, over its columns; a window of its own has its frame from the compositor.
-    PrismRim {
-        anchors.fill: body
-        visible: !root.windowed
-        radius: body.radius
-        tint: String(root.page?.tint ?? "grey")
     }
 }

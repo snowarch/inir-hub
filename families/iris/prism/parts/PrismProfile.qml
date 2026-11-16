@@ -8,19 +8,19 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
-// Who is signed in, as a pane of frosted glass over their own sky (`.claude/ref/language`, glass-card-pink-sky): the
-// wallpaper they wear sharp round the pane, the same picture frosted through it. On the pane: the avatar in a ring of
-// light, the greeting, the name, the day and the weather as clear tags; at its foot one glass pill that acts (their
+// Who is signed in, as a smoked pane over their own sky (`.claude/ref/language`, glass-card-pink-sky): the wallpaper
+// they wear sharp round the pane, the same picture blurred through black smoke inside it, no outline anywhere (his
+// 11-16). On the pane: the avatar, the greeting, the name, the day and the weather as clear tags; at its foot one glass pill that acts (their
 // wallpaper) and two round glass keys (dark or light, Do Not Disturb). Drawn once: it changes when the wallpaper does.
 Item {
     id: root
-    implicitHeight: root.inset * 2 + 2 + root.pad * 2 + who.height + PrismTheme.dp(14) + PrismTheme.dp(34)
+    implicitHeight: root.inset * 2 + root.pad * 2 + who.height + PrismTheme.dp(14) + PrismTheme.dp(34)
 
     readonly property int hour: DateTime.clock.date.getHours()
     readonly property bool silent: { const _ = PrismModel.revision; return Boolean(Config.getNestedValue("notifications.silent", false)) }
     readonly property bool dark: Appearance.m3colors.darkmode
     readonly property string sky: Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? ""))
-    readonly property real inset: PrismTheme.dp(12)
+    readonly property real inset: PrismTheme.dp(10)
     readonly property real pad: PrismTheme.dp(12)
 
     // The sky, sharp round the glass.
@@ -40,27 +40,14 @@ Item {
         }
     }
 
-    // The pane: its rim catches the light at the top, then the same sky frosted, darkened enough to hold white words.
-    Rectangle {
-        id: rim
+    // The pane: the same sky blurred under black smoke, its corners concentric with the card's.
+    ClippingRectangle {
+        id: pane
         x: root.inset
         y: root.inset
         width: root.width - root.inset * 2
         height: root.height - root.inset * 2
-        radius: PrismTheme.dp(17)
-        gradient: Gradient {
-            GradientStop { position: 0; color: PrismTheme.frostLight }
-            GradientStop { position: 0.45; color: PrismTheme.frostShade }
-            GradientStop { position: 1; color: PrismTheme.frostEdge }
-        }
-    }
-    ClippingRectangle {
-        id: pane
-        x: rim.x + 1
-        y: rim.y + 1
-        width: rim.width - 2
-        height: rim.height - 2
-        radius: rim.radius - 1
+        radius: PrismTheme.dp(24) - root.inset
         color: PrismTheme.night
         Image {
             id: frosted
@@ -85,15 +72,6 @@ Item {
             blurMax: 48
         }
         Rectangle { anchors.fill: parent; color: PrismTheme.glassSheet }
-        // The sheen: light on the pane's upper half, gone before the words.
-        Rectangle {
-            width: parent.width
-            height: parent.height * 0.55
-            gradient: Gradient {
-                GradientStop { position: 0; color: PrismTheme.frost }
-                GradientStop { position: 1; color: "transparent" }
-            }
-        }
     }
 
     Item {
@@ -132,14 +110,6 @@ Item {
                 maskSpreadAtMin: 1
             }
             Rectangle { id: round; anchors.fill: parent; radius: width / 2; visible: false; layer.enabled: true }
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: -2
-                radius: width / 2
-                color: "transparent"
-                border.width: 1.5
-                border.color: PrismTheme.frostLight
-            }
         }
 
         Column {
@@ -204,15 +174,13 @@ Item {
         }
     }
 
-    // A tag printed on the glass: a clear pill with a rim, mono caps.
+    // A tag printed on the pane: a smoked pill, mono caps.
     component Tag: Rectangle {
         property alias text: label.text
         width: label.implicitWidth + PrismTheme.dp(14)
         height: PrismTheme.dp(20)
         radius: height / 2
         color: PrismTheme.frost
-        border.width: 1
-        border.color: PrismTheme.frostEdge
         PrismText {
             id: label
             anchors.centerIn: parent
@@ -225,7 +193,7 @@ Item {
         }
     }
 
-    // A glass key: round with a glyph, or the pill that acts when it has words. Lit, it turns white.
+    // A smoked key: round with a glyph, or the pill that acts when it has words. Lit, it turns white.
     component Key: Item {
         id: key
         property string glyph: ""
@@ -240,8 +208,6 @@ Item {
             anchors.fill: parent
             radius: height / 2
             color: key.lit ? PrismTheme.paper : area.pressed ? PrismTheme.frostPress : area.containsMouse ? PrismTheme.frostHover : PrismTheme.frost
-            border.width: 1
-            border.color: PrismTheme.frostEdge
             Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
         }
         Row {

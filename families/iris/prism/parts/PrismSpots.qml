@@ -155,8 +155,6 @@ ClippingRectangle {
                 anchors.fill: parent
                 radius: width / 2
                 color: disc.lit ? PrismTheme.paper : PrismTheme.spot
-                border.width: disc.lit ? 0 : 1
-                border.color: PrismTheme.spotEdge
                 Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
             }
             Rectangle {
