@@ -9,7 +9,7 @@ import "../corner"
 import "../state"
 import "../state/watch.js" as Watch
 
-// Normal's Library, as Folio's «General»: grouped rows on one plate, a glyph in its tint, a name, what it holds on
+// Classic's and Folio's Library, as Folio's «General»: grouped rows on one plate, a glyph in its tint, a name, what it holds on
 // the right and a chevron, hairlines between them.
 ColumnLayout {
     id: root
@@ -22,7 +22,7 @@ ColumnLayout {
         { place: "sources", glyph: "extension", tint: IrisStyle.identity.orange, title: Translation.tr("Sources"),
           value: CornerSources.list.length > 0 ? Translation.tr("%1 sources").arg(CornerSources.list.length) : Translation.tr("You have no sources yet") },
         { place: "sources", glyph: "palette", tint: IrisStyle.identity.purple, title: Translation.tr("Appearance"),
-          value: CornerSkin.prism ? Translation.tr("Prism") : Translation.tr("Normal") }
+          value: Translation.tr(CornerSkin.looks.find(look => look.id === CornerSkin.look)?.label ?? "") }
     ]
     spacing: Math.round(10 * root.d)
 
@@ -61,6 +61,8 @@ ColumnLayout {
                             Layout.preferredHeight: Math.round(26 * root.d)
                             tint: row.modelData.tint
                             glyph: row.modelData.glyph
+                            // Plated as Settings plates its marks.
+                            plain: IrisStyle.settingsPlainMarks
                         }
                         IrisText { Layout.fillWidth: true; text: row.modelData.title; font.pixelSize: IrisStyle.typeLabel; elide: Text.ElideRight }
                         IrisText { text: row.modelData.value; color: IrisStyle.muted; font.pixelSize: IrisStyle.typeLabel; elide: Text.ElideRight; Layout.maximumWidth: Math.round(260 * root.d) }

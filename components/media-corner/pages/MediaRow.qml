@@ -15,7 +15,7 @@ ColumnLayout {
     required property var store
     property string title: ""
     property string note: ""
-    // Its glyph and tint where sections wear them (Normal).
+    // Its glyph and tint where sections wear them (Classic, Folio).
     property string glyph: root.store?.sourceName === "AniList" ? "animation" : "movie"
     property color tint: root.store?.sourceName === "AniList" ? IrisStyle.identity.purple : IrisStyle.identity.orange
     property var filter: null

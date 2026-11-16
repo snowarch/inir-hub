@@ -9,7 +9,7 @@ import "../state"
 
 // Home, laid out as iRiS's Settings home in the style worn, then shelves of anime, films and series.
 // Prism: one show up front, a deck (what you watched last, what plays or a popular film), the places of every day.
-// Normal (Folio): the trending shows in one card with their strip, Every day's tiles, Yours, and the Library rows.
+// Classic and Folio: the trending shows in one card with their strip, Every day's tiles, Yours, and the Library rows.
 MediaPage {
     id: root
     required property var anime

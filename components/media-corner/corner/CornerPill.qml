@@ -3,7 +3,7 @@ import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 
-// A capsule action: `solid` is the main one (white in Prism, the accent in Normal), `quiet` sits on the page, `art`
+// A capsule action: `solid` is the main one (white in Prism, the accent in Classic and Folio), `quiet` sits on the page, `art`
 // reads over a picture, `bare` is an option not taken (a segment beside the chosen one).
 IrisButton {
     id: root

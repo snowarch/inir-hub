@@ -9,7 +9,7 @@ Rectangle {
     id: root
     property string eyebrow: ""
     property string title: ""
-    // The glyph and tint its title wears in Normal.
+    // The glyph and tint its title wears in Classic and Folio.
     property string glyph: "label"
     property color tint: IrisStyle.identity.gray
     default property alias content: body.data
@@ -23,7 +23,7 @@ Rectangle {
         id: body
         anchors { left: parent.left; right: parent.right; top: parent.top; margins: Math.round(18 * root.d) }
         spacing: Math.round(10 * root.d)
-        // In Normal the title is Settings' group title, which says enough without the eyebrow.
+        // In Classic and Folio the title is Settings' group title, which says enough without the eyebrow.
         CornerHeading { eyebrow: CornerSkin.prism ? root.eyebrow : ""; title: root.title; glyph: root.glyph; tint: root.tint; visible: root.title.length > 0 }
     }
 }

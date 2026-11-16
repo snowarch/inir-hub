@@ -8,7 +8,7 @@ import qs.modules.iris.components
 import "../corner"
 import "../state"
 
-// Normal's «Every day», as Folio's tiles: a glyph in its tint and a name over what the place holds; the tile of what
+// Classic's and Folio's «Every day», as Folio's tiles: a glyph in its tint and a name over what the place holds; the tile of what
 // plays is lit with the accent.
 ColumnLayout {
     id: root
@@ -68,6 +68,8 @@ ColumnLayout {
                         height: width
                         tint: tile.modelData.tint
                         glyph: tile.modelData.glyph
+                        // Plated as Settings plates its marks.
+                        plain: IrisStyle.settingsPlainMarks
                     }
                     IrisText {
                         anchors.verticalCenter: parent.verticalCenter
