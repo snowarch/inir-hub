@@ -25,7 +25,12 @@ ShaderEffect {
     // Over this fraction of the width from the left the ribbon fades in, so a glow that starts mid-sheet has no edge.
     property real side: 0
 
-    readonly property var colours: PrismTheme.palette(root.tint)
+    // A folder's front sheet lying over this one (tab end, slope, rise, shoulder in this box's px; slope 0: none): the
+    // art shows only above the sheet's edge, for a frosted sheet that would show the art's own edge through it.
+    property vector4d cut: Qt.vector4d(0, 0, 0, 0)
+
+    property int turn: 0
+    readonly property var colours: PrismTheme.paletteAt(root.tint, root.turn)
     readonly property color ground: root.dark ? PrismTheme.night : PrismTheme.paperLight
 
     readonly property vector2d size: Qt.vector2d(width, height)

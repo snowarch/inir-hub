@@ -1,4 +1,6 @@
 import QtQuick
+import QtQuick.Effects
+import QtQuick.Shapes
 import Quickshell
 import qs
 import qs.services
@@ -30,28 +32,67 @@ Item {
     // The body's corner radius: the column draws the body's left corners itself.
     property real corner: 0
 
-    Rectangle {
+    // The open page's line, a tab of the page itself (PrismNavItem): cut out of the column's fill, so the tab is
+    // whatever the page is made of, its air or its glass (his 11-16).
+    property Item tabItem: null
+    readonly property real tabY: {
+        void (flick.contentY + column.implicitHeight + root.height)
+        const item = root.tabItem
+        if (!item?.visible) return -1
+        void ((item.parent?.y ?? 0) + (item.parent?.parent?.y ?? 0))
+        return item.mapToItem(root, 0, 0).y
+    }
+    // The cut, in the column: its top and foot (where the edge's soft corners begin), clear of the head and the foot.
+    readonly property real fillet: PrismTheme.dp(10)
+    readonly property real cutTop: root.tabY < 0 ? root.height : Math.max(flick.y, Math.min(root.height, root.tabY - root.fillet))
+    readonly property real cutFoot: root.tabY < 0 ? root.height
+        : Math.max(flick.y, Math.min(root.height, root.tabY + (root.tabItem?.height ?? 0) + root.fillet))
+    readonly property string fillPath: {
+        const W = root.width, H = root.height, c = root.corner, f = root.fillet, r = PrismTheme.dp(10)
+        const x0 = PrismTheme.dp(12)
+        const lo = flick.y, clamp = v => Math.max(lo, Math.min(H, v))
+        const a = root.cutTop, b = root.cutFoot
+        const t = clamp(root.tabY), u = clamp(root.tabY + (root.tabItem?.height ?? 0))
+        const notch = root.tabY < 0 ? "" : `L ${W} ${a} Q ${W} ${t} ${W - f} ${t} L ${x0 + r} ${t} Q ${x0} ${t} ${x0} ${clamp(t + r)} `
+            + `L ${x0} ${clamp(u - r)} Q ${x0} ${u} ${x0 + r} ${u} L ${W - f} ${u} Q ${W} ${u} ${W} ${b} `
+        return `M ${c} 0 L ${W} 0 ${notch}L ${W} ${H} L ${c} ${H} Q 0 ${H} 0 ${H - c} L 0 ${c} Q 0 0 ${c} 0 Z`
+    }
+    // The column's fill and the haze the reference spills from its corner in the person's accent, both cut the same.
+    Shape {
         anchors.fill: parent
-        color: PrismTheme.railGlass
-        topLeftRadius: root.corner
-        bottomLeftRadius: root.corner
+        preferredRendererType: Shape.CurveRenderer
+        ShapePath {
+            fillColor: PrismTheme.railGlass
+            strokeColor: "transparent"
+            strokeWidth: 0
+            PathSvg { path: root.fillPath }
+        }
+        ShapePath {
+            strokeColor: "transparent"
+            strokeWidth: 0
+            fillGradient: RadialGradient {
+                centerX: root.width * 0.11; centerY: root.width * 0.18
+                focalX: centerX; focalY: centerY
+                centerRadius: root.width * 1.1
+                GradientStop { position: 0; color: Qt.alpha(PrismTheme.accent, PrismTheme.light ? 0.22 : 0.36) }
+                GradientStop { position: 0.45; color: Qt.alpha(PrismTheme.accent, PrismTheme.light ? 0.088 : 0.144) }
+                GradientStop { position: 1; color: Qt.alpha(PrismTheme.accent, 0) }
+            }
+            PathSvg { path: root.fillPath }
+        }
     }
-    // The haze the reference spills from its corner, in the person's accent, filling only the column's own shape.
-    PrismGlow {
-        id: glow
-        x: -width * 0.45
-        y: -height * 0.42
-        width: root.width * 2.2
-        height: root.width * 2.2
-        colour: PrismTheme.accent
-        strength: PrismTheme.light ? 0.22 : 0.36
-        area: Qt.rect(-glow.x, -glow.y, glow.width + glow.x, Math.min(root.height, glow.height + glow.y))
-        corner: root.corner
+    // The column's edge, open where the tab passes through it.
+    Rectangle {
+        x: root.width - 1
+        width: 1
+        height: root.cutTop
+        color: PrismTheme.line
     }
     Rectangle {
-        anchors.right: parent.right
+        x: root.width - 1
+        y: root.cutFoot
         width: 1
-        height: parent.height
+        height: root.height - y
         color: PrismTheme.line
     }
 
@@ -191,6 +232,9 @@ Item {
         contentHeight: column.implicitHeight + PrismTheme.dp(24)
         boundsBehavior: Flickable.StopAtBounds
         clip: true
+        // The pages soften into the column at its edges, whatever lies behind it (a list this short costs nothing offscreen).
+        layer.enabled: sideEdge.active
+        layer.effect: MultiEffect { maskEnabled: true; maskSource: sideEdge.mask; maskThresholdMin: 0.5; maskSpreadAtMin: 1 }
 
         Column {
             id: column
@@ -242,6 +286,7 @@ Item {
                             // A page opened from far down the list brings its groups into sight once they unfold.
                             onListsChanged: if (entry.lists) { root.pending = entry; revealLater.restart() }
                             PrismNavItem {
+                                id: navItem
                                 width: group.width
                                 edge: group.width
                                 glyph: entry.modelData.glyph
@@ -251,6 +296,9 @@ Item {
                                 current: entry.open
                                 marked: entry.open && !entry.lists
                                 onClicked: PrismState.go(entry.modelData.pageId)
+                                onTabbedChanged: root.tabItem = navItem.tabbed ? navItem : root.tabItem === navItem ? null : root.tabItem
+                                Component.onCompleted: if (navItem.tabbed) root.tabItem = navItem
+                                Component.onDestruction: if (root.tabItem === navItem) root.tabItem = null
                             }
                             // The open page's groups, unfolding under it on a hairline that hangs from its glyph.
                             Item {
@@ -361,14 +409,11 @@ Item {
         }
     }
 
-    // The page list fades into the column where it meets the panel's edge.
     IrisScrollEdge {
         id: sideEdge
         flick: flick
         anchors.fill: flick
         blurs: false
         reach: PrismTheme.dp(28)
-        veil: PrismTheme.rail
-        bottomLeftRadius: root.corner
     }
 }

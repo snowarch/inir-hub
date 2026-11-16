@@ -5,6 +5,8 @@
 // only when the window's size, the page or a colour changes.
 // One frame for every copy: a copy laid over the edge of the scrolled column (`band`) draws the same air at the same
 // place and fades out along its height, so rows passing under it melt into the air instead of into a flat veil.
+// Over iRiS's glass (his 11-16) the canvas is a veil: over the compositor's blur it lets it through by the Tint, over
+// the wallpaper's glass it lies on the blurred wallpaper sampled where the panel sits on the screen.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 layout(std140, binding = 0) uniform buf {
@@ -20,7 +22,10 @@ layout(std140, binding = 0) uniform buf {
     float seed;
     float strength;
     float radius;  // the window's corners, px
+    vec4 glass;    // x: 0 the solid canvas, 1 a veil over the compositor's blur, 2 the wallpaper's glass under it; y: the veil
+    vec4 screen;   // where the window's top-left lies on the screen (x, y) and the screen's size (z, w), px
 } u;
+layout(binding = 1) uniform sampler2D backdrop;
 
 float draw(float k) { return fract(sin(u.seed * 12.9898 + k * 78.233) * 43758.5453); }
 float hash(vec2 p) {
@@ -48,7 +53,13 @@ void main() {
     float amount = a1 + a2 + a3 + a4;
     vec3 colour = (u.c1.rgb * a1 + u.c2.rgb * a2 + u.c3.rgb * a3 + u.c2.rgb * a4) / max(amount, 1e-3);
     amount = clamp(amount, 0.0, 1.0);
-    amount = amount * amount * (3.0 - 2.0 * amount) * u.strength;
+    // Over glass the blur behind carries the colour: the page's air only tints it.
+    amount = amount * amount * (3.0 - 2.0 * amount) * u.strength * (u.glass.x > 0.5 ? 0.6 : 1.0);
+    vec3 ground = u.ground.rgb;
+    if (u.glass.x > 1.5) {
+        vec3 behind = texture(backdrop, (u.screen.xy + at) / max(u.screen.zw, vec2(1.0))).rgb;
+        ground = mix(behind, ground, u.glass.y);
+    }
 
     // Film grain, a trace, so the wash never bands on an 8-bit screen.
     float n = 0.5 * (hash(floor(at)) + hash(floor(at * 0.5) * 1.37 + 3.1));
@@ -57,9 +68,9 @@ void main() {
     vec3 rgb;
     if (u.ground.a > 0.5) {
         vec3 lit = colour * amount;
-        rgb = 1.0 - (1.0 - u.ground.rgb) * (1.0 - lit);
+        rgb = 1.0 - (1.0 - ground) * (1.0 - lit);
     } else {
-        rgb = mix(u.ground.rgb, colour, amount);
+        rgb = mix(ground, colour, amount);
     }
     rgb = clamp(rgb + vec3(speck), 0.0, 1.0);
 
@@ -72,5 +83,7 @@ void main() {
         t = u.band.a > 0.0 ? t : 1.0 - t;
         alpha *= 1.0 - smoothstep(0.0, 1.0, t);
     }
+    // Over the compositor's blur the canvas covers only by the veil; everything else is opaque.
+    if (u.glass.x > 0.5 && u.glass.x < 1.5) alpha *= u.glass.y;
     fragColor = vec4(rgb * alpha, alpha) * u.qt_Opacity;
 }

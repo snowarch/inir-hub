@@ -46,13 +46,16 @@ Item {
         radius: plate.radius
         blur: PrismTheme.dp(28)
         offset.y: PrismTheme.dp(8)
-        color: Qt.rgba(0, 0, 0, PrismTheme.light ? 0.12 : 0.4) // iris-literal: Prism's own fills and scrims, scheme-aware above
+        // Lighter under glass: it would show through the plate.
+        color: Qt.rgba(0, 0, 0, (PrismTheme.light ? 0.12 : 0.4) * (PrismTheme.glass ? 0.5 : 1)) // iris-literal: Prism's own fills and scrims, scheme-aware above
     }
     Rectangle {
         id: plate
         anchors.fill: parent
         radius: PrismTheme.dp(22)
-        color: PrismTheme.raised
+        color: PrismTheme.bar
+        border.width: PrismTheme.glass ? 1 : 0
+        border.color: PrismTheme.rim
         // Presses and the pointer stop here, never reaching a row hidden under it; the wheel goes on to the page.
         MouseArea { anchors.fill: parent; hoverEnabled: true; onWheel: wheel => wheel.accepted = false }
     }
@@ -188,8 +191,8 @@ Item {
         height: PrismTheme.dp(44)
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: PrismTheme.raised }
-            GradientStop { position: 1; color: Qt.alpha(PrismTheme.raised, 0) }
+            GradientStop { position: 0; color: PrismTheme.bar }
+            GradientStop { position: 1; color: Qt.alpha(PrismTheme.bar, 0) }
         }
     }
     Rectangle {
@@ -200,8 +203,8 @@ Item {
         height: PrismTheme.dp(44)
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: Qt.alpha(PrismTheme.raised, 0) }
-            GradientStop { position: 1; color: PrismTheme.raised }
+            GradientStop { position: 0; color: Qt.alpha(PrismTheme.bar, 0) }
+            GradientStop { position: 1; color: PrismTheme.bar }
         }
     }
 

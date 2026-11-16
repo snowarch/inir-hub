@@ -133,7 +133,7 @@ ClippingRectangle {
             readonly property var mark: root.marks[disc.index] ?? null
             readonly property string entry: String(disc.mark?.entry ?? "")
             readonly property bool lit: disc.entry.length > 0 && (root.pointed === disc.entry || root.picked === disc.entry)
-            width: PrismTheme.dp(22)
+            width: PrismTheme.dp(20)
             height: width
             x: Math.round(Number(disc.mark?.x ?? 0) - width / 2)
             y: Math.round(Number(disc.mark?.y ?? 0) - height / 2)
@@ -148,6 +148,8 @@ ClippingRectangle {
                 offset.y: PrismTheme.dp(1)
                 color: PrismTheme.spotShadow
             }
+            // A pin, never an empty disc (his 11-15: no numbering): smoked glass round a point of light; lit, the
+            // glass turns white round a dark point.
             Rectangle {
                 id: face
                 anchors.fill: parent
@@ -157,13 +159,13 @@ ClippingRectangle {
                 border.color: PrismTheme.spotEdge
                 Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
             }
-            PrismText {
+            Rectangle {
                 anchors.centerIn: parent
-                mono: true
-                text: ""
+                width: PrismTheme.dp(6)
+                height: width
+                radius: width / 2
                 color: disc.lit ? PrismTheme.night : PrismTheme.paper
-                font.pixelSize: PrismTheme.caption
-                font.weight: Font.DemiBold
+                Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
             }
             // Changed from iNiR's: the strip's accent dot, on the number's shoulder.
             Rectangle {

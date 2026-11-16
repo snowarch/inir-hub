@@ -103,6 +103,7 @@ Item {
         rise: root.rise
         tabWidth: Math.min(root.tabNeed, root.tabRoom)
         tint: root.tint
+        turn: root.number - 1
         // Its own art: the group's name and place drawn into the seed, so no two folders anywhere share a ribbon.
         seed: root.number * 2.3 + Array.from(root.title).reduce((n, letter) => (n * 31 + letter.charCodeAt(0)) % 9973, 7) * 0.013
         sayWidth: chipBox.visible ? chipBox.width + PrismTheme.dp(24) : 0
@@ -240,6 +241,19 @@ Item {
                 sourceComponent: Item {
                     width: root.figureWidth
                     implicitHeight: scene.height + (caption.visible ? PrismTheme.dp(8) + caption.implicitHeight : 0)
+                    // A plate of glass round the picture: light on its upper rim, never a flat outline (glass-spectral).
+                    Rectangle {
+                        x: -1
+                        y: -1
+                        width: scene.width + 2
+                        height: scene.height + 2
+                        radius: scene.radius + 1
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: PrismTheme.frostLight }
+                            GradientStop { position: 0.45; color: PrismTheme.frostShade }
+                            GradientStop { position: 1; color: PrismTheme.frostEdge }
+                        }
+                    }
                     IrisGroupPreview {
                         id: scene
                         width: root.figureWidth

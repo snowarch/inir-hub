@@ -7,8 +7,8 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
-// The right column: who is signed in as a glass card over their wallpaper with the bell (Do Not Disturb), the settings
-// changed from the factory profile numbered as the reference's top artists, and what is playing.
+// The right column: who is signed in as a pane of glass over their wallpaper (their wallpaper, dark or light, Do Not
+// Disturb at hand), the settings changed from the factory profile, and what is playing.
 Item {
     id: root
     property bool active: true

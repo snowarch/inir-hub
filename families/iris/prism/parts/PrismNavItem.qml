@@ -1,14 +1,13 @@
 import QtQuick
-import QtQuick.Shapes
 import qs.services
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 
 // One sidebar line: glyph, name and its number in the contents, printed small at the right as a book's contents page
 // prints its page numbers (`.claude/ref/language`, Délavé's numbered dividers). The open one is a tab of the page
-// itself (his 11-10, "más distinguible en dónde se está"): the page's sheet runs out through the column's edge to hold
-// it, joined by soft inner corners, its glyph printed on the page's art and its name in the person's accent. A hovered
-// line takes a quiet plate in Prism's grey.
+// itself (his 11-10, "más distinguible en dónde se está"): the column cuts it out of its fill (PrismSidebar), so the
+// page runs out through the column's edge to hold it, its glyph printed on the page's art and its name in the
+// person's accent. A hovered line takes a quiet plate in Prism's grey.
 Item {
     id: root
     property string glyph: "circle"
@@ -34,29 +33,6 @@ Item {
         radius: PrismTheme.dp(9)
         color: root.current ? PrismTheme.accentPlate : area.containsMouse || tailArea.containsMouse ? PrismTheme.fill : "transparent"
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
-    }
-    // The tab: the page's own sheet, out through the column's edge, its inner corners soft where it meets it.
-    Shape {
-        visible: root.tabbed
-        x: -PrismTheme.dp(8)
-        y: -fillet
-        width: root.edge - x
-        height: root.height + fillet * 2
-        readonly property real fillet: PrismTheme.dp(10)
-        preferredRendererType: Shape.CurveRenderer
-        ShapePath {
-            fillColor: PrismTheme.canvas
-            strokeColor: "transparent"
-            strokeWidth: 0
-            PathSvg {
-                readonly property real w: root.edge + PrismTheme.dp(8)
-                readonly property real h: root.height
-                readonly property real f: PrismTheme.dp(10)
-                readonly property real r: PrismTheme.dp(10)
-                path: `M ${r} ${f} L ${w - f} ${f} Q ${w} ${f} ${w} 0 L ${w} ${h + f * 2} Q ${w} ${h + f} ${w - f} ${h + f} `
-                    + `L ${r} ${h + f} Q 0 ${h + f} 0 ${h + f - r} L 0 ${f + r} Q 0 ${f} ${r} ${f} Z`
-            }
-        }
     }
     // The open page's glyph printed on its art, the cover its rows wear.
     PrismThumb {

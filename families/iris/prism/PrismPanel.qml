@@ -12,15 +12,17 @@ import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 import qs.modules.iris.prism.parts
 
-// Prism's body: sidebar, the page in the middle (heading, hero, sections) and the rail. Lays itself out from the room
-// it is given; the window around it only places it.
+// Prism's body: sidebar, the page in the middle and the rail, laid out from the room it is given; its host places it.
 Item {
     id: root
     property bool active: true
     property string flashPath: ""
-    // Hosted as a window: square corners (the compositor rounds a window), the lights act on the window, the switch
-    // between hosts reads "Over the desktop".
+    // Hosted as a window: square corners (the compositor rounds it), the lights act on the window.
     property bool windowed: false
+    // Under Glass the overlay lends the blurred wallpaper and where the panel lies on the screen.
+    property Item backdrop: null
+    property point screenAt: Qt.point(0, 0)
+    property size screenSize: Qt.size(1, 1)
     signal closeRequested()
     // The yellow light in a window: the window goes to the dock as any app's would.
     signal minimizeRequested()
@@ -286,8 +288,7 @@ Item {
         }
     }
 
-    // The body's round corners are drawn by what stands in them (the sidebar's fill, its glow, the edge veils' feet);
-    // nothing else reaches them. A mask over the whole body rendered every frame of Prism twice, offscreen and again (11-07).
+    // The body's round corners are drawn by what stands in them: a mask over the body rendered Prism twice a frame (11-07).
     readonly property bool watching: root.active && root.visible
     onWatchingChanged: PrismModel.watching = root.watching
     Component.onCompleted: PrismModel.watching = root.watching
@@ -297,11 +298,12 @@ Item {
         id: body
         anchors.fill: parent
         radius: root.windowed ? 0 : PrismTheme.dp(28)
-        color: PrismTheme.canvas
+        color: PrismTheme.glass ? "transparent" : PrismTheme.canvas
         clip: true
 
         // The page's colour in the air of the whole panel, under every column (his 11-15).
-        PrismAura { id: air; anchors.fill: parent; key: String(root.page?.pageId ?? ""); tint: String(root.page?.tint ?? "grey"); radius: body.radius }
+        PrismAura { id: air; anchors.fill: parent; key: String(root.page?.pageId ?? ""); tint: String(root.page?.tint ?? "grey"); radius: body.radius
+            backdrop: root.backdrop; screenAt: root.screenAt; screenSize: root.screenSize }
 
         PrismSidebar {
             id: sidebar
@@ -445,8 +447,7 @@ Item {
                     }
                 }
 
-                // Where the groups begin. A pixel tall: a Column leaves an item of no height at y 0, and the strip read
-                // the page as scrolled past its top from the start.
+                // Where the groups begin, a pixel tall: a Column leaves an item of no height at y 0.
                 Item { id: groupsAt; width: 1; height: 1 }
 
                 // Groups keyed by title: a write rebuilds the list, never the groups on screen.
@@ -523,16 +524,16 @@ Item {
             }
         }
 
-        // Rows leaving the top or waiting past the foot melt into the air: the same air again over each edge, fading
-        // along it, so no flat band of canvas cuts the colour (nothing rendered offscreen, 11-11).
+        // Rows leaving the top or past the foot melt into the air drawn again over each edge (nothing offscreen, 11-11).
+        // Over the compositor's blur nothing can be drawn again: rows end at the panel's edge, as any glass window's.
         Repeater {
             model: [1, -1]
             delegate: PrismAura {
                 required property int modelData
                 x: centre.x; y: modelData > 0 ? 0 : body.height - height; width: centre.width; height: PrismTheme.dp(36)
-                visible: centre.visible && (modelData > 0 ? centre.contentY > 1 : centre.contentY + centre.height < centre.contentHeight - 1)
+                visible: centre.visible && !PrismTheme.glassBlur && (modelData > 0 ? centre.contentY > 1 : centre.contentY + centre.height < centre.contentHeight - 1)
                 fadeDir: modelData; frameSize: Qt.size(body.width, body.height); origin: Qt.point(x, y)
-                key: air.key; tint: air.tint; radius: body.radius
+                key: air.key; tint: air.tint; radius: body.radius; backdrop: air.backdrop; screenAt: air.screenAt; screenSize: air.screenSize
             }
         }
 
@@ -565,8 +566,7 @@ Item {
             onReach: row => root.reach(row)
         }
 
-        // The side column's own key, at the page's top corner where the column begins: it folds it away and brings it
-        // back, and stays in reach however far the page is read.
+        // The side column's own key, at the page's top corner: it folds the column away and back, in reach at any depth.
         PrismRound {
             id: railKey
             visible: root.railFits

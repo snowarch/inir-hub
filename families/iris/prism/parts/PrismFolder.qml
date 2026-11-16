@@ -14,6 +14,7 @@ Item {
     property real rise: PrismTheme.dp(46)
     property real radius: PrismTheme.dp(24)
     property string tint: "grey"
+    property int turn: 0
     property real seed: 0
     property color sheet: PrismTheme.card
     // Room on the art for what it says, so the ribbon gathers away from it.
@@ -33,6 +34,7 @@ Item {
         width: root.width - x
         height: root.rise + root.shoulder + PrismTheme.dp(2)
         tint: root.tint
+        turn: root.turn
         seed: root.seed
         // The ribbon gathers between the step and the words.
         centre: Qt.point(Math.max(0.15, Math.min(0.7, (root.artWidth - root.sayWidth) / Math.max(1, width) * 0.55)), 0.46)
@@ -42,16 +44,19 @@ Item {
         topLeftRadius: 0
         bottomLeftRadius: 0
         bottomRightRadius: 0
+        // Over glass the front sheet is frosted: the art ends exactly at its edge instead of showing through it.
+        cut: PrismTheme.glass ? Qt.vector4d(PrismTheme.dp(4), root.slope, root.rise, root.shoulder) : Qt.vector4d(0, 0, 0, 0)
     }
 
-    // The front sheet: the tab, a soft step down to the front's edge, its round shoulder, then the card.
+    // The front sheet: the tab, a soft step down to the front's edge, its round shoulder, then the card. Over glass a
+    // frosted sheet with a thread of light along its edge (glass-card-pink-sky).
     Shape {
         anchors.fill: parent
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             fillColor: root.sheet
-            strokeColor: "transparent"
-            strokeWidth: 0
+            strokeColor: PrismTheme.glass ? PrismTheme.rim : "transparent"
+            strokeWidth: PrismTheme.glass ? 1 : 0
             PathSvg {
                 readonly property real w: root.width
                 readonly property real h: Math.max(root.height, root.rise + root.radius * 2)
@@ -76,6 +81,7 @@ Item {
         width: root.width - x
         height: Math.min(PrismTheme.dp(96), Math.max(0, root.height - root.rise))
         tint: root.tint
+        turn: root.turn
         seed: root.seed
         centre: Qt.point(Math.max(0.15, Math.min(0.7, (root.artWidth - root.sayWidth) / Math.max(1, width) * 0.55)), -0.1)
         thickness: 0.5

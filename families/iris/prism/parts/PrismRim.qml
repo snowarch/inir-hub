@@ -39,4 +39,13 @@ Shape {
         PathRectangle { x: 0; y: 0; width: root.width; height: root.height; radius: root.radius }
         PathRectangle { x: 1; y: 1; width: root.width - 2; height: root.height - 2; radius: Math.max(0, root.radius - 1) }
     }
+    // Over glass the whole edge catches a thread of light, as a frosted sheet's does (glass-card-pink-sky).
+    Rectangle {
+        visible: PrismTheme.glass
+        anchors.fill: parent
+        radius: root.radius
+        color: "transparent"
+        border.width: 1
+        border.color: PrismTheme.rim
+    }
 }

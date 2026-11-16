@@ -19,6 +19,9 @@ layout(std140, binding = 0) uniform buf {
     float grain;
     float fade;    // from this fraction of the height down the ribbon fades out (1: never), so words below read
     float side;    // over this fraction of the width from the left the ribbon fades in (0: a hard start)
+    vec4 cut;      // a folder's front sheet over this back sheet (y > 0): where its tab ends, its slope, its rise and its
+                   // shoulder, px in this box; the art shows only above the sheet's top edge, so a frosted sheet never
+                   // shows the art's own edge through it
 } u;
 
 // One number in 0..1 for each question asked of a seed.
@@ -37,6 +40,26 @@ float cornerBox(vec2 p, vec2 half_, vec4 r) {
     float rr = p.x < 0.0 ? (p.y < 0.0 ? r.x : r.w) : (p.y < 0.0 ? r.y : r.z);
     vec2 q = abs(p) - half_ + vec2(rr);
     return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - rr;
+}
+
+// The front sheet's top edge at x, as PrismFolder draws it: flat on the tab, its cubic step down, flat, its round
+// shoulder (a quadratic) into the right side.
+float sheetTop(float x) {
+    float t = u.cut.x, s = u.cut.y, k = u.cut.z, o = max(u.cut.w, 1e-3), w = u.size.x;
+    if (x <= t) return 0.0;
+    if (x < t + s) {
+        // x(τ) = t + s·(1.5τ − 1.5τ² + τ³), y(τ) = k·(3τ² − 2τ³): solved for τ (monotone, so Newton settles at once).
+        float target = (x - t) / s;
+        float tau = target;
+        for (int i = 0; i < 4; i++) {
+            float f = 1.5 * tau - 1.5 * tau * tau + tau * tau * tau - target;
+            tau = clamp(tau - f / (1.5 - 3.0 * tau + 3.0 * tau * tau), 0.0, 1.0);
+        }
+        return k * tau * tau * (3.0 - 2.0 * tau);
+    }
+    if (x < w - o) return k;
+    float tau = 1.0 - sqrt(clamp((w - x) / o, 0.0, 1.0));
+    return k + o * tau * tau;
 }
 
 void main() {
@@ -114,6 +137,12 @@ void main() {
 
     float edge = cornerBox(px - u.size * 0.5, u.size * 0.5, u.radii);
     float alpha = clamp(0.5 - edge, 0.0, 1.0);
+    if (u.cut.y > 0.0) {
+        // Measured across the edge, so the steep shoulder is as smooth as the flat top.
+        float top = sheetTop(px.x);
+        float slopeAt = (sheetTop(px.x + 0.5) - sheetTop(px.x - 0.5));
+        alpha *= clamp((top - px.y) / sqrt(1.0 + slopeAt * slopeAt) + 0.5, 0.0, 1.0);
+    }
     if (u.paper.a > 1.5) {
         // Bare: only the colour, as much of it as the ribbon holds, over whatever lies below.
         float a = clamp(amount + speck * amount, 0.0, 1.0) * alpha;
