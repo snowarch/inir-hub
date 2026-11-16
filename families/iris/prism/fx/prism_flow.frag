@@ -22,6 +22,9 @@ layout(std140, binding = 0) uniform buf {
     vec4 cut;      // a folder's front sheet over this back sheet (y > 0): where its tab ends, its slope, its rise and its
                    // shoulder, px in this box; the art shows only above the sheet's top edge, so a frosted sheet never
                    // shows the art's own edge through it
+    float strength; // how much of the ribbon shows (1: all): a folder's back sheet rests quieter than a poster
+    float mute;     // how far its colours lean to grey (0: none), so many folders on one page never shout together
+    vec4 frost;     // bare only: a frosted sheet under the light (rgb, a), so a back sheet over glass is glass too
 } u;
 
 // One number in 0..1 for each question asked of a seed.
@@ -116,9 +119,10 @@ void main() {
     colour = mix(colour, mix(k3, k1, draw(s, 17.0)), bloom / max(lead + bloom, 1e-3));
     body = body + bloom;
 
+    colour = mix(colour, vec3(dot(colour, vec3(0.2126, 0.7152, 0.0722))), u.mute);
     float amount = clamp(body + haze, 0.0, 1.0) * (1.0 - 0.92 * smoothstep(u.fade, u.fade + 0.3, qt_TexCoord0.y));
     amount *= smoothstep(0.0, max(u.side, 1e-4), qt_TexCoord0.x);
-    amount = amount * amount * (3.0 - 2.0 * amount);
+    amount = amount * amount * (3.0 - 2.0 * amount) * u.strength;
     // Film grain: two octaves averaged so no single pixel stands out, strongest in the colour, a trace on the ground.
     float n = 0.5 * (hash(floor(px) + s * 17.0) + hash(floor(px * 0.5) * 1.37 + 3.1));
     float speck = (n - 0.5) * u.grain * (0.3 + 0.7 * amount);
@@ -145,8 +149,12 @@ void main() {
     }
     if (u.paper.a > 1.5) {
         // Bare: only the colour, as much of it as the ribbon holds, over whatever lies below.
-        float a = clamp(amount + speck * amount, 0.0, 1.0) * alpha;
-        fragColor = vec4(colour * a, a) * u.qt_Opacity;
+        float a = clamp(amount + speck * amount, 0.0, 1.0);
+        // Light added over the frost: screened in dark, so it glows; laid on as pigment in light.
+        vec3 under = u.frost.rgb * u.frost.a;
+        vec3 lit = u.paper.rgb.r > 0.5 ? under * (1.0 - a) + colour * a : under + colour * a * (1.0 - under);
+        float cover = 1.0 - (1.0 - u.frost.a) * (1.0 - a);
+        fragColor = vec4(lit, cover) * alpha * u.qt_Opacity;
         return;
     }
     fragColor = vec4(rgb * alpha, alpha) * u.qt_Opacity;

@@ -9,7 +9,7 @@ import qs.modules.iris.prism.core
 Shape {
     id: root
     property string tint: "grey"
-    property real radius: PrismTheme.dp(28)
+    property real radius: PrismTheme.corner
 
     readonly property var colours: PrismTheme.palette(root.tint)
     readonly property real strength: PrismTheme.light ? 0.75 : 0.95

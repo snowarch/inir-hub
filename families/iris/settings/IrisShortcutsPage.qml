@@ -35,6 +35,9 @@ Flickable {
         return name === "ii Shell" ? Translation.tr("iNiR Shell") : name
     }
     function categoryGlyph(name: string): string { return IrisBinds.glyphOf(name) }
+    // A host may print each category's mark its own way (Prism: a cover of its art); iRiS's squircle otherwise. The
+    // delegate reads `glyph` and `name` from its Loader.
+    property Component markDelegate: null
     function categoryTint(name: string): color { return IrisStyle.identityColor(IrisBinds.tintOf(name)) }
     function parseCombo(combo: string): var {
         if (!combo || combo.length === 0) return { mods: [], key: "" }
@@ -289,6 +292,7 @@ Flickable {
                 IrisSquircle {
                     plain: IrisStyle.settingsPlainMarks
                     id: mark
+                    visible: root.markDelegate === null
                     anchors.left: parent.left
                     anchors.leftMargin: 14 * root.d
                     anchors.verticalCenter: parent.verticalCenter
@@ -296,6 +300,13 @@ Flickable {
                     height: width
                     tint: root.categoryTint(category.modelData.name)
                     glyph: root.categoryGlyph(category.modelData.name)
+                }
+                Loader {
+                    readonly property string glyph: root.categoryGlyph(category.modelData.name)
+                    readonly property string name: String(category.modelData.name)
+                    anchors.centerIn: mark
+                    active: root.markDelegate !== null
+                    sourceComponent: root.markDelegate
                 }
                 IrisText {
                     anchors.left: parent.left

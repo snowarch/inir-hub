@@ -19,8 +19,14 @@ Singleton {
     // the compositor blurs behind the panel, Glass blurs the wallpaper inside it, Off is the solid canvas. A window
     // cannot know where it sits on screen, so a window over the wallpaper's glass stays solid, as iRiS's windows do.
     readonly property bool windowHost: String(Config.options?.iris?.appearance?.settingsHost ?? "overlay") === "window"
-    readonly property bool glassBlur: IrisStyle.glassCompositor
-    readonly property bool glassWallpaper: IrisStyle.glassWallpaper && !root.windowHost
+    // Settings window › Material: Solid keeps Prism solid over a glass desktop; Glass gives it the wallpaper's glass
+    // when the desktop has none.
+    readonly property string ownMaterial: IrisStyle.surfaceMaterial("settings")
+    readonly property bool glassBlur: root.ownMaterial !== "solid" && IrisStyle.glassCompositor
+    readonly property bool glassWallpaper: root.ownMaterial !== "solid" && !root.windowHost
+        && (IrisStyle.glassWallpaper || (root.ownMaterial === "glass" && !IrisStyle.glassCompositor && Appearance.effectsEnabled))
+    // Settings window › Corners: Auto is Prism's own round.
+    readonly property real corner: IrisStyle.surfaceRadius("settings", root.dp(28))
     readonly property bool glass: root.glassBlur || root.glassWallpaper
     // How much canvas lies over the glass: the person's Tint, held by iRiS to the floor where the ink still reads.
     readonly property real veil: root.glass ? Math.max(0.5, IrisStyle.glassTint) : 1
@@ -162,5 +168,7 @@ Singleton {
     readonly property real poster: 52 * IrisStyle.typeScale
 
     readonly property bool motion: IrisStyle.motionEnabled
+    // Settings window › Motion speed: how fast the panel opens and closes.
+    readonly property real openSpeed: IrisStyle.surfaceSpeed("settings")
     function ms(value: int): int { return root.motion ? value : 0 }
 }

@@ -297,7 +297,7 @@ Item {
     Rectangle {
         id: body
         anchors.fill: parent
-        radius: root.windowed ? 0 : PrismTheme.dp(28)
+        radius: root.windowed ? 0 : PrismTheme.corner
         color: PrismTheme.glass ? "transparent" : PrismTheme.canvas
         clip: true
 
@@ -516,11 +516,26 @@ Item {
             }
             // iRiS's own pages keep 16 dp of air each side: given 16 more, their column stands on Prism's.
             Loader {
-                readonly property real air: String(root.page.view ?? "").includes("/prism/parts/") ? 0 : PrismTheme.dp(16)
-                anchors { top: hostedTop.bottom; bottom: parent.bottom; left: parent.left; right: parent.right
-                    leftMargin: air; rightMargin: air }
+                id: hostedView
+                // Not named "air": the panel's PrismAura holds that id, and an id wins over a property (the page was 0 wide).
+                readonly property real inset: String(root.page.view ?? "").includes("/prism/parts/") ? 0 : PrismTheme.dp(16)
+                x: inset
+                y: hostedTop.height
+                width: parent.width - inset * 2
+                height: parent.height - hostedTop.height
                 active: root.hosted
                 source: root.hosted ? root.page.view : ""
+                // iRiS's own pages print their marks as Prism's covers, so a hosted list reads as the rail does.
+                onLoaded: if (item && ("markDelegate" in item)) item.markDelegate = hostedMark
+                Component {
+                    id: hostedMark
+                    PrismThumb {
+                        size: PrismTheme.dp(28)
+                        glyph: String(parent?.glyph ?? "circle")
+                        salt: String(parent?.name ?? "")
+                        tint: String(root.page?.tint ?? "grey")
+                    }
+                }
             }
         }
 
@@ -552,6 +567,8 @@ Item {
             restorable: PrismModel.restorableOf(root.page.pageId)
             onPickGroup: title => root.showGroup(root.firstOf(title))
             onRestore: PrismModel.restore(root.page.pageId)
+            under: centre
+            underAt: Qt.point(x - centre.x, y - centre.y)
         }
 
         PrismRail {

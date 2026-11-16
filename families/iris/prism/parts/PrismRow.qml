@@ -123,7 +123,8 @@ Item {
         visible: !root.namedByCard
         height: root.namedByCard ? PrismTheme.dp(4) : root.stacked
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
-            : Math.max(PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
+            // A row with nothing to explain stands shorter than one that says what it does (his 11-16).
+            : Math.max(PrismTheme.dp(root.about.length > 0 || root.note.length > 0 ? 58 : 48), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
         opacity: root.locked ? 0.45 : 1
 
         // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
@@ -187,7 +188,10 @@ Item {
                     id: place
                     width: Math.min(implicitWidth, parent.width - go.width - parent.spacing)
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Translation.tr(PrismModel.page(root.row.page).name) + (String(root.row.section ?? "").length > 0 ? "  ›  " + Translation.tr(root.row.section) : "")
+                    // A group named as its page ("App colours › App colours") says the page once.
+                    readonly property string pageName: PrismModel.page(root.row.page).name
+                    readonly property string groupName: String(root.row.section ?? "")
+                    text: Translation.tr(pageName) + (groupName.length > 0 && groupName !== pageName ? "  ›  " + Translation.tr(groupName) : "")
                     color: placeArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
                     font.pixelSize: PrismTheme.small
                     font.weight: placeArea.containsMouse ? Font.DemiBold : Font.Normal

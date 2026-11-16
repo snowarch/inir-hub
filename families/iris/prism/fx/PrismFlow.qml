@@ -29,6 +29,13 @@ ShaderEffect {
     // art shows only above the sheet's edge, for a frosted sheet that would show the art's own edge through it.
     property vector4d cut: Qt.vector4d(0, 0, 0, 0)
 
+    // How much of the ribbon shows, and how far its colours lean to grey: a poster speaks, a folder's back rests.
+    property real strength: 1
+    property real mute: 0
+    // Bare only: a frosted sheet under the light, so a back sheet over the desktop's glass is glass as well.
+    property color frostColour: "transparent"
+    readonly property vector4d frost: Qt.vector4d(root.frostColour.r, root.frostColour.g, root.frostColour.b, root.frostColour.a)
+
     property int turn: 0
     readonly property var colours: PrismTheme.paletteAt(root.tint, root.turn)
     readonly property color ground: root.dark ? PrismTheme.night : PrismTheme.paperLight

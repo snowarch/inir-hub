@@ -144,6 +144,9 @@ Singleton {
         return spec.section === "general" && spec.group === "Settings window"
             && (spec.path === "iris.appearance.settingsLayout" || spec.path === "iris.appearance.settingsOriginal" || (spec.kind === "action" && spec.label === "Prism"))
     }
+    // Settings window rows Prism does not wear (it has its own look, light and way of opening): shown by the other
+    // designs, never here, where they would change nothing.
+    readonly property var unworn: ["iris.appearance.places.settings", "iris.appearance.surfaces.settings.light", "iris.appearance.surfaces.settings.morph"]
     function coverOf(spec: var): string {
         const own = PrismCovers.byPath[String(spec.path ?? "")]
         if (own) return own
@@ -154,7 +157,7 @@ Singleton {
         const out = []
         let designPlaced = false
         for (const spec of IrisOptions.settings) {
-            if (spec.mirror || (spec.section === "general" && spec.group === "Every day")) continue
+            if (spec.mirror || (spec.section === "general" && spec.group === "Every day") || root.unworn.includes(String(spec.path ?? ""))) continue
             if (root.designRowOf(spec)) {
                 if (!designPlaced) { out.push(root.designRow); designPlaced = true }
                 continue

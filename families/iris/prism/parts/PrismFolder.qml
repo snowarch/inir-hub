@@ -28,8 +28,14 @@ Item {
     readonly property real artWidth: root.width - root.artX
 
     // The back sheet. It starts under the step and goes down past the front's shoulder, so the round corner there
-    // shows art behind it as a real folder's would.
+    // shows art behind it as a real folder's would. A page holds many folders under one loud poster: the back rests
+    // quieter and greyer than the poster (his 11-16: every card's colour pulled the eye), and over the desktop's glass
+    // it is a frosted sheet with the light inside it, so the blur behind reads through it as through the rest.
     PrismFlow {
+        bare: PrismTheme.glass
+        frostColour: PrismTheme.light ? Qt.rgba(1, 1, 1, 0.42) : Qt.rgba(1, 1, 1, 0.03) // iris-literal: the back sheet's frost, a step under the front's
+        strength: PrismTheme.light ? 0.58 : 0.66
+        mute: 0.22
         x: root.tab - PrismTheme.dp(4)
         width: root.width - x
         height: root.rise + root.shoulder + PrismTheme.dp(2)
@@ -44,7 +50,7 @@ Item {
         topLeftRadius: 0
         bottomLeftRadius: 0
         bottomRightRadius: 0
-        // Over glass the front sheet is frosted: the art ends exactly at its edge instead of showing through it.
+        // Over glass the front sheet is frosted: the art and its frost end exactly at its edge, never seen through it.
         cut: PrismTheme.glass ? Qt.vector4d(PrismTheme.dp(4), root.slope, root.rise, root.shoulder) : Qt.vector4d(0, 0, 0, 0)
     }
 
@@ -88,7 +94,8 @@ Item {
         fade: 0.08
         side: 0.3
         bare: true
-        opacity: PrismTheme.light ? 0.3 : 0.42
+        mute: 0.22
+        opacity: PrismTheme.light ? 0.24 : 0.3
         topRightRadius: root.shoulder
         topLeftRadius: 0
         bottomLeftRadius: 0

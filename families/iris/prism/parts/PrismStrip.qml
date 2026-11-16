@@ -21,6 +21,10 @@ Item {
     property string currentGroup: ""
     property int restorable: 0
     property bool shown: false
+    // What scrolls beneath it and where the strip lies on it: over glass the plate is frosted, the rows under it
+    // blurred into light (his 11-16: they read through the veil), never seen sharp.
+    property Item under: null
+    property point underAt: Qt.point(0, 0)
     signal pickGroup(string title)
     signal restore()
 
@@ -48,6 +52,36 @@ Item {
         offset.y: PrismTheme.dp(8)
         // Lighter under glass: it would show through the plate.
         color: Qt.rgba(0, 0, 0, (PrismTheme.light ? 0.12 : 0.4) * (PrismTheme.glass ? 0.5 : 1)) // iris-literal: Prism's own fills and scrims, scheme-aware above
+    }
+    // Only over glass and only while shown: rendered again as the page scrolls under it, a strip's area alone.
+    readonly property bool frosted: PrismTheme.glass && root.under !== null && root.shown
+    ShaderEffectSource {
+        id: beneath
+        sourceItem: root.frosted ? root.under : null
+        sourceRect: Qt.rect(root.underAt.x, root.underAt.y, root.width, root.height)
+        live: root.frosted
+        visible: false
+    }
+    Rectangle {
+        id: plateMask
+        width: root.width
+        height: root.height
+        radius: PrismTheme.dp(22)
+        visible: false
+        layer.enabled: root.frosted
+    }
+    MultiEffect {
+        anchors.fill: parent
+        visible: root.frosted
+        source: beneath
+        blurEnabled: true
+        blur: 1
+        blurMax: 48
+        saturation: 0.1
+        maskEnabled: true
+        maskSource: plateMask
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1
     }
     Rectangle {
         id: plate

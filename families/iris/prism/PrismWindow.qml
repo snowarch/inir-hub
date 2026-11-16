@@ -40,7 +40,7 @@ PanelWindow {
         window: root
         shapes: GlobalStates.settingsOverlayOpen && PrismTheme.glassBlur ? [{
             x: panel.x + panel.width * (1 - panel.scale) / 2, y: panel.y + panel.height * (1 - panel.scale) / 2,
-            width: panel.width * panel.scale, height: panel.height * panel.scale, radius: PrismTheme.dp(28) * panel.scale }] : []
+            width: panel.width * panel.scale, height: panel.height * panel.scale, radius: PrismTheme.corner * panel.scale }] : []
         windowWidth: root.width
         windowHeight: root.height
     }
@@ -55,7 +55,7 @@ PanelWindow {
         id: shown
         anchors.fill: parent
         opacity: GlobalStates.settingsOverlayOpen ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160 / PrismTheme.openSpeed); easing.type: Easing.OutCubic } }
 
         Rectangle {
             anchors.fill: parent
@@ -68,7 +68,7 @@ PanelWindow {
     RectangularShadow {
         anchors.fill: panel
         opacity: panel.opacity
-        radius: PrismTheme.dp(28)
+        radius: PrismTheme.corner
         blur: PrismTheme.dp(60)
         offset.y: PrismTheme.dp(20)
         color: Qt.rgba(0, 0, 0, Math.min(IrisStyle.shadowCeiling, PrismTheme.light ? 0.22 : 0.5)) // iris-literal: Prism's own shadow, under Umbriel's blur threshold
@@ -82,9 +82,9 @@ PanelWindow {
         anchors.centerIn: parent
         opacity: PrismTheme.glassBlur && GlobalStates.settingsOverlayOpen ? 1 : shown.opacity
         scale: GlobalStates.settingsOverlayOpen ? 1 : 0.97
-        Behavior on scale { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutCubic } }
-        Behavior on width { NumberAnimation { duration: PrismTheme.ms(260); easing.type: Easing.OutCubic } }
-        Behavior on height { NumberAnimation { duration: PrismTheme.ms(260); easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: PrismTheme.ms(220 / PrismTheme.openSpeed); easing.type: Easing.OutCubic } }
+        Behavior on width { NumberAnimation { duration: PrismTheme.ms(260 / PrismTheme.openSpeed); easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: PrismTheme.ms(260 / PrismTheme.openSpeed); easing.type: Easing.OutCubic } }
         backdrop: glassLoader.item?.ready ? glassLoader.item.texture : null
         screenAt: Qt.point(panel.x, panel.y)
         screenSize: Qt.size(root.width, root.height)
