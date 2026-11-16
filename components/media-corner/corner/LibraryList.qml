@@ -46,7 +46,7 @@ ColumnLayout {
         visible: CornerWatch.watchlistLoaded && root.wanted.length === 0
         Layout.fillWidth: true
         text: CornerState.savedQuery.trim() ? Translation.tr("Nothing here yet") : Translation.tr("Titles you save show here")
-        color: IrisStyle.textTertiary
+        color: IrisStyle.textSecondary
         font.pixelSize: IrisStyle.typeMeta
         wrapMode: Text.WordWrap
     }
