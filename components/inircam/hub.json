@@ -1,22 +1,9 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "changes": {
-    "1.0.1": [
-      "Reliable RTSP playback via ffmpeg frame pulling (fixes stuck/connecting on affected systems)",
-      "Panel auto-syncs camera feed helper for live streams"
-    ],
-    "1.0.2": [
-      "A clean preview screenshot and a README that matches what the component ships"
-    ],
-    "1.0.3": [
-      "Frames stay in a folder only you can read, and pullers stop when no camera is shown",
-      "Camera passwords leave no trace in ps or /proc"
-    ],
-    "1.0.4": [
-      "Worn with Material, the family it is tested with",
-      "Pictures are written whole, so the panel never draws a half-written frame",
-      "The helper asks for ffmpeg when it is missing instead of failing silently"
+    "1.1.0": [
+      "The panel answers other items: the camera list, and a request to keep the frames running while they are shown"
     ]
   },
   "summary": "Live camera panel: RTSP feeds, grid, wall, enlarged views and pins",
