@@ -202,7 +202,6 @@
     "Winter": "חורף",
     "Year": "שנה",
     "“%1”": "„%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, פרק %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "כתובת החיפוש של אתר, עם %s במקום הכותרת. נפתחת בדפדפן.",
@@ -312,7 +311,7 @@
     "Good morning": "בוקר טוב",
     "Leave it to me": "אבחר בעצמי",
     "Library": "ספרייה",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal עוקב אחרי הצבעים והזכוכית של iRiS; Prism כמעט שחור, עם לבן למה שנבחר.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "מבוסס על ההגדרות של iRiS: Classic ו־Folio בצבעי iRiS, Prism כמעט שחור עם לבן למה שנבחר.",
     "Now playing": "מתנגן עכשיו",
     "Paused": "מושהה",
     "Save": "שמירה",
@@ -326,5 +325,7 @@
     "Find something to watch": "מצאו משהו לצפות בו",
     "Nothing playing": "שום דבר לא מתנגן",
     "Press Watch on any title": "לחצו על צפייה בכל כותר",
-    "What to watch today": "מה לראות היום"
+    "What to watch today": "מה לראות היום",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

@@ -202,7 +202,6 @@
     "Winter": "겨울",
     "Year": "년",
     "“%1”": "“%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, %2화",
     "A site's search address, with %s where the title goes. It opens in your browser.": "사이트의 검색 주소이며 제목 자리에 %s를 넣습니다. 브라우저에서 열립니다.",
@@ -312,7 +311,7 @@
     "Good morning": "좋은 아침이에요",
     "Leave it to me": "직접 고를게요",
     "Library": "라이브러리",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal은 iRiS의 색과 유리를 따르고, Prism은 거의 검은색에 선택한 것을 흰색으로 보여 줍니다.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "iRiS 설정을 바탕으로: Classic과 Folio는 iRiS 색상, Prism은 거의 검은색에 선택한 것을 흰색으로 보여 줍니다.",
     "Now playing": "재생 중",
     "Paused": "일시 정지됨",
     "Save": "저장",
@@ -326,5 +325,7 @@
     "Find something to watch": "볼거리 찾기",
     "Nothing playing": "재생 중인 항목 없음",
     "Press Watch on any title": "작품에서 보기를 누르세요",
-    "What to watch today": "오늘 볼 것"
+    "What to watch today": "오늘 볼 것",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

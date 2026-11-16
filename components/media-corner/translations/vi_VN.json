@@ -202,7 +202,6 @@
     "Winter": "Mùa đông",
     "Year": "Năm",
     "“%1”": "“%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, tập %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Địa chỉ tìm kiếm của một trang, với %s ở vị trí tiêu đề. Mở trong trình duyệt.",
@@ -312,7 +311,7 @@
     "Good morning": "Chào buổi sáng",
     "Leave it to me": "Để tôi chọn",
     "Library": "Thư viện",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal theo màu sắc và hiệu ứng kính của iRiS; Prism gần như đen, dùng màu trắng cho mục đã chọn.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "Dựa trên Cài đặt của iRiS: Classic và Folio theo màu của iRiS, Prism gần như đen, dùng màu trắng cho mục đã chọn.",
     "Now playing": "Đang phát",
     "Paused": "Đã tạm dừng",
     "Save": "Lưu",
@@ -326,5 +325,7 @@
     "Find something to watch": "Tìm gì đó để xem",
     "Nothing playing": "Không có gì đang phát",
     "Press Watch on any title": "Nhấn Xem trên bất kỳ tựa nào",
-    "What to watch today": "Hôm nay xem gì"
+    "What to watch today": "Hôm nay xem gì",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

@@ -202,7 +202,6 @@
     "Winter": "Kış",
     "Year": "Yıl",
     "“%1”": "“%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, %2. bölüm",
     "A site's search address, with %s where the title goes. It opens in your browser.": "Bir sitenin arama adresi; başlığın geleceği yerde %s olur. Tarayıcıda açılır.",
@@ -312,7 +311,7 @@
     "Good morning": "Günaydın",
     "Leave it to me": "Ben seçerim",
     "Library": "Kitaplık",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal, iRiS'in renklerini ve camını izler; Prism neredeyse siyahtır, seçilen beyazdır.",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "iRiS Ayarları'ndan esinlenir: Classic ve Folio iRiS'in renklerinde, Prism neredeyse siyah, seçilen beyaz.",
     "Now playing": "Şimdi oynatılıyor",
     "Paused": "Duraklatıldı",
     "Save": "Kaydet",
@@ -326,5 +325,7 @@
     "Find something to watch": "İzleyecek bir şey bul",
     "Nothing playing": "Oynatılan bir şey yok",
     "Press Watch on any title": "Herhangi bir yapımda İzle’ye bas",
-    "What to watch today": "Bugün ne izlesek"
+    "What to watch today": "Bugün ne izlesek",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

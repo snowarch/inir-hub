@@ -202,7 +202,6 @@
     "Winter": "सर्दी",
     "Year": "वर्ष",
     "“%1”": "“%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1, एपिसोड %2",
     "A site's search address, with %s where the title goes. It opens in your browser.": "किसी साइट का खोज पता, शीर्षक की जगह %s के साथ। यह ब्राउज़र में खुलता है।",
@@ -312,7 +311,7 @@
     "Good morning": "सुप्रभात",
     "Leave it to me": "मैं खुद चुनूँगा",
     "Library": "लाइब्रेरी",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal iRiS के रंगों और ग्लास का पालन करता है; Prism लगभग काला है, चुनी हुई चीज़ सफ़ेद में।",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "iRiS की सेटिंग्स पर आधारित: Classic और Folio iRiS के रंगों में, Prism लगभग काला, चुनी हुई चीज़ सफ़ेद में।",
     "Now playing": "अभी चल रहा है",
     "Paused": "रुका हुआ",
     "Save": "सहेजें",
@@ -326,5 +325,7 @@
     "Find something to watch": "देखने के लिए कुछ खोजें",
     "Nothing playing": "कुछ नहीं चल रहा",
     "Press Watch on any title": "किसी भी शीर्षक पर देखें दबाएँ",
-    "What to watch today": "आज क्या देखें"
+    "What to watch today": "आज क्या देखें",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

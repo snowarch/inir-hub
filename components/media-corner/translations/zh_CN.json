@@ -202,7 +202,6 @@
     "Winter": "冬季",
     "Year": "年",
     "“%1”": "“%1”",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1,第 %2 集",
     "A site's search address, with %s where the title goes. It opens in your browser.": "网站的搜索地址,用 %s 代替标题。在浏览器中打开。",
@@ -312,7 +311,7 @@
     "Good morning": "早上好",
     "Leave it to me": "由我选择",
     "Library": "媒体库",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal 跟随 iRiS 的颜色和玻璃效果；Prism 近乎全黑，所选内容以白色显示。",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "参照 iRiS 设置：Classic 和 Folio 使用 iRiS 的颜色，Prism 近乎全黑，所选内容以白色显示。",
     "Now playing": "正在播放",
     "Paused": "已暂停",
     "Save": "保存",
@@ -326,5 +325,7 @@
     "Find something to watch": "找点东西看",
     "Nothing playing": "没有正在播放的内容",
     "Press Watch on any title": "在任意作品上按“观看”",
-    "What to watch today": "今天看什么"
+    "What to watch today": "今天看什么",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }

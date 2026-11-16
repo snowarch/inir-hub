@@ -202,7 +202,6 @@
     "Winter": "冬",
     "Year": "年",
     "“%1”": "「%1」",
-    "Normal": "Normal",
     "Prism": "Prism",
     "%1, episode %2": "%1、第%2話",
     "A site's search address, with %s where the title goes. It opens in your browser.": "サイトの検索アドレス。タイトルの位置に %s を入れます。ブラウザで開きます。",
@@ -312,7 +311,7 @@
     "Good morning": "おはようございます",
     "Leave it to me": "自分で選ぶ",
     "Library": "ライブラリ",
-    "Normal follows iRiS's colours and glass; Prism is near-black with white for what is chosen.": "Normal は iRiS の色とガラスに従い、Prism はほぼ黒で、選んだものを白で示します。",
+    "Based on iRiS's Settings: Classic and Folio in iRiS's colours, Prism near-black with white for what is chosen.": "iRiS の設定がもと：Classic と Folio は iRiS の色、Prism はほぼ黒で、選んだものを白で示します。",
     "Now playing": "再生中",
     "Paused": "一時停止中",
     "Save": "保存",
@@ -326,5 +325,7 @@
     "Find something to watch": "見るものを探す",
     "Nothing playing": "再生していません",
     "Press Watch on any title": "作品で「見る」を押してください",
-    "What to watch today": "今日見るもの"
+    "What to watch today": "今日見るもの",
+    "Classic": "Classic",
+    "Folio": "Folio"
 }
