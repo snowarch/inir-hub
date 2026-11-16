@@ -2639,5 +2639,7 @@
   "A shield that fills while a VPN is on.": "Un bouclier qui se remplit quand un VPN est actif.",
   "Shows when a new iNiR is out.": "Apparaît quand un nouvel iNiR est sorti.",
   "The next episode airing, and the time left.": "Le prochain épisode diffusé et le temps restant.",
-  "Search, pick an episode and pick up where you left.": "Cherchez, choisissez un épisode, reprenez où vous étiez."
+  "Search, pick an episode and pick up where you left.": "Cherchez, choisissez un épisode, reprenez où vous étiez.",
+  "%1 panel off": "Panneau %1 désactivé",
+  "Frosted slabs · the spectrum only on what each widget draws": "Plaques givrées · le spectre seulement sur ce que dessine chaque widget"
 }

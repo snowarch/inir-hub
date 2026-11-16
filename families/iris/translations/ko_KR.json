@@ -2639,5 +2639,7 @@
   "A shield that fills while a VPN is on.": "VPN이 켜져 있는 동안 채워지는 방패.",
   "Shows when a new iNiR is out.": "새 iNiR이 나오면 보입니다.",
   "The next episode airing, and the time left.": "다음 방영 에피소드와 남은 시간.",
-  "Search, pick an episode and pick up where you left.": "검색하고 에피소드를 고르고 본 데서 이어 봅니다."
+  "Search, pick an episode and pick up where you left.": "검색하고 에피소드를 고르고 본 데서 이어 봅니다.",
+  "%1 panel off": "%1 패널 꺼짐",
+  "Frosted slabs · the spectrum only on what each widget draws": "반투명 판 · 스펙트럼은 각 위젯이 그리는 것에만"
 }

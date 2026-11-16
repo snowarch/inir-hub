@@ -136,7 +136,8 @@ ColumnLayout {
             Piece {
                 glyph: root.adding ? "close" : "add"
                 title: root.adding ? Translation.tr("Cancel") : Translation.tr("Add")
-                line: root.list.length === 0 && !root.adding ? Translation.tr("No app has a rule yet") : ""
+                // While the rules are still read, "none yet" would be a guess.
+                line: root.list.length === 0 && !root.adding && (root.rules?.ready ?? true) ? Translation.tr("No app has a rule yet") : ""
                 lit: root.adding
                 onPressed: { root.adding = !root.adding; root.picked = "" }
             }

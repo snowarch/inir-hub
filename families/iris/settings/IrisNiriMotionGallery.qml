@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -17,6 +18,11 @@ ColumnLayout {
 
     spacing: Math.round(10 * root.d)
     Component.onCompleted: NiriAnimationPresets.ensure()
+
+    // Every tile draws its opening on one clock, so a quick preset reads quick beside a slow one at rest: the longest
+    // opening and a little air after it.
+    readonly property real span: 1.15 * Math.max(0.1, ...root.presets.map(preset =>
+        NiriAnimationPresets.easingSeconds(preset?.types?.["window-open"])))
 
     GridLayout {
         id: grid
@@ -37,6 +43,20 @@ ColumnLayout {
                 property real clock: 0
                 property bool playOnce: false
                 readonly property var frame: tile.clock > 0 ? NiriAnimationPresets.demoFrame(tile.modelData, tile.clock) : ({ opacity: 1, scale: 1, x: 0 })
+                readonly property bool playing: tile.clock > 0
+                // At rest the tile draws its motion: a window opening, as how far it is there against time, the figure
+                // under it. A bounce rises past the line it lands on, a quick one is there at once; six identical stills
+                // (and the column slide, whose springs barely differ) said nothing.
+                readonly property var slide: {
+                    const open = tile.modelData?.types?.["window-open"]
+                    const ends = NiriAnimationPresets.easingSeconds(open)
+                    const out = []
+                    for (let i = 0; i <= 64; i++) {
+                        const t = root.span * i / 64
+                        out.push(t >= ends ? 1 : NiriAnimationPresets.curveValue(open, t / ends))
+                    }
+                    return out
+                }
 
                 Layout.fillWidth: true
                 Layout.preferredHeight: stage.height + Math.round(6 * root.d) + title.implicitHeight + detail.implicitHeight
@@ -66,9 +86,37 @@ ColumnLayout {
                     readonly property real pad: Math.round(12 * root.d)
                     readonly property real column: Math.round((width - 3 * pad) / 2)
 
+                    // Where the window starts and where it lands, and its path between them.
+                    Item {
+                        id: chart
+                        anchors.fill: parent
+                        anchors.margins: stage.pad
+                        opacity: tile.playing ? 0 : 1
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                        readonly property real low: chart.height
+                        readonly property real high: Math.round(chart.height * 0.3)
+                        Rectangle { width: chart.width; height: 1; y: chart.high; color: IrisStyle.hairline }
+                        Rectangle { width: chart.width; height: 1; y: chart.low - 1; color: IrisStyle.hairline }
+                        Shape {
+                            anchors.fill: parent
+                            preferredRendererType: Shape.CurveRenderer
+                            ShapePath {
+                                strokeColor: tile.on ? IrisStyle.accent : IrisStyle.subtext
+                                strokeWidth: Math.max(1.5, 2 * root.d)
+                                fillColor: "transparent"
+                                capStyle: ShapePath.RoundCap
+                                joinStyle: ShapePath.RoundJoin
+                                PathPolyline {
+                                    path: tile.slide.map((v, i) => Qt.point(chart.width * i / Math.max(1, tile.slide.length - 1),
+                                        chart.low - 1 - v * (chart.low - 1 - chart.high)))
+                                }
+                            }
+                        }
+                    }
                     Repeater {
                         model: 2
                         Rectangle {
+                            opacity: tile.playing ? 1 : 0
                             required property int index
                             x: stage.pad + index * (stage.column + stage.pad)
                             y: stage.pad
@@ -79,6 +127,7 @@ ColumnLayout {
                         }
                     }
                     Rectangle {
+                        visible: tile.playing
                         x: stage.pad + tile.frame.x * (stage.column + stage.pad)
                         y: stage.pad
                         width: stage.column

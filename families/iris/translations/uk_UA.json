@@ -2639,5 +2639,7 @@
   "A shield that fills while a VPN is on.": "Щит, що наповнюється, коли VPN увімкнено.",
   "Shows when a new iNiR is out.": "З'являється, коли виходить новий iNiR.",
   "The next episode airing, and the time left.": "Наступна серія в ефірі і скільки лишилося.",
-  "Search, pick an episode and pick up where you left.": "Шукайте, оберіть серію і продовжте з місця зупинки."
+  "Search, pick an episode and pick up where you left.": "Шукайте, оберіть серію і продовжте з місця зупинки.",
+  "%1 panel off": "Панель «%1» вимкнена",
+  "Frosted slabs · the spectrum only on what each widget draws": "Матові пластини · спектр лише на тому, що малює віджет"
 }

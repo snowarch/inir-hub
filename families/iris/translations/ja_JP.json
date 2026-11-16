@@ -2639,5 +2639,7 @@
   "A shield that fills while a VPN is on.": "VPN 接続中を、満たされる盾で表示。",
   "Shows when a new iNiR is out.": "新しい iNiR が出ると現れます。",
   "The next episode airing, and the time left.": "次に放送されるアニメのエピソードと残り時間。",
-  "Search, pick an episode and pick up where you left.": "アニメを検索し、エピソードを選び、続きから再生。"
+  "Search, pick an episode and pick up where you left.": "アニメを検索し、エピソードを選び、続きから再生。",
+  "%1 panel off": "%1 パネルはオフ",
+  "Frosted slabs · the spectrum only on what each widget draws": "すりガラスの板 · スペクトルは各ウィジェットが描くものだけに"
 }

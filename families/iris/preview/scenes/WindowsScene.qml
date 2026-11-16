@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
+import Quickshell.Widgets
 import qs.services
 import qs.modules.common.widgets
 import qs.modules.iris.style
@@ -9,7 +10,7 @@ import qs.modules.iris.components
 import qs.modules.iris.preview.parts
 
 // Niri's strip as it tiles: three columns with the gaps between them, the focused one in its ring or border, corners,
-// shadows and the opacity of the windows you are not using, all read from Niri itself.
+// shadows, how see-through the windows are in and out of focus and the blur behind them, all read from Niri itself.
 PreviewScene {
     id: winRoot
     function colourOf(value: var, fallback: color): color { return String(value ?? "").length > 0 ? value : fallback }
@@ -25,6 +26,15 @@ PreviewScene {
     readonly property bool shadows: winRoot.niri("layout", "shadow.enabled", false) === true
     readonly property real softness: Number(winRoot.niri("layout", "shadow.softness", 30))
     readonly property real dim: Math.max(0.2, Math.min(1, Number(winRoot.niri("window-rules", "inactive-opacity", 1))))
+    readonly property real lit: Math.max(0.2, Math.min(1, Number(winRoot.niri("window-rules", "active-opacity", 1))))
+    readonly property bool frosted: winRoot.niri("window-rules", "blur", false) === true
+    // The column on the left runs off the screen as Niri's strip does; the focused one sits in the middle.
+    readonly property var columns: [{ x: -0.16, w: 0.34, focused: false }, { x: 0.18, w: 0.46, focused: true }, { x: 0.64, w: 0.42, focused: false }]
+    function frameOf(column: var): rect {
+        const g = winRoot.gaps
+        return Qt.rect(Math.round(winRoot.width * column.x + g / 2), Math.round(g + IrisStyle.weld),
+            Math.round(winRoot.width * column.w - g), Math.round(winRoot.height - 2 * g - IrisStyle.weld))
+    }
     readonly property real naturalWidth: Math.round(680 * winRoot.d)
     readonly property real naturalHeight: Math.round(320 * winRoot.d)
     narrowest: Math.round(400 * winRoot.d)
@@ -46,22 +56,57 @@ PreviewScene {
             { group: "Closing", x: fx + pad + Math.round(54 * d), y: fy + pad + Math.round(4 * d),
                 part: Qt.rect(fx + pad - Math.round(6 * d), fy + pad - Math.round(6 * d), Math.round(48 * d), Math.round(20 * d)), radius: Math.round(10 * d) },
             { group: "Title bars", x: fx + fw - Math.round(28 * d), y: fy + Math.round(bar / 2), part: Qt.rect(fx, fy, fw, bar), radius: winRoot.corners },
-            { group: "Layout", x: gapX, y: Math.round(h * 0.5), part: Qt.rect(gapX - g / 2 - Math.round(3 * d), fy, g + Math.round(6 * d), fh), radius: Math.round(4 * d) }
+            { group: "Layout", x: gapX, y: Math.round(h * 0.5), part: Qt.rect(gapX - g / 2 - Math.round(3 * d), fy, g + Math.round(6 * d), fh), radius: Math.round(4 * d) },
+            { group: "Glass behind apps", x: Math.round(w * 0.64 + g / 2) + Math.round(w * 0.21), y: Math.round(h * 0.5),
+                part: winRoot.frameOf(winRoot.columns[2]), radius: winRoot.corners }
         ]
     }
 
+    // What shows through a see-through window, frosted when Niri blurs behind apps.
+    ShaderEffectSource {
+        id: wall
+        anchors.fill: parent
+        visible: false
+        sourceItem: winRoot.frosted ? winRoot.wallpaperView?.textureItem ?? null : null
+        live: true
+    }
     Repeater {
-        // The column on the left runs off the screen as Niri's strip does; the focused one sits in the middle.
-        model: [{ x: -0.16, w: 0.34, focused: false }, { x: 0.18, w: 0.46, focused: true }, { x: 0.64, w: 0.42, focused: false }]
+        model: winRoot.frosted && (winRoot.lit < 1 || winRoot.dim < 1) ? winRoot.columns : []
+        ClippingRectangle {
+            id: frost
+            required property var modelData
+            readonly property rect frame: winRoot.frameOf(frost.modelData)
+            x: frost.frame.x
+            y: frost.frame.y
+            width: frost.frame.width
+            height: frost.frame.height
+            radius: winRoot.corners
+            color: "transparent"
+            MultiEffect {
+                x: -frost.x
+                y: -frost.y
+                width: winRoot.width
+                height: winRoot.height
+                source: wall
+                autoPaddingEnabled: false
+                blurEnabled: true
+                blur: 1
+                blurMax: Math.round(48 * winRoot.d)
+            }
+        }
+    }
+
+    Repeater {
+        model: winRoot.columns
         Item {
             id: column
             required property var modelData
-            readonly property real g: winRoot.gaps
-            x: Math.round(winRoot.width * column.modelData.x + column.g / 2)
-            y: Math.round(column.g + IrisStyle.weld)
-            width: Math.round(winRoot.width * column.modelData.w - column.g)
-            height: Math.round(winRoot.height - 2 * column.g - IrisStyle.weld)
-            opacity: column.modelData.focused ? 1 : winRoot.dim
+            readonly property rect frame: winRoot.frameOf(column.modelData)
+            x: column.frame.x
+            y: column.frame.y
+            width: column.frame.width
+            height: column.frame.height
+            opacity: column.modelData.focused ? winRoot.lit : winRoot.dim
 
             RectangularShadow {
                 visible: winRoot.shadows
@@ -98,8 +143,12 @@ PreviewScene {
     }
 
     Caption {
-        glyph: "select_window"
-        text: [Translation.tr("Gaps") + " " + Math.round(winRoot.gaps) + " px",
+        glyph: winRoot.group === "Glass behind apps" ? "blur_on" : "select_window"
+        text: winRoot.group === "Glass behind apps"
+            ? [Translation.tr("Window in focus") + " " + Math.round(winRoot.lit * 100) + " %",
+                Translation.tr("Windows out of focus") + " " + Math.round(winRoot.dim * 100) + " %",
+                winRoot.frosted ? Translation.tr("Blur behind apps") : ""].filter(part => part.length > 0).join(" · ")
+            : [Translation.tr("Gaps") + " " + Math.round(winRoot.gaps) + " px",
             winRoot.corners > 0 ? Translation.tr("Window corners") + " " + Math.round(winRoot.corners) + " px" : "",
             winRoot.ring ? Translation.tr("Focus ring") : winRoot.border ? Translation.tr("Border") : ""].filter(part => part.length > 0).join(" · ")
     }

@@ -14,7 +14,9 @@ import qs.modules.iris.sidebar
 PreviewScene {
     id: panelRoot
     readonly property string lit: panelRoot.group === "Focus" ? "left" : panelRoot.group === "Today" ? "right" : ""
-    readonly property Item litPanel: panelRoot.lit === "left" ? focusPanel : panelRoot.lit === "right" ? todayPanel : null
+    readonly property Panel named: panelRoot.lit === "left" ? focusPanel : panelRoot.lit === "right" ? todayPanel : null
+    // A panel turned off leaves nothing to frame: the scene shows the whole desktop and says which one is off.
+    readonly property Item litPanel: panelRoot.named?.visible ? panelRoot.named : null
     subject: panelRoot.litPanel ? Qt.rect(panelRoot.litPanel.x, panelRoot.litPanel.y, panelRoot.litPanel.width, panelRoot.litPanel.height)
         : Qt.rect(0, 0, panelRoot.width, panelRoot.height)
     readonly property real naturalWidth: (focusPanel.width + todayPanel.width) * 1.5
@@ -132,8 +134,10 @@ PreviewScene {
         title: Translation.tr("Focus")
     }
     OffState {
-        visible: !focusPanel.visible && !todayPanel.visible
-        text: Translation.tr("Side panels off")
+        z: 1
+        visible: (!focusPanel.visible && !todayPanel.visible) || (panelRoot.named !== null && !panelRoot.named.visible)
+        text: !focusPanel.visible && !todayPanel.visible ? Translation.tr("Side panels off")
+            : Translation.tr("%1 panel off").arg(panelRoot.named?.title ?? "")
     }
     Panel {
         id: todayPanel

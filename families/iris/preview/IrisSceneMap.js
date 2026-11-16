@@ -21,7 +21,7 @@ function sceneFor(section, group) {
         "colour/Colour theme": "palette", "colour/Scheme": "palette", "colour/Accent": "palette", "colour/Highlight": "highlight",
         "colour/App colours": "palette", "colour/Dark look": "palette", "colour/Ink look": "palette", "colour/Light look": "palette",
         "colour/Wallpaper tint": "palette",
-        "appearance/App colours": "palette", "windows/Layout": "windows",
+        "appearance/App colours": "palette", "windows/Layout": "windows", "windows/Glass behind apps": "windows",
         "login/Login Screen": "login",
         "desktop/Desktop menu": "menus",
         "motion/Motion": "motion", "motion/Curve": "motion", "motion/Timing": "motion",

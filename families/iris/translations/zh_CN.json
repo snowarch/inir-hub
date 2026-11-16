@@ -2639,5 +2639,7 @@
   "A shield that fills while a VPN is on.": "VPN 开启时填充的盾牌。",
   "Shows when a new iNiR is out.": "有新版 iNiR 时显示。",
   "The next episode airing, and the time left.": "即将播出的下一集与剩余时间。",
-  "Search, pick an episode and pick up where you left.": "搜索、选择一集，并从上次停下的地方继续。"
+  "Search, pick an episode and pick up where you left.": "搜索、选择一集，并从上次停下的地方继续。",
+  "%1 panel off": "%1 面板已关闭",
+  "Frosted slabs · the spectrum only on what each widget draws": "磨砂板 · 光谱只落在每个小组件绘制的内容上"
 }

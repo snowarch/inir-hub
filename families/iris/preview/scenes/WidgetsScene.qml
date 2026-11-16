@@ -24,7 +24,9 @@ PreviewScene {
     lowest: Math.round(190 * widgetsRoot.d)
     readonly property bool on: widgetsRoot.opt("iris.modules.desktopWidgets", true)
     readonly property string design: DesktopWidgetDesign.current
-    readonly property bool iris: widgetsRoot.design === "iris"
+    // A design drawn by the family's own faces (Prism) wears iRiS's plates: its slabs are the same frosted glass.
+    readonly property bool faced: DesktopWidgetDesign.faceDesigns.some(face => face.value === widgetsRoot.design)
+    readonly property bool iris: widgetsRoot.design === "iris" || widgetsRoot.faced
     readonly property bool instrument: widgetsRoot.design === "instrument"
     readonly property bool bare: widgetsRoot.instrument || widgetsRoot.design === "readout"
     readonly property string material: String(widgetsRoot.opt("iris.widgets.material", "glass"))
@@ -204,7 +206,7 @@ PreviewScene {
     }
     // A Design that prints the clock and the weather shows its own prints here, on stand-in faces fed by the live clock
     // and forecast (the widgets themselves are not instantiated).
-    readonly property bool printed: widgetsRoot.iris && IrisDesign.has("widgetClock") && IrisDesign.has("widgetWeather")
+    readonly property bool printed: widgetsRoot.design === "iris" && IrisDesign.has("widgetClock") && IrisDesign.has("widgetWeather")
     readonly property var standIn: ({
         small: true, medium: false, large: false,
         dp: v => Math.round(v * widgetsRoot.d), px: v => Math.round(v * widgetsRoot.d * IrisStyle.typeScale),
@@ -251,6 +253,7 @@ PreviewScene {
             : widgetsRoot.instrument ? Translation.tr("Dials, scales and ruled lists")
             : widgetsRoot.design === "readout" ? Translation.tr("Quiet figures and open lists")
             : !widgetsRoot.iris ? Translation.tr("Each widget keeps its Material design")
+            : widgetsRoot.faced ? Translation.tr("Frosted slabs · the spectrum only on what each widget draws")
             : widgetsRoot.glass && Boolean(widgetsRoot.opt("iris.widgets.brightWallpapers", false)) ? Translation.tr("Frosted wallpaper · turns to frost over a bright wallpaper")
             : widgetsRoot.glass ? Translation.tr("Frosted wallpaper · darker only where the wallpaper is bright")
             : widgetsRoot.clear ? Translation.tr("Bare wallpaper · a veil only where text needs it")

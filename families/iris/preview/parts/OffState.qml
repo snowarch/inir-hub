@@ -10,6 +10,11 @@ Rectangle {
     id: off
     property string text: ""
     anchors.centerIn: parent
+    // A scene is laid out wider than its frame and shrunk into it (IrisGroupPreview's `world`): the words stand at
+    // their own size in the frame, never at the scene's (Side Panels' wide scene shrank them to a third, unreadable).
+    readonly property real shrunk: (off.parent?.preview?.width ?? 0) > 0 && (off.parent?.width ?? 0) > 0
+        ? off.parent.preview.width / off.parent.width : 1
+    scale: off.shrunk < 0.999 ? Math.min(4, 1 / Math.max(0.05, off.shrunk)) : 1
     implicitWidth: offRow.implicitWidth + Math.round(28 * IrisStyle.density)
     implicitHeight: Math.round(36 * IrisStyle.density)
     radius: IrisStyle.capsule(height)

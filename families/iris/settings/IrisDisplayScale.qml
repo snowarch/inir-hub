@@ -82,6 +82,7 @@ Column {
                     }
                     // One window, its words at this scale: the more the scale, the fewer fit.
                     Rectangle {
+                        id: window
                         readonly property real ink: Math.max(3, bezel.width * 0.05 * step.scale_)
                         x: Math.round(bezel.width * 0.12)
                         y: Math.round(bezel.height * 0.16)
@@ -95,20 +96,30 @@ Column {
                             y: parent.ink * 0.6
                             width: parent.width - parent.ink * 1.6
                             spacing: parent.ink * 0.3
+                            // A window wraps its words and ends a paragraph on its last whole line, as a real one
+                            // would: an ellipsis inside a title, or a line cut in half at the edge, read as broken.
                             IrisText {
+                                id: heading
                                 width: parent.width
                                 text: Translation.tr("Morning notes")
-                                font.pixelSize: Math.round(parent.parent.ink * 1.15)
+                                font.pixelSize: Math.round(window.ink * 1.15)
                                 font.weight: IrisStyle.weight(Font.DemiBold)
-                                elide: Text.ElideRight
+                                wrapMode: Text.WordWrap
+                                maximumLineCount: 2
+                                elide: Text.ElideNone
                                 renderType: Text.QtRendering
                             }
                             IrisText {
+                                readonly property int fits: Math.floor((window.height - window.ink * 1.2 - heading.height - window.ink * 0.3)
+                                    / (font.pixelSize * 1.3))
+                                visible: fits > 0
                                 width: parent.width
                                 text: Translation.tr("Words, icons and windows take this much room on this screen, and the rest is space.")
                                 color: IrisStyle.subtext
-                                font.pixelSize: Math.round(parent.parent.ink)
+                                font.pixelSize: Math.round(window.ink)
                                 wrapMode: Text.WordWrap
+                                maximumLineCount: Math.max(1, fits)
+                                elide: Text.ElideRight
                                 renderType: Text.QtRendering
                             }
                         }
