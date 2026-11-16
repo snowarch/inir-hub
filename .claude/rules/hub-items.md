@@ -41,9 +41,6 @@ in its pull request. The id is lowercase letters, digits and dashes (3 to 48), f
 ## Size
 
 - One file does one job, at most 600 lines: the item's state, each page, each part, each helper in its own file.
-- From outside, a pull request adds at most 2500 lines of code (translations, docs and images not counted). A big
-  feature ships as the smallest version that works (one page, one source) and grows by pull requests that each add
-  one thing and raise the version.
 - Two items that share most of their code are one item. Never ship the same file in two items.
 
 ## Permissions

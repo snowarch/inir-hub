@@ -53,6 +53,4 @@ Scripts under `scripts/` follow `hub-scripts.md`: standard library only, arrays 
 
 ## Size
 
-A component that needs more than 2500 lines to be useful ships its first useful slice first: one page, one source,
-the window and its IPC. Every next pull request adds one thing and raises the version. Each file stays under 600
-lines: state, each page, each part on its own.
+A component is as big as its job. Each file stays under 600 lines: its state, each page, each part on its own.

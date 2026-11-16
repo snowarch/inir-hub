@@ -159,6 +159,10 @@ jobs:
         working-directory: review
         run: |
           if [ -z "$GEMINI_API_KEY$GEMINI_API_KEY_2" ]; then echo "state=nokey" >> "$GITHUB_OUTPUT"; echo "no GEMINI_API_KEY"; exit 0; fi
+          # The reviewer reads the diff whole or not at all: past 400 KB (some 10k lines) a maintainer reads it instead, so
+          # nothing merges unread. The pull request's size itself is not capped; a plugin is as big as its job.
+          gh pr diff "$PR" --repo "$REPO" > diff.txt
+          if [ "$(wc -c < diff.txt)" -gt 400000 ]; then echo "state=toobig" >> "$GITHUB_OUTPUT"; echo "diff over 400 KB"; exit 0; fi
           kind=${ITEM%%/*} id=${ITEM#*/}
           # instructions: review.md and the hub's rules for this kind, from main
           {
@@ -187,7 +191,7 @@ jobs:
             echo "Files changed:"
             gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[] | "- \(.status) \(.filename) (+\(.additions) -\(.deletions))"'
             echo; echo "===== Diff ====="
-            gh pr diff "$PR" --repo "$REPO" | head -c 400000
+            cat diff.txt
             find "pr/$ITEM" "pr/docs/$id" -type f 2>/dev/null | sort | while read -r f; do
               grep -Iq . "$f" || continue
               printf '\n===== %s =====\n' "${f#pr/}"; cat -n "$f" | head -c 200000
@@ -278,6 +282,7 @@ jobs:
           if [ "$NEXT" = review ]; then
             case "$STATE" in
               nokey) say "Check passed. $WHY, so a maintainer merges it."; exit 0 ;;
+              toobig) say "Check passed. $WHY, and its changes are more than the reviewer reads whole in one go: a maintainer reads and merges it."; exit 0 ;;
               done) ;;
               *) say "Check passed. $WHY, and the reviewer could not read it this time: a maintainer asks it again with a \`/review\` comment."; exit 0 ;;
             esac

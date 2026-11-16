@@ -17,8 +17,7 @@ Read `AGENTS.md` first if you have not this session. The steps below are in orde
   wrong: what people use is a widget. Never change a family or the base to fit the item.
 - Check the source: an official API or a site whose terms allow the use, no key you would have to ship. If none,
   say so and stop.
-- Plan the first version so it is useful and under 2500 lines of code: one page, one source. Write the plan as a
-  short list of files, each with its one job, none near 600 lines. Later features are later pull requests.
+- Write the plan as a short list of files, each with its one job, none near 600 lines.
 
 ## 2. Start
 
