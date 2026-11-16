@@ -90,7 +90,7 @@ Item {
     }
     PrismText {
         id: numberText
-        visible: root.number > 0 && !tail.visible
+        visible: false // his 11-15: no numbering
         anchors.right: parent.right
         anchors.rightMargin: PrismTheme.dp(18)
         anchors.verticalCenter: parent.verticalCenter

@@ -75,8 +75,8 @@ Item {
             clip: true
             Printed {
                 visible: first.length > 0
-                first: root.number > 0 ? String(root.number).padStart(2, "0") + (root.total > 0 ? " / " + String(root.total).padStart(2, "0") : "") : root.eyebrow
-                second: root.number > 0 ? root.eyebrow : ""
+                first: root.eyebrow
+                second: ""
             }
             Printed {
                 visible: root.settings > 0

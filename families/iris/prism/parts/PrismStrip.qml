@@ -146,7 +146,7 @@ Item {
                         x: PrismTheme.dp(14)
                         y: (parent.height - height) / 2 + (chip.here ? PrismTheme.keyLip / 2 : 0)
                         mono: true
-                        text: String(chip.index + 1).padStart(2, "0")
+                        text: "" // his 11-15: no numbering
                         color: chip.here ? PrismTheme.inkSolid : PrismTheme.ink3
                         opacity: chip.here ? 0.55 : 1
                         font.pixelSize: PrismTheme.caption
@@ -164,7 +164,7 @@ Item {
                     }
                     PrismText {
                         id: said
-                        x: (dot.visible ? dot.x + dot.width : number.x + number.implicitWidth) + PrismTheme.dp(7)
+                        x: dot.visible ? dot.x + dot.width + PrismTheme.dp(7) : number.x
                         y: (parent.height - height) / 2 + (chip.here ? PrismTheme.keyLip / 2 : 0)
                         text: Translation.tr(chip.title)
                         color: chip.here ? PrismTheme.inkSolid : PrismTheme.ink

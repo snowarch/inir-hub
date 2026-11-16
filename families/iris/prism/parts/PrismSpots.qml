@@ -160,7 +160,7 @@ ClippingRectangle {
             PrismText {
                 anchors.centerIn: parent
                 mono: true
-                text: String(Number(disc.mark?.number ?? 0)).padStart(2, "0")
+                text: ""
                 color: disc.lit ? PrismTheme.night : PrismTheme.paper
                 font.pixelSize: PrismTheme.caption
                 font.weight: Font.DemiBold

@@ -75,7 +75,7 @@ Item {
                     Column {
                         anchors.left: thumb.right
                         anchors.leftMargin: PrismTheme.dp(12)
-                        anchors.right: rank.left
+                        anchors.right: parent.right
                         anchors.rightMargin: PrismTheme.dp(8)
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: PrismTheme.dp(2)
@@ -103,7 +103,7 @@ Item {
                         id: rank
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        text: String(change.index + 1).padStart(2, "0")
+                        visible: false // his 11-15: no numbering
                         mono: true
                         color: PrismTheme.ink3
                         font.pixelSize: PrismTheme.caption - 1

@@ -161,7 +161,7 @@ Item {
             // Its number on the page, as the strip and the pictures' discs say it.
             PrismText {
                 id: numberSaid
-                visible: root.number > 0 && root.groups.length > 1
+                visible: false // his 11-15: no numbering
                 anchors.baseline: titleSaid.baseline
                 mono: true
                 text: String(root.number).padStart(2, "0")

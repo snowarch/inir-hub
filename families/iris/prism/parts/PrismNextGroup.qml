@@ -96,7 +96,7 @@ Item {
             PrismText {
                 width: parent.width
                 text: root.next.length > 0
-                    ? Translation.tr("Next") + "  ·  " + String(root.position + 1).padStart(2, "0") + " / " + String(root.count).padStart(2, "0")
+                    ? Translation.tr("Next")
                     : Translation.tr("Back to the start")
                 figures: true
                 color: PrismTheme.ink2

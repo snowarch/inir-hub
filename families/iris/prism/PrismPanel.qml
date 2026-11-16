@@ -473,7 +473,7 @@ Item {
                             tint: root.page.tint
                             rows: sectionBox.modelData.rows
                             flashPath: root.flashPath
-                            note: root.paged ? String(root.sections.findIndex(section => section.title === sectionBox.modelData.title) + 1).padStart(2, "0") + " / " + String(root.sections.length).padStart(2, "0") : ""
+                            note: ""
                         }
                         Item { width: 1; height: PrismTheme.dp(18) }
                     }
