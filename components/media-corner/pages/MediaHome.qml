@@ -56,7 +56,7 @@ MediaPage {
         : !root.heroSettled ? Translation.tr("Asking %1…").arg(root.anime.sourceName) : ""
     readonly property var latest: CornerWatch.latest?.entry ?? null
 
-    CornerHeading { page: true; eyebrow: CornerSkin.prism ? Translation.tr("Media Corner") : Translation.tr("What to watch today"); title: Translation.tr("Home") }
+    CornerHeading { page: true; eyebrow: Translation.tr("What to watch today"); title: Translation.tr("Home") }
 
     RowLayout {
         Layout.fillWidth: true
