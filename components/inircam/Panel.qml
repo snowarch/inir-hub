@@ -111,7 +111,10 @@ Scope {
     // Pullers run only while the panel or a pinned camera is on screen; at rest
     // the shell keeps no stream open.
     readonly property string feedHelper: Qt.resolvedUrl("inircam-feeds").toString().replace(/^file:\/\//, "")
-    readonly property bool feedsNeeded: root.open || pins.pins.length > 0
+    // Who is showing the frames right now: the panel, a pin, or another item that
+    // asked through `feeds`. Nothing runs while nobody holds one.
+    property var feedHolders: ({})
+    readonly property bool feedsNeeded: root.open || pins.pins.length > 0 || Object.keys(root.feedHolders).length > 0
 
     Process {
         id: feedSync
@@ -176,6 +179,23 @@ Scope {
         }
         /// Every pinned camera as JSON
         function pins(): string { return JSON.stringify(pins.pins) }
+        /// The cameras this panel can show, without their passwords, as JSON
+        function cameras(): string {
+            return JSON.stringify(store.enabledCameras().map(camera => ({
+                id: String(camera.id ?? ""),
+                name: String(camera.name ?? camera.id ?? "")
+            })))
+        }
+        /// Keep the frames running for another item that shows them, or let them go
+        function feeds(holder: string, active: bool): string {
+            const name = String(holder ?? "")
+            if (name.length === 0) return JSON.stringify({ error: "a holder is required" })
+            const next = Object.assign({}, root.feedHolders)
+            if (active) next[name] = true
+            else delete next[name]
+            root.feedHolders = next
+            return JSON.stringify({ holders: Object.keys(next) })
+        }
     }
 
     // The pinned cameras: their own windows, up while the panel is closed.
