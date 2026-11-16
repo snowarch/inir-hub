@@ -747,6 +747,22 @@ Item {
         else grown.height = root.height - inset - grown.y
         return Object.assign(grown, { runsTo: wall })
     }
+    // Two lines out of one corner (a row on the top wall run to the right one, a column on the right wall run up to the
+    // top) cross there, each welded to its walls alone: the elbow between them stayed a square notch, and the frame's
+    // light (holo, the music frame) turned on its point (his 11-16 capture). The second joins the first, so the elbow is
+    // a fillet of its own round; the join it gives up is the one to the wall the first lies along, hidden under it.
+    function weldElbows(cornered: var): void {
+        for (let i = 0; i < cornered.length; i++) for (let j = i + 1; j < cornered.length; j++) {
+            const a = cornered[i], b = cornered[j]
+            if (a.body.runsTo !== b.side || b.body.runsTo !== a.side) continue
+            const p = a.body, q = b.body
+            if (Math.max(p.x, q.x) > Math.min(p.x + p.width, q.x + q.width) + 1
+                    || Math.max(p.y, q.y) > Math.min(p.y + p.height, q.y + q.height) + 1) continue
+            const own = !q.joins ? [] : Array.isArray(q.joins) ? q.joins : [q.joins]
+            const kept = own.filter(name => name !== "pieceEdge:" + a.side)
+            q.joins = kept.length > 0 ? [kept[0], p.id] : p.id
+        }
+    }
     // A line lying wholly inside another that shares its corner (a bubble on the bottom wall under a column on the side)
     // draws nothing of its own: two bodies there lean into each other, one reads as one surface.
     function holds(outer: var, inner: var): bool {
@@ -870,11 +886,17 @@ Item {
         }
         const runs = root.joinRuns(lines)
         const alias = runs.alias
+        const cornered = []
         runs.lines.forEach((line, i) => {
             const holder = runs.lines.find((other, j) => i !== j && root.holds(other.shape, line.shape) && (j < i || !root.holds(line.shape, other.shape)))
             if (holder) { for (const id in alias) if (alias[id] === line.shape.id) alias[id] = holder.shape.id }
-            else out.push(root.meltInto(line.shape, line.side, sides))
+            else {
+                const body = root.meltInto(line.shape, line.side, sides)
+                out.push(body)
+                if (body.runsTo) cornered.push({ body: body, side: line.side })
+            }
         })
+        root.weldElbows(cornered)
         for (const side of sides) out.unshift(root.edgeBody(side))
         if (carried.shown && !root.carryingIsland) {
             const size = root.size * carried.scale

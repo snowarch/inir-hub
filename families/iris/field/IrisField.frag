@@ -631,7 +631,12 @@ void main() {
                 if (casts)
                     withFrame = min(withFrame, smoothUnion(frameCast, dCast, k));
             } else {
-                float mate = linkAt(int(name + 0.5) - 1).w;
+                vec4 mateLink = linkAt(int(name + 0.5) - 1);
+                float mate = mateLink.w;
+                // Joined to a body welded to the frame (a card out of its bubble, a corner's second line), or welded to
+                // it itself: the join is the chassis too, so the frame's light runs round it, never across it.
+                if (min(min(link.y, link.z), min(mateLink.y, mateLink.z)) < -0.5)
+                    frameClusterDistance = min(frameClusterDistance, fused);
                 if (m > 1.5 && (mate < 3.0 ? mate : mate - 4.0) > 1.5)
                     held = min(held, fused);
                 if (casts && mate < 3.0)
