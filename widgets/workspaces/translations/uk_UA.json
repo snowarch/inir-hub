@@ -1,0 +1,20 @@
+{
+  "%1 windows": "%1 вікон",
+  "1 window": "1 вікно",
+  "App icons": "Значки застосунків",
+  "App icons on the windows": "Значки застосунків на вікнах",
+  "Empty": "Порожньо",
+  "Here": "Тут",
+  "Instrument": "Instrument",
+  "No workspace on this screen": "На цьому екрані немає робочого простору",
+  "Nothing open. Your windows show here as Niri lays them out": "Нічого не відкрито. Вікна з’являться тут так, як їх розставляє Niri",
+  "On each window, where it fits": "На кожному вікні, де вміщується",
+  "Reading the workspaces…": "Читання робочих просторів…",
+  "Shape": "Форма",
+  "Shape of the number": "Форма числа",
+  "Style": "Стиль",
+  "Windows": "Вікна",
+  "Workspace %1": "Робочий простір %1",
+  "Workspaces": "Робочі простори",
+  "Workspaces show on Niri and Umbriel": "Робочі простори показуються на Niri та Umbriel"
+}

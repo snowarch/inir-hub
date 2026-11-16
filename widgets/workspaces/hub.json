@@ -1,0 +1,18 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Your workspaces and their windows as Niri lays them, a press away",
+    "description": "Every workspace of the screen as a lane of its real columns, widths as on the screen, stacked windows split, floating ones at the end. The window in focus is lit; press any window to go to it, any lane to go to its workspace. Titles never show, only apps. Niri and Umbriel.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "MIT",
+    "tags": [
+        "niri",
+        "workspaces",
+        "windows"
+    ],
+    "permissions": [],
+    "minInir": "3.1.0",
+    "preview": "preview.webp"
+}

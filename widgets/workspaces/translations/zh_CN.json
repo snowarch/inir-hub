@@ -1,0 +1,20 @@
+{
+  "%1 windows": "%1 个窗口",
+  "1 window": "1 个窗口",
+  "App icons": "应用图标",
+  "App icons on the windows": "窗口上的应用图标",
+  "Empty": "空",
+  "Here": "此处",
+  "Instrument": "Instrument",
+  "No workspace on this screen": "此屏幕上没有工作区",
+  "Nothing open. Your windows show here as Niri lays them out": "没有打开的窗口。你的窗口会按 Niri 的排列显示在这里",
+  "On each window, where it fits": "在每个窗口上，放得下时显示",
+  "Reading the workspaces…": "正在读取工作区…",
+  "Shape": "形状",
+  "Shape of the number": "数字形状",
+  "Style": "样式",
+  "Windows": "窗口",
+  "Workspace %1": "工作区 %1",
+  "Workspaces": "工作区",
+  "Workspaces show on Niri and Umbriel": "工作区显示在 Niri 和 Umbriel 上"
+}

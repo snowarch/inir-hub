@@ -1,0 +1,54 @@
+{
+    "name": "Workspaces",
+    "icon": "view_week",
+    "version": "1.0.0",
+    "author": "snowarch",
+    "description": "Your workspaces on the desktop as Niri lays them: one lane per workspace of the screen, its windows as wide as they are, the one in focus lit. Press a window to go to it, a lane to go to that workspace. Works on Niri and Umbriel; under iRiS it wears the iRiS, Prism or Material design.",
+    "category": "system",
+    "main": "Workspaces.qml",
+    "iris": {
+        "desktop": {
+            "iris": "IrisWorkspaces.qml",
+            "prism": "PrismWorkspaces.qml"
+        }
+    },
+    "sizes": [
+        "medium",
+        "small",
+        "large"
+    ],
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "showBackground": true,
+        "backgroundOpacity": 0.16,
+        "borderWidth": 1,
+        "borderOpacity": 0.2,
+        "cornerRadius": -1,
+        "useBlur": false,
+        "x": 240,
+        "y": 240,
+        "style": "shape",
+        "shape": "Cookie7Sided",
+        "icons": true
+    },
+    "configKeys": {
+        "icons": {
+            "type": "bool",
+            "default": true,
+            "label": "App icons on the windows"
+        }
+    },
+    "options": [
+        {
+            "key": "icons",
+            "label": "App icons",
+            "description": "On each window, where it fits",
+            "type": "switch",
+            "default": true
+        }
+    ]
+}

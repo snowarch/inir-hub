@@ -1,0 +1,13 @@
+{
+	"id": "workspaces",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/workspaces/",
+	"order": 23,
+	"groups": [
+		{
+			"label": "Widgets",
+			"pages": [
+				"WORKSPACES"
+			]
+		}
+	]
+}

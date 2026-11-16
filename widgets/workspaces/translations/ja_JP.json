@@ -1,0 +1,20 @@
+{
+  "%1 windows": "ウィンドウ %1 つ",
+  "1 window": "ウィンドウ 1 つ",
+  "App icons": "アプリアイコン",
+  "App icons on the windows": "ウィンドウ上のアプリアイコン",
+  "Empty": "空",
+  "Here": "ここ",
+  "Instrument": "Instrument",
+  "No workspace on this screen": "この画面にワークスペースはありません",
+  "Nothing open. Your windows show here as Niri lays them out": "何も開いていません。ウィンドウは Niri の並びのままここに表示されます",
+  "On each window, where it fits": "各ウィンドウに、収まるときに",
+  "Reading the workspaces…": "ワークスペースを読み込み中…",
+  "Shape": "形",
+  "Shape of the number": "数字の形",
+  "Style": "スタイル",
+  "Windows": "ウィンドウ",
+  "Workspace %1": "ワークスペース %1",
+  "Workspaces": "ワークスペース",
+  "Workspaces show on Niri and Umbriel": "ワークスペースは Niri と Umbriel に表示"
+}
