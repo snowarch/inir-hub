@@ -25,9 +25,13 @@ PreviewScene {
     readonly property real corners: Math.max(0, Number(winRoot.niri("window-rules", "corner-radius", 0)))
     readonly property bool shadows: winRoot.niri("layout", "shadow.enabled", false) === true
     readonly property real softness: Number(winRoot.niri("layout", "shadow.softness", 30))
-    readonly property real dim: Math.max(0.2, Math.min(1, Number(winRoot.niri("window-rules", "inactive-opacity", 1))))
-    readonly property real lit: Math.max(0.2, Math.min(1, Number(winRoot.niri("window-rules", "active-opacity", 1))))
-    readonly property bool frosted: winRoot.niri("window-rules", "blur", false) === true
+    // Niri sets how see-through windows are; Umbriel leaves it to each app and blurs behind the ones that are (its
+    // `glass`). There the window out of focus stands for such an app, so the blur has something to show through.
+    readonly property bool opacities: CompositorConfig.has("window-rules", "inactive-opacity")
+    readonly property bool frosted: winRoot.niri("window-rules", "blur", false) === true || winRoot.niri("glass", "enabled", false) === true
+    readonly property real dim: winRoot.opacities ? Math.max(0.2, Math.min(1, Number(winRoot.niri("window-rules", "inactive-opacity", 1))))
+        : winRoot.frosted && winRoot.group === "Glass behind apps" ? 0.82 : 1
+    readonly property real lit: winRoot.opacities ? Math.max(0.2, Math.min(1, Number(winRoot.niri("window-rules", "active-opacity", 1)))) : 1
     // The column on the left runs off the screen as Niri's strip does; the focused one sits in the middle.
     readonly property var columns: [{ x: -0.16, w: 0.34, focused: false }, { x: 0.18, w: 0.46, focused: true }, { x: 0.64, w: 0.42, focused: false }]
     function frameOf(column: var): rect {
@@ -145,8 +149,8 @@ PreviewScene {
     Caption {
         glyph: winRoot.group === "Glass behind apps" ? "blur_on" : "select_window"
         text: winRoot.group === "Glass behind apps"
-            ? [Translation.tr("Window in focus") + " " + Math.round(winRoot.lit * 100) + " %",
-                Translation.tr("Windows out of focus") + " " + Math.round(winRoot.dim * 100) + " %",
+            ? [winRoot.opacities ? Translation.tr("Window in focus") + " " + Math.round(winRoot.lit * 100) + " %" : "",
+                winRoot.opacities ? Translation.tr("Windows out of focus") + " " + Math.round(winRoot.dim * 100) + " %" : "",
                 winRoot.frosted ? Translation.tr("Blur behind apps") : ""].filter(part => part.length > 0).join(" · ")
             : [Translation.tr("Gaps") + " " + Math.round(winRoot.gaps) + " px",
             winRoot.corners > 0 ? Translation.tr("Window corners") + " " + Math.round(winRoot.corners) + " px" : "",

@@ -14,6 +14,7 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.preview.parts
 import qs.modules.iris.widgets
+import qs.modules.iris.widgets.prism
 
 PreviewScene {
     id: widgetsRoot
@@ -40,8 +41,11 @@ PreviewScene {
         || (widgetsRoot.outline === "auto" && (!widgetsRoot.clear || Boolean(widgetsRoot.opt("iris.widgets.rim", false)))))
     readonly property bool edgeLit: widgetsRoot.rimShown && (widgetsRoot.glass || IrisStyle.edgeLit) && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
     readonly property real plateRadius: Math.round(Math.max(0, Math.min(40, Number(widgetsRoot.opt("iris.widgets.radius", 22)))) * widgetsRoot.d)
-    readonly property real unit: Math.round(170 * widgetsRoot.d)
-    readonly property real wide: Math.round(250 * widgetsRoot.d)
+    // Prism's faces are measured in their own sizes (176 small, 368 x 176 medium): the scene sets them at the scale
+    // that fits the clock and the weather side by side.
+    readonly property real prismK: widgetsRoot.d * Math.min(1, Math.max(0.5, (widgetsRoot.width - 32 * widgetsRoot.d) / (560 * widgetsRoot.d)))
+    readonly property real unit: widgetsRoot.faced ? Math.round(176 * widgetsRoot.prismK) : Math.round(170 * widgetsRoot.d)
+    readonly property real wide: widgetsRoot.faced ? Math.round(368 * widgetsRoot.prismK) : Math.round(250 * widgetsRoot.d)
     readonly property real gap: Math.round(16 * widgetsRoot.d)
     readonly property real plateX: Math.round((widgetsRoot.width - widgetsRoot.wide - widgetsRoot.gap - widgetsRoot.unit) / 2)
     readonly property real plateY: Math.round((widgetsRoot.height - widgetsRoot.unit) / 2)
@@ -60,7 +64,7 @@ PreviewScene {
         live: true
     }
     Repeater {
-        model: widgetsRoot.on && widgetsRoot.glass ? [
+        model: widgetsRoot.on && widgetsRoot.glass && !widgetsRoot.faced ? [
             Qt.rect(widgetsRoot.plateX, widgetsRoot.plateY, widgetsRoot.wide, widgetsRoot.unit),
             Qt.rect(widgetsRoot.plateX + widgetsRoot.wide + widgetsRoot.gap, widgetsRoot.plateY, widgetsRoot.unit, widgetsRoot.unit)
         ] : []
@@ -89,7 +93,7 @@ PreviewScene {
     }
 
     Rectangle {
-        visible: widgetsRoot.on && !widgetsRoot.printed
+        visible: widgetsRoot.on && !widgetsRoot.printed && !widgetsRoot.faced
         x: widgetsRoot.plateX
         y: widgetsRoot.plateY
         width: widgetsRoot.wide
@@ -159,7 +163,7 @@ PreviewScene {
         }
     }
     Rectangle {
-        visible: widgetsRoot.on && !widgetsRoot.printed
+        visible: widgetsRoot.on && !widgetsRoot.printed && !widgetsRoot.faced
         x: widgetsRoot.plateX + widgetsRoot.wide + widgetsRoot.gap
         y: widgetsRoot.plateY
         width: widgetsRoot.unit
@@ -180,6 +184,69 @@ PreviewScene {
             FaceText { face: widgetsRoot.face; Layout.fillWidth: true; text: IrisFaceData.capitalized(String(Weather.data?.description ?? "")); size: 12.5; weight: Font.DemiBold }
         }
     }
+    // Prism draws every widget with faces of its own: the scene wears the real ones, each handed a stand-in of the
+    // widget it reads (its size, the shared look, the place it sits at), so the picture is the desktop's drawing.
+    component Stand: QtObject {
+        id: stand
+        required property string sizeClass
+        property real x: 0
+        property real y: 0
+        readonly property var parent: null
+        readonly property real screenWidth: widgetsRoot.width
+        readonly property real screenHeight: widgetsRoot.height
+        readonly property real scaleFactor: widgetsRoot.prismK / Math.max(0.01, IrisStyle.density)
+        readonly property real cornerRadiusOverride: -1
+        readonly property var look: prismLook
+        readonly property int widgetTitleWeight: prismLook.titleWeight(stand)
+        readonly property real widgetCardRadius: prismLook.cardRadius(stand)
+        readonly property bool showBackground: true
+        readonly property bool showBorder: true
+        readonly property bool bare: false
+        readonly property bool familyFaced: true
+        readonly property bool hasFamilyFace: true
+        readonly property bool powerActive: widgetsRoot.on
+        readonly property bool visible: widgetsRoot.on
+        readonly property bool motionActive: false
+        readonly property real regionBrightness: 0.3
+        readonly property real regionBrightnessSpread: 0
+        readonly property bool legibleAlways: Boolean(widgetsRoot.opt("iris.widgets.legibleAlways", false))
+        readonly property bool inkOnLight: false
+        readonly property bool forceDarkInk: false
+        readonly property bool stacked: false
+        readonly property bool stackShown: false
+        readonly property var stack: null
+        readonly property bool stackDropHint: false
+        readonly property real stackPos: 0
+        readonly property bool containsPress: false
+        readonly property string outputName: ""
+        readonly property string timeFormat: "system"
+        function _readConfigKey(key: string): var { return undefined }
+        function familyOption(key: string, fallback: var): var { return fallback }
+    }
+    readonly property IrisWidgetLook prismLook: IrisWidgetLook {}
+    readonly property Stand clockStand: Stand { sizeClass: "medium"; x: widgetsRoot.plateX; y: widgetsRoot.plateY }
+    readonly property Stand weatherStand: Stand {
+        sizeClass: "small"
+        x: widgetsRoot.plateX + widgetsRoot.wide + widgetsRoot.gap
+        y: widgetsRoot.plateY
+    }
+    Loader {
+        active: widgetsRoot.on && widgetsRoot.faced
+        x: widgetsRoot.plateX
+        y: widgetsRoot.plateY
+        width: widgetsRoot.wide
+        height: widgetsRoot.unit
+        sourceComponent: PrismClock { widget: widgetsRoot.clockStand }
+    }
+    Loader {
+        active: widgetsRoot.on && widgetsRoot.faced
+        x: widgetsRoot.plateX + widgetsRoot.wide + widgetsRoot.gap
+        y: widgetsRoot.plateY
+        width: widgetsRoot.unit
+        height: widgetsRoot.unit
+        sourceComponent: PrismWeather { widget: widgetsRoot.weatherStand }
+    }
+
     // What the face parts read, as a widget face would hand it to them, in this scene's options.
     readonly property var face: ({
         small: false, medium: true, large: false, nothing: false, moving: false,
