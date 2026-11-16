@@ -62,7 +62,7 @@ start_feed() {
     -protocol_whitelist file,rtsp,rtsps,tcp,udp,rtp,tls,crypto,https,http,data \
     -i "$listfile" -an \
     -vf "fps=8,scale='min(1280,iw)':-2" \
-    -q:v 4 -f image2 -update 1 -y "$frame" \
+    -q:v 4 -f image2 -update 1 -atomic_writing 1 -y "$frame" \
     </dev/null >>"$logfile" 2>&1 &
   echo $! > "$pidfile"
 }
