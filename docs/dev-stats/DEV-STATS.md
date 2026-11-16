@@ -41,15 +41,43 @@ The platform is read from the host — `github.com`, `gitlab.com`, anything else
 
 ## The five looks
 
-| Look | What it draws |
-| --- | --- |
-| Squares | The weeks as a grid, five steps of the accent, the numbers under it. Hovering a square names the day |
-| Instrument | The iNstrument grammar: an eyebrow, the total as the reading, two measured weeks, labelled fields |
-| Bars | The last twelve weeks as columns: which weeks were heavy and which were quiet |
-| Month | This calendar month as a sheet of days, today outlined |
-| Today | Today's count in a Material shape, beside the week so far, the streak and the busiest day |
+Every look reads the same numbers, so the choice is only about how the work reads best to you.
 
-With iNstrument or Readout chosen as the desktop's widget design, every face draws the Instrument look.
+### Squares
+
+![The Squares look: weeks of squares with the total, the streak and the busiest day](shots/look-grid.webp)
+
+The weeks as a grid, five steps of the accent from quiet to busy, the numbers under it. Hovering a square names the
+day; a click fetches again.
+
+### Instrument
+
+![The Instrument look: an eyebrow, the total as the reading and three labelled fields](shots/look-instrument.webp)
+
+The iNstrument grammar the built-in widgets wear: an eyebrow, the total as the reading, the last two weeks measured,
+and the streak, longest run and busiest day as fields. It is also what every face draws when the desktop's widget
+design is iNstrument or Readout.
+
+### Bars
+
+![The Bars look: the last twelve weeks as columns](shots/look-weeks.webp)
+
+The last twelve weeks as columns: which weeks were heavy, which were quiet, and where the run the streak is made of
+sits.
+
+### Month
+
+![The Month look: this calendar month as a sheet, each day shaded and today outlined](shots/look-month.webp)
+
+This calendar month as a sheet of days, each one shaded by what it holds and today outlined. The footer says how much
+the month has added so far.
+
+### Today
+
+![The Today look: today's count in a Material shape beside the week, the streak and the busiest day](shots/look-today.webp)
+
+Today's count in a Material shape — the shape grammar of the built-in widgets — beside the week so far, the streak and
+the busiest day.
 
 On the desktop card, hovering a square names its day and how much you did; the arrow at the top right
 fetches again by hand.

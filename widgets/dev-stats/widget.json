@@ -1,7 +1,7 @@
 {
     "name": "Dev Stats",
     "icon": "commit",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": "yukazakiri",
     "description": "Your contribution graph on the desktop: GitHub, GitLab and Forgejo (Codeberg, Gitea), in five looks \u2014 squares, instrument, bars, this month, or today in a shape \u2014 with the streak that is still going, the longest one and the busiest day. A card on the desktop, a card in Material's sidebars, a line on the iRiS Island and a card in Waffle's Widgets panel.",
     "category": "system",
