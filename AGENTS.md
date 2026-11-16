@@ -55,9 +55,8 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
 - **Answer for someone else's IPC.** Every `IpcHandler` target starts with the item's id.
 - **Start the shell's binary.** Never `qs`, `quickshell` or `qs -c inir ipc call …`: on iNiR the shell runs on its
   own runtime, not a `qs` on the PATH. Reach the shell, or another item, with `["inir", "<target>", "<function>"]`.
-- **Grow past what a reviewer can read.** At most 600 lines in one file (split by job: state, each page, each part)
-  and, from outside, at most 2500 lines of code in one pull request (translations and docs not counted). A big
-  feature lands as the smallest version that works, then each addition on its own pull request with a raised version.
+- **Put many jobs in one file.** At most 600 lines in one file: split by job (state, each page, each
+  part) so each file can be read, reviewed and fixed on its own. An item as a whole is as big as its job.
 - **Install, elevate or download code.** No `pip`, `npm`, package managers or `sudo` from the item; no `curl … | sh`,
   no `eval`, no `Qt.createQmlObject`, no QML from the internet, no `atob` or `base64 -d` on hidden content. Python
   helpers use the standard library only.
@@ -72,9 +71,9 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
 
 ## When you are stuck
 
-If a rule can't be met without breaking another (the part you need is a family's inside, the feature can't fit in
-2500 lines, the source has no API that allows the use), stop and tell the person why, with the rule's name. Never
-work around it. The way forward is an issue on this repository, a smaller first version, or another source.
+If a rule can't be met without breaking another (the part you need is a family's inside, the source has no API that
+allows the use), stop and tell the person why, with the rule's name. Never work around it. The way forward is an
+issue on this repository, or another source.
 
 ## Maintainers
 
