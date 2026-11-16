@@ -324,183 +324,195 @@ Item {
             onSearchEntered: root.takeFirstHit()
         }
 
-        Flickable {
-            id: centre
-            visible: !root.hosted
-            anchors.left: sidebar.right
-            anchors.right: parent.right
-            anchors.rightMargin: root.railWidth
-            height: parent.height
-            contentHeight: content.implicitHeight + PrismTheme.dp(40)
-            boundsBehavior: Flickable.StopAtBounds
-            clip: true
-            onContentYChanged: {
-                // A hand on the page: the reading line names the group again.
-                if (!glider.running && !root.placing) { root.heldGroup = ""; root.aimUntil = 0 }
-                root.spy()
-            }
-            onContentHeightChanged: {
-                if (Date.now() < root.aimUntil) aimLater.restart()
-                root.spy()
-            }
-
-            Column {
-                id: content
-                x: PrismTheme.dp(32)
-                width: centre.width - PrismTheme.dp(64)
-                spacing: 0
-
-                // The page opens on its poster: the page's art, where it stands and its size printed small, its name
-                // big, what it holds now as figures. A search, Changes, Home and Wallpaper keep the words without art.
-                // The poster stands off the window's top edge as the folders under it do.
-                Item { width: 1; height: root.staged ? PrismTheme.dp(14) : 0 }
-                PrismPoster {
-                    width: content.width
-                    art: root.staged
-                    page: root.page
-                    eyebrow: root.topEyebrow
-                    title: root.topTitle
-                    number: !PrismState.searching && !root.changesView ? PrismModel.index(root.page.pageId) + 1 : 0
-                    total: PrismModel.ids.length
-                    settings: root.staged ? root.sections.reduce((n, section) => n + section.rows.length, 0) : 0
-                    changed: root.staged ? PrismModel.changedOf(root.page.pageId).length : 0
-                    restorable: root.staged ? PrismModel.restorableOf(root.page.pageId) : 0
-                    pills: root.staged
-                    lead: root.staged ? PrismModel.leadOf(root.page) : []
-                    keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
-                    picture: root.home ? Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? "")) : ""
-                    hues: root.home ? PrismTheme.palette(String(root.page.tint)) : []
-                    tools: PrismRound {
-                        visible: root.home
-                        overArt: true
-                        solid: true
-                        implicitWidth: PrismTheme.dp(34)
-                        glyph: "shuffle"
-                        Accessible.name: Translation.tr("Next wallpaper")
-                        onClicked: Wallpapers.nextWallpaper(Appearance.m3colors.darkmode, NiriService.currentOutput)
-                    }
-                    onRestore: PrismModel.restore(root.page.pageId)
+        // Over the compositor's blur nothing can be drawn again above the strip, so the rows stop at its middle there
+        // (a scissor, no layer): sharp text never scrolls in the air over it. The page itself keeps its place.
+        Item {
+            id: scroller
+            readonly property real cut: stripBar.shown && PrismTheme.glassBlur ? stripBar.y + stripBar.height / 2 : 0
+            width: parent.width
+            y: scroller.cut
+            height: parent.height - scroller.y
+            clip: scroller.cut > 0
+            Behavior on y { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+            Flickable {
+                id: centre
+                visible: !root.hosted
+                // The scroller spans the panel from x 0, so the page's x is the panel's; its y is the panel's 0.
+                x: sidebar.x + sidebar.width
+                y: -scroller.y
+                width: parent.width - x - root.railWidth
+                height: body.height
+                contentHeight: content.implicitHeight + PrismTheme.dp(40)
+                boundsBehavior: Flickable.StopAtBounds
+                clip: true
+                onContentYChanged: {
+                    // A hand on the page: the reading line names the group again.
+                    if (!glider.running && !root.placing) { root.heldGroup = ""; root.aimUntil = 0 }
+                    root.spy()
                 }
-                // Wallpaper opens on the wallpaper itself: what is worn and the ones to go back to.
-                Loader {
-                    active: !PrismState.searching && !root.changesView && root.page.pageId === "wallpaper"
-                    visible: active
-                    width: content.width
-                    sourceComponent: PrismWallpaperHero {
+                onContentHeightChanged: {
+                    if (Date.now() < root.aimUntil) aimLater.restart()
+                    root.spy()
+                }
+
+                Column {
+                    id: content
+                    x: PrismTheme.dp(32)
+                    width: centre.width - PrismTheme.dp(64)
+                    spacing: 0
+
+                    // The page opens on its poster: the page's art, where it stands and its size printed small, its name
+                    // big, what it holds now as figures. A search, Changes, Home and Wallpaper keep the words without art.
+                    // The poster stands off the window's top edge as the folders under it do.
+                    Item { width: 1; height: root.staged ? PrismTheme.dp(14) : 0 }
+                    PrismPoster {
                         width: content.width
-                        restorable: PrismModel.restorableOf(root.page.pageId)
+                        art: root.staged
+                        page: root.page
+                        eyebrow: root.topEyebrow
+                        title: root.topTitle
+                        number: !PrismState.searching && !root.changesView ? PrismModel.index(root.page.pageId) + 1 : 0
+                        total: PrismModel.ids.length
+                        settings: root.staged ? root.sections.reduce((n, section) => n + section.rows.length, 0) : 0
+                        changed: root.staged ? PrismModel.changedOf(root.page.pageId).length : 0
+                        restorable: root.staged ? PrismModel.restorableOf(root.page.pageId) : 0
+                        pills: root.staged
+                        lead: root.staged ? PrismModel.leadOf(root.page) : []
+                        keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
+                        picture: root.home ? Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? "")) : ""
+                        hues: root.home ? PrismTheme.palette(String(root.page.tint)) : []
+                        tools: PrismRound {
+                            visible: root.home
+                            overArt: true
+                            solid: true
+                            implicitWidth: PrismTheme.dp(34)
+                            glyph: "shuffle"
+                            Accessible.name: Translation.tr("Next wallpaper")
+                            onClicked: Wallpapers.nextWallpaper(Appearance.m3colors.darkmode, NiriService.currentOutput)
+                        }
                         onRestore: PrismModel.restore(root.page.pageId)
                     }
-                }
-                Item { visible: !PrismState.searching && !root.changesView; width: 1; height: root.staged ? PrismTheme.dp(26) : PrismTheme.dp(12) }
-
-                // Home: the settings touched every day, as tiles that act.
-                Loader {
-                    active: !PrismState.searching && !root.changesView && root.page.pageId === "general"
-                    visible: active
-                    width: content.width
-                    sourceComponent: Column {
+                    // Wallpaper opens on the wallpaper itself: what is worn and the ones to go back to.
+                    Loader {
+                        active: !PrismState.searching && !root.changesView && root.page.pageId === "wallpaper"
+                        visible: active
                         width: content.width
-                        PrismHome { width: parent.width; tint: String(root.page?.tint ?? "grey"); onReach: row => root.reach(row) }
-                        Item { width: 1; height: PrismTheme.dp(18) }
-                    }
-                }
-
-                // A search, or every change: the places it names (a page, a group) first, then one chart of rows that
-                // say where they live; a press on a place or a row's name goes there.
-                Loader {
-                    active: PrismState.searching || root.changesView
-                    visible: active
-                    width: content.width
-                    sourceComponent: Column {
-                        width: content.width
-                        id: found
-                        readonly property var hits: PrismState.searching ? PrismModel.search(PrismState.asked) : PrismModel.changes
-                        readonly property var places: PrismState.searching ? PrismModel.places(PrismState.asked) : []
-                        // The rows that fill the screen come in the first frame, the rest a few a frame after it: forty
-                        // rows with their controls in one frame cost ~70 ms.
-                        // A new query starts over; a write in Changes keeps every row it had.
-                        property int built: 12
-                        readonly property string answering: PrismState.asked
-                        onAnsweringChanged: { found.built = 12; grow.restart() }
-                        onHitsChanged: if (found.built < found.hits.length) grow.restart()
-                        Component.onCompleted: if (found.built < found.hits.length) grow.restart()
-                        Timer {
-                            id: grow
-                            interval: 16
-                            repeat: true
-                            onTriggered: { found.built += 8; if (found.built >= found.hits.length) grow.stop() }
-                        }
-                        PrismPlaces {
-                            visible: parent.places.length > 0
-                            width: parent.width
-                            places: parent.places
-                            onOpen: place => root.openPlace(place)
-                        }
-                        Item { visible: parent.places.length > 0; width: 1; height: PrismTheme.dp(30) }
-                        PrismText {
-                            visible: parent.hits.length === 0 && parent.places.length === 0
-                            topPadding: PrismTheme.dp(12)
-                            text: PrismState.searching ? Translation.tr("No setting matches that.") : Translation.tr("Everything is as it came.")
-                            color: PrismTheme.ink2
-                            font.pixelSize: PrismTheme.row
-                        }
-                        PrismSection {
-                            visible: parent.hits.length > 0
-                            width: parent.width
-                            line: PrismState.searching ? Translation.tr("Settings") : Translation.tr("From the factory profile")
-                            title: Translation.tr("%1 found").arg(parent.hits.length)
-                            glyph: PrismState.searching ? "search" : "history"
-                            rows: found.hits.slice(0, found.built)
-                            showPage: true
-                            onReach: row => root.reach(row)
+                        sourceComponent: PrismWallpaperHero {
+                            width: content.width
+                            restorable: PrismModel.restorableOf(root.page.pageId)
+                            onRestore: PrismModel.restore(root.page.pageId)
                         }
                     }
-                }
+                    Item { visible: !PrismState.searching && !root.changesView; width: 1; height: root.staged ? PrismTheme.dp(26) : PrismTheme.dp(12) }
 
-                // Where the groups begin, a pixel tall: a Column leaves an item of no height at y 0.
-                Item { id: groupsAt; width: 1; height: 1 }
-
-                // Groups keyed by title: a write rebuilds the list, never the groups on screen.
-                Repeater {
-                    id: sectionsRepeater
-                    model: ScriptModel { objectProp: "title"; values: root.shownSections }
-                    delegate: Column {
-                        id: sectionBox
-                        required property var modelData
-                        required property int index
-                        visible: sectionBox.modelData.rows.length > 0 || Boolean(root.figures[sectionBox.modelData.title]?.keys)
+                    // Home: the settings touched every day, as tiles that act.
+                    Loader {
+                        active: !PrismState.searching && !root.changesView && root.page.pageId === "general"
+                        visible: active
                         width: content.width
-                        PrismSection {
-                            width: parent.width
-                            figure: root.figures[sectionBox.modelData.title] ?? null
-                            groups: root.groups
-                            entry: root.bandOf(sectionBox.modelData.title)
-                            viewTop: centre.contentY + root.stickTop - content.y - sectionBox.y
-                            viewHeight: centre.height - root.stickTop
-                            active: root.active
-                            onGoGroup: title => root.showGroup(root.firstOf(title))
-                            title: Translation.tr(sectionBox.modelData.title)
-                            glyph: String(sectionBox.modelData.glyph ?? root.page.glyph)
-                            tint: root.page.tint
-                            rows: sectionBox.modelData.rows
-                            flashPath: root.flashPath
+                        sourceComponent: Column {
+                            width: content.width
+                            PrismHome { width: parent.width; tint: String(root.page?.tint ?? "grey"); onReach: row => root.reach(row) }
+                            Item { width: 1; height: PrismTheme.dp(18) }
                         }
-                        Item { width: 1; height: PrismTheme.dp(18) }
                     }
-                }
 
-                // A long page's part ends on where to go next: the next part's first group large, the part before quiet.
-                PrismNextGroup {
-                    visible: root.paged && !PrismState.searching && !root.changesView && root.parts.length > 1
-                    width: content.width
-                    previous: root.partIndex > 0 ? String(root.parts[root.partIndex - 1][0].title) : ""
-                    next: root.partIndex < root.parts.length - 1 ? String(root.parts[root.partIndex + 1][0].title) : ""
-                    first: String(root.sections[0]?.title ?? "")
-                    then: root.partIndex < root.parts.length - 1 ? root.parts[root.partIndex + 1].slice(1).map(section => Translation.tr(section.title)) : []
-                    position: root.partIndex + 1
-                    count: root.parts.length
-                    onPick: title => root.showGroup(title)
+                    // A search, or every change: the places it names (a page, a group) first, then one chart of rows that
+                    // say where they live; a press on a place or a row's name goes there.
+                    Loader {
+                        active: PrismState.searching || root.changesView
+                        visible: active
+                        width: content.width
+                        sourceComponent: Column {
+                            width: content.width
+                            id: found
+                            readonly property var hits: PrismState.searching ? PrismModel.search(PrismState.asked) : PrismModel.changes
+                            readonly property var places: PrismState.searching ? PrismModel.places(PrismState.asked) : []
+                            // The rows that fill the screen come in the first frame, the rest a few a frame after it: forty
+                            // rows with their controls in one frame cost ~70 ms.
+                            // A new query starts over; a write in Changes keeps every row it had.
+                            property int built: 12
+                            readonly property string answering: PrismState.asked
+                            onAnsweringChanged: { found.built = 12; grow.restart() }
+                            onHitsChanged: if (found.built < found.hits.length) grow.restart()
+                            Component.onCompleted: if (found.built < found.hits.length) grow.restart()
+                            Timer {
+                                id: grow
+                                interval: 16
+                                repeat: true
+                                onTriggered: { found.built += 8; if (found.built >= found.hits.length) grow.stop() }
+                            }
+                            PrismPlaces {
+                                visible: parent.places.length > 0
+                                width: parent.width
+                                places: parent.places
+                                onOpen: place => root.openPlace(place)
+                            }
+                            Item { visible: parent.places.length > 0; width: 1; height: PrismTheme.dp(30) }
+                            PrismText {
+                                visible: parent.hits.length === 0 && parent.places.length === 0
+                                topPadding: PrismTheme.dp(12)
+                                text: PrismState.searching ? Translation.tr("No setting matches that.") : Translation.tr("Everything is as it came.")
+                                color: PrismTheme.ink2
+                                font.pixelSize: PrismTheme.row
+                            }
+                            PrismSection {
+                                visible: parent.hits.length > 0
+                                width: parent.width
+                                line: PrismState.searching ? Translation.tr("Settings") : Translation.tr("From the factory profile")
+                                title: Translation.tr("%1 found").arg(parent.hits.length)
+                                glyph: PrismState.searching ? "search" : "history"
+                                rows: found.hits.slice(0, found.built)
+                                showPage: true
+                                onReach: row => root.reach(row)
+                            }
+                        }
+                    }
+
+                    // Where the groups begin, a pixel tall: a Column leaves an item of no height at y 0.
+                    Item { id: groupsAt; width: 1; height: 1 }
+
+                    // Groups keyed by title: a write rebuilds the list, never the groups on screen.
+                    Repeater {
+                        id: sectionsRepeater
+                        model: ScriptModel { objectProp: "title"; values: root.shownSections }
+                        delegate: Column {
+                            id: sectionBox
+                            required property var modelData
+                            required property int index
+                            visible: sectionBox.modelData.rows.length > 0 || Boolean(root.figures[sectionBox.modelData.title]?.keys)
+                            width: content.width
+                            PrismSection {
+                                width: parent.width
+                                figure: root.figures[sectionBox.modelData.title] ?? null
+                                groups: root.groups
+                                entry: root.bandOf(sectionBox.modelData.title)
+                                viewTop: centre.contentY + root.stickTop - content.y - sectionBox.y
+                                viewHeight: centre.height - root.stickTop
+                                active: root.active
+                                onGoGroup: title => root.showGroup(root.firstOf(title))
+                                title: Translation.tr(sectionBox.modelData.title)
+                                glyph: String(sectionBox.modelData.glyph ?? root.page.glyph)
+                                tint: root.page.tint
+                                rows: sectionBox.modelData.rows
+                                flashPath: root.flashPath
+                            }
+                            Item { width: 1; height: PrismTheme.dp(18) }
+                        }
+                    }
+
+                    // A long page's part ends on where to go next: the next part's first group large, the part before quiet.
+                    PrismNextGroup {
+                        visible: root.paged && !PrismState.searching && !root.changesView && root.parts.length > 1
+                        width: content.width
+                        previous: root.partIndex > 0 ? String(root.parts[root.partIndex - 1][0].title) : ""
+                        next: root.partIndex < root.parts.length - 1 ? String(root.parts[root.partIndex + 1][0].title) : ""
+                        first: String(root.sections[0]?.title ?? "")
+                        then: root.partIndex < root.parts.length - 1 ? root.parts[root.partIndex + 1].slice(1).map(section => Translation.tr(section.title)) : []
+                        position: root.partIndex + 1
+                        count: root.parts.length
+                        onPick: title => root.showGroup(title)
+                    }
                 }
             }
         }
@@ -578,7 +590,7 @@ Item {
             onPickGroup: title => root.showGroup(root.firstOf(title))
             onRestore: PrismModel.restore(root.page.pageId)
             under: centre
-            underAt: Qt.point(x - centre.x, y - centre.y)
+            underAt: Qt.point(x - centre.x, y) // the page stands at the panel's top whatever the scroller cuts
         }
 
         PrismRail {

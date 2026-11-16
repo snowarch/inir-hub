@@ -175,7 +175,8 @@ MouseArea {
             // What it puts on, in words: the material, the corners, the type (his 11-02: say what changes).
             text: [card.look.glass ? Translation.tr("Glass") : Translation.tr("Solid"),
                 card.s < 0.75 ? Translation.tr("Sharp") : card.s > 1.15 ? Translation.tr("Round") : Translation.tr("Soft"),
-                String(card.look.titleFont).split(",")[0]].join(" · ")
+                // The family's name, not the patch it wears ("JetBrainsMono Nerd Font" reads JetBrainsMono).
+                String(card.look.titleFont).split(",")[0].replace(/ (Nerd Font( Mono| Propo)?|NF|NFM|NFP)$/, "")].join(" · ")
                 + (card.mine && card.theme.author ? " · " + Translation.tr("by %1").arg(card.theme.author) : "")
             color: Qt.alpha(card.ink, 0.5)
             font.family: IrisStyle.fontMain
