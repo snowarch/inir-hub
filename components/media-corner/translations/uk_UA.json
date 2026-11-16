@@ -233,7 +233,7 @@
     "Remove": "Видалити",
     "Watching": "Перегляд",
     "Web, opens in the browser": "Веб, відкривається в браузері",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "Тут шукає «Дивитися». Джерел немає, доки ви їх не додасте, і ніхто не перевіряв те, що ви додаєте: ви самі вирішуєте, чому довіряти.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "Тут «Дивитися» шукає потоки. Їх немає, доки ви не додасте, і ніхто не перевіряв те, що ви додаєте: ви вирішуєте, чому довіряти.",
     "You have no sources yet": "У вас ще немає джерел",
     "Your sources have nothing for this": "У ваших джерелах цього немає",
     "mpv couldn't play it. Try another stream": "mpv не зміг це відтворити. Спробуйте інший потік",
@@ -320,5 +320,11 @@
     "Style": "Стиль",
     "Titles you save show here": "Тут з’являться збережені тайтли",
     "What you watch shows here": "Тут з’явиться те, що ви дивитеся",
-    "Yours": "Ваше"
+    "Yours": "Ваше",
+    "%1 sources": "Джерел: %1",
+    "%1 titles": "Тайтлів: %1",
+    "Find something to watch": "Знайти, що подивитися",
+    "Nothing playing": "Нічого не грає",
+    "Press Watch on any title": "Натисніть «Дивитися» в будь-якому тайтлі",
+    "What to watch today": "Що подивитися сьогодні"
 }

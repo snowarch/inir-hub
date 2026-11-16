@@ -233,7 +233,7 @@
     "Remove": "हटाएँ",
     "Watching": "देखना",
     "Web, opens in the browser": "वेब, ब्राउज़र में खुलता है",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "यहाँ «देखें» खोजता है। जब तक आप न जोड़ें, कोई स्रोत नहीं होता, और आपके जोड़े गए स्रोतों की किसी ने जाँच नहीं की: किस पर भरोसा करना है, यह आप चुनते हैं।",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "यहाँ देखें स्ट्रीम खोजता है। जब तक आप न जोड़ें, यहाँ कुछ नहीं होता, और आप जो जोड़ते हैं उसे किसी ने जाँचा नहीं है: भरोसा करना आपका फ़ैसला है।",
     "You have no sources yet": "आपके पास अभी कोई स्रोत नहीं है",
     "Your sources have nothing for this": "आपके स्रोतों में इसके लिए कुछ नहीं है",
     "mpv couldn't play it. Try another stream": "mpv इसे चला नहीं सका। कोई दूसरी स्ट्रीम आज़माएँ",
@@ -320,5 +320,11 @@
     "Style": "शैली",
     "Titles you save show here": "आपके सहेजे शीर्षक यहाँ दिखते हैं",
     "What you watch shows here": "आप जो देखते हैं वह यहाँ दिखता है",
-    "Yours": "आपके"
+    "Yours": "आपके",
+    "%1 sources": "%1 स्रोत",
+    "%1 titles": "%1 शीर्षक",
+    "Find something to watch": "देखने के लिए कुछ खोजें",
+    "Nothing playing": "कुछ नहीं चल रहा",
+    "Press Watch on any title": "किसी भी शीर्षक पर देखें दबाएँ",
+    "What to watch today": "आज क्या देखें"
 }

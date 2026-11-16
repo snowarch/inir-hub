@@ -233,7 +233,7 @@
     "Remove": "הסרה",
     "Watching": "צפייה",
     "Web, opens in the browser": "אינטרנט, נפתח בדפדפן",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "כאן «צפייה» מחפשת. אין מקורות עד שתוסיפו, ואיש לא בדק את מה שתוסיפו: אתם בוחרים במה לבטוח.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "כאן «צפייה» מחפשת שידורים. אין כאלה עד שתוסיפו, ואף אחד לא בדק את מה שאתם מוסיפים: אתם מחליטים במה לבטוח.",
     "You have no sources yet": "עדיין אין לך מקורות",
     "Your sources have nothing for this": "במקורות שלך אין את זה",
     "mpv couldn't play it. Try another stream": "mpv לא הצליח לנגן. נסו שידור אחר",
@@ -320,5 +320,11 @@
     "Style": "סגנון",
     "Titles you save show here": "כותרים שתשמרו יופיעו כאן",
     "What you watch shows here": "מה שתצפו בו יופיע כאן",
-    "Yours": "שלכם"
+    "Yours": "שלכם",
+    "%1 sources": "%1 מקורות",
+    "%1 titles": "%1 כותרים",
+    "Find something to watch": "מצאו משהו לצפות בו",
+    "Nothing playing": "שום דבר לא מתנגן",
+    "Press Watch on any title": "לחצו על צפייה בכל כותר",
+    "What to watch today": "מה לראות היום"
 }

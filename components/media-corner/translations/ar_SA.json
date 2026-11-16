@@ -233,7 +233,7 @@
     "Remove": "إزالة",
     "Watching": "المشاهدة",
     "Web, opens in the browser": "ويب، يُفتح في المتصفح",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "حيث تبحث «مشاهدة». لا يوجد شيء حتى تضيفه، ولم يتحقق أحد مما تضيفه: أنت تختار ما تثق به.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "هنا تبحث «مشاهدة» عن البث. لا يوجد شيء حتى تضيف مصادر، ولم يراجع أحد ما تضيفه: أنت من يقرر بمن يثق.",
     "You have no sources yet": "ليس لديك مصادر بعد",
     "Your sources have nothing for this": "لا تحتوي مصادرك على هذا",
     "mpv couldn't play it. Try another stream": "تعذّر على mpv تشغيله. جرّب بثًا آخر",
@@ -320,5 +320,11 @@
     "Style": "النمط",
     "Titles you save show here": "تظهر هنا العناوين التي تحفظها",
     "What you watch shows here": "يظهر هنا ما تشاهده",
-    "Yours": "لك"
+    "Yours": "لك",
+    "%1 sources": "%1 مصادر",
+    "%1 titles": "%1 عناوين",
+    "Find something to watch": "ابحث عن شيء لتشاهده",
+    "Nothing playing": "لا شيء قيد التشغيل",
+    "Press Watch on any title": "اضغط مشاهدة على أي عنوان",
+    "What to watch today": "ماذا تشاهد اليوم"
 }

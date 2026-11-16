@@ -233,7 +233,7 @@
     "Remove": "Rimuovi",
     "Watching": "Da guardare",
     "Web, opens in the browser": "Web, si apre nel browser",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "Dove cerca «Guarda». Non ce ne sono finché non le aggiungi, e nessuno ha controllato ciò che aggiungi: scegli tu di cosa fidarti.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "Dove Guarda cerca gli stream. Non ce ne sono finché non ne aggiungi, e nessuno ha controllato ciò che aggiungi: decidi tu di cosa fidarti.",
     "You have no sources yet": "Non hai ancora fonti",
     "Your sources have nothing for this": "Le tue fonti non hanno nulla per questo",
     "mpv couldn't play it. Try another stream": "mpv non è riuscito a riprodurlo. Prova un altro stream",
@@ -320,5 +320,11 @@
     "Style": "Stile",
     "Titles you save show here": "I titoli che salvi compaiono qui",
     "What you watch shows here": "Ciò che guardi compare qui",
-    "Yours": "I tuoi"
+    "Yours": "I tuoi",
+    "%1 sources": "%1 fonti",
+    "%1 titles": "%1 titoli",
+    "Find something to watch": "Trova qualcosa da guardare",
+    "Nothing playing": "Niente in riproduzione",
+    "Press Watch on any title": "Premi Guarda su un titolo",
+    "What to watch today": "Cosa guardare oggi"
 }

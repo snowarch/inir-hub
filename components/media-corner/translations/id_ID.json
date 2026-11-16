@@ -233,7 +233,7 @@
     "Remove": "Hapus",
     "Watching": "Menonton",
     "Web, opens in the browser": "Web, terbuka di peramban",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "Tempat Tonton mencari. Tidak ada sampai kamu menambahkannya, dan tak ada yang memeriksa yang kamu tambahkan: kamu yang memilih apa yang dipercaya.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "Tempat Tonton mencari stream. Belum ada sampai kamu menambahkannya, dan tak ada yang memeriksa apa yang kamu tambahkan: kamu yang memutuskan mana yang dipercaya.",
     "You have no sources yet": "Kamu belum punya sumber",
     "Your sources have nothing for this": "Sumbermu tidak punya apa pun untuk ini",
     "mpv couldn't play it. Try another stream": "mpv tidak bisa memutarnya. Coba stream lain",
@@ -320,5 +320,11 @@
     "Style": "Gaya",
     "Titles you save show here": "Judul yang kamu simpan muncul di sini",
     "What you watch shows here": "Yang kamu tonton muncul di sini",
-    "Yours": "Milikmu"
+    "Yours": "Milikmu",
+    "%1 sources": "%1 sumber",
+    "%1 titles": "%1 judul",
+    "Find something to watch": "Cari tontonan",
+    "Nothing playing": "Tidak ada yang diputar",
+    "Press Watch on any title": "Tekan Tonton pada judul mana pun",
+    "What to watch today": "Tontonan hari ini"
 }
