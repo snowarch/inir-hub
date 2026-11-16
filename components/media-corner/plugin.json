@@ -2,7 +2,7 @@
     "id": "media-corner",
     "kind": "component",
     "name": "Media Corner",
-    "summary": "Browse anime, films and series and see where they stream",
+    "summary": "Browse anime, films and series, and watch them from sources you add",
     "icon": "movie",
     "version": "1.4.0",
     "choices": {
