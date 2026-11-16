@@ -215,8 +215,10 @@ Singleton {
         const fits = row => {
             if (!row || row.page !== id || row.kind === "switch" || row.kind === "action" || !root.shown(row) || out.includes(row)) return false
             const say = String(root.sayNow(row) ?? "")
-            // A bare number ("0" for Speed) says nothing alone on a poster: a figure there carries its unit or a word.
-            if (/^[\d\s.,−-]+$/.test(say)) return false
+            // A poster figure says something alone: a bare number ("0" for Speed) or sign (";" for Clipboard) has no
+            // word or unit, and "Off", "None" or a zero ("0%" Shadow) names what is not in use. The next row stands in.
+            if (!/[A-Za-z%\u00C0-\uFFFF]/.test(say) || /^0(?![\d.,])/.test(say)
+                || say === Translation.tr("Off") || say === Translation.tr("None")) return false
             return say.length > 0 && say.length <= 16 && !said().includes(say)
         }
         for (const lead of Array.from(page?.lead ?? [])) {
