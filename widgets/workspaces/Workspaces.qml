@@ -197,7 +197,10 @@ AbstractBackgroundWidget {
                     width: parent.width
                     visible: root.isLarge && root.current !== null
                     text: root.currentName
+                    // A long name the person gave the workspace shrinks before it would be cut.
                     elide: Text.ElideRight
+                    fontSizeMode: Text.HorizontalFit
+                    minimumPixelSize: Math.round(font.pixelSize * 0.7)
                     font.family: root.widgetTitleFamily
                     font.weight: root.widgetTitleWeight
                     font.letterSpacing: root.widgetTitleTracking
