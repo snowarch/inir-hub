@@ -62,7 +62,7 @@ start_feed() {
     -protocol_whitelist file,rtsp,rtsps,tcp,udp,rtp,tls,crypto,https,http,data \
     -i "$listfile" -an \
     -vf "fps=8,scale='min(1280,iw)':-2" \
-    -q:v 4 -f image2 -update 1 -y "$frame" \
+    -q:v 4 -f image2 -update 1 -atomic_writing 1 -y "$frame" \
     </dev/null >>"$logfile" 2>&1 &
   echo $! > "$pidfile"
 }
@@ -91,7 +91,12 @@ PY
 
 sync_feeds() {
   [[ -f "$CONFIG" ]] || return 0
-  local wanted=()
+  if ! command -v ffmpeg >/dev/null 2>&1; then
+    echo "inircam needs ffmpeg to show RTSP cameras; install the ffmpeg package" >&2
+    return 1
+  fi
+  local -a want_ids=()
+  local -a want_quals=()
   # parse cameras from config
   while IFS=$'\t' read -r id enabled host user pass urlMain urlSub; do
     [[ "$enabled" == "true" ]] || continue
@@ -99,14 +104,14 @@ sync_feeds() {
     if [[ -n "$urlSub" && "$urlSub" == rtsp* ]]; then
       local u
       u=$(build_rtsp_url "$urlSub" "$user" "$pass")
-      wanted+=("${id}|sub")
+      want_ids+=("$id"); want_quals+=("sub")
       start_feed "$id" "sub" "$u"
     fi
     # main stream for enlarged and wall views
     if [[ -n "$urlMain" && "$urlMain" == rtsp* ]]; then
       local u
       u=$(build_rtsp_url "$urlMain" "$user" "$pass")
-      wanted+=("${id}|main")
+      want_ids+=("$id"); want_quals+=("main")
       start_feed "$id" "main" "$u"
     fi
   done < <(python3 - "$CONFIG" <<'PY'
@@ -124,14 +129,12 @@ PY
 
   # kill feeds not wanted, and frames left by another shell pid
   shopt -s nullglob
-  local pf
+  local pf base i keep
   for pf in "$PIDDIR"/*.pid; do
-    local base keep=0 w wid rest wq
     base=$(basename "$pf" .pid)
-    for w in "${wanted[@]:-}"; do
-      [[ -z "$w" ]] && continue
-      wid="${w%%|*}"; rest="${w#*|}"; wq="${rest%%|*}"
-      if [[ "$base" == "${wid}-${wq}" ]]; then keep=1; break; fi
+    keep=0
+    for i in "${!want_ids[@]}"; do
+      if [[ "$base" == "${want_ids[$i]}-${want_quals[$i]}" ]]; then keep=1; break; fi
     done
     if [[ $keep -eq 0 ]]; then
       kill_feed "$pf"

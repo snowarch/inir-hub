@@ -16,7 +16,7 @@ Inspired by [OmaCam](https://github.com/entroit/omacam) (MIT, Entroit).
 
 RTSP and RTSPS are drawn by `inircam-feeds`, a small helper that runs `ffmpeg` and keeps a fresh JPEG per camera for the panel to show. That path is used because Qt Multimedia's FFmpeg/VAAPI backend fails on some machines with `Invalid data found` or EGL texture errors, and a JPEG that is always ready never shows a broken video surface.
 
-The frames live in `$XDG_RUNTIME_DIR/inircam`, a folder only you can read (mode 700), and the pullers run only while the panel or a pinned camera is on screen. Camera passwords travel in a 0600 file and the puller starts non-dumpable, so they do not show up in `ps` for anyone else.
+The frames live in `$XDG_RUNTIME_DIR/inircam`, a folder only you can read (mode 700), and the pullers run only while the panel or a pinned camera is on screen. A camera's password never reaches a command line: the helper hands the URL to `ffmpeg` through a 0600 list file, so `ps` and `/proc` show only the list's path.
 
 Everything else (HTTP, MJPEG) plays through Qt Multimedia.
 
@@ -62,6 +62,7 @@ The pin button in the panel, or `inir inircam pin <cameraId>`, gives a camera it
 
 - `~/.config/inir/plugins/inircam.json` — the cameras, mode 600, because it holds camera passwords.
 - the state folder — `inircam-pins.json`, where each pin sits.
+- `$XDG_RUNTIME_DIR/inircam` — the frames the panel shows, mode 700, gone at logout.
 
 ## Requirements
 
