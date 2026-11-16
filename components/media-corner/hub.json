@@ -44,7 +44,7 @@
         "1.2.0": ["Choose Normal or Prism presentation in Community Hub"],
         "1.3.0": [
             "Normal and Prism share every feature: the rail with Yours and what plays, the home hero and deck, the mini player",
-            "Prism follows iRiS Settings: grouped places, back and forward, eyebrow titles, cards and pills",
+            "Normal is laid out as iRiS Settings in Folio, Prism as Settings in Prism; back and forward in both",
             "Seek, pause and stop mpv from the Corner and by IPC",
             "Watch in one step, with subtitles preselected in a menu",
             "Seen marks, history, upcoming episodes and saved filters; shelves show loading and failure",
