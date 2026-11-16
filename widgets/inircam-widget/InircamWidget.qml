@@ -58,6 +58,7 @@ AbstractBackgroundWidget {
     // ── State ────────────────────────────────────────────────
     property var cameras: []
     property bool ready: false
+    property bool answered: false
     property int frameTick: 0
 
     readonly property int pad: Math.round(12 * root.scaleFactor)
@@ -92,7 +93,7 @@ AbstractBackgroundWidget {
             waitForEnd: true
             onStreamFinished: root.takeList(listOut.text)
         }
-        onExited: (code) => { if (code !== 0) root.readFallback() }
+        onExited: (code) => { if (code !== 0) root.panelSilent() }
     }
 
     function refresh() {
@@ -103,14 +104,14 @@ AbstractBackgroundWidget {
 
     function takeList(text) {
         const raw = String(text ?? "").trim()
-        if (raw.length === 0) return root.readFallback()
+        if (raw.length === 0) return root.panelSilent()
         let list = null
         try {
             list = JSON.parse(raw)
         } catch (e) {
             list = null
         }
-        if (!Array.isArray(list)) return root.readFallback()
+        if (!Array.isArray(list)) return root.panelSilent()
         root.applyList(list)
     }
 
@@ -124,41 +125,15 @@ AbstractBackgroundWidget {
             if (out.length >= 12) break
         }
         root.cameras = out
+        root.answered = true
         root.ready = true
     }
 
-    // Fallback for shells where `inir` does not reach the panel yet: the panel's own file,
-    // read only. This is the only place that knows where the panel keeps its cameras.
-    FileView {
-        id: options
-        path: Directories.pluginFile("inircam")
-        printErrors: false
-        onLoaded: root.readFallbackText(text())
-        onLoadFailed: {
-            root.cameras = []
-            root.ready = true
-        }
-    }
-
-    function readFallback() { options.reload() }
-
-    function readFallbackText(text) {
-        let doc = {}
-        try {
-            doc = JSON.parse(String(text ?? "{}"))
-        } catch (e) {
-            doc = {}
-        }
-        const list = Array.isArray(doc.cameras) ? doc.cameras : []
-        const out = []
-        for (let i = 0; i < list.length; i++) {
-            const cam = list[i] || {}
-            if (cam.enabled === false) continue
-            const id = String(cam.id ?? "")
-            if (id.length === 0) continue
-            out.push({ id: id, name: String(cam.name ?? id) })
-        }
-        root.cameras = out
+    // The panel did not answer. This card has no other source: it never reads the panel's
+    // file, so it says so instead of guessing.
+    function panelSilent() {
+        root.cameras = []
+        root.answered = false
         root.ready = true
     }
 
@@ -182,6 +157,15 @@ AbstractBackgroundWidget {
         interval: 30000
         repeat: true
         running: root.visible
+        onTriggered: root.refresh()
+    }
+
+    // While the panel has not answered — it may still be starting, or was restarted — ask again
+    // sooner than the regular refresh.
+    Timer {
+        interval: 5000
+        repeat: true
+        running: root.visible && root.ready && !root.answered
         onTriggered: root.refresh()
     }
 
@@ -355,13 +339,16 @@ AbstractBackgroundWidget {
 
             MaterialSymbol {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "videocam_off"
+                text: root.answered ? "videocam_off" : "link_off"
                 iconSize: Math.round(20 * root.scaleFactor)
                 color: root.widgetInkMuted
             }
             StyledText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: Translation.tr("No cameras yet")
+                width: root.width - root.pad * 2
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                text: root.answered ? Translation.tr("No cameras yet") : Translation.tr("The camera panel is not answering")
                 color: root.widgetInk
                 font.pixelSize: Math.round(Appearance.font.pixelSize.small * root.scaleFactor)
             }
@@ -370,7 +357,9 @@ AbstractBackgroundWidget {
                 width: root.width - root.pad * 2
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                text: Translation.tr("Add one in the camera panel")
+                text: root.answered
+                    ? Translation.tr("Add one in the camera panel")
+                    : Translation.tr("Check that the Cameras panel is installed and up to date")
                 color: root.widgetInkMuted
                 font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
             }

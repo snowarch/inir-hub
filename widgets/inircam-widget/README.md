@@ -4,7 +4,8 @@ Your cameras from the camera panel, as a grid on the desktop.
 
 It installs alongside **Cameras** (`inircam`), the panel that adds cameras, scans an NVR and pins
 feeds. The panel does the work and this card shows it: no stream is opened here, no password is
-read here, and nothing is written here.
+read here, and nothing is written here. The card reads only the frames the panel writes, never the
+panel's own settings file — it asks the panel for its cameras over IPC instead.
 
 | Family | Where it shows |
 | --- | --- |
