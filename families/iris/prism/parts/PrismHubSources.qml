@@ -172,7 +172,6 @@ Column {
             anchors.rightMargin: PrismTheme.dp(18)
             anchors.verticalCenter: parent.verticalCenter
             checked: Hub.sharing
-            tint: "pink"
             onToggled: value => Hub.setSharing(value)
         }
     }

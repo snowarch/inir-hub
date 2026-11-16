@@ -215,7 +215,6 @@ Column {
                         anchors.rightMargin: PrismTheme.dp(12)
                         anchors.verticalCenter: parent.verticalCenter
                         checked: Boolean(lead.modelData.on)
-                        tint: "pink"
                         Accessible.name: String(lead.modelData.label ?? "")
                         onToggled: Hub.toggleChoice(page.item.id, lead.modelData.id)
                     }

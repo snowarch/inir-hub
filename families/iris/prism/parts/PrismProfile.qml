@@ -213,7 +213,9 @@ Item {
         Row {
             anchors.centerIn: parent
             spacing: PrismTheme.dp(6)
+            // A long word ("Hintergrundbild") keeps its whole self and lets the glyph go first.
             PrismGlyph {
+                visible: key.text.length === 0 || words.implicitWidth + PrismTheme.dp(23) + PrismTheme.dp(20) <= key.width
                 anchors.verticalCenter: parent.verticalCenter
                 text: key.glyph
                 filled: true
@@ -221,9 +223,10 @@ Item {
                 color: key.lit ? PrismTheme.night : PrismTheme.paper
             }
             PrismText {
+                id: words
                 visible: key.text.length > 0
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(implicitWidth, key.width - PrismTheme.dp(20) - PrismTheme.dp(23))
+                width: Math.min(implicitWidth, key.width - PrismTheme.dp(20) - (words.implicitWidth + PrismTheme.dp(43) <= key.width ? PrismTheme.dp(23) : 0))
                 text: key.text
                 elide: Text.ElideRight
                 color: PrismTheme.paper

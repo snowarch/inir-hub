@@ -20,7 +20,6 @@ Item {
     required property var row
     property bool showPage: false   // search and Changes say where a row lives
     property bool stacked: false
-    property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
     // What the control at the line's end needs, so a narrow column can give a switch only its own width.
     readonly property real controlNeed: kind.item?.implicitWidth ?? 0
@@ -36,15 +35,12 @@ Item {
     readonly property bool restorable: PrismModel.restorable(root.row)
     readonly property bool locked: PrismModel.locked(root.row)
     readonly property string note: PrismModel.note(root.row)
-    // The page's art colours what the row's controls show through (a switch's well, a fader's groove).
-    readonly property string tint: String(PrismModel.page(root.row.page)?.tint ?? "grey")
     // Read from the row's spec each time: a description that follows live state (a compositor's refusal) stays current.
     readonly property string about: String(root.spec.description ?? root.row.detail ?? "")
     readonly property bool hovered: hover.hovered
     property bool open: false
     // A row named like its card says what it does in its name's place: the card's head already says the name.
     readonly property bool echoes: !root.showPage && root.about.length > 0 && String(root.row.label) === String(root.row.section ?? "")
-    readonly property bool aboutShown: root.aboutWidth > 0 && root.about.length > 0 && !root.echoes
 
     // A colour pick: every choice (but at most one, a "custom") carries the colour it gives.
     readonly property bool swatched: root.kind === "choice" && root.choices.length > 1
@@ -124,7 +120,7 @@ Item {
         height: root.namedByCard ? PrismTheme.dp(4) : root.stacked
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
             // A row with nothing to explain stands shorter than one that says what it does (his 11-16).
-            : Math.max(PrismTheme.dp(root.about.length > 0 || root.note.length > 0 ? 58 : 48), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
+            : Math.max(PrismTheme.dp(root.about.length > 0 || root.note.length > 0 ? 58 : 48), name.implicitHeight + PrismTheme.dp(20))
         opacity: root.locked ? 0.45 : 1
 
         // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
@@ -153,7 +149,7 @@ Item {
         Column {
             id: name
             anchors.left: parent.left
-            anchors.right: root.stacked ? tail.left : root.aboutShown ? about.left : control.left
+            anchors.right: root.stacked ? tail.left : control.left
             anchors.rightMargin: root.stacked ? PrismTheme.dp(4) : PrismTheme.dp(16)
             y: root.stacked ? PrismTheme.dp(12) : Math.round((parent.height - height) / 2)
             spacing: PrismTheme.dp(2)
@@ -170,7 +166,7 @@ Item {
             }
             PrismText {
                 width: parent.width
-                visible: text.length > 0 && !root.showPage && !root.aboutShown && !root.echoes
+                visible: text.length > 0 && !root.showPage && !root.echoes
                 text: Translation.tr(root.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
@@ -218,24 +214,6 @@ Item {
                 maximumLineCount: 2
                 elide: Text.ElideRight
             }
-        }
-        // One grid for every row of a page (his 11-11): what it does starts at the head's own column whatever stands
-        // at the line's end, and the line grows rather than cut a sentence.
-        PrismText {
-            id: about
-            visible: root.aboutShown
-            width: root.aboutWidth
-            anchors.right: control.left
-            anchors.rightMargin: PrismTheme.dp(20)
-            anchors.verticalCenter: parent.verticalCenter
-            text: Translation.tr(root.about)
-            color: PrismTheme.ink2
-            font.pixelSize: PrismTheme.small
-            wrapMode: Text.WordWrap
-            // No elide: with it the text's own height answers to the line it sizes (a loop), and four lines hold every description.
-            maximumLineCount: 4
-            elide: Text.ElideNone
-            lineHeight: 1.1
         }
 
         Item {
@@ -331,7 +309,6 @@ Item {
     Component {
         id: switchKind
         PrismSwitch {
-            tint: root.tint
             checked: Boolean(root.value)
             onToggled: value => PrismModel.write(root.row, value)
         }
@@ -346,7 +323,6 @@ Item {
             stepSize: Number(root.spec.step ?? 1)
             value: Number(root.value ?? 0)
             home: PrismModel.home(root.row)
-            tint: root.tint
             label: PrismModel.figure(root.row, slider.live)
             onMoved: value => PrismModel.preview(root.row, value)
             onCommitted: value => PrismModel.write(root.row, value)

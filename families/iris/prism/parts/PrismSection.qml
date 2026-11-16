@@ -37,8 +37,6 @@ Item {
     property var rows: []
     property bool showPage: false
     property string flashPath: ""
-    // A figure at the chip's place when no row names one: where this group stands among the page's ("03 / 12").
-    property string note: ""
     // Search and Changes: a press on a row's name opens it where it lives.
     signal reach(var row)
 
@@ -58,11 +56,9 @@ Item {
     readonly property real gap: PrismTheme.dp(28)
     readonly property bool twoUp: !root.showPage && root.rowsWidth >= PrismTheme.dp(640)
     readonly property real half: Math.floor((root.rowsWidth - root.gap) / 2)
-    // The chart's grey column only where the room holds it; otherwise what a row does sits under its name.
-    readonly property real aboutWidth: root.rowsWidth < PrismTheme.dp(900) ? 0 : Math.min(PrismTheme.dp(260), root.rowsWidth * 0.28)
     readonly property real controlWidth: Math.min(PrismTheme.dp(300), root.rowsWidth * 0.4)
 
-    // What the chip says: the first row that names its group's state now (the keyboard's layout), else the note.
+    // What the chip says: the first row that names its group's state now (the keyboard's layout).
     readonly property var chipRow: root.rows.find(row => typeof row.spec?.chip === "function")
         ?? (root.keys && typeof root.figure.row?.spec?.chip === "function" ? root.figure.row : null)
     readonly property string chip: {
@@ -92,10 +88,15 @@ Item {
 
     // The tab holds the number and the name on one line, with air; the art takes the rest of the top.
     readonly property real rise: PrismTheme.dp(50)
-    readonly property real tabNeed: root.pad + (numberSaid.visible ? numberSaid.implicitWidth + PrismTheme.dp(10) : 0)
-        + titleSaid.implicitWidth + PrismTheme.dp(22)
-    // What the art says (the chip) keeps its room; the tab never squeezes the art under a sliver.
-    readonly property real tabRoom: root.width - (chipBox.visible ? chipBox.width + PrismTheme.dp(28) : PrismTheme.dp(96)) - card.slope
+    readonly property real tabNeed: root.pad + titleSaid.implicitWidth + PrismTheme.dp(22)
+    // What stands on the art (the chip, the group's own restore) keeps its room; the tab never squeezes the art under a sliver.
+    readonly property real artSays: (chipBox.visible ? chipBox.width : 0) + (resetBox.visible ? resetBox.width + (chipBox.visible ? PrismTheme.dp(8) : 0) : 0)
+    readonly property real tabRoom: root.width - (root.artSays > 0 ? root.artSays + PrismTheme.dp(28) : PrismTheme.dp(96)) - card.slope
+    // The rows of this group left iNiR's values that Restore may put back: said on the art, put back from there.
+    readonly property var restorables: {
+        const _ = PrismModel.revision
+        return root.showPage ? [] : root.rows.filter(row => PrismModel.restorable(row))
+    }
     PrismFolder {
         id: card
         width: root.width
@@ -106,14 +107,13 @@ Item {
         turn: root.number - 1
         // Its own art: the group's name and place drawn into the seed, so no two folders anywhere share a ribbon.
         seed: root.number * 2.3 + Array.from(root.title).reduce((n, letter) => (n * 31 + letter.charCodeAt(0)) % 9973, 7) * 0.013
-        sayWidth: chipBox.visible ? chipBox.width + PrismTheme.dp(24) : 0
+        sayWidth: root.artSays > 0 ? root.artSays + PrismTheme.dp(24) : 0
     }
 
     // What the group holds now, printed on its art in a smoked glass pill (the Pink Sky card's tags).
     Rectangle {
         id: chipBox
-        // Its place among the page's groups only where the tab carries no number already ("01" and "01 / 16").
-        readonly property string say: root.chip.length > 0 ? root.chip : numberSaid.visible ? "" : root.note
+        readonly property string say: root.chip
         visible: say.length > 0
         x: root.width - width - PrismTheme.dp(12)
         y: Math.round((root.rise - height) / 2)
@@ -139,12 +139,26 @@ Item {
             width: chipBox.width - x - PrismTheme.dp(13)
             anchors.verticalCenter: parent.verticalCenter
             text: chipBox.say
-            figures: root.chip.length === 0
             color: PrismTheme.paper
             font.pixelSize: PrismTheme.small
             font.weight: Font.DemiBold
             elide: Text.ElideRight
         }
+    }
+
+    // What this group changed, put back from its own folder: the count on the art, a press restores only these rows.
+    PrismPill {
+        id: resetBox
+        visible: root.restorables.length > 0
+        z: 1
+        x: (chipBox.visible ? chipBox.x - PrismTheme.dp(8) : root.width - PrismTheme.dp(12)) - width
+        y: Math.round((root.rise - height) / 2)
+        implicitHeight: PrismTheme.dp(30)
+        tone: "dark"
+        glyph: "restart_alt"
+        text: Translation.tr("%1 changed").arg(root.restorables.length)
+        Accessible.name: Translation.tr("Restore defaults")
+        onClicked: IrisOptions.restore(root.restorables.map(row => row.spec))
     }
 
     Column {
@@ -157,19 +171,8 @@ Item {
         Item {
             width: parent.width
             height: root.rise + (lineSaid.visible ? lineSaid.implicitHeight + PrismTheme.dp(2) : 0)
-            // Its number on the page, as the strip and the pictures' discs say it.
-            PrismText {
-                id: numberSaid
-                visible: false // his 11-15: no numbering
-                anchors.baseline: titleSaid.baseline
-                mono: true
-                text: String(root.number).padStart(2, "0")
-                color: PrismTheme.ink3
-                font.pixelSize: PrismTheme.caption
-            }
             PrismText {
                 id: titleSaid
-                x: numberSaid.visible ? numberSaid.implicitWidth + PrismTheme.dp(10) : 0
                 y: Math.round((root.rise - height) / 2) + PrismTheme.dp(3)
                 width: Math.max(0, card.tab - root.pad - x - PrismTheme.dp(14))
                 text: root.title
@@ -339,7 +342,6 @@ Item {
                                 row: entry.modelData.rows[0]
                                 stacked: parent.stackedPair
                                 showPage: root.showPage
-                                aboutWidth: parent.paired ? 0 : root.aboutWidth
                                 controlWidth: parent.stackedPair ? root.half : parent.paired ? PrismTheme.dp(64) : root.controlWidth
                                 flash: root.flashPath === row.path
                                 onOpenRequested: root.reach(row)
@@ -353,7 +355,6 @@ Item {
                                     width: root.half
                                     row: entry.modelData.rows[1]
                                     stacked: second.stackedPair
-                                    aboutWidth: 0
                                     controlWidth: second.stackedPair ? root.half : PrismTheme.dp(64)
                                     flash: root.flashPath === row.path
                                 }

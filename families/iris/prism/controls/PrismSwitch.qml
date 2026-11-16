@@ -1,16 +1,14 @@
 import QtQuick
 import qs.services
 import qs.modules.iris.prism.core
-import qs.modules.iris.prism.fx
 
 // On and off as an object (`.claude/ref/language`: the Figma toggle's deep well, the rocker's printed I and O): a well
 // cut into the card and a white key with its state printed on it, a bar for on, a ring for off, the same in every
-// language. On, the page's art shows through the well, the three colours of its poster; off, the well is empty and the
-// key rests at the start. Three ways to tell, so no colour alone carries it.
+// language. On, the well fills with the person's accent (the spectrum is the art's, never a control's: a page of
+// switches read as a page of rainbows); off, it is empty and the key rests at the start. Three ways to tell.
 Item {
     id: root
     property bool checked: false
-    property string tint: "grey"
     signal toggled(bool value)
 
     readonly property real pad: PrismTheme.dp(3)
@@ -27,16 +25,12 @@ Item {
         anchors.fill: parent
         hovered: area.containsMouse && !root.checked
     }
-    PrismFlow {
+    Rectangle {
         anchors.fill: parent
         anchors.margins: 1
         radius: height / 2
-        dark: true
-        tint: root.tint
-        seed: 3.7
-        centre: Qt.point(0.4, 0.5)
-        thickness: 1.3
-        opacity: root.checked ? 1 : 0
+        color: PrismTheme.accent
+        opacity: root.checked ? (area.containsMouse ? 0.88 : 1) : 0
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
     }

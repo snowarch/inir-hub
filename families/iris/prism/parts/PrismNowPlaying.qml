@@ -9,14 +9,14 @@ import qs.modules.iris.prism.controls
 import qs.modules.iris.prism.fx
 
 // The reference's player card: the cover fills it and a frosted sheet holds the song, the scrubber and the transport.
-// With nothing playing it folds to one quiet line at the column's foot and gives the room to the changes above:
-// the refraction is the hero's, said once.
+// With nothing playing it is not there at all and the changes above take its room (his 11-16: a card saying
+// "Nothing playing" told nothing).
 Item {
     id: root
+    visible: root.playing
     property bool active: true
     readonly property var player: MprisController.activePlayer
     readonly property bool playing: root.player !== null && media.effectiveTitle.length > 0
-    readonly property real idleHeight: PrismTheme.dp(64)
 
     PlayerBase { id: media; player: root.player; positionUpdatesActive: root.active && root.playing }
 
@@ -75,43 +75,6 @@ Item {
     }
     Rectangle { id: shape; anchors.fill: parent; radius: PrismTheme.dp(24); visible: false; layer.enabled: true }
     Rectangle { id: sheetShape; width: sheet.width; height: sheet.height; radius: sheet.radius; visible: false; layer.enabled: true }
-
-    // Idle: a cover-sized note and the two lines, the size of a change row.
-    Rectangle {
-        visible: !root.playing
-        anchors.fill: parent
-        radius: PrismTheme.dp(24)
-        color: PrismTheme.card
-        PrismThumb {
-            id: note
-            x: PrismTheme.dp(13)
-            anchors.verticalCenter: parent.verticalCenter
-            glyph: "music_note"
-            tint: "pink"
-            size: PrismTheme.dp(38)
-        }
-        Column {
-            anchors.left: note.right
-            anchors.leftMargin: PrismTheme.dp(12)
-            anchors.right: parent.right
-            anchors.rightMargin: PrismTheme.dp(13)
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: PrismTheme.dp(2)
-            PrismText {
-                width: parent.width
-                text: Translation.tr("Nothing playing")
-                font.pixelSize: PrismTheme.body
-                font.weight: Font.DemiBold
-            }
-            PrismText {
-                width: parent.width
-                text: Translation.tr("Play some music")
-                elide: Text.ElideRight
-                color: PrismTheme.ink2
-                font.pixelSize: PrismTheme.small
-            }
-        }
-    }
 
     Column {
         visible: root.playing

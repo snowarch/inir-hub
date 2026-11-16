@@ -19,7 +19,7 @@ Item {
     // Four changes beside a song; with nothing playing, as many as the column holds (the player folds to a line).
     readonly property real rowHeight: PrismTheme.dp(54)
     readonly property int shown: player.playing ? 4
-        : Math.max(4, Math.min(12, Math.floor((root.height - list.y - PrismTheme.dp(15 + 20 + 22) - player.idleHeight) / root.rowHeight)))
+        : Math.max(4, Math.min(12, Math.floor((root.height - list.y - PrismTheme.dp(15 + 20 + 22)) / root.rowHeight)))
 
     Column {
         id: column
@@ -127,8 +127,8 @@ Item {
         id: player
         x: column.x
         width: column.width
-        y: player.playing ? column.y + column.height + PrismTheme.dp(20) : root.height - PrismTheme.dp(22) - player.idleHeight
-        height: player.playing ? root.height - PrismTheme.dp(22) - y : player.idleHeight
+        y: column.y + column.height + PrismTheme.dp(20)
+        height: Math.max(0, root.height - PrismTheme.dp(22) - y)
         active: root.active
     }
 }

@@ -203,23 +203,45 @@ Singleton {
 
     function page(id: string): var { return root.pages.find(entry => entry.pageId === id) ?? root.pages[0] }
     function find(path: string): var { return root.rows.find(row => row.path === path) ?? null }
-    // What a page's hero says: the machine's own facts first (the screen as it runs now), then its leading rows that
-    // the compositor in use shows, two lines at most.
+    // What a page's poster says (his 11-16: never a bare On or Off): the machine's own facts first (the screen as it
+    // runs, the charge, the sound), then its leading rows that hold a named value or a figure, then the page's next such
+    // row; a switch never leads, its "On" says nothing at that size. Two at most, each short enough to stand whole.
     function leadOf(page: var): var {
         const _ = root.revision
-        const out = root.factsOf(String(page?.pageId ?? ""))
-        for (const id of Array.from(page?.lead ?? [])) {
+        const id = String(page?.pageId ?? "")
+        const out = root.factsOf(id)
+        // Two figures that read the same ("Auto", "Auto") say one thing: the second gives way to the next.
+        const said = () => out.map(entry => entry.fact ? String(entry.say) : String(root.sayNow(entry)))
+        const fits = row => {
+            if (!row || row.page !== id || row.kind === "switch" || row.kind === "action" || !root.shown(row) || out.includes(row)) return false
+            const say = String(root.sayNow(row) ?? "")
+            return say.length > 0 && say.length <= 16 && !said().includes(say)
+        }
+        for (const lead of Array.from(page?.lead ?? [])) {
             if (out.length >= 2) break
-            const named = String(id)
+            const named = String(lead)
             const row = named.includes(":")
                 ? root.rows.find(row => !row.virtual && row.spec.comp !== undefined && row.spec.comp + ":" + row.spec.key === named && root.shown(row))
                 : root.find(named)
-            // A row hidden now (a style the chosen look lacks) or with nothing to say yet leaves the line to the next.
-            if (row && row.page === page.pageId && root.shown(row) && String(root.sayNow(row) ?? "").length > 0) out.push(row)
+            if (fits(row)) out.push(row)
+        }
+        for (const row of root.rows) {
+            if (out.length >= 2) break
+            if (!row.onStage && fits(row)) out.push(row)
         }
         return out
     }
     function factsOf(id: string): var {
+        // Home's poster is the wallpaper: its name leads when it has one a person would say.
+        if (id === "general") {
+            const name = root.wallpaperName(String(Wallpapers.effectiveWallpaperPath ?? ""))
+            return name === Translation.tr("Your wallpaper") || name.length > 18 ? [] : [{ fact: true, say: name, label: Translation.tr("Wallpaper") }]
+        }
+        if (id === "battery" && Battery.available)
+            return [{ fact: true, say: Math.round(Battery.percentage * 100) + "%",
+                      label: Battery.isCharging ? Translation.tr("Charging") : Translation.tr("On battery") }]
+        if (id === "sound" && Audio.ready && Audio.sink)
+            return [{ fact: true, say: Math.round(Audio.value * 100) + "%", label: Audio.friendlyDeviceName(Audio.sink) }]
         if (id !== "display") return []
         const _ = CompositorConfig.revision
         const screen = CompositorConfig.output

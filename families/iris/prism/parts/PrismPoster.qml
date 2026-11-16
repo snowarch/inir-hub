@@ -1,6 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
+import Quickshell.Widgets
 import qs.services
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
@@ -26,11 +28,18 @@ Item {
     property int restorable: 0
     property var lead: []
     property bool pills: true
+    // A picture worn as the art in place of the ribbon (Home wears the desktop's own wallpaper), and the hues it gives.
+    property string picture: ""
+    property var hues: []
+    // What the page itself offers at the top right, beside Restore defaults (Home: the next wallpaper).
+    property alias tools: toolSlot.data
     // Room kept at the top right for the side column's key, which stands there over the page.
     property real keyRoom: PrismTheme.dp(44)
     signal restore()
 
-    readonly property bool onNight: root.art && !PrismTheme.light
+    readonly property bool pictured: root.art && root.picture.length > 0
+    // Over art the ink is white; a picture stays dark under its floor in every scheme.
+    readonly property bool onNight: root.art && (!PrismTheme.light || root.pictured)
     readonly property color ink: root.onNight ? PrismTheme.paper : PrismTheme.ink
     readonly property color ink2: root.onNight ? Qt.rgba(1, 1, 1, 0.66) : PrismTheme.ink2 // iris-literal: Prism's own ink over its art
     readonly property color ink3: root.onNight ? Qt.rgba(1, 1, 1, 0.46) : PrismTheme.ink3 // iris-literal: Prism's own ink over its art
@@ -42,7 +51,7 @@ Item {
     implicitHeight: root.art ? PrismTheme.dp(244) : name.y + name.height + PrismTheme.dp(22)
 
     PrismFlow {
-        visible: root.art
+        visible: root.art && !root.pictured
         anchors.fill: parent
         radius: PrismTheme.dp(24)
         tint: String(root.page?.tint ?? "grey")
@@ -50,6 +59,58 @@ Item {
         centre: Qt.point(0.66, 0.34)
         thickness: 0.3
         fade: 0.5
+    }
+
+    // The picture as the poster's field: sharp at the top, and toward the foot the same picture blurred and deepened
+    // (a variable blur, the iOS lock screen's floor), so the name and figures stand on calm ground without a band.
+    ClippingRectangle {
+        visible: root.pictured
+        anchors.fill: parent
+        radius: PrismTheme.dp(24)
+        color: PrismTheme.night
+        Image {
+            id: shot
+            anchors.fill: parent
+            source: root.pictured ? root.picture : ""
+            sourceSize.width: PrismTheme.dp(1100)
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+        }
+        Rectangle {
+            id: floorMask
+            anchors.fill: parent
+            visible: false
+            layer.enabled: true
+            gradient: Gradient {
+                GradientStop { position: 0.3; color: "transparent" }
+                GradientStop { position: 0.78; color: PrismTheme.paper }
+            }
+        }
+        MultiEffect {
+            anchors.fill: parent
+            source: shot
+            visible: root.pictured
+            blurEnabled: true
+            blur: 1
+            blurMax: 56
+            brightness: -0.36
+            saturation: 0.1
+            maskEnabled: true
+            maskSource: floorMask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1
+        }
+        // A breath of shade under the credits, where the picture's sky may be bright, and a deeper one at the foot,
+        // so a light patch of the picture never sits under the figures' small names.
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0; color: PrismTheme.spotScrim }
+                GradientStop { position: 0.3; color: "transparent" }
+                GradientStop { position: 0.5; color: "transparent" }
+                GradientStop { position: 1; color: PrismTheme.spotScrim }
+            }
+        }
     }
 
     // The top line: back and forward, then the printed columns, then the page's buttons.
@@ -83,6 +144,31 @@ Item {
                 first: Translation.tr("%1 settings").arg(root.settings)
                 second: root.changed > 0 ? Translation.tr("%1 changed").arg(root.changed) : ""
             }
+            // The three hues the desktop takes from its wallpaper now, the posters' palette dots.
+            Column {
+                visible: root.hues.length > 0
+                spacing: PrismTheme.dp(5)
+                PrismText {
+                    text: Translation.tr("Colours").toUpperCase()
+                    mono: true
+                    color: root.ink
+                    font.pixelSize: PrismTheme.caption - 1
+                    font.letterSpacing: 0.8
+                }
+                Row {
+                    spacing: PrismTheme.dp(4)
+                    Repeater {
+                        model: root.hues
+                        delegate: Rectangle {
+                            required property color modelData
+                            width: PrismTheme.dp(9)
+                            height: width
+                            radius: width / 2
+                            color: modelData
+                        }
+                    }
+                }
+            }
         }
         Row {
             id: buttons
@@ -96,6 +182,10 @@ Item {
                 glyph: "restart_alt"
                 text: Translation.tr("Restore defaults")
                 onClicked: root.restore()
+            }
+            Row {
+                id: toolSlot
+                spacing: PrismTheme.dp(8)
             }
             PrismPill {
                 visible: Boolean(root.page?.show)
@@ -153,7 +243,7 @@ Item {
                 PrismText {
                     text: stat.modelData.label.toUpperCase()
                     mono: true
-                    color: root.ink3
+                    color: root.pictured ? root.ink2 : root.ink3
                     font.pixelSize: PrismTheme.caption - 1
                     font.letterSpacing: 0.8
                 }

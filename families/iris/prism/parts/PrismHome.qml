@@ -14,12 +14,18 @@ import qs.modules.iris.prism.controls
 // first colour, so a row of keys reads like the collage, loud and held together by shape and type; off, the quiet cap.
 // A press sinks the key and acts: a switch flips, a choice steps to the next, anything else opens its row. The list is
 // the classic Home's (`iris.appearance.settingsHome`), so both Settings show the same; Edit takes keys off and offers
-// the daily ones to add, in place. The keys lie in a folder as every group does (his 11-16); Edit stands on its art.
+// the daily ones to add, in place. Over the keys, the two levels reached for most (the output's volume, the screen's
+// brightness) as faders that move the real thing; a machine with neither shows none. One folder holds it all (his
+// 11-16: Home spoke many languages); Edit stands on its art.
 PrismFile {
     id: root
     signal reach(var row)
     property bool editing: false
     title: Translation.tr("Every day")
+    // The screen Settings stands on, or the first one: its brightness is the one people mean.
+    readonly property var monitor: Brightness.monitors.find(entry => entry.screen?.name === NiriService.currentOutput) ?? Brightness.monitors[0] ?? null
+    // A screen that answers with a level (a nested or virtual output reads "ready" with none).
+    readonly property bool dims: Boolean(root.monitor?.ready) && Number.isFinite(Number(root.monitor?.brightness))
     turn: 2
     seed: 8.1
 
@@ -71,107 +77,155 @@ PrismFile {
         onClicked: root.editing = !root.editing
     }
 
-    Flow {
-        id: grid
+    Column {
         width: root.innerWidth
-        spacing: PrismTheme.dp(8)
-        readonly property int columns: Math.max(2, Math.floor((width + spacing) / (PrismTheme.dp(150) + spacing)))
-        readonly property real tileWidth: Math.floor((width - (columns - 1) * spacing) / columns)
+        spacing: PrismTheme.dp(14)
 
-        Repeater {
-            // Keyed by id (an offer apart): a write rebuilds the tile list, the tiles stay.
-            model: ScriptModel {
-                objectProp: "key"
-                values: root.tiles.map(tile => Object.assign({ key: tile.id }, tile)).concat(root.editing ? root.offered.map(tile => Object.assign({ offer: true, key: "+" + tile.id }, tile)) : [])
+        Row {
+            visible: Audio.ready
+            width: parent.width
+            spacing: PrismTheme.dp(10)
+            // Mute answers in place: the key goes white while the sound is off.
+            PrismRound {
+                y: volume.middle - height / 2
+                glyph: Audio.sink?.audio?.muted ? "volume_off" : "volume_up"
+                lit: Boolean(Audio.sink?.audio?.muted)
+                implicitWidth: PrismTheme.dp(32)
+                glyphSize: PrismTheme.dp(17)
+                Accessible.name: Translation.tr("Mute")
+                onClicked: Audio.toggleMute()
             }
-            delegate: Item {
-                id: tile
-                required property var modelData
-                readonly property bool offer: Boolean(tile.modelData.offer)
-                readonly property bool on: !tile.offer && root.isOn(tile.modelData)
-                readonly property color lit: PrismTheme.palette(String(root.pageOf(tile.modelData)?.tint ?? "grey"))[0]
-                // The legend printed on the cap: dark on a bright cap, white on a deep one, the page's ink when off.
-                readonly property color legend: !tile.on ? PrismTheme.ink : PrismTheme.lum(tile.lit) > 0.55 ? PrismTheme.night : PrismTheme.paper
-                width: grid.tileWidth
-                height: PrismTheme.dp(84)
-                opacity: tile.offer ? (press.containsMouse ? 0.9 : 0.55) : 1
-                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+            PrismSlider {
+                id: volume
+                width: parent.width - PrismTheme.dp(42)
+                label: Math.round(volume.live) + "%"
+                Accessible.name: Translation.tr("Volume")
+                from: 0
+                to: 100
+                value: Math.round(Audio.value * 100)
+                onMoved: value => { Audio.lastUserChange = Date.now(); if (Audio.sink?.audio) Audio.sink.audio.volume = value / 100 }
+                onCommitted: value => { Audio.lastUserChange = Date.now(); if (Audio.sink?.audio) Audio.sink.audio.volume = value / 100 }
+            }
+        }
+        // The screen's level, its grooves in line with the volume's.
+        Row {
+            visible: root.dims
+            width: parent.width
+            spacing: PrismTheme.dp(10)
+            Item {
+                width: PrismTheme.dp(32)
+                height: light.height
+                PrismGlyph {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    y: light.middle - height / 2
+                    text: "light_mode"
+                    filled: true
+                    iconSize: PrismTheme.dp(17)
+                    color: PrismTheme.ink2
+                }
+            }
+            PrismSlider {
+                id: light
+                width: parent.width - PrismTheme.dp(42)
+                label: Math.round(light.live) + "%"
+                Accessible.name: Translation.tr("Brightness")
+                from: 1
+                to: 100
+                value: Math.round(Number(root.monitor?.brightness ?? 0) * 100)
+                onMoved: value => root.monitor?.setBrightness(value / 100)
+                onCommitted: value => root.monitor?.setBrightness(value / 100)
+            }
+        }
 
-                PrismKey {
-                    anchors.fill: parent
-                    radius: PrismTheme.dp(16)
-                    face: tile.on ? tile.lit : PrismTheme.keyQuiet
-                    hovered: press.containsMouse
-                    down: press.pressed
-                    PrismGlyph {
-                        x: PrismTheme.dp(14)
-                        y: PrismTheme.dp(12)
-                        text: tile.offer ? "add" : tile.modelData.glyph
-                        filled: tile.on
-                        iconSize: PrismTheme.dp(20)
-                        color: tile.legend
-                    }
-                    // A switch prints its state as the switch does: a bar for on, a ring for off.
-                    Rectangle {
-                        visible: !tile.offer && !root.editing && tile.modelData.kind === "switch"
-                        x: parent.width - PrismTheme.dp(14) - width
-                        y: PrismTheme.dp(17)
-                        width: tile.on ? PrismTheme.dp(2) : PrismTheme.dp(10)
-                        height: PrismTheme.dp(10)
-                        radius: tile.on ? 1 : width / 2
-                        color: tile.on ? tile.legend : "transparent"
-                        border.width: tile.on ? 0 : PrismTheme.dp(1.5)
-                        border.color: tile.legend
-                        opacity: tile.on ? 0.8 : 0.4
-                    }
-                    Column {
-                        x: PrismTheme.dp(14)
-                        width: parent.width - PrismTheme.dp(28)
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: PrismTheme.dp(11)
-                        spacing: 0
-                        PrismText {
-                            width: parent.width
-                            text: Translation.tr(tile.modelData.label)
-                            elide: Text.ElideRight
-                            color: tile.legend
-                            font.pixelSize: PrismTheme.small
-                            font.weight: Font.Bold
-                        }
-                        // What it holds now; a key on offer says where it lives instead.
-                        PrismText {
-                            width: parent.width
-                            text: tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData)
-                            elide: Text.ElideRight
-                            color: tile.legend
-                            opacity: 0.66
-                            font.pixelSize: PrismTheme.caption
-                        }
-                    }
+        Flow {
+            id: grid
+            width: parent.width
+            spacing: PrismTheme.dp(8)
+            readonly property int columns: Math.max(2, Math.floor((width + spacing) / (PrismTheme.dp(150) + spacing)))
+            readonly property real tileWidth: Math.floor((width - (columns - 1) * spacing) / columns)
+
+            Repeater {
+                // Keyed by id (an offer apart): a write rebuilds the tile list, the tiles stay.
+                model: ScriptModel {
+                    objectProp: "key"
+                    values: root.tiles.map(tile => Object.assign({ key: tile.id }, tile)).concat(root.editing ? root.offered.map(tile => Object.assign({ offer: true, key: "+" + tile.id }, tile)) : [])
                 }
-                MouseArea {
-                    id: press
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    Accessible.role: tile.modelData.kind === "switch" ? Accessible.CheckBox : Accessible.Button
-                    Accessible.name: Translation.tr(tile.modelData.label)
-                    Accessible.checked: tile.on
-                    onClicked: {
-                        if (tile.offer) root.setIds(root.ids.concat([tile.modelData.id]))
-                        else if (!root.editing) root.act(tile.modelData)
+                delegate: Item {
+                    id: tile
+                    required property var modelData
+                    readonly property bool offer: Boolean(tile.modelData.offer)
+                    readonly property bool on: !tile.offer && root.isOn(tile.modelData)
+                    readonly property color lit: PrismTheme.palette(String(root.pageOf(tile.modelData)?.tint ?? "grey"))[0]
+                    // The legend printed on the cap: dark on a bright cap, white on a deep one, the page's ink when off.
+                    readonly property color legend: !tile.on ? PrismTheme.ink : PrismTheme.lum(tile.lit) > 0.55 ? PrismTheme.night : PrismTheme.paper
+                    width: grid.tileWidth
+                    height: PrismTheme.dp(84)
+                    opacity: tile.offer ? (press.containsMouse ? 0.9 : 0.55) : 1
+                    Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+
+                    PrismKey {
+                        anchors.fill: parent
+                        radius: PrismTheme.dp(16)
+                        face: tile.on ? tile.lit : PrismTheme.keyQuiet
+                        hovered: press.containsMouse
+                        down: press.pressed
+                        PrismGlyph {
+                            x: PrismTheme.dp(14)
+                            y: PrismTheme.dp(12)
+                            text: tile.offer ? "add" : tile.modelData.glyph
+                            filled: tile.on
+                            iconSize: PrismTheme.dp(20)
+                            color: tile.legend
+                        }
+                        Column {
+                            x: PrismTheme.dp(14)
+                            width: parent.width - PrismTheme.dp(28)
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: PrismTheme.dp(11)
+                            spacing: 0
+                            PrismText {
+                                width: parent.width
+                                text: Translation.tr(tile.modelData.label)
+                                elide: Text.ElideRight
+                                color: tile.legend
+                                font.pixelSize: PrismTheme.small
+                                font.weight: Font.Bold
+                            }
+                            // What it holds now; a key on offer says where it lives instead.
+                            PrismText {
+                                width: parent.width
+                                text: tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData)
+                                elide: Text.ElideRight
+                                color: tile.legend
+                                opacity: 0.66
+                                font.pixelSize: PrismTheme.caption
+                            }
+                        }
                     }
-                }
-                // Editing: a tile on Home comes off from its corner.
-                PrismRound {
-                    visible: root.editing && !tile.offer
-                    anchors.right: parent.right
-                    anchors.rightMargin: PrismTheme.dp(8)
-                    y: PrismTheme.dp(8)
-                    implicitWidth: PrismTheme.dp(24)
-                    glyphSize: PrismTheme.dp(15)
-                    glyph: "remove"
-                    onClicked: root.setIds(root.ids.filter(id => id !== tile.modelData.id))
+                    MouseArea {
+                        id: press
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        Accessible.role: tile.modelData.kind === "switch" ? Accessible.CheckBox : Accessible.Button
+                        Accessible.name: Translation.tr(tile.modelData.label)
+                        Accessible.checked: tile.on
+                        onClicked: {
+                            if (tile.offer) root.setIds(root.ids.concat([tile.modelData.id]))
+                            else if (!root.editing) root.act(tile.modelData)
+                        }
+                    }
+                    // Editing: a tile on Home comes off from its corner.
+                    PrismRound {
+                        visible: root.editing && !tile.offer
+                        anchors.right: parent.right
+                        anchors.rightMargin: PrismTheme.dp(8)
+                        y: PrismTheme.dp(8)
+                        implicitWidth: PrismTheme.dp(24)
+                        glyphSize: PrismTheme.dp(15)
+                        glyph: "remove"
+                        onClicked: root.setIds(root.ids.filter(id => id !== tile.modelData.id))
+                    }
                 }
             }
         }

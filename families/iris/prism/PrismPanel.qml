@@ -87,7 +87,9 @@ Item {
             .filter(shown => shown.length > 0)
     }
     // A page drawn as cards with pictures (not Home, Wallpaper, a search or Changes): which card wears which.
-    readonly property bool staged: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper" && root.page.pageId !== "general"
+    readonly property bool staged: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper"
+    // Home wears the desktop's own wallpaper as its poster's art, and the hues it gives.
+    readonly property bool home: root.staged && root.page.pageId === "general"
     readonly property var figures: {
         return root.staged ? PrismModel.figuresOf(root.page.pageId, root.sections.map(section => section.title)) : ({})
     }
@@ -366,6 +368,17 @@ Item {
                     pills: root.staged
                     lead: root.staged ? PrismModel.leadOf(root.page) : []
                     keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
+                    picture: root.home ? Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? "")) : ""
+                    hues: root.home ? PrismTheme.palette(String(root.page.tint)) : []
+                    tools: PrismRound {
+                        visible: root.home
+                        overArt: true
+                        solid: true
+                        implicitWidth: PrismTheme.dp(34)
+                        glyph: "shuffle"
+                        Accessible.name: Translation.tr("Next wallpaper")
+                        onClicked: Wallpapers.nextWallpaper(Appearance.m3colors.darkmode, NiriService.currentOutput)
+                    }
                     onRestore: PrismModel.restore(root.page.pageId)
                 }
                 // Wallpaper opens on the wallpaper itself: what is worn and the ones to go back to.
@@ -388,10 +401,8 @@ Item {
                     width: content.width
                     sourceComponent: Column {
                         width: content.width
-                        PrismHomeDeck { width: parent.width; tint: String(root.page?.tint ?? "grey") }
-                        Item { width: 1; height: PrismTheme.dp(24) }
                         PrismHome { width: parent.width; tint: String(root.page?.tint ?? "grey"); onReach: row => root.reach(row) }
-                        Item { width: 1; height: PrismTheme.dp(40) }
+                        Item { width: 1; height: PrismTheme.dp(18) }
                     }
                 }
 
@@ -474,7 +485,6 @@ Item {
                             tint: root.page.tint
                             rows: sectionBox.modelData.rows
                             flashPath: root.flashPath
-                            note: ""
                         }
                         Item { width: 1; height: PrismTheme.dp(18) }
                     }

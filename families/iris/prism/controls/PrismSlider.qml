@@ -1,7 +1,6 @@
 import QtQuick
 import qs.modules.common.widgets
 import qs.modules.iris.prism.core
-import qs.modules.iris.prism.fx
 
 // A level as a fader. A drag previews; release commits. The wheel steps once a notch (fine wheels and touchpads add up
 // to one), previews each step and commits once when the burst stops, as a release would.
@@ -13,7 +12,6 @@ Item {
     property real stepSize: 1
     property string glyph: ""
     property string label: ""
-    property string tint: "grey"
     signal moved(real value)
     signal committed(real value)
 
@@ -50,7 +48,7 @@ Item {
     }
 
     // The fader (`.claude/ref/language`: the tactile sliders): a groove cut into the card with its scale printed under
-    // it, the page's art filling it up to a white cap with a grip, the figure printed at the end. The factory value's
+    // it, the person's accent filling it up to a white cap with a grip, the figure printed at the end. The factory value's
     // tick stands taller, so it can be found again by eye as well as by the drag that holds there.
     readonly property real capWidth: PrismTheme.dp(28)
     readonly property real figureRoom: Math.max(PrismTheme.dp(46), figure.implicitWidth) + PrismTheme.dp(12)
@@ -76,23 +74,14 @@ Item {
         height: PrismTheme.dp(8)
         hovered: area.containsMouse || root.held
     }
-    // The art runs the groove's whole length and shows up to the cap, so its colours stay put while the cap moves.
-    Item {
-        x: track.x
-        y: track.y
-        width: cap.x - track.x + cap.width / 2
-        height: track.height
-        clip: true
-        PrismFlow {
-            width: track.width
-            height: track.height
-            radius: height / 2
-            dark: true
-            tint: root.tint
-            seed: 1.3
-            centre: Qt.point(0.5, 0.5)
-            thickness: 2.4
-        }
+    // The groove fills with the person's accent up to the cap: a level is a chosen state, never the art's spectrum.
+    Rectangle {
+        x: track.x + 1
+        y: track.y + 1
+        width: Math.max(track.height - 2, cap.x - track.x + cap.width / 2 - 1)
+        height: track.height - 2
+        radius: height / 2
+        color: PrismTheme.accent
     }
     Repeater {
         model: 11
