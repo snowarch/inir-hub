@@ -1,21 +1,29 @@
 #!/usr/bin/env bash
+# Pulls RTSP cameras into fresh JPEG frames for the camera panel.
+#
+#   inircam-feeds sync <shell-pid>   start the pullers, given the shell's pid
+#   inircam-feeds stop               stop them
+#
+# Frames and pid files live in $XDG_RUNTIME_DIR/inircam, which only its owner
+# can read. A camera's URL carries its password, so it is written to a 0600
+# list file and ffmpeg reads it from there: ps and /proc show the list's path,
+# never the credentials.
 set -euo pipefail
+umask 077
 
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/inir/plugins/inircam.json"
-PIDDIR="${XDG_RUNTIME_DIR:-/tmp}/inircam-feeds"
-mkdir -p "$PIDDIR"
+RUNTIME="${XDG_RUNTIME_DIR:-/tmp}"
+FRAMEDIR="$RUNTIME/inircam"
+PIDDIR="$FRAMEDIR/feeds"
 
-# Quickshell process id for inir shell (frame paths must match CameraFeed.qml)
-QS_PID=$(pgrep -f 'inir-shell.*quickshell/inir' | head -1 || true)
-if [[ -z "$QS_PID" ]]; then
-  QS_PID=$(pgrep -f 'quickshell.*inir' | head -1 || true)
-fi
-QS_PID="${QS_PID:-1859}"
+mkdir -p "$FRAMEDIR" "$PIDDIR"
+chmod 700 "$FRAMEDIR" "$PIDDIR"
 
 log() { printf '%s %s\n' "$(date -Is)" "$*" >&2; }
 
 kill_feed() {
-  local pidfile="$1"
+  local pidfile="$1" base
+  base=$(basename "$pidfile" .pid)
   if [[ -f "$pidfile" ]]; then
     local pid
     pid=$(cat "$pidfile" 2>/dev/null || true)
@@ -26,13 +34,15 @@ kill_feed() {
     fi
     rm -f "$pidfile"
   fi
+  rm -f "$PIDDIR/${base}.m3u" "$PIDDIR/${base}.log" 2>/dev/null || true
 }
 
 start_feed() {
   local cam_id="$1" quality="$2" url="$3"
-  local frame="/tmp/inircam-feed-${QS_PID}-${cam_id}-${quality}.jpg"
+  local frame="$FRAMEDIR/feed-${QS_PID}-${cam_id}-${quality}.jpg"
   local pidfile="$PIDDIR/${cam_id}-${quality}.pid"
   local logfile="$PIDDIR/${cam_id}-${quality}.log"
+  local listfile="$PIDDIR/${cam_id}-${quality}.m3u"
 
   # if already running and healthy, skip
   if [[ -f "$pidfile" ]]; then
@@ -43,10 +53,14 @@ start_feed() {
     fi
   fi
 
+  # Hand the URL over in a 0600 list: ffmpeg's command line names the list, not
+  # the camera, so the password is not in ps or /proc/*/cmdline for anyone.
+  printf "file '%s'\noption rtsp_transport tcp\noption timeout 30000000\n" "${url//\'/%27}" > "$listfile"
+
   ffmpeg -hide_banner -loglevel warning -nostdin \
-    -rtsp_transport tcp -timeout 30000000 \
-    -fflags nobuffer -flags low_delay \
-    -i "$url" -an \
+    -f concat -safe 0 \
+    -protocol_whitelist file,rtsp,rtsps,tcp,udp,rtp,tls,crypto,https,http,data \
+    -i "$listfile" -an \
     -vf "fps=8,scale='min(1280,iw)':-2" \
     -q:v 4 -f image2 -update 1 -y "$frame" \
     </dev/null >>"$logfile" 2>&1 &
@@ -68,12 +82,10 @@ if not user and not pw:
     print(url)
     sys.exit(0)
 m = urllib.parse.urlsplit(url)
-netloc = m.netloc
 auth = urllib.parse.quote(user, safe='')
 if pw:
     auth += ':' + urllib.parse.quote(pw, safe='')
-netloc = auth + '@' + netloc
-print(urllib.parse.urlunsplit((m.scheme, netloc, m.path, m.query, m.fragment)))
+print(urllib.parse.urlunsplit((m.scheme, auth + '@' + m.netloc, m.path, m.query, m.fragment)))
 PY
 }
 
@@ -87,14 +99,14 @@ sync_feeds() {
     if [[ -n "$urlSub" && "$urlSub" == rtsp* ]]; then
       local u
       u=$(build_rtsp_url "$urlSub" "$user" "$pass")
-      wanted+=("${id}|sub|${u}")
+      wanted+=("${id}|sub")
       start_feed "$id" "sub" "$u"
     fi
-    # main stream for enlarged/wall (start on demand would be better, but keep simple)
+    # main stream for enlarged and wall views
     if [[ -n "$urlMain" && "$urlMain" == rtsp* ]]; then
       local u
       u=$(build_rtsp_url "$urlMain" "$user" "$pass")
-      wanted+=("${id}|main|${u}")
+      wanted+=("${id}|main")
       start_feed "$id" "main" "$u"
     fi
   done < <(python3 - "$CONFIG" <<'PY'
@@ -110,41 +122,48 @@ for c in cfg.get('cameras', []):
 PY
   )
 
-  # kill feeds not wanted
+  # kill feeds not wanted, and frames left by another shell pid
   shopt -s nullglob
+  local pf
   for pf in "$PIDDIR"/*.pid; do
-    local base
+    local base keep=0 w wid rest wq
     base=$(basename "$pf" .pid)
-    local keep=0
     for w in "${wanted[@]:-}"; do
       [[ -z "$w" ]] && continue
-      local wid="${w%%|*}"; local rest="${w#*|}"; local wq="${rest%%|*}"
+      wid="${w%%|*}"; rest="${w#*|}"; wq="${rest%%|*}"
       if [[ "$base" == "${wid}-${wq}" ]]; then keep=1; break; fi
     done
     if [[ $keep -eq 0 ]]; then
       kill_feed "$pf"
-      rm -f "$PIDDIR/${base}.log" 2>/dev/null || true
     fi
+  done
+  local frame
+  for frame in "$FRAMEDIR"/feed-*.jpg; do
+    [[ "$(basename "$frame")" == "feed-${QS_PID}-"* ]] || rm -f "$frame"
   done
 }
 
 stop_all() {
+  local pf
   shopt -s nullglob
   for pf in "$PIDDIR"/*.pid; do kill_feed "$pf"; done
+  rm -f "$PIDDIR"/*.m3u "$PIDDIR"/*.log 2>/dev/null || true
 }
 
 case "${1:-sync}" in
-  sync) sync_feeds ;;
-  stop) stop_all ;;
-  daemon)
-    trap stop_all EXIT INT TERM
-    while true; do
-      sync_feeds || true
-      # restart dead feeds
-      sleep 10
-    done
+  sync)
+    QS_PID="${2:-}"
+    if [[ -z "$QS_PID" ]]; then
+      echo "usage: $0 sync <shell-pid>" >&2
+      exit 2
+    fi
+    sync_feeds
+    ;;
+  stop)
+    stop_all
     ;;
   *)
-    echo "usage: $0 {sync|stop|daemon}" >&2; exit 1
+    echo "usage: $0 {sync <shell-pid>|stop}" >&2
+    exit 1
     ;;
 esac

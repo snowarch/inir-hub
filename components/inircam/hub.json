@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "changes": {
     "1.0.1": [
       "Reliable RTSP playback via ffmpeg frame pulling (fixes stuck/connecting on affected systems)",
@@ -8,6 +8,10 @@
     ],
     "1.0.2": [
       "A clean preview screenshot and a README that matches what the component ships"
+    ],
+    "1.0.3": [
+      "Frames stay in a folder only you can read, and pullers stop when no camera is shown",
+      "Camera passwords leave no trace in ps or /proc"
     ]
   },
   "summary": "Live camera panel: RTSP feeds, grid, wall, enlarged views and pins",

@@ -22,7 +22,9 @@ Item {
 
     readonly property string streamUrlStr: root.camera ? Brands.streamUrl(root.camera, root.quality).toString() : ""
     readonly property bool useFfmpeg: /^rtsps?:/i.test(root.streamUrlStr)
-    readonly property string framePath: "/tmp/inircam-feed-" + Quickshell.processId + "-" + (root.camera ? root.camera.id : "none") + "-" + root.quality + ".jpg"
+    // Same private folder inircam-feeds writes to: only this user can read it.
+    readonly property string frameDir: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/inircam"
+    readonly property string framePath: root.frameDir + "/feed-" + Quickshell.processId + "-" + (root.camera ? root.camera.id : "none") + "-" + root.quality + ".jpg"
 
     property string status: "idle"   // idle · connecting · live · error
     property string note: ""
