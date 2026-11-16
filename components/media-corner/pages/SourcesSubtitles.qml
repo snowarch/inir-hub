@@ -13,6 +13,8 @@ SourcesCard {
     id: sub
     eyebrow: Translation.tr("Watch")
     title: Translation.tr("Subtitles")
+    glyph: "subtitles"
+    tint: IrisStyle.identity.blue
     readonly property var languages: [
         { value: "eng", label: "English (eng)" }, { value: "spa", label: "Español (spa)" },
         { value: "por", label: "Português (por)" }, { value: "fra", label: "Français (fra)" },
