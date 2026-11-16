@@ -271,8 +271,9 @@ ColumnLayout {
             width: parent.width - Math.round(4 * root.d)
             visible: piece.line.length > 0
             horizontalAlignment: Text.AlignHCenter
-            text: piece.line
-            wrapMode: Text.Wrap
+            // A figure keeps its unit: the line breaks between its parts, never inside "90 %".
+            text: piece.line.replace(/ (%|px)/g, "\u00a0$1")
+            wrapMode: Text.WordWrap
             maximumLineCount: 2
             elide: Text.ElideRight
             font.pixelSize: IrisStyle.typeCaption
