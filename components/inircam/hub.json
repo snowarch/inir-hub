@@ -11,7 +11,8 @@
     ],
     "1.0.3": [
       "Frames stay in a folder only you can read, and pullers stop when no camera is shown",
-      "Camera passwords leave no trace in ps or /proc"
+      "Camera passwords leave no trace in ps or /proc",
+      "Worn with Material, the family it is tested with"
     ]
   },
   "summary": "Live camera panel: RTSP feeds, grid, wall, enlarged views and pins",

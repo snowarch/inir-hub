@@ -9,5 +9,7 @@
   "parts": {
     "panel": "Panel.qml"
   },
-  "families": []
+  "families": [
+    "ii"
+  ]
 }
