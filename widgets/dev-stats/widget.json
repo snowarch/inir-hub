@@ -1,0 +1,187 @@
+{
+    "name": "Dev Stats",
+    "icon": "commit",
+    "version": "1.0.0",
+    "author": "yukazakiri",
+    "description": "Your contribution graph on the desktop: GitHub, GitLab and Forgejo (Codeberg, Gitea), in five looks \u2014 squares, instrument, bars, this month, or today in a shape \u2014 with the streak that is still going, the longest one and the busiest day. A card on the desktop, a card in Material's sidebars, a line on the iRiS Island and a card in Waffle's Widgets panel.",
+    "category": "system",
+    "main": "DevStats.qml",
+    "iris": {
+        "main": "IrisDevStats.qml",
+        "slots": [
+            "island.desktop"
+        ]
+    },
+    "ii": {
+        "main": "SidebarDevStats.qml",
+        "slots": [
+            "sidebar.left",
+            "sidebar.right"
+        ]
+    },
+    "waffle": {
+        "main": "WaffleDevStats.qml"
+    },
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "style": "grid",
+        "showBackground": true,
+        "backgroundOpacity": 0.16,
+        "borderWidth": 1,
+        "borderOpacity": 0.2,
+        "cornerRadius": -1,
+        "useBlur": false,
+        "x": 280,
+        "y": 200,
+        "account": "",
+        "discover": true,
+        "weeks": 26,
+        "showTotals": true,
+        "refreshMinutes": 30
+    },
+    "configKeys": {
+        "account": {
+            "type": "string",
+            "default": "",
+            "label": "Account",
+            "placeholder": "github.com/you",
+            "description": "Host and user name, like github.com/you, codeberg.org/you or gitlab.example.com/you. A platform in front (forgejo:codeberg.org/you) when the host does not say which one it is. Empty uses the first account gh or glab is logged in to."
+        },
+        "discover": {
+            "type": "bool",
+            "default": true,
+            "label": "Find the accounts my gh and glab are logged in to"
+        },
+        "weeks": {
+            "type": "int",
+            "default": 26,
+            "min": 4,
+            "max": 53,
+            "step": 1,
+            "label": "Weeks shown"
+        },
+        "showTotals": {
+            "type": "bool",
+            "default": true,
+            "label": "Show the total and the streak"
+        },
+        "refreshMinutes": {
+            "type": "int",
+            "default": 30,
+            "min": 5,
+            "max": 240,
+            "step": 5,
+            "label": "Refresh every (minutes)"
+        },
+        "style": {
+            "type": "string",
+            "default": "grid",
+            "label": "Look",
+            "options": [
+                {
+                    "label": "Squares (weeks as a grid)",
+                    "value": "grid"
+                },
+                {
+                    "label": "Instrument",
+                    "value": "instrument"
+                },
+                {
+                    "label": "Bars (the last twelve weeks)",
+                    "value": "weeks"
+                },
+                {
+                    "label": "Month (this calendar month)",
+                    "value": "month"
+                },
+                {
+                    "label": "Today (today's count in a shape)",
+                    "value": "today"
+                }
+            ],
+            "description": "Squares draw the weeks as a grid; Instrument is the built-in instrument grammar; Bars draws the last twelve weeks as columns; Month is this calendar month as a sheet; Today puts today's count in a Material shape."
+        }
+    },
+    "options": [
+        {
+            "key": "account",
+            "label": "Account",
+            "type": "text",
+            "default": "",
+            "placeholder": "github.com/you"
+        },
+        {
+            "key": "discover",
+            "label": "Find my gh and glab accounts",
+            "type": "switch",
+            "default": true,
+            "tune": true
+        },
+        {
+            "key": "weeks",
+            "label": "Weeks shown",
+            "type": "range",
+            "default": 26,
+            "min": 4,
+            "max": 53,
+            "step": 1
+        },
+        {
+            "key": "showTotals",
+            "label": "Total and streak",
+            "type": "switch",
+            "default": true
+        },
+        {
+            "key": "refreshMinutes",
+            "label": "Refresh every",
+            "type": "range",
+            "default": 30,
+            "min": 5,
+            "max": 240,
+            "step": 5,
+            "unit": " min",
+            "tune": true
+        },
+        {
+            "key": "style",
+            "label": "Look",
+            "type": "choice",
+            "default": "grid",
+            "choices": [
+                [
+                    "grid",
+                    "Squares (weeks as a grid)"
+                ],
+                [
+                    "instrument",
+                    "Instrument"
+                ],
+                [
+                    "weeks",
+                    "Bars (the last twelve weeks)"
+                ],
+                [
+                    "month",
+                    "Month (this calendar month)"
+                ],
+                [
+                    "today",
+                    "Today (today's count in a shape)"
+                ]
+            ],
+            "page": "look"
+        }
+    ],
+    "resizableAxes": {
+        "uniform": "widgetScale"
+    },
+    "defaultSize": {
+        "width": 360,
+        "height": 200
+    }
+}

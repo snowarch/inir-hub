@@ -1,0 +1,29 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Your contribution graph on the desktop, in every family",
+    "description": "GitHub, GitLab and Forgejo (Codeberg, Gitea) contributions on the desktop in five looks: a grid of weeks, the built-in instrument grammar, the last twelve weeks as bars, this month as a calendar sheet, or today's count in a shape. With the streak that is still going, the longest one and the busiest day. It reads the accounts your own gh and glab are already logged in to, and fetches with their own tools, so there is no token to paste.",
+    "authors": [
+        "yukazakiri"
+    ],
+    "license": "MIT",
+    "tags": [
+        "github",
+        "gitlab",
+        "forgejo",
+        "contributions",
+        "dev",
+        "heatmap"
+    ],
+    "permissions": [
+        "process",
+        "network"
+    ],
+    "hosts": [
+        "github.com",
+        "gitlab.com",
+        "codeberg.org"
+    ],
+    "minInir": "3.1.0",
+    "preview": "preview.webp"
+}

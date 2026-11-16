@@ -1,0 +1,13 @@
+{
+	"id": "dev-stats",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/dev-stats/",
+	"order": 23,
+	"groups": [
+		{
+			"label": "Widgets",
+			"pages": [
+				"DEV-STATS"
+			]
+		}
+	]
+}

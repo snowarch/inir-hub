@@ -1,0 +1,10 @@
+singleton DevStatsStore 1.0 DevStatsStore.qml
+DevStats 1.0 DevStats.qml
+IrisDevStats 1.0 IrisDevStats.qml
+SidebarDevStats 1.0 SidebarDevStats.qml
+WaffleDevStats 1.0 WaffleDevStats.qml
+LookGrid 1.0 LookGrid.qml
+LookInstrument 1.0 LookInstrument.qml
+LookWeeks 1.0 LookWeeks.qml
+LookMonth 1.0 LookMonth.qml
+LookToday 1.0 LookToday.qml
