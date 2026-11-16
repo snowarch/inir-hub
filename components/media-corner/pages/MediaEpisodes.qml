@@ -24,8 +24,9 @@ ColumnLayout {
                 episodes: all.filter(e => e.season === season).map(e => ({ season, episode: e.episode, title: e.title }))
             }))
         }
-        // What has aired: the next one to air says so while it runs; otherwise AniList's count.
-        const aired = Number(root.show?.nextEpisode ?? 0) > 0 ? root.show.nextEpisode - 1 : Number(root.show?.episodes) || 0
+        // A total alone does not say what has aired. Use it only for finished titles.
+        const aired = Number(root.show?.nextEpisode ?? 0) > 0 ? root.show.nextEpisode - 1
+            : root.show?.status === "FINISHED" ? Number(root.show?.episodes) || 0 : 0
         const out = []
         for (let first = 1; first <= aired; first += root.perGroup) {
             const last = Math.min(aired, first + root.perGroup - 1), episodes = []
@@ -34,6 +35,7 @@ ColumnLayout {
         }
         return out
     }
+    property bool markingEpisodes: false
     property int picked: 0
     readonly property int group: Math.min(root.picked, Math.max(0, root.groups.length - 1))
     readonly property var nextUnseen: root.show?.kind === "series"
@@ -41,7 +43,9 @@ ColumnLayout {
             episode => Streams.watchKey(root.show, episode),
             key => CornerWatch.isSeen(key), 0)
         : null
-    onShowChanged: root.picked = 0
+    readonly property var summary: Watch.summarizeEpisodes(root.groups[root.group]?.episodes ?? [],
+        CornerWatch.progress, CornerWatch.seenMarks, episode => Streams.watchKey(root.show, episode))
+    onShowChanged: { root.picked = 0; root.markingEpisodes = false }
 
     visible: root.groups.length > 0
     Layout.fillWidth: true
@@ -72,6 +76,24 @@ ColumnLayout {
             }
         }
     }
+    IrisText {
+        Layout.fillWidth: true
+        visible: CornerWatch.seenMarksLoaded && CornerWatch.progressLoaded
+        text: Translation.tr("%1 of %2 known episodes watched").arg(root.summary.watched).arg(root.summary.known)
+        color: IrisStyle.textSecondary
+    }
+    IrisText {
+        Layout.fillWidth: true
+        visible: CornerWatch.seenMarksLoaded && CornerWatch.progressLoaded
+        text: root.summary.next ? Translation.tr("Next known unwatched episode: %1").arg(root.summary.next.episode) : Translation.tr("No known unwatched episodes")
+        color: IrisStyle.textSecondary
+    }
+    IrisButton {
+        enabled: CornerWatch.seenMarksLoaded
+        quiet: true
+        text: root.markingEpisodes ? Translation.tr("Done marking episodes") : Translation.tr("Mark episodes watched or unwatched")
+        onClicked: root.markingEpisodes = !root.markingEpisodes
+    }
     Flow {
         Layout.fillWidth: true
         spacing: Math.round(6 * root.d)
@@ -81,8 +103,15 @@ ColumnLayout {
                 required property var modelData
                 glyph: root.show && CornerWatch.isSeen(Streams.watchKey(root.show, modelData)) ? "check" : ""
                 label: modelData.title ? `${modelData.episode}. ${modelData.title}` : String(modelData.episode)
-                Accessible.description: Translation.tr("Watch episode %1").arg(modelData.episode)
-                onClicked: CornerWatch.begin(root.show, modelData)
+                Accessible.description: root.markingEpisodes
+                    ? (CornerWatch.isSeen(Streams.watchKey(root.show, modelData)) ? Translation.tr("Mark episode %1 as unwatched") : Translation.tr("Mark episode %1 as watched")).arg(modelData.episode)
+                    : Translation.tr("Watch episode %1").arg(modelData.episode)
+                onClicked: {
+                    if (root.markingEpisodes) {
+                        const key = Streams.watchKey(root.show, modelData)
+                        CornerWatch.setSeen(key, !CornerWatch.isSeen(key))
+                    } else CornerWatch.begin(root.show, modelData)
+                }
             }
         }
     }

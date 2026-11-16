@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import qs.services
 import qs.modules.common
+import "http.js" as Http
 
 // The Media Corner's own state, kept while the Corner is closed: where you are, the answers it already has, and the
 // person's options. The options live in ~/.config/inir/plugins/media-corner.json, never in config.json, so removing
@@ -17,6 +18,7 @@ Singleton {
     // A place ("anime:top", "movie:genre:Drama"…), what the search field holds, and the titles opened over the page.
     property string place: "home"
     property string query: ""
+    property string savedQuery: ""
     property var trail: []
     readonly property var show: root.trail.length > 0 ? root.trail[root.trail.length - 1] : null
     // Goes up to ask again what failed: back online, on Retry, on opening.
@@ -79,6 +81,24 @@ Singleton {
     property var _out: ({})
     property int _outCount: 0
 
+    // Detach one caller; abort the request only when nobody else is waiting for it.
+    function cancelAsk(callback: var): void {
+        if (!callback) return
+        for (const key in root._out) {
+            const ticket = root._out[key]
+            const remaining = ticket.callbacks.filter(waiting => waiting !== callback)
+            if (remaining.length === ticket.callbacks.length) continue
+            ticket.callbacks = remaining
+            if (remaining.length === 0) {
+                ticket.done = true
+                delete root._out[key]
+                root._outCount--
+                ticket.xhr.abort()
+            }
+        }
+        root.scheduleDeadline()
+    }
+
     function ask(url: string, body: string, shape: var, callback: var, force = false): void {
         if (!root.open) return
         const key = url + body
@@ -112,8 +132,12 @@ Singleton {
                 if (xhr.responseText.length > 1024 * 1024) error = "bad reply"
                 else try { value = shape(JSON.parse(xhr.responseText)) } catch (e) { error = "bad reply" }
             } else error = xhr.status === 429 ? "busy" : "HTTP " + xhr.status
+            let retryAfter = ""
+            if (error === "busy") {
+                try { retryAfter = Http.retryAfter(xhr.getResponseHeader("Retry-After")) } catch (e) {}
+            }
             if (!error) root._answers[key] = { at: Date.now(), value }
-            root._settle(ticket, value, error)
+            root._settle(ticket, value, error, retryAfter)
         }
         try {
             xhr.open(body.length > 0 ? "POST" : "GET", url)
@@ -123,16 +147,16 @@ Singleton {
             }
             xhr.send(body)
         } catch (e) {
-            if (!ticket.done) root._settle(ticket, null, "network")
+            if (!ticket.done) root._settle(ticket, null, "network", "")
         }
     }
-    function _settle(ticket: var, value: var, error: string): void {
+    function _settle(ticket: var, value: var, error: string, retryAfter: string): void {
         if (ticket.done) return
         ticket.done = true
         delete root._out[ticket.key]
         root._outCount--
         root.scheduleDeadline()
-        for (const callback of ticket.callbacks) callback(value, error)
+        for (const callback of ticket.callbacks) callback(value, error, retryAfter)
     }
     // Abort outstanding requests when no page can use their answers.
     function dropCallers(): void {
@@ -164,7 +188,7 @@ Singleton {
             for (const key in root._out) {
                 const ticket = root._out[key]
                 if (Date.now() - ticket.at < root.waitMs) continue
-                root._settle(ticket, null, "no answer")
+                root._settle(ticket, null, "no answer", "")
                 ticket.xhr.abort()
             }
             root.scheduleDeadline()
@@ -219,8 +243,11 @@ Singleton {
             property bool windowed: false
             // Empty means the person has not chosen a style yet.
             property string style: ""
+            property string savedOrder: "title"
             property string sources: "[]"
             property string subtitleLanguage: "eng"
+            property string subtitleFallbackLanguage: ""
+            property bool subtitleAutoSelect: true
             property string subtitleApiKey: ""
         }
     }

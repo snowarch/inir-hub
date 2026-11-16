@@ -13,6 +13,7 @@ import "reveal.js" as Reveal
 // The Corner's places. Prism groups the open catalogue beneath its page; Normal keeps the original list.
 Rectangle {
     id: root
+    property string pendingHistoryRemoval: ""
     property bool narrow: false
     property bool prism: false
     property bool railVisible: false
@@ -51,7 +52,7 @@ Rectangle {
         if (anime) result.push(...root.places.slice(1, 7).map(p => Object.assign({}, p, { caption: "", child: true })))
         result.push({ id: "movie:movies", title: "Films and series", icon: "movie", group: "movie", caption: "Films and series" })
         if (movies) result.push(...root.places.slice(7, 12).map(p => Object.assign({}, p, { caption: "", child: true })))
-        result.push(root.places[12])
+        result.push(root.places[12], root.places[13], root.places[14])
         return result
     }
     color: root.prism ? IrisStyle.surfaceHigh : IrisStyle.readingSidebar
@@ -125,6 +126,18 @@ Rectangle {
             pad: root.pad
             onSubmitted: root.submitted()
         }
+        SavedFilter {
+            visible: !root.railVisible
+            Layout.fillWidth: true
+            Layout.bottomMargin: Math.round(6 * root.d)
+        }
+        SavedSort { visible: !root.railVisible; Layout.fillWidth: true }
+        RowLayout {
+            visible: CornerWatch.progressLoadFailed
+            Layout.fillWidth: true
+            IrisText { Layout.fillWidth: true; text: Translation.tr("Could not load playback history"); color: IrisStyle.danger; wrapMode: Text.WordWrap }
+            IrisButton { quiet: true; text: Translation.tr("Retry"); onClicked: CornerWatch.retryProgressLoad() }
+        }
         ListView {
             id: list
             IrisScrollFeel {}
@@ -139,27 +152,30 @@ Rectangle {
             model: {
                 const rows = root.navPlaces.map(place => ({ kind: "place", place }))
                 if (CornerWatch.watchlistLoadFailed) rows.push({ kind: "error" })
-                const wanted = root.railVisible ? [] : Object.keys(CornerWatch.watchlist)
+                const wanted = root.railVisible ? [] : CornerWatch.sortedSavedKeys.filter(key => CornerWatch.matchesSaved(CornerWatch.watchlist[key], CornerState.savedQuery))
                 if (wanted.length) rows.push({ kind: "wantedHeader" })
                 for (const key of wanted) rows.push({ kind: "wanted", key })
-                const watching = root.prism && !root.railVisible ? Object.keys(CornerWatch.progress).filter(key => {
+                const watching = !root.railVisible ? Object.keys(CornerWatch.progress).filter(key => {
                     const entry = CornerWatch.progress[key]
-                    return entry && entry.show && (CornerWatch.resumeAt(key) > 0 || entry.position === 0)
-                }).sort((a, b) => CornerWatch.progress[b].at - CornerWatch.progress[a].at).slice(0, 5) : []
+                    return entry && entry.show && CornerWatch.matchesSaved(entry.show, CornerState.savedQuery)
+                }).sort((a, b) => CornerWatch.progress[b].at - CornerWatch.progress[a].at) : []
+                if (!CornerState.savedQuery.trim()) watching.splice(5)
                 if (watching.length) rows.push({ kind: "watchingHeader" })
                 for (const key of watching) rows.push({ kind: "watching", key })
+                if (!root.railVisible && CornerState.savedQuery.trim() && !wanted.length && !watching.length)
+                    rows.push({ kind: "emptySaved" })
                 return rows
             }
             delegate: Loader {
                 id: sidebarRow
                 required property var modelData
                 width: list.width
-                sourceComponent: modelData.kind === "place" ? placeRow : modelData.kind === "error" ? errorRow : modelData.kind === "wantedHeader" || modelData.kind === "watchingHeader" ? headerRow : modelData.kind === "wanted" ? wantedRow : watchingRow
+                sourceComponent: modelData.kind === "place" ? placeRow : modelData.kind === "error" ? errorRow : modelData.kind === "wantedHeader" || modelData.kind === "watchingHeader" ? headerRow : modelData.kind === "wanted" ? wantedRow : modelData.kind === "emptySaved" ? emptySavedRow : watchingRow
                 Component { id: placeRow; PlaceRow { modelData: sidebarRow.modelData.place } }
                 Component {
                     id: errorRow
                     RowLayout {
-                        IrisText { Layout.fillWidth: true; text: Translation.tr("Request failed"); color: IrisStyle.danger; wrapMode: Text.WordWrap }
+                        IrisText { Layout.fillWidth: true; text: Translation.tr("Could not load saved titles"); color: IrisStyle.danger; wrapMode: Text.WordWrap }
                         IrisButton { quiet: true; text: Translation.tr("Retry"); onClicked: CornerWatch.retryWatchlistLoad() }
                     }
                 }
@@ -174,6 +190,11 @@ Rectangle {
                     topPadding: Math.round(12 * root.d)
                     bottomPadding: sidebarRow.modelData.kind === "watchingHeader" ? Math.round(4 * root.d) : 0
                 } }
+                Component { id: emptySavedRow; IrisText {
+                    text: Translation.tr("Nothing here yet")
+                    color: IrisStyle.textTertiary
+                    leftPadding: Math.round(12 * root.d)
+                } }
                 Component { id: wantedRow; RowLayout {
                         IrisButton {
                             Layout.fillWidth: true
@@ -187,14 +208,16 @@ Rectangle {
                             onClicked: CornerWatch.toggleWatchlist(CornerWatch.watchlist[sidebarRow.modelData.key])
                         }
                 } }
-                Component { id: watchingRow; RowLayout {
+                Component { id: watchingRow; ColumnLayout {
+                    RowLayout {
+                        Layout.fillWidth: true
                         HoverHandler { id: watchedHover }
                         IrisButton {
                             Layout.fillWidth: true
                             quiet: true
-                            text: String(CornerWatch.progress[sidebarRow.modelData.key]?.show?.title ?? "")
+                            readonly property var entry: CornerWatch.progress[sidebarRow.modelData.key]
+                            text: String(entry?.show?.title ?? "") + (entry?.episode ? " · " + (entry.episode.season ? entry.episode.season + "×" : "") + entry.episode.episode : "")
                             onClicked: {
-                                const entry = CornerWatch.progress[sidebarRow.modelData.key]
                                 if (!entry?.show) return
                                 CornerState.openShow(entry.show)
                                 CornerWatch.begin(entry.show, entry.episode ?? null)
@@ -202,10 +225,26 @@ Rectangle {
                         }
                         IrisIconButton {
                             materialIcon: "close"
+                            enabled: !(CornerWatch.busy && CornerWatch._current?.key === sidebarRow.modelData.key)
                             opacity: watchedHover.hovered || activeFocus ? 1 : 0
-                            Accessible.name: Translation.tr("Remove")
-                            onClicked: CornerWatch.forget(sidebarRow.modelData.key)
+                            Accessible.name: Translation.tr("Remove history entry")
+                            onClicked: root.pendingHistoryRemoval = sidebarRow.modelData.key
                         }
+                    }
+                    IrisButton {
+                        Layout.fillWidth: true
+                        quiet: true
+                        visible: root.pendingHistoryRemoval === sidebarRow.modelData.key
+                        text: Translation.tr("Confirm remove history entry")
+                        onClicked: { CornerWatch.forget(sidebarRow.modelData.key); root.pendingHistoryRemoval = "" }
+                    }
+                    IrisButton {
+                        Layout.fillWidth: true
+                        quiet: true
+                        visible: root.pendingHistoryRemoval === sidebarRow.modelData.key
+                        text: Translation.tr("Cancel")
+                        onClicked: root.pendingHistoryRemoval = ""
+                    }
                 } }
             }
         }

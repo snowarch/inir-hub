@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.services
 import "../state"
+import "../state/http.js" as Http
 
 // What the Media Corner asks Cinemeta (Stremio's open catalogue of films and series, by IMDb id): lists, searches and
 // one title in full.
@@ -22,8 +23,8 @@ QtObject {
         "Family", "Fantasy", "History", "Horror", "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western"].concat(root.seriesOnly)
 
     function _get(path: string, shape: var, callback: var): void {
-        CornerState.ask(root.base + path, "", shape, (value, error) => {
-            root.down = !error ? "" : !Network.online && error === "HTTP 0" ? Network.offlineReason : Translation.tr("%1 didn't answer (´・ω・`)").arg(root.sourceName)
+        CornerState.ask(root.base + path, "", shape, (value, error, retryAfter) => {
+            root.down = !error ? "" : error === "busy" ? root.sourceName + ": " + Translation.tr("The provider limited requests; try again later") + (retryAfter ? " · " + Translation.tr("Retry-After: %1").arg(Http.retryDisplay(retryAfter)) : "") : !Network.online && error === "HTTP 0" ? Network.offlineReason : Translation.tr("%1 didn't answer (´・ω・`)").arg(root.sourceName)
             callback(value, error)
         })
     }
