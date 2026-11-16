@@ -2,6 +2,8 @@
 
 Live IP camera panel for iNiR: a grid of cameras, one enlarged, a wall of all of them, a form to add and edit them, and cameras you can pin to the desktop.
 
+It comes with **Cameras**, a desktop card that shows the same cameras as a grid on your desktop. Installing this panel installs the card with it.
+
 Inspired by [OmaCam](https://github.com/entroit/omacam) (MIT, Entroit).
 
 ## Features
