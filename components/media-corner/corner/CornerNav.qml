@@ -10,9 +10,10 @@ import qs.modules.iris.components
 import "../state"
 import "reveal.js" as Reveal
 
-// The Corner's places, as iRiS's Settings lists its pages: its name, a search pill, and groups under caps captions whose
-// rows open beneath them while one of theirs is shown. The same in Normal and Prism; only the skin differs.
-// Without the rail beside the page, Yours (Want to watch, Watching) follows the places here.
+// The Corner's places, as iRiS's Settings lists its pages in each style.
+// Prism: its name, a search pill, and groups under caps captions whose rows open beneath them while one of theirs is
+// shown; without the rail beside the page, Yours (Want to watch, Watching) follows the places here.
+// Normal (Folio): every place under its caption, the one you are in on a light pill; the search sits over the page.
 Rectangle {
     id: root
     property bool narrow: false
@@ -42,6 +43,7 @@ Rectangle {
     }
     // Home, then Anime and Films and series as groups (their rows open while one of theirs is shown), then the rest.
     readonly property var navPlaces: {
+        if (!CornerSkin.prism) return root.places
         const result = [root.places[0]]
         const group = (id, title, icon, caption, children) => {
             const open = children.some(place => root.section.startsWith(id + ":"))
@@ -74,6 +76,7 @@ Rectangle {
             spacing: 0
 
             RowLayout {
+                visible: CornerSkin.prism
                 Layout.fillWidth: true
                 Layout.topMargin: Math.round(6 * root.d)
                 Layout.bottomMargin: Math.round(14 * root.d)
@@ -92,6 +95,7 @@ Rectangle {
             }
             CornerSearch {
                 id: searchPlate
+                visible: CornerSkin.prism
                 Layout.fillWidth: true
                 Layout.bottomMargin: Math.round(8 * root.d)
                 hint: root.hint
@@ -117,7 +121,7 @@ Rectangle {
                 }
             }
             LibraryList {
-                visible: !root.railVisible && !root.narrow
+                visible: CornerSkin.prism && !root.railVisible && !root.narrow
                 Layout.fillWidth: true
                 Layout.topMargin: Math.round(16 * root.d)
             }
@@ -153,9 +157,10 @@ Rectangle {
             width: row.width - x
             text: row.caption
             color: IrisStyle.textTertiary
-            font.pixelSize: IrisStyle.typeFootnote
-            font.letterSpacing: 0.6 // literal: caps captions need tracking to read
-            font.weight: IrisStyle.weight(Font.DemiBold)
+            font.family: CornerSkin.prism ? IrisStyle.fontMain : IrisStyle.fontMono
+            font.pixelSize: CornerSkin.prism ? IrisStyle.typeFootnote : IrisStyle.typeCaption
+            font.letterSpacing: CornerSkin.prism ? 0.6 : 1 // literal: caps captions need tracking to read
+            font.weight: IrisStyle.weight(CornerSkin.prism ? Font.DemiBold : Font.Medium)
             font.capitalization: Font.AllUppercase
             elide: Text.ElideRight
         }
@@ -166,12 +171,13 @@ Rectangle {
             x: row.child ? Math.round(16 * root.d) : 0
             width: row.width - x
             height: row.rowHeight
-            radius: IrisStyle.radiusRow
+            radius: CornerSkin.prism ? IrisStyle.radiusRow : height / 2
             color: plate.lit ? CornerSkin.rowOn : row.containsMouse ? IrisStyle.fillHover : "transparent"
+            readonly property color ink: plate.lit ? CornerSkin.rowOnInk : IrisStyle.text
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
             // The mark of where you are: Settings' white bar on the right in Prism, the accent in Normal.
             Rectangle {
-                visible: plate.lit
+                visible: plate.lit && CornerSkin.prism
                 x: parent.width - width
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.round(3 * root.d)
@@ -188,16 +194,16 @@ Rectangle {
                 text: row.modelData.icon
                 iconSize: Math.round(18 * root.d)
                 fill: row.selected ? 1 : 0
-                color: IrisStyle.text
+                color: plate.ink
             }
             IrisText {
                 x: row.child ? Math.round(14 * root.d) : ink.x + Math.round(30 * root.d)
                 width: parent.width - x - Math.round((root.narrow ? 36 : 12) * root.d)
                 anchors.verticalCenter: parent.verticalCenter
                 text: Translation.tr(row.modelData.title)
-                color: row.child && !row.selected ? IrisStyle.textSecondary : IrisStyle.text
+                color: row.child && !row.selected ? IrisStyle.textSecondary : plate.ink
                 font.pixelSize: row.child ? IrisStyle.typeMeta : IrisStyle.typeLabel
-                font.weight: IrisStyle.weight(row.selected || !row.child ? Font.DemiBold : Font.Normal)
+                font.weight: IrisStyle.weight(row.selected || (!row.child && CornerSkin.prism) ? Font.DemiBold : Font.Normal)
                 elide: Text.ElideRight
             }
             MaterialSymbol {
