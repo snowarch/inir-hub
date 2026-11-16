@@ -77,14 +77,14 @@ Rectangle {
             width: scroller.width
             spacing: 0
 
+            // The Corner's name and mark heads the places in every style.
             RowLayout {
-                visible: CornerSkin.prism
                 Layout.fillWidth: true
                 Layout.topMargin: Math.round(6 * root.d)
                 Layout.bottomMargin: Math.round(14 * root.d)
                 Layout.leftMargin: Math.round(6 * root.d)
-                spacing: Math.round(8 * root.d)
-                MaterialSymbol { text: "movie"; fill: 1; iconSize: Math.round(20 * root.d); color: IrisStyle.text }
+                spacing: Math.round(9 * root.d)
+                CornerMark { size: Math.round(24 * root.d) }
                 IrisText {
                     Layout.fillWidth: true
                     text: Translation.tr("Media Corner")

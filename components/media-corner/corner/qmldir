@@ -15,3 +15,4 @@ CornerRow 1.0 CornerRow.qml
 PlaybackTracks 1.0 PlaybackTracks.qml
 PlaybackCard 1.0 PlaybackCard.qml
 LibraryList 1.0 LibraryList.qml
+CornerMark 1.0 CornerMark.qml

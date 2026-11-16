@@ -56,6 +56,13 @@ ClippingRectangle {
             saturation: 0.15 // literal: Folio's quiet backdrop
         }
         Rectangle { anchors.fill: parent; color: IrisStyle.veilStrong }
+        // Nothing to show yet: the Corner's mark holds the stage.
+        CornerMark {
+            visible: root.show === null
+            anchors.verticalCenter: parent.verticalCenter
+            x: Math.round(28 * root.d)
+            size: Math.round(120 * root.d)
+        }
 
         RowLayout {
             anchors.fill: parent
