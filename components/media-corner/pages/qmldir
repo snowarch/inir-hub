@@ -21,3 +21,6 @@ HomePlaces 1.0 HomePlaces.qml
 SourcesCard 1.0 SourcesCard.qml
 SourcesAppearance 1.0 SourcesAppearance.qml
 SourcesSubtitles 1.0 SourcesSubtitles.qml
+FolioHero 1.0 FolioHero.qml
+FolioTiles 1.0 FolioTiles.qml
+FolioLibrary 1.0 FolioLibrary.qml

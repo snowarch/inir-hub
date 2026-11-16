@@ -15,6 +15,9 @@ ColumnLayout {
     required property var store
     property string title: ""
     property string note: ""
+    // Its glyph and tint where sections wear them (Normal).
+    property string glyph: root.store?.sourceName === "AniList" ? "animation" : "movie"
+    property color tint: root.store?.sourceName === "AniList" ? IrisStyle.identity.purple : IrisStyle.identity.orange
     property var filter: null
     // Titles already at hand (a show's relations, its recommendations): listed as they are, nothing is asked.
     property var local: null
@@ -61,6 +64,8 @@ ColumnLayout {
     CornerHeading {
         eyebrow: root.note
         title: root.title
+        glyph: root.glyph
+        tint: root.tint
         link: root.allPlace.length > 0 && !root.failed ? Translation.tr("See all") : ""
         onLinkClicked: CornerState.pick(root.allPlace)
     }

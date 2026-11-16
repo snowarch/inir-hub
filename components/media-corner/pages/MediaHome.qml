@@ -7,15 +7,16 @@ import qs.modules.iris.components
 import "../corner"
 import "../state"
 
-// Home, laid out as iRiS's Settings home: the page's name, one show up front, a deck of two cards (pick up what you
-// watched, and what plays or a popular film), the places of every day, then shelves of anime, films and series.
-// Normal and Prism show the same; only the skin differs.
+// Home, laid out as iRiS's Settings home in the style worn, then shelves of anime, films and series.
+// Prism: one show up front, a deck (what you watched last, what plays or a popular film), the places of every day.
+// Normal (Folio): the trending shows in one card with their strip, Every day's tiles, Yours, and the Library rows.
 MediaPage {
     id: root
     required property var anime
     required property var movies
 
     property var hero: null
+    property var trending: []
     property var featuredAnime: null
     property var featuredFilm: null
     // Settled: the hero's answer came, with a show or without.
@@ -25,7 +26,7 @@ MediaPage {
         root.anime.page({ sort: "TRENDING_DESC" }, 1, (result, error) => {
             if (!root) return
             root.heroSettled = true
-            if (!error) { root.hero = result.items[0] ?? null; root.featuredAnime = result.items[1] ?? null }
+            if (!error) { root.hero = result.items[0] ?? null; root.featuredAnime = result.items[1] ?? null; root.trending = result.items.slice(0, 6) }
         })
     }
     function askFilm(): void {
@@ -55,7 +56,7 @@ MediaPage {
         : !root.heroSettled ? Translation.tr("Asking %1…").arg(root.anime.sourceName) : ""
     readonly property var latest: CornerWatch.latest?.entry ?? null
 
-    CornerHeading { page: true; eyebrow: Translation.tr("Media Corner"); title: Translation.tr("Home") }
+    CornerHeading { page: true; eyebrow: CornerSkin.prism ? Translation.tr("Media Corner") : Translation.tr("What to watch today"); title: Translation.tr("Home") }
 
     RowLayout {
         Layout.fillWidth: true
@@ -74,54 +75,86 @@ MediaPage {
         }
     }
 
-    HomeHero {
+    Loader {
         Layout.fillWidth: true
-        show: root.hero
-        status: root.status || Translation.tr("Nothing here yet")
+        active: CornerSkin.prism
+        visible: active
+        sourceComponent: prismTop
     }
-
-    // The deck: what you watched last (or another trending show) and what plays (or a popular film).
-    GridLayout {
-        id: deck
+    Loader {
         Layout.fillWidth: true
-        columns: width >= Math.round(560 * root.d) ? 2 : 1
-        columnSpacing: Math.round(14 * root.d)
-        rowSpacing: Math.round(14 * root.d)
-        HomeCard {
-            Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(196 * root.d)
-            show: root.latest?.show ?? root.featuredAnime
-            eyebrow: root.latest ? Translation.tr("Continue") : Translation.tr("Also trending")
-            glyph: root.latest ? "play_arrow" : "info"
-            action: root.latest ? Translation.tr("Continue") : Translation.tr("Details")
-            onOpened: CornerState.openShow(show)
-            onActed: {
-                CornerState.openShow(show)
-                if (root.latest) CornerWatch.begin(root.latest.show, root.latest.episode ?? null)
+        active: !CornerSkin.prism
+        visible: active
+        sourceComponent: folioTop
+    }
+    Component {
+        id: prismTop
+        ColumnLayout {
+            spacing: root.spacing
+            HomeHero {
+                Layout.fillWidth: true
+                show: root.hero
+                status: root.status || Translation.tr("Nothing here yet")
             }
-        }
-        PlaybackCard {
-            visible: CornerWatch.current !== null
-            Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(196 * root.d)
-            large: false
-            extras: false
-            playingOnly: true
-        }
-        HomeCard {
-            visible: CornerWatch.current === null
-            Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(196 * root.d)
-            show: root.featuredFilm
-            eyebrow: Translation.tr("Popular films")
-            glyph: "info"
-            action: Translation.tr("Details")
-            onOpened: CornerState.openShow(show)
-            onActed: CornerState.openShow(show)
+
+            // The deck: what you watched last (or another trending show) and what plays (or a popular film).
+            GridLayout {
+                id: deck
+                Layout.fillWidth: true
+                columns: width >= Math.round(560 * root.d) ? 2 : 1
+                columnSpacing: Math.round(14 * root.d)
+                rowSpacing: Math.round(14 * root.d)
+                HomeCard {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.round(196 * root.d)
+                    show: root.latest?.show ?? root.featuredAnime
+                    eyebrow: root.latest ? Translation.tr("Continue") : Translation.tr("Also trending")
+                    glyph: root.latest ? "play_arrow" : "info"
+                    action: root.latest ? Translation.tr("Continue") : Translation.tr("Details")
+                    onOpened: CornerState.openShow(show)
+                    onActed: {
+                        CornerState.openShow(show)
+                        if (root.latest) CornerWatch.begin(root.latest.show, root.latest.episode ?? null)
+                    }
+                }
+                PlaybackCard {
+                    visible: CornerWatch.current !== null
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.round(196 * root.d)
+                    large: false
+                    extras: false
+                    playingOnly: true
+                }
+                HomeCard {
+                    visible: CornerWatch.current === null
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.round(196 * root.d)
+                    show: root.featuredFilm
+                    eyebrow: Translation.tr("Popular films")
+                    glyph: "info"
+                    action: Translation.tr("Details")
+                    onOpened: CornerState.openShow(show)
+                    onActed: CornerState.openShow(show)
+                }
+            }
+
+            HomePlaces { Layout.fillWidth: true }
         }
     }
-
-    HomePlaces { Layout.fillWidth: true }
+    Component {
+        id: folioTop
+        ColumnLayout {
+            spacing: root.spacing
+            FolioHero {
+                Layout.fillWidth: true
+                shows: root.trending
+                status: root.status || Translation.tr("Nothing here yet")
+            }
+            FolioTiles { Layout.fillWidth: true; anime: root.anime }
+            LibraryList { Layout.fillWidth: true }
+            FolioLibrary { Layout.fillWidth: true }
+        }
+    }
 
     Repeater {
         model: root.shelves
@@ -132,6 +165,8 @@ MediaPage {
             note: modelData.note ?? ""
             filter: modelData.filter
             allPlace: modelData.place
+            glyph: modelData.anime ? "animation" : modelData.filter.kind === "series" ? "tv" : "movie"
+            tint: modelData.anime ? IrisStyle.identity.purple : modelData.filter.kind === "series" ? IrisStyle.identity.blue : IrisStyle.identity.orange
         }
     }
 }
