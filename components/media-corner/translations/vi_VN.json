@@ -233,7 +233,7 @@
     "Remove": "Xóa",
     "Watching": "Đang xem",
     "Web, opens in the browser": "Web, mở trong trình duyệt",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "Nơi nút Xem tìm kiếm. Không có nguồn nào cho đến khi bạn thêm, và chưa ai kiểm tra những gì bạn thêm: bạn chọn tin vào đâu.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "Nơi Xem tìm luồng phát. Chưa có gì cho đến khi bạn thêm, và không ai kiểm tra những gì bạn thêm: bạn tự quyết định tin vào đâu.",
     "You have no sources yet": "Bạn chưa có nguồn nào",
     "Your sources have nothing for this": "Các nguồn của bạn không có nội dung này",
     "mpv couldn't play it. Try another stream": "mpv không phát được. Hãy thử luồng khác",
@@ -320,5 +320,11 @@
     "Style": "Kiểu",
     "Titles you save show here": "Các tựa bạn lưu sẽ hiện ở đây",
     "What you watch shows here": "Những gì bạn xem sẽ hiện ở đây",
-    "Yours": "Của bạn"
+    "Yours": "Của bạn",
+    "%1 sources": "%1 nguồn",
+    "%1 titles": "%1 tựa",
+    "Find something to watch": "Tìm gì đó để xem",
+    "Nothing playing": "Không có gì đang phát",
+    "Press Watch on any title": "Nhấn Xem trên bất kỳ tựa nào",
+    "What to watch today": "Hôm nay xem gì"
 }

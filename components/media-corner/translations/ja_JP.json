@@ -233,7 +233,7 @@
     "Remove": "削除",
     "Watching": "視聴",
     "Web, opens in the browser": "Web、ブラウザで開きます",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "「視聴」が探す場所です。追加するまで何もなく、追加したものは誰も確認していません。何を信頼するかはあなた次第です。",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "「見る」がストリームを探す場所です。追加するまで何もありません。追加したものは誰も確認していないので、信頼するかはあなたが決めます。",
     "You have no sources yet": "ソースはまだありません",
     "Your sources have nothing for this": "ソースにこの作品はありません",
     "mpv couldn't play it. Try another stream": "mpv で再生できませんでした。別のストリームをお試しください",
@@ -320,5 +320,11 @@
     "Style": "スタイル",
     "Titles you save show here": "保存した作品がここに表示されます",
     "What you watch shows here": "視聴した作品がここに表示されます",
-    "Yours": "あなたの"
+    "Yours": "あなたの",
+    "%1 sources": "%1 件のソース",
+    "%1 titles": "%1 作品",
+    "Find something to watch": "見るものを探す",
+    "Nothing playing": "再生していません",
+    "Press Watch on any title": "作品で「見る」を押してください",
+    "What to watch today": "今日見るもの"
 }

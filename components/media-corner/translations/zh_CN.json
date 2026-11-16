@@ -233,7 +233,7 @@
     "Remove": "移除",
     "Watching": "观看",
     "Web, opens in the browser": "网页,在浏览器中打开",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "“观看”查找的地方。在你添加之前这里没有来源,也没有人检查过你添加的内容:信任什么由你决定。",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "“观看”在这里查找流。添加之前这里什么都没有，而且没人审核过你添加的内容：信任与否由你决定。",
     "You have no sources yet": "你还没有来源",
     "Your sources have nothing for this": "你的来源中没有此内容",
     "mpv couldn't play it. Try another stream": "mpv 无法播放。请尝试其他视频流",
@@ -320,5 +320,11 @@
     "Style": "样式",
     "Titles you save show here": "你保存的作品会显示在这里",
     "What you watch shows here": "你看过的内容会显示在这里",
-    "Yours": "我的"
+    "Yours": "我的",
+    "%1 sources": "%1 个来源",
+    "%1 titles": "%1 部作品",
+    "Find something to watch": "找点东西看",
+    "Nothing playing": "没有正在播放的内容",
+    "Press Watch on any title": "在任意作品上按“观看”",
+    "What to watch today": "今天看什么"
 }

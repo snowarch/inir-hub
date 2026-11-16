@@ -233,7 +233,7 @@
     "Remove": "Remove",
     "Watching": "Watching",
     "Web, opens in the browser": "Web, opens in the browser",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "Maani Isiginnaarit aallaaveqarfinnik ujarlerpoq. Ilanngussinngikkuit aallaaveqanngilaq, ilanngussatillu kia misissorsimanngilai: illit aalajangerputit.",
     "You have no sources yet": "You have no sources yet",
     "Your sources have nothing for this": "Your sources have nothing for this",
     "mpv couldn't play it. Try another stream": "mpv couldn't play it. Try another stream",
@@ -320,5 +320,11 @@
     "Style": "Isikkua",
     "Titles you save show here": "Atuagassat toqqorsimasatit maani takuneqassapput",
     "What you watch shows here": "Isiginnaakkatit maani takuneqassapput",
-    "Yours": "Illit"
+    "Yours": "Illit",
+    "%1 sources": "%1 aallaavik",
+    "%1 titles": "%1 atuagassat",
+    "Find something to watch": "Isiginnaagassamik ujarlerit",
+    "Nothing playing": "Aallartinneqartoqanngilaq",
+    "Press Watch on any title": "Atuagassami Isiginnaarit tooruk",
+    "What to watch today": "Ullumi isiginnaagassat"
 }

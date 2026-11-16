@@ -233,7 +233,7 @@
     "Remove": "Remove",
     "Watching": "Watching",
     "Web, opens in the browser": "Web, opens in the browser",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.",
     "You have no sources yet": "You have no sources yet",
     "Your sources have nothing for this": "Your sources have nothing for this",
     "mpv couldn't play it. Try another stream": "mpv couldn't play it. Try another stream",
@@ -320,5 +320,11 @@
     "Style": "Style",
     "Titles you save show here": "Titles you save show here",
     "What you watch shows here": "What you watch shows here",
-    "Yours": "Yours"
+    "Yours": "Yours",
+    "%1 sources": "%1 sources",
+    "%1 titles": "%1 titles",
+    "Find something to watch": "Find something to watch",
+    "Nothing playing": "Nothing playing",
+    "Press Watch on any title": "Press Watch on any title",
+    "What to watch today": "What to watch today"
 }

@@ -233,7 +233,7 @@
     "Remove": "Kaldır",
     "Watching": "İzleme",
     "Web, opens in the browser": "Web, tarayıcıda açılır",
-    "What Watch looks in. There are none until you add them, and nobody has checked what you add: you choose what to trust.": "İzle’nin baktığı yer. Sen eklemedikçe hiç yoktur ve eklediklerini kimse denetlemedi: neye güveneceğini sen seçersin.",
+    "Where Watch looks for streams. There are none until you add some, and nobody has reviewed what you add: you decide what to trust.": "İzle’nin yayın aradığı yer. Sen eklemeden hiçbiri yok ve eklediklerini kimse incelemedi: neye güveneceğine sen karar verirsin.",
     "You have no sources yet": "Henüz kaynağın yok",
     "Your sources have nothing for this": "Kaynaklarında bunun için bir şey yok",
     "mpv couldn't play it. Try another stream": "mpv bunu oynatamadı. Başka bir yayın dene",
@@ -320,5 +320,11 @@
     "Style": "Stil",
     "Titles you save show here": "Kaydettiğin yapımlar burada görünür",
     "What you watch shows here": "İzlediklerin burada görünür",
-    "Yours": "Seninkiler"
+    "Yours": "Seninkiler",
+    "%1 sources": "%1 kaynak",
+    "%1 titles": "%1 yapım",
+    "Find something to watch": "İzleyecek bir şey bul",
+    "Nothing playing": "Oynatılan bir şey yok",
+    "Press Watch on any title": "Herhangi bir yapımda İzle’ye bas",
+    "What to watch today": "Bugün ne izlesek"
 }
