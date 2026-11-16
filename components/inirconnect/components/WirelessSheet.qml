@@ -63,7 +63,7 @@ Item {
 
                 IrisText {
                     Layout.fillWidth: true
-                    text: "Depuración Inalámbrica (ADB)"
+                    text: Translation.tr("Wireless Debugging (ADB)")
                     color: IrisStyle.text
                     font.family: IrisStyle.fontTitle
                     font.pixelSize: IrisStyle.typeLabel
@@ -86,9 +86,9 @@ Item {
 
                 Repeater {
                     model: [
-                        { id: "qr", label: "Código QR", icon: "qr_code_scanner" },
-                        { id: "manual", label: "Código manual", icon: "password" },
-                        { id: "usb", label: "USB a Wi-Fi", icon: "usb" }
+                        { id: "qr", label: Translation.tr("QR Code"), icon: "qr_code_scanner" },
+                        { id: "manual", label: Translation.tr("Pairing code"), icon: "password" },
+                        { id: "usb", label: Translation.tr("USB to Wi-Fi"), icon: "usb" }
                     ]
 
                     delegate: IrisPlate {
@@ -171,7 +171,7 @@ Item {
                                 tint: IrisStyle.accent
                             }
                             IrisText {
-                                text: "Generando..."
+                                text: Translation.tr("Generating...")
                                 color: "#221F1B" // literal: dark text over high-contrast white scrim
                                 font.pixelSize: Math.round(10 * root.d)
                             }
@@ -206,12 +206,12 @@ Item {
 
                         IrisText {
                             text: {
-                                if (AndroidState.qrStatus === "connected") return "¡Dispositivo vinculado y conectado!"
-                                if (AndroidState.qrStatus === "pairing") return "Dispositivo detectado. Vinculando..."
-                                if (AndroidState.qrStatus === "connecting") return "Conectando al puerto ADB..."
-                                if (AndroidState.qrStatus === "timeout") return "Tiempo agotado. Presiona regenerar."
-                                if (AndroidState.qrStatus === "error") return "Error en vinculación."
-                                return "Esperando que el teléfono escanee el código..."
+                                if (AndroidState.qrStatus === "connected") return Translation.tr("Device paired and connected!")
+                                if (AndroidState.qrStatus === "pairing") return Translation.tr("Device detected. Pairing...")
+                                if (AndroidState.qrStatus === "connecting") return Translation.tr("Connecting to ADB port...")
+                                if (AndroidState.qrStatus === "timeout") return Translation.tr("Timed out. Press regenerate.")
+                                if (AndroidState.qrStatus === "error") return Translation.tr("Pairing failed.")
+                                return Translation.tr("Waiting for phone to scan QR code...")
                             }
                             color: IrisStyle.text
                             font.pixelSize: IrisStyle.typeCaption
@@ -223,7 +223,7 @@ Item {
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignHCenter
                         wrapMode: Text.WordWrap
-                        text: "1. En tu móvil: Opciones de desarrollador > Depuración inalámbrica\n2. Toca 'Vincular dispositivo con código QR' y apunta la cámara aquí."
+                        text: Translation.tr("1. On your phone: Developer options > Wireless debugging\n2. Tap 'Pair device with QR code' and point camera here.")
                         color: IrisStyle.subtext
                         font.pixelSize: Math.max(9, Math.round(10 * root.d))
                     }
@@ -233,7 +233,7 @@ Item {
                         spacing: Math.round(8 * root.d)
 
                         IrisButton {
-                            text: "Regenerar código QR"
+                            text: Translation.tr("Regenerate QR Code")
                             onClicked: AndroidState.startQrPairing()
                         }
                     }
@@ -249,7 +249,7 @@ Item {
                 IrisText {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: "En 'Depuración inalámbrica', toca 'Vincular con código de vinculación'. Ingresa la IP, el puerto de la ventana emergente y el código de 6 dígitos:"
+                    text: Translation.tr("In 'Wireless debugging', tap 'Pair with pairing code'. Enter IP, popup port and 6-digit code:")
                     color: IrisStyle.subtext
                     font.pixelSize: Math.max(9, Math.round(10.5 * root.d))
                 }
@@ -303,7 +303,7 @@ Item {
                             IrisText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: manualPairPort.text.length === 0 && !manualPairPort.activeFocus
-                                text: "Puerto vinc."
+                                text: Translation.tr("Pair port")
                                 color: IrisStyle.muted
                                 font.pixelSize: IrisStyle.typeMeta
                             }
@@ -333,7 +333,7 @@ Item {
                             IrisText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: manualCode.text.length === 0 && !manualCode.activeFocus
-                                text: "Código 6 dígitos"
+                                text: Translation.tr("6-digit code")
                                 color: IrisStyle.muted
                                 font.pixelSize: IrisStyle.typeMeta
                             }
@@ -368,7 +368,7 @@ Item {
                             IrisText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: manualConnectPort.text.length === 0 && !manualConnectPort.activeFocus
-                                text: "Puerto conexión (pantalla principal, ej. 39485)"
+                                text: Translation.tr("Connection port (main screen, e.g. 39485)")
                                 color: IrisStyle.muted
                                 font.pixelSize: IrisStyle.typeMeta
                             }
@@ -377,7 +377,7 @@ Item {
 
                     IrisButton {
                         emphasized: true
-                        text: "Vincular y Conectar"
+                        text: Translation.tr("Pair and Connect")
                         onClicked: {
                             AndroidState.pairAndConnect(
                                 manualIp.text.trim(),
@@ -399,7 +399,7 @@ Item {
                 IrisText {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
-                    text: "Conecta tu teléfono por cable USB solo una vez para activar el modo inalámbrico permanente en el puerto 5555. No necesitarás escanear ni vincular códigos."
+                    text: Translation.tr("Connect your phone via USB cable once to enable permanent wireless mode on port 5555. No QR scanning or pairing codes needed.")
                     color: IrisStyle.subtext
                     font.pixelSize: Math.max(9, Math.round(10.5 * root.d))
                 }
@@ -410,7 +410,7 @@ Item {
 
                     IrisButton {
                         emphasized: true
-                        text: "Activar Wi-Fi permanente (adb tcpip 5555)"
+                        text: Translation.tr("Enable permanent Wi-Fi (adb tcpip 5555)")
                         onClicked: AndroidState.enableUsbTcpip()
                     }
                 }
