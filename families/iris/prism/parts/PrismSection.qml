@@ -40,7 +40,12 @@ Item {
     // Search and Changes: a press on a row's name opens it where it lives.
     signal reach(var row)
 
-    readonly property real pad: PrismTheme.dp(24)
+    // Bare: only the rows (and the drawn keyboard), with no folder or head; the page's lead folder draws those.
+    property bool bare: false
+    // The least height of the folder: folders side by side in a row of the grid end on one line.
+    property real floor: 0
+    readonly property real naturalHeight: body.implicitHeight + root.pad - PrismTheme.dp(8)
+    readonly property real pad: root.bare ? 0 : PrismTheme.dp(24)
     readonly property real inner: root.width - root.pad * 2
 
     // ── The picture's place: beside the rows where both fit, else over them.
@@ -84,7 +89,7 @@ Item {
         return out
     }
 
-    implicitHeight: card.height
+    implicitHeight: root.bare ? body.implicitHeight : card.height
 
     // The tab holds the number and the name on one line, with air; the art takes the rest of the top.
     readonly property real rise: PrismTheme.dp(50)
@@ -99,8 +104,9 @@ Item {
     }
     PrismFolder {
         id: card
+        visible: !root.bare
         width: root.width
-        height: body.implicitHeight + root.pad - PrismTheme.dp(8)
+        height: Math.max(root.naturalHeight, root.floor)
         rise: root.rise
         tabWidth: Math.min(root.tabNeed, root.tabRoom)
         tint: root.tint
@@ -114,7 +120,7 @@ Item {
     Rectangle {
         id: chipBox
         readonly property string say: root.chip
-        visible: say.length > 0
+        visible: say.length > 0 && !root.bare
         x: root.width - width - PrismTheme.dp(12)
         y: Math.round((root.rise - height) / 2)
         z: 1
@@ -149,7 +155,7 @@ Item {
     // What this group changed, put back from its own folder: the count on the art, a press restores only these rows.
     PrismPill {
         id: resetBox
-        visible: root.restorables.length > 0
+        visible: root.restorables.length > 0 && !root.bare
         z: 1
         x: (chipBox.visible ? chipBox.x - PrismTheme.dp(8) : root.width - PrismTheme.dp(12)) - width
         y: Math.round((root.rise - height) / 2)
@@ -169,8 +175,9 @@ Item {
 
         // The head: the number and the name inside the tab, the line under it on the front sheet.
         Item {
+            visible: !root.bare
             width: parent.width
-            height: root.rise + (lineSaid.visible ? lineSaid.implicitHeight + PrismTheme.dp(2) : 0)
+            height: root.bare ? 0 : root.rise + (lineSaid.visible ? lineSaid.implicitHeight + PrismTheme.dp(2) : 0)
             PrismText {
                 id: titleSaid
                 y: Math.round((root.rise - height) / 2) + PrismTheme.dp(3)
@@ -192,7 +199,7 @@ Item {
                 wrapMode: Text.WordWrap
             }
         }
-        Item { width: 1; height: root.scened || root.keys ? PrismTheme.dp(18) : PrismTheme.dp(10) }
+        Item { width: 1; height: root.bare ? 0 : root.scened || root.keys ? PrismTheme.dp(18) : PrismTheme.dp(10) }
 
         // The drawn keyboard heads its card whole; the keys left iNiR's go back at once from under it.
         Loader {

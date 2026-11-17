@@ -19,6 +19,8 @@ Item {
     property color sheet: PrismTheme.card
     // Room on the art for what it says, so the ribbon gathers away from it.
     property real sayWidth: 0
+    // Off, only the front sheet is drawn: the host lays its own art behind the step (the page's lead folder).
+    property bool art: true
 
     readonly property real slope: Math.round(root.rise * 1.25)
     readonly property real tab: Math.max(root.radius * 2, Math.min(root.tabWidth, root.width - root.slope - root.radius * 2))
@@ -32,6 +34,7 @@ Item {
     // quieter and greyer than the poster (his 11-16: every card's colour pulled the eye), and over the desktop's glass
     // it is smoke with the light inside it (white frost in light), so the blur behind reads through it as through the rest.
     PrismFlow {
+        visible: root.art
         bare: PrismTheme.glass
         frostColour: PrismTheme.light ? Qt.rgba(1, 1, 1, 0.42) : Qt.rgba(0, 0, 0, 0.18) // iris-literal: the back sheet's smoke, under the front's
         strength: PrismTheme.light ? 0.58 : 0.66
@@ -82,6 +85,7 @@ Item {
     // The front sheet is frosted (folders-glass): the art behind it glows through its top, blurred, and dies away
     // before the first row. The same ribbon a step lower, so the light that shows is the light behind the step.
     PrismFlow {
+        visible: root.art
         x: root.tab
         y: root.rise
         width: root.width - x
