@@ -33,7 +33,10 @@ Variants {
         anchors.right: true
 
         color: "transparent"
-        visible: true
+        // Umbriel has no place-within-backdrop: a Background surface stacks over the wallpaper in map order and its
+        // overview mirrors it into every workspace, blurred. Its overview blurs the desktop by itself, so there the
+        // backdrop is mapped only as the desktop ("only the backdrop").
+        visible: CompositorService.niriNative || (Config.options?.waffles?.background?.backdrop?.hideWallpaper ?? false)
 
         // Multi-monitor wallpaper support
         readonly property string _perMonitorMainPath: {
