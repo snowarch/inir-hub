@@ -63,11 +63,11 @@ ColumnLayout {
 
                 IrisPlate {
                     anchors.fill: parent
-                    radius: IrisStyle.radiusRow
+                    radius: IrisStyle.radiusTile
                     lit: tile.modelData.active
                     color: ColorUtils.mix(
                         IrisStyle.accentFill,
-                        tileMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fill,
+                        tileMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate,
                         tile.lit
                     )
                     scale: tileMouse.pressed ? IrisStyle.pressScale(0.97) : 1.0

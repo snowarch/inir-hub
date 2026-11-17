@@ -93,11 +93,11 @@ Item {
                     readonly property bool isCurrent: devRow.modelData.id === AndroidState.selectedDeviceId
                     Layout.fillWidth: true
                     implicitHeight: Math.round(48 * root.d)
-                    radius: IrisStyle.radiusRow
+                    radius: IrisStyle.radiusTile
                     lit: devRow.isCurrent
                     color: devRow.isCurrent
                         ? IrisStyle.tintFill(IrisStyle.accent)
-                        : (devMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet)
+                        : (devMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate)
                     Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration } }
 
                     RowLayout {

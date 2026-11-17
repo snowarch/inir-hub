@@ -22,7 +22,7 @@ ColumnLayout {
         Layout.minimumHeight: Math.round(160 * root.d)
         implicitHeight: Math.round(180 * root.d)
         radius: IrisStyle.radiusCard
-        color: IrisStyle.fillQuiet
+        color: IrisStyle.formPlate
 
         Rectangle {
             anchors.top: parent.top

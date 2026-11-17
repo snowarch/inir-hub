@@ -96,9 +96,9 @@ Item {
                         required property var modelData
                         Layout.fillWidth: true
                         Layout.preferredHeight: Math.round(30 * root.d)
-                        radius: IrisStyle.radiusRow
+                        radius: IrisStyle.radiusTile
                         lit: root.activeTab === modelData.id
-                        color: lit ? IrisStyle.accentFill : (tabMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet)
+                        color: lit ? IrisStyle.accentFill : (tabMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate)
 
                         RowLayout {
                             anchors.centerIn: parent
@@ -421,7 +421,7 @@ Item {
                 Layout.fillWidth: true
                 visible: AndroidState.statusMessage.length > 0
                 implicitHeight: statusRow.implicitHeight + Math.round(10 * root.d)
-                radius: IrisStyle.radiusRow
+                radius: IrisStyle.radiusTile
                 color: IrisStyle.fillQuiet
 
                 RowLayout {

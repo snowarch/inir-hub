@@ -14,6 +14,7 @@ Singleton {
     property bool open: false
     property alias windowed: adapter.windowed
     property alias verticalLayout: adapter.verticalLayout
+    property alias pinned: adapter.pinned
     property alias mediaVisible: adapter.mediaVisible
     property bool wirelessOpen: false
     property bool devicesOpen: false
@@ -86,6 +87,7 @@ Singleton {
             property bool windowed: false
             property bool verticalLayout: false
             property bool mediaVisible: true
+            property bool pinned: false
             property string preferredDeviceId: ""
         }
     }
@@ -344,7 +346,7 @@ Singleton {
             cmd += " --no-audio"
         if (root.keepAwake)
             cmd += " --stay-awake"
-        if (!root.windowed)
+        if (!root.windowed && !root.pinned)
             root.open = false
         scrcpyProc.command = ["sh", "-c", cmd]
         scrcpyProc.running = true
@@ -352,7 +354,7 @@ Singleton {
 
     function turnScreenOff(): void {
         if (!root.requireAdbOrGuide("Pantalla apagada")) return
-        if (!root.windowed)
+        if (!root.windowed && !root.pinned)
             root.open = false
         scrcpyProc.command = [
             "sh", "-c",
@@ -405,7 +407,7 @@ Singleton {
     }
 
     function browseFiles(): void {
-        if (!root.windowed)
+        if (!root.windowed && !root.pinned)
             root.open = false
         Quickshell.execDetached([
             "sh", "-c",
@@ -418,7 +420,7 @@ Singleton {
     }
 
     function shareFileDialog(): void {
-        if (!root.windowed)
+        if (!root.windowed && !root.pinned)
             root.open = false
         Quickshell.execDetached([
             "sh", "-c",

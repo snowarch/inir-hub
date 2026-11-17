@@ -82,5 +82,7 @@
     "Connection port (main screen, e.g. 39485)": "Puerto conexión (pantalla principal, ej. 39485)",
     "Pair and Connect": "Vincular y Conectar",
     "Connect your phone via USB cable once to enable permanent wireless mode on port 5555. No QR scanning or pairing codes needed.": "Conecta tu teléfono por cable USB solo una vez para activar el modo inalámbrico permanente en el puerto 5555. No necesitarás escanear ni vincular códigos.",
-    "Enable permanent Wi-Fi (adb tcpip 5555)": "Activar Wi-Fi permanente (adb tcpip 5555)"
+    "Enable permanent Wi-Fi (adb tcpip 5555)": "Activar Wi-Fi permanente (adb tcpip 5555)",
+    "Keep open": "Fijar panel",
+    "Stop keeping open": "Desfijar panel"
 }

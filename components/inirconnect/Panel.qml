@@ -38,7 +38,7 @@ Scope {
             WlrLayershell.namespace: "quickshell:inirconnect"
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: AndroidState.open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
-            mask: AndroidState.open ? null : bodyRegion
+            mask: (AndroidState.open && AndroidState.pinned) ? bodyRegion : (AndroidState.open ? null : bodyRegion)
             Region { id: bodyRegion; item: overlayWin.frame }
 
             Loader {
@@ -157,6 +157,8 @@ Scope {
         function layout(): void { AndroidState.verticalLayout = !AndroidState.verticalLayout }
         /// Toggle between overlay surface and floating Wayland window mode
         function windowed(): void { AndroidState.windowed = !AndroidState.windowed }
+        /// Toggle keeping the overlay panel pinned
+        function pin(): void { AndroidState.pinned = !AndroidState.pinned }
         /// Toggle a specific subsheet (wireless, notifications, devices)
         function sheet(name: string): void { AndroidState.toggleSheet(name) }
     }
