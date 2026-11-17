@@ -128,7 +128,7 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        enabled: root.open && !root.windowed
+        enabled: root.open && !root.windowed && !AndroidState.pinned
         onClicked: AndroidState.open = false
     }
 

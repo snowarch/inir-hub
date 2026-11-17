@@ -56,7 +56,7 @@ Item {
                     implicitHeight: Math.round(18 * root.d)
                     radius: Math.round(9 * root.d)
                     lit: AndroidState.devicesOpen
-                    color: AndroidState.devicesOpen ? IrisStyle.accentFill : IrisStyle.fill
+                    color: AndroidState.devicesOpen ? IrisStyle.accentFill : IrisStyle.formPlate
 
                     Row {
                         id: devBadgeRow
@@ -189,6 +189,17 @@ Item {
                 selected: AndroidState.windowed
                 Accessible.name: AndroidState.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open in window")
                 onClicked: AndroidState.windowed = !AndroidState.windowed
+            }
+
+            IrisIconButton {
+                visible: !AndroidState.windowed
+                implicitWidth: parent.btnSize
+                implicitHeight: parent.btnSize
+                iconSize: parent.glyphSize
+                materialIcon: "keep"
+                selected: AndroidState.pinned
+                Accessible.name: AndroidState.pinned ? Translation.tr("Stop keeping open") : Translation.tr("Keep open")
+                onClicked: AndroidState.pinned = !AndroidState.pinned
             }
 
             IrisIconButton {

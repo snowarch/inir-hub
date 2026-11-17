@@ -147,8 +147,8 @@ Item {
                         required property var modelData
                         Layout.fillWidth: true
                         implicitHeight: Math.round(34 * root.d)
-                        radius: IrisStyle.radiusRow
-                        color: fileMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
+                        radius: IrisStyle.radiusTile
+                        color: fileMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate
                         Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration } }
 
                         RowLayout {

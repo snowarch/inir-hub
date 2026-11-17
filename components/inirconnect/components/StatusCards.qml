@@ -62,7 +62,7 @@ ColumnLayout {
                 Layout.minimumHeight: Math.round(46 * root.d)
                 implicitHeight: Math.round(48 * root.d)
                 radius: IrisStyle.radiusTile
-                color: cardMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fill
+                color: cardMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate
                 Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration } }
 
                 RowLayout {

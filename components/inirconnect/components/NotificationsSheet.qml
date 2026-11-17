@@ -158,8 +158,8 @@ Item {
                         required property var modelData
                         Layout.fillWidth: true
                         implicitHeight: nRow.implicitHeight + Math.round(12 * root.d)
-                        radius: IrisStyle.radiusRow
-                        color: IrisStyle.fillQuiet
+                        radius: IrisStyle.radiusTile
+                        color: IrisStyle.formPlate
 
                         RowLayout {
                             id: nRow

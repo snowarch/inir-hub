@@ -17,7 +17,7 @@ IrisPlate {
     implicitHeight: Math.round(56 * root.d)
     radius: IrisStyle.radiusTile
     lit: AndroidState.mediaPlaying
-    color: AndroidState.mediaPlaying ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.fill
+    color: AndroidState.mediaPlaying ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.formPlate
     Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration } }
 
     RowLayout {
