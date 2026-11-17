@@ -17,6 +17,7 @@
     "summary": "Phone status, wireless pairing, KDE Connect actions and live ADB/scrcpy control",
     "description": "Manage your Android device from iNiR: live ADB and KDE Connect telemetry (battery, network, signal), wireless QR pairing, screen mirroring via scrcpy, screenshot, screen recording, unlock, locate phone, and file browsing.",
     "authors": [
+        "LATAR-web",
         "ltar"
     ],
     "license": "MIT",
