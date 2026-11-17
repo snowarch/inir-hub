@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
-// The desktop card in Prism (the widget design "Prism" of iRiS): the lanes are the body, the window in focus is the
-// one thing the light breaks on (it wears the spectrum), the head counts what is open. Small: three lanes of icons.
+// The desktop card in Prism (the widget design "Prism" of iRiS): the lanes are the body, the window in focus a white
+// tile (the refs' lit key), the head counts what is open. Small: three lanes of icons.
 // Medium: three with their numbers and the apps named where a window is wide enough. Large: up to six.
 import QtQuick
 import qs.services
@@ -21,9 +21,9 @@ PrismFolder {
     flapGlyph: root.drawn && root.small ? "select_window" : ""
     lightPass: root.card.here ? 1 : 0.55
 
-    // A slab gives the lanes its whole body under the head; folded, they keep to the clear pane.
-    readonly property real lanesTop: root.paneTop + root.pick(root.folded ? 8 : 2, root.folded ? 8 : 2, root.folded ? 12 : 4)
-    readonly property real lanesBottom: root.folded ? root.paneBottom - root.pick(8, 8, 12) : root.height - root.inset
+    // The slab gives the lanes its whole body under the head.
+    readonly property real lanesTop: root.paneTop + root.pick(2, 2, 4)
+    readonly property real lanesBottom: root.footBottom - root.pick(6, 6, 10)
 
     WorkspaceLanes {
         id: lanes
@@ -58,7 +58,6 @@ PrismFolder {
         lit: root.ink
         onLit: root.onFill(root.ink)
         radius: root.pick(9, 10, 12)
-        litEffect: Component { PrismSpectrum { mono: root.nothing; white: 0.1 } }
     }
     FaceText {
         visible: !root.drawn

@@ -64,8 +64,8 @@ PrismFolder {
         visible: !root.small
         x: root.inset
         width: root.innerWidth
-        y: Math.round(root.large ? root.footTop + root.dp(20) : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
-        spacing: root.dp(12)
+        y: Math.round(root.large ? root.footTop + root.dp(14) : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
+        spacing: root.dp(10)
         Repeater {
             model: root.small ? [] : root.stories.slice(1)
             Item {

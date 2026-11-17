@@ -37,7 +37,7 @@ PrismFolder {
     ].filter(entry => entry.there && Boolean(root.widget.familyOption("tile." + entry.key, true)))
     readonly property int perLine: root.small ? 3 : root.medium ? 5 : 4
     readonly property var shown: root.keys.slice(0, root.large ? 8 : root.perLine)
-    readonly property real disc: root.pick(40, 46, 50)
+    readonly property real disc: Math.min(root.pick(38, 44, 48), Math.floor((root.paneHeight - (root.large ? root.dp(10) : root.dp(4))) / (root.large ? 2 : 1)))
     readonly property real gap: root.perLine > 1 ? (root.innerWidth - root.perLine * root.disc) / (root.perLine - 1) : 0
     readonly property bool levels: Boolean(root.widget.familyOption("sliders", true))
     readonly property string lit: root.keys.filter(entry => entry.lit).map(entry => entry.label).join(" · ")
@@ -101,9 +101,9 @@ PrismFolder {
         id: volumeLevel
         visible: root.levels && root.sounding
         x: root.inset
-        y: Math.round(root.footTop + (root.large ? root.dp(28) : (root.footHeight - height) / 2 - root.dp(2)))
+        y: Math.round(root.footTop + (root.large ? root.dp(18) : (root.footHeight - height) / 2 - root.dp(2)))
         width: root.innerWidth
-        height: root.pick(30, 30, 36)
+        height: root.pick(28, 28, 34)
         muted: root.muted
         icon: root.volumeGlyph
         value: root.volume
@@ -116,7 +116,7 @@ PrismFolder {
     IrisCapsuleSlider {
         visible: root.large && root.levels && root.monitor !== null && root.sounding
         x: root.inset
-        y: volumeLevel.y + volumeLevel.height + root.dp(12)
+        y: volumeLevel.y + volumeLevel.height + root.dp(10)
         width: root.innerWidth
         height: volumeLevel.height
         icon: "light_mode"
@@ -133,11 +133,14 @@ PrismFolder {
         face: root
         x: root.inset
         width: root.innerWidth
-        y: Math.round(alone ? root.footTop + (root.footHeight - height) / 2 - root.dp(2) : root.height - root.inset - height)
+        y: Math.round(alone ? root.footTop + (root.footHeight - height) / 2 - root.dp(2) : root.footBottom - root.dp(8) - height)
         text: root.lit.length > 0 ? root.lit : Translation.tr("Everything is off")
         color: root.inkSecondary
         size: 13
         weight: Font.Medium
+        // Small takes two lines rather than cut a name.
+        wrapMode: Text.WordWrap
+        maximumLineCount: root.small ? 2 : 1
         elide: Text.ElideRight
     }
 }

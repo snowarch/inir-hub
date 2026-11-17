@@ -106,7 +106,6 @@ Item {
         fanSpread: view.compact ? 0.34 : view.wide ? 0.28 : 0.3
         lightPass: view.lightPass
         shelf: view.songLight
-        white: view.label
     }
 
     // ── the tab: the player's mark and name ──

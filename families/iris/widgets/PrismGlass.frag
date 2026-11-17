@@ -4,7 +4,7 @@
 // shorter flap lit in the widget's colour holds one fact; a clearer pane of glass laid across the whole width holds what
 // the widget is about; the folder's foot runs under it. One beam of white light enters low on the left, breaks on the
 // pane into its spectrum and fans out to the upper right, seen diffused through the frost (more through the pane than
-// through the body). Grain on the glass, a rim lit from above, the pane's shadow on the folder and the tab's on the flap.
+// through the body). Grain on the glass, no rim, the pane's shadow on the folder and the tab's on the flap.
 // The folder's shadow on the desktop is the person's (`look.w`, off by factory); nothing glows past its edge (his 11-07:
 // no light behind a widget). Static: it draws again only when a value changes.
 layout(location = 0) in vec2 qt_TexCoord0;
@@ -34,7 +34,7 @@ layout(std140, binding = 0) uniform buf {
     // on the desktop (0 none, the factory; 1 full).
     vec4 look;
     // x: 0 the folder, 1 a slab (one piece of glass: no tab, flap or pane); y: the slab's corners; z: how much of the
-    // beam a slab lets through (0 quiet: only its rim splits the light, near `beam.zw`); w: unused.
+    // beam a slab lets through (0 quiet: only a breath of it inside the glass, near `beam.zw`); w: unused.
     vec4 form;
     // The spectrum's stops, violet to red (IrisStyle.prismStops).
     vec4 s0; vec4 s1; vec4 s2; vec4 s3; vec4 s4; vec4 s5; vec4 s6;
@@ -222,30 +222,20 @@ void main() {
     float n = hash(floor(p / px)) - 0.5;
     col.rgb += vec3(n * u.look.z * covered * col.a);
 
-    // The rims, lit from above and fading downward (Figma's 0.5 px stroke, white to clear).
+    // No rim (his 11-16 "bordes slop"): the body and its pane stand off by their fill. Only where the beam passes
+    // nearest the break, a breath of its light just inside the glass.
     vec2 e = vec2(0.5 * px, 0.0);
     vec2 nBody = normalize(vec2(metrics(p + e.xy).x - metrics(p - e.xy).x, metrics(p + e.yx).x - metrics(p - e.yx).x) + 1e-5);
     vec2 nPane = normalize(vec2(box(p + e.xy, u.pane, vec4(u.radii.w)) - box(p - e.xy, u.pane, vec4(u.radii.w)),
         box(p + e.yx, u.pane, vec4(u.radii.w)) - box(p - e.yx, u.pane, vec4(u.radii.w))) + 1e-5);
     float lineBody = (1.0 - smoothstep(0.0, px * 1.1, abs(body + 0.5 * px))) * (1.0 - inPane);
     float linePane = 1.0 - smoothstep(0.0, px * 1.1, abs(paneD + 0.5 * px));
-    float fromTopBody = 0.25 + 0.75 * clamp(-nBody.y, 0.0, 1.0);
-    float fromTopPane = 0.3 + 0.7 * clamp(-nPane.y, 0.0, 1.0);
-    float rimBody = lineBody * fromTopBody * (paper ? 0.55 : 0.2) * (1.0 - lit);
-    float rimPane = linePane * fromTopPane * (paper ? 0.9 : 0.42);
-    if (slab) rimBody *= paper ? 1.0 : 1.6;
-    col.rgb = mix(col.rgb, vec3(col.a), clamp(rimBody + rimPane, 0.0, 1.0));
-    // A slab's rim splits the light where it passes nearest the break: a short run of the spectrum along the edge,
-    // its colour turning with the angle around the break, gone a third of the way round.
     if (slab && u.fan.z > 0.0) {
         vec2 v = p - u.beam.zw;
         float reach = 0.16 * size.y + 0.06 * size.x;
         float near = exp(-length(v) / reach);
         float a = atan(v.y, v.x);
         vec3 hue = u.fan.w > 0.5 ? vec3(1.0) : spectrum(0.5 + 0.5 * sin(a * 1.5 + u.fan.x));
-        float glint = (1.0 - smoothstep(0.0, px * 1.4, abs(body + 0.7 * px))) * near * near * u.fan.z * 1.3;
-        col.rgb = mix(col.rgb, hue * col.a, clamp(glint * (paper ? 0.55 : 0.7), 0.0, 1.0));
-        // and inside the glass, a breath of the same colour just behind the edge
         float haze = (1.0 - smoothstep(0.0, 0.07 * size.y, -body)) * inBody * near * near * u.fan.z;
         col.rgb += hue * haze * (paper ? 0.05 : 0.12) * col.a;
     }

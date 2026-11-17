@@ -1376,9 +1376,10 @@ Item {
                                     width: windowsContent.cardWidth
                                     height: windowsContent.cardHeight
                                     radius: Math.max(IrisStyle.radiusMicro, menu.radius - Math.round(10 * root.d))
-                                    color: card.pressed ? IrisStyle.fillActive : card.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
-                                    border.width: card.focusedWindow ? Math.max(2, Math.round(2 * root.d)) : 0
-                                    border.color: IrisStyle.accent
+                                    // The focused window is the lit card, never a ring round it (his 10-30).
+                                    color: card.pressed ? IrisStyle.fillActive
+                                        : card.focusedWindow ? (card.containsMouse ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.tintFill(IrisStyle.accent))
+                                        : card.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
                                     scale: card.pressed ? IrisStyle.pressScale(0.97) : 1
                                     Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                     Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }

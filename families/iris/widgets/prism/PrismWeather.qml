@@ -55,7 +55,7 @@ PrismFolder {
             id: number
             face: root
             text: root.figure
-            size: root.type(46, 56, 86)
+            size: root.type(40, 48, 76)
         }
         FaceText {
             face: root
@@ -145,7 +145,7 @@ PrismFolder {
         visible: root.ready && root.hours.length > 0
         x: root.inset
         width: root.innerWidth
-        y: root.large ? root.footTop + root.dp(18) : Math.round(root.footTop + (root.footHeight - height) / 2)
+        y: root.large ? root.footTop + root.dp(10) : Math.round(root.footTop + (root.footHeight - height) / 2)
         Repeater {
             model: root.hours
             Column {
@@ -195,8 +195,8 @@ PrismFolder {
             readonly property string glyph: Icons.getWeatherIcon(day.modelData.code, false) ?? "cloud"
             x: root.inset
             width: root.innerWidth
-            height: root.dp(28)
-            y: coming.y + coming.height + root.dp(12) + day.index * height
+            height: root.dp(25)
+            y: coming.y + coming.height + root.dp(8) + day.index * height
             FaceText {
                 id: dayName
                 anchors.verticalCenter: parent.verticalCenter

@@ -20,6 +20,14 @@ MouseArea {
     Accessible.name: tile.name
     Accessible.checked: tile.selected
     onClicked: Config.setNestedValue("iris.appearance.preset", tile.name)
+    // The chosen preset stands on the selection fill, miniature and name together; never a ring (his 10-30).
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: -Math.round(4 * tile.d)
+        radius: miniature.radius + Math.round(4 * tile.d)
+        color: tile.selected ? IrisStyle.selectionFill : tile.containsMouse ? IrisStyle.fillHover : "transparent"
+        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+    }
     Rectangle {
         id: miniature
         anchors.left: parent.left
@@ -28,9 +36,6 @@ MouseArea {
         height: Math.round(40 * tile.d)
         radius: Math.round(12 * tile.values.shape * tile.d)
         color: IrisStyle.surfaceOpaque
-        border.width: tile.selected ? 2 : 1
-        border.color: tile.selected ? IrisStyle.accent : (tile.containsMouse ? IrisStyle.borderStrong : IrisStyle.border)
-        Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         Column {
             anchors.fill: parent
             anchors.margins: Math.round(8 * tile.d)

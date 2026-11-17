@@ -44,30 +44,17 @@ PrismFolder {
 
     tabGlyph: "hourglass_top"
     tabText: root.small ? Translation.tr("Today") : Translation.tr("Screen Time")
+    // The app used most, its mark in the pane and its time on the head; small has room for the day's total only.
+    flapText: !root.small && root.counting && root.leader !== null && !root.idle ? root.shortDuration(root.leader?.seconds ?? 0) : ""
     shelf: root.nothing ? root.signal : root.accent
 
-    // ── the flap: the app the day went to ──
-    Row {
-        visible: root.counting && root.leader !== null && !root.idle
-        readonly property real middle: root.folded ? Math.round((root.flapTop + root.paneTop) / 2) : root.headY
-        x: root.folded ? Math.round((root.flapLeft + root.flapRight) / 2 + root.dp(3) - width / 2) : root.width - root.inset - width
-        y: Math.round(middle - height / 2)
-        spacing: root.dp(4)
-        SmartAppIcon {
-            anchors.verticalCenter: parent.verticalCenter
-            implicitSize: root.pick(14, 16, 22)
-            icon: IrisPieces.appIcon(String(root.leader?.originalId ?? root.leader?.id ?? ""))
-        }
-        FaceText {
-            anchors.verticalCenter: parent.verticalCenter
-            face: root
-            text: root.shortDuration(root.leader?.seconds ?? 0)
-            color: root.folded ? root.inkOnShelf : root.shelf
-            size: root.folded ? root.type(12, 13, 17) : root.type(12, 13, 15)
-            weight: Font.Bold
-            font.family: root.fontNumbers
-            font.features: ({ "tnum": 1 })
-        }
+    // ── the leader app mark at the trailing end of the pane ──
+    SmartAppIcon {
+        visible: !root.small && root.counting && root.leader !== null && !root.idle
+        x: root.width - root.inset - width
+        y: Math.round(root.paneMiddle - height / 2)
+        implicitSize: root.pick(22, 26, 36)
+        icon: IrisPieces.appIcon(String(root.leader?.originalId ?? root.leader?.id ?? ""))
     }
 
     // ── the pane: today ──
@@ -87,7 +74,7 @@ PrismFolder {
                     id: figure
                     face: root
                     text: part.modelData.value
-                    size: root.type(36, 50, 72)
+                    size: root.type(34, 46, 68)
                 }
                 FaceText {
                     face: root
@@ -120,13 +107,9 @@ PrismFolder {
         visible: root.counting
         x: root.inset
         width: root.innerWidth
-        y: root.footTop + root.pick(12, 10, 18)
-        height: root.pick(26, 24, 44)
+        y: root.footTop + root.pick(6, 6, 12)
+        height: root.pick(22, 20, 38)
         readonly property real pitch: hours.width / 24
-        // A slab runs the day through the spectrum, midnight violet to the next midnight red; hours to come stay faint.
-        layer.enabled: !root.folded
-        layer.smooth: true
-        layer.effect: PrismSpectrum { mono: root.nothing }
         Repeater {
             model: hours.visible ? 24 : 0
             Rectangle {
@@ -138,8 +121,7 @@ PrismFolder {
                 height: Math.max(width, Math.round(hours.height * bar.level))
                 y: hours.height - height
                 radius: Math.min(width / 2, root.dp(2))
-                color: !root.folded ? (bar.index > root.hourNow ? root.fill : root.ink)
-                    : bar.index === root.hourNow ? root.shelf : bar.index > root.hourNow ? root.fill : root.fillActive
+                color: bar.index === root.hourNow ? root.shelf : bar.index > root.hourNow ? root.fill : root.ink
             }
         }
     }
@@ -166,8 +148,8 @@ PrismFolder {
             required property int index
             x: root.inset
             width: root.innerWidth
-            height: root.dp(30)
-            y: root.footTop + root.dp(90) + app.index * root.dp(32)
+            height: root.dp(28)
+            y: root.footTop + root.dp(72) + app.index * root.dp(30)
             SmartAppIcon {
                 anchors.verticalCenter: parent.verticalCenter
                 implicitSize: root.dp(20)

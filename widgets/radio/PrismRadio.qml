@@ -65,7 +65,7 @@ PrismFolder {
     // ── the pane: the station, and its key ──
     Rectangle {
         id: playKey
-        width: root.pick(40, 52, 64)
+        width: Math.min(root.pick(38, 48, 58), root.paneHeight - root.dp(6))
         height: width
         x: root.width - root.inset - width
         y: Math.round(root.paneMiddle - height / 2)
@@ -90,7 +90,7 @@ PrismFolder {
     Column {
         x: root.inset
         y: Math.round(root.paneMiddle - height / 2)
-        width: playKey.x - root.inset - root.dp(12)
+        width: (playKey.visible ? playKey.x - root.dp(12) : root.width - root.inset) - root.inset
         spacing: root.dp(1)
         FaceText {
             face: root

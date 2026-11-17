@@ -20,14 +20,12 @@ PrismFolder {
     tabText: root.card.label
     flapText: root.reading.valid ? root.card.shortDate : ""
     lightPass: root.card.arrived ? 1 : root.counting && !root.reading.past ? 0.55 : 0.3
-    // The beam falls on today's tick: through the pane's foot when folded, from the slab's top edge otherwise.
-    prism: ruler.visible ? Qt.point(ruler.x + ruler.todayX, root.folded ? ruler.y : 0)
-        : root.folded ? Qt.point(Math.round(root.inset * 0.5), root.paneBottom - root.pick(10, 10, 16))
-        : Qt.point(root.width - root.pick(28, 40, 48), root.pick(2, 2, 4))
+    // The light falls on today's tick, from the slab's top edge.
+    prism: ruler.visible ? Qt.point(ruler.x + ruler.todayX, 0) : Qt.point(root.width - root.pick(28, 40, 48), root.pick(2, 2, 4))
 
-    // A slab gives its whole body under the head; folded, the card keeps to the clear pane.
-    readonly property real areaTop: root.paneTop + root.pick(root.folded ? 8 : 2, root.folded ? 8 : 2, root.folded ? 12 : 6)
-    readonly property real areaBottom: root.folded ? root.paneBottom - root.pick(8, 8, 12) : root.height - root.inset
+    // The slab gives its whole body under the head.
+    readonly property real areaTop: root.paneTop + root.pick(2, 2, 6)
+    readonly property real areaBottom: root.footBottom - root.pick(6, 6, 10)
     readonly property real rulerHeight: root.pick(14, 18, 30)
     readonly property real wordsBottom: ruler.visible ? ruler.y - root.pick(8, 10, 18) : root.areaBottom
 
@@ -44,8 +42,7 @@ PrismFolder {
         feedback: IrisStyle.feedbackDuration
         ink: root.ink
         track: IrisStyle.trackOf(root.ink)
-        lit: root.ink
-        litEffect: Component { PrismSpectrum { mono: root.nothing; white: 0.1 } }
+        lit: root.shelf
     }
 
     // Large: the date in full and the share gone, over the ruler.

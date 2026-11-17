@@ -8,11 +8,15 @@ StyledText {
     property real size: 13
     property int weight: Font.Medium
 
+    // A credit (`.claude/ref/language`): a figure's name or a count, set small in mono caps, never in sentence case.
+    property bool credit: false
+
     color: face.ink
-    font.family: face.fontMain
-    font.pixelSize: face.px(size)
+    font.family: root.credit ? face.fontLabel : face.fontMain
+    font.pixelSize: face.px(root.credit ? size * 0.84 : size)
     font.weight: weight
-    font.letterSpacing: 0
+    font.capitalization: root.credit ? Font.AllUppercase : Font.MixedCase
+    font.letterSpacing: root.credit ? face.px(size) * 0.06 : 0
     elide: Text.ElideRight
     maximumLineCount: 1
     // Whole-pixel size: a text's fractional natural size puts every neighbour after it off the pixel grid.

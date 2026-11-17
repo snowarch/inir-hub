@@ -51,11 +51,11 @@ IrisWidgetFace {
         readonly property color onChip: root.onFill(chip.color)
         readonly property bool justCopied: root.copied === chip.index
         color: chip.value.length > 0 ? chip.value : root.fill
-        // At rest a hairline: a wallpaper's darkest colours are the plate's own and the swatch was gone.
-        border.width: chipHover.hovered ? root.dp(2) : 1
-        border.color: chipHover.hovered ? ColorUtils.applyAlpha(chip.onChip, 0.45) : IrisStyle.hairlineStrong // iris-literal: a swatch ring in its own colour
+        // A hairline keeps a swatch as dark as the plate visible; pointing lifts the swatch, never rings it (his 10-30).
+        border.width: 1
+        border.color: IrisStyle.hairlineStrong
         transformOrigin: Item.Center
-        scale: chipTap.pressed ? IrisStyle.pressScale(0.94) : 1
+        scale: chipTap.pressed ? IrisStyle.pressScale(0.94) : chipHover.hovered ? 1.05 : 1
         Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
         Behavior on color {
             SequentialAnimation {

@@ -1,7 +1,7 @@
 # Prism
 
 Prism is a Design for iRiS that dresses the whole shell in the language of Prism, iRiS's Settings: near-black
-surfaces, white solids for what is chosen, hairlines of light, and the spectrum as the only colour of its own.
+surfaces, white solids for what is chosen, bodies standing off by their fill, and the spectrum as the only colour of its own.
 
 ## Wear it
 
@@ -16,9 +16,9 @@ were wearing it, iRiS shows again.
 - Colour: Prism's three near-blacks and Apple's label inks in dark and ink; in light, Prism's paper whites. Filled
   controls, chosen buttons and today's date are white solids (black in light). Your accent still marks where you are.
 - Shape: Prism's corners (panels 28, cards 18, rows 14) and squircle bubbles and pieces.
-- Material: a hairline of light on every edge, flat texture. Glass stays your choice.
+- Material: flat, no rim; each body stands off by its fill. Glass stays your choice.
 - Motion: glide, calm and without bounce.
-- Lists and rows: chosen rows and hovers as solid plates, lists numbered like a chart, sections ruled by hairlines.
+- Lists and rows: chosen rows and hovers as solid plates, sections ruled by hairlines.
 - Desktop widgets: their Prism faces, frosted glass with one lit colour each. A widget you gave a design of its own
   keeps it.
 - The Island at rest: a thread of white light enters from the left, meets the hour and leaves it as the spectrum.

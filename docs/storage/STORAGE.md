@@ -18,7 +18,7 @@ Home. A drive mounted many times (a btrfs subvolume at `/`, `/home`, `/var/log`)
 - **Large:** what is left on all of them, over up to six drives.
 
 The card leads with the system drive, or with a drive past nine tenths when there is one. In Prism the lead drive's
-bar wears the spectrum.
+bar is lit white.
 
 ## States
 

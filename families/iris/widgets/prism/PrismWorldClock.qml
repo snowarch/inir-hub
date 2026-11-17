@@ -48,7 +48,7 @@ PrismFolder {
             id: hour
             face: root
             text: root.time.main
-            size: root.type(42, 54, 82)
+            size: root.type(38, 48, 76)
             tone: root.first?.isDay ?? true ? root.ink : root.inkSecondary
         }
         FaceText {
@@ -90,11 +90,11 @@ PrismFolder {
             id: row
             required property var modelData
             required property int index
-            readonly property real pitch: root.pick(24, 0, 50)
+            readonly property real pitch: root.pick(22, 0, 44)
             x: root.inset
             width: root.innerWidth
             height: row.pitch
-            y: root.footTop + root.pick(8, 0, 14) + row.index * row.pitch
+            y: root.footTop + root.pick(4, 0, 10) + row.index * row.pitch
             Rectangle {
                 visible: root.large && row.index > 0
                 width: parent.width

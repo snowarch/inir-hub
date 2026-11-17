@@ -29,10 +29,11 @@ Item {
     // How much light passes (0 none, 1 all), and the flap's colour.
     property real lightPass: 1
     property color shelf: body.face.accent
-    // Nothing: white light only.
-    property bool white: body.face.nothing ?? false
+    // White light only (his 11-16: the split light read as a rainbow pasted on every card). The shader keeps its
+    // spectrum path for a Design that asks for it.
+    property bool white: true
     // One piece of glass instead of the folder (Prism's quiet and beam looks): no tab, flap or pane; its corners, and how
-    // much of the beam it lets through (0: only its rim splits the light near `prism`).
+    // much of the beam it lets through (0: only a breath of it inside the glass near `prism`).
     property bool slab: false
     property real slabRadius: body.face.radius
     property real beamPass: 0

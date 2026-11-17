@@ -48,7 +48,7 @@ PrismFolder {
             rolls: false
             face: root
             text: root.card.downRate[0]
-            size: root.type(42, 52, 80)
+            size: root.type(38, 46, 74)
         }
         FaceText {
             face: root
@@ -65,20 +65,14 @@ PrismFolder {
         // Its own place, never pushed by the figure: medium at the pane's right, small and large across the foot.
         x: root.medium ? root.inset + Math.round(root.innerWidth * 0.56) : root.inset
         width: root.width - root.inset - x
-        y: root.medium ? root.paneTop + root.dp(10) : root.footTop + root.pick(8, 0, 12)
+        y: root.medium ? root.paneTop + root.dp(10) : root.footTop + root.pick(6, 0, 10)
         height: root.medium ? root.paneBottom - root.dp(10) - y
-            : root.small ? root.height - root.inset - y : others.y - root.dp(14) - y
+            : root.small ? root.footBottom - root.dp(6) - y : others.y - root.dp(12) - y
         downs: root.card.downLevels
         ups: root.card.upLevels
         filled: root.card.filled
         inTint: root.shelf
         outTint: root.outTint
-        // A slab colours what came in by its height, as Vitals colours a load.
-        inEffect: root.folded ? null : spectrum
-        Component {
-            id: spectrum
-            PrismSpectrum { mono: root.nothing; angle: -90; from: 0.3; to: 1 }
-        }
     }
     FaceText {
         visible: !root.card.shown
@@ -103,7 +97,7 @@ PrismFolder {
         x: root.inset
         width: root.innerWidth
         // Medium: the foot's middle. Large: its bottom, under the horizon.
-        y: root.large ? root.height - root.inset - height : Math.round(root.footTop + (root.footHeight - height) / 2) - root.dp(2)
+        y: root.large ? root.footBottom - root.dp(10) - height : Math.round(root.footTop + (root.footHeight - height) / 2) - root.dp(2)
         spacing: root.pick(14, 18, 22)
         Repeater {
             // Large: four short columns, each named by its arrow and one word, so no label is ever cut.

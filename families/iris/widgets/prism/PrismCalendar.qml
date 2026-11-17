@@ -13,7 +13,7 @@ PrismFolder {
     readonly property var today: DateTime.clock.date
     readonly property var viewing: root.widget.viewingDate ?? root.today
     readonly property var cells: root.large ? root.widget.monthCells() : []
-    readonly property var coming: IrisFaceData.upcomingEvents(root.today, 7).slice(0, root.small ? 1 : root.medium ? 2 : 3)
+    readonly property var coming: IrisFaceData.upcomingEvents(root.today, 7).slice(0, root.small ? 1 : 2)
     readonly property bool turned: (root.widget.monthShift ?? 0) !== 0
     function eventsOn(date: var): int {
         return (Events.getEventsForDate(date) ?? []).length + (CalendarSync.getEventsForDate(date) ?? []).length
@@ -25,6 +25,10 @@ PrismFolder {
         return sameDay ? time : IrisFaceData.capitalized(Translation.locale.toString(day, "ddd")) + " " + time
     }
 
+    capInteractive: root.turned
+    capGlyph: "today"
+    capName: Translation.tr("Today")
+    onCapClicked: root.widget.monthShift = 0
     tabGlyph: "calendar_month"
     tabText: IrisFaceData.capitalized(Translation.locale.toString(root.viewing, root.large ? "MMMM yyyy" : "MMMM"))
     flapText: root.turned ? Translation.tr("Today") : IrisFaceData.capitalized(Translation.locale.toString(root.today, "ddd d"))
@@ -75,9 +79,9 @@ PrismFolder {
         id: month
         visible: root.large
         x: root.inset
-        y: root.footTop + root.dp(12)
+        y: root.footTop + root.dp(8)
         width: root.innerWidth
-        height: root.height - root.dp(14) - y
+        height: root.footBottom - root.dp(6) - y
         readonly property real cell: month.width / 7
         readonly property real head: root.dp(18)
         readonly property int rows: Math.max(1, Math.ceil(root.cells.length / 7))
@@ -144,16 +148,8 @@ PrismFolder {
         }
         WheelHandler {
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-            onWheel: event => root.widget.monthShift = (root.widget.monthShift ?? 0) + (event.angleDelta.y > 0 ? -1 : 1)
+            // One notch, one month: a touchpad's small deltas add up to nothing until they reach a notch.
+            onWheel: event => { if (Math.abs(event.angleDelta.y) >= 60) root.widget.monthShift = (root.widget.monthShift ?? 0) + (event.angleDelta.y > 0 ? -1 : 1) }
         }
-    }
-    Item {
-        enabled: root.turned
-        x: root.flapLeft
-        y: root.flapTop
-        width: root.flapRight - root.flapLeft
-        height: root.paneTop - root.flapTop
-        HoverHandler { cursorShape: root.turned ? Qt.PointingHandCursor : Qt.ArrowCursor }
-        TapHandler { onTapped: root.widget.monthShift = 0 }
     }
 }

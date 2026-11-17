@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 // One drive a line: its name, what is left on it, and a bar of what it holds. Every face draws its drives with this,
 // in its own ink: the bar's taken part in `fill`, a drive past nine tenths in `full`, the one the face leads with in
-// `lit` (Prism lays its spectrum there through `litEffect`).
+// `lit`.
 import QtQuick
 import "storage.js" as Logic
 
@@ -24,7 +24,6 @@ Item {
     property color lit: "white"
     // Which line leads (lit), -1 none.
     property int leading: 0
-    property Component litEffect: null
     // Names for drives the system mounts without a label ("/" and "/home"), in the person's language.
     property string systemName: "System"
     property string homeName: "Home"
@@ -93,8 +92,6 @@ Item {
                     height: parent.height
                     radius: parent.radius
                     color: line.tone
-                    layer.enabled: line.leads && !line.filled && root.litEffect !== null
-                    layer.effect: root.litEffect
                 }
             }
         }

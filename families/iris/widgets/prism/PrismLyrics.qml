@@ -75,7 +75,7 @@ PrismFolder {
     Column {
         x: root.inset
         width: root.innerWidth
-        y: Math.round(root.large ? root.footTop + root.dp(22) : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
+        y: Math.round(root.large ? root.footTop + root.dp(14) : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
         spacing: root.dp(8)
         Repeater {
             model: root.singing ? root.coming.slice(0, root.large ? 2 : 1) : [root.artist].filter(name => name.length > 0)

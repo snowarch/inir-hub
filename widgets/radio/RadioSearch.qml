@@ -4,7 +4,7 @@ import QtQuick
 import qs.services
 
 // The tuner's search field. A plate in the family's corner, or in Prism's grammar a pill: a soft sheen from the
-// left, a hairline edge and, while typing, a thread of the spectrum under it.
+// left, a hairline edge and, while typing, a thread of the accent under it.
 FocusScope {
     id: root
 
@@ -35,18 +35,18 @@ FocusScope {
             GradientStop { position: 1; color: Qt.alpha(root.look.ink, 0.02) }
         }
     }
-    // Prism's focus: the spectrum as a thread along the bottom, inside the round ends.
+    // Prism's focus: the accent as a thread along the bottom, inside the round ends.
     Rectangle {
-        visible: root.prism && input.activeFocus && (root.look.spectrum ?? []).length > 1
+        visible: root.prism && input.activeFocus
         anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
         anchors.leftMargin: plate.radius
         anchors.rightMargin: plate.radius
         height: 1
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: root.look.spectrum?.[0] ?? "transparent" }
-            GradientStop { position: 0.5; color: root.look.spectrum?.[3] ?? "transparent" }
-            GradientStop { position: 1; color: root.look.spectrum?.[6] ?? "transparent" }
+            GradientStop { position: 0; color: "transparent" }
+            GradientStop { position: 0.5; color: root.look.accent }
+            GradientStop { position: 1; color: "transparent" }
         }
     }
     RadioGlyph {

@@ -135,8 +135,6 @@ IrisWidgetFace {
                     radius: IrisStyle.capsule(width)
                     visible: cell.modelData.isToday || cell.chosen || (dayHover.hovered && cell.modelData.currentMonth && grid.picks)
                     color: cell.modelData.isToday ? root.todayFill : cell.chosen ? root.fillActive : root.fillHover
-                    border.width: cell.chosen && !cell.modelData.isToday ? 1 : 0
-                    border.color: root.accent
                 }
                 HoverHandler { id: dayHover; cursorShape: grid.picks || !cell.modelData.currentMonth ? Qt.PointingHandCursor : Qt.ArrowCursor }
                 TapHandler {

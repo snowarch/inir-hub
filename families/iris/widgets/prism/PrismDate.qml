@@ -31,7 +31,7 @@ PrismFolder {
         x: root.inset
         y: Math.round(root.paneMiddle - height / 2)
         text: root.today.getDate()
-        size: root.type(50, 58, 92)
+        size: root.type(42, 50, 80)
         rolls: false
     }
     Column {
@@ -43,6 +43,7 @@ PrismFolder {
             anchors.right: parent.right
             face: root
             text: Translation.tr("Week %1").arg(root.week)
+            credit: true
             color: root.inkSecondary
             size: root.type(12, 13, 15)
             weight: Font.DemiBold
@@ -52,6 +53,7 @@ PrismFolder {
             anchors.right: parent.right
             face: root
             text: Translation.tr("Day %1").arg(root.dayOfYear)
+            credit: true
             color: root.inkTertiary
             size: root.type(11, 12, 14)
         }
@@ -67,7 +69,7 @@ PrismFolder {
         x: root.inset
         width: root.innerWidth
         height: implicitHeight
-        y: root.large ? root.footTop + root.dp(24) : Math.round(root.footTop + (root.footHeight - height) / 2)
+        y: root.large ? root.footTop + root.dp(16) : Math.round(root.footTop + (root.footHeight - height) / 2)
     }
     // The year as its twelve months: the ones gone dim, this one filling in the widget's colour, the rest to come.
     Row {
@@ -78,12 +80,8 @@ PrismFolder {
         x: root.inset
         width: root.innerWidth
         height: root.dp(root.large ? 6 : 5)
-        y: root.small ? root.footTop + root.dp(22) : root.height - root.dp(56)
+        y: root.small ? Math.round(root.footTop + root.footHeight * 0.28) : root.footBottom - root.dp(44)
         spacing: root.dp(root.large ? 4 : 3)
-        // A slab spends the year through the spectrum: January violet to December red, the months to come faint.
-        layer.enabled: !root.folded
-        layer.smooth: true
-        layer.effect: PrismSpectrum { mono: root.nothing }
         Repeater {
             model: 12
             Rectangle {
@@ -92,13 +90,13 @@ PrismFolder {
                 width: (year.width - 11 * year.spacing) / 12
                 height: year.height
                 radius: height / 2
-                color: month.index < year.month ? (root.folded ? root.fillActive : root.ink) : root.fill
+                color: month.index < year.month ? root.ink : root.fill
                 Rectangle {
                     visible: month.index === year.month
                     width: Math.max(height, parent.width * year.monthShare)
                     height: parent.height
                     radius: height / 2
-                    color: root.folded ? root.shelf : root.ink
+                    color: root.shelf
                 }
             }
         }

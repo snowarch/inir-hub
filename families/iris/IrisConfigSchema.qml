@@ -36,7 +36,7 @@ JsonObject {
         property string tint: "wallpaper" // accents: "wallpaper", "system" (iRiS), "spectrum" or "mono"
         property int vibrance: 85 // how strong widget accents are (0-100)
         property bool legibleAlways: false // Lume backs every widget as if the wallpaper under it were bright and busy
-        property string design: "iris" // "iris" faces, "material" (each widget's own style), "instrument" or "readout"
+        property string design: "iris" // "iris" faces, "prism", "material" (each widget's own style), "instrument" or "readout"
         property string material: "glass" // "glass", "clear", "solid" or "tinted"
         property int blur: 100 // how much the glass behind widgets frosts the wallpaper, % of the maximum
         property string weight: "regular" // "light", "regular" or "bold"
@@ -243,7 +243,7 @@ JsonObject {
         property string settingsHost: "overlay"
         // Prism's side column (profile, Changes, Now Playing): "auto" gives the page its room, "open" or "closed" is the person's.
         property string settingsRail: "auto"
-        // How iRiS Settings lays its page: "folio", "deck" or "console" (a Design with its own page keeps it).
+        // How iRiS Settings lays its page: "classic" or "folio" (a Design with its own page keeps it).
         property string settingsLayout: "classic"
         // iRiS Settings drawn as v2.33 drew it over every page of today: plated marks, an area's groups in one list, a
         // sidebar without captions.

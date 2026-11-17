@@ -33,6 +33,14 @@ PrismFolder {
         function onWidgetEditModeChanged(): void { root.adding = false }
     }
 
+    // Small has no room for the plus beside the task: the head's key adds one.
+    capInteractive: root.small && !root.adding
+    capGlyph: "add"
+    capName: Translation.tr("New task")
+    onCapClicked: {
+        root.adding = true
+        entry.forceActiveFocus()
+    }
     tabGlyph: "checklist"
     tabText: Translation.tr("Tasks")
     flapText: root.pending > 0 ? root.pending + " " + Translation.tr("left") : Translation.tr("All done")
@@ -167,8 +175,8 @@ PrismFolder {
     Column {
         x: root.inset
         width: root.innerWidth
-        y: Math.round(root.large ? root.footTop + root.dp(22) : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
-        spacing: root.pick(6, 8, 12)
+        y: Math.round(root.large ? root.footTop + root.dp(14) : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
+        spacing: root.pick(6, 8, 10)
         Repeater {
             model: root.entries.slice(1, root.small ? 2 : root.medium ? 2 : 6)
             Item {
@@ -176,6 +184,7 @@ PrismFolder {
                 required property var modelData
                 width: root.innerWidth
                 height: root.pick(20, 22, 24)
+                HoverHandler { id: taskHover }
                 Check {
                     entry: task.modelData
                     width: root.pick(16, 18, 20)
@@ -185,7 +194,7 @@ PrismFolder {
                 FaceText {
                     face: root
                     x: root.pick(24, 28, 30)
-                    width: parent.width - x
+                    width: parent.width - x - (remove.visible ? remove.width + root.dp(6) : 0)
                     anchors.verticalCenter: parent.verticalCenter
                     text: root.nameOf(task.modelData)
                     color: task.modelData.done ? root.inkTertiary : root.inkSecondary
@@ -193,6 +202,20 @@ PrismFolder {
                     size: root.type(12, 13, 14.5)
                     weight: Font.Medium
                     elide: Text.ElideRight
+                }
+                // Pointed, a task can go: the glyph turns the danger colour under the pointer.
+                MaterialSymbol {
+                    id: remove
+                    visible: taskHover.hovered && !root.small
+                    x: parent.width - width
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "close"
+                    iconSize: root.px(root.type(13, 14, 15))
+                    color: removeHover.hovered ? root.danger : root.inkTertiary
+                    HoverHandler { id: removeHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { onTapped: Todo.deleteItem(task.modelData.originalIndex) }
+                    Accessible.role: Accessible.Button
+                    Accessible.name: Translation.tr("Delete")
                 }
             }
         }

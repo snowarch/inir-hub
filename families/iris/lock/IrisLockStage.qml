@@ -94,10 +94,9 @@ Item {
             anchors.fill: parent
             visible: !glass.skinned && (glass.material !== "none" || glass.outline)
             radius: glass.radius
+            // A plate stands off by its smoke, never a line round it (his 11-16); a field on bare picture by a fill.
             color: glass.material === "glass" ? IrisStyle.mediaGlass
-                : glass.material === "tint" ? IrisStyle.mediaScrim : "transparent"
-            border.width: glass.material !== "tint" && !glass.lit ? 1 : 0
-            border.color: glass.material === "none" ? IrisStyle.onMediaFill : IrisStyle.mediaHairline
+                : glass.material === "tint" ? IrisStyle.mediaScrim : IrisStyle.onMediaFill
         }
         readonly property bool lit: glass.material === "glass" && IrisStyle.edgeLit
         IrisGlassEdge {
@@ -288,8 +287,6 @@ Item {
             radius: body.plateRadius > 0 ? Math.round(body.plateRadius * body.blockScale) + Math.round(8 * root.d) : IrisStyle.radiusPlate
             color: body.picked ? IrisStyle.tintFill(IrisStyle.accentOnMedia)
                 : grip.containsMouse ? IrisStyle.onMediaFill : "transparent"
-            border.width: body.picked || grip.containsMouse ? Math.max(1, Math.round(1.5 * root.d)) : 0
-            border.color: body.picked ? IrisStyle.accentOnMedia : IrisStyle.onMediaFillHover
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
         }
         Row {
@@ -849,8 +846,6 @@ Item {
                 height: width
                 radius: IrisStyle.capsule(width)
                 color: IrisStyle.mediaGlass
-                border.width: Math.max(1, Math.round(1.5 * root.d))
-                border.color: IrisStyle.mediaHairline
                 ClippingRectangle {
                 id: avatar
                 anchors.centerIn: parent

@@ -43,7 +43,6 @@ Item {
     property color lit: "transparent"
     property color onLit: root.ink
     // Laid over the lit window's fill (Prism breaks the light there); null wears `lit` as it is.
-    property Component litEffect: null
 
 
     function dp(v: real): real { return Math.round(v * root.d) }
@@ -189,9 +188,6 @@ Item {
                                         radius: Math.min(Math.max(root.dp(3), well.radius - root.dp(root.tileGap)), tile.side / 2)
                                         color: tile.lit ? root.lit : tileArea.containsMouse ? root.tileHover
                                             : tile.modelData.here ? root.tileHere : root.tile
-                                        layer.enabled: tile.lit && root.litEffect !== null
-                                        layer.smooth: true
-                                        layer.effect: root.litEffect
                                         Behavior on color { ColorAnimation { duration: root.feedback; easing.type: Easing.OutCubic } }
                                     }
                                     // The app's icon where it fits, its name beside it only where it fits whole.

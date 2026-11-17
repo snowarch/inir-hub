@@ -41,8 +41,8 @@
         },
         "material": {
             "texture": "flat",
-            "edge": "light",
-            "edgeWidth": 1,
+            "edge": "none",
+            "edgeWidth": 0,
             "plates": { "black": ["#1e1e21", "#0f0f11"], "white": ["#ffffff", "#f5f5f7"] },
             "glass": "refuse"
         },
@@ -53,7 +53,7 @@
         "look": {
             "look": "prism",
             "widgets": "prism",
-            "traits": { "marks": "tile", "selection": "plate", "captions": "mono", "hover": "wash", "index": true, "sections": "line", "rings": "none" }
+            "traits": { "marks": "tile", "selection": "plate", "captions": "mono", "hover": "wash", "index": false, "sections": "line", "rings": "none" }
         }
     }
 }

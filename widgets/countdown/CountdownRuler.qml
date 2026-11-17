@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 // The wait as a ruler, drawn the same in the iRiS and Prism faces: one tick per stretch of the wait, from the day the
 // date was set to the day itself. The ones gone stand in ink, the ones ahead are a track, and today's tick stands
-// whole and lit (Prism lays its spectrum over it, and aims the card's light there).
+// whole in `lit` (Prism aims the card's light there).
 import QtQuick
 
 Item {
@@ -15,7 +15,6 @@ Item {
     property color ink: "transparent"
     property color track: "transparent"
     property color lit: "transparent"
-    property Component litEffect: null
 
     function dp(v: real): real { return Math.round(v * root.d) }
     readonly property int today: Math.max(0, Math.min(root.ticks - 1, Math.floor(root.fraction * root.ticks)))
@@ -35,9 +34,6 @@ Item {
             y: root.height - height
             radius: width / 2
             color: tick.now ? root.lit : tick.index < root.today ? root.ink : root.track
-            layer.enabled: tick.now && root.litEffect !== null
-            layer.smooth: true
-            layer.effect: root.litEffect
             Behavior on color { ColorAnimation { duration: root.feedback; easing.type: Easing.OutCubic } }
         }
     }

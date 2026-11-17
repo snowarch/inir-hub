@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
 
 // The desktop card in Prism (the widget design "Prism" of iRiS): the tab names it, the flap says what is left on the
-// drive it leads with, and the bars are the body; the lead drive's bar is the one thing the light breaks on (it wears
-// the spectrum), a drive past nine tenths the warning colour. Small: the lead drive. Medium: three. Large: six.
+// drive it leads with, and the bars are the body: the lead drive's bar lit white inside the glass (the refs' white
+// pill for today), a drive past nine tenths the warning colour. Small: the lead drive. Medium: three. Large: six.
 import QtQuick
 import qs.services
 import qs.modules.iris.style
@@ -24,8 +24,8 @@ PrismFolder {
     flapGlyph: ""
     lightPass: root.card.leadDrive && root.card.leadDrive.taken >= 0.9 ? 0.55 : 1
 
-    readonly property real barsTop: root.paneTop + root.pick(root.folded ? 8 : 4, root.folded ? 8 : 4, root.folded ? 12 : 6)
-    readonly property real barsBottom: root.folded ? root.paneBottom - root.pick(8, 8, 12) : root.height - root.inset
+    readonly property real barsTop: root.paneTop + root.pick(4, 4, 6)
+    readonly property real barsBottom: root.footBottom - root.pick(6, 6, 10)
 
     StorageBars {
         visible: root.drawn
@@ -53,7 +53,6 @@ PrismFolder {
         freeText: root.card.freeText
         sizeText: root.card.sizeText
         figure: root.small ? "size" : "free"
-        litEffect: Component { PrismSpectrum { mono: root.nothing; white: 0.1 } }
     }
     FaceText {
         visible: !root.drawn

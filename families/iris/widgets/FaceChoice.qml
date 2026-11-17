@@ -17,8 +17,6 @@ Rectangle {
     radius: height / 2
     color: root.selected ? IrisStyle.selectionFill
         : hover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
-    border.width: root.selected && !IrisStyle.plateSelection ? 1 : 0
-    border.color: IrisStyle.tintBorder(IrisStyle.accent)
     scale: tap.pressed ? IrisStyle.pressScale(0.97) : 1
     Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
     Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }

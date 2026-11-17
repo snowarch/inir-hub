@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 // The minute's horizon in an iRiS face, drawn with the family's FaceArea (the Day's line): what came in rises above
 // the line, what went out hangs under it, on one scale (traffic.js `levels`), the newest second at the right. Until a
-// minute is kept it grows in from the right. Prism lays its spectrum over what came in (`inEffect`).
+// minute is kept it grows in from the right.
 import QtQuick
 import qs.modules.iris.widgets
 
@@ -17,7 +17,6 @@ Item {
     property color outTint: root.face.accent2
     // What came in takes the room above the line.
     property real split: 0.56
-    property Component inEffect: null
     // The line both halves stand on, across the whole minute even while it fills.
     property color axis: root.face.fillActive
 
@@ -35,9 +34,6 @@ Item {
         curve: t => root.at(root.downs, t)
         tint: root.inTint
         guide: false
-        layer.enabled: root.inEffect !== null
-        layer.smooth: true
-        layer.effect: root.inEffect
     }
     Rectangle {
         width: root.width

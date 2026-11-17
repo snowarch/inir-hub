@@ -44,7 +44,7 @@ PrismFolder {
                     id: figure
                     face: root
                     text: part.modelData.value
-                    size: root.type(36, 50, 72)
+                    size: root.type(34, 46, 68)
                 }
                 FaceText {
                     face: root
@@ -74,16 +74,12 @@ PrismFolder {
         face: root
         x: root.inset
         width: root.innerWidth
-        y: root.footTop + root.pick(14, 10, 30)
-        height: root.pick(22, 22, 72)
+        y: root.footTop + root.pick(8, 8, 22)
+        height: Math.min(root.pick(20, 20, 62), Math.max(root.dp(14), root.footHeight - root.dp(24)))
         from: root.bootAt
         to: root.nowAt
-        tint: root.folded ? root.shelf : root.ink
+        tint: root.ink
         curve: t => 0.8
-        // A slab: the time on runs through the spectrum, white where it began.
-        layer.enabled: !root.folded
-        layer.smooth: true
-        layer.effect: PrismSpectrum { mono: root.nothing; white: 0.18; from: 0.1; to: 0.9 }
     }
     Repeater {
         model: [0, 6, 12, 18, 24]

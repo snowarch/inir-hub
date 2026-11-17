@@ -89,16 +89,16 @@ PrismFolder {
         face: root
         x: root.inset
         y: Math.round(root.paneMiddle - height / 2)
-        width: Math.min(implicitWidth, root.innerWidth - leadKey.width - root.dp(12))
+        width: Math.min(implicitWidth, root.innerWidth - (leadKey.visible ? leadKey.width + root.dp(12) : 0))
         text: root.lead.value
-        size: root.type(34, 52, 72)
+        size: root.type(32, 48, 66)
         fontSizeMode: Text.HorizontalFit
         minimumPixelSize: root.px(20)
     }
     Key {
         id: leadKey
         timer: root.lead
-        width: root.pick(40, 52, 64)
+        width: Math.min(root.pick(38, 48, 58), root.paneHeight - root.dp(6))
         height: width
         x: root.width - root.inset - width
         y: Math.round(root.paneMiddle - height / 2)
@@ -114,9 +114,9 @@ PrismFolder {
             readonly property real columnWidth: root.medium ? (root.innerWidth - root.dp(16)) / 2 : root.innerWidth
             x: Math.round(root.inset + (root.medium ? other.index * (other.columnWidth + root.dp(16)) : 0))
             y: Math.round(root.footTop + (root.small ? (root.footHeight - height) / 2 - root.dp(2)
-                : root.medium ? (root.footHeight - height) / 2 - root.dp(2) : root.dp(26) + other.index * root.dp(66)))
+                : root.medium ? (root.footHeight - height) / 2 - root.dp(2) : root.dp(16) + other.index * root.dp(58)))
             width: other.columnWidth
-            height: root.pick(32, 36, 52)
+            height: root.pick(30, 34, 48)
             Key {
                 id: otherKey
                 timer: other.modelData

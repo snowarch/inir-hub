@@ -1268,7 +1268,6 @@ QtObject {
     readonly property color onMediaFillHover: ColorUtils.applyAlpha(root.onMedia, 0.3)
     readonly property color mediaScrim: Qt.rgba(0, 0, 0, 0.34)
     readonly property color mediaGlass: Qt.rgba(0, 0, 0, 0.16)
-    readonly property color mediaHairline: ColorUtils.applyAlpha(root.onMedia, 0.16)
     readonly property color plateShadow: root.glowing(Math.min(0.9, 0.36 * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
     // A grey sky is no light: it only greyed the face. On paper the wash is half as strong, a tint and not a film.
     // On paper a face's colour is a faint pigment wash, never a lamp behind it.

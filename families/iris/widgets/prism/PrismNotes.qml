@@ -46,5 +46,6 @@ PrismFolder {
         size: root.type(11.5, 12.5, 14)
         weight: Font.Medium
         wrapMode: Text.WordWrap
+        maximumLineCount: 2
     }
 }

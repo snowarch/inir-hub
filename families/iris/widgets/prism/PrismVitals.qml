@@ -80,7 +80,7 @@ PrismFolder {
             id: number
             face: root
             text: root.leadEntry ? root.figure(root.lead) : ""
-            size: root.type(42, 52, 80)
+            size: root.type(38, 46, 74)
             tone: root.level(root.lead) >= 0.85 ? root.danger : root.ink
         }
         FaceText {
@@ -102,10 +102,6 @@ PrismFolder {
         curve: t => IrisFaceData.smooth(root.levels, t)
         tint: root.shelf
         guide: false
-        // A slab colours the load by its height: calm blue at the foot, through green and yellow, red at the top.
-        layer.enabled: !root.folded
-        layer.smooth: true
-        layer.effect: PrismSpectrum { mono: root.nothing; angle: -90; from: 0.3; to: 1 }
     }
     FaceText {
         visible: root.leadEntry === null
@@ -124,7 +120,7 @@ PrismFolder {
         id: others
         x: root.inset
         width: root.innerWidth
-        y: Math.round(root.footTop + (root.footHeight - height) / 2) + root.pick(-2, -2, -10)
+        y: Math.round(root.footTop + (root.footHeight - height) / 2)
         spacing: root.pick(14, 18, 22)
         Repeater {
             model: root.footing
@@ -137,6 +133,7 @@ PrismFolder {
                     face: root
                     width: Math.min(implicitWidth, other.width)
                     text: root.short(other.modelData)
+                    credit: true
                     color: root.inkTertiary
                     size: root.type(11, 11.5, 13)
                     weight: Font.DemiBold

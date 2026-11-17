@@ -58,7 +58,7 @@ PrismFolder {
             id: charge
             face: root
             text: root.lead ? String(Math.round(root.lead.level * 100)) : ""
-            size: root.type(40, 52, 76)
+            size: root.type(38, 48, 72)
         }
         FaceText {
             face: root
@@ -87,8 +87,8 @@ PrismFolder {
     Column {
         x: root.inset
         width: root.innerWidth
-        y: Math.round(root.large ? root.footTop + root.dp(22) : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
-        spacing: root.pick(4, 6, 12)
+        y: Math.round(root.large ? root.footTop + root.dp(14) : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
+        spacing: root.pick(4, 6, 10)
         Repeater {
             model: root.small ? root.others.slice(0, 1) : root.medium ? root.others.slice(0, 2) : root.others
             Item {

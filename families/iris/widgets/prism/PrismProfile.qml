@@ -27,7 +27,8 @@ PrismFolder {
 
     tabGlyph: "person"
     tabText: root.name
-    flapText: root.host
+    // The machine shows where the head has the room for it.
+    flapText: root.small ? "" : root.host
 
     // ── the pane: picture and greeting ──
     FaceAvatar {
@@ -35,7 +36,7 @@ PrismFolder {
         visible: root.avatar
         x: root.inset
         y: Math.round(root.paneMiddle - height / 2)
-        width: root.pick(48, 56, 92)
+        width: Math.min(root.pick(44, 52, 84), root.paneHeight - root.dp(6))
         height: width
     }
     Column {
@@ -81,7 +82,7 @@ PrismFolder {
         readonly property real keyWidth: (root.innerWidth - 2 * keys.spacing) / 3
         readonly property bool roomy: lockKey.wordedWidth <= keys.keyWidth && settingsKey.wordedWidth <= keys.keyWidth && sessionKey.wordedWidth <= keys.keyWidth
         x: root.inset
-        y: Math.round(root.large ? root.height - root.inset - height : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
+        y: Math.round(root.large ? root.footBottom - root.dp(12) - height : root.footTop + (root.footHeight - height) / 2 - root.dp(2))
         spacing: root.dp(8)
         FaceAction {
             id: lockKey

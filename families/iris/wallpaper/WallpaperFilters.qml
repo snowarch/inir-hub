@@ -79,9 +79,17 @@ Flow {
                             height: width
                             radius: width / 2
                             color: accentKey.modelData.colour
-                            border.width: accentKey.chosen ? Math.round(2 * root.d) : 0
-                            border.color: IrisStyle.onMedia
                             Behavior on width { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                            // The chosen colour is lit from inside, never ringed (his 10-30): hover grows a key too.
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: Math.round(6 * root.d)
+                                height: width
+                                radius: width / 2
+                                color: IrisStyle.onMedia
+                                opacity: accentKey.chosen ? 1 : 0
+                                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                            }
                         }
                     }
                 }

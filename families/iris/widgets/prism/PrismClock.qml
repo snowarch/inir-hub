@@ -34,10 +34,9 @@ PrismFolder {
         - new Date(root.now.getFullYear(), 0, 1)) / 86400000) + 1
 
     // A slab worn small is a lens: a disc of glass with the hour in its middle, the day above and the date under it.
-    readonly property bool lens: root.small && !root.folded
+    readonly property bool lens: root.small
     slabRadius: root.lens ? Math.min(root.width, root.height) / 2 : root.radius
     prism: root.lens ? Qt.point(root.width * 0.82, root.height * 0.12)
-        : root.folded ? Qt.point(Math.round(root.inset * 0.5), root.paneBottom - root.pick(10, 10, 16))
         : Qt.point(root.width - root.pick(28, 40, 48), root.pick(2, 2, 4))
 
     tabGlyph: root.lens ? "" : "schedule"
@@ -88,28 +87,20 @@ PrismFolder {
             weight: Font.Bold
         }
     }
-    // The hour passing, as a thread of the light split under the figure: white where the hour began, the colours as it
-    // goes; the rest of the hour a faint line.
+    // The hour passing, as a thread of white light under the figure; the rest of the hour a faint line.
     Item {
         id: thread
-        visible: !root.folded
         readonly property real share: root.now.getMinutes() / 60
         x: root.lens ? Math.round(root.width * 0.3) : root.inset
         width: root.lens ? Math.round(root.width * 0.4) : figure.width
         y: root.lens ? Math.round(root.height * 0.64) : figure.y + figure.height + root.pick(4, 4, 8)
         height: root.dp(root.large ? 3 : 2)
         Rectangle { anchors.fill: parent; radius: height / 2; color: root.fill }
-        Item {
-            anchors.fill: parent
-            layer.enabled: true
-            layer.smooth: true
-            layer.effect: PrismSpectrum { mono: root.nothing; white: 0.12 }
-            Rectangle {
-                width: Math.max(parent.height, parent.width * thread.share)
-                height: parent.height
-                radius: height / 2
-                color: root.ink
-            }
+        Rectangle {
+            width: Math.max(parent.height, parent.width * thread.share)
+            height: parent.height
+            radius: height / 2
+            color: root.ink
         }
     }
     Column {
@@ -122,6 +113,7 @@ PrismFolder {
             anchors.right: parent.right
             face: root
             text: Translation.tr("Week %1").arg(root.week)
+            credit: true
             color: root.inkSecondary
             size: 13
             weight: Font.DemiBold
@@ -130,6 +122,7 @@ PrismFolder {
             anchors.right: parent.right
             face: root
             text: Translation.tr("Day %1").arg(root.dayOfYear)
+            credit: true
             color: root.inkTertiary
             size: 12
         }
@@ -144,16 +137,17 @@ PrismFolder {
         x: root.inset
         width: root.innerWidth
         height: implicitHeight
-        y: root.large ? root.footTop + root.dp(26) : Math.round(root.footTop + (root.footHeight - height) / 2)
+        y: root.large ? root.footTop + root.dp(18) : Math.round(root.footTop + (root.footHeight - height) / 2)
     }
     FaceText {
         visible: root.large
         face: root
         x: root.inset
         width: root.innerWidth
-        y: root.height - root.dp(30) - height / 2
+        y: root.footBottom - root.dp(20) - height / 2
         horizontalAlignment: Text.AlignHCenter
         text: Translation.tr("Week %1").arg(root.week) + "  ·  " + Translation.tr("Day %1").arg(root.dayOfYear)
+        credit: true
         color: root.inkTertiary
         size: 13
     }

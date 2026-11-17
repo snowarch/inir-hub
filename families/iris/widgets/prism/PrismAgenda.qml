@@ -101,8 +101,8 @@ PrismFolder {
         visible: !root.small && root.after.length > 0
         x: root.inset
         width: root.innerWidth
-        y: root.large ? root.footTop + root.dp(22) : Math.round(root.footTop + (root.footHeight - height) / 2 - root.dp(2))
-        spacing: root.dp(12)
+        y: root.large ? root.footTop + root.dp(14) : Math.round(root.footTop + (root.footHeight - height) / 2 - root.dp(2))
+        spacing: root.dp(10)
         Repeater {
             model: root.small ? [] : root.after
             PrismEventLine {

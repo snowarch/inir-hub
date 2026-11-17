@@ -28,10 +28,10 @@ PrismFolder {
     ClippingRectangle {
         id: frame
         visible: root.showsPicture
-        x: root.pick(6, 6, 8)
+        x: Math.max(root.pick(6, 6, 8), root.inset - root.dp(8))
         y: root.paneTop
         width: root.width - 2 * x
-        height: root.height - y - x
+        height: Math.max(1, root.footBottom - y - root.pick(4, 4, 6))
         radius: Math.max(0, root.radius - x)
         color: "transparent"
         Item {
@@ -42,16 +42,6 @@ PrismFolder {
     Component.onCompleted: if (!root.designed) root.widget.irisPhotoHost = host
     onDesignedChanged: if (!root.designed) root.widget.irisPhotoHost = host
     Component.onDestruction: if (root.widget.irisPhotoHost === host) root.widget.irisPhotoHost = null
-
-    Item {
-        enabled: root.count > 1
-        x: root.flapLeft
-        y: root.flapTop
-        width: root.flapRight - root.flapLeft
-        height: root.paneTop - root.flapTop
-        HoverHandler { cursorShape: root.count > 1 ? Qt.PointingHandCursor : Qt.ArrowCursor }
-        TapHandler { onTapped: root.widget.advance(1, false) }
-    }
 
     FaceText {
         face: root

@@ -234,8 +234,6 @@ Item {
         height: Math.max(cardText.implicitHeight, card.miniHeight) + Math.round(24 * root.d)
         radius: panel.plateRadius
         color: card.current ? IrisStyle.tintFill(IrisStyle.accent) : cardArea.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
-        border.width: card.current ? Math.max(1, Math.round(1.5 * root.d)) : 0
-        border.color: IrisStyle.tintBorder(IrisStyle.accent)
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
 
         Rectangle {

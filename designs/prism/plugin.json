@@ -4,7 +4,7 @@
     "name": "Prism",
     "summary": "iRiS in Prism's language: near-black, white solids, the hour as a prism",
     "icon": "flare",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "families": ["iris"],
     "provides": "modules/prism",
     "parts": {

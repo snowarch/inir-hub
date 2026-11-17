@@ -698,8 +698,6 @@ ColumnLayout {
             color: tileSkin.active ? "transparent"
                 : tile.on ? (tileArea.containsMouse ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.tintFill(IrisStyle.accent))
                 : tileArea.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
-            border.width: tile.on && !tileSkin.active ? 1 : 0
-            border.color: IrisStyle.tintBorder(IrisStyle.accent)
             scale: tileArea.pressed && !tileSkin.active ? IrisStyle.pressScale(0.92) : 1
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
             Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
@@ -794,8 +792,6 @@ ColumnLayout {
         radius: root.blockRadius
         color: presetSkin.active ? "transparent"
             : card.current ? IrisStyle.tintFill(IrisStyle.accent) : cardArea.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
-        border.width: card.current && !presetSkin.active ? Math.max(1, Math.round(1.5 * root.d)) : 0
-        border.color: IrisStyle.tintBorder(IrisStyle.accent)
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
 
         IrisSkin {

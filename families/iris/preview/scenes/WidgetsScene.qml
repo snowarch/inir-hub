@@ -219,13 +219,15 @@ PreviewScene {
         readonly property real stackPos: 0
         readonly property bool containsPress: false
         readonly property string outputName: ""
+        property string configEntryName: ""
         readonly property string timeFormat: "system"
         function _readConfigKey(key: string): var { return undefined }
         function familyOption(key: string, fallback: var): var { return fallback }
     }
     readonly property IrisWidgetLook prismLook: IrisWidgetLook {}
-    readonly property Stand clockStand: Stand { sizeClass: "medium"; x: widgetsRoot.plateX; y: widgetsRoot.plateY }
+    readonly property Stand clockStand: Stand { configEntryName: "clock"; sizeClass: "medium"; x: widgetsRoot.plateX; y: widgetsRoot.plateY }
     readonly property Stand weatherStand: Stand {
+        configEntryName: "weather"
         sizeClass: "small"
         x: widgetsRoot.plateX + widgetsRoot.wide + widgetsRoot.gap
         y: widgetsRoot.plateY

@@ -689,8 +689,6 @@ Item {
                         Layout.preferredHeight: Layout.preferredWidth
                         radius: IrisStyle.tileRadius(width)
                         color: workspaceRow.modelData.is_active ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.fillQuiet
-                        border.width: workspaceRow.modelData.is_active ? 0 : 1
-                        border.color: IrisStyle.border
                         IrisText {
                             anchors.centerIn: parent
                             text: workspaceRow.modelData.idx ?? "–"
