@@ -1,77 +1,77 @@
 {
- "generated": "2026-11-16T13:08:00Z",
+ "generated": "2026-11-17T13:50:43Z",
  "items": {
   "afterglyph": {
-   "downloads": 28,
-   "installs": 61,
-   "up": 2,
+   "downloads": 38,
+   "installs": 63,
+   "up": 4,
    "down": 0
   },
   "airisu": {
-   "downloads": 361,
-   "installs": 651,
-   "up": 16,
+   "downloads": 464,
+   "installs": 545,
+   "up": 12,
    "down": 0,
    "reactions": {
-    "❤️": 15,
+    "❤️": 9,
     "🤯": 1,
-    "🫃": 14
+    "🫃": 10
    }
   },
   "countdown": {
-   "downloads": 17,
-   "installs": 63,
+   "downloads": 20,
+   "installs": 47,
    "up": 3,
    "down": 0
   },
   "dev-stats": {
-   "downloads": 4,
-   "installs": 2,
+   "downloads": 9,
+   "installs": 8,
    "up": 0,
    "down": 0
   },
   "excalidraw": {
-   "downloads": 12,
-   "installs": 54,
+   "downloads": 14,
+   "installs": 45,
    "up": 3,
    "down": 0
   },
   "fastfetch": {
-   "downloads": 532,
-   "installs": 655,
-   "up": 9,
+   "downloads": 661,
+   "installs": 566,
+   "up": 7,
    "down": 1,
    "reactions": {
     "❤️": 2
    }
   },
   "ii": {
-   "downloads": 953,
-   "installs": 679,
+   "downloads": 1114,
+   "installs": 583,
    "up": 4,
    "down": 0
   },
   "inir-docker": {
-   "downloads": 30,
-   "installs": 41,
-   "up": 2,
+   "downloads": 37,
+   "installs": 47,
+   "up": 3,
    "down": 0
   },
   "inircam": {
-   "downloads": 440,
-   "installs": 134,
-   "up": 6,
+   "downloads": 616,
+   "installs": 159,
+   "up": 5,
    "down": 0
   },
   "inircam-widget": {
-   "downloads": 1,
-   "installs": 1,
+   "downloads": 126,
+   "installs": 13,
    "up": 0,
    "down": 0
   },
   "inirconnect": {
-   "downloads": 66,
-   "installs": 21,
+   "downloads": 255,
+   "installs": 44,
    "up": 1,
    "down": 0,
    "reactions": {
@@ -79,18 +79,18 @@
    }
   },
   "iris": {
-   "downloads": 1054,
-   "installs": 679,
-   "up": 16,
+   "downloads": 1218,
+   "installs": 576,
+   "up": 12,
    "down": 0,
    "reactions": {
-    "❤️": 14,
-    "🫃": 15
+    "❤️": 10,
+    "🫃": 11
    }
   },
   "media-corner": {
-   "downloads": 1114,
-   "installs": 265,
+   "downloads": 1338,
+   "installs": 313,
    "up": 3,
    "down": 0,
    "reactions": {
@@ -98,50 +98,53 @@
    }
   },
   "moss-garden": {
-   "downloads": 18,
-   "installs": 68,
+   "downloads": 19,
+   "installs": 54,
    "up": 1,
    "down": 0
   },
   "paper-lantern": {
-   "downloads": 15,
-   "installs": 44,
-   "up": 2,
+   "downloads": 17,
+   "installs": 37,
+   "up": 1,
+   "down": 0
+  },
+  "prism": {
+   "downloads": 659,
+   "installs": 430,
+   "up": 0,
+   "down": 0
+  },
+  "radio": {
+   "downloads": 26,
+   "installs": 40,
+   "up": 1,
    "down": 0,
    "reactions": {
     "🔥": 1
    }
   },
-  "prism": {
-   "downloads": 531,
-   "installs": 409,
-   "up": 0,
-   "down": 0
-  },
-  "radio": {
-   "downloads": 20,
-   "installs": 37,
-   "up": 2,
-   "down": 0,
-   "reactions": {
-    "🔥": 2
-   }
-  },
   "shell-line": {
-   "downloads": 14,
-   "installs": 59,
+   "downloads": 15,
+   "installs": 47,
    "up": 0,
    "down": 0
   },
   "tidepool": {
-   "downloads": 24,
-   "installs": 81,
+   "downloads": 27,
+   "installs": 61,
    "up": 0,
    "down": 0
   },
+  "video-editor": {
+   "downloads": 37,
+   "installs": 2,
+   "up": 1,
+   "down": 0
+  },
   "waffle": {
-   "downloads": 937,
-   "installs": 652,
+   "downloads": 1096,
+   "installs": 550,
    "up": 1,
    "down": 0
   }
