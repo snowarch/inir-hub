@@ -101,12 +101,16 @@ ColumnLayout {
 
                     onClicked: {
                         const downloadPath = FileUtils.trimFileProtocol(Directories.downloads)
-                        Quickshell.execDetached(["bash", "-c", 
-                            `echo '${StringUtils.shellSingleQuoteEscape(segmentContent)}' > '${downloadPath}/code.${segmentLang || "txt"}'`
+                        // The language is the AI's: only [A-Za-z0-9_+-] becomes the extension, else "txt".
+                        const codeExt = String(segmentLang ?? "").replace(/[^A-Za-z0-9_+-]/g, "") || "txt"
+                        const codePath = `${downloadPath}/code.${codeExt}`
+                        Quickshell.execDetached(["bash", "-c",
+                            'printf \'%s\\n\' "$1" > "$2"',
+                            "code-save", segmentContent, codePath
                         ])
-                        Quickshell.execDetached(["notify-send", 
-                            Translation.tr("Code saved to file"), 
-                            Translation.tr("Saved to %1").arg(`${downloadPath}/code.${segmentLang || "txt"}`),
+                        Quickshell.execDetached(["notify-send",
+                            Translation.tr("Code saved to file"),
+                            Translation.tr("Saved to %1").arg(codePath),
                             "-a", "Shell"
                         ])
                         saveCodeButton.activated = true

@@ -1504,10 +1504,10 @@ ContentPage {
                     const tzs = Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
                     if (tzs.length === 0) { liveTimes = ({}); return }
                     const fmt = (Config.options?.material?.sidebar?.widgets?.worldClock_settings?.use24Hour ?? true) ? "%H:%M" : "%I:%M %p"
-                    let script = ""
-                    for (let i = 0; i < tzs.length; i++)
-                        script += `printf '%s|%s\\n' "${tzs[i]}" "$(TZ='${tzs[i]}' date '+${fmt}|%:z')"\n`
-                    liveTimeProc.command = ["bash", "-c", script]
+                    // Timezones (Config) and the format go in as arguments: $1 format, $2.. zones.
+                    liveTimeProc.command = ["bash", "-c",
+                        'fmt="$1"; shift; for tz do printf "%s|%s\\n" "$tz" "$(TZ="$tz" date "+$fmt|%:z")"; done',
+                        "_", fmt].concat(tzs)
                     liveTimeProc.running = true
                 }
 

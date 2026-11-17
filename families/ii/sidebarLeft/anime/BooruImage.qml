@@ -25,16 +25,23 @@ Button {
     property string downloadPath
     property string nsfwPath
     readonly property string _fileUrl: imageData?.file_url ?? imageData?.sample_url ?? imageData?.preview_url ?? ""
+    // The name comes from the web: the last path segment, reduced to [A-Za-z0-9._-] and never a leading dot,
+    // so no `../` or `/` can reach the folder it is saved in.
+    function _safeFileName(text) {
+        return String(text ?? "").replace(/[^A-Za-z0-9._-]/g, "").replace(/^\.+/, "")
+    }
     property string fileName: {
         if (root._fileUrl.length > 0) {
             const cleanUrl = root._fileUrl.split("?")[0]
             const slashIndex = cleanUrl.lastIndexOf("/")
-            const candidate = decodeURIComponent(cleanUrl.substring(slashIndex + 1))
+            let decoded = ""
+            try { decoded = decodeURIComponent(cleanUrl.substring(slashIndex + 1)) } catch (error) { decoded = "" }
+            const candidate = root._safeFileName(decoded)
             if (candidate.length > 0)
                 return candidate
         }
-        const fallbackId = String(root.imageData?.id ?? "preview")
-        const fallbackExt = String(root.imageData?.file_ext ?? "jpg")
+        const fallbackId = root._safeFileName(root.imageData?.id ?? "preview")
+        const fallbackExt = root._safeFileName(root.imageData?.file_ext ?? "jpg")
         return fallbackId + "." + fallbackExt
     }
     property string filePath: `${root.previewDownloadPath}/${root.fileName}`
@@ -91,7 +98,7 @@ Button {
     Process {
         id: downloadProcess
         running: false
-        command: ["bash", "-c", `mkdir -p '${root.previewDownloadPath}' && [ -f ${root.filePath} ] || curl -sSL '${root.imageData.preview_url ?? root.imageData.sample_url}' -o '${root.filePath}'`]
+        command: ["bash", "-c", 'mkdir -p "$1" && [ -f "$2" ] || curl -sSL "$3" -o "$2"', "booru-preview", root.previewDownloadPath, root.filePath, root.imageData.preview_url ?? root.imageData.sample_url ?? ""]
         onExited: (exitCode, exitStatus) => {
             imageObject.source = `${previewDownloadPath}/${root.fileName}`
         }
@@ -263,8 +270,9 @@ Button {
                     action: () => {
                         const targetPath = root.imageData.is_nsfw ? root.nsfwPath : root.downloadPath;
                         const localPath = `${targetPath}/${root.fileName}`;
-                        Quickshell.execDetached(["bash", "-c", 
-                            `mkdir -p '${targetPath}' && curl '${root.imageData.file_url}' -o '${localPath}' && notify-send '${Translation.tr("Download complete")}' '${localPath}' -a 'Shell'`
+                        Quickshell.execDetached(["bash", "-c",
+                            'mkdir -p "$1" && curl "$2" -o "$3" && notify-send "$4" "$3" -a Shell',
+                            "booru-download", targetPath, root.imageData.file_url, localPath, Translation.tr("Download complete")
                         ])
                         if (Config.options?.material?.sidebar?.openFolderOnDownload ?? false)
                             ShellExec.execDetachedArgs(["xdg-open", targetPath], "Open image")
@@ -279,7 +287,8 @@ Button {
                         const localPath = `${targetPath}/${root.fileName}`;
                         const mode = Appearance.m3colors.darkmode ? "dark" : "light";
                         Quickshell.execDetached(["bash", "-c",
-                            `mkdir -p '${targetPath}' && curl -sSL '${root.imageData.file_url}' -o '${localPath}' && '${Directories.wallpaperSwitchScriptPath}' --image '${localPath}' --mode '${mode}'`
+                            'mkdir -p "$1" && curl -sSL "$2" -o "$3" && "$4" --image "$3" --mode "$5"',
+                            "booru-wallpaper", targetPath, root.imageData.file_url, localPath, Directories.wallpaperSwitchScriptPath, mode
                         ])
                     }
                 }

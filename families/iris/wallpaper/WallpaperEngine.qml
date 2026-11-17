@@ -805,9 +805,11 @@ Item {
         const folder = Directories.booruDownloads
         const live = entry.video === true
         const sharp = live && String(entry.file4k ?? "").length > 0 && String(root.options?.liveQuality ?? "best") !== "light"
-        const ext = String(entry.ext || entry.file.split("?")[0].split(".").pop() || "jpg").toLowerCase()
-        const name = live ? "motionbgs-" + String(entry.slug || entry.id) + (sharp ? "-4k" : "") + ".mp4"
-            : entry.provider + "-" + entry.id + "." + ext
+        // Every part of the name comes from the web: only [A-Za-z0-9._-] reaches the disk, never a leading dot.
+        const safeName = (text) => String(text ?? "").replace(/[^A-Za-z0-9._-]/g, "").replace(/^\.+/, "")
+        const ext = safeName(String(entry.ext || entry.file.split("?")[0].split(".").pop() || "jpg").toLowerCase()) || "jpg"
+        const name = live ? "motionbgs-" + safeName(entry.slug || entry.id) + (sharp ? "-4k" : "") + ".mp4"
+            : safeName(entry.provider + "-" + entry.id) + "." + ext
         download.entry = entry
         download.localPath = folder + "/" + name
         root.downloadingKey = entry.key

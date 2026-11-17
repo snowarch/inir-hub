@@ -94,12 +94,10 @@ Item {
             ? (showSeconds ? "%H:%M:%S" : "%H:%M")
             : (showSeconds ? "%I:%M:%S %p" : "%I:%M %p")
         // One shell pass: emit "tz|time|offset|date|doy|hour24" per line.
-        let script = ""
-        for (let i = 0; i < tzs.length; i++) {
-            const tz = tzs[i]
-            script += `printf '%s|%s\\n' "${tz}" "$(TZ='${tz}' date '+${timeFmt}|%:z|%a %d %b|%j|%H')"\n`
-        }
-        clockProcess.command = ["bash", "-c", script]
+        // Timezones (Config) and the format go in as arguments: $1 format, $2.. zones.
+        clockProcess.command = ["bash", "-c",
+            'fmt="$1"; shift; for tz do printf "%s|%s\\n" "$tz" "$(TZ="$tz" date "+$fmt|%:z|%a %d %b|%j|%H")"; done',
+            "_", timeFmt].concat(tzs)
         clockProcess.running = true
     }
 
