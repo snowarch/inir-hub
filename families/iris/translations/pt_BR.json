@@ -2642,5 +2642,11 @@
   "Search, pick an episode and pick up where you left.": "Busque, escolha um episódio e continue de onde parou.",
   "%1 panel off": "Painel %1 desligado",
   "Frosted slabs · the spectrum only on what each widget draws": "Placas foscas · o espectro só no que cada widget desenha",
-  "Can't read the compositor's config, so app rules can't be set here.": "Não foi possível ler a configuração do compositor, então as regras de apps não podem ser definidas aqui."
+  "Can't read the compositor's config, so app rules can't be set here.": "Não foi possível ler a configuração do compositor, então as regras de apps não podem ser definidas aqui.",
+  "Look": "Visual",
+  "How Prism lays out every page.": "Como o Prism organiza cada página.",
+  "Folders": "Pastas",
+  "Board": "Painel",
+  "Each page a folder over its groups.": "Cada página, uma pasta sobre seus grupos.",
+  "Areas as keys, pages as tabs, groups as modules.": "Áreas como teclas, páginas como abas, grupos como módulos."
 }

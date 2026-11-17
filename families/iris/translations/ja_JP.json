@@ -2642,5 +2642,11 @@
   "Search, pick an episode and pick up where you left.": "アニメを検索し、エピソードを選び、続きから再生。",
   "%1 panel off": "%1 パネルはオフ",
   "Frosted slabs · the spectrum only on what each widget draws": "すりガラスの板 · スペクトルは各ウィジェットが描くものだけに",
-  "Can't read the compositor's config, so app rules can't be set here.": "コンポジターの設定を読み込めないため、ここではアプリのルールを設定できません。"
+  "Can't read the compositor's config, so app rules can't be set here.": "コンポジターの設定を読み込めないため、ここではアプリのルールを設定できません。",
+  "Look": "ルック",
+  "How Prism lays out every page.": "Prism が各ページをどう並べるか。",
+  "Folders": "フォルダー",
+  "Board": "ボード",
+  "Each page a folder over its groups.": "各ページはグループの上のフォルダー。",
+  "Areas as keys, pages as tabs, groups as modules.": "エリアはキー、ページはタブ、グループはモジュール。"
 }

@@ -56,6 +56,9 @@ Item {
     Shortcut { sequences: ["Ctrl+Shift+Z", "Ctrl+Y"]; enabled: root.active && IrisOptions.canRedo; onActivated: IrisOptions.redo() }
 
     readonly property var page: PrismModel.page(PrismState.page)
+    // The look the person picked for every page (iris.appearance.prismLook): "folders" (design B, the sidebar and a lead
+    // folder over the page's groups) or "board" (design D3: categories as keys, pages as tabs, groups as modules).
+    readonly property bool board: String(Config.options?.iris?.appearance?.prismLook ?? "folders") === "board"
     readonly property bool changesView: PrismState.page === "changes"
     // A page iRiS draws as a view of its own (Community Hub, Keyboard shortcuts, About) fills the middle below its title.
     readonly property bool hosted: !PrismState.searching && !root.changesView && String(root.page.view ?? "").length > 0
@@ -123,6 +126,40 @@ Item {
             else out.push({ title: title, changed: changed, first: section.title, rows: Array.from(section.rows) })
         }
         return out
+    }
+    // The form a group wears (his 11-17: siblings each their own form): a picture or the keyboard makes a folder; one
+    // or two rows a slip; a value worth printing big over a few rows a card; a long list a sheet.
+    function sayOf(section: var): string {
+        const _ = PrismModel.revision
+        return String(PrismModel.glanceOf({ title: section.title, rows: section.rows }).say ?? "")
+    }
+    function formOf(section: var): string {
+        if (root.board) return "module"
+        if (root.figures[section.title]) return "folder"
+        const n = section.rows.length
+        if (n <= 2) return "slip"
+        const say = root.sayOf(section)
+        // A card's figure is a measure (a number with its unit), never a word a switch already says.
+        if (n <= 6 && /\d/.test(say) && say.length <= 14) return "card"
+        return "sheet"
+    }
+    // How many of the shelf's columns a group takes: on the Board the keyboard takes the row, a picture or a long list two.
+    function spanOf(section: var): int {
+        if (!root.board) return 1
+        const figure = root.figures[section.title]
+        if (figure?.keys) return 99
+        // A drawing among its rows (the screen's stand, a list of apps) needs the room a column cannot give; a scene
+        // stands over its rows in one column, so the short modules fill the columns beside the long ones.
+        const drawn = section.rows.some(row => row.kind === "list" && Boolean(row.spec?.view))
+        return drawn || section.rows.length > 8 ? 2 : 1
+    }
+    // A module's figure: a measure (a number with its unit) under its name, never a word its switch already says.
+    function figureOf(section: var, form: string): string {
+        if (form !== "card" && form !== "module") return ""
+        // A drawing among the rows already says it (the screen's stand names its size).
+        if (section.rows.some(row => row.kind === "list" && Boolean(row.spec?.view))) return ""
+        const say = root.sayOf(section)
+        return /\d/.test(say) && say.length <= 14 ? say : ""
     }
     function firstOf(entry: string): string {
         return String(root.sections.find(section => root.bandOf(section.title) === entry)?.title ?? entry)
@@ -205,7 +242,7 @@ Item {
     readonly property bool railFits: root.width >= PrismTheme.dp(1080)
     // Settings is for finding and changing settings: the column waits behind its key until asked for.
     readonly property bool railAuto: false
-    readonly property bool railOpen: root.railFits && (root.railMode === "open" || root.railMode !== "closed" && root.railAuto)
+    readonly property bool railOpen: !root.board && root.railFits && (root.railMode === "open" || root.railMode !== "closed" && root.railAuto)
     // By hand the column slides; a page that opens already has it where it belongs.
     property bool railByHand: false
     property real railShown: root.railOpen ? 1 : 0
@@ -220,7 +257,7 @@ Item {
         Config.setNestedValue("iris.appearance.settingsRail", next === root.railAuto ? "auto" : next ? "open" : "closed")
     }
 
-    function focusSearch(): void { sidebar.search.input.forceActiveFocus() }
+    function focusSearch(): void { (root.board && body.boardFrame ? body.boardFrame.search : sidebar.search).input.forceActiveFocus() }
     // A place a search found: its page, and its group when it names one.
     function openPlace(place: var): void {
         PrismState.query = ""
@@ -314,7 +351,8 @@ Item {
 
         PrismSidebar {
             id: sidebar
-            width: root.sideWidth
+            visible: !root.board
+            width: root.board ? 0 : root.sideWidth
             height: parent.height
             corner: body.radius
             windowed: root.windowed
@@ -329,6 +367,33 @@ Item {
             onSearchEntered: root.takeFirstHit()
         }
 
+        // The Board: categories as keys down the left, the page's line, tabs and sheet beside them.
+        PrismKeys {
+            id: keysRail
+            visible: root.board
+            width: root.board ? PrismTheme.dp(96) : 0
+            height: parent.height
+            windowed: root.windowed
+            onCloseRequested: root.closeRequested()
+            onMinimizeRequested: root.minimizeRequested()
+            onGrowRequested: root.growRequested()
+        }
+        Loader {
+            id: boardLoader
+            active: root.board
+            visible: active
+            x: keysRail.width
+            width: body.width - x - PrismTheme.dp(16)
+            height: body.height - PrismTheme.dp(16)
+            sourceComponent: PrismBoard {
+                width: boardLoader.width
+                height: boardLoader.height
+                page: root.page
+                onSearchEntered: root.takeFirstHit()
+            }
+        }
+        readonly property Item boardFrame: boardLoader.item
+
         // Over the compositor's blur the rows stop at the strip's middle (a scissor): none scrolls sharp in the air above it.
         Item {
             id: scroller
@@ -342,10 +407,11 @@ Item {
                 id: centre
                 visible: !root.hosted
                 // The scroller spans the panel from x 0, so the page's x is the panel's; its y is the panel's 0.
-                x: sidebar.x + sidebar.width
-                y: -scroller.y
-                width: parent.width - x - root.railWidth
-                height: body.height
+                readonly property real sheetTop: root.board && body.boardFrame ? body.boardFrame.sheetTop : 0
+                x: root.board ? boardLoader.x : sidebar.x + sidebar.width
+                y: centre.sheetTop - scroller.y
+                width: root.board ? boardLoader.width : parent.width - x - root.railWidth
+                height: root.board ? boardLoader.height - centre.sheetTop : body.height
                 contentHeight: content.implicitHeight + PrismTheme.dp(40)
                 boundsBehavior: Flickable.StopAtBounds
                 clip: true
@@ -361,14 +427,74 @@ Item {
 
                 Column {
                     id: content
-                    x: PrismTheme.dp(32)
-                    width: centre.width - PrismTheme.dp(64)
+                    x: root.board ? PrismTheme.dp(22) : PrismTheme.dp(32)
+                    width: centre.width - x * 2
                     spacing: 0
 
                     // The page opens on its poster: the page's art, where it stands and its size printed small, its name
                     // big, what it holds now as figures. A search, Changes, Home and Wallpaper keep the words without art.
                     // The poster stands off the window's top edge as the folders under it do.
-                    Item { width: 1; height: PrismTheme.dp(14) }
+                    Item { width: 1; height: root.board ? 0 : PrismTheme.dp(14) }
+                    // The Board's page head on its art: the page's facts in mono, its name large, what it is for, its actions.
+                    Item {
+                        id: boardHead
+                        readonly property var says: !root.board || !root.staged ? [] : PrismModel.leadOf(root.page).slice(0, 2)
+                            .map(entry => entry.fact ? String(entry.say) : String(PrismModel.sayNow(entry) ?? "")).filter(say => say.length > 0)
+                        readonly property string tip: Translation.tr(String(IrisOptions.sectionById(String(root.page.area ?? ""))?.tip ?? root.page.subtitle ?? ""))
+                        visible: root.board && root.staged
+                        width: content.width
+                        height: visible ? headLede.y + (headLede.visible ? headLede.height : 0) + PrismTheme.dp(24) : 0
+                        PrismText {
+                            id: headCredit
+                            y: PrismTheme.dp(22)
+                            width: parent.width - headActs.width - PrismTheme.dp(20)
+                            // Values keep their case: "4 s" is not "4 S".
+                            text: boardHead.says.join("  ·  ")
+                            mono: true
+                            color: PrismTheme.light ? PrismTheme.ink : PrismTheme.paper
+                            font.pixelSize: PrismTheme.caption
+                            font.weight: Font.DemiBold
+                            font.letterSpacing: 0.9
+                        }
+                        PrismText {
+                            id: headName
+                            y: headCredit.y + headCredit.height + PrismTheme.dp(8)
+                            width: parent.width - headActs.width - PrismTheme.dp(20)
+                            text: root.topTitle
+                            font.pixelSize: PrismTheme.title + PrismTheme.dp(12)
+                            font.weight: Font.Bold
+                            font.letterSpacing: -1.4
+                        }
+                        PrismText {
+                            id: headLede
+                            y: headName.y + headName.height + PrismTheme.dp(4)
+                            width: parent.width - headActs.width - PrismTheme.dp(20)
+                            visible: text.length > 0
+                            text: boardHead.tip
+                            color: PrismTheme.light ? PrismTheme.ink2 : PrismTheme.inkNav
+                            font.pixelSize: PrismTheme.body
+                        }
+                        Row {
+                            id: headActs
+                            anchors.right: parent.right
+                            anchors.bottom: headLede.visible ? headLede.bottom : headName.bottom
+                            spacing: PrismTheme.dp(8)
+                            PrismRound {
+                                visible: root.home
+                                implicitWidth: PrismTheme.dp(34)
+                                glyph: "shuffle"
+                                Accessible.name: Translation.tr("Next wallpaper")
+                                onClicked: Wallpapers.nextWallpaper(Appearance.m3colors.darkmode, NiriService.currentOutput)
+                            }
+                            PrismPill {
+                                visible: root.board && root.staged && PrismModel.restorableOf(root.page.pageId) > 0
+                                tone: "quiet"
+                                glyph: "restart_alt"
+                                text: Translation.tr("Restore defaults")
+                                onClicked: PrismModel.restore(root.page.pageId)
+                            }
+                        }
+                    }
                     PrismPoster {
                         visible: !root.staged
                         width: content.width
@@ -393,7 +519,7 @@ Item {
                         id: leadFolder
                         readonly property var modelData: root.sections[0] ?? null
                         readonly property int index: 0
-                        visible: root.staged && root.sections.length > 0
+                        visible: root.staged && !root.board && root.sections.length > 0
                         width: content.width
                         page: root.page
                         eyebrow: [Translation.tr(root.page.group), Translation.tr(root.page.name)].filter(part => part.length > 0).join(" · ")
@@ -501,38 +627,51 @@ Item {
                     // Where the groups begin, a pixel tall: a Column leaves an item of no height at y 0.
                     Item { id: groupsAt; width: 1; height: 1 }
 
-                    // The other groups, folders in a grid under the lead, keyed by title: a write never rebuilds one on screen.
-                    // Folders side by side end on one line.
-                    Grid {
+                    // The other groups under the lead, each in the form its content asks for (formOf), packed into columns
+                    // where each goes under the shortest, so no group is stretched to its neighbour's height. Keyed by
+                    // title: a write never rebuilds one on screen.
+                    Item {
                         id: shelf
-                        readonly property real gap: PrismTheme.dp(14)
-                        columns: content.width >= PrismTheme.dp(1080) ? 3 : content.width >= PrismTheme.dp(640) ? 2 : 1
+                        readonly property real gap: root.board ? PrismTheme.dp(12) : PrismTheme.dp(14)
+                        readonly property int columns: content.width >= PrismTheme.dp(1080) ? 3 : content.width >= PrismTheme.dp(640) ? 2 : 1
                         readonly property real cell: Math.floor((content.width - shelf.gap * (shelf.columns - 1)) / shelf.columns)
+                        // Where each group stands, and the shelf's height: read from the groups' own heights, never their places.
+                        readonly property var packed: {
+                            const tops = []
+                            for (let c = 0; c < shelf.columns; ++c) tops.push(0)
+                            const at = []
+                            for (let i = 0; i < sectionsRepeater.count; ++i) {
+                                const item = sectionsRepeater.itemAt(i)
+                                if (!item || !item.visible) { at.push(Qt.point(0, 0)); continue }
+                                // A group over several columns goes where those columns are lowest, together.
+                                const span = Math.min(shelf.columns, item.span)
+                                let c = 0, top = Infinity
+                                for (let k = 0; k + span <= shelf.columns; ++k) {
+                                    const y = Math.max(...tops.slice(k, k + span))
+                                    if (y < top - 1) { c = k; top = y }
+                                }
+                                at.push(Qt.point(c * (shelf.cell + shelf.gap), top))
+                                for (let k = c; k < c + span; ++k) tops[k] = top + item.implicitHeight + shelf.gap
+                            }
+                            return { at: at, height: Math.max(0, Math.max(...tops) - shelf.gap) }
+                        }
                         width: content.width
-                        spacing: shelf.gap
+                        height: shelf.packed.height
                         Repeater {
                             id: sectionsRepeater
-                            model: ScriptModel { objectProp: "title"; values: root.staged ? root.shownSections.slice(1) : root.shownSections }
+                            model: ScriptModel { objectProp: "title"; values: root.staged && !root.board ? root.shownSections.slice(1) : root.shownSections }
                             delegate: PrismSection {
                                 id: sectionBox
                                 required property var modelData
                                 required property int index
-                                readonly property int place: {
-                                    let n = 0
-                                    for (let i = 0; i < sectionBox.index; ++i) if (sectionsRepeater.itemAt(i)?.visible) n++
-                                    return n
-                                }
                                 visible: sectionBox.modelData.rows.length > 0 || Boolean(root.figures[sectionBox.modelData.title]?.keys)
-                                width: shelf.cell
-                                floor: {
-                                    const first = Math.floor(sectionBox.place / shelf.columns) * shelf.columns
-                                    let most = 0
-                                    for (let i = 0; i < sectionsRepeater.count; ++i) {
-                                        const item = sectionsRepeater.itemAt(i)
-                                        if (item?.visible && item.place >= first && item.place < first + shelf.columns) most = Math.max(most, item.naturalHeight)
-                                    }
-                                    return most
-                                }
+                                x: shelf.packed.at[sectionBox.index]?.x ?? 0
+                                y: shelf.packed.at[sectionBox.index]?.y ?? 0
+                                readonly property int span: Math.min(shelf.columns, root.spanOf(sectionBox.modelData))
+                                width: root.staged ? shelf.cell * sectionBox.span + shelf.gap * (sectionBox.span - 1) : content.width
+                                form: root.staged ? root.formOf(sectionBox.modelData) : "folder"
+                                figureSay: root.figureOf(sectionBox.modelData, sectionBox.form)
+                                echoed: root.board && String(sectionBox.modelData.title) === String(root.page.name)
                                 figure: root.figures[sectionBox.modelData.title] ?? null
                                 groups: root.groups
                                 entry: root.bandOf(sectionBox.modelData.title)
@@ -568,10 +707,10 @@ Item {
         // A page iRiS draws itself: Prism gives it the title and the room.
         PrismHostedPage {
             visible: root.hosted
-            anchors.left: sidebar.right
-            anchors.right: parent.right
-            anchors.rightMargin: root.railWidth
-            height: parent.height
+            x: root.board ? boardLoader.x : sidebar.width
+            y: centre.sheetTop
+            width: root.board ? boardLoader.width : parent.width - x - root.railWidth
+            height: root.board ? boardLoader.height - y : parent.height
             hosted: root.hosted
             page: root.page
             eyebrow: root.topEyebrow
@@ -586,7 +725,7 @@ Item {
             delegate: PrismAura {
                 required property int modelData
                 x: centre.x; y: modelData > 0 ? 0 : body.height - height; width: centre.width; height: PrismTheme.dp(36)
-                visible: centre.visible && !PrismTheme.glassBlur && (modelData > 0 ? centre.contentY > 1 : centre.contentY + centre.height < centre.contentHeight - 1)
+                visible: centre.visible && !root.board && !PrismTheme.glassBlur && (modelData > 0 ? centre.contentY > 1 : centre.contentY + centre.height < centre.contentHeight - 1)
                 fadeDir: modelData; frameSize: Qt.size(body.width, body.height); origin: Qt.point(x, y)
                 key: air.key; tint: air.tint; radius: body.radius; backdrop: air.backdrop; screenAt: air.screenAt; screenSize: air.screenSize
             }
@@ -626,7 +765,7 @@ Item {
         // The side column's own key, at the page's top corner: it folds the column away and back, in reach at any depth.
         PrismRound {
             id: railKey
-            visible: root.railFits
+            visible: root.railFits && !root.board
             x: Math.round(body.width - root.railWidth - width - PrismTheme.dp(32) - (root.staged && !root.hosted ? PrismTheme.dp(22) : 0))
             y: stripBar.shown ? Math.round(stripBar.y + (stripBar.height - height) / 2) : PrismTheme.dp(root.staged && !root.hosted ? 32 : 18)
             Behavior on y { NumberAnimation { duration: PrismTheme.ms(240); easing.type: IrisStyle.feedbackEasing } }

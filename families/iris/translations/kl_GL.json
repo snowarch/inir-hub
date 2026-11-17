@@ -2642,5 +2642,11 @@
   "Search, pick an episode and pick up where you left.": "Ujarlerit, episode toqqarit aamma unitsiffigisatit ingerlaqqiffiguk.",
   "%1 panel off": "%1 panel qamippoq",
   "Frosted slabs · the spectrum only on what each widget draws": "Pladet tarrajuttut · qalipaatit widget-ip titartagaani kisimi",
-  "Can't read the compositor's config, so app rules can't be set here.": "Compositorip aaqqissuussinera atuarneqarsinnaanngilaq, taamaattumik app-inut maleruagassat maani aaqqissorneqarsinnaanngillat."
+  "Can't read the compositor's config, so app rules can't be set here.": "Compositorip aaqqissuussinera atuarneqarsinnaanngilaq, taamaattumik app-inut maleruagassat maani aaqqissorneqarsinnaanngillat.",
+  "Look": "Isikkoq",
+  "How Prism lays out every page.": "Prism-ip qupperneq tamarmik qanoq aaqqissuuttarai.",
+  "Folders": "Quppersakkat",
+  "Board": "Pisiffik",
+  "Each page a folder over its groups.": "Qupperneq tamarmi quppersakkamik ataatsimik.",
+  "Areas as keys, pages as tabs, groups as modules.": "Immikkoortut tasterit, quppernerit tabit, katersat modulit."
 }

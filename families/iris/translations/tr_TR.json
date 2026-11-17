@@ -2642,5 +2642,11 @@
   "Search, pick an episode and pick up where you left.": "Arayın, bir bölüm seçin ve kaldığınız yerden devam edin.",
   "%1 panel off": "%1 paneli kapalı",
   "Frosted slabs · the spectrum only on what each widget draws": "Buzlu levhalar · tayf yalnızca her widget'ın çizdiğinde",
-  "Can't read the compositor's config, so app rules can't be set here.": "Bileşikleştiricinin yapılandırması okunamıyor, bu yüzden uygulama kuralları burada ayarlanamaz."
+  "Can't read the compositor's config, so app rules can't be set here.": "Bileşikleştiricinin yapılandırması okunamıyor, bu yüzden uygulama kuralları burada ayarlanamaz.",
+  "Look": "Görünüm",
+  "How Prism lays out every page.": "Prism her sayfayı nasıl dizer.",
+  "Folders": "Klasörler",
+  "Board": "Pano",
+  "Each page a folder over its groups.": "Her sayfa, gruplarının üstünde bir klasör.",
+  "Areas as keys, pages as tabs, groups as modules.": "Alanlar tuş, sayfalar sekme, gruplar modül."
 }

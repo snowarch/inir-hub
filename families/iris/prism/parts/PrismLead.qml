@@ -107,18 +107,6 @@ Item {
             font.weight: Font.Bold
             font.letterSpacing: -1
         }
-        PrismText {
-            visible: root.stats.length > 0
-            anchors.right: parent.right
-            width: Math.min(implicitWidth, root.width * 0.5)
-            horizontalAlignment: Text.AlignRight
-            text: root.stats[0]?.say ?? ""
-            color: PrismTheme.paper
-            opacity: 0.55
-            font.pixelSize: PrismTheme.title + PrismTheme.dp(2)
-            font.weight: Font.Bold
-            font.letterSpacing: -1
-        }
     }
 
     // What the page offers: Restore, its own tools, its show; under the name, clear of the picture.
@@ -266,7 +254,7 @@ Item {
             height: big.height
             PrismText {
                 id: big
-                text: root.stats[1]?.say ?? root.stats[0]?.say ?? ""
+                text: root.stats[0]?.say ?? ""
                 figures: true
                 font.pixelSize: PrismTheme.poster
                 font.weight: Font.Bold
@@ -276,19 +264,29 @@ Item {
                 anchors.left: big.right
                 anchors.leftMargin: PrismTheme.dp(8)
                 anchors.baseline: big.baseline
-                text: root.stats.length > 1 ? root.stats[1].label : root.stats[0]?.label ?? ""
+                text: root.stats[0]?.label ?? ""
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.head - PrismTheme.dp(1)
             }
-            PrismText {
+            // The page's second fact, its value and its name, at the foot's right.
+            Row {
                 visible: root.stats.length > 1
                 anchors.right: parent.right
                 anchors.baseline: big.baseline
-                width: Math.min(implicitWidth, parent.width * 0.4)
-                horizontalAlignment: Text.AlignRight
-                text: root.stats[0]?.label ?? ""
-                font.pixelSize: PrismTheme.head - PrismTheme.dp(1)
-                font.weight: Font.DemiBold
+                spacing: PrismTheme.dp(6)
+                PrismText {
+                    anchors.baseline: parent.baseline
+                    text: root.stats[1]?.say ?? ""
+                    figures: true
+                    font.pixelSize: PrismTheme.head + PrismTheme.dp(2)
+                    font.weight: Font.Bold
+                }
+                PrismText {
+                    anchors.baseline: parent.baseline
+                    text: root.stats[1]?.label ?? ""
+                    color: PrismTheme.ink2
+                    font.pixelSize: PrismTheme.body
+                }
             }
         }
     }

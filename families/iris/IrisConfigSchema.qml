@@ -243,6 +243,9 @@ JsonObject {
         property string settingsHost: "overlay"
         // Prism's side column (profile, Changes, Now Playing): "auto" gives the page its room, "open" or "closed" is the person's.
         property string settingsRail: "auto"
+        // How Prism lays out its pages: "folders" (a page's lead folder over its groups) or "board" (categories as keys,
+        // pages as tabs, groups as modules).
+        property string prismLook: "folders"
         // How iRiS Settings lays its page: "classic" or "folio" (a Design with its own page keeps it).
         property string settingsLayout: "classic"
         // iRiS Settings drawn as v2.33 drew it over every page of today: plated marks, an area's groups in one list, a

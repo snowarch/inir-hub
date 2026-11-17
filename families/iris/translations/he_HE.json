@@ -2642,5 +2642,11 @@
   "Search, pick an episode and pick up where you left.": "חפש, בחר פרק והמשך מאיפה שעצרת.",
   "%1 panel off": "לוח %1 כבוי",
   "Frosted slabs · the spectrum only on what each widget draws": "לוחות זכוכית חלבית · הספקטרום רק על מה שכל וידג'ט מצייר",
-  "Can't read the compositor's config, so app rules can't be set here.": "לא ניתן לקרוא את הגדרות המרכיב, לכן אי אפשר לקבוע כאן כללי אפליקציות."
+  "Can't read the compositor's config, so app rules can't be set here.": "לא ניתן לקרוא את הגדרות המרכיב, לכן אי אפשר לקבוע כאן כללי אפליקציות.",
+  "Look": "מראה",
+  "How Prism lays out every page.": "איך Prism מסדר כל עמוד.",
+  "Folders": "תיקיות",
+  "Board": "לוח",
+  "Each page a folder over its groups.": "כל עמוד תיקייה מעל הקבוצות שלו.",
+  "Areas as keys, pages as tabs, groups as modules.": "אזורים כמקשים, עמודים כלשוניות, קבוצות כמודולים."
 }

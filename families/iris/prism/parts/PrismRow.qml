@@ -117,10 +117,12 @@ Item {
         id: line
         width: parent.width
         visible: !root.namedByCard
+        // A row with nothing to explain stands shorter than one that says what it does (his 11-16). The control reads
+        // this, never the line's height: a row that turns stacked with its module's width looped through it.
+        readonly property real flat: Math.max(PrismTheme.dp(root.about.length > 0 || root.note.length > 0 ? 58 : 48), name.implicitHeight + PrismTheme.dp(20))
         height: root.namedByCard ? PrismTheme.dp(4) : root.stacked
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
-            // A row with nothing to explain stands shorter than one that says what it does (his 11-16).
-            : Math.max(PrismTheme.dp(root.about.length > 0 || root.note.length > 0 ? 58 : 48), name.implicitHeight + PrismTheme.dp(20))
+            : line.flat
         opacity: root.locked ? 0.45 : 1
 
         // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
@@ -223,8 +225,9 @@ Item {
             y: root.stacked ? name.y + name.height + PrismTheme.dp(10) : 0
             // A switch is never narrower than its own pill: a paired row gives it 64 px, and the pill's words ("AUS AN",
             // "إيقاف تشغيل") ran under the name, seen once right-to-left text sat against that edge.
-            width: root.stacked ? parent.width : root.inline === "switch" ? Math.max(root.controlWidth, root.controlNeed) : root.controlWidth
-            height: root.stacked ? (kind.item ? kind.item.height : 0) : parent.height
+            // A switch takes only its pill's room: the words beside it run up to it (a narrow module wrapped them in three).
+            width: root.stacked ? parent.width : root.inline === "switch" ? (root.controlNeed > 0 ? root.controlNeed : root.controlWidth) : root.controlWidth
+            height: root.stacked ? (kind.item ? kind.item.height : 0) : line.flat
             enabled: !root.locked
             // Placed by x, never by anchors that come and go: a delegate that held a field (stacked, anchored on both
             // sides) kept that width once its anchor let go, and the next row's switch stretched across its name (11-15).

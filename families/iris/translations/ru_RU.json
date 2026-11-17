@@ -2642,5 +2642,11 @@
   "Search, pick an episode and pick up where you left.": "Ищите, выбирайте серию и продолжайте с места остановки.",
   "%1 panel off": "Панель «%1» выключена",
   "Frosted slabs · the spectrum only on what each widget draws": "Матовые пластины · спектр только на том, что рисует виджет",
-  "Can't read the compositor's config, so app rules can't be set here.": "Не удаётся прочитать конфигурацию композитора, поэтому правила приложений здесь задать нельзя."
+  "Can't read the compositor's config, so app rules can't be set here.": "Не удаётся прочитать конфигурацию композитора, поэтому правила приложений здесь задать нельзя.",
+  "Look": "Вид",
+  "How Prism lays out every page.": "Как Prism раскладывает каждую страницу.",
+  "Folders": "Папки",
+  "Board": "Панель",
+  "Each page a folder over its groups.": "Каждая страница — папка над своими группами.",
+  "Areas as keys, pages as tabs, groups as modules.": "Разделы — клавиши, страницы — вкладки, группы — модули."
 }

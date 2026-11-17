@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Widgets
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.preview
@@ -7,6 +8,7 @@ import qs.modules.iris.settings
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
+import qs.modules.iris.prism.fx
 
 // A group of rows as one card (Raell Tech's keyboard and mouse page, his 11-14: `.claude/ref/iris-prism/raell-keyboard-mouse.png`):
 // its mark, its name and a line under it, a chip at the right that says what it holds now, and its rows inside. Where
@@ -44,6 +46,22 @@ Item {
     property bool bare: false
     // The least height of the folder: folders side by side in a row of the grid end on one line.
     property real floor: 0
+    // The form a group wears on the page's grid (his 11-17: not every group the same folder card). "folder": the tab and
+    // its art, for a group with a picture; "card": a sheet lit from its top edge with its value set big (card-taskello);
+    // "sheet": a plain smoked sheet for a long list; "slip": a slim sheet for one or two rows.
+    // "module": the Board's instrument (design D3), its name in mono caps, its value large, its switch at the corner.
+    property string form: "folder"
+    readonly property bool foldered: !root.bare && root.form === "folder"
+    readonly property bool moduled: !root.bare && root.form === "module"
+    // A group whose first row is a switch named as the group (Do Not Disturb, Night light) wears that switch at its
+    // head's corner, its description under the name: the row itself never stood as a nameless line (his 11-17).
+    readonly property var master: !root.bare && !root.foldered && !root.showPage && root.rows.length >= 2
+        && root.rows[0].kind === "switch" && String(root.rows[0].label) === String(root.rows[0].section ?? "") ? root.rows[0] : null
+    readonly property var listed: root.master ? root.rows.slice(1) : root.rows
+    // What a card sets big: the group's value now.
+    property string figureSay: ""
+    // A module named as its page (Keyboard on Keyboard) under the page's own name: its credit would say it twice.
+    property bool echoed: false
     readonly property real naturalHeight: body.implicitHeight + root.pad - PrismTheme.dp(8)
     readonly property real pad: root.bare ? 0 : PrismTheme.dp(24)
     readonly property real inner: root.width - root.pad * 2
@@ -51,8 +69,8 @@ Item {
     // ── The picture's place: beside the rows where both fit, else over them.
     readonly property bool keys: Boolean(root.figure?.keys)
     readonly property bool scened: !root.showPage && !root.keys && root.figure !== null && root.figure !== undefined
-    readonly property bool beside: root.scened && root.inner >= PrismTheme.dp(720)
-    readonly property real figureWidth: root.beside ? Math.round(Math.max(PrismTheme.dp(300), Math.min(PrismTheme.dp(420), root.inner * 0.4))) : root.inner
+    readonly property bool beside: root.scened && root.inner >= (root.moduled ? PrismTheme.dp(560) : PrismTheme.dp(720))
+    readonly property real figureWidth: root.beside ? Math.round(Math.max(PrismTheme.dp(260), Math.min(PrismTheme.dp(420), root.inner * (root.moduled ? 0.46 : 0.4)))) : root.inner
     readonly property real figureHeight: root.beside ? Math.round(root.figureWidth * 0.66)
         : Math.round(Math.max(PrismTheme.dp(180), Math.min(PrismTheme.dp(260), root.inner * 0.42)))
     readonly property real rowsWidth: root.beside ? root.inner - root.figureWidth - PrismTheme.dp(28) : root.inner
@@ -62,6 +80,9 @@ Item {
     readonly property bool twoUp: !root.showPage && root.rowsWidth >= PrismTheme.dp(640)
     readonly property real half: Math.floor((root.rowsWidth - root.gap) / 2)
     readonly property real controlWidth: Math.min(PrismTheme.dp(300), root.rowsWidth * 0.4)
+    // A module one column wide sets its levels and fields under their names, as wide as the module (design D3).
+    readonly property bool narrow: root.moduled && root.rowsWidth < PrismTheme.dp(440)
+    function stackOf(row: var): bool { return root.narrow && ["range", "text", "hue"].includes(String(row?.kind ?? "")) }
 
     // What the chip says: the first row that names its group's state now (the keyboard's layout).
     readonly property var chipRow: root.rows.find(row => typeof row.spec?.chip === "function")
@@ -76,7 +97,7 @@ Item {
     function shapeOf(row: var): string { return PrismModel.shapeOf(row) }
     readonly property var lines: {
         const out = []
-        const list = root.rows
+        const list = root.listed
         for (let i = 0; i < list.length; i++) {
             const row = list[i]
             const next = list[i + 1]
@@ -89,40 +110,88 @@ Item {
         return out
     }
 
-    implicitHeight: root.bare ? body.implicitHeight : card.height
+    implicitHeight: root.bare ? body.implicitHeight : root.boxHeight
 
     // The tab holds the number and the name on one line, with air; the art takes the rest of the top.
-    readonly property real rise: PrismTheme.dp(50)
+    readonly property real rise: root.form === "folder" ? PrismTheme.dp(50) : root.form === "card" ? PrismTheme.dp(46)
+        : root.form === "sheet" ? PrismTheme.dp(56) : root.moduled ? (root.echoed && !root.master ? PrismTheme.dp(14) : PrismTheme.dp(46)) : PrismTheme.dp(40)
+    readonly property real slope: Math.round(root.rise * 1.25)
+    readonly property real cardRadius: root.form === "slip" || root.moduled ? PrismTheme.dp(22) : PrismTheme.dp(24)
+    readonly property real tab: Math.max(root.cardRadius * 2, Math.min(Math.min(root.tabNeed, root.tabRoom), root.width - root.slope - root.cardRadius * 2))
     readonly property real tabNeed: root.pad + titleSaid.implicitWidth + PrismTheme.dp(22)
     // What stands on the art (the chip, the group's own restore) keeps its room; the tab never squeezes the art under a sliver.
-    readonly property real artSays: (chipBox.visible ? chipBox.width : 0) + (resetBox.visible ? resetBox.width + (chipBox.visible ? PrismTheme.dp(8) : 0) : 0)
-    readonly property real tabRoom: root.width - (root.artSays > 0 ? root.artSays + PrismTheme.dp(28) : PrismTheme.dp(96)) - card.slope
+    readonly property real artSays: (chipBox.visible ? chipBox.width : 0) + (masterBox.visible ? masterBox.width : 0)
+        + (resetBox.visible ? resetBox.width + (chipBox.visible || masterBox.visible ? PrismTheme.dp(8) : 0) : 0)
+    readonly property real tabRoom: root.width - (root.artSays > 0 ? root.artSays + PrismTheme.dp(28) : PrismTheme.dp(96)) - root.slope
     // The rows of this group left iNiR's values that Restore may put back: said on the art, put back from there.
     readonly property var restorables: {
         const _ = PrismModel.revision
         return root.showPage ? [] : root.rows.filter(row => PrismModel.restorable(row))
     }
-    PrismFolder {
-        id: card
-        visible: !root.bare
-        width: root.width
-        height: Math.max(root.naturalHeight, root.floor)
-        rise: root.rise
-        tabWidth: Math.min(root.tabNeed, root.tabRoom)
-        tint: root.tint
-        turn: root.number - 1
-        // Its own art: the group's name and place drawn into the seed, so no two folders anywhere share a ribbon.
-        seed: root.number * 2.3 + Array.from(root.title).reduce((n, letter) => (n * 31 + letter.charCodeAt(0)) % 9973, 7) * 0.013
-        sayWidth: root.artSays > 0 ? root.artSays + PrismTheme.dp(24) : 0
+    readonly property real seedOf: root.number * 2.3 + Array.from(root.title).reduce((n, letter) => (n * 31 + letter.charCodeAt(0)) % 9973, 7) * 0.013
+    readonly property real boxHeight: Math.max(root.naturalHeight, root.floor)
+    Loader {
+        id: folderBox
+        active: root.foldered
+        visible: active
+        sourceComponent: PrismFolder {
+            width: root.width
+            height: root.boxHeight
+            rise: root.rise
+            tabWidth: Math.min(root.tabNeed, root.tabRoom)
+            tint: root.tint
+            turn: root.number - 1
+            // Its own art: the group's name and place drawn into the seed, so no two folders anywhere share a ribbon.
+            seed: root.seedOf
+            sayWidth: root.artSays > 0 ? root.artSays + PrismTheme.dp(24) : 0
+        }
+    }
+    // Card, sheet and slip: one smoked sheet, no tab; a card's art is light coming in at its top edge, fading before
+    // its rows, the value printed on it big.
+    Loader {
+        active: !root.bare && !root.foldered
+        visible: active
+        sourceComponent: ClippingRectangle {
+            width: root.width
+            height: root.boxHeight
+            radius: root.cardRadius
+            color: PrismTheme.card
+            // A slip's art is its spine (Délavé's dividers): a band of the page's colours down its left edge.
+            PrismFlow {
+                visible: root.form === "slip"
+                width: PrismTheme.dp(7)
+                height: parent.height
+                tint: root.tint
+                turn: root.number
+                seed: root.seedOf
+                centre: Qt.point(0.5, 0.35)
+                thickness: 0.9
+            }
+            PrismFlow {
+                visible: root.form === "card"
+                width: parent.width
+                height: Math.min(parent.height, root.rise + PrismTheme.dp(64))
+                tint: root.tint
+                turn: root.number
+                seed: root.seedOf
+                centre: Qt.point(0.7, 0.05)
+                thickness: 0.55
+                fade: 0.18
+                bare: true
+                mute: 0.12
+                opacity: PrismTheme.light ? 0.4 : 0.62
+            }
+        }
     }
 
     // What the group holds now, printed on its art in a smoked glass pill (the Pink Sky card's tags).
     Rectangle {
         id: chipBox
         readonly property string say: root.chip
-        visible: say.length > 0 && !root.bare
+        visible: say.length > 0 && !root.bare && root.form !== "card" && !root.moduled && root.master === null
         x: root.width - width - PrismTheme.dp(12)
-        y: Math.round((root.rise - height) / 2)
+        y: root.form === "slip" ? PrismTheme.dp(8) : Math.round((root.rise - height) / 2)
+        color: root.foldered ? PrismTheme.spot : PrismTheme.fill
         z: 1
         // Laid out by hand from the text's own width: a Row here fed its width back through the box (polish loop).
         readonly property bool marked: root.chip.length > 0 && String(root.chipRow?.spec?.chipGlyph ?? "").length > 0
@@ -130,14 +199,13 @@ Item {
         width: Math.min(chipBox.lead + chipText.implicitWidth + PrismTheme.dp(26), root.width * 0.42)
         height: PrismTheme.dp(30)
         radius: height / 2
-        color: PrismTheme.spot
         PrismGlyph {
             visible: chipBox.marked
             x: PrismTheme.dp(13)
             anchors.verticalCenter: parent.verticalCenter
             text: String(root.chipRow?.spec?.chipGlyph ?? "")
             iconSize: PrismTheme.dp(15)
-            color: PrismTheme.spotInk2
+            color: root.foldered ? PrismTheme.spotInk2 : PrismTheme.ink2
         }
         PrismText {
             id: chipText
@@ -145,7 +213,7 @@ Item {
             width: chipBox.width - x - PrismTheme.dp(13)
             anchors.verticalCenter: parent.verticalCenter
             text: chipBox.say
-            color: PrismTheme.paper
+            color: root.foldered ? PrismTheme.paper : PrismTheme.ink
             font.pixelSize: PrismTheme.small
             font.weight: Font.DemiBold
             elide: Text.ElideRight
@@ -157,14 +225,27 @@ Item {
         id: resetBox
         visible: root.restorables.length > 0 && !root.bare
         z: 1
-        x: (chipBox.visible ? chipBox.x - PrismTheme.dp(8) : root.width - PrismTheme.dp(12)) - width
-        y: Math.round((root.rise - height) / 2)
+        x: (chipBox.visible ? chipBox.x - PrismTheme.dp(8) : masterBox.visible ? masterBox.x - PrismTheme.dp(10) : root.width - PrismTheme.dp(12)) - width
+        y: root.form === "slip" ? PrismTheme.dp(8) : root.moduled ? PrismTheme.dp(12) : Math.round((root.rise - height) / 2)
         implicitHeight: PrismTheme.dp(30)
         tone: "dark"
         glyph: "restart_alt"
         text: Translation.tr("%1 changed").arg(root.restorables.length)
         Accessible.name: Translation.tr("Restore defaults")
         onClicked: IrisOptions.restore(root.restorables.map(row => row.spec))
+    }
+
+    // The group's own switch at its head's corner.
+    PrismSwitch {
+        id: masterBox
+        visible: root.master !== null
+        z: 1
+        // In line with the rows' own switches, which keep the pin's room at their end.
+        x: root.width - root.pad - (root.beside ? 0 : PrismTheme.dp(64)) - width
+        y: root.form === "slip" ? PrismTheme.dp(11) : root.moduled ? PrismTheme.dp(13) : Math.round((root.rise - height) / 2) + PrismTheme.dp(2)
+        checked: root.master ? Boolean(PrismModel.read(root.master)) : false
+        Accessible.name: root.title
+        onToggled: value => PrismModel.write(root.master, value)
     }
 
     Column {
@@ -177,29 +258,62 @@ Item {
         Item {
             visible: !root.bare
             width: parent.width
-            height: root.bare ? 0 : root.rise + (lineSaid.visible ? lineSaid.implicitHeight + PrismTheme.dp(2) : 0)
+            height: root.bare ? 0 : lineSaid.y + (lineSaid.visible ? lineSaid.implicitHeight + PrismTheme.dp(2) : 0)
+            // Folder and sheet: the name, bold; in a folder it stands in the tab.
             PrismText {
                 id: titleSaid
-                y: Math.round((root.rise - height) / 2) + PrismTheme.dp(3)
-                width: Math.max(0, card.tab - root.pad - x - PrismTheme.dp(14))
+                visible: root.form === "folder" || root.form === "sheet"
+                y: Math.round((root.rise - height) / 2) + (root.foldered ? PrismTheme.dp(3) : PrismTheme.dp(2))
+                width: root.foldered ? Math.max(0, root.tab - root.pad - x - PrismTheme.dp(14))
+                    : Math.max(0, parent.width - root.artSays - PrismTheme.dp(16))
                 text: root.title
-                font.pixelSize: PrismTheme.head
+                font.pixelSize: root.form === "sheet" ? PrismTheme.head + PrismTheme.dp(2) : PrismTheme.head
                 font.weight: Font.Bold
-                font.letterSpacing: -0.2
+                font.letterSpacing: root.form === "sheet" ? -0.4 : -0.2
+                elide: Text.ElideRight
+            }
+            // Card and slip: the name printed small in mono caps, as a specimen sheet credits its plate.
+            PrismText {
+                id: creditSaid
+                visible: root.form === "card" || root.form === "slip" || (root.moduled && !(root.echoed && !root.master))
+                y: root.form === "card" ? PrismTheme.dp(20) : root.moduled ? PrismTheme.dp(19) : PrismTheme.dp(16)
+                width: Math.max(0, parent.width - root.artSays - PrismTheme.dp(16))
+                text: root.title.toUpperCase()
+                mono: true
+                color: root.form === "card" && !PrismTheme.light ? PrismTheme.paper : PrismTheme.ink
+                font.pixelSize: PrismTheme.caption
+                font.weight: Font.DemiBold
+                font.letterSpacing: 0.9
+                elide: Text.ElideRight
+            }
+            // A card's value, big, on its light.
+            PrismText {
+                id: figureSaid
+                visible: (root.form === "card" || root.moduled) && root.figureSay.length > 0
+                y: root.rise - PrismTheme.dp(4)
+                width: Math.min(implicitWidth, parent.width)
+                text: root.figureSay
+                figures: true
+                color: root.form === "card" && !PrismTheme.light ? PrismTheme.paper : PrismTheme.ink
+                font.pixelSize: root.moduled ? PrismTheme.display + PrismTheme.dp(10) : PrismTheme.display + PrismTheme.dp(6)
+                font.weight: Font.Bold
+                font.letterSpacing: root.moduled ? -1.6 : -1.2
                 elide: Text.ElideRight
             }
             PrismText {
                 id: lineSaid
-                y: root.rise
-                width: parent.width
-                visible: root.line.length > 0
-                text: root.line
+                readonly property string about: root.master ? String(root.master.spec?.description ?? root.master.detail ?? "") : ""
+                y: root.rise + (figureSaid.visible ? figureSaid.height + PrismTheme.dp(2) : root.master && root.form !== "sheet" ? PrismTheme.dp(-6) : 0)
+                width: parent.width - (root.master && !figureSaid.visible ? root.artSays + PrismTheme.dp(12) : 0)
+                visible: text.length > 0
+                maximumLineCount: 3
+                text: root.line.length > 0 ? root.line : Translation.tr(lineSaid.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
                 wrapMode: Text.WordWrap
             }
         }
-        Item { width: 1; height: root.bare ? 0 : root.scened || root.keys ? PrismTheme.dp(18) : PrismTheme.dp(10) }
+        Item { width: 1; height: root.bare || root.form === "slip" ? 0 : root.scened || root.keys ? PrismTheme.dp(18) : root.moduled ? PrismTheme.dp(4) : PrismTheme.dp(10) }
 
         // The drawn keyboard heads its card whole; the keys left iNiR's go back at once from under it.
         Loader {
@@ -313,7 +427,7 @@ Item {
                         readonly property string part: String(entry.modelData.rows[0].spec?.part ?? "")
                         // A search's hits come from many groups: a part's caption there would name one group's inside.
                         readonly property bool partStarts: !root.showPage && entry.part.length > 0
-                            && (entry.modelData.first === 0 || String(root.rows[entry.modelData.first - 1]?.spec?.part ?? "") !== entry.part)
+                            && (entry.modelData.first === 0 || String(root.listed[entry.modelData.first - 1]?.spec?.part ?? "") !== entry.part)
                         // A part's head as the specimen sheets print theirs (`.claude/ref/language`, micrographics): its
                         // name in small mono caps and a hairline running to the card's edge.
                         Item {
@@ -347,9 +461,9 @@ Item {
                             PrismRow {
                                 width: parent.paired ? root.half : list.width
                                 row: entry.modelData.rows[0]
-                                stacked: parent.stackedPair
+                                stacked: parent.stackedPair || root.stackOf(row)
                                 showPage: root.showPage
-                                controlWidth: parent.stackedPair ? root.half : parent.paired ? PrismTheme.dp(64) : root.controlWidth
+                                controlWidth: parent.stackedPair ? root.half : parent.paired ? PrismTheme.dp(64) : root.stackOf(row) ? list.width - PrismTheme.dp(64) : root.controlWidth
                                 flash: root.flashPath === row.path
                                 onOpenRequested: root.reach(row)
                             }
