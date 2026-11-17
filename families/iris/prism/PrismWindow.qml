@@ -87,7 +87,6 @@ PanelWindow {
         Behavior on height { NumberAnimation { duration: PrismTheme.ms(260 / PrismTheme.openSpeed); easing.type: Easing.OutCubic } }
         backdrop: glassLoader.item?.ready ? glassLoader.item.texture : null
         screenAt: Qt.point(panel.x, panel.y)
-        screenSize: Qt.size(root.width, root.height)
         active: GlobalStates.settingsOverlayOpen
         focus: true
         onCloseRequested: root.close()
