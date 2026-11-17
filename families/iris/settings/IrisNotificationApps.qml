@@ -61,6 +61,16 @@ ColumnLayout {
 
     spacing: 0
 
+    IrisText {
+        visible: root.apps.length === 0
+        Layout.fillWidth: true
+        Layout.preferredHeight: Math.round(48 * root.d)
+        verticalAlignment: Text.AlignVCenter
+        text: Translation.tr("No app has sent a notification yet.")
+        color: IrisStyle.muted
+        font.pixelSize: IrisStyle.typeBody
+    }
+
     Repeater {
         model: root.apps
         Item {

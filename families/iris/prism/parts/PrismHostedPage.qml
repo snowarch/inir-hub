@@ -10,6 +10,8 @@ Item {
     property string eyebrow: ""
     property string title: ""
     property real keyRoom: 0
+    // The Board's own line says the way back and the category (PrismPoster.topLine).
+    property bool topLine: true
 
     PrismPoster {
         id: top
@@ -21,6 +23,7 @@ Item {
         eyebrow: root.eyebrow
         title: root.title
         keyRoom: root.keyRoom
+        topLine: root.topLine
     }
     // iRiS's own pages keep 16 dp of air each side: given 16 more, their column stands on Prism's.
     Loader {

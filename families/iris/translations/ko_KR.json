@@ -911,6 +911,7 @@
   "Already used by “%1”": "“%1”에서 이미 사용 중",
   "Closing": "닫기",
   "Could not read your Niri config, showing the defaults": "Niri 설정을 읽을 수 없어 기본값을 표시합니다",
+  "Could not read your Umbriel config, showing the defaults": "Umbriel 설정을 읽을 수 없어 기본값을 표시합니다",
   "From %1": "%1부터",
   "Gray": "회색",
   "Green": "초록",
@@ -2648,5 +2649,6 @@
   "Folders": "폴더",
   "Board": "보드",
   "Each page a folder over its groups.": "각 페이지는 그룹 위의 폴더.",
-  "Areas as keys, pages as tabs, groups as modules.": "영역은 키, 페이지는 탭, 그룹은 모듈."
+  "Areas as keys, pages as tabs, groups as modules.": "영역은 키, 페이지는 탭, 그룹은 모듈.",
+  "No app has sent a notification yet.": "아직 알림을 보낸 앱이 없습니다."
 }

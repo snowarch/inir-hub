@@ -10,6 +10,7 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.fx
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
+import "PrismShelf.js" as Shelf
 import qs.modules.iris.prism.parts
 
 // Prism's body: sidebar, the page in the middle and the rail, laid out from the room it is given; its host places it.
@@ -143,23 +144,57 @@ Item {
         if (n <= 6 && /\d/.test(say) && say.length <= 14) return "card"
         return "sheet"
     }
-    // How many of the shelf's columns a group takes: on the Board the keyboard takes the row, a picture or a long list two.
+    // The Board's modules: a group of one plain row is never a module of its own (it read thin, his 11-17); it joins
+    // the module before it as a part under its own name. Its rows keep their group, so pins and a press still find it.
+    function drawnIn(section: var): bool { return section.rows.some(row => row.kind === "list" && Boolean(row.spec?.view)) }
+    // What a group's gallery asks of the Board (PrismRow.below): whole looks and faces the shelf's width, their pictures
+    // a line across; Designs, motion, curves, icons and widgets two columns; a group without one, nothing.
+    function galleryOf(section: var): int {
+        let span = 0
+        for (const row of section.rows) {
+            const kind = String(row.kind)
+            if (kind === "themes" || (kind === "choice" && row.spec?.cards === "island")) return 99
+            if (["designs", "widgets", "niriMotion", "curve", "icon"].includes(kind) || (kind === "list" && row.spec?.view)) span = 2
+        }
+        return span
+    }
+    readonly property var boardModules: {
+        const out = []
+        for (const section of root.shownSections) {
+            const host = out[out.length - 1]
+            const lone = section.rows.length === 1 && root.galleryOf(section) === 0 && !root.figures[section.title]
+            // A gallery's module keeps its own: a switch folded under a wall of pictures is never found.
+            if (host && lone && !root.figures[host.title] && root.galleryOf(host) === 0) {
+                const own = String(section.rows[0].label) === String(section.title)
+                const rows = section.rows.map(row => Object.assign({}, row, { part: own ? "" : String(section.title), folded: true }))
+                out[out.length - 1] = Object.assign({}, host, { rows: host.rows.concat(rows), folded: (host.folded ?? []).concat([section.title]) })
+            } else out.push(section)
+        }
+        return out
+    }
+    // How many of the shelf's columns a group takes on the Board: the keyboard the row; a gallery what galleryOf asks,
+    // but a lone drawn list one, as it is a column; rows that stand taller than a column reads at a glance two.
     function spanOf(section: var): int {
         if (!root.board) return 1
-        const figure = root.figures[section.title]
-        if (figure?.keys) return 99
-        // A drawing among its rows (the screen's stand, a list of apps) needs the room a column cannot give; a scene
-        // stands over its rows in one column, so the short modules fill the columns beside the long ones.
-        const drawn = section.rows.some(row => row.kind === "list" && Boolean(row.spec?.view))
-        return drawn || section.rows.length > 8 ? 2 : 1
+        if (root.figures[section.title]?.keys) return 99
+        const gallery = root.galleryOf(section)
+        if (gallery > 0 && (gallery > 2 || section.rows.length > 1 || !root.drawnIn(section))) return gallery
+        // A level, a field or a hue sets its control under its name in a column: it stands near twice a row's height.
+        const tall = section.rows.filter(row => ["range", "text", "hue"].includes(String(row.kind))).length
+        return section.rows.length + tall * 0.7 > 6 ? 2 : 1
     }
-    // A module's figure: a measure (a number with its unit) under its name, never a word its switch already says.
-    function figureOf(section: var, form: string): string {
-        if (form !== "card" && form !== "module") return ""
-        // A drawing among the rows already says it (the screen's stand names its size).
-        if (section.rows.some(row => row.kind === "list" && Boolean(row.spec?.view))) return ""
-        const say = root.sayOf(section)
-        return /\d/.test(say) && say.length <= 14 ? say : ""
+    // A module's figure: a measure (a number with its unit) under its name, from a level, whose own figure it then
+    // takes (PrismSection.figureRow): said once. A choice or a drawing among the rows already says it.
+    function figureOf(section: var, form: string): var {
+        const none = { say: "", row: null }
+        if (form !== "card" && form !== "module") return none
+        if (root.drawnIn(section)) return none
+        const _ = PrismModel.revision
+        const glance = PrismModel.glanceOf({ title: section.title, rows: section.rows })
+        const say = String(glance.say ?? "")
+        if (!/\d/.test(say) || say.length > 14) return none
+        if (glance.row && glance.row.kind !== "range" && !glance.chip) return none
+        return { say: say, row: glance.chip ? null : glance.row }
     }
     function firstOf(entry: string): string {
         return String(root.sections.find(section => root.bandOf(section.title) === entry)?.title ?? entry)
@@ -196,7 +231,7 @@ Item {
     }
     function yOf(box: Item): real { return box.mapToItem(content, 0, 0).y + content.y }
     function boxOf(title: string): var {
-        return root.boxes().find(box => box.modelData?.title === title) ?? null
+        return root.boxes().find(box => box.modelData?.title === title || (box.modelData?.folded ?? []).includes(title)) ?? null
     }
     // A group asked for: on screen it glides to its head; in another part of a long page that part opens first.
     function showGroup(title: string): void {
@@ -435,19 +470,26 @@ Item {
                     // big, what it holds now as figures. A search, Changes, Home and Wallpaper keep the words without art.
                     // The poster stands off the window's top edge as the folders under it do.
                     Item { width: 1; height: root.board ? 0 : PrismTheme.dp(14) }
-                    // The Board's page head on its art: the page's facts in mono, its name large, what it is for, its actions.
+                    // The Board's page head on its art: the page's facts in mono, its name large, what it is for and its
+                    // actions at the left; the page's object drawn in light at the right, a pin on each group's part.
                     Item {
                         id: boardHead
-                        readonly property var says: !root.board || !root.staged ? [] : PrismModel.leadOf(root.page).slice(0, 2)
-                            .map(entry => entry.fact ? String(entry.say) : String(PrismModel.sayNow(entry) ?? "")).filter(say => say.length > 0)
+                        // The machine's facts only (the screen's name, the battery's charge): a row's value is said by its row.
+                        readonly property var says: !root.board || !root.staged ? [] : PrismModel.factsOf(String(root.page.pageId))
+                            .map(entry => String(entry.say)).filter(say => say.length > 0)
                         readonly property string tip: Translation.tr(String(IrisOptions.sectionById(String(root.page.area ?? ""))?.tip ?? root.page.subtitle ?? ""))
+                        readonly property real words: headObject.visible ? width - headObject.width - PrismTheme.dp(24) : width
                         visible: root.board && root.staged
                         width: content.width
-                        height: visible ? headLede.y + (headLede.visible ? headLede.height : 0) + PrismTheme.dp(24) : 0
+                        // The words set the head's height; the object fits in it, never the other way (it left a band of air).
+                        readonly property real wordsBottom: headActs.visible ? headActs.y + headActs.height
+                            : headLede.visible ? headLede.y + headLede.height : headName.y + headName.height
+                        height: visible ? Math.max(boardHead.wordsBottom, headObject.visible ? headObject.y + headObject.height : 0) + PrismTheme.dp(22) : 0
                         PrismText {
                             id: headCredit
                             y: PrismTheme.dp(22)
-                            width: parent.width - headActs.width - PrismTheme.dp(20)
+                            visible: text.length > 0
+                            width: boardHead.words
                             // Values keep their case: "4 s" is not "4 S".
                             text: boardHead.says.join("  ·  ")
                             mono: true
@@ -458,8 +500,8 @@ Item {
                         }
                         PrismText {
                             id: headName
-                            y: headCredit.y + headCredit.height + PrismTheme.dp(8)
-                            width: parent.width - headActs.width - PrismTheme.dp(20)
+                            y: headCredit.visible ? headCredit.y + headCredit.height + PrismTheme.dp(8) : PrismTheme.dp(18)
+                            width: boardHead.words
                             text: root.topTitle
                             font.pixelSize: PrismTheme.title + PrismTheme.dp(12)
                             font.weight: Font.Bold
@@ -468,7 +510,7 @@ Item {
                         PrismText {
                             id: headLede
                             y: headName.y + headName.height + PrismTheme.dp(4)
-                            width: parent.width - headActs.width - PrismTheme.dp(20)
+                            width: boardHead.words
                             visible: text.length > 0
                             text: boardHead.tip
                             color: PrismTheme.light ? PrismTheme.ink2 : PrismTheme.inkNav
@@ -476,10 +518,11 @@ Item {
                         }
                         Row {
                             id: headActs
-                            anchors.right: parent.right
-                            anchors.bottom: headLede.visible ? headLede.bottom : headName.bottom
+                            y: (headLede.visible ? headLede.y + headLede.height : headName.y + headName.height) + PrismTheme.dp(14)
+                            visible: nextWall.visible || restoreAll.visible
                             spacing: PrismTheme.dp(8)
                             PrismRound {
+                                id: nextWall
                                 visible: root.home
                                 implicitWidth: PrismTheme.dp(34)
                                 glyph: "shuffle"
@@ -487,12 +530,25 @@ Item {
                                 onClicked: Wallpapers.nextWallpaper(Appearance.m3colors.darkmode, NiriService.currentOutput)
                             }
                             PrismPill {
+                                id: restoreAll
                                 visible: root.board && root.staged && PrismModel.restorableOf(root.page.pageId) > 0
                                 tone: "quiet"
                                 glyph: "restart_alt"
                                 text: Translation.tr("Restore defaults")
                                 onClicked: PrismModel.restore(root.page.pageId)
                             }
+                        }
+                        PrismObject {
+                            id: headObject
+                            visible: drawn && boardHead.width >= PrismTheme.dp(720)
+                            x: boardHead.width - width
+                            width: Math.round(Math.min(PrismTheme.dp(360), boardHead.width * 0.36))
+                            height: Math.max(PrismTheme.dp(112), Math.min(PrismTheme.dp(160), boardHead.wordsBottom + PrismTheme.dp(16)))
+                            atRight: true
+                            pageId: root.board && root.staged ? String(root.page.pageId) : ""
+                            tint: String(root.page.tint)
+                            groups: root.groups
+                            onGoGroup: title => root.showGroup(root.firstOf(title))
                         }
                     }
                     PrismPoster {
@@ -508,6 +564,7 @@ Item {
                         changed: root.staged ? PrismModel.changedOf(root.page.pageId).length : 0
                         restorable: root.staged ? PrismModel.restorableOf(root.page.pageId) : 0
                         pills: false
+                        topLine: !root.board
                         lead: root.staged ? PrismModel.leadOf(root.page) : []
                         keyRoom: 0
                         picture: root.home ? Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? "")) : ""
@@ -528,9 +585,6 @@ Item {
                         figure: root.figures[String(root.sections[0]?.title ?? "")] ?? null
                         groups: root.groups
                         flashPath: root.flashPath
-                        active: root.active
-                        viewTop: centre.contentY - content.y - leadFolder.y
-                        viewHeight: centre.height
                         restorable: root.staged ? PrismModel.restorableOf(root.page.pageId) : 0
                         lead: root.staged ? PrismModel.leadOf(root.page) : []
                         keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
@@ -635,31 +689,39 @@ Item {
                         readonly property real gap: root.board ? PrismTheme.dp(12) : PrismTheme.dp(14)
                         readonly property int columns: content.width >= PrismTheme.dp(1080) ? 3 : content.width >= PrismTheme.dp(640) ? 2 : 1
                         readonly property real cell: Math.floor((content.width - shelf.gap * (shelf.columns - 1)) / shelf.columns)
-                        // Where each group stands, and the shelf's height: read from the groups' own heights, never their places.
-                        readonly property var packed: {
-                            const tops = []
-                            for (let c = 0; c < shelf.columns; ++c) tops.push(0)
-                            const at = []
+                        // Bumped as the Repeater makes or drops a group: its count changes before the items exist.
+                        property int built: 0
+                        // The shown groups as the packing reads them: each one's columns and its own height.
+                        function measured(spanOf: var): var {
+                            const out = []
                             for (let i = 0; i < sectionsRepeater.count; ++i) {
                                 const item = sectionsRepeater.itemAt(i)
-                                if (!item || !item.visible) { at.push(Qt.point(0, 0)); continue }
-                                // A group over several columns goes where those columns are lowest, together.
-                                const span = Math.min(shelf.columns, item.span)
-                                let c = 0, top = Infinity
-                                for (let k = 0; k + span <= shelf.columns; ++k) {
-                                    const y = Math.max(...tops.slice(k, k + span))
-                                    if (y < top - 1) { c = k; top = y }
-                                }
-                                at.push(Qt.point(c * (shelf.cell + shelf.gap), top))
-                                for (let k = c; k < c + span; ++k) tops[k] = top + item.implicitHeight + shelf.gap
+                                out.push(item && item.visible ? { span: spanOf(item), height: item.implicitHeight } : null)
                             }
-                            return { at: at, height: Math.max(0, Math.max(...tops) - shelf.gap) }
+                            return out
+                        }
+                        // On the Board the last module widens over the columns still empty beside it (D3's Apps).
+                        readonly property var grown: {
+                            if (!root.board) return { index: -1, span: 0 }
+                            const _ = shelf.built
+                            return Shelf.grown(shelf.measured(item => item.ownSpan), shelf.columns, shelf.gap)
+                        }
+                        // Where each group stands, and the shelf's height: read from the groups' own heights, never their places.
+                        readonly property var packed: {
+                            const _ = shelf.built
+                            const spots = Shelf.pack(shelf.measured(item => item.span), shelf.columns, shelf.gap)
+                            return {
+                                at: spots.at.map(spot => spot ? Qt.point(spot.c * (shelf.cell + shelf.gap), spot.top) : Qt.point(0, 0)),
+                                height: Math.max(0, Math.max(...spots.tops) - shelf.gap)
+                            }
                         }
                         width: content.width
                         height: shelf.packed.height
                         Repeater {
                             id: sectionsRepeater
-                            model: ScriptModel { objectProp: "title"; values: root.staged && !root.board ? root.shownSections.slice(1) : root.shownSections }
+                            onItemAdded: shelf.built++
+                            onItemRemoved: shelf.built++
+                            model: ScriptModel { objectProp: "title"; values: root.staged && !root.board ? root.shownSections.slice(1) : root.board ? root.boardModules : root.shownSections }
                             delegate: PrismSection {
                                 id: sectionBox
                                 required property var modelData
@@ -667,18 +729,17 @@ Item {
                                 visible: sectionBox.modelData.rows.length > 0 || Boolean(root.figures[sectionBox.modelData.title]?.keys)
                                 x: shelf.packed.at[sectionBox.index]?.x ?? 0
                                 y: shelf.packed.at[sectionBox.index]?.y ?? 0
-                                readonly property int span: Math.min(shelf.columns, root.spanOf(sectionBox.modelData))
+                                readonly property int ownSpan: Math.min(shelf.columns, root.spanOf(sectionBox.modelData))
+                                readonly property int span: shelf.grown.index === sectionBox.index ? shelf.grown.span : sectionBox.ownSpan
                                 width: root.staged ? shelf.cell * sectionBox.span + shelf.gap * (sectionBox.span - 1) : content.width
                                 form: root.staged ? root.formOf(sectionBox.modelData) : "folder"
-                                figureSay: root.figureOf(sectionBox.modelData, sectionBox.form)
+                                readonly property var shown: root.figureOf(sectionBox.modelData, sectionBox.form)
+                                figureSay: sectionBox.shown.say
+                                figureRow: sectionBox.shown.row
                                 echoed: root.board && String(sectionBox.modelData.title) === String(root.page.name)
                                 figure: root.figures[sectionBox.modelData.title] ?? null
                                 groups: root.groups
                                 entry: root.bandOf(sectionBox.modelData.title)
-                                viewTop: centre.contentY - content.y - shelf.y - sectionBox.y
-                                viewHeight: centre.height
-                                active: root.active
-                                onGoGroup: title => root.showGroup(root.firstOf(title))
                                 title: Translation.tr(sectionBox.modelData.title)
                                 glyph: String(sectionBox.modelData.glyph ?? root.page.glyph)
                                 tint: root.page.tint
@@ -716,6 +777,7 @@ Item {
             eyebrow: root.topEyebrow
             title: root.topTitle
             keyRoom: railKey.visible ? PrismTheme.dp(44) : 0
+            topLine: !root.board
         }
 
         // Rows leaving the top or past the foot melt into the air drawn again over each edge (nothing offscreen, 11-11).

@@ -28,6 +28,8 @@ Item {
     property int restorable: 0
     property var lead: []
     property bool pills: true
+    // The way back and the credits over the name; the Board's own line says them, so there the poster starts at its name.
+    property bool topLine: true
     // A picture worn as the art in place of the ribbon (Home wears the desktop's own wallpaper), and the hues it gives.
     property string picture: ""
     property var hues: []
@@ -116,6 +118,7 @@ Item {
     // The top line: back and forward, then the printed columns, then the page's buttons.
     Item {
         id: top
+        visible: root.topLine
         x: root.inset
         y: PrismTheme.dp(18)
         width: root.width - root.inset * 2
@@ -201,7 +204,7 @@ Item {
     PrismText {
         id: name
         x: root.inset
-        y: root.art ? root.height - height - PrismTheme.dp(20) : top.y + top.height + PrismTheme.dp(26)
+        y: root.art ? root.height - height - PrismTheme.dp(20) : root.topLine ? top.y + top.height + PrismTheme.dp(26) : PrismTheme.dp(22)
         // A long name in a narrow window steps down in size rather than losing its end.
         width: Math.min(implicitWidth, root.width - root.inset * 2)
         fontSizeMode: Text.HorizontalFit

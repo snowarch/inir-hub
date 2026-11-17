@@ -911,6 +911,7 @@
   "Already used by “%1”": "“%1” पहले से इस्तेमाल कर रहा है",
   "Closing": "बंद होना",
   "Could not read your Niri config, showing the defaults": "आपका Niri कॉन्फ़िग पढ़ा नहीं जा सका, डिफ़ॉल्ट दिखाए जा रहे हैं",
+  "Could not read your Umbriel config, showing the defaults": "आपका Umbriel कॉन्फ़िग पढ़ा नहीं जा सका, डिफ़ॉल्ट दिखाए जा रहे हैं",
   "From %1": "%1 से",
   "Gray": "धूसर",
   "Green": "हरा",
@@ -2648,5 +2649,6 @@
   "Folders": "फ़ोल्डर",
   "Board": "बोर्ड",
   "Each page a folder over its groups.": "हर पेज अपने समूहों के ऊपर एक फ़ोल्डर।",
-  "Areas as keys, pages as tabs, groups as modules.": "क्षेत्र कुंजियों के रूप में, पेज टैब, समूह मॉड्यूल।"
+  "Areas as keys, pages as tabs, groups as modules.": "क्षेत्र कुंजियों के रूप में, पेज टैब, समूह मॉड्यूल।",
+  "No app has sent a notification yet.": "अभी तक किसी ऐप ने सूचना नहीं भेजी।"
 }

@@ -911,6 +911,7 @@
   "Already used by “%1”": "כבר בשימוש על ידי „%1”",
   "Closing": "סגירה",
   "Could not read your Niri config, showing the defaults": "לא ניתן היה לקרוא את תצורת Niri שלך, מוצגות ברירות המחדל",
+  "Could not read your Umbriel config, showing the defaults": "לא ניתן היה לקרוא את תצורת Umbriel שלך, מוצגות ברירות המחדל",
   "From %1": "מ־%1",
   "Gray": "אפור",
   "Green": "ירוק",
@@ -2648,5 +2649,6 @@
   "Folders": "תיקיות",
   "Board": "לוח",
   "Each page a folder over its groups.": "כל עמוד תיקייה מעל הקבוצות שלו.",
-  "Areas as keys, pages as tabs, groups as modules.": "אזורים כמקשים, עמודים כלשוניות, קבוצות כמודולים."
+  "Areas as keys, pages as tabs, groups as modules.": "אזורים כמקשים, עמודים כלשוניות, קבוצות כמודולים.",
+  "No app has sent a notification yet.": "אף אפליקציה עוד לא שלחה התראה."
 }

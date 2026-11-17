@@ -172,6 +172,7 @@ Flickable {
             text: root.statusMsg.length > 0 ? root.statusMsg
                 : !root.isNiri ? Translation.tr("Shortcuts are only available on Niri.")
                 : NiriKeybinds.loaded ? Translation.tr("From %1").arg(NiriKeybinds.configPath)
+                : CompositorService.isUmbriel ? Translation.tr("Could not read your Umbriel config, showing the defaults")
                 : Translation.tr("Could not read your Niri config, showing the defaults")
             color: root.statusMsg.length > 0 ? (root.statusType === "error" ? IrisStyle.danger : IrisStyle.success) : IrisStyle.muted
             font.pixelSize: IrisStyle.typeMeta

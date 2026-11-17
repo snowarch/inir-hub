@@ -3,7 +3,6 @@ import Quickshell
 import Quickshell.Widgets
 import qs.services
 import qs.modules.iris.style
-import qs.modules.iris.preview
 import qs.modules.iris.settings
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
@@ -15,23 +14,16 @@ import qs.modules.iris.prism.fx
 // the card is wide enough, two fields in a row (text, levels, short choices) stand side by side with the name over the
 // control, and two switches share a line; everything else takes the card's whole width. A part of the group gets its
 // own caption.
-// A group with a picture wears it in its card (his 11-15, Raell's keyboard and mouse in their own cards): the scene
-// beside the rows, its part lit and numbered like the page's strip, following the rows down while the card is read so
-// what a control changes stays in sight; narrow, it stands over the rows. The drawn keyboard heads its card whole.
+// The drawn keyboard heads its card whole; no group wears a live scene (the page's drawn object stands on its art).
 Item {
     id: root
     property string title: ""
-    // The picture: { section, group } of a scene, { keys, row } for the drawn keyboard, or null (PrismModel.figureOf).
+    // { keys, row } for the drawn keyboard, or null (PrismModel.figureOf).
     property var figure: null
-    // The page's groups as the strip numbers them, and this card's entry among them (a band's title on banded pages).
+    // The page's groups, and this card's entry among them (a band's title on banded pages): its turn of the art.
     property var groups: []
     property string entry: ""
     readonly property int number: root.groups.findIndex(group => String(group.title) === root.entry) + 1
-    // Where the page's visible top stands in this card's frame, and how tall the page is: the picture keeps in sight.
-    property real viewTop: 0
-    property real viewHeight: 0
-    property bool active: true
-    signal goGroup(string title)
     // Under the title: what the card holds (search: where the rows come from).
     property string line: ""
     property string glyph: "tune"
@@ -58,31 +50,40 @@ Item {
     readonly property var master: !root.bare && !root.foldered && !root.showPage && root.rows.length >= 2
         && root.rows[0].kind === "switch" && String(root.rows[0].label) === String(root.rows[0].section ?? "") ? root.rows[0] : null
     readonly property var listed: root.master ? root.rows.slice(1) : root.rows
-    // What a card sets big: the group's value now.
+    // What a card sets big: the group's value now, and the level it comes from, whose own figure it takes (said once);
+    // while that level is dragged, the figure follows the hand.
     property string figureSay: ""
+    property var figureRow: null
+    property string liveSay: ""
+    function said(row: var): bool { return root.figureRow !== null && String(row?.key ?? "") === String(root.figureRow.key) }
+    // A part of the group (its spec's), or the group a row was folded in from on the Board (PrismPanel.boardModules).
+    function partOf(row: var): string { return String(row?.part ?? row?.spec?.part ?? "") }
     // A module named as its page (Keyboard on Keyboard) under the page's own name: its credit would say it twice.
     property bool echoed: false
     readonly property real naturalHeight: body.implicitHeight + root.pad - PrismTheme.dp(8)
     readonly property real pad: root.bare ? 0 : PrismTheme.dp(24)
     readonly property real inner: root.width - root.pad * 2
 
-    // ── The picture's place: beside the rows where both fit, else over them.
     readonly property bool keys: Boolean(root.figure?.keys)
-    readonly property bool scened: !root.showPage && !root.keys && root.figure !== null && root.figure !== undefined
-    readonly property bool beside: root.scened && root.inner >= (root.moduled ? PrismTheme.dp(560) : PrismTheme.dp(720))
-    readonly property real figureWidth: root.beside ? Math.round(Math.max(PrismTheme.dp(260), Math.min(PrismTheme.dp(420), root.inner * (root.moduled ? 0.46 : 0.4)))) : root.inner
-    readonly property real figureHeight: root.beside ? Math.round(root.figureWidth * 0.66)
-        : Math.round(Math.max(PrismTheme.dp(180), Math.min(PrismTheme.dp(260), root.inner * 0.42)))
-    readonly property real rowsWidth: root.beside ? root.inner - root.figureWidth - PrismTheme.dp(28) : root.inner
-    readonly property bool seen: root.viewTop < root.height && root.viewTop + root.viewHeight > 0
+    readonly property real rowsWidth: root.inner
 
     readonly property real gap: PrismTheme.dp(28)
     readonly property bool twoUp: !root.showPage && root.rowsWidth >= PrismTheme.dp(640)
     readonly property real half: Math.floor((root.rowsWidth - root.gap) / 2)
     readonly property real controlWidth: Math.min(PrismTheme.dp(300), root.rowsWidth * 0.4)
+    readonly property real halfControl: Math.min(PrismTheme.dp(260), root.half * 0.45)
     // A module one column wide sets its levels and fields under their names, as wide as the module (design D3).
     readonly property bool narrow: root.moduled && root.rowsWidth < PrismTheme.dp(440)
     function stackOf(row: var): bool { return root.narrow && ["range", "text", "hue"].includes(String(row?.kind ?? "")) }
+    // A module the shelf's whole width sets its one-line rows (a switch, a plain choice) two to a line, each with its
+    // control at its half's end, as D3's Apps: a row across the window leaves its name and control far apart.
+    readonly property bool wide: root.moduled && root.rowsWidth >= PrismTheme.dp(860)
+    function lineOf(row: var): bool {
+        const kind = String(row?.kind ?? "")
+        if (kind === "switch") return true
+        return kind === "choice" && row.spec?.cards !== "island" && !row.spec?.flags
+            && !PrismModel.choicesOf(row).some(choice => choice.swatch !== undefined && choice.swatch !== null)
+    }
 
     // What the chip says: the first row that names its group's state now (the keyboard's layout).
     readonly property var chipRow: root.rows.find(row => typeof row.spec?.chip === "function")
@@ -102,8 +103,12 @@ Item {
             const row = list[i]
             const next = list[i + 1]
             const shape = root.twoUp ? root.shapeOf(row) : ""
-            if (shape.length > 0 && next && root.shapeOf(next) === shape && String(next.spec?.part ?? "") === String(row.spec?.part ?? "")) {
+            const together = next && root.partOf(next) === root.partOf(row)
+            if (shape.length > 0 && together && root.shapeOf(next) === shape) {
                 out.push({ key: row.key + "+" + next.key, rows: [row, next], shape: shape, first: i })
+                i++
+            } else if (root.wide && together && root.lineOf(row) && root.lineOf(next)) {
+                out.push({ key: row.key + "+" + next.key, rows: [row, next], shape: "line", first: i })
                 i++
             } else out.push({ key: row.key, rows: [row], shape: "", first: i })
         }
@@ -240,8 +245,8 @@ Item {
         id: masterBox
         visible: root.master !== null
         z: 1
-        // In line with the rows' own switches, which keep the pin's room at their end.
-        x: root.width - root.pad - (root.beside ? 0 : PrismTheme.dp(64)) - width
+        // In line with the rows' own switches.
+        x: root.width - root.pad - width
         y: root.form === "slip" ? PrismTheme.dp(11) : root.moduled ? PrismTheme.dp(13) : Math.round((root.rise - height) / 2) + PrismTheme.dp(2)
         checked: root.master ? Boolean(PrismModel.read(root.master)) : false
         Accessible.name: root.title
@@ -292,7 +297,7 @@ Item {
                 visible: (root.form === "card" || root.moduled) && root.figureSay.length > 0
                 y: root.rise - PrismTheme.dp(4)
                 width: Math.min(implicitWidth, parent.width)
-                text: root.figureSay
+                text: root.liveSay.length > 0 ? root.liveSay : root.figureSay
                 figures: true
                 color: root.form === "card" && !PrismTheme.light ? PrismTheme.paper : PrismTheme.ink
                 font.pixelSize: root.moduled ? PrismTheme.display + PrismTheme.dp(10) : PrismTheme.display + PrismTheme.dp(6)
@@ -313,7 +318,7 @@ Item {
                 wrapMode: Text.WordWrap
             }
         }
-        Item { width: 1; height: root.bare || root.form === "slip" ? 0 : root.scened || root.keys ? PrismTheme.dp(18) : root.moduled ? PrismTheme.dp(4) : PrismTheme.dp(10) }
+        Item { width: 1; height: root.bare || root.form === "slip" ? 0 : root.keys ? PrismTheme.dp(18) : root.moduled ? PrismTheme.dp(4) : PrismTheme.dp(10) }
 
         // The drawn keyboard heads its card whole; the keys left iNiR's go back at once from under it.
         Loader {
@@ -344,73 +349,14 @@ Item {
             }
         }
 
-        // The rows, and the picture beside them (or over them).
+        // The rows.
         Item {
             id: stage
             width: body.width
-            readonly property real pictureHeight: !root.scened ? 0 : pictureBox.item ? pictureBox.item.implicitHeight : root.figureHeight
-            height: root.beside ? Math.max(list.implicitHeight, stage.pictureHeight)
-                : root.scened ? stage.pictureHeight + PrismTheme.dp(14) + list.implicitHeight : list.implicitHeight
-
-            Loader {
-                id: pictureBox
-                active: root.scened
-                visible: active
-                x: root.beside ? body.width - root.figureWidth : 0
-                // Beside the rows it keeps to the page's visible top while the card is read, never past its rows' end.
-                y: !root.beside ? 0 : Math.round(Math.max(0, Math.min(stage.height - stage.pictureHeight,
-                    root.viewTop - body.y - stage.y)))
-                sourceComponent: Item {
-                    width: root.figureWidth
-                    implicitHeight: scene.height + (caption.visible ? PrismTheme.dp(8) + caption.implicitHeight : 0)
-                    IrisGroupPreview {
-                        id: scene
-                        width: root.figureWidth
-                        height: scene.cardHeight > 0 ? Math.min(root.figureHeight, Math.max(PrismTheme.dp(120), scene.cardHeight)) : root.figureHeight
-                        radius: PrismTheme.dp(16)
-                        framed: false
-                        captionOutside: true
-                        // Prism draws it with the animated previews off too, held still: a picture at rest costs nothing.
-                        holdsStill: true
-                        playing: root.active && root.seen
-                        section: String(root.figure?.section ?? "")
-                        group: String(root.figure?.group ?? "")
-                        niriValue: (section, key) => CompositorConfig.value(IrisOptions.settings.find(spec => spec.comp === section && spec.key === key) ?? { comp: section, key: key })
-                        niriRevision: CompositorConfig.revision
-                    }
-                    // Its part lit, the others numbered quietly: pointing at one names it, a press goes to its card.
-                    PrismSpots {
-                        id: marks
-                        property string hovering: ""
-                        width: scene.width
-                        height: scene.height
-                        radius: scene.radius
-                        spots: scene.spots
-                        groups: root.groups
-                        pointed: marks.hovering
-                        picked: root.entry
-                        sayOf: title => PrismModel.glanceOf(root.groups.find(group => String(group.title) === title)).say
-                        onPoint: title => marks.hovering = title
-                        onPick: title => { if (title.length > 0 && title !== root.entry) root.goGroup(title) }
-                    }
-                    PrismText {
-                        id: caption
-                        y: scene.height + PrismTheme.dp(8)
-                        width: parent.width
-                        text: scene.caption
-                        visible: text.length > 0
-                        color: PrismTheme.ink2
-                        font.pixelSize: PrismTheme.small
-                        wrapMode: Text.WordWrap
-                        maximumLineCount: 2
-                        elide: Text.ElideNone
-                    }
-                }
-            }
+            height: list.implicitHeight
 
             Column {
                 id: list
-                y: root.beside || !root.scened ? 0 : stage.pictureHeight + PrismTheme.dp(14)
                 width: root.rowsWidth
                 spacing: 0
 
@@ -424,10 +370,10 @@ Item {
                         required property var modelData
                         required property int index
                         width: list.width
-                        readonly property string part: String(entry.modelData.rows[0].spec?.part ?? "")
+                        readonly property string part: root.partOf(entry.modelData.rows[0])
                         // A search's hits come from many groups: a part's caption there would name one group's inside.
                         readonly property bool partStarts: !root.showPage && entry.part.length > 0
-                            && (entry.modelData.first === 0 || String(root.listed[entry.modelData.first - 1]?.spec?.part ?? "") !== entry.part)
+                            && (entry.modelData.first === 0 || root.partOf(root.listed[entry.modelData.first - 1]) !== entry.part)
                         // A part's head as the specimen sheets print theirs (`.claude/ref/language`, micrographics): its
                         // name in small mono caps and a hairline running to the card's edge.
                         Item {
@@ -457,14 +403,18 @@ Item {
                         Row {
                             readonly property bool paired: entry.modelData.rows.length > 1
                             readonly property bool stackedPair: paired && entry.modelData.shape === "field"
+                            readonly property bool lined: paired && entry.modelData.shape === "line"
                             spacing: root.gap
                             PrismRow {
                                 width: parent.paired ? root.half : list.width
                                 row: entry.modelData.rows[0]
                                 stacked: parent.stackedPair || root.stackOf(row)
+                                beside: parent.paired
                                 showPage: root.showPage
-                                controlWidth: parent.stackedPair ? root.half : parent.paired ? PrismTheme.dp(64) : root.stackOf(row) ? list.width - PrismTheme.dp(64) : root.controlWidth
+                                controlWidth: parent.stackedPair ? root.half : parent.lined ? root.halfControl : parent.paired ? PrismTheme.dp(64) : root.stackOf(row) ? list.width : root.controlWidth
                                 flash: root.flashPath === row.path
+                                said: root.said(row)
+                                onLive: say => root.liveSay = say
                                 onOpenRequested: root.reach(row)
                             }
                             Loader {
@@ -472,12 +422,16 @@ Item {
                                 active: parent.paired
                                 visible: active
                                 readonly property bool stackedPair: parent.stackedPair
+                                readonly property bool lined: parent.lined
                                 sourceComponent: PrismRow {
                                     width: root.half
                                     row: entry.modelData.rows[1]
                                     stacked: second.stackedPair
-                                    controlWidth: second.stackedPair ? root.half : PrismTheme.dp(64)
+                                    beside: true
+                                    controlWidth: second.stackedPair ? root.half : second.lined ? root.halfControl : PrismTheme.dp(64)
                                     flash: root.flashPath === row.path
+                                    said: root.said(row)
+                                    onLive: say => root.liveSay = say
                                 }
                             }
                         }

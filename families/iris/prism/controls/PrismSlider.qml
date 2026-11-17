@@ -51,7 +51,7 @@ Item {
     // it, the person's accent filling it up to a white cap with a grip, the figure printed at the end. The factory value's
     // tick stands taller, so it can be found again by eye as well as by the drag that holds there.
     readonly property real capWidth: PrismTheme.dp(28)
-    readonly property real figureRoom: Math.max(PrismTheme.dp(46), figure.implicitWidth) + PrismTheme.dp(12)
+    readonly property real figureRoom: root.label.length > 0 ? Math.max(PrismTheme.dp(46), figure.implicitWidth) + PrismTheme.dp(12) : 0
     // A glyph, when given (the home deck's volume), leads before the groove.
     readonly property real lead: root.glyph.length > 0 ? PrismTheme.dp(26) : 0
     readonly property real grooveWidth: Math.max(root.capWidth * 2, root.width - root.figureRoom - root.lead)

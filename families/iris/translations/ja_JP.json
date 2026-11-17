@@ -911,6 +911,7 @@
   "Already used by “%1”": "「%1」で使用中",
   "Closing": "閉じるとき",
   "Could not read your Niri config, showing the defaults": "Niri の設定を読み込めなかったため、既定値を表示しています",
+  "Could not read your Umbriel config, showing the defaults": "Umbriel の設定を読み込めなかったため、既定値を表示しています",
   "From %1": "%1 から",
   "Gray": "グレー",
   "Green": "緑",
@@ -2648,5 +2649,6 @@
   "Folders": "フォルダー",
   "Board": "ボード",
   "Each page a folder over its groups.": "各ページはグループの上のフォルダー。",
-  "Areas as keys, pages as tabs, groups as modules.": "エリアはキー、ページはタブ、グループはモジュール。"
+  "Areas as keys, pages as tabs, groups as modules.": "エリアはキー、ページはタブ、グループはモジュール。",
+  "No app has sent a notification yet.": "まだ通知を送ったアプリはありません。"
 }

@@ -911,6 +911,7 @@
   "Already used by “%1”": "Sudah dipakai oleh “%1”",
   "Closing": "Menutup",
   "Could not read your Niri config, showing the defaults": "Tidak dapat membaca konfigurasi Niri Anda, menampilkan bawaan",
+  "Could not read your Umbriel config, showing the defaults": "Tidak dapat membaca konfigurasi Umbriel Anda, menampilkan bawaan",
   "From %1": "Dari %1",
   "Gray": "Abu-abu",
   "Green": "Hijau",
@@ -2648,5 +2649,6 @@
   "Folders": "Map",
   "Board": "Papan",
   "Each page a folder over its groups.": "Setiap halaman sebuah map di atas grupnya.",
-  "Areas as keys, pages as tabs, groups as modules.": "Area sebagai tombol, halaman sebagai tab, grup sebagai modul."
+  "Areas as keys, pages as tabs, groups as modules.": "Area sebagai tombol, halaman sebagai tab, grup sebagai modul.",
+  "No app has sent a notification yet.": "Belum ada aplikasi yang mengirim notifikasi."
 }

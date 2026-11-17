@@ -911,6 +911,7 @@
   "Already used by “%1”": "Already used by “%1”",
   "Closing": "Closing",
   "Could not read your Niri config, showing the defaults": "Could not read your Niri config, showing the defaults",
+  "Could not read your Umbriel config, showing the defaults": "Could not read your Umbriel config, showing the defaults",
   "From %1": "From %1",
   "Gray": "Gray",
   "Green": "Green",
@@ -2648,5 +2649,6 @@
   "Folders": "Folders",
   "Board": "Board",
   "Each page a folder over its groups.": "Each page a folder over its groups.",
-  "Areas as keys, pages as tabs, groups as modules.": "Areas as keys, pages as tabs, groups as modules."
+  "Areas as keys, pages as tabs, groups as modules.": "Areas as keys, pages as tabs, groups as modules.",
+  "No app has sent a notification yet.": "No app has sent a notification yet."
 }

@@ -6,7 +6,6 @@ import qs.services
 import qs.modules.common
 import qs.modules.iris.settings
 import qs.modules.iris.prism.core
-import "../../preview/IrisSceneMap.js" as SceneMap
 
 // Prism's one model, drawn from iRiS Settings' one registry (IrisOptions): every area is a page, every row of it a
 // line of the chart, read, written, undone and said exactly as Classic and Folio do. What Prism adds is its dress:
@@ -25,46 +24,46 @@ Singleton {
     function captionOf(category: var): string { return category.foot ? "iNiR" : String(category.title) }
     readonly property var groups: [""].concat(IrisOptions.categories.map(category => root.captionOf(category)))
 
-    // Prism's dress per area: a shorter name where the sidebar wants one, its mark and tint, and the rows the hero says.
+    // Prism's dress per area: a shorter name where the sidebar wants one, its mark and tint.
     readonly property var dress: ({
-        general: { name: "Home", glyph: "home", tint: "blue", lead: ["panelFamily", "time.format"] },
-        appearance: { name: "Style", glyph: "style", tint: "violet", lead: ["iris.appearance.look", "iris.appearance.design"] },
-        colour: { name: "Colour", glyph: "palette", tint: "pink", lead: ["iris.appearance.scheme", "iris.appearance.accent"] },
-        surfaces: { name: "Surfaces", glyph: "layers", tint: "teal", lead: ["iris.appearance.theme.surface", "iris.appearance.glass.mode"] },
-        typeIcons: { name: "Type & icons", glyph: "text_fields", tint: "orange", lead: ["iris.appearance.theme.text", "iris.appearance.icons.style"] },
-        appColours: { name: "App colours", glyph: "format_paint", tint: "blue", lead: ["iris.appearance.accentForApps", "appearance.wallpaperTheming.enableAppsAndShell"] },
-        wallpaper: { glyph: "wallpaper", tint: "teal", lead: ["iris.wallpaper.layout", "iris.wallpaper.sort"] },
-        motion: { glyph: "animation", tint: "pink", lead: ["iris.appearance.morph", "iris.appearance.theme.curve"] },
-        bar: { name: "Island", glyph: "smart_button", tint: "indigo", lead: ["iris.bar.design", "iris.bar.position"] },
-        dock: { glyph: "dock_to_bottom", tint: "blue", lead: ["iris.dock.position", "iris.dock.shape"] },
-        bubbles: { name: "Bubbles", glyph: "bubble_chart", tint: "pink", lead: ["iris.bubbles.design", "iris.bubbles.join"] },
-        desktop: { glyph: "desktop_windows", tint: "amber", lead: ["iris.widgets.design", "iris.widgets.material"] },
-        widgets: { glyph: "widgets", tint: "amber", lead: ["background.widgets.editGrid.snap", "background.widgets.powerSaving.enable"] },
+        general: { name: "Home", glyph: "home", tint: "blue" },
+        appearance: { name: "Style", glyph: "style", tint: "violet" },
+        colour: { name: "Colour", glyph: "palette", tint: "pink" },
+        surfaces: { name: "Surfaces", glyph: "layers", tint: "teal" },
+        typeIcons: { name: "Type & icons", glyph: "text_fields", tint: "orange" },
+        appColours: { name: "App colours", glyph: "format_paint", tint: "blue" },
+        wallpaper: { glyph: "wallpaper", tint: "teal" },
+        motion: { glyph: "animation", tint: "pink" },
+        bar: { name: "Island", glyph: "smart_button", tint: "indigo" },
+        dock: { glyph: "dock_to_bottom", tint: "blue" },
+        bubbles: { name: "Bubbles", glyph: "bubble_chart", tint: "pink" },
+        desktop: { glyph: "desktop_windows", tint: "amber" },
+        widgets: { glyph: "widgets", tint: "amber" },
         // The compositor's pages (cluster 5), in the order of `order`. A lead with a colon names a compositor row.
-        display: { name: "Displays", glyph: "desktop_windows", tint: "amber", cluster: 5, order: 0, lead: ["light.night.colorTemperature"] },
-        layout: { name: "Layout", glyph: "view_column_2", tint: "teal", cluster: 5, order: 1, lead: ["layout:mode", "layout:gaps"] },
-        windows: { glyph: "select_window", tint: "blue", cluster: 5, order: 2, lead: ["window-rules:corner-radius", "layout:border.enabled", "titlebar:mode"] },
-        glass: { name: "Glass & effects", glyph: "blur_on", tint: "violet", cluster: 5, order: 3, lead: ["glass:enabled", "window-rules:blur", "blur:enabled"] },
-        movement: { name: "Movement", glyph: "animation", tint: "pink", cluster: 5, order: 4, lead: ["animations:enabled", "animations:duration", "animations:slowdown"] },
-        keyboard: { name: "Keyboard", glyph: "keyboard", tint: "indigo", cluster: 5, order: 5, lead: ["input:keyboard.layout", "input:keyboard.repeat-delay"] },
-        pointer: { name: "Mouse & pointer", glyph: "mouse", tint: "orange", cluster: 5, order: 7, lead: ["input:cursor.xcursor-theme", "input:cursor.xcursor-size"] },
-        sidebars: { name: "Side Panels", glyph: "dock_to_right", tint: "green", lead: ["iris.sidebars.right.enable", "iris.sidebars.left.enable"] },
-        controlCenter: { glyph: "toggle_on", tint: "green", lead: ["iris.controlCenter.opens", "iris.controlCenter.controls"] },
-        spotlight: { glyph: "search", tint: "orange", lead: ["iris.palette.opens", "iris.palette.maxResults"] },
-        orbit: { glyph: "grid_view", tint: "violet", lead: ["iris.orbit.opens", "iris.orbit.titles"] },
-        capture: { name: "Screenshots & Recording", glyph: "screenshot_region", tint: "orange", lead: ["screenRecord.audioMode", "regionSelector.annotation.useSatty"] },
-        player: { name: "Now Playing", glyph: "music_note", tint: "red", lead: ["iris.player.visualizer.style", "iris.player.bubbleOpens"] },
-        anime: { glyph: "live_tv", tint: "pink", lead: ["iris.bubbles.extras.anime.enable", "iris.bubbles.extras.watching.enable"] },
-        notifications: { glyph: "notifications", tint: "red", lead: ["iris.osd.style", "iris.notifications.duration"] },
-        sound: { name: "Sound", glyph: "volume_up", tint: "orange", lead: ["audio.protection.maxAllowed", "audio.protection.maxAllowedIncrease"] },
-        shortcuts: { name: "Keyboard shortcuts", glyph: "keyboard_command_key", tint: "indigo", lead: [], view: "IrisShortcutsPage.qml", cluster: 5, order: 6, after: "keyboard" },
-        battery: { glyph: "battery_full", tint: "green", lead: ["battery.low", "battery.critical"], needs: "battery" },
-        gaming: { name: "Gaming", glyph: "sports_esports", tint: "teal", lead: ["gameMode.autoDetect", "gameMode.disableAnimations"] },
-        lock: { name: "Lock", glyph: "lock", tint: "indigo", lead: ["iris.lock.material", "iris.lock.type.clockFont"] },
-        login: { name: "Login", glyph: "login", tint: "violet", lead: ["lock.loginScreen", "lock.loginStyle"] },
-        sources: { glyph: "cloud_sync", tint: "blue", lead: ["weather.enable", "calendar.externalSync.enable"] },
-        system: { glyph: "storefront", tint: "pink", lead: [], view: "PrismHub.qml" },
-        about: { name: "About", glyph: "info", tint: "holo", lead: [], view: "PrismAbout.qml", cluster: 4, after: "system" }
+        display: { name: "Displays", glyph: "desktop_windows", tint: "amber", cluster: 5, order: 0 },
+        layout: { name: "Layout", glyph: "view_column_2", tint: "teal", cluster: 5, order: 1 },
+        windows: { glyph: "select_window", tint: "blue", cluster: 5, order: 2 },
+        glass: { name: "Glass & effects", glyph: "blur_on", tint: "violet", cluster: 5, order: 3 },
+        movement: { name: "Movement", glyph: "animation", tint: "pink", cluster: 5, order: 4 },
+        keyboard: { name: "Keyboard", glyph: "keyboard", tint: "indigo", cluster: 5, order: 5 },
+        pointer: { name: "Mouse & pointer", glyph: "mouse", tint: "orange", cluster: 5, order: 7 },
+        sidebars: { name: "Side Panels", glyph: "dock_to_right", tint: "green" },
+        controlCenter: { glyph: "toggle_on", tint: "green" },
+        spotlight: { glyph: "search", tint: "orange" },
+        orbit: { glyph: "grid_view", tint: "violet" },
+        capture: { name: "Screenshots & Recording", glyph: "screenshot_region", tint: "orange" },
+        player: { name: "Now Playing", glyph: "music_note", tint: "red" },
+        anime: { glyph: "live_tv", tint: "pink" },
+        notifications: { glyph: "notifications", tint: "red" },
+        sound: { name: "Sound", glyph: "volume_up", tint: "orange" },
+        shortcuts: { name: "Keyboard shortcuts", glyph: "keyboard_command_key", tint: "indigo", view: "IrisShortcutsPage.qml", cluster: 5, order: 6, after: "keyboard" },
+        battery: { glyph: "battery_full", tint: "green", needs: "battery" },
+        gaming: { name: "Gaming", glyph: "sports_esports", tint: "teal" },
+        lock: { name: "Lock", glyph: "lock", tint: "indigo" },
+        login: { name: "Login", glyph: "login", tint: "violet" },
+        sources: { glyph: "cloud_sync", tint: "blue" },
+        system: { glyph: "storefront", tint: "pink", view: "PrismHub.qml" },
+        about: { name: "About", glyph: "info", tint: "holo", view: "PrismAbout.qml", cluster: 4, after: "system" }
     })
 
     // An area too long for one page is read as several (his 11-07: Style was "un chorizo", 126 rows in 31 groups): each
@@ -110,7 +109,6 @@ Singleton {
                 group: area === "general" ? "" : root.captionOf(IrisOptions.categoryOf(area)),
                 glyph: String(dress.glyph ?? base?.icon ?? "circle"),
                 tint: String(dress.tint ?? "grey"),
-                lead: Array.from(dress.lead ?? []),
                 // A view of Prism's own sits beside its parts; the rest are iRiS Settings' pages, shared with Classic.
                 view: !dress.view ? "" : dress.view.startsWith("Prism") ? Qt.resolvedUrl("../parts/" + dress.view) : Qt.resolvedUrl("../../settings/" + dress.view),
                 subtitle: String(dress.subtitle ?? base?.subtitle ?? ""),
@@ -203,38 +201,9 @@ Singleton {
 
     function page(id: string): var { return root.pages.find(entry => entry.pageId === id) ?? root.pages[0] }
     function find(path: string): var { return root.rows.find(row => row.path === path) ?? null }
-    // What a page's poster says (his 11-16: never a bare On or Off): the machine's own facts first (the screen as it
-    // runs, the charge, the sound), then its leading rows that hold a named value or a figure, then the page's next such
-    // row; a switch never leads, its "On" says nothing at that size. Two at most, each short enough to stand whole.
-    function leadOf(page: var): var {
-        const _ = root.revision
-        const id = String(page?.pageId ?? "")
-        const out = root.factsOf(id)
-        // Two figures that read the same ("Auto", "Auto") say one thing: the second gives way to the next.
-        const said = () => out.map(entry => entry.fact ? String(entry.say) : String(root.sayNow(entry)))
-        const fits = row => {
-            if (!row || row.page !== id || row.kind === "switch" || row.kind === "action" || !root.shown(row) || out.includes(row)) return false
-            const say = String(root.sayNow(row) ?? "")
-            // A poster figure says something alone: a bare number ("0" for Speed) or sign (";" for Clipboard) has no
-            // word or unit, and "Off", "None" or a zero ("0%" Shadow) names what is not in use. The next row stands in.
-            if (!/[A-Za-z%\u00C0-\uFFFF]/.test(say) || /^0(?![\d.,])/.test(say)
-                || say === Translation.tr("Off") || say === Translation.tr("None")) return false
-            return say.length > 0 && say.length <= 16 && !said().includes(say)
-        }
-        for (const lead of Array.from(page?.lead ?? [])) {
-            if (out.length >= 2) break
-            const named = String(lead)
-            const row = named.includes(":")
-                ? root.rows.find(row => !row.virtual && row.spec.comp !== undefined && row.spec.comp + ":" + row.spec.key === named && root.shown(row))
-                : root.find(named)
-            if (fits(row)) out.push(row)
-        }
-        for (const row of root.rows) {
-            if (out.length >= 2) break
-            if (!row.onStage && fits(row)) out.push(row)
-        }
-        return out
-    }
+    // What a page's head says: the machine's own facts only (the charge, what the screen can). A row's value is said by
+    // its row on the same page, never again as a figure over it (his 11-17: "datos repetidos").
+    function leadOf(page: var): var { return root.factsOf(String(page?.pageId ?? "")) }
     function factsOf(id: string): var {
         // Home's poster is the wallpaper: its name leads when it has one a person would say.
         if (id === "general") {
@@ -244,19 +213,14 @@ Singleton {
         if (id === "battery" && Battery.available)
             return [{ fact: true, say: Math.round(Battery.percentage * 100) + "%",
                       label: Battery.isCharging ? Translation.tr("Charging") : Translation.tr("On battery") }]
-        if (id === "sound" && Audio.ready && Audio.sink)
-            return [{ fact: true, say: Math.round(Audio.value * 100) + "%", label: Audio.friendlyDeviceName(Audio.sink) }]
+        // Sound's device and level, the screen's name, size and rate are said by the page's own rows: never twice.
         if (id !== "display") return []
         const _ = CompositorConfig.revision
         const screen = CompositorConfig.output
-        const size = CompositorConfig.resolutionLabel(screen)
-        if (!screen || size.length === 0) return []
-        const rate = CompositorConfig.rateLabel(screen.current_rate_string)
-        const out = [{ fact: true, say: size, label: [CompositorConfig.screenName(screen), rate].filter(part => part.length > 0).join(" · ") }]
+        if (!screen) return []
         // What this very screen can do beyond the plain picture: its rows are on the page only because it can.
         const can = [screen.hdr_supported === true ? "HDR" : "", screen.vrr_supported === true ? "VRR" : ""].filter(part => part.length > 0)
-        if (can.length > 0) out.push({ fact: true, say: can.join(" · "), label: Translation.tr("This screen can") })
-        return out
+        return can.length > 0 ? [{ fact: true, say: can.join(" · "), label: Translation.tr("This screen can") }] : []
     }
     function index(id: string): int { return Math.max(0, root.ids.indexOf(id)) }
     function inGroup(group: string): var { return root.pages.filter(page => page.group === group) }
@@ -375,33 +339,20 @@ Singleton {
         return IrisOptions.say(row.spec, root.stored(row, value))
     }
     function sayNow(row: var): string { return root.say(row, root.read(row)) }
-    // The picture a group's card wears beside its rows (Raell Tech's page: the keyboard in its card, the mouse in its):
-    // the group's own scene, else the page's, numbered with its part lit; the drawn keyboard where a row of the group is
-    // drawn by it. null: the card is its rows alone. Names as IrisGroupPreview takes them ({ section, group }).
+    // The picture a group's module wears among its rows: the drawn keyboard where a row of the group is drawn by it,
+    // else null. Prism shows no live scene (each page has its drawn object in the art band, PrismObject).
     function figureOf(id: string, group: string): var {
         const keyRow = root.rows.find(row => row.onStage && row.page === id && row.section === group && root.shown(row))
-        if (keyRow) return { keys: true, row: keyRow }
-        // A group whose row draws its own picture (App rules' window) wears none: the page's goes to the next card.
-        if (root.rows.some(row => row.page === id && row.section === group && row.spec?.drawn === true && root.shown(row))) return null
-        const area = String(root.page(id)?.area ?? "")
-        if (SceneMap.sceneFor(area, group).length > 0) return { section: area, group: group }
-        if (id !== area && SceneMap.sceneFor(id, group).length > 0) return { section: id, group: group }
-        if (id === area && SceneMap.standsIn(area) && SceneMap.sceneFor(area, "").length > 0) return { section: area, group: "" }
-        return id !== area && SceneMap.standsIn(id) && SceneMap.sceneFor(id, "").length > 0 ? { section: id, group: "" } : null
+        return keyRow ? { keys: true, row: keyRow } : null
     }
-    // Which card of a page wears which picture: each picture once, on the first card it belongs to (three cards of
-    // one page under the same drawing read as a repeat; the first one's numbers lead to the others).
-    // Previews off leaves only the drawn keyboard, which is a control, not a picture.
+    // Which group of a page wears the keyboard: the first one it belongs to.
     function figuresOf(id: string, titles: var): var {
-        const out = ({}), worn = []
-        const pictures = Config.options?.iris?.appearance?.previews !== false
+        const out = ({})
+        let worn = false
         for (const title of titles) {
-            const found = root.figureOf(id, title)
-            const figure = found && (pictures || found.keys) ? found : null
-            const scene = figure ? (figure.keys ? "keys" : SceneMap.sceneFor(figure.section, figure.group)) : ""
-            if (!figure || worn.includes(scene)) { out[title] = null; continue }
-            worn.push(scene)
-            out[title] = figure
+            const found = worn ? null : root.figureOf(id, title)
+            out[title] = found
+            if (found) worn = true
         }
         return out
     }
@@ -412,12 +363,12 @@ Singleton {
         const rows = Array.from(entry?.rows ?? [])
         const chipRow = rows.find(row => typeof row.spec?.chip === "function")
         const chip = chipRow ? String(chipRow.spec.chip() ?? "") : ""
-        if (chip.length > 0) return { say: chip, label: "" }
+        if (chip.length > 0) return { say: chip, label: "", row: chipRow, chip: true }
         for (const row of rows) {
             if (!["choice", "switch", "range"].includes(String(row.kind))) continue
             const said = String(root.sayNow(row) ?? "")
             // A row named like its group says only its value: "On Notch" under Notch said the name twice.
-            if (said.length > 0) return { say: said, label: row.label === entry.title ? "" : Translation.tr(row.label) }
+            if (said.length > 0) return { say: said, label: row.label === entry.title ? "" : Translation.tr(row.label), row: row }
         }
         return { say: "", label: rows.length === 1 ? Translation.tr("One setting") : Translation.tr("%1 settings").arg(rows.length) }
     }

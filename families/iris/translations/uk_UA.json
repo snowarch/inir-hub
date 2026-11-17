@@ -911,6 +911,7 @@
   "Already used by “%1”": "Уже використовується «%1»",
   "Closing": "Закриття",
   "Could not read your Niri config, showing the defaults": "Не вдалося прочитати конфігурацію Niri, показано типові значення",
+  "Could not read your Umbriel config, showing the defaults": "Не вдалося прочитати конфігурацію Umbriel, показано типові значення",
   "From %1": "З %1",
   "Gray": "Сірий",
   "Green": "Зелений",
@@ -2648,5 +2649,6 @@
   "Folders": "Теки",
   "Board": "Панель",
   "Each page a folder over its groups.": "Кожна сторінка — тека над своїми групами.",
-  "Areas as keys, pages as tabs, groups as modules.": "Розділи — клавіші, сторінки — вкладки, групи — модулі."
+  "Areas as keys, pages as tabs, groups as modules.": "Розділи — клавіші, сторінки — вкладки, групи — модулі.",
+  "No app has sent a notification yet.": "Жоден застосунок ще не надіслав сповіщення."
 }

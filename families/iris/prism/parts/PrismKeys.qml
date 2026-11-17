@@ -14,7 +14,7 @@ Item {
     signal minimizeRequested()
     signal growRequested()
 
-    readonly property string here: PrismState.searching || PrismState.page === "changes" ? "-" : String(PrismModel.page(PrismState.page).group)
+    readonly property string here: PrismState.searching ? "-" : PrismState.page === "changes" ? "" : String(PrismModel.page(PrismState.page).group)
     property var lastOf: ({})
     Connections {
         target: PrismState

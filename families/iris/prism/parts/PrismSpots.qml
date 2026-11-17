@@ -23,6 +23,11 @@ ClippingRectangle {
     property string picked: ""
     // What a group holds now, in a few words (PrismModel.glanceOf).
     property var sayOf: null
+    // The rest of the picture steps back round the pointed part; over art with no edge of its own (a drawn object)
+    // the scrim would print the frame's box on it.
+    property bool scrim: true
+    // A pin's size: a drawn object's parts are small, its pins stand on their edges.
+    property real pin: PrismTheme.dp(20)
     signal point(string title)
     signal pick(string title)
 
@@ -96,6 +101,7 @@ ClippingRectangle {
         color: "transparent"
         border.width: scrim.big
         border.color: PrismTheme.spotScrim
+        visible: root.scrim
         opacity: root.litMark ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
         NumberAnimation { id: glider; target: scrim; property: "glide"; from: 0; to: 1; duration: PrismTheme.ms(240); easing.type: Easing.OutCubic }
@@ -133,7 +139,7 @@ ClippingRectangle {
             readonly property var mark: root.marks[disc.index] ?? null
             readonly property string entry: String(disc.mark?.entry ?? "")
             readonly property bool lit: disc.entry.length > 0 && (root.pointed === disc.entry || root.picked === disc.entry)
-            width: PrismTheme.dp(20)
+            width: root.pin
             height: width
             x: Math.round(Number(disc.mark?.x ?? 0) - width / 2)
             y: Math.round(Number(disc.mark?.y ?? 0) - height / 2)
@@ -159,7 +165,7 @@ ClippingRectangle {
             }
             Rectangle {
                 anchors.centerIn: parent
-                width: PrismTheme.dp(6)
+                width: Math.round(root.pin * 0.3)
                 height: width
                 radius: width / 2
                 color: disc.lit ? PrismTheme.night : PrismTheme.paper
@@ -170,7 +176,7 @@ ClippingRectangle {
                 visible: Boolean(disc.mark?.changed)
                 x: parent.width - width * 0.75
                 y: -height * 0.25
-                width: PrismTheme.dp(7)
+                width: Math.round(root.pin * 0.35)
                 height: width
                 radius: width / 2
                 color: PrismTheme.accent

@@ -911,6 +911,7 @@
   "Already used by “%1”": "Já usado por “%1”",
   "Closing": "Fechamento",
   "Could not read your Niri config, showing the defaults": "Não foi possível ler sua configuração do Niri; mostrando os padrões",
+  "Could not read your Umbriel config, showing the defaults": "Não foi possível ler sua configuração do Umbriel; mostrando os padrões",
   "From %1": "A partir de %1",
   "Gray": "Cinza",
   "Green": "Verde",
@@ -2648,5 +2649,6 @@
   "Folders": "Pastas",
   "Board": "Painel",
   "Each page a folder over its groups.": "Cada página, uma pasta sobre seus grupos.",
-  "Areas as keys, pages as tabs, groups as modules.": "Áreas como teclas, páginas como abas, grupos como módulos."
+  "Areas as keys, pages as tabs, groups as modules.": "Áreas como teclas, páginas como abas, grupos como módulos.",
+  "No app has sent a notification yet.": "Nenhum app enviou uma notificação ainda."
 }

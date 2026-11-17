@@ -141,7 +141,10 @@ PrismFile {
             id: grid
             width: parent.width
             spacing: PrismTheme.dp(8)
-            readonly property int columns: Math.max(2, Math.floor((width + spacing) / (PrismTheme.dp(150) + spacing)))
+            // As many keys a line as fit, then evened out: eight keys are one line or two of four, never six and two.
+            readonly property int count: root.tiles.length + (root.editing ? root.offered.length : 0)
+            readonly property int fits: Math.max(2, Math.floor((width + spacing) / (PrismTheme.dp(128) + spacing)))
+            readonly property int columns: Math.max(2, Math.ceil(grid.count / Math.max(1, Math.ceil(grid.count / grid.fits))))
             readonly property real tileWidth: Math.floor((width - (columns - 1) * spacing) / columns)
 
             Repeater {

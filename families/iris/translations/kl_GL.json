@@ -911,6 +911,7 @@
   "Already used by “%1”": "“%1”-mit atorneqareerpoq",
   "Closing": "Matuneq",
   "Could not read your Niri config, showing the defaults": "Niri-ip config-ia atuarneqarsinnaanngilaq, nalinginnaasut takutinneqarput",
+  "Could not read your Umbriel config, showing the defaults": "Umbriel-ip config-ia atuarneqarsinnaanngilaq, nalinginnaasut takutinneqarput",
   "From %1": "%1-mit",
   "Gray": "Qasertoq",
   "Green": "Qorsuk",
@@ -2648,5 +2649,6 @@
   "Folders": "Quppersakkat",
   "Board": "Pisiffik",
   "Each page a folder over its groups.": "Qupperneq tamarmi quppersakkamik ataatsimik.",
-  "Areas as keys, pages as tabs, groups as modules.": "Immikkoortut tasterit, quppernerit tabit, katersat modulit."
+  "Areas as keys, pages as tabs, groups as modules.": "Immikkoortut tasterit, quppernerit tabit, katersat modulit.",
+  "No app has sent a notification yet.": "Qinnuttaasaq suli nalunaarummik nassiussisimanngilaq."
 }

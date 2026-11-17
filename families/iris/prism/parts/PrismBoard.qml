@@ -21,12 +21,14 @@ Item {
     readonly property real sheetTop: sheet.y + root.tabHeight
 
     readonly property bool changes: PrismState.page === "changes"
-    readonly property var tabs: PrismState.searching ? [{ pageId: "", name: Translation.tr("Search"), glyph: "search" }]
-        : root.changes ? [{ pageId: "changes", name: Translation.tr("Changes"), glyph: "history" }]
+    // Changes is Home's second tab: what the person changed, beside the shell they shape (the Folders' side column
+    // holds it there; the Board has no column).
+    readonly property bool home: root.changes || String(root.page?.group ?? "").length === 0
+    readonly property var tabs: PrismState.searching ? [{ pageId: "", name: "Search", glyph: "search" }]
+        : root.home ? PrismModel.inGroup("").concat([{ pageId: "changes", name: "Changes", glyph: "history" }])
         : PrismModel.inGroup(String(root.page?.group ?? ""))
     readonly property string credit: PrismState.searching ? Translation.tr("Search")
-        : root.changes ? Translation.tr("Yours")
-        : String(root.page?.group ?? "").length > 0 ? Translation.tr(String(root.page.group)) : Translation.tr("Home")
+        : root.home ? Translation.tr("Home") : Translation.tr(String(root.page.group))
 
     // ── The line over the sheet.
     Item {
@@ -173,7 +175,7 @@ Item {
                             }
                             PrismText {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: PrismState.searching || root.changes ? String(tab.modelData.name) : Translation.tr(String(tab.modelData.name))
+                                text: Translation.tr(String(tab.modelData.name))
                                 color: tab.on ? PrismTheme.ink : PrismTheme.inkNav
                                 font.pixelSize: PrismTheme.body
                                 font.weight: tab.on ? Font.Bold : Font.Medium

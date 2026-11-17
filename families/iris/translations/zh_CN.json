@@ -911,6 +911,7 @@
   "Already used by “%1”": "已被“%1”使用",
   "Closing": "关闭",
   "Could not read your Niri config, showing the defaults": "无法读取你的 Niri 配置，正在显示默认值",
+  "Could not read your Umbriel config, showing the defaults": "无法读取你的 Umbriel 配置，正在显示默认值",
   "From %1": "自 %1",
   "Gray": "灰色",
   "Green": "绿色",
@@ -2648,5 +2649,6 @@
   "Folders": "文件夹",
   "Board": "面板",
   "Each page a folder over its groups.": "每页是一个文件夹，下面是它的分组。",
-  "Areas as keys, pages as tabs, groups as modules.": "区域为按键，页面为标签，分组为模块。"
+  "Areas as keys, pages as tabs, groups as modules.": "区域为按键，页面为标签，分组为模块。",
+  "No app has sent a notification yet.": "还没有应用发送过通知。"
 }

@@ -911,6 +911,7 @@
   "Already used by “%1”": "Bereits verwendet von „%1“",
   "Closing": "Schließen",
   "Could not read your Niri config, showing the defaults": "Deine Niri-Konfiguration konnte nicht gelesen werden, es werden die Standardwerte gezeigt",
+  "Could not read your Umbriel config, showing the defaults": "Deine Umbriel-Konfiguration konnte nicht gelesen werden, es werden die Standardwerte gezeigt",
   "From %1": "Ab %1",
   "Gray": "Grau",
   "Green": "Grün",
@@ -2648,5 +2649,6 @@
   "Folders": "Mappen",
   "Board": "Tafel",
   "Each page a folder over its groups.": "Jede Seite eine Mappe über ihren Gruppen.",
-  "Areas as keys, pages as tabs, groups as modules.": "Bereiche als Tasten, Seiten als Reiter, Gruppen als Module."
+  "Areas as keys, pages as tabs, groups as modules.": "Bereiche als Tasten, Seiten als Reiter, Gruppen als Module.",
+  "No app has sent a notification yet.": "Noch keine App hat eine Benachrichtigung gesendet."
 }

@@ -911,6 +911,7 @@
   "Already used by “%1”": "Đã được dùng bởi “%1”",
   "Closing": "Đóng",
   "Could not read your Niri config, showing the defaults": "Không đọc được cấu hình Niri của bạn, đang hiện giá trị mặc định",
+  "Could not read your Umbriel config, showing the defaults": "Không đọc được cấu hình Umbriel của bạn, đang hiện giá trị mặc định",
   "From %1": "Từ %1",
   "Gray": "Xám",
   "Green": "Xanh lá",
@@ -2648,5 +2649,6 @@
   "Folders": "Thư mục",
   "Board": "Bảng",
   "Each page a folder over its groups.": "Mỗi trang là một thư mục trên các nhóm.",
-  "Areas as keys, pages as tabs, groups as modules.": "Khu vực là phím, trang là thẻ, nhóm là mô-đun."
+  "Areas as keys, pages as tabs, groups as modules.": "Khu vực là phím, trang là thẻ, nhóm là mô-đun.",
+  "No app has sent a notification yet.": "Chưa có ứng dụng nào gửi thông báo."
 }

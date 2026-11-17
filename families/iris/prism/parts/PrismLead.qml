@@ -4,7 +4,6 @@ import Quickshell.Widgets
 import qs.services
 import qs.modules.iris.settings
 import qs.modules.iris.style
-import qs.modules.iris.preview
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
@@ -12,20 +11,19 @@ import qs.modules.iris.prism.fx
 
 // A page's first group as its wide folder (`.claude/ref/iris-prism/studio/b-carpeta.html`): the page's art as a band,
 // the way back and forward with where it stands, the page's name big at the right; the front sheet's tab carries the
-// group's name, its rows at the left, its picture an inset card at the right with its parts pinned, a figure at the foot.
+// group's name, its rows at the left, the page's object drawn in light on an inset card of night at the right with its
+// groups pinned, a figure at the foot.
 Item {
     id: root
     property var page: null
     property string eyebrow: ""
     property string title: ""
-    // The first group ({ title, rows, glyph }), its picture and the page's groups as the pins name them.
+    // The first group ({ title, rows, glyph }), the drawn keyboard if it holds it, and the page's groups as the pins
+    // name them.
     property var section: null
     property var figure: null
     property var groups: []
     property string flashPath: ""
-    property bool active: true
-    property real viewTop: 0
-    property real viewHeight: 0
     property int restorable: 0
     property var lead: []
     property alias tools: toolSlot.data
@@ -41,14 +39,22 @@ Item {
     readonly property real pad: PrismTheme.dp(26)
     readonly property real inner: root.width - root.pad * 2
     readonly property bool keys: Boolean(root.figure?.keys)
-    readonly property bool scened: root.figure !== null && root.figure !== undefined && !root.keys && root.section !== null
+    readonly property bool scened: !root.keys && root.section !== null && drawing.drawn
     readonly property bool beside: root.scened && root.inner >= PrismTheme.dp(700)
     readonly property real wellW: root.beside ? Math.round(Math.max(PrismTheme.dp(300), Math.min(PrismTheme.dp(400), root.inner * 0.4))) : root.inner
-    readonly property real wellH: Math.round(Math.min(PrismTheme.dp(270), root.wellW * 0.67))
+    // Beside the rows the well runs down with them, up to a little past square: no empty quarter under it. Read from
+    // colsY, never rowsY: rowsY follows wellH while the well stands over the rows, and a flip of `beside` looped them.
+    readonly property real wellH: Math.round(Math.max(Math.min(PrismTheme.dp(270), root.wellW * 0.67),
+        root.beside ? Math.min(root.wellW * 1.1, root.colsY + rows.implicitHeight - root.wellY) : 0))
     readonly property real rowsW: root.beside ? root.inner - root.wellW - PrismTheme.dp(26) : root.inner
     readonly property var stats: root.lead.slice(0, 2).map(entry => entry.fact ? { say: String(entry.say), label: String(entry.label) }
         : { say: String(PrismModel.sayNow(entry) ?? ""), label: Translation.tr(entry.label) }).filter(entry => entry.say.length > 0)
-    readonly property string glance: root.section ? String(PrismModel.glanceOf({ title: root.section.title, rows: root.section.rows }).say ?? "") : ""
+    // Under the tab's name, what the group holds when no row of it says so (the keyboard's layout); a row's value never.
+    readonly property string glance: {
+        if (!root.section) return ""
+        const glance = PrismModel.glanceOf({ title: root.section.title, rows: root.section.rows })
+        return glance.chip ? String(glance.say ?? "") : ""
+    }
 
     // Inside the sheet: the tab's words, then rows and picture, then the foot.
     readonly property real colsY: root.rise + PrismTheme.dp(20)
@@ -191,12 +197,10 @@ Item {
             groups: root.groups
             entry: String(root.section?.title ?? "")
             tint: root.tint
-            active: root.active
             flashPath: root.flashPath
-            onGoGroup: title => root.goGroup(title)
         }
 
-        // The picture, an inset card of night with its parts pinned.
+        // The page's object, on an inset card of night, its groups pinned.
         ClippingRectangle {
             id: well
             visible: root.scened
@@ -206,42 +210,15 @@ Item {
             height: root.wellH
             radius: PrismTheme.dp(20)
             color: PrismTheme.night
-            IrisGroupPreview {
-                id: scene
+            PrismObject {
+                id: drawing
                 anchors.fill: parent
-                radius: well.radius
-                framed: false
-                captionOutside: true
-                holdsStill: true
-                playing: root.active && root.viewTop < root.implicitHeight
-                section: String(root.figure?.section ?? "")
-                group: String(root.figure?.group ?? "")
-                niriValue: (section, key) => CompositorConfig.value(IrisOptions.settings.find(spec => spec.comp === section && spec.key === key) ?? { comp: section, key: key })
-                niriRevision: CompositorConfig.revision
-            }
-            PrismSpots {
-                id: marks
-                property string hovering: ""
-                anchors.fill: parent
-                radius: well.radius
-                spots: scene.spots
+                anchors.margins: PrismTheme.dp(22)
+                pageId: String(root.page?.pageId ?? "")
+                tint: root.tint
                 groups: root.groups
-                pointed: marks.hovering
-                picked: String(root.section?.title ?? "")
-                sayOf: title => PrismModel.glanceOf(root.groups.find(group => String(group.title) === title)).say
-                onPoint: title => marks.hovering = title
-                onPick: title => { if (title.length > 0) root.goGroup(title) }
+                onGoGroup: title => root.goGroup(title)
             }
-        }
-        PrismText {
-            visible: root.scened && text.length > 0
-            x: well.x
-            y: well.y + well.height + PrismTheme.dp(8)
-            width: well.width
-            text: scene.caption
-            color: PrismTheme.ink3
-            font.pixelSize: PrismTheme.small
-            elide: Text.ElideRight
         }
 
         // The foot: the page's figure big at the left, where it stands at the right.

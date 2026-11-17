@@ -9,9 +9,9 @@ import qs.modules.iris.components
 import qs.modules.iris.style
 
 // Settings › Display › Screen: every screen Niri drives, as it is. A miniature at its own shape (and, beside other
-// screens, at its own size) showing the wallpaper, the name on the box, then diagonal, pixels, rate and scale. With two
-// or more the cards pick the screen the rows below change; a single one only says what it is, so nothing in it looks
-// clickable without doing anything.
+// screens, at its own size) showing the wallpaper, the name on the box, then its diagonal; the other screens add their
+// pixels, rate and scale, which the rows below already say for the screen they change. With two or more the cards pick
+// that screen; a single one only says what it is, so nothing in it looks clickable without doing anything.
 Flow {
     id: root
 
@@ -32,15 +32,17 @@ Flow {
             id: tile
             required property var modelData
             required property int index
-            readonly property bool chosen: root.picks && CompositorConfig.output?.name === tile.modelData?.name
+            readonly property bool chosen: root.picks && tile.described
+            // The screen the rows below change: they say its pixels, rate and scale.
+            readonly property bool described: CompositorConfig.output?.name === tile.modelData?.name
             readonly property real inches: CompositorConfig.inchesOf(tile.modelData)
             // Beside a bigger screen a smaller one draws smaller, never so small its picture stops reading.
             readonly property real size: root.picks && tile.inches > 0 && root.largest > 0 ? Math.max(0.62, tile.inches / root.largest) : 1
             readonly property string details: [
                 tile.inches > 0 ? `${Math.round(tile.inches)}″` : "",
-                CompositorConfig.resolutionLabel(tile.modelData),
-                CompositorConfig.rateLabel(tile.modelData?.current_rate ?? 0),
-                `${Math.round(Number(tile.modelData?.scale ?? 1) * 100)} %`
+                tile.described ? "" : CompositorConfig.resolutionLabel(tile.modelData),
+                tile.described ? "" : CompositorConfig.rateLabel(tile.modelData?.current_rate ?? 0),
+                tile.described ? "" : `${Math.round(Number(tile.modelData?.scale ?? 1) * 100)} %`
             ].filter(part => part.length > 0).map(part => part.replace(/ /g, "\u00a0")).join(" · ") // a figure wraps whole
 
             width: root.tileWidth
@@ -51,7 +53,7 @@ Flow {
 
             activeFocusOnTab: root.picks
             Accessible.role: root.picks ? Accessible.RadioButton : Accessible.StaticText
-            Accessible.name: CompositorConfig.screenName(tile.modelData) + ", " + tile.details
+            Accessible.name: [CompositorConfig.screenName(tile.modelData), tile.details].filter(part => part.length > 0).join(", ")
             Accessible.checkable: root.picks
             Accessible.checked: tile.chosen
             Keys.onPressed: event => {
@@ -127,6 +129,7 @@ Flow {
                 }
                 IrisText {
                     width: parent.width
+                    visible: text.length > 0
                     text: tile.details
                     color: IrisStyle.subtext
                     font.pixelSize: IrisStyle.typeMeta

@@ -911,6 +911,7 @@
   "Already used by “%1”": "Zaten “%1” tarafından kullanılıyor",
   "Closing": "Kapanış",
   "Could not read your Niri config, showing the defaults": "Niri yapılandırmanız okunamadı, varsayılanlar gösteriliyor",
+  "Could not read your Umbriel config, showing the defaults": "Umbriel yapılandırmanız okunamadı, varsayılanlar gösteriliyor",
   "From %1": "%1 itibarıyla",
   "Gray": "Gri",
   "Green": "Yeşil",
@@ -2648,5 +2649,6 @@
   "Folders": "Klasörler",
   "Board": "Pano",
   "Each page a folder over its groups.": "Her sayfa, gruplarının üstünde bir klasör.",
-  "Areas as keys, pages as tabs, groups as modules.": "Alanlar tuş, sayfalar sekme, gruplar modül."
+  "Areas as keys, pages as tabs, groups as modules.": "Alanlar tuş, sayfalar sekme, gruplar modül.",
+  "No app has sent a notification yet.": "Henüz hiçbir uygulama bildirim göndermedi."
 }

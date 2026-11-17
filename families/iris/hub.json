@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.103",
+    "version": "2.33.104",
     "changes": {
+      "2.33.104": ["Prism Settings in two looks (General › Settings window › Look): Folders, or Board with category keys, page tabs and group modules", "Each Prism page draws the thing it sets in light on its art, its groups pinned on it", "Keyboard shortcuts on Umbriel name Umbriel's config when they cannot read it"],
       "2.33.103": ["Prism widgets: one smoked glass, each widget its own form; their material, opacity and shadow work again", "Prism widgets: delete a task, keep or shuffle the palette and lend it to the accent, turn the month one notch at a time", "Marks are white light, never a rainbow; the Dock, the lock screen and Quick controls lose their rims"],
       "2.33.91": ["Wallpapers downloaded from the web take only safe file names"],
       "2.33.90": ["Prism Settings' new look: soft ribbons in your wallpaper's colours, folders whose art glows through frosted glass, keys that sink",
