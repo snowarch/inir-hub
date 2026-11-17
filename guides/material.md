@@ -13,7 +13,7 @@ box, it looks broken beside them. Use what the shell gives you:
 
 | Piece | Import | What it is for |
 | --- | --- | --- |
-| `MaterialShape` | `qs.modules.common.widgets` | 35 Material 3 shapes (cookies, bursts, clovers, gems). Change `shape` and it morphs with a spring. Hold your glyph or figure in one. |
+| `MaterialShape` | `qs.modules.common.widgets` | Material 3 shapes (cookies, bursts, clovers, gems). Change `shape` and it morphs with a spring. Hold your glyph or figure in one. |
 | `DesktopWidgetShapes.shapeForName()` | `qs.modules.shared.background.widgets` | The shape names the user picks from, so your setting matches the built-ins' |
 | `WidgetShapePicker` | `qs.modules.shared.background.widgets` | The shape grid for your quick controls |
 | `StyledProgressBar { wavy: true }` | `qs.modules.common.widgets` | The Material 3 wavy bar, for a bounded value (a wait, a percentage). Keep `animateWave: false` on the desktop. |

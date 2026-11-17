@@ -164,6 +164,7 @@ jobs:
           gh pr diff "$PR" --repo "$REPO" > diff.txt
           if [ "$(wc -c < diff.txt)" -gt 400000 ]; then echo "state=toobig" >> "$GITHUB_OUTPUT"; echo "diff over 400 KB"; exit 0; fi
           kind=${ITEM%%/*} id=${ITEM#*/}
+          case "$kind" in iris-themes) kind=themes ;; esac # no hub-iris-themes.md: an iRiS theme reads hub-themes.md
           # instructions: review.md and the hub's rules for this kind, from main
           {
             cat hub/.github/review.md

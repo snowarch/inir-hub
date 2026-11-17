@@ -131,7 +131,10 @@ by naming one file per design in its family block:
               "desktop": { "iris": "IrisFace.qml", "prism": "PrismFace.qml" } }
 ```
 
-- The block needs `main` or `desktop`; a widget with only desktop faces leaves `main` and `slots` out.
+- The desktop faces are drawn inside the Material `main`, so keep it. Left out, it defaults to `<Pascal>.qml`
+  (`my-widget` → `MyWidget.qml`), and `inir hub check` refuses the widget if that file is missing (`entry point ...
+  does not exist`). A block with `desktop` and no `main` is accepted; a widget with no surface at all is refused
+  (`declares no surface`).
 - Each file is loaded inside your Material `main` with `widget` set to it, fills it, and draws the whole widget in
   every size it declares (`widget.sizeClass`): the root is `IrisWidgetFace` (`qs.modules.iris.widgets`: its plate,
   glass and blur, the inks `ink`, `inkSecondary`, `inkTertiary`, `accent`, the parts `FaceText`, `FaceHeader`,
@@ -179,10 +182,10 @@ AbstractBackgroundWidget {
 | `Quickshell` | Process, SystemClock, Quickshell.execDetached() |
 | `Quickshell.Io` | FileView, StdioCollector, SplitParser |
 | `qs` | Root module |
-| `qs.services` | All 73 service singletons (see Services section) |
+| `qs.services` | All service singletons (see Services section) |
 | `qs.modules.common` | Config, Appearance, Directories, GlobalStates |
 | `qs.modules.common.functions` | ColorUtils, StringUtils, DateUtils, FileUtils, ObjectUtils |
-| `qs.modules.common.widgets` | 130+ reusable UI components (see Components section) |
+| `qs.modules.common.widgets` | The reusable UI components (see Components section) |
 | `qs.modules.shared.background.widgets` | AbstractBackgroundWidget base class |
 
 ---
@@ -396,11 +399,11 @@ FadeLoader {
 ```qml
 StyledSlider {
     from: 0; to: 100; value: 50
-    onMoved: Config.setNestedValue("background.widgets.custom.my-widget.myVal", value)
+    onMoved: CustomWidgets.setConfigValue("my-widget", "myVal", value)
 }
 StyledSpinBox {
     from: 0; to: 100; stepSize: 5; value: 50
-    onValueModified: Config.setNestedValue("background.widgets.custom.my-widget.myVal", value)
+    onValueModified: CustomWidgets.setConfigValue("my-widget", "myVal", value)
 }
 ```
 
@@ -413,14 +416,10 @@ Widget config persists in `~/.config/inir/config.json` under
 
 ### Reading
 ```qml
-// Via inherited helper (reads from configEntry):
+// Desktop widgets: the inherited helper reads the widget's own entry:
 readonly property bool showLabel: _readConfigKey("showLabel") ?? true
 
-// Direct access through Config.getNestedValue() is required for custom widgets,
-// because the custom namespace is stored outside JsonAdapter for VM safety:
-readonly property int myVal: Config.getNestedValue("background.widgets.custom.my-widget.myVal", 42)
-
-// Or via CustomWidgets helper:
+// Any surface: the CustomWidgets helper reads the same entry:
 readonly property var myVal: CustomWidgets.getConfigValue("my-widget", "myVal", 42)
 ```
 
@@ -593,7 +592,7 @@ editPopoverContent: Component {
             StyledText { text: "Size"; color: Appearance.colors.colOnLayer2 }
             StyledSpinBox {
                 from: 50; to: 300; value: root._readConfigKey("mySize") ?? 100
-                onValueModified: Config.setNestedValue("background.widgets.custom.my-widget.mySize", value)
+                onValueModified: CustomWidgets.setConfigValue("my-widget", "mySize", value)
             }
         }
     }

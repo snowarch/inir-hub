@@ -78,8 +78,8 @@ Item {
 Use these first:
 
 - `IrisStyle`: colors, fonts, density, radii, spacing, motion duration and text sizes
-  (`typeCaption` 10, `typeFootnote` 11, `typeMeta` 12, `typeLabel` 13, `typeBody` 14,
-  `typeHeadline` 15, `typeTitle` 17, `typeTitleLarge` 21, `typeDisplay` 28). Use those instead of
+  (`typeCaption`, `typeFootnote`, `typeMeta`, `typeLabel`, `typeBody`, `typeHeadline`, `typeTitle`,
+  `typeTitleLarge`, `typeDisplay`). Use those instead of
   `N * typeScale`, and keep spacing on even steps of `IrisStyle.density` (2, 4, 6, 8, 10, 12…);
 - `IrisText`: roles that set size, weight and ink together (`Body`, `Meta`, `Title`, `Display`,
   `Metric`, `Eyebrow`);
@@ -104,7 +104,8 @@ background processes for a value that is not continuously visible.
 - Prefer service signals over polling timers.
 - Keep module failure local; do not mutate family loader state.
 - Respect `targetScreen` for output-specific data.
-- Use `Config.setNestedValue(...)` for persistent writes; do not assign into `Config.options`.
+- Persist a widget's own option with `CustomWidgets.setConfigValue("<id>", key, value)`; never write
+  `Config.setNestedValue` or `Config.options`.
 - Keep presentation in iRiS tokens rather than hard-coded theme colors.
 
 For full desktop-widget APIs and the broader service/component catalog, see [widgets.md](widgets.md).

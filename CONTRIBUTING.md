@@ -45,7 +45,8 @@ Every item lives in its own folder and its own lane. Nothing outside a family ca
 - **answer for someone else's IPC.** Its `IpcHandler` targets start with its id (`my-corner`, `myCornerSearch`).
 - **reach inside a family.** It imports the base (`qs`, `qs.services`, `qs.modules.common`) and only what a family
   offers items: `qs.modules.iris.style`, `qs.modules.iris.components`, `qs.modules.iris.frame`,
-  `qs.modules.waffle.looks`, `qs.modules.ii.kit`. The rest of a family (`iris.state`, `iris.pieces`,
+  `qs.modules.iris.widgets` (a widget's iRiS desktop face, with its `.prism`), `qs.modules.waffle.looks`,
+  `qs.modules.ii.kit`. The rest of a family (`iris.state`, `iris.pieces`,
   `iris.settings`, `iris.field`…) changes with each of its releases, and an item that imports it stops loading for
   everyone. A family's own data (its follows, its lists) is never changed from outside.
 - **carry a copy.** A file that is mostly another file of the hub (a family's surface, another item's code) drifts
@@ -347,8 +348,9 @@ Nobody has to click merge for you. Once Check passes, a pull request that change
 - an update by one of the item's authors that asks for no new permission or host (and, for a web app, keeps its
   address): people already trust you with that item, so it merges on Check alone;
 - anything else (a new widget, component, Design or web app, a change to someone else's item, more permissions): a
-  reviewer (an AI model reading the item's files as data, with this file and `.github/review.md` as its rules) reads
-  what no check can:
+  reviewer (an AI model reading the item's files as data, with `.github/review.md`, `AGENTS.md`, this file and the
+  rule files `.claude/rules/hub-items.md`, `hub-qml.md`, `hub-scripts.md` and the item's kind (`hub-<kind>.md`) as its
+  rules, and the maintainers' earlier requests on the pull request) reads what no check can:
   - nothing in it is abuse: no data sent off the machine, no code downloaded and run, nothing outside its own folder;
   - it does what the summary says, in each family it claims, every state handled;
   - it looks like it belongs there: the family's parts, sizes on the family's grid, every string translated;

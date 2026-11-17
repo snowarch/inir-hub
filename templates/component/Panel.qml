@@ -50,8 +50,8 @@ Scope {
                 anchors.fill: parent
                 implicitWidth: column.implicitWidth + 48
                 implicitHeight: column.implicitHeight + 40
-                radius: Appearance.rounding.large
-                color: Appearance.colors.colLayer1
+                radius: FamilyStyle.radiusPlate
+                color: FamilyStyle.fill
                 focus: true
                 Keys.onEscapePressed: root.open = false
 
@@ -61,8 +61,8 @@ Scope {
                     spacing: 8
                     StyledText {
                         text: Translation.tr("%1 from __NAME__").arg(options.greeting)
-                        color: Appearance.colors.colOnLayer1
-                        font.pixelSize: Appearance.font.pixelSize.title
+                        color: FamilyStyle.text
+                        font.pixelSize: FamilyStyle.typeTitle
                     }
                 }
             }
