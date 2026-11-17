@@ -1,0 +1,29 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Trim, crop, compress, and export local videos",
+    "description": "Edit one local video: trim, crop, rotate, flip, compress, extract MP3 audio, export GIFs, or save a frame. Native family controls and automatic recording-finished prompts.",
+    "authors": [
+        "Nachtasyl"
+    ],
+    "license": "GPL-3.0-only",
+    "tags": [
+        "video",
+        "editing",
+        "ffmpeg"
+    ],
+    "permissions": [
+        "process",
+        "files"
+    ],
+    "hosts": [],
+    "minInir": "3.1.1",
+    "provides": "modules/video-editor",
+    "preview": "preview.webp",
+    "changes": {
+        "1.0.0": [
+          "Initial release: single-clip editing with trim, crop, rotate, flip, speed and mute.",
+          "MP4 compression, GIF export, MP3 extraction and frame snapshots.",
+          "Automatic Edit Video prompt after screen recordings; native Material, iRiS and Waffle styling; all 18 Hub languages."]
+    }
+}

@@ -1,0 +1,6 @@
+EditorOptions 1.0 EditorOptions.qml
+EditorSession 1.0 EditorSession.qml
+PlaybackController 1.0 PlaybackController.qml
+RecordingBridge 1.0 RecordingBridge.qml
+RenderJob 1.0 RenderJob.qml
+VideoBackend 1.0 VideoBackend.qml
