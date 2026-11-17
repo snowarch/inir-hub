@@ -20,14 +20,9 @@ Item {
     required property var row
     property bool showPage: false   // search and Changes say where a row lives
     property bool stacked: false
+    property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
-    // What the control at the line's end needs, so a narrow column can give a switch only its own width.
-    readonly property real controlNeed: kind.item?.implicitWidth ?? 0
     property bool flash: false
-    // Its level's figure is printed big by its module (PrismSection.figureRow): the fader leaves its own off and says
-    // the figure under the hand through `live` ("" once let go).
-    property bool said: false
-    signal live(string say)
     // Search and Changes: a press on the row's name or its place opens it where it lives; the control still answers here.
     signal openRequested()
 
@@ -43,11 +38,7 @@ Item {
     readonly property string about: String(root.spec.description ?? root.row.detail ?? "")
     readonly property bool hovered: hover.hovered
     property bool open: false
-    // A row named like its card says what it does in its name's place: the card's head already says the name. Folded
-    // into another module on the Board (PrismPanel.boardModules), the head says the other's. Beside another row it keeps
-    // its name: a description alone there reads as its neighbour's.
-    property bool beside: false
-    readonly property bool echoes: !root.showPage && !root.beside && !root.row.folded && root.about.length > 0 && String(root.row.label) === String(root.row.section ?? "")
+    readonly property bool aboutShown: root.aboutWidth > 0 && root.about.length > 0
 
     // A colour pick: every choice (but at most one, a "custom") carries the colour it gives.
     readonly property bool swatched: root.kind === "choice" && root.choices.length > 1
@@ -68,9 +59,6 @@ Item {
     // Past what the line's end holds they are laid out under it, each with its name.
     readonly property bool manySwatches: root.swatched && (root.choices.length - 1) * PrismTheme.dp(26) + PrismTheme.dp(96) > root.controlWidth
     readonly property bool listed: root.kind === "pieces" || Boolean(root.spec.flags)
-    // A drawing whose name is its card's (Displays' "Screen" under the "Screen" tab) is shown without saying it again.
-    readonly property bool namedByCard: root.kind === "list" && Boolean(root.spec.view) && !root.showPage
-        && String(root.row.section ?? "") === String(root.row.label ?? "")
     // What goes under the line, if anything.
     readonly property string below: {
         if (root.listed) return "pieces"
@@ -93,8 +81,7 @@ Item {
         if (root.kind === "designs") return "now"
         if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "now"
         if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
-        // One way only (a screen with one mode) is a fact, not a choice: it is said, never offered.
-        if (root.kind === "choice" && root.choices.length > 1) return "choice"
+        if (root.kind === "choice" && root.choices.length > 0) return "choice"
         if (root.kind === "choice" || root.kind === "list" || root.listed) return "now"
         return ""
     }
@@ -123,13 +110,9 @@ Item {
     Item {
         id: line
         width: parent.width
-        visible: !root.namedByCard
-        // A row with nothing to explain stands shorter than one that says what it does (his 11-16). The control reads
-        // this, never the line's height: a row that turns stacked with its module's width looped through it.
-        readonly property real flat: Math.max(PrismTheme.dp(root.about.length > 0 || root.note.length > 0 ? 58 : 48), name.implicitHeight + PrismTheme.dp(20))
-        height: root.namedByCard ? PrismTheme.dp(4) : root.stacked
+        height: root.stacked
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
-            : line.flat
+            : Math.max(PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
         opacity: root.locked ? 0.45 : 1
 
         // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
@@ -158,19 +141,15 @@ Item {
         Column {
             id: name
             anchors.left: parent.left
-            anchors.right: root.stacked ? parent.right : control.left
-            anchors.rightMargin: root.stacked ? 0 : PrismTheme.dp(16)
+            anchors.right: root.stacked ? tail.left : root.aboutShown ? about.left : control.left
+            anchors.rightMargin: root.stacked ? PrismTheme.dp(4) : PrismTheme.dp(16)
             y: root.stacked ? PrismTheme.dp(12) : Math.round((parent.height - height) / 2)
             spacing: PrismTheme.dp(2)
             PrismText {
-                id: label
-                // The name's own width, short of the room its pin and restore glyph take at its end, so they never
-                // cover a word and the control keeps the row's edge.
-                width: Math.min(implicitWidth, parent.width - (tail.wanted ? tail.room : 0))
-                text: Translation.tr(root.echoes ? root.about : root.row.label)
-                color: root.echoes ? PrismTheme.ink2 : PrismTheme.ink
-                font.pixelSize: root.echoes ? PrismTheme.small : PrismTheme.row
-                font.weight: root.echoes ? Font.Normal : Font.DemiBold
+                width: parent.width
+                text: Translation.tr(root.row.label)
+                font.pixelSize: PrismTheme.row
+                font.weight: Font.DemiBold
                 // A long language takes a second line, never a cut name ("Apps em tela cheia desenham direto…", 11-14).
                 wrapMode: Text.WordWrap
                 maximumLineCount: 2
@@ -178,14 +157,13 @@ Item {
             }
             PrismText {
                 width: parent.width
-                visible: text.length > 0 && !root.showPage && !root.echoes
+                visible: text.length > 0 && !root.showPage && !root.aboutShown
                 text: Translation.tr(root.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
-                // A narrow column (the inspector) takes every line a long language needs: what it does is never cut.
                 wrapMode: Text.WordWrap
-                maximumLineCount: 6
-                elide: Text.ElideNone
+                maximumLineCount: 3
+                elide: Text.ElideRight
             }
             // Where a found row lives, said as a path that goes there: the page, its group, an arrow on hover.
             Row {
@@ -196,10 +174,7 @@ Item {
                     id: place
                     width: Math.min(implicitWidth, parent.width - go.width - parent.spacing)
                     anchors.verticalCenter: parent.verticalCenter
-                    // A group named as its page ("App colours › App colours") says the page once.
-                    readonly property string pageName: PrismModel.page(root.row.page).name
-                    readonly property string groupName: String(root.row.section ?? "")
-                    text: Translation.tr(pageName) + (groupName.length > 0 && groupName !== pageName ? "  ›  " + Translation.tr(groupName) : "")
+                    text: Translation.tr(PrismModel.page(root.row.page).name) + (String(root.row.section ?? "").length > 0 ? "  ›  " + Translation.tr(root.row.section) : "")
                     color: placeArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
                     font.pixelSize: PrismTheme.small
                     font.weight: placeArea.containsMouse ? Font.DemiBold : Font.Normal
@@ -227,26 +202,37 @@ Item {
                 elide: Text.ElideRight
             }
         }
+        // One grid for every row of a page (his 11-11): what it does starts at the head's own column whatever stands
+        // at the line's end, and the line grows rather than cut a sentence.
+        PrismText {
+            id: about
+            visible: root.aboutShown
+            width: root.aboutWidth
+            anchors.right: control.left
+            anchors.rightMargin: PrismTheme.dp(20)
+            anchors.verticalCenter: parent.verticalCenter
+            text: Translation.tr(root.about)
+            color: PrismTheme.ink2
+            font.pixelSize: PrismTheme.small
+            wrapMode: Text.WordWrap
+            // No elide: with it the text's own height answers to the line it sizes (a loop), and four lines hold every description.
+            maximumLineCount: 4
+            elide: Text.ElideNone
+            lineHeight: 1.1
+        }
 
         Item {
             id: control
             // Stacked: under the name, as wide as the row.
-            x: root.stacked ? 0 : parent.width - width
+            x: root.stacked ? 0 : parent.width - tail.width - PrismTheme.dp(8) - width
             y: root.stacked ? name.y + name.height + PrismTheme.dp(10) : 0
-            // A switch is never narrower than its own pill: a paired row gives it 64 px, and the pill's words ("AUS AN",
-            // "إيقاف تشغيل") ran under the name, seen once right-to-left text sat against that edge.
-            // A switch takes only its pill's room: the words beside it run up to it (a narrow module wrapped them in three).
-            // What is only said (a list's summary) takes its words' room: an empty one left the words a third of the row.
-            width: root.stacked ? parent.width : root.inline === "switch" ? (root.controlNeed > 0 ? root.controlNeed : root.controlWidth)
-                : root.inline === "now" ? Math.min(root.controlNeed, root.controlWidth) : root.controlWidth
-            height: root.stacked ? (kind.item ? kind.item.height : 0) : line.flat
+            width: root.stacked ? parent.width : root.controlWidth
+            height: root.stacked ? (kind.item ? kind.item.height : 0) : parent.height
             enabled: !root.locked
-            // Placed by x, never by anchors that come and go: a delegate that held a field (stacked, anchored on both
-            // sides) kept that width once its anchor let go, and the next row's switch stretched across its name (11-15).
             Loader {
                 id: kind
-                // From the item's own width: the Loader's follows it a step later, and reading that looped.
-                x: root.stacked ? 0 : parent.width - (kind.item ? kind.item.width : 0)
+                anchors.right: root.stacked ? undefined : parent.right
+                anchors.left: root.stacked ? parent.left : undefined
                 anchors.verticalCenter: parent.verticalCenter
                 active: root.inline.length > 0
                 sourceComponent: ({ switch: switchKind, range: rangeKind, hue: hueKind, text: textKind, action: actionKind,
@@ -254,39 +240,33 @@ Item {
             }
         }
 
-        // At the name's end: the way back to the factory value when the row has left it, and the pin. Pointed, both
-        // show; at rest only a pinned row's pin, in the accent.
+        // Pin, and the way back to the factory value when the row has left it.
         Row {
             id: tail
-            readonly property bool wanted: PrismModel.pinnable(root.row) || root.restorable
-            readonly property real room: PrismTheme.dp(52)
-            visible: tail.wanted
-            x: name.x + label.width + PrismTheme.dp(4)
-            y: name.y + Math.round(Math.min(label.height, label.font.pixelSize * 1.4) / 2) - Math.round(height / 2)
+            anchors.right: parent.right
+            y: root.stacked ? PrismTheme.dp(8) : Math.round((parent.height - height) / 2)
             spacing: 0
+            width: PrismTheme.dp(56)
+            layoutDirection: Qt.RightToLeft
             PrismGlyph {
-                width: PrismTheme.dp(24); height: PrismTheme.dp(24)
-                text: "restart_alt"
-                iconSize: PrismTheme.dp(15)
-                visible: root.restorable && !root.locked
-                color: resetArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
-                opacity: root.hovered ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
-                Accessible.role: Accessible.Button
-                Accessible.name: Translation.tr("Restore defaults")
-                MouseArea { id: resetArea; anchors.fill: parent; enabled: root.hovered; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: PrismModel.restoreRow(root.row) }
-            }
-            PrismGlyph {
-                width: PrismTheme.dp(24); height: PrismTheme.dp(24)
+                width: PrismTheme.dp(28); height: PrismTheme.dp(28)
                 text: "keep"
                 visible: PrismModel.pinnable(root.row)
                 readonly property bool pinned: PrismModel.pinned(root.row)
                 filled: pinned
-                iconSize: PrismTheme.dp(15)
-                color: pinned ? PrismTheme.accent : pinArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+                iconSize: PrismTheme.dp(16)
+                color: pinned ? PrismTheme.accent : pinArea.containsMouse ? PrismTheme.ink : PrismTheme.ink3
                 opacity: pinned || root.hovered ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
-                MouseArea { id: pinArea; anchors.fill: parent; enabled: parent.pinned || root.hovered; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: PrismModel.togglePin(root.row) }
+                MouseArea { id: pinArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: PrismModel.togglePin(root.row) }
+            }
+            PrismGlyph {
+                width: PrismTheme.dp(28); height: PrismTheme.dp(28)
+                text: "restart_alt"
+                iconSize: PrismTheme.dp(16)
+                visible: root.restorable && !root.locked
+                color: resetArea.containsMouse ? PrismTheme.ink : PrismTheme.ink3
+                opacity: root.hovered ? 1 : 0
+                MouseArea { id: resetArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: PrismModel.restoreRow(root.row) }
             }
         }
     }
@@ -310,7 +290,7 @@ Item {
             // everything else sits under the row's name.
             readonly property bool full: root.below === "faces" || root.below === "themes"
             anchors.leftMargin: slot.full ? 0 : name.x
-            width: parent.width - (slot.full ? 0 : name.x)
+            width: slot.full ? parent.width : parent.width - name.x - PrismTheme.dp(56)
             height: item ? item.implicitHeight : 0
             sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow,
                 view: viewBelow, icon: iconBelow, curve: curveBelow, niriMotion: niriBelow, widgets: widgetsBelow, themes: themesBelow })[root.below] ?? null
@@ -344,9 +324,10 @@ Item {
             stepSize: Number(root.spec.step ?? 1)
             value: Number(root.value ?? 0)
             home: PrismModel.home(root.row)
-            label: root.said ? "" : PrismModel.figure(root.row, slider.live)
-            onMoved: value => { PrismModel.preview(root.row, value); if (root.said) root.live(PrismModel.figure(root.row, value)) }
-            onCommitted: value => { PrismModel.write(root.row, value); root.live("") }
+            glyph: root.row.glyph ?? ""
+            label: PrismModel.figure(root.row, slider.live)
+            onMoved: value => PrismModel.preview(root.row, value)
+            onCommitted: value => PrismModel.write(root.row, value)
         }
     }
     Component {

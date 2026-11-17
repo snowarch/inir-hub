@@ -9,14 +9,14 @@ import qs.modules.iris.prism.controls
 import qs.modules.iris.prism.fx
 
 // The reference's player card: the cover fills it and a frosted sheet holds the song, the scrubber and the transport.
-// With nothing playing it is not there at all and the changes above take its room (his 11-16: a card saying
-// "Nothing playing" told nothing).
+// With nothing playing it folds to one quiet line at the column's foot and gives the room to the changes above:
+// the refraction is the hero's, said once.
 Item {
     id: root
-    visible: root.playing
     property bool active: true
     readonly property var player: MprisController.activePlayer
     readonly property bool playing: root.player !== null && media.effectiveTitle.length > 0
+    readonly property real idleHeight: PrismTheme.dp(64)
 
     PlayerBase { id: media; player: root.player; positionUpdatesActive: root.active && root.playing }
 
@@ -62,19 +62,68 @@ Item {
             maskThresholdMin: 0.5
             maskSpreadAtMin: 1
         }
-        // The same smoked sheet as the profile's, inset and concentric with the card, no outline (his 11-16).
         Rectangle {
             id: sheet
-            x: PrismTheme.dp(10)
-            width: parent.width - PrismTheme.dp(20)
+            x: PrismTheme.dp(8)
+            width: parent.width - PrismTheme.dp(16)
             height: Math.min(parent.height * 0.6, PrismTheme.dp(138))
-            y: parent.height - height - PrismTheme.dp(10)
-            radius: PrismTheme.dp(14)
-            color: PrismTheme.glassSheet
+            y: parent.height - height - PrismTheme.dp(8)
+            radius: PrismTheme.dp(18)
+            color: Qt.rgba(0.07, 0.07, 0.09, 0.42) // iris-literal: Prism's own ink over its art, the same in every scheme
+            // Glass catches light on its top edge only, brightest in the middle: a rim, never an outline.
+            Rectangle {
+                x: sheet.radius * 0.6
+                y: 0
+                width: sheet.width - x * 2
+                height: 1
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: "transparent" }
+                    GradientStop { position: 0.5; color: Qt.rgba(1, 1, 1, 0.26) } // iris-literal: Prism's own ink over its art, the same in every scheme
+                    GradientStop { position: 1; color: "transparent" }
+                }
+            }
         }
     }
-    Rectangle { id: shape; anchors.fill: parent; radius: PrismTheme.dp(24); visible: false; layer.enabled: true }
+    Rectangle { id: shape; anchors.fill: parent; radius: PrismTheme.dp(22); visible: false; layer.enabled: true }
     Rectangle { id: sheetShape; width: sheet.width; height: sheet.height; radius: sheet.radius; visible: false; layer.enabled: true }
+
+    // Idle: a cover-sized note and the two lines, the size of a change row.
+    Rectangle {
+        visible: !root.playing
+        anchors.fill: parent
+        radius: PrismTheme.dp(18)
+        color: PrismTheme.fill
+        PrismThumb {
+            id: note
+            x: PrismTheme.dp(13)
+            anchors.verticalCenter: parent.verticalCenter
+            glyph: "music_note"
+            tint: "pink"
+            size: PrismTheme.dp(38)
+        }
+        Column {
+            anchors.left: note.right
+            anchors.leftMargin: PrismTheme.dp(12)
+            anchors.right: parent.right
+            anchors.rightMargin: PrismTheme.dp(13)
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: PrismTheme.dp(2)
+            PrismText {
+                width: parent.width
+                text: Translation.tr("Nothing playing")
+                font.pixelSize: PrismTheme.body
+                font.weight: Font.DemiBold
+            }
+            PrismText {
+                width: parent.width
+                text: Translation.tr("Play some music")
+                elide: Text.ElideRight
+                color: PrismTheme.ink2
+                font.pixelSize: PrismTheme.small
+            }
+        }
+    }
 
     Column {
         visible: root.playing

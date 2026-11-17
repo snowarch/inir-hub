@@ -1,4 +1,6 @@
 import QtQuick
+import QtQuick.Shapes
+import QtQuick.Effects
 import Quickshell
 import qs
 import qs.services
@@ -7,8 +9,8 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
-// The right column: who is signed in as a pane of glass over their wallpaper (their wallpaper, dark or light, Do Not
-// Disturb at hand), the settings changed from the factory profile, and what is playing.
+// The right column: who is signed in and the bell (Do Not Disturb), the settings changed from the factory profile
+// numbered as the reference's top artists, and what is playing.
 Item {
     id: root
     property bool active: true
@@ -19,7 +21,7 @@ Item {
     // Four changes beside a song; with nothing playing, as many as the column holds (the player folds to a line).
     readonly property real rowHeight: PrismTheme.dp(54)
     readonly property int shown: player.playing ? 4
-        : Math.max(4, Math.min(12, Math.floor((root.height - list.y - PrismTheme.dp(15 + 20 + 22)) / root.rowHeight)))
+        : Math.max(4, Math.min(12, Math.floor((root.height - list.y - PrismTheme.dp(15 + 20 + 22) - player.idleHeight) / root.rowHeight)))
 
     Column {
         id: column
@@ -27,9 +29,116 @@ Item {
         width: parent.width - PrismTheme.dp(44)
         spacing: 0
 
-        Item { width: 1; height: PrismTheme.dp(14) }
-        PrismProfile { width: parent.width }
-        Item { width: 1; height: PrismTheme.dp(22) }
+        Item {
+            width: parent.width
+            height: PrismTheme.dp(92)
+            // The avatar sits in a ring of the spectrum, the light of the hero.
+            Shape {
+                anchors.centerIn: avatar
+                width: avatar.width + PrismTheme.dp(6)
+                height: width
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeColor: "transparent"
+                    fillGradient: ConicalGradient {
+                        centerX: PrismTheme.dp(23) + PrismTheme.dp(3); centerY: centerX; angle: 90
+                        GradientStop { position: 0; color: PrismTheme.tint("red") }
+                        GradientStop { position: 0.25; color: PrismTheme.tint("orange") }
+                        GradientStop { position: 0.5; color: PrismTheme.tint("green") }
+                        GradientStop { position: 0.75; color: PrismTheme.tint("blue") }
+                        GradientStop { position: 1; color: PrismTheme.tint("red") }
+                    }
+                    PathAngleArc { centerX: PrismTheme.dp(26); centerY: PrismTheme.dp(26); radiusX: PrismTheme.dp(26); radiusY: radiusX; startAngle: 0; sweepAngle: 360 }
+                }
+            }
+            Rectangle {
+                anchors.centerIn: avatar
+                width: avatar.width + PrismTheme.dp(2)
+                height: width
+                radius: width / 2
+                color: PrismTheme.rail
+            }
+            Item {
+                id: avatar
+                property int sourceIndex: 0
+                width: PrismTheme.dp(46)
+                height: width
+                anchors.verticalCenter: parent.verticalCenter
+                Rectangle {
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: PrismTheme.raised
+                    PrismGlyph { anchors.centerIn: parent; text: "person"; filled: true; color: PrismTheme.ink2; visible: photo.status !== Image.Ready }
+                }
+                Image {
+                    id: photo
+                    anchors.fill: parent
+                    source: Directories.avatarSourceAt(avatar.sourceIndex)
+                    sourceSize.width: width * 2
+                    sourceSize.height: height * 2
+                    fillMode: Image.PreserveAspectCrop
+                    visible: false
+                    onStatusChanged: if (status === Image.Error && avatar.sourceIndex + 1 < Directories.userAvatarPaths.length) Qt.callLater(() => avatar.sourceIndex++)
+                }
+                MultiEffect {
+                    anchors.fill: parent
+                    visible: photo.status === Image.Ready
+                    source: photo
+                    maskEnabled: true
+                    maskSource: round
+                    maskThresholdMin: 0.5
+                    maskSpreadAtMin: 1
+                }
+                Rectangle { id: round; anchors.fill: parent; radius: width / 2; visible: false; layer.enabled: true }
+            }
+            Column {
+                anchors.left: avatar.right
+                anchors.leftMargin: PrismTheme.dp(12)
+                anchors.right: bell.left
+                anchors.rightMargin: PrismTheme.dp(12)
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: PrismTheme.dp(1)
+                // The welcome: a greeting in time with the day over the name, then the day and the weather.
+                readonly property int hour: DateTime.clock.date.getHours()
+                PrismText {
+                    width: parent.width
+                    text: parent.hour >= 5 && parent.hour < 12 ? Translation.tr("Good morning")
+                        : parent.hour >= 12 && parent.hour < 19 ? Translation.tr("Good afternoon")
+                        : parent.hour >= 19 ? Translation.tr("Good evening") : Translation.tr("Good night")
+                    color: PrismTheme.ink2
+                    font.pixelSize: PrismTheme.caption
+                }
+                PrismText {
+                    width: parent.width
+                    text: SystemInfo.displayName || SystemInfo.username
+                    elide: Text.ElideRight
+                    font.pixelSize: PrismTheme.head
+                    font.weight: Font.Bold
+                    font.letterSpacing: -0.3
+                }
+                PrismText {
+                    width: parent.width
+                    text: Translation.locale.toString(DateTime.clock.date, "ddd d MMM")
+                        + (Weather.enabled && Weather.hasData ? "  ·  " + String(Weather.data?.temp ?? "") : "")
+                    elide: Text.ElideRight
+                    color: PrismTheme.ink3
+                    font.pixelSize: PrismTheme.caption
+                }
+            }
+            PrismRound {
+                id: bell
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: PrismTheme.dp(36)
+                readonly property bool silent: { const _ = PrismModel.revision; return Boolean(Config.getNestedValue("notifications.silent", false)) }
+                glyph: silent ? "notifications_off" : "notifications"
+                lit: silent
+                glyphSize: PrismTheme.dp(17)
+                onClicked: Config.setNestedValue("notifications.silent", !silent)
+            }
+        }
+        Rectangle { width: parent.width; height: 1; color: PrismTheme.line }
+        Item { width: 1; height: PrismTheme.dp(18) }
 
         PrismHeading {
             width: parent.width
@@ -68,14 +177,13 @@ Item {
                         id: thumb
                         anchors.verticalCenter: parent.verticalCenter
                         glyph: change.modelData.glyph
-                        salt: String(change.modelData.label ?? "")
                         tint: PrismModel.page(change.modelData.page).tint
                         size: PrismTheme.dp(38)
                     }
                     Column {
                         anchors.left: thumb.right
                         anchors.leftMargin: PrismTheme.dp(12)
-                        anchors.right: parent.right
+                        anchors.right: rank.left
                         anchors.rightMargin: PrismTheme.dp(8)
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: PrismTheme.dp(2)
@@ -86,22 +194,27 @@ Item {
                             font.weight: Font.DemiBold
                             color: changeArea.containsMouse ? PrismTheme.accent : PrismTheme.ink
                         }
-                        // A value it cannot name leaves the name alone, never a glyph over an empty line.
                         Row {
-                            id: said
-                            readonly property string value: PrismModel.sayNow(change.modelData)
-                            visible: said.value.length > 0
                             width: parent.width
                             spacing: PrismTheme.dp(4)
                             PrismGlyph { anchors.verticalCenter: parent.verticalCenter; text: PrismModel.page(change.modelData.page).glyph; iconSize: PrismTheme.dp(12); color: PrismTheme.ink3 }
                             PrismText {
                                 width: parent.width - PrismTheme.dp(16)
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: said.value
+                                text: PrismModel.sayNow(change.modelData)
                                 color: PrismTheme.ink2
                                 font.pixelSize: PrismTheme.small
                             }
                         }
+                    }
+                    PrismText {
+                        id: rank
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: String(change.index + 1).padStart(2, "0")
+                        figures: true
+                        color: PrismTheme.ink3
+                        font.pixelSize: PrismTheme.small
                     }
                     MouseArea {
                         id: changeArea
@@ -121,8 +234,8 @@ Item {
         id: player
         x: column.x
         width: column.width
-        y: column.y + column.height + PrismTheme.dp(20)
-        height: Math.max(0, root.height - PrismTheme.dp(22) - y)
+        y: player.playing ? column.y + column.height + PrismTheme.dp(20) : root.height - PrismTheme.dp(22) - player.idleHeight
+        height: player.playing ? root.height - PrismTheme.dp(22) - y : player.idleHeight
         active: root.active
     }
 }
