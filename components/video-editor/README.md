@@ -20,7 +20,7 @@ changes update live. All 18 Hub languages are supported.
 
 ## Requirements
 
-- iNiR 3.1.2 or newer, with qs-rs/Quickshell and Qt 6 Multimedia support.
+- iNiR 3.1.1 or newer, with qs-rs/Quickshell and Qt 6 Multimedia support.
 - Python 3; the backend uses only the standard library.
 - FFmpeg and ffprobe. FFmpeg needs `libx264`, AAC, `libmp3lame`, JPEG encoding and the GIF palette filters.
 - Optional: `wl-clipboard` (`wl-copy`) for **Copy Path**, `xdg-utils` (`xdg-open`) for opening exported
