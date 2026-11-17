@@ -1,0 +1,12 @@
+CropOverlay 1.0 CropOverlay.qml
+EditorAction 1.0 EditorAction.qml
+EditorChoices 1.0 EditorChoices.qml
+EditorFacts 1.0 EditorFacts.qml
+EditorRange 1.0 EditorRange.qml
+singleton EditorSkin 1.0 EditorSkin.qml
+EditorStatus 1.0 EditorStatus.qml
+EditorSurface 1.0 EditorSurface.qml
+EditorText 1.0 EditorText.qml
+EditorTools 1.0 EditorTools.qml
+TrimTimeline 1.0 TrimTimeline.qml
+VideoPreview 1.0 VideoPreview.qml

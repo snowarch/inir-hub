@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Monochrome launcher symbol; currentColor inherits the icon host's ink. -->
+  <path fill="currentColor" d="M4 3h16a2 2 0 0 1 2 2v10h-2V9H4v10h8v2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v2h3V5H4zm5 0v2h3V5H9zm5 0v2h3V5h-3zm5 0v2h1V5h-1zM9 11l6 3-6 3v-6zm12 4 2 2-6 6h-2v-2l6-6z"/>
+</svg>

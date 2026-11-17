@@ -1,0 +1,11 @@
+{
+    "id": "video-editor",
+    "edit": "https://github.com/snowarch/inir-hub/edit/main/docs/video-editor/",
+    "order": 20,
+    "groups": [
+        {
+            "label": "Components",
+            "pages": ["VIDEO_EDITOR"]
+        }
+    ]
+}
