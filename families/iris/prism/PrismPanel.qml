@@ -478,13 +478,12 @@ Item {
                         readonly property var says: !root.board || !root.staged ? [] : PrismModel.factsOf(String(root.page.pageId))
                             .map(entry => String(entry.say)).filter(say => say.length > 0)
                         readonly property string tip: Translation.tr(String(IrisOptions.sectionById(String(root.page.area ?? ""))?.tip ?? root.page.subtitle ?? ""))
-                        readonly property real words: headObject.visible ? width - headObject.width - PrismTheme.dp(24) : width
+                        readonly property real words: width
                         visible: root.board && root.staged
                         width: content.width
-                        // The words set the head's height; the object fits in it, never the other way (it left a band of air).
                         readonly property real wordsBottom: headActs.visible ? headActs.y + headActs.height
                             : headLede.visible ? headLede.y + headLede.height : headName.y + headName.height
-                        height: visible ? Math.max(boardHead.wordsBottom, headObject.visible ? headObject.y + headObject.height : 0) + PrismTheme.dp(22) : 0
+                        height: visible ? boardHead.wordsBottom + PrismTheme.dp(22) : 0
                         PrismText {
                             id: headCredit
                             y: PrismTheme.dp(22)
@@ -537,18 +536,6 @@ Item {
                                 text: Translation.tr("Restore defaults")
                                 onClicked: PrismModel.restore(root.page.pageId)
                             }
-                        }
-                        PrismObject {
-                            id: headObject
-                            visible: drawn && boardHead.width >= PrismTheme.dp(720)
-                            x: boardHead.width - width
-                            width: Math.round(Math.min(PrismTheme.dp(360), boardHead.width * 0.36))
-                            height: Math.max(PrismTheme.dp(112), Math.min(PrismTheme.dp(160), boardHead.wordsBottom + PrismTheme.dp(16)))
-                            atRight: true
-                            pageId: root.board && root.staged ? String(root.page.pageId) : ""
-                            tint: String(root.page.tint)
-                            groups: root.groups
-                            onGoGroup: title => root.showGroup(root.firstOf(title))
                         }
                     }
                     PrismPoster {

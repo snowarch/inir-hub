@@ -11,8 +11,7 @@ import qs.modules.iris.prism.fx
 
 // A page's first group as its wide folder (`.claude/ref/iris-prism/studio/b-carpeta.html`): the page's art as a band,
 // the way back and forward with where it stands, the page's name big at the right; the front sheet's tab carries the
-// group's name, its rows at the left, the page's object drawn in light on an inset card of night at the right with its
-// groups pinned, a figure at the foot.
+// group's name, its rows across, a figure at the foot.
 Item {
     id: root
     property var page: null
@@ -39,14 +38,7 @@ Item {
     readonly property real pad: PrismTheme.dp(26)
     readonly property real inner: root.width - root.pad * 2
     readonly property bool keys: Boolean(root.figure?.keys)
-    readonly property bool scened: !root.keys && root.section !== null && drawing.drawn
-    readonly property bool beside: root.scened && root.inner >= PrismTheme.dp(700)
-    readonly property real wellW: root.beside ? Math.round(Math.max(PrismTheme.dp(300), Math.min(PrismTheme.dp(400), root.inner * 0.4))) : root.inner
-    // Beside the rows the well runs down with them, up to a little past square: no empty quarter under it. Read from
-    // colsY, never rowsY: rowsY follows wellH while the well stands over the rows, and a flip of `beside` looped them.
-    readonly property real wellH: Math.round(Math.max(Math.min(PrismTheme.dp(270), root.wellW * 0.67),
-        root.beside ? Math.min(root.wellW * 1.1, root.colsY + rows.implicitHeight - root.wellY) : 0))
-    readonly property real rowsW: root.beside ? root.inner - root.wellW - PrismTheme.dp(26) : root.inner
+    readonly property real rowsW: root.inner
     readonly property var stats: root.lead.slice(0, 2).map(entry => entry.fact ? { say: String(entry.say), label: String(entry.label) }
         : { say: String(PrismModel.sayNow(entry) ?? ""), label: Translation.tr(entry.label) }).filter(entry => entry.say.length > 0)
     // Under the tab's name, what the group holds when no row of it says so (the keyboard's layout); a row's value never.
@@ -58,9 +50,8 @@ Item {
 
     // Inside the sheet: the tab's words, then rows and picture, then the foot.
     readonly property real colsY: root.rise + PrismTheme.dp(20)
-    readonly property real wellY: root.beside ? root.colsY - PrismTheme.dp(54) : root.colsY
-    readonly property real rowsY: root.beside || !root.scened ? root.colsY : root.colsY + root.wellH + PrismTheme.dp(18)
-    readonly property real colsEnd: Math.max(root.rowsY + rows.implicitHeight, root.scened ? root.wellY + root.wellH + PrismTheme.dp(28) : 0)
+    readonly property real rowsY: root.colsY
+    readonly property real colsEnd: root.rowsY + rows.implicitHeight
     readonly property real sheetHeight: root.colsEnd + (foot.visible ? foot.height + PrismTheme.dp(16) : 0) + PrismTheme.dp(22)
     implicitHeight: root.sheetTop + root.sheetHeight
 
@@ -120,7 +111,6 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: PrismTheme.dp(28)
         y: Math.max(head.y + head.height + PrismTheme.dp(10), PrismTheme.dp(20))
-        visible: !root.beside || y + height < root.sheetTop + root.wellY - PrismTheme.dp(8)
         spacing: PrismTheme.dp(8)
         PrismPill {
             visible: root.restorable > 0
@@ -198,27 +188,6 @@ Item {
             entry: String(root.section?.title ?? "")
             tint: root.tint
             flashPath: root.flashPath
-        }
-
-        // The page's object, on an inset card of night, its groups pinned.
-        ClippingRectangle {
-            id: well
-            visible: root.scened
-            x: root.beside ? root.width - root.pad - root.wellW : root.pad
-            y: root.wellY
-            width: root.wellW
-            height: root.wellH
-            radius: PrismTheme.dp(20)
-            color: PrismTheme.night
-            PrismObject {
-                id: drawing
-                anchors.fill: parent
-                anchors.margins: PrismTheme.dp(22)
-                pageId: String(root.page?.pageId ?? "")
-                tint: root.tint
-                groups: root.groups
-                onGoGroup: title => root.goGroup(title)
-            }
         }
 
         // The foot: the page's figure big at the left, where it stands at the right.

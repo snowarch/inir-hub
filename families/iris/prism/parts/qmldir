@@ -8,7 +8,6 @@ PrismHeading 1.0 PrismHeading.qml
 PrismPoster 1.0 PrismPoster.qml
 PrismStrip 1.0 PrismStrip.qml
 PrismSpots 1.0 PrismSpots.qml
-PrismObject 1.0 PrismObject.qml
 PrismSection 1.0 PrismSection.qml
 PrismRow 1.0 PrismRow.qml
 PrismThumb 1.0 PrismThumb.qml

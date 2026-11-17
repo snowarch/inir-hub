@@ -340,7 +340,7 @@ Singleton {
     }
     function sayNow(row: var): string { return root.say(row, root.read(row)) }
     // The picture a group's module wears among its rows: the drawn keyboard where a row of the group is drawn by it,
-    // else null. Prism shows no live scene (each page has its drawn object in the art band, PrismObject).
+    // else null. Prism shows no scene.
     function figureOf(id: string, group: string): var {
         const keyRow = root.rows.find(row => row.onStage && row.page === id && row.section === group && root.shown(row))
         return keyRow ? { keys: true, row: keyRow } : null
