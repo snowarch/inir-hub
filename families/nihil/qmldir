@@ -1,6 +1,0 @@
-module qs.modules.nihil
-IrisConfigSchema 1.0 IrisConfigSchema.qml
-IrisFamilyStyle 1.0 IrisFamilyStyle.qml
-IrisFamilyTransition 1.0 IrisFamilyTransition.qml
-IrisLayout 1.0 IrisLayout.qml
-ShellIrisPanelsImpl 1.0 ShellIrisPanelsImpl.qml

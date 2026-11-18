@@ -1,3 +1,0 @@
-module qs.modules.nihil.prism.core
-singleton PrismTheme 1.0 PrismTheme.qml
-singleton PrismState 1.0 PrismState.qml

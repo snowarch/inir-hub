@@ -1,8 +1,0 @@
-module qs.modules.nihil.settings.layouts
-AreaPool 1.0 AreaPool.qml
-AreaRows 1.0 AreaRows.qml
-FineTune 1.0 FineTune.qml
-Folio 1.0 Folio.qml
-FolioPage 1.0 FolioPage.qml
-LayoutSwitch 1.0 LayoutSwitch.qml
-StagePlate 1.0 StagePlate.qml

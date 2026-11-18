@@ -1,3 +1,0 @@
-module qs.modules.nihil.state
-singleton IrisState 1.0 IrisState.qml
-singleton AnimeWatch 1.0 AnimeWatch.qml
