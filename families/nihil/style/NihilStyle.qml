@@ -109,24 +109,24 @@ Singleton {
     readonly property real panelRadius: root.s(24 * root.corners)
     function cells(n: int): real { return n * root.cell + (n - 1) * root.cellGap }
 
-    // Type: Space Grotesk to read, Space Mono for figures and labels, Bodoni for the one serif word (the search
-    // field, a day's name, a quote's author). They ship with NiHiL (assets/fonts, OFL).
+    // Type: Hanken Grotesk to read, figures in its tabular numbers so a clock or a percent never shifts; Doto, a
+    // dot-matrix face with round dots, for a heading or a name drawn in dots where DotText's grid has no letter for it.
+    // Both ship with NiHiL (assets/fonts, OFL). "system" reads in the shell's own main font instead.
     function face(file: string): url { return Qt.resolvedUrl(`../assets/fonts/${file}.ttf`) }
-    readonly property FontLoader groteskLoader: FontLoader { source: root.face("SpaceGrotesk") }
-    readonly property FontLoader monoLoader: FontLoader { source: root.face("SpaceMono-Regular") }
-    readonly property FontLoader monoBoldLoader: FontLoader { source: root.face("SpaceMono-Bold") }
-    readonly property FontLoader serifLoader: FontLoader { source: root.face("BodoniModa") }
+    readonly property FontLoader sansLoader: FontLoader { source: root.face("HankenGrotesk") }
+    readonly property FontLoader dotsLoader: FontLoader { source: root.face("DotoRound") }
     function loaded(loader: FontLoader, fallback: string): string {
         return loader.status === FontLoader.Ready && loader.name.length > 0 ? loader.name : fallback
     }
-    readonly property string mono: root.loaded(root.monoLoader, "monospace")
-    // The reading face: Space Grotesk, or the mono throughout when the person prefers it.
-    readonly property string grotesk: String(root.theme?.font ?? "grotesk") === "mono" ? root.mono : root.loaded(root.groteskLoader, "Inter")
-    readonly property string serif: root.loaded(root.serifLoader, "serif")
-    readonly property real textSmall: root.s(11)
-    readonly property real textBody: root.s(13)
-    readonly property real textLarge: root.s(16)
-    readonly property real textTitle: root.s(22)
+    readonly property string systemFont: String(Config.options?.appearance?.typography?.mainFont ?? "")
+    readonly property string grotesk: String(root.theme?.font ?? "grotesk") === "system" && root.systemFont.length > 0
+        ? root.systemFont : root.loaded(root.sansLoader, "sans-serif")
+    readonly property string dots: root.loaded(root.dotsLoader, root.grotesk)
+    readonly property real textSmall: root.s(12)
+    readonly property real textBody: root.s(14)
+    readonly property real textLarge: root.s(17)
+    readonly property real textTitle: root.s(24)
+    readonly property real textDisplay: root.s(34)
 
     // Motion: short and settled, no bounce. "calm" shortens it, "off" and game mode take it away.
     readonly property string motionChoice: String(root.theme?.motion ?? "full")

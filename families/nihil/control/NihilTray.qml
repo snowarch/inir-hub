@@ -31,7 +31,7 @@ NPopup {
         NText {
             anchors.centerIn: parent
             visible: root.items.length === 0
-            mono: true
+            figures: true
             text: Translation.tr("Nothing in the tray")
             color: NihilStyle.inkSoft
             font.pixelSize: NihilStyle.textSmall

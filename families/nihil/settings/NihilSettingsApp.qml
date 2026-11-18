@@ -125,7 +125,7 @@ ApplicationWindow {
                     color: NihilStyle.accent
                 }
                 NText {
-                    mono: true
+                    figures: true
                     text: SettingsModel.accentWord.toUpperCase()
                     font.pixelSize: NihilStyle.s(10)
                     color: NihilStyle.inkSoft

@@ -45,7 +45,9 @@ Rectangle {
         color: root.ink
     }
 
-    Item { id: holder; anchors.fill: parent }
+    // Above the button's own hand: a key inside (a chevron, the time in the status pill) answers for itself, while the
+    // words and glyphs let every other click through.
+    Item { id: holder; anchors.fill: parent; z: 1 }
 
     MouseArea {
         id: mouse

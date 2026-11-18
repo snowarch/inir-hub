@@ -55,7 +55,7 @@ Grid {
                 NText {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
-                    mono: true
+                    figures: true
                     text: key.modelData.label
                     font.pixelSize: NihilStyle.textSmall
                     color: key.ink

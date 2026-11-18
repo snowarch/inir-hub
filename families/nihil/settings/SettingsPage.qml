@@ -85,7 +85,6 @@ NScroller {
             }
             NText {
                 width: heading.width
-                serif: true
                 text: String(root.page?.line ?? "")
                 font.pixelSize: NihilStyle.textLarge
                 color: NihilStyle.inkSoft

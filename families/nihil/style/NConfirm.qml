@@ -40,7 +40,7 @@ NButton {
         NText {
             id: word
             anchors.verticalCenter: parent.verticalCenter
-            mono: true
+            figures: true
             text: (root.armed ? root.askLabel : root.label).toUpperCase()
             font.pixelSize: NihilStyle.textSmall
             color: root.ink

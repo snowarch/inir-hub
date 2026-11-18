@@ -1,13 +1,17 @@
 import QtQuick
 
-// Text in NiHiL: Space Grotesk to read, `mono` for figures and labels, `serif` for the one word that sets the tone.
+// Text in NiHiL: Hanken Grotesk to read; `figures` for numbers that change (tabular, a touch heavier), `dots` for a
+// heading or a name in Doto's round dots.
 Text {
-    property bool mono: false
-    property bool serif: false
-    font.family: serif ? NihilStyle.serif : mono ? NihilStyle.mono : NihilStyle.grotesk
+    property bool figures: false
+    property bool dots: false
+    font.family: dots ? NihilStyle.dots : NihilStyle.grotesk
     font.pixelSize: NihilStyle.textBody
+    font.weight: dots ? Font.Normal : figures ? Font.Medium : Font.Normal
+    font.features: figures ? { "tnum": 1 } : ({})
     color: NihilStyle.ink
-    renderType: Text.NativeRendering
+    // The dot face is drawn by Qt itself: native hinting pulls its round dots out of line.
+    renderType: dots ? Text.QtRendering : Text.NativeRendering
     elide: Text.ElideRight
     verticalAlignment: Text.AlignVCenter
 }

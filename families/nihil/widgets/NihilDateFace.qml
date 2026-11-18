@@ -26,7 +26,7 @@ NihilFace {
             spacing: root.diameter * 0.04
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                mono: true
+                figures: true
                 font.pixelSize: Math.round(root.diameter * 0.075)
                 font.capitalization: Font.AllUppercase
                 color: NihilStyle.inkSoft
@@ -41,7 +41,7 @@ NihilFace {
             }
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                serif: true
+                dots: true
                 font.pixelSize: Math.round(root.diameter * 0.1)
                 font.weight: Font.DemiBold
                 font.capitalization: Font.AllUppercase

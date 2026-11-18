@@ -51,6 +51,6 @@ Column {
         height: NihilStyle.s(36)
         label: root.actionLabel
         onClicked: root.action()
-        FontMetrics { id: implicitWidthOfLabel; font.family: NihilStyle.mono; font.pixelSize: NihilStyle.textSmall }
+        FontMetrics { id: implicitWidthOfLabel; font.family: NihilStyle.grotesk; font.pixelSize: NihilStyle.textSmall }
     }
 }

@@ -93,7 +93,7 @@ NihilFace {
             spacing: root.dp(2)
             NText {
                 width: parent.width * (root.large ? 0.9 : 0.55)
-                mono: true
+                figures: true
                 font.bold: true
                 font.pixelSize: root.dp(15)
                 font.capitalization: Font.AllUppercase
@@ -101,7 +101,6 @@ NihilFace {
             }
             NText {
                 width: parent.width * 0.55
-                serif: true
                 font.pixelSize: root.dp(13)
                 color: NihilStyle.inkSoft
                 text: root.artist
@@ -181,7 +180,7 @@ NihilFace {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Math.min(implicitWidth, root.width * 0.7)
                 horizontalAlignment: Text.AlignHCenter
-                mono: true
+                figures: true
                 font.pixelSize: root.dp(12)
                 font.capitalization: Font.AllUppercase
                 text: root.title

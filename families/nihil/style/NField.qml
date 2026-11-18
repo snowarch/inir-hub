@@ -14,8 +14,12 @@ Rectangle {
     property var accepts: null
     readonly property alias text: input.text
     readonly property bool typing: input.activeFocus
+    property alias echoMode: input.echoMode
     signal edited(string text)
     signal committed(string text)
+    // Enter, and the arrows for a list the field steers (the clipboard's, a search's).
+    signal entered()
+    signal stepped(int by)
 
     function take(): void { input.forceActiveFocus(); input.selectAll() }
     function clear(): void { input.text = ""; root.edited("") }
@@ -52,11 +56,16 @@ Rectangle {
         color: NihilStyle.ink
         selectionColor: NihilStyle.accent
         selectedTextColor: NihilStyle.onAccent
-        font.family: root.mono ? NihilStyle.mono : NihilStyle.grotesk
+        font.family: NihilStyle.grotesk
+        font.features: root.mono ? { "tnum": 1 } : ({})
         font.pixelSize: NihilStyle.textBody
         Accessible.role: Accessible.EditableText
         Accessible.name: root.placeholder
         onTextEdited: root.edited(input.text)
+        onAccepted: root.entered()
+        passwordCharacter: "\u25CF"
+        Keys.onUpPressed: root.stepped(-1)
+        Keys.onDownPressed: root.stepped(1)
         function keep(): void {
             if (input.text === root.value) return
             if (root.accepts && !root.accepts(input.text)) { input.text = root.value; return }

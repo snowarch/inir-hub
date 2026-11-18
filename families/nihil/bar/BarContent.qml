@@ -48,6 +48,11 @@ Item {
                 grid: true
             }
         }
+        Workspaces {
+            visible: (NihilStyle.options?.bar?.showWorkspaces ?? true) && implicitVisible
+            readonly property bool implicitVisible: CompositorService.isNiri && spaces.length > 0
+            screen: root.screen
+        }
     }
 
     Group {
@@ -75,7 +80,6 @@ Item {
                 NIcon { anchors.verticalCenter: parent.verticalCenter; text: "search"; size: NihilStyle.s(22) }
                 NText {
                     anchors.verticalCenter: parent.verticalCenter
-                    serif: true
                     text: Translation.tr("Search")
                     font.pixelSize: NihilStyle.textLarge
                 }
@@ -99,6 +103,7 @@ Item {
         }
         StatusPill {
             onClicked: NihilState.toggle("control")
+            onTimeTapped: NihilState.toggle("today")
         }
     }
 }

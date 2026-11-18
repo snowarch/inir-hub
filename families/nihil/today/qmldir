@@ -1,0 +1,4 @@
+module qs.modules.nihil.today
+NihilToday 1.0 NihilToday.qml
+TodayCalendar 1.0 TodayCalendar.qml
+TodayNotice 1.0 TodayNotice.qml

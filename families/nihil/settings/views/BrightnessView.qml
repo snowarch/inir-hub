@@ -32,7 +32,7 @@ Column {
             NText {
                 anchors.verticalCenter: parent.verticalCenter
                 width: NihilStyle.s(86)
-                mono: true
+                figures: true
                 text: line.modelData.name
                 font.pixelSize: NihilStyle.textSmall
                 color: NihilStyle.inkSoft
@@ -49,7 +49,7 @@ Column {
                 anchors.verticalCenter: parent.verticalCenter
                 width: NihilStyle.s(38)
                 horizontalAlignment: Text.AlignRight
-                mono: true
+                figures: true
                 text: Math.round(line.modelData.monitor.brightness * 100) + "%"
                 font.pixelSize: NihilStyle.textSmall
             }

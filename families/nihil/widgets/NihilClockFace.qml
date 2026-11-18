@@ -68,14 +68,14 @@ NihilFace {
             spacing: root.dp(4)
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                mono: true
+                figures: true
                 font.bold: true
                 font.pixelSize: root.dp(40)
                 text: DateTime.time
             }
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                mono: true
+                figures: true
                 color: NihilStyle.inkSoft
                 font.pixelSize: root.dp(12)
                 font.capitalization: Font.AllUppercase

@@ -54,7 +54,7 @@ NPopup {
                 spacing: NihilStyle.s(14)
                 NText {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    mono: true
+                    figures: true
                     font.bold: true
                     font.letterSpacing: NihilStyle.s(1)
                     text: Translation.tr("Goodbye,").toUpperCase()

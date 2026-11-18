@@ -80,7 +80,7 @@ Column {
             width: root.width
             spacing: NihilStyle.s(7)
             NText {
-                mono: true
+                figures: true
                 text: line.modelData.label.toUpperCase()
                 font.pixelSize: NihilStyle.textSmall
                 color: NihilStyle.inkSoft

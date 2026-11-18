@@ -34,13 +34,13 @@ NihilFace {
             DotText { anchors.horizontalCenter: parent.horizontalCenter; icon: root.sky; dot: root.dp(4); spacing: root.dp(1.6) }
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                mono: true
+                figures: true
                 font.pixelSize: root.dp(34)
                 text: root.temp
             }
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                mono: true
+                figures: true
                 font.pixelSize: root.dp(11)
                 font.capitalization: Font.AllUppercase
                 color: NihilStyle.inkSoft
@@ -71,8 +71,8 @@ NihilFace {
             }
             Column {
                 anchors.verticalCenter: parent.verticalCenter
-                NText { mono: true; font.pixelSize: root.dp(10); text: `H ${root.figure(root.wx.tempMax)}` }
-                NText { mono: true; font.pixelSize: root.dp(10); text: `L ${root.figure(root.wx.tempMin)}` }
+                NText { figures: true; font.pixelSize: root.dp(10); text: `H ${root.figure(root.wx.tempMax)}` }
+                NText { figures: true; font.pixelSize: root.dp(10); text: `L ${root.figure(root.wx.tempMin)}` }
             }
         }
         Column {
@@ -83,14 +83,14 @@ NihilFace {
                 anchors.right: parent.right
                 width: Math.min(implicitWidth, root.width * 0.42)
                 horizontalAlignment: Text.AlignRight
-                mono: true
+                figures: true
                 font.bold: true
                 font.pixelSize: root.dp(11)
                 text: Weather.showVisibleCity ? Weather.visibleCity : ""
             }
             NText {
                 anchors.right: parent.right
-                mono: true
+                figures: true
                 font.pixelSize: root.dp(11)
                 color: NihilStyle.accent
                 text: root.word
@@ -107,10 +107,10 @@ NihilFace {
                     required property var modelData
                     width: parent.width / Math.max(1, root.days.length)
                     spacing: root.dp(5)
-                    NText { anchors.horizontalCenter: parent.horizontalCenter; mono: true; font.pixelSize: root.dp(11); text: String(day.modelData.dayName ?? "").slice(0, 3) }
+                    NText { anchors.horizontalCenter: parent.horizontalCenter; figures: true; font.pixelSize: root.dp(11); text: String(day.modelData.dayName ?? "").slice(0, 3) }
                     DotText { anchors.horizontalCenter: parent.horizontalCenter; icon: DotGlyphs.iconFor(day.modelData.code, false); dot: root.dp(2.4); spacing: root.dp(0.8) }
-                    NText { anchors.horizontalCenter: parent.horizontalCenter; mono: true; font.pixelSize: root.dp(10); color: NihilStyle.accent; text: root.figure(day.modelData.hi) }
-                    NText { anchors.horizontalCenter: parent.horizontalCenter; mono: true; font.pixelSize: root.dp(10); text: root.figure(day.modelData.lo) }
+                    NText { anchors.horizontalCenter: parent.horizontalCenter; figures: true; font.pixelSize: root.dp(10); color: NihilStyle.accent; text: root.figure(day.modelData.hi) }
+                    NText { anchors.horizontalCenter: parent.horizontalCenter; figures: true; font.pixelSize: root.dp(10); text: root.figure(day.modelData.lo) }
                 }
             }
         }
@@ -118,7 +118,7 @@ NihilFace {
             visible: root.days.length === 0
             anchors.centerIn: parent
             anchors.verticalCenterOffset: root.dp(20)
-            mono: true
+            figures: true
             font.pixelSize: root.dp(12)
             color: NihilStyle.inkSoft
             text: Weather.enabled ? Translation.tr("Waiting for the forecast") : Translation.tr("Weather is off in Settings")

@@ -41,7 +41,7 @@ NScroller {
                     id: pageWord
                     x: NihilStyle.s(14)
                     anchors.verticalCenter: parent.verticalCenter
-                    mono: true
+                    figures: true
                     text: group.modelData.page.label.toUpperCase()
                     font.pixelSize: NihilStyle.textSmall
                 }

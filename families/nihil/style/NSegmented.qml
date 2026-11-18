@@ -26,7 +26,7 @@ Rectangle {
         return most
     }
 
-    FontMetrics { id: metrics; font.family: NihilStyle.mono; font.pixelSize: NihilStyle.textSmall }
+    FontMetrics { id: metrics; font.family: NihilStyle.grotesk; font.pixelSize: NihilStyle.textSmall }
 
     implicitWidth: (root.widest + NihilStyle.s(22)) * root.options.length + root.inset * 2
     implicitHeight: NihilStyle.s(36)
@@ -87,7 +87,7 @@ Rectangle {
                         id: word
                         anchors.verticalCenter: parent.verticalCenter
                         width: Math.min(implicitWidth, segment.width - NihilStyle.s(segment.glyph.length > 0 ? 30 : 8))
-                        mono: true
+                        figures: true
                         text: root.shownLabel(segment.modelData)
                         font.pixelSize: NihilStyle.textSmall
                         color: segment.chosen ? NihilStyle.onAccent : segment.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft

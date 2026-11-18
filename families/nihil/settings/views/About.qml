@@ -35,7 +35,7 @@ Column {
                 required property var modelData
                 spacing: NihilStyle.s(6)
                 NText {
-                    mono: true
+                    figures: true
                     text: part.modelData.name.toUpperCase()
                     font.pixelSize: NihilStyle.textSmall
                     font.weight: Font.DemiBold

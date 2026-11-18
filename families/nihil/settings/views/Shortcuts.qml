@@ -45,7 +45,7 @@ Column {
             width: root.width
             spacing: NihilStyle.s(4)
             NText {
-                mono: true
+                figures: true
                 text: String(group.modelData.name).toUpperCase()
                 font.pixelSize: NihilStyle.textSmall
                 color: NihilStyle.inkSoft
@@ -83,7 +83,7 @@ Column {
                                 NText {
                                     id: capWord
                                     anchors.centerIn: parent
-                                    mono: true
+                                    figures: true
                                     text: String(cap.modelData)
                                     font.pixelSize: NihilStyle.textSmall
                                 }

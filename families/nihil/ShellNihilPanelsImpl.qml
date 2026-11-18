@@ -3,10 +3,8 @@ pragma ComponentBehavior: Bound
 import qs.modules.shared.bootGreeting
 import qs.modules.shared.lock
 import qs.modules.shared.mascot
-import qs.modules.shared.polkit
 import qs.modules.shared.regionSelector
 import qs.modules.shared.overlay
-import qs.modules.shared.clipboard as ClipboardModule
 
 import QtQuick
 import Quickshell
@@ -15,9 +13,10 @@ import qs.modules.common
 import qs.services
 import qs.services.deferred
 import qs.modules.nihil.state
+import qs.modules.nihil.polkit
 
-// NiHiL's panels after the first frame: its own (Start, quick controls, power, menu, tray, OSD, notifications) loaded
-// while open, and the shared tools it wears as they are.
+// NiHiL's panels after the first frame: its own (Start, quick controls, Today, power, menu, tray, OSD, notifications,
+// wallpapers, clipboard, the password asks) loaded while open, and the shared tools it wears as they are.
 Item {
     id: root
 
@@ -78,8 +77,11 @@ Item {
     OnDemandPanelLoader { identifier: "nTray"; open: NihilState.trayOpen; source: "./control/NihilTray.qml" }
     OnDemandPanelLoader { identifier: "nPower"; open: GlobalStates.sessionOpen; source: "./power/NihilPower.qml" }
     OnDemandPanelLoader { identifier: "nMenu"; open: NihilState.menuOpen; source: "./menu/NihilMenu.qml" }
+    OnDemandPanelLoader { identifier: "nToday"; open: NihilState.todayOpen; retainAfterUse: true; source: "./today/NihilToday.qml" }
+    OnDemandPanelLoader { identifier: "nWallpapers"; open: NihilState.wallpapersOpen; retainAfterUse: true; closeGraceMs: 250; source: "./wallpapers/NihilWallpapers.qml" }
+    OnDemandPanelLoader { identifier: "nClipboard"; open: NihilState.clipboardOpen; closeGraceMs: 250; source: "./clipboard/NihilClipboard.qml" }
     DeferredPanelLoader { identifier: "nLock"; component: Lock {} }
-    DeferredPanelLoader { identifier: "nPolkit"; component: Polkit {} }
+    DeferredPanelLoader { identifier: "nPolkit"; component: NihilPolkit {} }
 
     DeferredPanelLoader { identifier: "iiBootGreeting"; extraCondition: GlobalStates.bootGreetingOpen; component: BootGreeting {} }
     OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }
@@ -87,10 +89,6 @@ Item {
     OnDemandPanelLoader { identifier: "iiOverlay"; open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen); source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml") }
     OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/overview/Overview.qml") }
     DeferredPanelLoader { identifier: "iiRegionSelector"; component: RegionSelector {} }
-    OnDemandPanelLoader { identifier: "iiWallpaperSelector"; open: GlobalStates.wallpaperSelectorOpen; retainAfterUse: true; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperSelector.qml") }
-    OnDemandPanelLoader { identifier: "iiWallpaperLauncher"; open: GlobalStates.wallpaperLauncherOpen; retainAfterUse: true; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/wallpaperLauncher/WallpaperLauncher.qml") }
-    OnDemandPanelLoader { identifier: "iiCoverflowSelector"; open: GlobalStates.coverflowSelectorOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperCoverflow.qml") }
-    DeferredPanelLoader { identifier: "iiClipboard"; component: ClipboardModule.ClipboardPanel {} }
     OnDemandPanelLoader { identifier: "iiRecordingOsd"; open: RecorderStatus.isRecording; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/recordingOsd/RecordingOsd.qml") }
     OnDemandPanelLoader { identifier: "iiShellUpdate"; open: ShellUpdates.overlayOpen; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/shellUpdate/ShellUpdateOverlay.qml") }
     DeferredPanelLoader { identifier: "iiMascotCompanion"; extraCondition: (Config.options?.mascot?.enable ?? false) && (Config.options?.mascot?.companion?.enable ?? true); component: MascotCompanion {} }

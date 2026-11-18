@@ -1,0 +1,3 @@
+module qs.modules.nihil.wallpapers
+NihilWallpapers 1.0 NihilWallpapers.qml
+WallpaperThumb 1.0 WallpaperThumb.qml

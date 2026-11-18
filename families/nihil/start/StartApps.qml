@@ -72,7 +72,7 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.rightMargin: NihilStyle.s(8)
                 anchors.verticalCenter: parent.verticalCenter
-                mono: true
+                figures: true
                 text: row.modelData.name ?? ""
             }
             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
@@ -86,7 +86,7 @@ Rectangle {
         spacing: NihilStyle.s(12)
         NText {
             anchors.horizontalCenter: parent.horizontalCenter
-            mono: true
+            figures: true
             text: Translation.tr("No app found")
             color: NihilStyle.inkSoft
             font.pixelSize: NihilStyle.textSmall

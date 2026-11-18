@@ -55,7 +55,6 @@ Column {
                         NIcon { anchors.horizontalCenter: parent.horizontalCenter; text: folder.modelData.icon; size: NihilStyle.s(18); color: folder.ink }
                         NText {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            serif: true
                             text: folder.modelData.name
                             font.pixelSize: NihilStyle.textSmall
                             color: folder.ink
@@ -130,7 +129,7 @@ Column {
                 NText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: Math.min(implicitWidth, weather.width - NihilStyle.s(16))
-                    mono: true
+                    figures: true
                     text: (weather.has ? Weather.describeWeather(weather.wx.wCode, Weather.isNightNow()) : Translation.tr("No weather")).toUpperCase()
                     font.pixelSize: NihilStyle.s(10)
                     color: NihilStyle.onAccent
@@ -149,7 +148,7 @@ Column {
             color: Battery.available && Battery.isLow && !Battery.isCharging ? NihilStyle.pieceRaised : NihilStyle.accent
             NText {
                 anchors.centerIn: parent
-                mono: true
+                figures: true
                 text: Battery.available ? Math.round(Battery.percentage * 100) + "%" : "AC"
                 color: battery.color === NihilStyle.accent ? NihilStyle.onAccent : NihilStyle.accent
             }

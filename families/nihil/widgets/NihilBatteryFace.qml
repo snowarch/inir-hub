@@ -30,7 +30,7 @@ NihilFace {
             height: root.dp(22)
             NText {
                 anchors.left: parent.left
-                mono: true
+                figures: true
                 font.pixelSize: root.dp(15)
                 text: `${Math.round(root.level * 100)}%`
                 color: Battery.isLow && !root.charging ? NihilStyle.accent : NihilStyle.ink
@@ -38,13 +38,13 @@ NihilFace {
             NText {
                 visible: !root.small
                 anchors.horizontalCenter: parent.horizontalCenter
-                mono: true
+                figures: true
                 font.pixelSize: root.dp(14)
                 text: root.state
             }
             NText {
                 anchors.right: parent.right
-                mono: true
+                figures: true
                 font.pixelSize: root.dp(15)
                 text: root.small ? "" : root.timeLeft
             }

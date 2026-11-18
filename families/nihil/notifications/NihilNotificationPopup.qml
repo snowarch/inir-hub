@@ -71,7 +71,7 @@ Scope {
                                 spacing: NihilStyle.s(3)
                                 NText {
                                     width: parent.width
-                                    mono: true
+                                    figures: true
                                     font.pixelSize: NihilStyle.textSmall
                                     font.capitalization: Font.AllUppercase
                                     color: card.modelData.urgency === "critical" ? NihilStyle.accent : NihilStyle.inkSoft

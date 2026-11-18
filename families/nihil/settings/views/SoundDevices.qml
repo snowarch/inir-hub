@@ -26,7 +26,7 @@ Column {
         spacing: NihilStyle.s(10)
 
         NText {
-            mono: true
+            figures: true
             text: side.title.toUpperCase()
             font.pixelSize: NihilStyle.textSmall
             color: NihilStyle.inkSoft
@@ -66,7 +66,7 @@ Column {
                 anchors.verticalCenter: parent.verticalCenter
                 width: NihilStyle.s(42)
                 horizontalAlignment: Text.AlignRight
-                mono: true
+                figures: true
                 text: Math.round(side.volume * 100) + "%"
                 font.pixelSize: NihilStyle.textSmall
             }

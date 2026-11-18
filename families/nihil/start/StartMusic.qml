@@ -45,7 +45,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - NihilStyle.s(16)
         horizontalAlignment: Text.AlignHCenter
-        mono: true
+        figures: true
         font.bold: true
         font.pixelSize: NihilStyle.s(10)
         text: (root.has ? MprisController.titleOf(root.player) : Translation.tr("Nothing playing")).toUpperCase()

@@ -31,5 +31,6 @@ every page, live search, and the signal colour, pieces, corners, dots, type and 
 
 ## Credits
 
-Inspired by the NothingOS desktop concept shared on nothing.community. Fonts: Space Grotesk, Space Mono and
-Bodoni Moda, all under the SIL Open Font License (`assets/fonts`).
+Inspired by the NothingOS desktop concept shared on nothing.community. Fonts: Hanken Grotesk for reading and
+Doto (its round, heaviest cut, kept as `DotoRound.ttf`) for the dot figures, both under the SIL Open Font License
+(`assets/fonts`).

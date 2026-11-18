@@ -3,6 +3,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
+import qs.modules.nihil.state
 
 // The status at the bar's right: sound, the battery as a small cell (the charge filled in), the time in figures.
 NButton {
@@ -10,6 +11,9 @@ NButton {
 
     readonly property real volume: Audio.value ?? 0
     readonly property bool muted: Audio.sink?.audio?.muted ?? false
+    readonly property int notices: Notifications.list.length
+    // The time leads to Today (the month and the notifications); the rest of the pill to Control.
+    signal timeTapped()
 
     width: row.implicitWidth + NihilStyle.s(40)
 
@@ -53,11 +57,32 @@ NButton {
                 opacity: 0.4
             }
         }
-        NText {
+        Item {
             anchors.verticalCenter: parent.verticalCenter
-            mono: true
-            text: DateTime.timeDisplay
-            font.pixelSize: NihilStyle.textBody
+            width: clock.implicitWidth + (root.notices > 0 ? NihilStyle.s(14) : 0)
+            height: root.height
+            Behavior on width { NumberAnimation { duration: NihilStyle.quick } }
+            NText {
+                id: clock
+                anchors.verticalCenter: parent.verticalCenter
+                figures: true
+                text: DateTime.timeDisplay
+                font.pixelSize: NihilStyle.textBody
+                color: NihilState.todayOpen ? NihilStyle.accent : NihilStyle.ink
+            }
+            Rectangle {
+                visible: root.notices > 0
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
+                width: NihilStyle.s(7); height: width; radius: width / 2
+                color: Notifications.silent ? NihilStyle.inkSoft : NihilStyle.accent
+            }
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -NihilStyle.s(8)
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.timeTapped()
+            }
         }
     }
 }

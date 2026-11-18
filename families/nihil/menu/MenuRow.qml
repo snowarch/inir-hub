@@ -57,7 +57,7 @@ NButton {
         NText {
             id: value
             anchors.centerIn: parent
-            mono: true
+            figures: true
             text: root.shown.toUpperCase()
             font.pixelSize: NihilStyle.textSmall
             color: root.on ? NihilStyle.onAccent : NihilStyle.ink

@@ -141,7 +141,7 @@ Singleton {
                 ] },
                 { title: Translation.tr("Type and dots"), rows: [
                     root.pick("nihil.theme.dotShape", Translation.tr("Dots"), "", "round", [{ value: "round", label: "Round" }, { value: "square", label: "Square" }]),
-                    root.pick("nihil.theme.font", Translation.tr("Reading type"), "", "grotesk", [{ value: "grotesk", label: "Grotesk" }, { value: "mono", label: "Mono" }]),
+                    root.pick("nihil.theme.font", Translation.tr("Reading type"), "", "grotesk", [{ value: "grotesk", label: "Hanken" }, { value: "system", label: Translation.tr("System") }]),
                     root.pick("nihil.theme.scale", Translation.tr("Size"), "", 1, [{ value: 0.9, label: "90%" }, { value: 1, label: "100%" }, { value: 1.1, label: "110%" }, { value: 1.25, label: "125%" }]),
                     root.pick("nihil.theme.motion", Translation.tr("Motion"), "", "full", [{ value: "full", label: "Full" }, { value: "calm", label: "Calm" }, { value: "off", label: "Off" }])
                 ] },
@@ -293,7 +293,7 @@ Singleton {
                 { title: Translation.tr("Time"), rows: [
                     root.pick("time.format", Translation.tr("Clock"), "", "hh:mm", [{ value: "hh:mm", label: "24h" }, { value: "h:mm ap", label: "12h am" }, { value: "h:mm AP", label: "12h AM" }]),
                     root.sw("time.secondPrecision", Translation.tr("Keep time to the second"), "", false),
-                    root.line("time.dateFormat", Translation.tr("Long date"), Translation.tr("ddd is the day, dd/MM the date."), "ddd, dd/MM", { mono: true, stacked: true })
+                    root.line("time.dateFormat", Translation.tr("Long date"), Translation.tr("ddd is the day, dd/MM the date."), "ddd, dd/MM", { figures: true, stacked: true })
                 ] },
                 { title: Translation.tr("Weather"), rows: [
                     root.sw("weather.enable", Translation.tr("Show the weather"), "", true),
@@ -308,15 +308,15 @@ Singleton {
             key: "apps", label: Translation.tr("Apps"), glyph: "apps", line: Translation.tr("What opens when NiHiL asks for something."),
             sections: [
                 { title: Translation.tr("Default apps"), rows: [
-                    root.line("apps.terminal", Translation.tr("Terminal"), "", "kitty", { mono: true }),
-                    root.line("apps.browser", Translation.tr("Browser"), "", "firefox", { mono: true }),
-                    root.line("apps.volumeMixer", Translation.tr("Volume mixer"), "", "pavucontrol", { mono: true }),
-                    root.line("apps.taskManager", Translation.tr("Task manager"), "", "missioncenter", { mono: true }),
-                    root.line("apps.network", Translation.tr("Network"), "", "nm-connection-editor", { mono: true }),
-                    root.line("apps.bluetooth", Translation.tr("Bluetooth"), "", "blueman-manager", { mono: true })
+                    root.line("apps.terminal", Translation.tr("Terminal"), "", "kitty", { figures: true }),
+                    root.line("apps.browser", Translation.tr("Browser"), "", "firefox", { figures: true }),
+                    root.line("apps.volumeMixer", Translation.tr("Volume mixer"), "", "pavucontrol", { figures: true }),
+                    root.line("apps.taskManager", Translation.tr("Task manager"), "", "missioncenter", { figures: true }),
+                    root.line("apps.network", Translation.tr("Network"), "", "nm-connection-editor", { figures: true }),
+                    root.line("apps.bluetooth", Translation.tr("Bluetooth"), "", "blueman-manager", { figures: true })
                 ] },
                 { title: Translation.tr("Search"), rows: [
-                    root.line("search.engineBaseUrl", Translation.tr("Web search"), Translation.tr("The address your words are added to."), "https://www.google.com/search?q=", { mono: true, stacked: true }),
+                    root.line("search.engineBaseUrl", Translation.tr("Web search"), Translation.tr("The address your words are added to."), "https://www.google.com/search?q=", { figures: true, stacked: true }),
                     root.sw("search.sloppy", Translation.tr("Forgive typos"), Translation.tr("Finds apps from loose spelling."), false)
                 ] }
             ]

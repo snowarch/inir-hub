@@ -2,3 +2,4 @@ module qs.modules.nihil.control
 NihilControl 1.0 NihilControl.qml
 NihilTray 1.0 NihilTray.qml
 MusicDisc 1.0 MusicDisc.qml
+ControlList 1.0 ControlList.qml

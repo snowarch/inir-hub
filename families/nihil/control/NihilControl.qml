@@ -19,6 +19,9 @@ NPopup {
     open: NihilState.controlOpen
     namespace: "nihil:control"
     onDismissed: NihilState.controlOpen = false
+    // The list a key leads to (wifi, bluetooth, output, input), shown in this same piece; empty is the grid.
+    property string page: ""
+    onOpenChanged: if (!root.open) root.page = ""
 
     readonly property real c: NihilStyle.cell
     readonly property real g: NihilStyle.cellGap
@@ -41,8 +44,18 @@ NPopup {
         x: parent.width - width - NihilStyle.edge
         y: root.barBottom ? parent.height - height - root.edgeBottom : root.edgeTop
 
+        ControlList {
+            width: parent.width
+            height: parent.height
+            visible: root.page.length > 0
+            page: root.page
+            onPageChanged: root.page = page
+            onBack: root.page = ""
+        }
+
         Column {
             spacing: root.g
+            visible: root.page.length === 0
 
             Row {
                 spacing: root.g
@@ -55,8 +68,10 @@ NPopup {
                         lit: bt.toggled
                         enabled: bt.available
                         opacity: bt.available ? 1 : 0.5
+                        opens: bt.available
                         onClicked: bt.mainAction()
-                        onRightClicked: bt.altAction()
+                        onRightClicked: root.page = "bluetooth"
+                        onOpened: root.page = "bluetooth"
                     }
                     NKey {
                         width: NihilStyle.cells(2); height: root.c
@@ -77,7 +92,18 @@ NPopup {
                     radius: NihilStyle.s(18)
                     lit: net.toggled
                     onClicked: net.mainAction()
-                    onRightClicked: net.altAction()
+                    onRightClicked: root.page = "wifi"
+                    // The corner leads to the networks; the rest of the tile turns Wi-Fi on and off.
+                    NButton {
+                        width: NihilStyle.s(32); height: width
+                        x: parent.width - width - NihilStyle.s(8)
+                        y: NihilStyle.s(8)
+                        tone: net.toggled ? Qt.rgba(0, 0, 0, 0.14) : NihilStyle.pieceRaised
+                        ink: net.toggled ? NihilStyle.onAccent : NihilStyle.ink
+                        icon: "chevron_right"
+                        iconSize: NihilStyle.s(18)
+                        onClicked: root.page = "wifi"
+                    }
                     Column {
                         anchors.centerIn: parent
                         spacing: NihilStyle.s(8)
@@ -90,7 +116,7 @@ NPopup {
                         NText {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: Math.min(implicitWidth, NihilStyle.cells(2) - NihilStyle.s(20))
-                            mono: true
+                            figures: true
                             text: net.toggled ? (Network.networkName || Translation.tr("Wi-Fi")) : Translation.tr("Wi-Fi")
                             color: net.toggled ? NihilStyle.onAccent : NihilStyle.ink
                         }
@@ -118,7 +144,9 @@ NPopup {
                     width: root.c; height: NihilStyle.cells(2)
                     value: Audio.sink?.audio?.muted ? 0 : Audio.value
                     icon: Audio.sink?.audio?.muted ? "volume_off" : "volume_up"
+                    opens: true
                     onMoved: v => Audio.setSinkVolume(v)
+                    onOpened: root.page = "output"
                 }
             }
 

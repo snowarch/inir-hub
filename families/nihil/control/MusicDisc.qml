@@ -38,7 +38,7 @@ Rectangle {
     NText {
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height * 0.09
-        mono: true
+        figures: true
         text: root.clock(root.position)
         font.pixelSize: NihilStyle.s(10)
         color: root.ink
@@ -48,7 +48,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: parent.height * 0.09
-        mono: true
+        figures: true
         text: root.clock(root.length)
         font.pixelSize: NihilStyle.s(10)
         color: root.ink

@@ -28,7 +28,7 @@ NihilFace {
             NIcon { anchors.horizontalCenter: parent.horizontalCenter; text: "add_photo_alternate"; size: root.dp(28); color: NihilStyle.inkSoft }
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                mono: true
+                figures: true
                 font.pixelSize: root.dp(11)
                 color: NihilStyle.inkSoft
                 text: Translation.tr("Drop a picture here")

@@ -52,7 +52,7 @@ Item {
         spacing: NihilStyle.s(8)
         NText {
             width: parent.width
-            mono: true
+            figures: true
             text: root.fileName
             font.pixelSize: NihilStyle.textSmall
             color: NihilStyle.inkSoft

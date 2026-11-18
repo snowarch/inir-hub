@@ -13,7 +13,7 @@ Column {
         visible: root.title.length > 0
         x: NihilStyle.s(14)
         width: root.width - NihilStyle.s(28)
-        mono: true
+        figures: true
         text: root.title.toUpperCase()
         font.pixelSize: NihilStyle.textSmall
         font.weight: Font.DemiBold

@@ -30,7 +30,7 @@ Flow {
             NText {
                 id: word
                 anchors.centerIn: parent
-                mono: true
+                figures: true
                 text: Translation.tr(String(chip.modelData.label ?? ""))
                 font.pixelSize: NihilStyle.textSmall
                 color: chip.ink

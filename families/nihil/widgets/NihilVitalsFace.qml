@@ -19,7 +19,7 @@ NihilFace {
         NText {
             id: share
             x: root.dp(16); y: root.dp(14)
-            mono: true
+            figures: true
             font.pixelSize: root.dp(20)
             color: NihilStyle.accent
             text: `${Math.round(root.memory * 100)}%`
@@ -27,7 +27,7 @@ NihilFace {
         NText {
             x: share.x
             anchors.top: share.bottom
-            mono: true
+            figures: true
             font.pixelSize: root.dp(14)
             text: Translation.tr("RAM")
         }
@@ -67,8 +67,8 @@ NihilFace {
                 color: NihilStyle.well
                 Column {
                     anchors.centerIn: parent
-                    NText { anchors.horizontalCenter: parent.horizontalCenter; mono: true; font.pixelSize: root.dp(11); text: `${Translation.tr("RAM")} ${Math.round(root.memory * 100)}` }
-                    NText { anchors.horizontalCenter: parent.horizontalCenter; mono: true; font.pixelSize: root.dp(11); text: `${Translation.tr("DISK")} ${Math.round(root.disk * 100)}`; color: NihilStyle.inkSoft }
+                    NText { anchors.horizontalCenter: parent.horizontalCenter; figures: true; font.pixelSize: root.dp(11); text: `${Translation.tr("RAM")} ${Math.round(root.memory * 100)}` }
+                    NText { anchors.horizontalCenter: parent.horizontalCenter; figures: true; font.pixelSize: root.dp(11); text: `${Translation.tr("DISK")} ${Math.round(root.disk * 100)}`; color: NihilStyle.inkSoft }
                 }
             }
             PieDial {

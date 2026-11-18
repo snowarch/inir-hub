@@ -97,7 +97,7 @@ Scope {
                     anchors.right: parent.right
                     anchors.rightMargin: NihilStyle.s(18)
                     anchors.verticalCenter: parent.verticalCenter
-                    mono: true
+                    figures: true
                     text: Math.round(root.level * 100)
                 }
             }

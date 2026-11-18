@@ -1,7 +1,13 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "changes": {
+        "1.2.0": [
+            "NiHiL's own Today (the month and every notification), wallpapers, clipboard and password asks, with nothing of Material's under them",
+            "Control leads to the Wi-Fi networks, the Bluetooth devices and the sound outputs and inputs, in its own piece",
+            "The bar shows the screen's workspaces as dots; the time opens Today and a dot marks notifications",
+            "New type: Hanken Grotesk for reading, Doto for the dot figures"
+        ],
         "1.1.0": [
             "NiHiL has its own Settings window: every page, live search, and full control of the signal colour, pieces, corners, dots, type and motion"
         ],

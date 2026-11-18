@@ -63,7 +63,7 @@ NPopup {
                 anchors.right: parent.right
                 anchors.rightMargin: NihilStyle.s(16)
                 anchors.verticalCenter: parent.verticalCenter
-                font.family: NihilStyle.mono
+                font.family: NihilStyle.grotesk
                 font.pixelSize: NihilStyle.textBody
                 color: NihilStyle.ink
                 selectionColor: NihilStyle.accent
@@ -75,7 +75,7 @@ NPopup {
                 NText {
                     anchors.fill: parent
                     visible: field.text.length === 0
-                    mono: true
+                    figures: true
                     text: Translation.tr("Search this PC").toUpperCase()
                     color: NihilStyle.inkSoft
                 }

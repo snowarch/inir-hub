@@ -46,7 +46,7 @@ Item {
         anchors.topMargin: NihilStyle.s(7)
         width: root.width
         horizontalAlignment: Text.AlignHCenter
-        mono: true
+        figures: true
         text: root.label.toUpperCase()
         font.pixelSize: NihilStyle.s(10)
         color: root.chosen ? NihilStyle.ink : NihilStyle.inkSoft

@@ -112,7 +112,7 @@ NRow {
                 anchors.verticalCenter: parent.verticalCenter
                 width: NihilStyle.s(56)
                 horizontalAlignment: Text.AlignRight
-                mono: true
+                figures: true
                 text: SettingsModel.format(level.shownValue, root.row.format)
                 font.pixelSize: NihilStyle.textSmall
                 color: NihilStyle.inkSoft
@@ -144,7 +144,7 @@ NRow {
         NField {
             value: String(root.stored ?? "")
             placeholder: String(root.row.placeholder ?? "")
-            mono: root.row.mono === true
+            mono: root.row.figures === true || root.row.mono === true
             implicitWidth: NihilStyle.s(250)
             onCommitted: text => root.put(text)
         }
@@ -167,7 +167,7 @@ NRow {
             label: String(root.row.actionLabel)
             glyph: String(root.row.glyph ?? "")
             onClicked: SettingsModel.run(root.row.action)
-            FontMetrics { id: wordWidth; font.family: NihilStyle.mono; font.pixelSize: NihilStyle.textSmall }
+            FontMetrics { id: wordWidth; font.family: NihilStyle.grotesk; font.pixelSize: NihilStyle.textSmall }
         }
     }
 }

@@ -47,8 +47,8 @@ NPopup {
             DotText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.page.length > 0 ? (root.pages.find(p => p.id === root.page)?.label ?? "") : "NIHIL"
-                dot: NihilStyle.s(4)
-                spacing: NihilStyle.s(1.5)
+                dot: NihilStyle.s(4.2)
+                spacing: NihilStyle.s(2.4)
                 fitWidth: root.w - NihilStyle.s(20)
             }
             DotText {
@@ -57,8 +57,8 @@ NPopup {
                 visible: root.page.length === 0
                 text: root.dynamic ? "DYNAMIC" : "SIGNAL"
                 color: NihilStyle.accent
-                dot: NihilStyle.s(3)
-                spacing: NihilStyle.s(1)
+                dot: NihilStyle.s(2.8)
+                spacing: NihilStyle.s(1.7)
                 MouseArea {
                     anchors.fill: parent
                     anchors.margins: -NihilStyle.s(6)

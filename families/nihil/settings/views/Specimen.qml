@@ -79,7 +79,6 @@ ClippingRectangle {
             height: NihilStyle.s(46)
             NText {
                 anchors.centerIn: parent
-                serif: true
                 text: Translation.tr("Search")
                 font.pixelSize: NihilStyle.textLarge
                 color: NihilStyle.inkSoft

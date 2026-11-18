@@ -94,7 +94,7 @@ MouseArea {
         }
         NText {
             anchors.horizontalCenter: parent.horizontalCenter
-            serif: true
+            dots: true
             text: DateTime.date
             font.pixelSize: NihilStyle.s(28)
             color: NihilStyle.ink
@@ -141,7 +141,7 @@ MouseArea {
             NText {
                 anchors.centerIn: parent
                 visible: root.context.currentText.length === 0
-                mono: true
+                figures: true
                 text: (root.context.showFailure ? Translation.tr("Try again") : Translation.tr("Password")).toUpperCase()
                 color: root.context.showFailure ? NihilStyle.accent : NihilStyle.inkSoft
             }
@@ -193,7 +193,7 @@ MouseArea {
             }
             NText {
                 anchors.verticalCenter: parent.verticalCenter
-                mono: true
+                figures: true
                 text: Math.round(Battery.percentage * 100) + "%"
             }
         }

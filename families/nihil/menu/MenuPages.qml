@@ -96,7 +96,7 @@ Column {
             width: root.w
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
-            mono: true
+            figures: true
             text: Translation.tr("NiHiL %1").arg(Plugins.manifests?.nihil?.version ?? "")
             font.pixelSize: NihilStyle.textBody
         }
@@ -104,7 +104,6 @@ Column {
             width: root.w
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
-            serif: true
             text: Translation.tr("Flat pieces, round keys, one signal colour, the time in dots. A family of iNiR.")
             color: NihilStyle.inkSoft
             elide: Text.ElideNone
