@@ -14,6 +14,8 @@ Item {
     property var entry: ({ title: "", rows: [] })
     // The page's own head is bigger than a group's.
     property real size: PrismTheme.dp(16)
+    // The line under the name may run past the name's own width (a folder's tab holds the name; the line sits on the body).
+    property real lineWidth: root.width
 
     readonly property string title: String(root.entry?.title ?? "")
     readonly property var rows: Array.from(root.entry?.rows ?? [])
@@ -51,7 +53,7 @@ Item {
         }
         PrismText {
             visible: text.length > 0
-            width: parent.width
+            width: root.lineWidth
             text: root.line
             color: PrismTheme.ink2
             font.pixelSize: PrismTheme.small

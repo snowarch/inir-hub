@@ -82,7 +82,8 @@ Item {
         if (root.kind === "choice" && root.choices.length > 1 && root.choices.every(choice => choice.palette)) return "palettes"
         if (root.kind === "choice" && root.spec.previewFont && root.faces.length > 1) return "typefaces"
         if (root.kind === "choice" && root.manySwatches) return "swatches"
-        if (root.kind === "choice" && root.open && !root.swatched) return "chips"
+        // A group's own choice under a head that says its name: its choices laid out, one press each, not a lone pill.
+        if (root.kind === "choice" && !root.swatched && (root.open || root.headless)) return "chips"
         if (root.kind === "list" && root.spec.view) return "view"
         if (["icon", "curve", "niriMotion", "widgets", "themes"].includes(root.kind)) return root.kind
         return ""
@@ -101,6 +102,7 @@ Item {
         // A face's whole installed list stays one press away at the end; a pairing is only its cards.
         if (root.below === "typefaces") return root.spec.installedFonts ? "choice" : "now"
         if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
+        if (root.kind === "choice" && root.headless && root.below === "chips") return ""
         if (root.kind === "choice" && root.choices.length > 0) return "choice"
         if (root.kind === "choice" || root.kind === "list" || root.listed) return "now"
         return ""
@@ -121,7 +123,8 @@ Item {
         radius: PrismTheme.dp(14)
         color: root.flash ? Qt.alpha(PrismTheme.accent, 0.16) : PrismTheme.fill // iris-literal: the found row's flash
         // A view drawn under its name (the keyboard) is the thing itself: a plate over the name alone read as a stray bar.
-        opacity: root.flash || (root.hovered && root.below !== "view") ? 1 : 0
+        // A group's own control under its head is the thing itself too: no plate over it.
+        opacity: root.flash || (root.hovered && root.below !== "view" && !root.headless) ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(root.flash ? 120 : root.hovered ? 140 : 420); easing.type: Easing.OutCubic } }
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(420); easing.type: Easing.OutCubic } }
@@ -139,16 +142,6 @@ Item {
             : line.flat
         opacity: root.locked ? 0.45 : 1
 
-        // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
-        Rectangle {
-            visible: root.changed && !root.headless
-            x: -PrismTheme.dp(16)
-            width: PrismTheme.dp(3)
-            height: PrismTheme.dp(16)
-            radius: width / 2
-            y: name.y + PrismTheme.dp(2)
-            color: PrismTheme.accent
-        }
         MouseArea {
             id: placeArea
             visible: root.showPage
@@ -166,12 +159,14 @@ Item {
             id: name
             visible: !root.headless
             anchors.left: parent.left
-            anchors.right: root.tall || root.compact ? tail.left : root.aboutShown ? about.left : control.left
-            anchors.rightMargin: root.tall ? PrismTheme.dp(4) : PrismTheme.dp(16)
+            anchors.right: root.tall ? parent.right : root.aboutShown ? about.left : control.left
+            anchors.rightMargin: root.tall ? 0 : PrismTheme.dp(16)
             y: root.tall ? PrismTheme.dp(12) : Math.round((parent.height - height) / 2)
             spacing: PrismTheme.dp(2)
             PrismText {
-                width: parent.width
+                id: label
+                // Room after the name for the pin and the way back, so they never stand on the control.
+                width: parent.width - tail.room
                 text: Translation.tr(root.row.label)
                 font.pixelSize: PrismTheme.row
                 font.weight: Font.DemiBold
@@ -249,10 +244,10 @@ Item {
         Item {
             id: control
             // Stacked: under the name, as wide as the row.
-            // In a folder the control stands flush at the line's end (the study) and the pin waits beside it.
-            x: root.tall ? 0 : parent.width - (root.compact ? 0 : tail.width + PrismTheme.dp(8)) - width
+            // The control stands flush at the line's end (B · Carpeta); the pin waits after the name.
+            x: root.tall ? 0 : parent.width - width
             y: root.headless ? PrismTheme.dp(6) : root.tall ? name.y + name.height + PrismTheme.dp(10) : 0
-            width: root.headless ? parent.width - tail.width - PrismTheme.dp(8) : root.tall ? parent.width : root.compact ? Math.max(PrismTheme.dp(40), kind.item ? kind.item.implicitWidth : 0) : root.controlWidth
+            width: root.headless || root.tall ? parent.width : root.compact ? Math.max(PrismTheme.dp(40), kind.item ? kind.item.implicitWidth : 0) : root.controlWidth
             height: root.tall ? (kind.item ? kind.item.height : 0) : line.flat
             enabled: !root.locked
             Loader {
@@ -266,17 +261,17 @@ Item {
             }
         }
 
-        // Pin, and the way back to the factory value when the row has left it.
+        // Pin, and the way back to the factory value when the row has left it: right after the name, on its first line.
         Row {
             id: tail
-            anchors.right: root.compact && !root.tall ? control.left : parent.right
-            anchors.rightMargin: root.compact && !root.tall ? PrismTheme.dp(6) : 0
-            y: root.headless ? Math.max(0, control.y + Math.round((Math.min(control.height, PrismTheme.dp(32)) - PrismTheme.dp(28)) / 2)) : root.tall ? PrismTheme.dp(8) : Math.round((parent.height - height) / 2)
+            readonly property real room: (pin.visible ? PrismTheme.dp(24) : 0) + (back.visible ? PrismTheme.dp(24) : 0) + PrismTheme.dp(4)
+            visible: !root.headless
+            x: name.x + Math.min(label.implicitWidth, label.width) + PrismTheme.dp(2)
+            y: name.y + Math.round((Math.min(label.height, PrismTheme.dp(20)) - PrismTheme.dp(24)) / 2)
             spacing: 0
-            width: root.compact ? Math.max(PrismTheme.dp(28), implicitWidth) : PrismTheme.dp(56)
-            layoutDirection: Qt.RightToLeft
             PrismGlyph {
-                width: PrismTheme.dp(28); height: PrismTheme.dp(28)
+                id: pin
+                width: PrismTheme.dp(24); height: PrismTheme.dp(24)
                 text: "keep"
                 visible: PrismModel.pinnable(root.row)
                 readonly property bool pinned: PrismModel.pinned(root.row)
@@ -287,7 +282,8 @@ Item {
                 MouseArea { id: pinArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: PrismModel.togglePin(root.row) }
             }
             PrismGlyph {
-                width: PrismTheme.dp(28); height: PrismTheme.dp(28)
+                id: back
+                width: PrismTheme.dp(24); height: PrismTheme.dp(24)
                 text: "restart_alt"
                 iconSize: PrismTheme.dp(16)
                 visible: root.restorable && !root.locked
@@ -370,7 +366,9 @@ Item {
     Component {
         id: choiceKind
         PrismChoice {
-            width: root.tall ? root.controlWidth : implicitWidth
+            id: choice
+            // Segments may run the row's width; a folded pill keeps its own.
+            width: root.tall && !choice.folded ? root.controlWidth : implicitWidth
             choices: root.choices
             current: root.value
             most: root.spec.most ?? 4
@@ -410,18 +408,24 @@ Item {
     // Where a bubble rests: the choice in words, then the screen drawn small with its places.
     Component {
         id: zoneKind
-        Row {
+        Grid {
             id: zone
             readonly property string base: String(root.spec.path).replace(/\.place$/, "")
-            spacing: PrismTheme.dp(12)
+            readonly property string said: Translation.tr(String(root.choices.find(choice => choice.value === root.value)?.label ?? ""))
+            // The group's own place: the screen leads, as wide as the row lets it, its place said under it.
+            columns: root.headless ? 1 : 2
+            columnSpacing: PrismTheme.dp(12)
+            rowSpacing: PrismTheme.dp(10)
+            verticalItemAlignment: Grid.AlignVCenter
             PrismText {
-                anchors.verticalCenter: parent.verticalCenter
-                text: Translation.tr(String(root.choices.find(choice => choice.value === root.value)?.label ?? ""))
+                visible: !root.headless
+                text: zone.said
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
             }
-            IrisPlacePicker {
-                anchors.verticalCenter: parent.verticalCenter
+            PrismZone {
+                width: root.headless ? Math.min(control.width, PrismTheme.dp(460)) : implicitWidth
+                big: root.headless
                 place: String(root.value ?? "")
                 fx: { const _ = PrismModel.revision; return Number(Config.getNestedValue(zone.base + ".fx", 0.5)) }
                 fy: { const _ = PrismModel.revision; return Number(Config.getNestedValue(zone.base + ".fy", 0.5)) }
@@ -435,6 +439,12 @@ Item {
                     updates[root.spec.path] = "free"
                     Config.setNestedValues(updates)
                 }
+            }
+            PrismText {
+                visible: root.headless
+                text: zone.said
+                font.pixelSize: PrismTheme.dp(15)
+                font.weight: Font.DemiBold
             }
         }
     }

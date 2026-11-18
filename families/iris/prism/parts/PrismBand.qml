@@ -19,8 +19,8 @@ Item {
         seed: 0.61 + PrismModel.index(root.pageId) * 0.137
         centre: Qt.point(0.5, 0.5)
         thickness: 0.9
-        strength: PrismTheme.light ? 0.6 : 0.72
-        mute: 0.5
+        strength: PrismTheme.light ? 0.75 : 0.95
+        mute: 0.12
         radius: PrismTheme.dp(26)
     }
     Row {
@@ -32,11 +32,11 @@ Item {
         PrismText {
             anchors.verticalCenter: parent.verticalCenter
             leftPadding: PrismTheme.dp(8)
-            mono: true
-            text: [String(root.page?.group ?? ""), String(root.page?.name ?? "")].filter(part => part.length > 0).map(part => Translation.tr(part)).join("  /  ").toUpperCase()
+            visible: text.length > 0
+            text: Translation.tr(String(root.page?.group ?? ""))
             color: PrismTheme.light ? PrismTheme.ink2 : PrismTheme.spotInk2
-            font.pixelSize: PrismTheme.dp(9.5)
-            font.letterSpacing: PrismTheme.dp(9.5) * 0.1
+            font.pixelSize: PrismTheme.small
+            font.weight: Font.Medium
         }
     }
     PrismText {
@@ -44,8 +44,9 @@ Item {
         anchors.rightMargin: PrismTheme.dp(28)
         anchors.verticalCenter: parent.verticalCenter
         text: Translation.tr(String(root.page?.name ?? ""))
-        font.pixelSize: PrismTheme.display
+        color: PrismTheme.light ? PrismTheme.ink : PrismTheme.paper
+        font.pixelSize: PrismTheme.dp(30)
         font.weight: Font.Bold
-        font.letterSpacing: -PrismTheme.display * 0.035
+        font.letterSpacing: -PrismTheme.dp(30) * 0.03
     }
 }

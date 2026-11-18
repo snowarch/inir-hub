@@ -1,8 +1,14 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.107",
+    "version": "2.33.108",
     "changes": {
-      "2.33.107": ["Prism Settings: Home you arrange yourself, a page made for each of Colour, Type and Lock, palettes and typefaces shown as themselves, plain sentence-case labels"],
+      "2.33.108": [
+          "Prism Settings: Home shows your desktop, the poster art reads vivid and folders match the B · Carpeta study",
+          "Group descriptions are never cut, a group's own choice shows all its options, menus no longer stretch",
+          "Bubbles leads with a place picker drawn in Prism, Anime and other off groups show their rows dimmed",
+          "Short groups share their row, Shortcuts and About marks drawn in ink, callouts stay inside the drawing"
+      ],
+      "2.33.107": ["Prism Settings: Home you arrange, a page made for Colour, Type and Lock, palettes and typefaces as themselves"],
       "2.33.106": ["Settings lists every installed family (NiHiL, one from the Hub) next to the three built in"],
       "2.33.105": ["Prism Settings pages lose the small line drawing at their head"],
       "2.33.104": ["Prism Settings in two looks (General › Settings window › Look): Folders, or Board with category keys, page tabs and group modules", "Keyboard shortcuts on Umbriel name Umbriel's config when they cannot read it"],

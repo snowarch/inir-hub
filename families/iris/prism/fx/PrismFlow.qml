@@ -37,7 +37,9 @@ ShaderEffect {
     readonly property vector4d frost: Qt.vector4d(root.frostColour.r, root.frostColour.g, root.frostColour.b, root.frostColour.a)
 
     property int turn: 0
-    readonly property var colours: PrismTheme.paletteAt(root.tint, root.turn)
+    // Three colours of its own instead of the desktop's (Colour's head draws each role in its own light).
+    property var palette: []
+    readonly property var colours: root.palette.length === 3 ? root.palette : PrismTheme.paletteAt(root.tint, root.turn)
     readonly property color ground: root.dark ? PrismTheme.night : PrismTheme.paperLight
 
     readonly property vector2d size: Qt.vector2d(width, height)

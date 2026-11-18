@@ -13,7 +13,7 @@ import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 import qs.modules.iris.prism.parts
 
-// Prism's body: sidebar, the page in the middle (heading, hero, sections) and the rail. Lays itself out from the room
+// Prism's body: the sidebar and the page beside it (its card, its folders). Lays itself out from the room
 // it is given; the window around it only places it.
 Item {
     id: root
@@ -217,26 +217,9 @@ Item {
         }
     }
     readonly property real sideWidth: PrismTheme.dp(232)
-    // The side column (profile, Changes, Now Playing). Left to itself it stands on Home, which is about the person,
-    // and wherever the page keeps a wide measure beside it; every other page gets its room. The control at the page's
-    // top is the person's say, remembered: a press that only repeats what the column does by itself gives it back.
-    readonly property string railMode: String(Config.options?.iris?.appearance?.settingsRail ?? "auto")
-    readonly property bool railFits: root.width >= PrismTheme.dp(1080)
-    readonly property bool railAuto: PrismState.page === "general" || root.width - root.sideWidth - PrismTheme.dp(300) >= PrismTheme.dp(900)
-    readonly property bool railOpen: root.railFits && (root.railMode === "open" || root.railMode !== "closed" && root.railAuto)
-    // By hand the column slides; a page that opens already has it where it belongs.
-    property bool railByHand: false
-    property real railShown: root.railOpen ? 1 : 0
-    Behavior on railShown { enabled: root.railByHand; NumberAnimation { duration: PrismTheme.ms(240); easing.type: Easing.OutCubic } }
-    // The page takes the column's room once the column has left, and gives it before the column comes: one layout either way.
-    readonly property real railWidth: root.railOpen || root.railShown > 0 ? PrismTheme.dp(300) : 0
-    Timer { id: railRest; interval: 400; onTriggered: root.railByHand = false }
-    function toggleRail(): void {
-        const next = !root.railOpen
-        root.railByHand = true
-        railRest.restart()
-        Config.setNestedValue("iris.appearance.settingsRail", next === root.railAuto ? "auto" : next ? "open" : "closed")
-    }
+    // No side column (his 11-17: "la forma de navegar a la derecha es tan chota"): the page takes the room, the
+    // sidebar holds the way round, Home holds what changed.
+    readonly property real railWidth: 0
 
     function focusSearch(): void { sidebar.search.input.forceActiveFocus() }
     // A place a search found: its page, and its group when it names one.
@@ -352,15 +335,11 @@ Item {
             height: parent.height
             corner: body.radius
             windowed: root.windowed
-            // Every group is in sight as a folder: the sidebar lists pages only (B · Carpeta).
-            groups: []
-            currentGroup: root.bandOf(root.currentGroup)
             onCloseRequested: root.closeRequested()
             onMinimizeRequested: root.minimizeRequested()
             onGrowRequested: root.growRequested()
             onSwitchHost: root.switchHost()
             onReach: row => root.reach(row)
-            onPickGroup: title => root.showGroup(root.firstOf(title))
             onSearchEntered: root.takeFirstHit()
         }
 
@@ -404,22 +383,22 @@ Item {
                     // Home's card is the person's own: a greeting, the everyday tiles and the desktop drawn; its groups
                     // all stand on the shelf.
                     lead: root.shelved ? null : root.shownSections[0] ?? null
-                    tabTitle: root.home ? root.greeting : ""
-                    tabLine: root.home ? Translation.locale.toString(DateTime.clock.date, "dddd d MMMM") + (Weather.enabled && Weather.hasData ? "  ·  " + String(Weather.data?.temp ?? "") : "") : ""
+                    // Home's tab greets, a page drawn to its measure names what its drawing shows; the poster names the
+                    // page, or on Home the day.
+                    tabTitle: root.home ? root.greeting : Translation.tr(({ colour: "Your colours", typeIcons: "Your type", lock: "Your lock screen" })[String(root.page.pageId)] ?? "")
+                    tabLine: root.home ? (Weather.enabled && Weather.hasData ? String(Weather.data?.temp ?? "") + "  ·  " + Translation.tr("Settings, made yours") : Translation.tr("Settings, made yours"))
+                        : Translation.tr(({ colour: "The three colours iRiS wears, and where they come from", typeIcons: "The faces iRiS reads in, their size and weight" })[String(root.page.pageId)] ?? "")
+                    posterTitle: root.home ? Translation.locale.toString(DateTime.clock.date, "dddd d") : ""
+                    posterLine: root.home ? Translation.locale.toString(DateTime.clock.date, "MMMM") : ""
                     side: root.home && root.homeBlocks[0] === "everyday" ? homeSide : null
                     hero: root.heroNow
                     actions: root.pageActions
                     artKind: root.home ? String(root.homeLook.settingsHomeArt ?? "flow") : "flow"
                     onAction: id => root.act(id)
-                    groups: root.sections
                     flashPath: root.flashPath
                     restorable: PrismModel.restorableOf(root.page.pageId)
-                    railFits: root.railFits
-                    railOpen: root.railOpen
                     extra: root.page.pageId === "general" ? homeExtra : root.page.pageId === "wallpaper" ? wallpaperExtra : null
-                    onPickGroup: title => root.showGroup(title)
                     onRestore: PrismModel.restore(root.page.pageId)
-                    onToggleRail: root.toggleRail()
                 }
                 Item { visible: shelf.visible; width: 1; height: PrismTheme.dp(14) }
                 // Every other group, a folder each.
@@ -429,7 +408,6 @@ Item {
                     visible: leaf.visible && !root.home && shelf.groups.length > 0
                     width: content.width
                     groups: root.shelved ? root.shownSections : root.shownSections.slice(1)
-                    first: root.shelved ? 1 : 2
                     tint: root.page.tint
                     flashPath: root.flashPath
                 }
@@ -512,6 +490,19 @@ Item {
                 anchors.right: parent.right
                 active: root.hosted
                 source: root.hosted ? root.page.view : ""
+                // Prism's marks are ink alone (only the chosen wears colour): the page's own tinted marks give way.
+                onLoaded: {
+                    if (item && item.markDelegate !== undefined) item.markDelegate = hostedMark
+                    if (item && item.plainMarks !== undefined) item.plainMarks = true
+                }
+            }
+            Component {
+                id: hostedMark
+                PrismGlyph {
+                    text: parent ? String(parent.glyph ?? "") : ""
+                    iconSize: PrismTheme.dp(18)
+                    color: PrismTheme.ink2
+                }
             }
         }
 
@@ -529,36 +520,6 @@ Item {
             // Its ends meet the body's round corners unless the rail stands there.
             topRightRadius: root.railWidth > 0 ? 0 : body.radius
             bottomRightRadius: root.railWidth > 0 ? 0 : body.radius
-        }
-
-        PrismRail {
-            id: rail
-            x: Math.round(body.width - rail.width * root.railShown)
-            width: PrismTheme.dp(300)
-            visible: root.railShown > 0
-            opacity: root.railShown
-            height: parent.height
-            active: root.active && rail.visible
-            pageId: root.hosted || PrismState.searching || root.changesView ? "" : String(root.page.pageId ?? "")
-            pageName: String(root.page.name ?? "")
-            groups: root.groups
-            current: root.bandOf(root.currentGroup)
-            onPickGroup: title => root.showGroup(title)
-            onSeeAllChanges: PrismState.go("changes")
-            onReach: row => root.reach(row)
-        }
-
-        // The side column's own key, at the page's top corner where the column begins: it folds it away and brings it
-        // back, and stays in reach however far the page is read.
-        PrismRound {
-            visible: root.railFits && !leaf.visible
-            x: Math.round(body.width - root.railWidth - width - PrismTheme.dp(32))
-            y: PrismTheme.dp(18)
-            z: 5
-            glyph: root.railOpen ? "right_panel_close" : "right_panel_open"
-            Accessible.role: Accessible.Button
-            Accessible.name: root.railOpen ? Translation.tr("Hide the side column") : Translation.tr("Show the side column")
-            onClicked: root.toggleRail()
         }
 
         IrisSettingsIsland {
@@ -600,7 +561,7 @@ Item {
     Component { id: homeEveryday; PrismHome { editing: root.homeArranging; onReach: row => root.reach(row) } }
     Component { id: homeDeck; PrismHomeDeck {} }
     Component { id: homeIndex; PrismIndex {} }
-    Component { id: homeGroups; PrismShelf { groups: root.shownSections; first: 1; tint: root.page.tint; flashPath: root.flashPath } }
+    Component { id: homeGroups; PrismShelf { groups: root.shownSections; tint: root.page.tint; flashPath: root.flashPath } }
     // The pages drawn to their measure.
     Component { id: colourHero; PrismColourHero { onPickGroup: title => root.showGroup(title) } }
     Component { id: typeHero; PrismTypeHero { onPickGroup: title => root.showGroup(title) } }

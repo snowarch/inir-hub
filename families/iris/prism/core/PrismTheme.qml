@@ -36,7 +36,7 @@ Singleton {
     // Over glass every layer is the same step of the solid scheme made smoke: dark, a black sheet that deepens what is
     // behind it (folders-glass, the dark folder), never white over the blur (his 11-16: "el blur es blanco"); light,
     // a white frost. No layer has an outline: its fill alone sets it off (his 11-16: "bordes slop").
-    readonly property color canvas: root.light ? "#f5f5f7" : "#0f0f11" // iris-literal: Prism's middle column, its own neutral
+    readonly property color canvas: root.light ? "#f2f2f5" : "#0b0b0d" // iris-literal: Prism's ground, B · Carpeta's black
     readonly property color rail: root.light ? "#ebebee" : "#161618" // iris-literal: Prism's side columns
     readonly property color railGlass: root.glass ? (root.light ? Qt.rgba(1, 1, 1, 0.34) : Qt.rgba(0.086, 0.086, 0.094, 0.5)) // iris-literal: the side column, smoke over the page
         : root.light ? "#c7ebebee" : "#b3161618" // iris-literal: the side column as glass, the panel's air showing through
@@ -44,9 +44,16 @@ Singleton {
         : root.light ? "#ffffff" : "#1e1e21" // iris-literal: circles and fields standing on a rail
     readonly property color sunk: root.glass ? (root.light ? Qt.rgba(0, 0, 0, 0.08) : Qt.rgba(0, 0, 0, 0.32)) // iris-literal: a track cut into frosted glass
         : root.light ? "#e2e2e6" : "#050506" // iris-literal: a switch's track, darker than the page
+    // A control's track (a switch off, the segments' ground, a level's groove): a step under the card.
+    readonly property color track: root.glass ? (root.light ? Qt.rgba(0, 0, 0, 0.09) : Qt.rgba(0, 0, 0, 0.42)) // iris-literal: a track under smoked glass
+        : root.light ? "#e4e4e8" : "#0b0b0d" // iris-literal: a track, a step under the card
+    readonly property color knobOff: root.light ? "#ffffff" : "#5b5b61" // iris-literal: a switch's knob at rest, grey on the dark track
     // A group's card (Raell Tech's page, his 11-14): a step above the middle column, under the fields' own fill.
-    readonly property color card: root.glass ? (root.light ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(0.07, 0.07, 0.08, 0.6)) // iris-literal: a group's sheet, black smoke over the panel's glass
-        : root.light ? "#ffffff" : "#18181b" // iris-literal: Prism's group card, between canvas and raised
+    readonly property color card: root.glass ? (root.light ? Qt.rgba(1, 1, 1, 0.62) : Qt.rgba(0.15, 0.15, 0.165, 0.6)) // iris-literal: the page's sheet, smoke a step over the panel's glass
+        : root.light ? "#ffffff" : "#1b1b1e" // iris-literal: the page's sheet (B · Carpeta)
+    // A folder on the shelf: under the page's sheet, over the ground (B · Carpeta: the drawer sits lower than the page).
+    readonly property color folder: root.glass ? (root.light ? Qt.rgba(1, 1, 1, 0.42) : Qt.rgba(0.09, 0.09, 0.1, 0.62)) // iris-literal: a folder, smoke over the panel's glass
+        : root.light ? "#fafafc" : "#131316" // iris-literal: a folder (B · Carpeta)
     // The bar that rows pass under (the strip): denser glass, so what scrolls beneath it never reads through.
     readonly property color bar: root.glass ? ColorUtils.applyAlpha(root.canvas, Math.min(0.94, root.veil + 0.3)) : root.raised
     readonly property color line: root.light ? Qt.rgba(0, 0, 0, 0.08) : Qt.rgba(1, 1, 1, 0.065) // iris-literal: Prism's own fills and scrims, scheme-aware above
@@ -123,7 +130,9 @@ Singleton {
         const order = base.slice(k).concat(base.slice(0, k))
         return order.map((index, place) => {
             const c = root.artSources[index]
-            return IrisStyle.oklch(root.light ? 0.62 : 0.6 + (place === 2 ? 0.06 : 0), Math.min(root.chromaOf(c), 0.1), IrisStyle.oklchHue(c))
+            // The three keep their own hue and colour (his 11-18: the head read grey): one deep, one bright, one light.
+            const lightness = root.light ? [0.64, 0.7, 0.8][place] : [0.56, 0.68, 0.76][place]
+            return IrisStyle.oklch(lightness, Math.min(root.chromaOf(c) * 1.15, 0.17), IrisStyle.oklchHue(c))
         })
     }
     // The graphs' one mark (Technical Minimalism, his 11-17): the person's accent, the line that names what a page is about.

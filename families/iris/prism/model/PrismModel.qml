@@ -162,6 +162,8 @@ Singleton {
             }
             // Prism sets Scale on one segmented line, as its mocks draw it; Classic keeps its picture tiles.
             if (String(spec.view ?? "").endsWith("IrisDisplayScale.qml")) spec = Object.assign({}, spec, { kind: "choice", comp: "display", key: "scale", view: undefined, bare: false, most: 6 })
+            // One screen needs no picker: the page's drawing and the name under it already say which one it is.
+            if (String(spec.view ?? "").endsWith("IrisDisplayScreens.qml")) { const shown = spec.showIf; spec = Object.assign({}, spec, { showIf: () => CompositorConfig.outputs.length > 1 && (!shown || shown()) }) }
             const path = String(spec.path ?? spec.modelKey)
             // What the compositor's file needs before anything here applies heads every page of its area.
             for (const chapter of spec.notice ? (root.chapters[String(spec.section)] ?? []) : []) {

@@ -3,8 +3,8 @@ import qs.services
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 
-// One sidebar line: glyph and name (B · Carpeta, his 11-17 pick). The open page stands on a plate tinted with the
-// accent, its mark in the accent (his 11-18: the accent leads where you are); a hovered line takes a quiet plate.
+// One sidebar line: glyph and name (B · Carpeta, his 11-18 "tal cual", "menos colorcitos"). The open page stands on
+// a raised plate of Prism's own grey, in full ink; a hovered line takes a quieter one. No accent in the list.
 Item {
     id: root
     property string glyph: "circle"
@@ -16,17 +16,17 @@ Item {
     signal clicked()
     signal trailingClicked()
 
-    implicitHeight: PrismTheme.dp(34)
+    implicitHeight: PrismTheme.dp(32)
     Behavior on implicitHeight { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
 
-    // The open page: a plate in the accent's tint, no edge bar.
+    // The open page: a raised plate, no edge bar.
     Rectangle {
         visible: root.current
         x: -PrismTheme.dp(8)
         width: root.edge - x - PrismTheme.dp(10)
         height: parent.height
         radius: PrismTheme.dp(11)
-        color: PrismTheme.accentPlate
+        color: PrismTheme.keyQuiet
     }
     Rectangle {
         visible: !root.current
@@ -45,9 +45,8 @@ Item {
             x: PrismTheme.dp(2)
             anchors.verticalCenter: parent.verticalCenter
             text: root.glyph
-            filled: root.current
-            iconSize: PrismTheme.dp(18)
-            color: root.current ? PrismTheme.accentInk : area.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+            iconSize: PrismTheme.dp(17)
+            color: root.current || area.containsMouse ? PrismTheme.ink : PrismTheme.ink2
         }
         PrismText {
             anchors.left: icon.right

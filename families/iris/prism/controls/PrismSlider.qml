@@ -33,7 +33,7 @@ Item {
 
     readonly property real share: root.to > root.from ? Math.max(0, Math.min(1, (root.live - root.from) / (root.to - root.from))) : 0
     implicitWidth: PrismTheme.dp(220)
-    implicitHeight: PrismTheme.dp(32)
+    implicitHeight: PrismTheme.dp(28)
 
     function snap(v: real): real {
         const stepped = Math.round((v - root.from) / root.stepSize) * root.stepSize + root.from
@@ -47,16 +47,16 @@ Item {
         return root.snap(raw)
     }
 
-    // The fader (`.claude/ref/language`: the tactile sliders): a groove cut into the card with its scale printed under
-    // it, the person's accent filling it up to a white cap with a grip, the figure printed at the end. The factory value's
-    // tick stands taller, so it can be found again by eye as well as by the drag that holds there.
-    readonly property real capWidth: PrismTheme.dp(28)
+    // The level (B · Carpeta): a thin dark track, the person's accent filling it up to a round white knob, the
+    // figure at its end. The factory value is a small dot under the track, found again by eye and by the drag that
+    // holds there.
+    readonly property real capWidth: PrismTheme.dp(18)
     readonly property real figureRoom: root.label.length > 0 ? Math.max(PrismTheme.dp(46), figure.implicitWidth) + PrismTheme.dp(12) : 0
-    // A glyph, when given (the home deck's volume), leads before the groove.
+    // A glyph, when given (the home deck's volume), leads before the track.
     readonly property real lead: root.glyph.length > 0 ? PrismTheme.dp(26) : 0
     readonly property real grooveWidth: Math.max(root.capWidth * 2, root.width - root.figureRoom - root.lead)
     readonly property real travel: root.grooveWidth - root.capWidth
-    readonly property real middle: PrismTheme.dp(12)
+    readonly property real middle: root.height / 2
 
     PrismGlyph {
         visible: root.glyph.length > 0
@@ -66,63 +66,44 @@ Item {
         iconSize: PrismTheme.dp(16)
         color: PrismTheme.ink2
     }
-    PrismWell {
+    Rectangle {
         id: track
         x: root.lead
         y: root.middle - height / 2
         width: root.grooveWidth
-        height: PrismTheme.dp(8)
-        hovered: area.containsMouse || root.held
+        height: PrismTheme.dp(6)
+        radius: height / 2
+        color: area.containsMouse || root.held ? PrismTheme.keyHover(PrismTheme.track) : PrismTheme.track
     }
-    // The groove fills with the person's accent up to the cap: a level is a chosen state, never the art's spectrum.
     Rectangle {
-        x: track.x + 1
-        y: track.y + 1
-        width: Math.max(track.height - 2, cap.x - track.x + cap.width / 2 - 1)
-        height: track.height - 2
+        x: track.x
+        y: track.y
+        width: Math.max(track.height, cap.x - track.x + cap.width / 2)
+        height: track.height
         radius: height / 2
         color: PrismTheme.accent
-    }
-    Repeater {
-        model: 11
-        delegate: Rectangle {
-            required property int index
-            x: Math.round(root.lead + root.capWidth / 2 + root.travel * index / 10)
-            y: track.y + track.height + PrismTheme.dp(5)
-            width: 1
-            height: index % 5 === 0 ? PrismTheme.dp(5) : PrismTheme.dp(3)
-            color: PrismTheme.ink3
-            opacity: 0.7
-        }
     }
     Rectangle {
         readonly property real share: root.to > root.from ? (root.home - root.from) / (root.to - root.from) : 0
         visible: Number.isFinite(root.home) && share >= 0 && share <= 1
-        x: Math.round(root.lead + root.capWidth / 2 + root.travel * share)
-        y: track.y + track.height + PrismTheme.dp(4)
-        width: 1
-        height: PrismTheme.dp(7)
-        color: PrismTheme.ink
+        x: Math.round(root.lead + root.capWidth / 2 + root.travel * share - width / 2)
+        y: track.y + track.height + PrismTheme.dp(5)
+        width: PrismTheme.dp(3)
+        height: width
+        radius: width / 2
+        color: PrismTheme.ink3
     }
-    PrismKey {
+    Rectangle {
         id: cap
         x: root.lead + root.travel * root.share
-        y: root.middle - height / 2 - PrismTheme.dp(1)
+        y: root.middle - height / 2
         width: root.capWidth
-        height: PrismTheme.dp(20)
-        radius: PrismTheme.dp(7)
-        face: PrismTheme.paper
-        hovered: area.containsMouse
-        down: root.held
+        height: width
+        radius: width / 2
+        color: PrismTheme.paper
+        scale: root.held ? 1.12 : area.containsMouse ? 1.06 : 1
         Behavior on x { enabled: !root.held; NumberAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
-        Row {
-            anchors.centerIn: parent
-            spacing: PrismTheme.dp(3)
-            Repeater {
-                model: 2
-                delegate: Rectangle { width: 1; height: PrismTheme.dp(8); color: PrismTheme.night; opacity: 0.32 }
-            }
-        }
+        Behavior on scale { NumberAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
     }
     PrismText {
         id: figure

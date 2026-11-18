@@ -3,66 +3,40 @@ import Quickshell
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 
-// The page's other groups, each a folder, side by side under the page card (the B · Carpeta study): three to a row
-// where the page is wide, two where it is not, never an empty place.
+// The page's other groups under the page card, as an archive's drawer (B · Carpeta): short groups stand in columns,
+// each going to the column that ends highest, so no card is stretched to a neighbour's height and no place stays
+// empty; a gallery (faces, palettes, pieces) runs across every column. Each group takes the shape of what it holds
+// (PrismFolder), its art one of the desktop's colours.
 Item {
     id: root
     // Every group but the page card's: { title, rows }.
     property var groups: []
     property string tint: "grey"
     property string flashPath: ""
-    // The first folder's number: the page card holds group 01, except on Home.
-    property int first: 2
 
     readonly property real gap: PrismTheme.dp(14)
-    // At most three short groups to a row where the page is wide, two where it is not.
     readonly property int columns: root.width >= PrismTheme.dp(900) ? 3 : root.width >= PrismTheme.dp(520) ? 2 : 1
-    // A group whose rows lay things out under their line (lists, pieces, designs, a long group) takes a row of its own;
-    // short ones share a row, in halves or thirds, never leaving an empty place.
+    readonly property real cell: Math.floor((root.width - root.gap * (root.columns - 1)) / root.columns)
+
+    function laysOut(row: var): bool {
+        const kind = String(row?.kind ?? ""), spec = row?.spec ?? {}
+        return kind === "pieces" || Boolean(spec.flags) || kind === "designs" || (kind === "list" && Boolean(spec.view))
+            || ["icon", "curve", "niriMotion", "widgets", "themes"].includes(kind) || (kind === "choice" && spec.cards === "island")
+            || (kind === "choice" && Boolean(spec.previewFont))
+            || (kind === "choice" && spec.tiles === true && PrismModel.choicesOf(row).every(choice => choice.palette))
+    }
+    // A gallery, or a long group, reads across the page.
     function wide(group: var): bool {
         const rows = Array.from(group?.rows ?? [])
-        return rows.length >= 9 || rows.some(row => {
-            const kind = String(row?.kind ?? ""), spec = row?.spec ?? {}
-            return kind === "pieces" || Boolean(spec.flags) || kind === "designs" || (kind === "list" && Boolean(spec.view))
-                || ["icon", "curve", "niriMotion", "widgets", "themes"].includes(kind) || (kind === "choice" && spec.cards === "island")
-                // A gallery of faces or palettes reads across the page, not down a narrow folder.
-                || (kind === "choice" && Boolean(spec.previewFont))
-                || (kind === "choice" && spec.tiles === true && PrismModel.choicesOf(row).every(choice => choice.palette))
-        })
+        return root.columns > 1 && (rows.length >= 10 || rows.some(row => root.laysOut(row)))
     }
-    // [[index, …], …]: each row of the shelf. Short groups fill their rows in the page's order and a wide one keeps
-    // its place among them, so no short group stands alone across the page while another waits further down.
-    function linesOf(groups: var): var {
-        const out = []
-        let line = []
-        Array.from(groups ?? []).forEach((group, i) => {
-            if (root.wide(group)) { out.push([i]); return }
-            if (line.length === 0) out.push(line)
-            line.push(i)
-            if (line.length === root.columns) line = []
-        })
-        return out.filter(entry => entry.length > 0)
-    }
-    readonly property var lines: root.linesOf(root.groups)
-
-    // A folder's place across its row and its number as read, row by row (a short group pulled up keeps the count in
-    // order), found by its group's name in the groups themselves: a page's folders are made as soon as its groups
-    // arrive, before the shelf's own properties catch up, and the leaving page's folders live a moment past them. A
-    // folder at a width it never has lays out its rows (a colour pick's discs) for it; null for a folder on its way out.
-    function cellOf(title: string): var {
-        const index = root.groups.findIndex(group => String(group?.title ?? "") === title)
-        if (index < 0) return null
-        let at = 0
-        for (const line of root.linesOf(root.groups)) {
-            const c = line.indexOf(index)
-            if (c < 0) { at += line.length; continue }
-            const cell = Math.floor((root.width - root.gap * (line.length - 1)) / line.length)
-            return { x: c * (cell + root.gap), width: cell, number: at + c }
-        }
-        return null
+    // A group of a row or two that lays nothing out is a slip, not a folder.
+    function shapeOf(group: var): string {
+        const rows = Array.from(group?.rows ?? [])
+        if (root.wide(group)) return "band"
+        return rows.length <= 2 && !rows.some(row => root.laysOut(row)) ? "slip" : "folder"
     }
 
-    // A group's folder, for the page to glide to it.
     function boxOf(title: string): var {
         for (let i = 0; i < folders.count; ++i) {
             const box = folders.itemAt(i)
@@ -71,18 +45,46 @@ Item {
         return null
     }
 
-    // Row by row, every folder as tall as its row's tallest: their feet line up.
+    // Run by run: the short groups between two wide ones share the row, each to the column that ends highest; a run of
+    // fewer groups than columns splits the width among them, so no group stands narrow beside an empty place. A wide
+    // one goes under all of them.
     function place(): void {
-        let y = 0
-        for (const line of root.lines) {
-            const row = line.map(i => folders.itemAt(i)).filter(box => box !== null)
-            const tall = Math.max(0, ...row.map(box => box.implicitHeight))
-            row.forEach(box => { box.y = y; box.height = tall })
-            y += tall + root.gap
+        const boxes = []
+        for (let i = 0; i < folders.count; ++i) {
+            const box = folders.itemAt(i)
+            if (box && box.placed) boxes.push(box)
         }
-        root.implicitHeight = Math.max(0, y - root.gap)
+        let top = 0
+        let i = 0
+        while (i < boxes.length) {
+            if (boxes[i].wideBox) {
+                boxes[i].x = 0
+                boxes[i].y = top
+                top += boxes[i].implicitHeight + root.gap
+                i += 1
+                continue
+            }
+            let j = i
+            while (j < boxes.length && !boxes[j].wideBox) j += 1
+            const cols = Math.min(root.columns, j - i)
+            const cell = Math.floor((root.width - root.gap * (cols - 1)) / cols)
+            const ends = new Array(cols).fill(top)
+            for (let k = i; k < j; ++k) {
+                let c = 0
+                for (let m = 1; m < cols; ++m) if (ends[m] < ends[c] - 1) c = m
+                boxes[k].cellWidth = cell
+                boxes[k].x = c * (cell + root.gap)
+                boxes[k].y = ends[c]
+                boxes[k].column = c
+                ends[c] += boxes[k].implicitHeight + root.gap
+            }
+            top = Math.max(...ends)
+            i = j
+        }
+        root.implicitHeight = Math.max(0, top - root.gap)
     }
-    onLinesChanged: Qt.callLater(root.place)
+    onColumnsChanged: Qt.callLater(root.place)
+    onWidthChanged: Qt.callLater(root.place)
 
     Repeater {
         id: folders
@@ -92,13 +94,17 @@ Item {
             id: folder
             required property var modelData
             required property int index
+            // A folder on its way out (its group gone) keeps where it stood and leaves the placing.
+            readonly property bool placed: root.groups.some(group => String(group?.title ?? "") === folder.title)
+            readonly property bool wideBox: root.wide(folder.modelData)
+            property int column: 0
+            property real cellWidth: root.cell
             entry: modelData
-            readonly property var cell: root.cellOf(String(folder.modelData?.title ?? ""))
-            // On its way out it keeps where it stood.
-            Binding on x { when: folder.cell !== null; value: folder.cell?.x ?? 0; restoreMode: Binding.RestoreNone }
-            Binding on width { when: folder.cell !== null; value: folder.cell?.width ?? 0; restoreMode: Binding.RestoreNone }
-            Binding on number { when: folder.cell !== null; value: (folder.cell?.number ?? 0) + root.first; restoreMode: Binding.RestoreNone }
-            count: root.groups.length + root.first - 1
+            shape: root.shapeOf(folder.modelData)
+            width: folder.wideBox ? root.width : folder.cellWidth
+            height: implicitHeight
+            // Every front tab at the left, the back's at the right (the study).
+            tabLeft: true
             tint: root.tint
             turn: index + 1
             flashPath: root.flashPath

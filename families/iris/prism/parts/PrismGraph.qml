@@ -156,10 +156,13 @@ Item {
                 } else if (kind === "call") {
                     // A callout: a dot on the part, a leader to a short shelf, the part's name on it.
                     const ax = X(it[1]), ay = Y(it[2]), lx = X(it[3]), ly = Y(it[4])
-                    const right = lx >= ax
                     const text = String(it[5] ?? "")
                     ctx.font = mono(root.labelSize)
-                    const tw = ctx.measureText(text).width
+                    const tw = ctx.measureText(root.caption(text)).width
+                    // The shelf turns back where the plate ends, so a name never runs past the card's edge.
+                    let right = lx >= ax
+                    if (right && lx + tw + 14 > width) right = false
+                    else if (!right && lx - tw - 14 < 0) right = true
                     ctx.lineWidth = 1; ctx.strokeStyle = root.line; ctx.setLineDash([])
                     ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(lx, ly); ctx.lineTo(lx + (right ? 1 : -1) * (tw + 10), ly); ctx.stroke()
                     ctx.beginPath(); ctx.arc(ax, ay, 2.4, 0, Math.PI * 2); ctx.fillStyle = root.line; ctx.fill()

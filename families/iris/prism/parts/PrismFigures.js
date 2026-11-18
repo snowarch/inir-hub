@@ -31,6 +31,11 @@ function desk(lit, opts) {
     return out.map(fit)
 }
 
+// The desktop alone, no monitor round it (his 11-17: the monitor is Display's own): one quiet frame, the parts lit.
+function screen(lit, opts) {
+    return desk(lit, opts).slice(5).concat([fit(["rect", 0.12, 0.04, 0.76, 0.78, 10, "faint"])])
+}
+
 // The desk is drawn a size smaller so callouts have room round it: a point of it, and every item of it, moved there.
 const K = 0.72
 function dx(x) { return 0.5 + (x - 0.5) * K }
@@ -56,7 +61,7 @@ const figures = {
     general: v => ({
         code: v.family || "IRIS",
         note: "YOUR DESKTOP",
-        items: desk(["island", "dock", "widgets", "bubble"], {}).concat([
+        items: screen(["island", "dock", "widgets", "bubble"], {}).concat([
             ["call", dx(0.56), dy(0.117), 0.8, 0.06, "ISLAND"],
             ["call", dx(0.8), dy(0.5), 0.8, 0.34, "BUBBLES"],
             ["call", dx(0.62), dy(0.627), 0.8, 0.6, "DOCK"],
@@ -209,21 +214,46 @@ const figures = {
             ["call", 0.62, 0.59, 0.8, 0.4, "DIVIDER"]
         ]
     }),
+    // The Island seen close, its bubbles beside it, one opening its card.
     bubbles: v => ({
         code: "BUBBLES",
-        note: "SMALL APPS ON THE EDGE",
-        items: desk(["bubble", "bubble2"], { hide: ["widgets2"] }).concat([
-            ["circle", dx(0.8), dy(0.5), 0.045 * K, "dash"],
-            ["call", dx(0.8), dy(0.5), 0.82, 0.3, "BUBBLE"]
-        ])
+        note: "BESIDE THE ISLAND",
+        items: [
+            ["line", 0.04, 0.14, 0.96, 0.14, "dash"],
+            ["rect", 0.36, 0.2, 0.28, 0.12, 99, "line"],
+            ["circle", 0.42, 0.26, 0.014, "faint"],
+            ["line", 0.46, 0.26, 0.58, 0.26, "faint"],
+            ["circle", 0.29, 0.26, 0.038, "line"],
+            ["circle", 0.71, 0.26, 0.038, "markfill"],
+            ["circle", 0.8, 0.26, 0.026, "line"],
+            ["rect", 0.55, 0.42, 0.32, 0.34, 8, "dash"],
+            ["line", 0.71, 0.32, 0.71, 0.42, "faint"],
+            ["dim", 0.64, 0.4, 0.67, 0.4, ""],
+            ["call", 0.29, 0.26, 0.14, 0.44, "ACTIVITY"],
+            ["call", 0.71, 0.22, 0.62, 0.07, "TRAILING"],
+            ["call", 0.8, 0.235, 0.84, 0.07, "UTILITY"],
+            ["text", 0.71, 0.84, "CARD", "center", "faint"]
+        ]
     }),
+    // What sits on the wallpaper: a clock face, a card of lines, the grid they snap to.
     desktop: v => ({
         code: "DESKTOP",
         note: "WHAT SITS ON THE WALLPAPER",
-        items: desk(["widgets", "widgets2"], {}).concat([
-            ["dim", dx(0.19), dy(0.47), dx(0.3), dy(0.47), ""],
-            ["call", dx(0.19), dy(0.245), 0.18, 0.3, "WIDGET"]
-        ])
+        items: [
+            ["poly", [[0.06, 0.78], [0.24, 0.56], [0.36, 0.66], [0.54, 0.44], [0.72, 0.6], [0.94, 0.4]], "faint", false],
+            ["rect", 0.1, 0.12, 0.17, 0.17, 6, "dash"],
+            ["rect", 0.3, 0.12, 0.17, 0.17, 6, "dash"],
+            ["rect", 0.1, 0.32, 0.17, 0.17, 6, "dash"],
+            ["circle", 0.185, 0.205, 0.06, "markfill"],
+            ["line", 0.185, 0.205, 0.185, 0.15, "line"],
+            ["line", 0.185, 0.205, 0.22, 0.225, "line"],
+            ["rect", 0.3, 0.32, 0.36, 0.17, 6, "line"],
+            ["line", 0.33, 0.37, 0.52, 0.37, "faint"],
+            ["line", 0.33, 0.42, 0.6, 0.42, "faint"],
+            ["dim", 0.3, 0.06, 0.47, 0.06, ""],
+            ["call", 0.245, 0.17, 0.62, 0.14, "WIDGET"],
+            ["call", 0.27, 0.4, 0.14, 0.62, "SNAP"]
+        ]
     }),
     widgets: v => ({
         code: "GRID",
@@ -303,13 +333,25 @@ const figures = {
             ["call", 0.55, 0.22, 0.4, 0.14, "HOTSPOT"]
         ]
     }),
+    // A panel hugging each edge, the right one open, its width and its sections.
     sidebars: v => ({
         code: "PANELS",
         note: "LEFT AND RIGHT",
-        items: desk(["panel", "leftPanel"], { hide: ["widgets", "widgets2", "control"] }).concat([
-            ["call", dx(0.82), dy(0.3), 0.82, 0.2, "RIGHT"],
-            ["call", dx(0.18), dy(0.3), 0.18, 0.2, "LEFT"]
-        ])
+        items: [
+            ["line", 0.04, 0.08, 0.04, 0.84, "dash"],
+            ["line", 0.96, 0.08, 0.96, 0.84, "dash"],
+            ["rect", 0.07, 0.12, 0.2, 0.64, 8, "line"],
+            ["rect", 0.62, 0.12, 0.31, 0.64, 8, "markfill"],
+            ["rect", 0.65, 0.16, 0.25, 0.14, 5, "line"],
+            ["rect", 0.65, 0.34, 0.25, 0.2, 5, "line"],
+            ["line", 0.67, 0.6, 0.86, 0.6, "faint"],
+            ["line", 0.67, 0.66, 0.8, 0.66, "faint"],
+            ["line", 0.1, 0.2, 0.22, 0.2, "faint"],
+            ["line", 0.1, 0.26, 0.19, 0.26, "faint"],
+            ["dim", 0.62, 0.84, 0.93, 0.84, "WIDTH"],
+            ["call", 0.27, 0.44, 0.42, 0.3, "LEFT"],
+            ["call", 0.62, 0.44, 0.48, 0.58, "RIGHT"]
+        ]
     }),
     controlCenter: v => ({
         code: "CONTROLS",
@@ -384,15 +426,25 @@ const figures = {
             ["text", 0.66, 0.78, "NEXT EPISODE", "left", "faint"]
         ]
     }),
+    // Banners dropping out of the Island, the newest in front, the older ones stacked behind it, and its time.
     notifications: v => ({
         code: "NOTIFY",
-        note: "STACKED TOP RIGHT",
-        items: desk([], { hide: ["widgets", "widgets2", "panel", "leftPanel", "control", "bubble", "bubble2", "search"] }).concat([
-            fit(["rect", 0.6, 0.11, 0.22, 0.08, 6, "markfill"]),
-            fit(["rect", 0.6, 0.21, 0.22, 0.08, 6, "line"]),
-            fit(["rect", 0.6, 0.31, 0.22, 0.08, 6, "faint"]),
-            ["call", dx(0.82), dy(0.15), 0.84, 0.08, "NEWEST"]
-        ])
+        note: "OUT OF THE ISLAND",
+        items: [
+            ["line", 0.04, 0.12, 0.96, 0.12, "dash"],
+            ["rect", 0.4, 0.16, 0.2, 0.09, 99, "line"],
+            ["rect", 0.32, 0.56, 0.36, 0.12, 8, "faint"],
+            ["rect", 0.29, 0.45, 0.42, 0.13, 9, "line"],
+            ["rect", 0.26, 0.31, 0.48, 0.16, 10, "markfill"],
+            ["circle", 0.31, 0.39, 0.02, "line"],
+            ["line", 0.35, 0.36, 0.6, 0.36, "line"],
+            ["line", 0.35, 0.42, 0.52, 0.42, "faint"],
+            ["arc", 0.8, 0.39, 0.05, -90, 150, "mark"],
+            ["arc", 0.8, 0.39, 0.05, 150, 270, "faint"],
+            ["line", 0.5, 0.25, 0.5, 0.31, "faint"],
+            ["call", 0.74, 0.33, 0.9, 0.18, "NEWEST"],
+            ["text", 0.8, 0.56, "TIME", "center", "faint"]
+        ]
     }),
     sound: v => {
         const items = [["poly", [[0.12, 0.38], [0.18, 0.38], [0.27, 0.28], [0.27, 0.64], [0.18, 0.54], [0.12, 0.54]], "line", true],
@@ -466,7 +518,7 @@ const figures = {
     fallback: v => ({
         code: "IRIS",
         note: "",
-        items: desk(["island"], {})
+        items: screen(["island"], {})
     })
 }
 

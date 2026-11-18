@@ -22,6 +22,8 @@ Flickable {
     ScrollBar.vertical: IrisScrollBar {}
 
     readonly property string irisVersion: irisVersionFile.text().trim()
+    // A host that draws its marks in ink (Prism) sets it: the links open on their glyph alone, without a colour.
+    property bool plainMarks: false
 
     FileView {
         id: versionFile
@@ -80,7 +82,7 @@ Flickable {
 
         Heading { text: Translation.tr("iNiR") }
         IrisLinkCard {
-            tinted: true
+            tinted: !root.plainMarks
             links: [
                 { label: Translation.tr("Documentation"), icon: "menu_book", tint: IrisStyle.identity.sky, action: () => Qt.openUrlExternally("https://inir.space/docs/") },
                 { label: Translation.tr("Report an issue"), icon: "bug_report", tint: IrisStyle.identity.red, action: () => Qt.openUrlExternally("https://github.com/snowarch/inir/issues") },
@@ -95,7 +97,7 @@ Flickable {
         IrisLinkCard {
             id: distroLinks
             visible: links.length > 0
-            tinted: true
+            tinted: !root.plainMarks
             links: [
                 SystemInfo.homeUrl ? { label: Translation.tr("Website"), icon: "language", tint: IrisStyle.identity.blue, action: () => Qt.openUrlExternally(SystemInfo.homeUrl) } : null,
                 SystemInfo.documentationUrl ? { label: Translation.tr("Documentation"), icon: "auto_stories", tint: IrisStyle.identity.teal, action: () => Qt.openUrlExternally(SystemInfo.documentationUrl) } : null,
