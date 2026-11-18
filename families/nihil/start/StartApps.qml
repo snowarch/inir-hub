@@ -2,10 +2,11 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.services
+import qs.modules.common
 import qs.modules.nihil.style
 
 // Start's app column: a raised piece listing every app (or what the search finds), each its icon on a round key,
-// the keys lit and dark in turn, its name in mono beside it.
+// the keys lit and dark in turn, its name in mono beside it. Words no app answers go to the web search.
 Rectangle {
     id: root
 
@@ -14,10 +15,19 @@ Rectangle {
         ? AppSearch.fuzzyQuery(root.query)
         : AppSearch.list.map(entry => ({ name: entry.name, icon: entry.icon, originalEntry: entry }))
     readonly property var first: root.apps.length > 0 ? root.apps[0] : null
+    readonly property string asked: root.query.trim()
     signal launched()
 
+    function searchWeb(): void {
+        const engine = Config.options?.search?.engineBaseUrl ?? "https://www.google.com/search?q="
+        Qt.openUrlExternally(engine + encodeURIComponent(root.asked))
+        root.launched()
+    }
     function launch(app): void {
-        if (!app) return
+        if (!app) {
+            if (root.asked.length > 0) root.searchWeb()
+            return
+        }
         AppSearch.launchEntry(app.originalEntry ?? app)
         root.launched()
     }
@@ -70,12 +80,25 @@ Rectangle {
         }
     }
 
-    NText {
+    Column {
         anchors.centerIn: parent
         visible: root.apps.length === 0
-        mono: true
-        text: Translation.tr("No app found")
-        color: NihilStyle.inkSoft
-        font.pixelSize: NihilStyle.textSmall
+        spacing: NihilStyle.s(12)
+        NText {
+            anchors.horizontalCenter: parent.horizontalCenter
+            mono: true
+            text: Translation.tr("No app found")
+            color: NihilStyle.inkSoft
+            font.pixelSize: NihilStyle.textSmall
+        }
+        NKey {
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: root.asked.length > 0
+            width: NihilStyle.s(176)
+            height: NihilStyle.s(40)
+            glyph: "travel_explore"
+            label: Translation.tr("Search the web")
+            onClicked: root.searchWeb()
+        }
     }
 }

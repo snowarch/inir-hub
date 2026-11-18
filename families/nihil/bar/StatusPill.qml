@@ -56,7 +56,7 @@ NButton {
         NText {
             anchors.verticalCenter: parent.verticalCenter
             mono: true
-            text: DateTime.time
+            text: DateTime.timeDisplay
             font.pixelSize: NihilStyle.textBody
         }
     }

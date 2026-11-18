@@ -7,13 +7,13 @@ Rectangle {
 
     property real value: 0
     property bool vertical: true
-    property color fill: NihilStyle.accent
-    property color fillInk: NihilStyle.onAccent
+    property color fill: NihilStyle.litLevel
+    property color fillInk: NihilStyle.onLitLevel
     property string label: Math.round(root.value * 100) + "%"
     property string icon: ""
     signal moved(real value)
 
-    radius: NihilStyle.s(14)
+    radius: NihilStyle.rowRadius
     color: NihilStyle.pieceRaised
     clip: true
 

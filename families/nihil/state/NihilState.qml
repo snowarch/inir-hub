@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs
+import qs.services
 import qs.modules.common
 
 // NiHiL's own panels, open or not; one open at a time. Start is the shell's search (GlobalStates.searchOpen) and the
@@ -14,7 +15,7 @@ Singleton {
 
     property bool controlOpen: false
     property bool trayOpen: false
-    // NiHiL's menu (its Settings): opened by its bar button, or by the shell's Settings key while NiHiL keeps its own.
+    // NiHiL's quick menu, opened by its bar button; everything else lives in its Settings window.
     property bool menuOpen: false
     readonly property bool startOpen: GlobalStates.searchOpen
     readonly property bool powerOpen: GlobalStates.sessionOpen
@@ -40,28 +41,22 @@ Singleton {
         else if (which === "menu") root.menuOpen = true
     }
 
-    // Material's full Settings window, at a page: NiHiL's menu hands the Settings key to Material (the person can hand
-    // it back from Extras), and the window opens once the key is on disk, since the window reads it from there.
-    property string _materialPage: ""
-    function openMaterial(page: string): void {
+    // NiHiL's Settings window, at a page of it. Already open, it hears the page through this file and comes forward.
+    FileView { id: pageAsk; path: `${Directories.stateUserPath}/nihil/settings-page` }
+    function openSettings(page: string): void {
         root.closeAll()
-        root._materialPage = page
-        Config.setNestedValue("nihil.settings.useMaterial", true)
-        materialDelay.restart()
-    }
-    Timer {
-        id: materialDelay
-        interval: 700
-        onTriggered: root._materialPage.length > 0 ? GlobalStates.openSettingsAt(root._materialPage) : GlobalStates.openSettings()
+        if (page.length > 0) {
+            pageAsk.setText(`${page} ${Date.now()}`)
+            GlobalStates.openSettingsAt(page)
+        } else {
+            GlobalStates.openSettings()
+        }
+        const open = (NiriService.windows ?? []).find(entry => entry.title === Translation.tr("NiHiL Settings"))
+        if (open) NiriService.focusWindow(open.id)
     }
 
-    onMenuOpenChanged: if (!root.menuOpen) GlobalStates.settingsOverlayOpen = false
     Connections {
         target: GlobalStates
-        function onSettingsOverlayOpenChanged() {
-            if (GlobalStates.settingsOverlayOpen && !root.menuOpen) root.toggle("menu")
-            else if (!GlobalStates.settingsOverlayOpen) root.menuOpen = false
-        }
         function onSearchOpenChanged() { if (GlobalStates.searchOpen) { root.controlOpen = false; root.trayOpen = false } }
         function onSessionOpenChanged() { if (GlobalStates.sessionOpen) { root.controlOpen = false; root.trayOpen = false } }
     }

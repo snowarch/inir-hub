@@ -33,7 +33,7 @@ Column {
         MenuRow { width: root.w; label: Translation.tr("Two-tone clock"); key: "nihil.clock.twoTone"; fallback: true }
         MenuRow {
             width: root.w; label: Translation.tr("Add or arrange widgets")
-            action: () => NihilState.openMaterial("widgets")
+            action: () => NihilState.openSettings("widgets")
         }
     }
 
@@ -78,16 +78,12 @@ Column {
         visible: root.page === "extras"
         spacing: root.spacing
         MenuRow {
-            width: root.w; label: Translation.tr("Settings key opens"); key: "nihil.settings.useMaterial"; fallback: false
-            choices: [{ value: false, label: Translation.tr("This menu") }, { value: true, label: Translation.tr("Material") }]
-        }
-        MenuRow {
             width: root.w; label: Translation.tr("All settings")
-            action: () => NihilState.openMaterial("")
+            action: () => NihilState.openSettings("")
         }
         MenuRow {
             width: root.w; label: Translation.tr("Change family")
-            action: () => NihilState.openMaterial("modules")
+            action: () => NihilState.openSettings("system")
         }
     }
 

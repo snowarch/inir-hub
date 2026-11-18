@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "changes": {
+        "1.1.0": [
+            "NiHiL has its own Settings window: every page, live search, and full control of the signal colour, pieces, corners, dots, type and motion"
+        ],
         "1.0.0": [
             "NiHiL: a floating bar, dot-matrix clock and widgets, Start, quick controls, a power card and its own menu, in one signal colour"
         ]
@@ -19,5 +22,9 @@
     "requires": [
         "ii"
     ],
-    "preview": "preview.webp"
+    "preview": "preview.webp",
+    "permissions": [
+        "process",
+        "files"
+    ]
 }

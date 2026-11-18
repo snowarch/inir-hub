@@ -32,6 +32,8 @@ Canvas {
     antialiasing: true
     renderStrategy: Canvas.Cooperative
 
+    readonly property bool squareDots: NihilStyle.squareDots
+    onSquareDotsChanged: requestPaint()
     onTextChanged: requestPaint()
     onIconChanged: requestPaint()
     onColorChanged: requestPaint()
@@ -52,6 +54,7 @@ Canvas {
             for (const cell of cells) {
                 const cx = cell.x * root.pitch + r
                 const cy = cell.y * root.pitch + r
+                if (root.squareDots) { ctx.rect(cx - r, cy - r, root.cellDot, root.cellDot); continue }
                 ctx.moveTo(cx + r, cy)
                 ctx.arc(cx, cy, r, 0, Math.PI * 2, false)
             }

@@ -23,7 +23,7 @@ Rectangle {
 
     implicitWidth: NihilStyle.button
     implicitHeight: NihilStyle.button
-    radius: root.square ? Math.round(Math.min(width, height) * 0.3) : Math.min(width, height) / 2
+    radius: NihilStyle.keyRadius(width, height, root.square)
     color: root.lit ? NihilStyle.accent : root.hovered ? Qt.tint(root.tone, NihilStyle.hoverVeil) : root.tone
     scale: root.pressed ? 0.94 : 1
     Behavior on scale { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }

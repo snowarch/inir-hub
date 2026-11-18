@@ -9,7 +9,7 @@ Canvas {
     property int rows: 4
     property real level: 0
     property bool columnFirst: true
-    property color litColor: NihilStyle.accent
+    property color litColor: NihilStyle.litLevel
     property color offColor: NihilStyle.dotOff
     readonly property int count: root.columns * root.rows
     readonly property real cell: Math.min(width / root.columns, height / root.rows)
@@ -17,6 +17,8 @@ Canvas {
 
     renderStrategy: Canvas.Cooperative
     antialiasing: true
+    readonly property bool squareDots: NihilStyle.squareDots
+    onSquareDotsChanged: requestPaint()
     onLevelChanged: requestPaint()
     onLitColorChanged: requestPaint()
     onOffColorChanged: requestPaint()
@@ -37,14 +39,18 @@ Canvas {
             const cy = offY + row * root.cell + root.cell / 2
             const part = Math.max(0, Math.min(1, lit - i))
             ctx.fillStyle = root.offColor
-            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill()
+            ctx.beginPath()
+            if (root.squareDots) ctx.rect(cx - r, cy - r, root.dot, root.dot)
+            else ctx.arc(cx, cy, r, 0, Math.PI * 2)
+            ctx.fill()
             if (part <= 0) continue
             ctx.fillStyle = root.litColor
             ctx.beginPath()
-            if (part >= 1) ctx.arc(cx, cy, r, 0, Math.PI * 2)
+            if (root.squareDots) ctx.rect(cx - r, cy - r, root.dot * Math.min(1, part), root.dot)
+            else if (part >= 1) ctx.arc(cx, cy, r, 0, Math.PI * 2)
             else { ctx.save(); ctx.rect(cx - r, cy - r, root.dot * part, root.dot); ctx.clip(); ctx.arc(cx, cy, r, 0, Math.PI * 2) }
             ctx.fill()
-            if (part < 1) ctx.restore()
+            if (part < 1 && !root.squareDots) ctx.restore()
         }
     }
 }

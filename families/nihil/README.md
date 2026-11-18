@@ -19,13 +19,13 @@ wallpaper, round keys, the time drawn in dots, and one signal colour for whateve
   - *Widgets:* faces, clock style, two-tone clock.
   - *Menus:* signal or dynamic colour, bar position, hide the bar, one-colour icons, size.
   - *Wallpapers:* choose one, light or dark, lock blur.
-  - *Extras:* Material's full Settings, change family.
+  - *Extras:* all settings, change family.
 
 ## Set up
 
 Pick NiHiL in Settings › Families. The signal colour is the scheme's red; switch it to **Dynamic** (tap the word
-under NiHiL in its menu) to take the wallpaper's own colour. **Extras › All settings** opens Material's full
-Settings window; **Extras › Settings key opens** gives the Settings key back to this menu.
+under NiHiL in its menu) to take the wallpaper's own colour. **Extras › All settings** opens NiHiL's Settings window:
+every page, live search, and the signal colour, pieces, corners, dots, type and motion to make it yours.
 
 `inir nihil toggle start|control|tray|power|menu` opens a panel from a keybind.
 

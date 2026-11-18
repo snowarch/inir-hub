@@ -5,7 +5,7 @@
   "summary": "Nothing but dots: a floating bar, dot-matrix widgets and one signal colour.",
   "tagline": "Floating bar, dot-matrix clock, quick controls and a power card.",
   "icon": "blur_circular",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "provides": "modules/nihil",
   "parts": {
     "critical": "critical/ShellNihilCriticalPanels.qml",
@@ -20,11 +20,11 @@
     "widgetFace.date": "widgets/NihilDateFace.qml",
     "widgetFace.nowPlaying": "widgets/NihilNowPlayingFace.qml",
     "widgetFace.weather": "widgets/NihilWeatherFace.qml",
-    "widgetFace.photo": "widgets/NihilPhotoFace.qml"
-  },
-  "settingsFrom": {
-    "family": "ii",
-    "when": "nihil.settings.useMaterial"
+    "widgetFace.photo": "widgets/NihilPhotoFace.qml",
+    "settingsApp": "settings/NihilSettingsApp.qml",
+    "control.switch": "style/NSwitch.qml",
+    "control.scrubber": "style/NSlider.qml",
+    "control.segmented": "style/NSegmented.qml"
   },
   "configKey": "nihil",
   "enabledPanels": [

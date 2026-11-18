@@ -65,6 +65,7 @@ Item {
             }
         }
         NButton {
+            visible: NihilStyle.options?.bar?.showSearch ?? true
             width: NihilStyle.s(150)
             onClicked: NihilState.toggle("start")
             Row {
@@ -81,7 +82,7 @@ Item {
             }
         }
         Repeater {
-            model: TaskbarApps.apps.filter(app => app.appId !== "SEPARATOR")
+            model: (NihilStyle.options?.bar?.showApps ?? true) ? TaskbarApps.apps.filter(app => app.appId !== "SEPARATOR") : []
             delegate: AppCircle {}
         }
     }

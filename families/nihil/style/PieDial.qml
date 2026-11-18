@@ -5,7 +5,7 @@ Canvas {
     id: root
 
     property real value: 0
-    property color litColor: NihilStyle.accent
+    property color litColor: NihilStyle.litLevel
     property color offColor: NihilStyle.dotOff
 
     renderStrategy: Canvas.Cooperative

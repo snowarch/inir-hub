@@ -95,7 +95,7 @@ MouseArea {
         NText {
             anchors.horizontalCenter: parent.horizontalCenter
             serif: true
-            text: Qt.locale().toString(DateTime.clock.date, "dddd, d MMMM")
+            text: DateTime.date
             font.pixelSize: NihilStyle.s(28)
             color: NihilStyle.ink
         }
