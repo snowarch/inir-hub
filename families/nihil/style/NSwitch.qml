@@ -1,6 +1,6 @@
 import QtQuick
 
-// On or off: a pill that fills with the signal, its knob sliding to the lit end. The shell's own switch too (part
+// On or off: a small tile that fills with the signal, its block sliding to the lit end. The shell's own switch too (part
 // control.switch): `toggled` asks for the change, `on` follows the value it is given.
 Rectangle {
     id: root
@@ -15,7 +15,7 @@ Rectangle {
     implicitHeight: NihilStyle.s(26)
     width: implicitWidth
     height: implicitHeight
-    radius: NihilStyle.keyRadius(width, height, false)
+    radius: NihilStyle.roundKeys ? height / 2 : NihilStyle.s(7 * NihilStyle.corners)
     color: root.on ? NihilStyle.accent : NihilStyle.pieceRaised
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
 

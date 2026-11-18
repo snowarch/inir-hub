@@ -5,19 +5,27 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// Start's app column: a raised piece listing every app (or what the search finds), each its icon on a round key,
-// the keys lit and dark in turn, its name in mono beside it. Words no app answers go to the web search.
-Rectangle {
+// Start's apps: every app, or what the search finds, the one marked printed on paper. Words no app answers go to the
+// web search.
+NTile {
     id: root
 
     property string query: ""
-    readonly property var apps: root.query.trim().length > 0
+    property int at: 0
+    readonly property string asked: root.query.trim()
+    readonly property var apps: root.asked.length > 0
         ? AppSearch.fuzzyQuery(root.query)
         : AppSearch.list.map(entry => ({ name: entry.name, icon: entry.icon, originalEntry: entry }))
-    readonly property var first: root.apps.length > 0 ? root.apps[0] : null
-    readonly property string asked: root.query.trim()
+    readonly property var marked: root.apps[root.at] ?? null
     signal launched()
 
+    caption: root.asked.length > 0 ? Translation.tr("Found") : Translation.tr("Apps")
+
+    function walk(by: int): void {
+        if (root.apps.length === 0) return
+        root.at = Math.max(0, Math.min(root.apps.length - 1, root.at + by))
+        list.positionViewAtIndex(root.at, ListView.Contain)
+    }
     function searchWeb(): void {
         const engine = Config.options?.search?.engineBaseUrl ?? "https://www.google.com/search?q="
         Qt.openUrlExternally(engine + encodeURIComponent(root.asked))
@@ -32,73 +40,84 @@ Rectangle {
         root.launched()
     }
 
-    radius: NihilStyle.s(20)
-    color: NihilStyle.pieceRaised
-
     ListView {
         id: list
-        anchors.fill: parent
-        anchors.margins: NihilStyle.s(8)
+        x: NihilStyle.s(6)
+        y: NihilStyle.s(34)
+        width: root.width - NihilStyle.s(12)
+        height: root.height - y - NihilStyle.s(6)
         clip: true
-        spacing: NihilStyle.s(4)
+        spacing: 0
         model: root.apps
         boundsBehavior: Flickable.StopAtBounds
         delegate: Rectangle {
             id: row
             required property var modelData
             required property int index
+            readonly property bool marked: row.index === root.at
             width: list.width
-            height: NihilStyle.s(48)
-            radius: height / 2
-            color: hover.hovered ? NihilStyle.hoverVeil : "transparent"
+            height: NihilStyle.s(44)
+            radius: NihilStyle.rowRadius
+            color: row.marked ? NihilStyle.plate : "transparent"
 
-            NButton {
-                id: key
-                x: NihilStyle.s(4)
+            NAppIcon {
+                id: glyph
+                x: NihilStyle.s(10)
                 anchors.verticalCenter: parent.verticalCenter
-                width: NihilStyle.s(40); height: width
-                lit: row.index % 2 === 1
-                tone: NihilStyle.piece
-                NAppIcon {
-                    anchors.centerIn: parent
-                    size: NihilStyle.s(20)
-                    iconName: row.modelData.icon ?? ""
-                }
-                onClicked: root.launch(row.modelData)
+                size: NihilStyle.s(24)
+                iconName: row.modelData.icon ?? ""
+                onPaper: row.marked
             }
             NText {
-                anchors.left: key.right
-                anchors.leftMargin: NihilStyle.s(14)
+                anchors.left: glyph.right
+                anchors.leftMargin: NihilStyle.s(12)
                 anchors.right: parent.right
-                anchors.rightMargin: NihilStyle.s(8)
+                anchors.rightMargin: NihilStyle.s(10)
                 anchors.verticalCenter: parent.verticalCenter
-                figures: true
                 text: row.modelData.name ?? ""
+                font.pixelSize: NihilStyle.s(15)
+                font.weight: row.marked ? Font.Bold : Font.Medium
+                color: row.marked ? NihilStyle.onPlate : NihilStyle.ink
             }
-            HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-            TapHandler { onTapped: root.launch(row.modelData) }
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onEntered: root.at = row.index
+                onClicked: root.launch(row.modelData)
+            }
         }
     }
 
     Column {
         anchors.centerIn: parent
         visible: root.apps.length === 0
-        spacing: NihilStyle.s(12)
+        spacing: NihilStyle.s(14)
         NText {
             anchors.horizontalCenter: parent.horizontalCenter
-            figures: true
             text: Translation.tr("No app found")
-            color: NihilStyle.inkSoft
-            font.pixelSize: NihilStyle.textSmall
+            font.pixelSize: NihilStyle.textLarge
+            font.weight: Font.Bold
         }
-        NKey {
+        NButton {
+            id: webKey
             anchors.horizontalCenter: parent.horizontalCenter
             visible: root.asked.length > 0
-            width: NihilStyle.s(176)
-            height: NihilStyle.s(40)
-            glyph: "travel_explore"
-            label: Translation.tr("Search the web")
+            width: webRow.implicitWidth + NihilStyle.s(28)
+            lit: true
             onClicked: root.searchWeb()
+            Row {
+                id: webRow
+                anchors.centerIn: parent
+                spacing: NihilStyle.s(8)
+                NIcon { anchors.verticalCenter: parent.verticalCenter; text: "travel_explore"; size: NihilStyle.s(18); color: webKey.ink }
+                NText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Translation.tr("Search the web")
+                    font.weight: Font.Bold
+                    color: webKey.ink
+                }
+            }
         }
     }
 }

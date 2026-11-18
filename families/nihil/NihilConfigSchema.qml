@@ -23,8 +23,8 @@ JsonObject {
         property real opacity: 1
         // 0.35 to 1.25: how round every piece is.
         property real corners: 1
-        // "round" or "soft" (squircles).
-        property string keys: "round"
+        // "tile" (square-cornered blocks) or "round" (pills and circles).
+        property string keys: "tile"
         // "round" or "square".
         property string dotShape: "round"
         // "grotesk" or "mono".

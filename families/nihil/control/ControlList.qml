@@ -64,8 +64,8 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             visible: !root.sound
             text: root.wifi ? Translation.tr("Wi-Fi") : Translation.tr("Bluetooth")
-            font.pixelSize: NihilStyle.textLarge
-            font.weight: Font.DemiBold
+            font.pixelSize: NihilStyle.textTitle
+            font.weight: Font.Black
         }
         NSegmented {
             anchors.left: backKey.right
@@ -97,7 +97,7 @@ Item {
         width: parent.width
         height: parent.height - y
         clip: true
-        spacing: NihilStyle.s(6)
+        spacing: NihilStyle.seam
         boundsBehavior: Flickable.StopAtBounds
         model: root.rows
         visible: count > 0
@@ -136,9 +136,9 @@ Item {
         width: parent?.width ?? 0
         height: NihilStyle.s(50)
         radius: NihilStyle.rowRadius
-        color: line.current ? NihilStyle.accent : press.containsMouse ? NihilStyle.pieceHover : NihilStyle.pieceRaised
+        color: line.current ? NihilStyle.plate : press.containsMouse ? NihilStyle.pieceHover : NihilStyle.pieceRaised
         Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-        readonly property color inkOn: line.current ? NihilStyle.onAccent : NihilStyle.ink
+        readonly property color inkOn: line.current ? NihilStyle.onPlate : NihilStyle.ink
         MouseArea {
             id: press
             anchors.fill: parent
@@ -164,7 +164,7 @@ Item {
             NText {
                 width: parent.width
                 text: line.name
-                font.weight: Font.Medium
+                font.weight: Font.Bold
                 color: line.inkOn
             }
             NText {
@@ -193,7 +193,7 @@ Item {
             property var entry: null
             readonly property var ap: net.entry
             width: list.width
-            spacing: NihilStyle.s(6)
+            spacing: NihilStyle.seam
             Line {
                 width: net.width
                 current: net.ap?.active ?? false

@@ -8,8 +8,8 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The bar's three groups on one line, each piece standing alone on the wallpaper: the left keys (quick controls,
-// NiHiL's menu), the middle (Start, search, the apps), the right (the tray's chevron and the status pill).
+// The bar: three blocks of tiles on the screen's edge. Start, the menu and the workspaces; search and the apps;
+// the tray, the machine's state, what waits to be read and the time.
 Item {
     id: root
 
@@ -23,7 +23,7 @@ Item {
     Behavior on lift { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
 
     component Group: Row {
-        spacing: NihilStyle.gap
+        spacing: NihilStyle.seam
         y: root.atBottom ? root.height - NihilStyle.barMargin - height + root.lift : NihilStyle.barMargin - root.lift
         height: NihilStyle.button
     }
@@ -32,13 +32,19 @@ Item {
         id: leftGroup
         x: NihilStyle.edge
         NButton {
-            icon: "toggle_on"
-            lit: NihilState.controlOpen
-            onClicked: NihilState.toggle("control")
+            id: startKey
+            paper: !NihilState.startOpen
+            lit: NihilState.startOpen
+            onClicked: NihilState.toggle("start")
+            NihilMark {
+                anchors.centerIn: parent
+                size: startKey.width * 0.5
+                color: startKey.ink
+                ground: startKey.color
+            }
         }
         NButton {
             id: menuKey
-            square: true
             lit: NihilState.menuOpen
             onClicked: NihilState.toggle("menu")
             NihilMark {
@@ -49,8 +55,7 @@ Item {
             }
         }
         Workspaces {
-            visible: (NihilStyle.options?.bar?.showWorkspaces ?? true) && implicitVisible
-            readonly property bool implicitVisible: CompositorService.isNiri && spaces.length > 0
+            visible: CompositorService.isNiri && spaces.length > 0
             screen: root.screen
         }
     }
@@ -59,30 +64,24 @@ Item {
         id: centerGroup
         x: Math.round((root.width - width) / 2)
         NButton {
-            id: startKey
-            lit: NihilState.startOpen
-            onClicked: NihilState.toggle("start")
-            NihilMark {
-                anchors.centerIn: parent
-                size: startKey.width * 0.38
-                color: startKey.ink
-                ground: startKey.color
-            }
-        }
-        NButton {
+            id: searchKey
             visible: NihilStyle.options?.bar?.showSearch ?? true
-            width: NihilStyle.s(150)
+            width: NihilStyle.s(196)
             onClicked: NihilState.toggle("start")
-            Row {
+            NIcon {
+                x: NihilStyle.s(14)
                 anchors.verticalCenter: parent.verticalCenter
-                x: NihilStyle.s(18)
-                spacing: NihilStyle.s(12)
-                NIcon { anchors.verticalCenter: parent.verticalCenter; text: "search"; size: NihilStyle.s(22) }
-                NText {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: Translation.tr("Search")
-                    font.pixelSize: NihilStyle.textLarge
-                }
+                text: "search"
+                size: NihilStyle.s(20)
+                color: searchKey.ink
+            }
+            NText {
+                x: NihilStyle.s(44)
+                anchors.verticalCenter: parent.verticalCenter
+                text: Translation.tr("Search")
+                font.pixelSize: NihilStyle.textBody
+                font.weight: Font.DemiBold
+                color: searchKey.ink
             }
         }
         Repeater {
@@ -95,15 +94,57 @@ Item {
         id: rightGroup
         x: root.width - NihilStyle.edge - width
         NButton {
-            icon: NihilState.trayOpen ? "keyboard_arrow_down" : "keyboard_arrow_up"
-            iconSize: NihilStyle.s(28)
-            split: !NihilState.trayOpen
+            width: NihilStyle.s(30)
+            icon: NihilState.trayOpen ? "expand_more" : "expand_less"
+            iconSize: NihilStyle.s(20)
             lit: NihilState.trayOpen
             onClicked: NihilState.toggle("tray")
         }
         StatusPill {
+            lit: NihilState.controlOpen
             onClicked: NihilState.toggle("control")
-            onTimeTapped: NihilState.toggle("today")
+        }
+        NButton {
+            id: countKey
+            visible: Notifications.list.length > 0
+            width: Math.max(NihilStyle.button, count.implicitWidth + NihilStyle.s(20))
+            lit: !Notifications.silent
+            onClicked: NihilState.toggle("today")
+            NFigure {
+                id: count
+                anchors.centerIn: parent
+                size: NihilStyle.s(22)
+                text: String(Notifications.list.length)
+                color: countKey.ink
+            }
+        }
+        NButton {
+            id: clockKey
+            readonly property string day: {
+                DateTime.timeDisplay
+                return Qt.locale().toString(new Date(), "ddd d")
+            }
+            width: times.implicitWidth + NihilStyle.s(24)
+            paper: !NihilState.todayOpen
+            lit: NihilState.todayOpen
+            onClicked: NihilState.toggle("today")
+            Column {
+                id: times
+                anchors.centerIn: parent
+                spacing: -NihilStyle.s(2)
+                NFigure {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    size: NihilStyle.s(21)
+                    text: DateTime.timeDisplay
+                    color: clockKey.ink
+                }
+                NCaps {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: clockKey.day
+                    font.pixelSize: NihilStyle.s(9)
+                    color: clockKey.ink
+                }
+            }
         }
     }
 }

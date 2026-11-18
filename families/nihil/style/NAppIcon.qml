@@ -12,6 +12,8 @@ Item {
     property string iconName: ""
     property bool monochrome: Config.options?.nihil?.bar?.monochromeIcons ?? true
     property real size: NihilStyle.s(24)
+    // On a paper tile the one-colour icon prints dark.
+    property bool onPaper: false
 
     implicitWidth: root.size
     implicitHeight: root.size
@@ -29,6 +31,6 @@ Item {
         visible: root.monochrome
         saturation: -1
         contrast: 0.15
-        brightness: NihilStyle.dark ? 0.12 : -0.05
+        brightness: root.onPaper === NihilStyle.dark ? -0.45 : 0.12
     }
 }

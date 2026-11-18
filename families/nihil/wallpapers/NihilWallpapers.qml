@@ -8,8 +8,8 @@ import qs.modules.common.functions
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The wallpapers as one wide piece over the desktop: the name in dots, a search, light or dark for the colours taken
-// from it, one at random; then the folder as a grid of pictures, the one in use marked in the signal.
+// The wallpapers as one wide block over the bar: the name on paper, a search, light or dark for the colours taken from
+// the picture, one at random; then the folder as pictures packed a seam apart, the one in use marked in the signal.
 NPopup {
     id: root
 
@@ -49,115 +49,132 @@ NPopup {
         root.close()
     }
 
-    NCard {
-        id: card
+    NRack {
+        id: rack
         readonly property real room: root.height - root.edgeTop - root.edgeBottom
-        width: Math.min(NihilStyle.s(980), root.width - NihilStyle.edge * 2)
-        height: Math.min(NihilStyle.s(640), room)
+        readonly property real g: NihilStyle.seam
+        width: Math.min(NihilStyle.s(1040), root.width - NihilStyle.edge * 2)
+        height: Math.min(NihilStyle.s(660), room)
         x: Math.round((parent.width - width) / 2)
         y: root.barBottom ? parent.height - height - root.edgeBottom : root.edgeTop
-        pad: NihilStyle.s(16)
 
-        Item {
+        Row {
             id: head
-            width: parent.width
-            height: NihilStyle.s(46)
+            height: NihilStyle.s(72)
+            spacing: rack.g
 
-            DotText {
+            NTile {
                 id: title
-                anchors.verticalCenter: parent.verticalCenter
-                x: NihilStyle.s(6)
-                text: Translation.tr("Wallpapers").toUpperCase()
-                dot: NihilStyle.s(3.2)
-                spacing: NihilStyle.s(1.9)
-                color: NihilStyle.ink
+                width: NihilStyle.s(264)
+                height: head.height
+                paper: true
+                caption: root.shown.length + " " + Translation.tr("Pictures")
+                NText {
+                    x: title.pad
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: NihilStyle.s(6)
+                    text: Translation.tr("Wallpapers")
+                    font.pixelSize: NihilStyle.textTitle
+                    font.weight: Font.Black
+                    color: title.ink
+                }
             }
-            NText {
-                anchors.left: title.right
-                anchors.leftMargin: NihilStyle.s(12)
-                anchors.verticalCenter: parent.verticalCenter
-                figures: true
-                text: root.shown.length
-                font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
+            NField {
+                id: search
+                width: rack.width - title.width - modes.width - shuffle.width - closeKey.width - rack.g * 4
+                height: head.height
+                glyph: "search"
+                placeholder: Translation.tr("Search wallpapers")
+                clearable: true
+                onEdited: text => root.query = text
+                onStepped: by => by > 0 ? grid.moveCurrentIndexDown() : grid.moveCurrentIndexUp()
+                onEntered: root.pick(root.shown[grid.currentIndex] ?? "")
+                Keys.onLeftPressed: grid.moveCurrentIndexLeft()
+                Keys.onRightPressed: grid.moveCurrentIndexRight()
             }
             Row {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: NihilStyle.s(8)
-                NField {
-                    id: search
-                    width: NihilStyle.s(260); height: NihilStyle.s(42)
-                    glyph: "search"
-                    placeholder: Translation.tr("Search wallpapers")
-                    clearable: true
-                    onEdited: text => root.query = text
-                    onStepped: by => by > 0 ? grid.moveCurrentIndexDown() : grid.moveCurrentIndexUp()
-                    onEntered: root.pick(root.shown[grid.currentIndex] ?? "")
-                    Keys.onLeftPressed: grid.moveCurrentIndexLeft()
-                    Keys.onRightPressed: grid.moveCurrentIndexRight()
-                }
-                NSegmented {
-                    width: NihilStyle.s(170); height: NihilStyle.s(42)
-                    options: [{ value: false, label: Translation.tr("Light"), glyph: "light_mode" },
-                              { value: true, label: Translation.tr("Dark"), glyph: "dark_mode" }]
-                    current: root.dark
-                    onPicked: value => root.dark = value
+                id: modes
+                spacing: rack.g
+                NButton {
+                    width: head.height; height: head.height
+                    square: true
+                    paper: !root.dark
+                    icon: "light_mode"
+                    iconSize: NihilStyle.s(26)
+                    onClicked: root.dark = false
                 }
                 NButton {
-                    width: NihilStyle.s(42); height: width
-                    tone: NihilStyle.pieceRaised
-                    icon: "shuffle"
-                    iconSize: NihilStyle.s(20)
-                    onClicked: {
-                        Wallpapers.randomFromCurrentFolder(root.dark)
-                        root.close()
-                    }
+                    width: head.height; height: head.height
+                    square: true
+                    paper: root.dark
+                    icon: "dark_mode"
+                    iconSize: NihilStyle.s(26)
+                    onClicked: root.dark = true
                 }
-                NButton {
-                    width: NihilStyle.s(42); height: width
-                    tone: NihilStyle.pieceRaised
-                    icon: "close"
-                    iconSize: NihilStyle.s(20)
-                    onClicked: root.close()
+            }
+            NButton {
+                id: shuffle
+                width: head.height; height: head.height
+                square: true
+                icon: "shuffle"
+                iconSize: NihilStyle.s(26)
+                onClicked: {
+                    Wallpapers.randomFromCurrentFolder(root.dark)
+                    root.close()
                 }
+            }
+            NButton {
+                id: closeKey
+                width: head.height; height: head.height
+                square: true
+                icon: "close"
+                iconSize: NihilStyle.s(26)
+                onClicked: root.close()
             }
         }
 
-        GridView {
-            id: grid
-            y: head.height + NihilStyle.s(14)
-            width: parent.width
-            height: parent.height - y
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
-            readonly property int columns: Math.max(2, Math.round(width / NihilStyle.s(230)))
-            cellWidth: Math.floor(width / columns)
-            cellHeight: Math.round((cellWidth - NihilStyle.s(10)) * 10 / 16) + NihilStyle.s(36)
-            model: root.shown
-            keyNavigationEnabled: true
-            highlightFollowsCurrentItem: false
-            delegate: WallpaperThumb {
-                required property string modelData
-                required property int index
-                width: grid.cellWidth
-                height: grid.cellHeight
-                path: modelData
-                current: modelData === Wallpapers.effectiveWallpaperPath
-                focused: grid.currentIndex === index
-                live: root.open
-                onPicked: root.pick(modelData)
-                onHoveredChanged: if (hovered) grid.currentIndex = index
-            }
-        }
+        NTile {
+            id: sheet
+            y: head.height + rack.g
+            width: rack.width
+            height: rack.height - y
 
-        NEmpty {
-            anchors.centerIn: grid
-            width: Math.min(NihilStyle.s(420), grid.width - NihilStyle.s(40))
-            visible: grid.count === 0
-            glyph: root.query.length > 0 ? "search_off" : "wallpaper"
-            title: root.query.length > 0 ? Translation.tr("Nothing by that name") : Translation.tr("No wallpapers in this folder")
-            line: root.query.length > 0 ? Translation.tr("Try another word") : Wallpapers.effectiveDirectory
+            GridView {
+                id: grid
+                x: NihilStyle.s(6)
+                y: NihilStyle.s(6)
+                width: sheet.width - NihilStyle.s(12)
+                height: sheet.height - NihilStyle.s(12)
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                readonly property int columns: Math.max(2, Math.round(width / NihilStyle.s(250)))
+                cellWidth: Math.floor(width / columns)
+                cellHeight: Math.round((cellWidth - NihilStyle.seam) * 10 / 16) + NihilStyle.seam
+                model: root.shown
+                keyNavigationEnabled: true
+                highlightFollowsCurrentItem: false
+                delegate: WallpaperThumb {
+                    required property string modelData
+                    required property int index
+                    width: grid.cellWidth
+                    height: grid.cellHeight
+                    path: modelData
+                    current: modelData === Wallpapers.effectiveWallpaperPath
+                    focused: grid.currentIndex === index
+                    live: root.open
+                    onPicked: root.pick(modelData)
+                    onHoveredChanged: if (hovered) grid.currentIndex = index
+                }
+            }
+
+            NEmpty {
+                anchors.centerIn: parent
+                width: Math.min(NihilStyle.s(420), sheet.width - NihilStyle.s(40))
+                visible: grid.count === 0
+                glyph: root.query.length > 0 ? "search_off" : "wallpaper"
+                title: root.query.length > 0 ? Translation.tr("Nothing by that name") : Translation.tr("No wallpapers in this folder")
+                line: root.query.length > 0 ? Translation.tr("Try another word") : Wallpapers.effectiveDirectory
+            }
         }
     }
 }

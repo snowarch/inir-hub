@@ -9,8 +9,8 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// New notifications as NiHiL pieces at the top right: the app's glyph on a round piece, its name in figures, the
-// summary and body; the first action as a lit pill. A click opens it, the cross lets it go.
+// New notifications as tiles packed at the top right: the app's mark, its name in small capitals, the summary in heavy
+// type and the body; the first action on paper. A click opens it, the cross lets it go.
 Scope {
     id: root
 
@@ -27,22 +27,23 @@ Scope {
             WlrLayershell.layer: WlrLayer.Overlay
             anchors { top: true; right: true }
             margins { top: NihilStyle.edge; right: NihilStyle.edge }
-            implicitWidth: NihilStyle.s(380)
+            implicitWidth: NihilStyle.s(384)
             implicitHeight: Math.min(column.implicitHeight, (screen?.height ?? 800) * 0.7)
             mask: Region { item: column }
 
             Column {
                 id: column
                 width: parent.width
-                spacing: NihilStyle.gap
+                spacing: NihilStyle.seam
                 Repeater {
                     model: Notifications.popupList.slice(0, 4)
                     delegate: Rectangle {
                         id: card
                         required property var modelData
+                        readonly property bool critical: card.modelData.urgency === "critical"
                         width: column.width
-                        height: body.implicitHeight + NihilStyle.s(32)
-                        radius: NihilStyle.cardRadius
+                        height: Math.max(words.implicitHeight + NihilStyle.s(24), NihilStyle.s(68))
+                        radius: NihilStyle.tileRadius
                         color: NihilStyle.piece
 
                         MouseArea {
@@ -52,74 +53,84 @@ Scope {
                             onClicked: Notifications.attemptInvokeAction(card.modelData.notificationId, "default")
                         }
 
-                        Row {
-                            id: body
-                            x: NihilStyle.s(16); y: NihilStyle.s(16)
-                            width: parent.width - NihilStyle.s(32)
-                            spacing: NihilStyle.s(12)
-                            Rectangle {
-                                width: NihilStyle.s(40); height: width; radius: width / 2
-                                color: NihilStyle.pieceRaised
-                                IconImage {
-                                    anchors.centerIn: parent
-                                    implicitSize: NihilStyle.s(22)
-                                    source: Quickshell.iconPath(card.modelData.appIcon || AppSearch.guessIcon(card.modelData.appName), "dialog-information")
-                                }
+                        Rectangle {
+                            id: mark
+                            x: NihilStyle.s(10)
+                            y: NihilStyle.s(10)
+                            width: NihilStyle.s(48); height: width
+                            radius: NihilStyle.rowRadius
+                            color: card.critical ? NihilStyle.accent : NihilStyle.pieceRaised
+                            IconImage {
+                                anchors.centerIn: parent
+                                implicitSize: NihilStyle.s(26)
+                                source: Quickshell.iconPath(card.modelData.appIcon || AppSearch.guessIcon(card.modelData.appName), "dialog-information")
                             }
-                            Column {
-                                width: parent.width - NihilStyle.s(52) - close.width
-                                spacing: NihilStyle.s(3)
-                                NText {
-                                    width: parent.width
-                                    figures: true
-                                    font.pixelSize: NihilStyle.textSmall
-                                    font.capitalization: Font.AllUppercase
-                                    color: card.modelData.urgency === "critical" ? NihilStyle.accent : NihilStyle.inkSoft
-                                    text: card.modelData.appName
-                                }
-                                NText {
-                                    width: parent.width
-                                    font.pixelSize: NihilStyle.textLarge
-                                    font.weight: Font.Medium
-                                    text: card.modelData.summary
-                                }
-                                NText {
-                                    width: parent.width
-                                    visible: text.length > 0
-                                    color: NihilStyle.inkSoft
-                                    wrapMode: Text.Wrap
-                                    maximumLineCount: 3
-                                    textFormat: Text.PlainText
-                                    text: card.modelData.body
-                                }
-                                Row {
-                                    visible: card.modelData.actions.length > 0
-                                    spacing: NihilStyle.s(6)
-                                    topPadding: NihilStyle.s(6)
-                                    Repeater {
-                                        model: card.modelData.actions.slice(0, 3)
-                                        delegate: NButton {
-                                            id: action
-                                            required property var modelData
-                                            required property int index
-                                            height: NihilStyle.s(32)
-                                            width: label.implicitWidth + NihilStyle.s(28)
-                                            lit: action.index === 0
-                                            tone: NihilStyle.pieceRaised
-                                            onClicked: Notifications.attemptInvokeAction(card.modelData.notificationId, action.modelData.identifier)
-                                            NText { id: label; anchors.centerIn: parent; color: action.ink; text: action.modelData.text }
+                        }
+
+                        Column {
+                            id: words
+                            x: mark.x + mark.width + NihilStyle.s(12)
+                            y: NihilStyle.s(11)
+                            width: parent.width - x - close.width - NihilStyle.s(14)
+                            spacing: NihilStyle.s(2)
+                            NCaps {
+                                width: parent.width
+                                text: card.modelData.appName
+                                color: card.critical ? NihilStyle.accent : NihilStyle.inkSoft
+                            }
+                            NText {
+                                width: parent.width
+                                text: card.modelData.summary
+                                font.pixelSize: NihilStyle.textLarge
+                                font.weight: Font.Black
+                            }
+                            NText {
+                                width: parent.width
+                                visible: text.length > 0
+                                text: card.modelData.body
+                                textFormat: Text.PlainText
+                                wrapMode: Text.Wrap
+                                maximumLineCount: 3
+                                color: NihilStyle.inkSoft
+                            }
+                            Row {
+                                visible: card.modelData.actions.length > 0
+                                spacing: NihilStyle.seam
+                                topPadding: NihilStyle.s(6)
+                                Repeater {
+                                    model: card.modelData.actions.slice(0, 3)
+                                    delegate: NButton {
+                                        id: action
+                                        required property var modelData
+                                        required property int index
+                                        height: NihilStyle.s(34)
+                                        width: label.implicitWidth + NihilStyle.s(24)
+                                        paper: action.index === 0
+                                        tone: NihilStyle.pieceRaised
+                                        onClicked: Notifications.attemptInvokeAction(card.modelData.notificationId, action.modelData.identifier)
+                                        NText {
+                                            id: label
+                                            anchors.centerIn: parent
+                                            text: action.modelData.text
+                                            font.pixelSize: NihilStyle.textSmall
+                                            font.weight: Font.Bold
+                                            color: action.ink
                                         }
                                     }
                                 }
                             }
-                            NButton {
-                                id: close
-                                width: NihilStyle.s(28); height: width
-                                tone: NihilStyle.pieceRaised
-                                icon: "close"
-                                iconSize: NihilStyle.s(16)
-                                onClicked: Notifications.discardNotification(card.modelData.notificationId)
-                            }
+                        }
+
+                        NButton {
+                            id: close
+                            anchors.right: parent.right
+                            anchors.rightMargin: NihilStyle.s(6)
+                            y: NihilStyle.s(6)
+                            width: NihilStyle.s(28); height: width
+                            tone: NihilStyle.pieceRaised
+                            icon: "close"
+                            iconSize: NihilStyle.s(15)
+                            onClicked: Notifications.discardNotification(card.modelData.notificationId)
                         }
                     }
                 }

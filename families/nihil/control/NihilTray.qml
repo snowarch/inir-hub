@@ -10,8 +10,8 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The tray: what the chevron lifts, the running background apps as round keys on one piece over the bar's right
-// end. A tap opens the app, a right tap its own menu; an empty tray says so.
+// The tray: what the chevron lifts, the apps running behind as tiles over the bar's right end. A tap opens the app, a
+// right tap its own menu; an empty tray says so.
 NPopup {
     id: root
 
@@ -20,36 +20,38 @@ NPopup {
     onDismissed: NihilState.trayOpen = false
 
     readonly property var items: [...TrayService.pinnedItems, ...TrayService.unpinnedItems]
-    readonly property int columns: Math.max(1, Math.min(4, root.items.length))
+    readonly property int columns: Math.max(1, Math.min(5, root.items.length))
+    readonly property real side: NihilStyle.s(56)
 
-    NCard {
-        width: Math.max(NihilStyle.cells(root.columns), NihilStyle.cells(3)) + NihilStyle.panelPad * 2
-        height: (root.items.length > 0 ? grid.height : NihilStyle.cell) + NihilStyle.panelPad * 2
+    NRack {
+        width: root.items.length > 0 ? grid.implicitWidth : NihilStyle.s(220)
+        height: root.items.length > 0 ? grid.implicitHeight : root.side
         x: parent.width - width - NihilStyle.edge
         y: root.barBottom ? parent.height - height - root.edgeBottom : root.edgeTop
 
-        NText {
-            anchors.centerIn: parent
+        NTile {
+            anchors.fill: parent
             visible: root.items.length === 0
-            figures: true
-            text: Translation.tr("Nothing in the tray")
-            color: NihilStyle.inkSoft
-            font.pixelSize: NihilStyle.textSmall
+            NText {
+                anchors.centerIn: parent
+                text: Translation.tr("Nothing in the tray")
+                font.pixelSize: NihilStyle.textSmall
+                font.weight: Font.Bold
+            }
         }
 
         Grid {
             id: grid
-            anchors.right: parent.right
             columns: root.columns
-            spacing: NihilStyle.cellGap
+            spacing: NihilStyle.seam
             Repeater {
                 model: root.items
                 delegate: NButton {
                     id: key
                     required property SystemTrayItem modelData
-                    width: NihilStyle.cell
-                    height: NihilStyle.cell
-                    tone: NihilStyle.pieceRaised
+                    width: root.side
+                    height: root.side
+                    square: true
                     onClicked: {
                         if (!TrayService.smartToggle(key.modelData)) key.modelData.activate()
                         NihilState.trayOpen = false
@@ -61,7 +63,7 @@ NPopup {
                     }
                     IconImage {
                         anchors.centerIn: parent
-                        implicitSize: Math.round(key.width * 0.42)
+                        implicitSize: Math.round(key.width * 0.46)
                         source: TrayService.getSafeIcon(key.modelData)
                     }
                 }

@@ -8,9 +8,8 @@ import qs.modules.common.functions
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The power menu (the shell's session key): one piece at the screen's left over the bar. A raised head says goodbye
-// with the name in lit dots; under it the lit power disc and the restart disc, then the lock key beside sleep and
-// sign out.
+// The power menu (the shell's session key): one block over the Start key. The name on paper says goodbye; shutting down
+// is the signal's tile, restarting beside it, and the three lighter ways out under them.
 NPopup {
     id: root
 
@@ -18,11 +17,11 @@ NPopup {
     namespace: "nihil:power"
     onDismissed: GlobalStates.sessionOpen = false
 
-    readonly property real c: NihilStyle.cell
-    readonly property real g: NihilStyle.cellGap
+    readonly property real g: NihilStyle.seam
+    readonly property real wide: NihilStyle.s(372)
     readonly property string name: {
         const own = Config.options?.nihil?.power?.greeting ?? ""
-        return (own.length > 0 ? own : SystemInfo.username).toUpperCase()
+        return own.length > 0 ? own : SystemInfo.username
     }
 
     function act(what: string): void {
@@ -34,85 +33,105 @@ NPopup {
         else if (what === "logout") Session.logout()
     }
 
-    NCard {
-        id: card
-        width: NihilStyle.cells(4) + NihilStyle.panelPad * 2
-        height: head.height + NihilStyle.cells(2) * 2 + root.g * 2 + NihilStyle.panelPad
+    component Way: NButton {
+        id: way
+        property string glyph: ""
+        property string word: ""
+        property real glyphSize: NihilStyle.s(26)
+        property real wordSize: NihilStyle.s(15)
+        square: true
+        NIcon {
+            x: NihilStyle.s(14)
+            y: NihilStyle.s(14)
+            text: way.glyph
+            size: way.glyphSize
+            weight: 2.2
+            color: way.ink
+        }
+        NText {
+            x: NihilStyle.s(14)
+            width: way.width - NihilStyle.s(20)
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: NihilStyle.s(10)
+            text: way.word
+            font.pixelSize: way.wordSize
+            font.weight: Font.Black
+            color: way.ink
+        }
+    }
+
+    NRack {
+        width: root.wide
+        height: column.implicitHeight
         x: NihilStyle.edge
         y: root.barBottom ? parent.height - height - root.edgeBottom : root.edgeTop
 
-        Rectangle {
-            id: head
-            x: -card.pad
-            y: -card.pad
-            width: card.width
-            height: NihilStyle.s(104)
-            radius: card.radius
-            color: NihilStyle.pieceRaised
-            Column {
-                anchors.centerIn: parent
-                spacing: NihilStyle.s(14)
-                NText {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    figures: true
-                    font.bold: true
-                    font.letterSpacing: NihilStyle.s(1)
-                    text: Translation.tr("Goodbye,").toUpperCase()
-                    font.pixelSize: NihilStyle.textSmall
-                }
-                DotText {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.name
-                    color: NihilStyle.accent
-                    dot: NihilStyle.s(4)
-                    spacing: NihilStyle.s(1)
-                    fitWidth: head.width - NihilStyle.s(36)
-                }
-            }
-        }
-
-        Grid {
-            y: head.height - card.pad + root.g
-            columns: 2
+        Column {
+            id: column
             spacing: root.g
 
-            NButton {
-                width: NihilStyle.cells(2); height: width
-                lit: true
-                icon: "power_settings_new"
-                iconSize: NihilStyle.s(36)
-                onClicked: root.act("poweroff")
+            NTile {
+                id: head
+                width: root.wide
+                height: NihilStyle.s(112)
+                paper: true
+                caption: Translation.tr("Goodbye,")
+                NFigure {
+                    x: head.pad
+                    width: head.width - head.pad * 2
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: NihilStyle.s(6)
+                    size: NihilStyle.s(52)
+                    text: root.name
+                    elide: Text.ElideRight
+                    color: head.ink
+                }
             }
-            NButton {
-                width: NihilStyle.cells(2); height: width
-                tone: NihilStyle.pieceRaised
-                icon: "restart_alt"
-                iconSize: NihilStyle.s(36)
-                onClicked: root.act("reboot")
-            }
-            NButton {
-                width: NihilStyle.cells(2); height: width
-                square: true
-                radius: NihilStyle.s(18)
-                tone: NihilStyle.pieceRaised
-                icon: "lock"
-                iconSize: NihilStyle.s(36)
-                onClicked: root.act("lock")
-            }
-            Column {
+
+            Row {
                 spacing: root.g
-                NButton {
-                    width: NihilStyle.cells(2); height: (NihilStyle.cells(2) - root.g) / 2
-                    tone: NihilStyle.pieceRaised
-                    icon: "bedtime"
-                    iconSize: NihilStyle.s(22)
+                Way {
+                    width: (root.wide - root.g) / 2
+                    height: NihilStyle.s(136)
+                    lit: true
+                    glyph: "power_settings_new"
+                    glyphSize: NihilStyle.s(36)
+                    word: Translation.tr("Shut down")
+                    wordSize: NihilStyle.textTitle
+                    onClicked: root.act("poweroff")
+                }
+                Way {
+                    width: (root.wide - root.g) / 2
+                    height: NihilStyle.s(136)
+                    glyph: "restart_alt"
+                    glyphSize: NihilStyle.s(36)
+                    word: Translation.tr("Restart")
+                    wordSize: NihilStyle.textTitle
+                    onClicked: root.act("reboot")
+                }
+            }
+
+            Row {
+                spacing: root.g
+                Way {
+                    width: (root.wide - root.g * 2) / 3
+                    height: NihilStyle.s(96)
+                    glyph: "lock"
+                    word: Translation.tr("Lock")
+                    onClicked: root.act("lock")
+                }
+                Way {
+                    width: (root.wide - root.g * 2) / 3
+                    height: NihilStyle.s(96)
+                    glyph: "bedtime"
+                    word: Translation.tr("Sleep")
                     onClicked: root.act("suspend")
                 }
-                NButton {
-                    width: NihilStyle.cells(2); height: (NihilStyle.cells(2) - root.g) / 2
-                    tone: NihilStyle.pieceRaised
-                    icon: "logout"
-                    iconSize: NihilStyle.s(22)
+                Way {
+                    width: (root.wide - root.g * 2) / 3
+                    height: NihilStyle.s(96)
+                    glyph: "logout"
+                    word: Translation.tr("Sign out")
                     onClicked: root.act("logout")
                 }
             }

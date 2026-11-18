@@ -9,7 +9,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// What was copied, as one piece over the bar: the pins first, then the history newest first. The search keeps the
+// What was copied, as one block over the bar: the pins first, then the history newest first. The search keeps the
 // keys: arrows walk the rows, Enter copies the one marked and closes.
 NPopup {
     id: root
@@ -48,42 +48,41 @@ NPopup {
         GlobalStates.clipboardOpen = false
     }
 
-    NCard {
-        id: card
+    NRack {
+        id: rack
         readonly property real room: root.height - root.edgeTop - root.edgeBottom
-        width: Math.min(NihilStyle.s(480), root.width - NihilStyle.edge * 2)
-        height: Math.min(NihilStyle.s(600), room)
+        readonly property real g: NihilStyle.seam
+        width: Math.min(NihilStyle.s(500), root.width - NihilStyle.edge * 2)
+        height: Math.min(NihilStyle.s(620), room)
         x: Math.round((parent.width - width) / 2)
         y: root.barBottom ? parent.height - height - root.edgeBottom : root.edgeTop
-        pad: NihilStyle.s(14)
 
-        Item {
+        Row {
             id: head
-            width: parent.width
-            height: NihilStyle.s(40)
-            DotText {
+            height: NihilStyle.s(80)
+            spacing: rack.g
+            NTile {
                 id: title
-                anchors.verticalCenter: parent.verticalCenter
-                x: NihilStyle.s(6)
-                text: Translation.tr("Clipboard").toUpperCase()
-                dot: NihilStyle.s(3.2)
-                spacing: NihilStyle.s(1.9)
-                color: NihilStyle.ink
-            }
-            NText {
-                anchors.left: title.right
-                anchors.leftMargin: NihilStyle.s(12)
-                anchors.verticalCenter: parent.verticalCenter
-                figures: true
-                text: root.rows.length
-                font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
+                width: rack.width - wipe.width - rack.g
+                height: head.height
+                paper: true
+                caption: root.rows.length + " " + Translation.tr("Kept")
+                NText {
+                    x: title.pad
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: NihilStyle.s(6)
+                    text: Translation.tr("Clipboard")
+                    font.pixelSize: NihilStyle.textTitle
+                    font.weight: Font.Black
+                    color: title.ink
+                }
             }
             NConfirm {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                visible: Cliphist.entries.length > 0
-                height: NihilStyle.s(34)
+                id: wipe
+                width: NihilStyle.s(96)
+                height: head.height
+                square: true
+                interactive: Cliphist.entries.length > 0
                 glyph: "delete_sweep"
                 label: Translation.tr("Clear")
                 onConfirmed: Cliphist.wipe()
@@ -92,9 +91,9 @@ NPopup {
 
         NField {
             id: search
-            y: head.height + NihilStyle.s(10)
-            width: parent.width
-            height: NihilStyle.s(44)
+            y: head.height + rack.g
+            width: rack.width
+            height: NihilStyle.s(56)
             glyph: "search"
             placeholder: Translation.tr("Search what you copied")
             clearable: true
@@ -103,35 +102,43 @@ NPopup {
             onEntered: root.use(root.rows[list.currentIndex])
         }
 
-        ListView {
-            id: list
-            y: search.y + search.height + NihilStyle.s(10)
-            width: parent.width
-            height: parent.height - y
-            clip: true
-            spacing: NihilStyle.s(6)
-            boundsBehavior: Flickable.StopAtBounds
-            model: root.rows
-            highlightFollowsCurrentItem: false
-            onCurrentIndexChanged: list.positionViewAtIndex(list.currentIndex, ListView.Contain)
-            delegate: ClipRow {
-                required property var modelData
-                required property int index
-                width: list.width
-                row: modelData
-                marked: list.currentIndex === index
-                onUsed: root.use(modelData)
-                onHoveredChanged: if (hovered) list.currentIndex = index
-            }
-        }
+        NTile {
+            id: sheet
+            y: search.y + search.height + rack.g
+            width: rack.width
+            height: rack.height - y
 
-        NEmpty {
-            anchors.centerIn: list
-            width: list.width - NihilStyle.s(40)
-            visible: list.count === 0
-            glyph: root.query.length > 0 ? "search_off" : "content_paste"
-            title: root.query.length > 0 ? Translation.tr("Nothing matches") : Translation.tr("Nothing copied yet")
-            line: root.query.length > 0 ? Translation.tr("Try another word") : Translation.tr("What you copy lands here")
+            ListView {
+                id: list
+                x: NihilStyle.s(6)
+                y: NihilStyle.s(6)
+                width: sheet.width - NihilStyle.s(12)
+                height: sheet.height - NihilStyle.s(12)
+                clip: true
+                spacing: NihilStyle.seam
+                boundsBehavior: Flickable.StopAtBounds
+                model: root.rows
+                highlightFollowsCurrentItem: false
+                onCurrentIndexChanged: list.positionViewAtIndex(list.currentIndex, ListView.Contain)
+                delegate: ClipRow {
+                    required property var modelData
+                    required property int index
+                    width: list.width
+                    row: modelData
+                    marked: list.currentIndex === index
+                    onUsed: root.use(modelData)
+                    onHoveredChanged: if (hovered) list.currentIndex = index
+                }
+            }
+
+            NEmpty {
+                anchors.centerIn: parent
+                width: sheet.width - NihilStyle.s(40)
+                visible: list.count === 0
+                glyph: root.query.length > 0 ? "search_off" : "content_paste"
+                title: root.query.length > 0 ? Translation.tr("Nothing matches") : Translation.tr("Nothing copied yet")
+                line: root.query.length > 0 ? Translation.tr("Try another word") : Translation.tr("What you copy lands here")
+            }
         }
     }
 }

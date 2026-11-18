@@ -6,9 +6,9 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// The day as the reference's dot figures, its weekday and month beside them; under them the month, one round cell per
-// day, today lit in the signal. The arrows walk the months; a tap on the title comes back to this one.
-Item {
+// The day on a paper tile; beside it the month's name, the keys that walk the months and the day's hours as strokes;
+// under them the month as a grid of steps, today the signal's. A tap on the name comes back to this month.
+Column {
     id: root
 
     property bool live: true
@@ -21,113 +21,134 @@ Item {
     readonly property int lead: (root.first.getDay() - root.startDay + 7) % 7
     readonly property int days: new Date(root.first.getFullYear(), root.first.getMonth() + 1, 0).getDate()
     readonly property int rows: Math.ceil((root.lead + root.days) / 7)
-    readonly property real cell: (root.width - NihilStyle.s(6) * 6) / 7
+    readonly property real g: NihilStyle.seam
+    readonly property real dayShare: (root.now.getHours() * 60 + root.now.getMinutes()) / 1440
 
-    height: top.height + NihilStyle.s(14) + names.height + NihilStyle.s(6) + grid.height
-
-    Item {
-        id: top
-        width: parent.width
-        height: NihilStyle.s(62)
-        DotText {
-            id: dayDots
-            anchors.verticalCenter: parent.verticalCenter
-            x: NihilStyle.s(4)
-            text: String(root.now.getDate()).padStart(2, "0")
-            dot: NihilStyle.s(6)
-            color: NihilStyle.ink
-        }
-        Column {
-            anchors.left: dayDots.right
-            anchors.leftMargin: NihilStyle.s(14)
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: NihilStyle.s(2)
-            NText {
-                text: Qt.locale().dayName(root.now.getDay(), Locale.LongFormat)
-                font.pixelSize: NihilStyle.textLarge
-                font.weight: Font.DemiBold
-                font.capitalization: Font.Capitalize
-            }
-            MouseArea {
-                width: monthWord.implicitWidth; height: monthWord.implicitHeight
-                cursorShape: root.shift !== 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                onClicked: root.shift = 0
-                NText {
-                    id: monthWord
-                    text: root.first.toLocaleDateString(Qt.locale(), "MMMM yyyy")
-                    font.capitalization: Font.Capitalize
-                    color: root.shift === 0 ? NihilStyle.inkSoft : NihilStyle.accent
-                }
-            }
-        }
-        Row {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: NihilStyle.s(6)
-            NButton {
-                width: NihilStyle.s(36); height: width
-                tone: NihilStyle.pieceRaised
-                icon: "chevron_left"
-                iconSize: NihilStyle.s(20)
-                onClicked: root.shift -= 1
-            }
-            NButton {
-                width: NihilStyle.s(36); height: width
-                tone: NihilStyle.pieceRaised
-                icon: "chevron_right"
-                iconSize: NihilStyle.s(20)
-                onClicked: root.shift += 1
-            }
-        }
-    }
+    spacing: root.g
 
     Row {
-        id: names
-        y: top.height + NihilStyle.s(14)
-        spacing: NihilStyle.s(6)
-        Repeater {
-            model: 7
-            delegate: NText {
-                required property int index
-                width: root.cell
-                horizontalAlignment: Text.AlignHCenter
-                text: Qt.locale().dayName((root.startDay + index) % 7, Locale.NarrowFormat)
-                font.pixelSize: NihilStyle.textSmall
-                font.capitalization: Font.AllUppercase
-                color: NihilStyle.inkSoft
+        spacing: root.g
+
+        NTile {
+            id: day
+            width: NihilStyle.s(150)
+            height: NihilStyle.s(136)
+            paper: true
+            caption: Qt.locale().dayName(root.now.getDay(), Locale.LongFormat)
+            NFigure {
+                x: day.pad - NihilStyle.s(2)
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: NihilStyle.s(2)
+                size: NihilStyle.s(92)
+                text: String(root.now.getDate())
+                color: day.ink
+            }
+        }
+
+        Column {
+            spacing: root.g
+
+            NTile {
+                id: month
+                width: root.width - day.width - root.g
+                height: NihilStyle.s(84)
+                interactive: root.shift !== 0
+                caption: String(root.first.getFullYear())
+                onClicked: root.shift = 0
+                NText {
+                    x: month.pad
+                    width: month.width - month.pad * 2
+                    y: NihilStyle.s(28)
+                    text: Qt.locale().standaloneMonthName(root.first.getMonth(), Locale.LongFormat)
+                    font.pixelSize: NihilStyle.textTitle
+                    font.weight: Font.Black
+                    font.capitalization: Font.Capitalize
+                    color: root.shift === 0 ? NihilStyle.ink : NihilStyle.accent
+                }
+                NTicks {
+                    x: month.pad
+                    width: month.width - month.pad * 2
+                    height: NihilStyle.s(10)
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: NihilStyle.s(10)
+                    count: 24
+                    level: root.dayShare
+                    marked: true
+                }
+            }
+            Row {
+                spacing: root.g
+                NButton {
+                    width: (month.width - root.g) / 2
+                    height: NihilStyle.s(48)
+                    square: true
+                    icon: "chevron_left"
+                    iconSize: NihilStyle.s(22)
+                    onClicked: root.shift -= 1
+                }
+                NButton {
+                    width: (month.width - root.g) / 2
+                    height: NihilStyle.s(48)
+                    square: true
+                    icon: "chevron_right"
+                    iconSize: NihilStyle.s(22)
+                    onClicked: root.shift += 1
+                }
             }
         }
     }
 
-    Grid {
-        id: grid
-        y: names.y + names.height + NihilStyle.s(6)
-        columns: 7
-        spacing: NihilStyle.s(6)
-        Repeater {
-            model: root.rows * 7
-            delegate: Rectangle {
-                id: day
-                required property int index
-                readonly property int number: day.index - root.lead + 1
-                readonly property bool inMonth: day.number >= 1 && day.number <= root.days
-                readonly property bool today: root.shift === 0 && day.number === root.now.getDate()
-                readonly property bool weekend: {
-                    const weekday = (root.startDay + day.index) % 7
-                    return weekday === 0 || weekday === 6
+    NTile {
+        id: sheet
+        width: root.width
+        height: grid.y + grid.height + NihilStyle.s(10)
+
+        Row {
+            id: names
+            x: NihilStyle.s(10)
+            y: NihilStyle.s(10)
+            spacing: grid.spacing
+            Repeater {
+                model: 7
+                delegate: NCaps {
+                    required property int index
+                    width: grid.cell
+                    horizontalAlignment: Text.AlignHCenter
+                    text: Qt.locale().dayName((root.startDay + index) % 7, Locale.NarrowFormat)
+                    color: NihilStyle.inkSoft
                 }
-                width: root.cell
-                height: Math.min(root.cell, NihilStyle.s(36))
-                radius: height / 2
-                color: day.today ? NihilStyle.accent : "transparent"
-                NText {
-                    anchors.centerIn: parent
-                    visible: day.inMonth
-                    figures: true
-                    text: day.number
-                    font.pixelSize: NihilStyle.textSmall
-                    font.weight: day.today ? Font.Bold : Font.Medium
-                    color: day.today ? NihilStyle.onAccent : day.weekend ? NihilStyle.inkSoft : NihilStyle.ink
+            }
+        }
+
+        Grid {
+            id: grid
+            readonly property real cell: (sheet.width - NihilStyle.s(20) - grid.spacing * 6) / 7
+            x: NihilStyle.s(10)
+            y: names.y + names.height + NihilStyle.s(6)
+            columns: 7
+            spacing: NihilStyle.s(3)
+            Repeater {
+                model: root.rows * 7
+                delegate: Rectangle {
+                    id: step
+                    required property int index
+                    readonly property int number: step.index - root.lead + 1
+                    readonly property bool inMonth: step.number >= 1 && step.number <= root.days
+                    readonly property bool today: root.shift === 0 && step.number === root.now.getDate()
+                    readonly property bool gone: root.shift < 0 || (root.shift === 0 && step.number < root.now.getDate())
+                    width: grid.cell
+                    height: NihilStyle.s(34)
+                    radius: NihilStyle.s(7 * NihilStyle.corners)
+                    color: !step.inMonth ? "transparent" : step.today ? NihilStyle.accent : NihilStyle.pieceRaised
+                    NText {
+                        anchors.centerIn: parent
+                        visible: step.inMonth
+                        figures: true
+                        text: step.number
+                        font.pixelSize: NihilStyle.s(13)
+                        font.weight: step.today ? Font.Black : Font.DemiBold
+                        color: step.today ? NihilStyle.onAccent : step.gone ? NihilStyle.inkSoft : NihilStyle.ink
+                    }
                 }
             }
         }

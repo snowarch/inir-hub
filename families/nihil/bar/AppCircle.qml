@@ -7,8 +7,8 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// One app on the bar: its icon on a round piece, in ink while NiHiL draws icons in one colour. A dot under the icon
-// says it is open, in the signal colour while it has the focus. A click focuses, hides or launches it, as Waffle's.
+// One app on the bar: its icon on a tile, in ink while NiHiL draws icons in one colour. The app in front is the paper
+// tile; a stroke under the icon says it is open. A click focuses, hides or launches it.
 NButton {
     id: root
 
@@ -17,6 +17,7 @@ NButton {
     readonly property bool open: (root.modelData.toplevels ?? []).length > 0
     readonly property bool focused: (root.modelData.toplevels ?? []).some(t => t.activated)
     readonly property bool monochrome: Config.options?.nihil?.bar?.monochromeIcons ?? true
+    paper: root.focused
 
     function windowIds(): var {
         return (root.modelData.toplevels ?? []).map(t => Number(t?.niriWindowId ?? -1)).filter(id => id > 0)
@@ -45,17 +46,18 @@ NButton {
 
     NAppIcon {
         anchors.centerIn: parent
-        size: Math.round(root.width * 0.46)
+        size: Math.round(root.width * 0.52)
         iconName: AppSearch.guessIcon(root.modelData.appId)
         monochrome: root.monochrome
+        onPaper: root.paper
     }
     Rectangle {
         visible: root.open
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: NihilStyle.s(5)
-        width: NihilStyle.s(root.focused ? 10 : 4)
-        height: NihilStyle.s(4)
+        anchors.bottomMargin: NihilStyle.s(4)
+        width: NihilStyle.s(root.focused ? 16 : 8)
+        height: NihilStyle.s(3)
         radius: height / 2
         color: root.focused ? NihilStyle.accent : root.ink
         Behavior on width { NumberAnimation { duration: NihilStyle.quick } }

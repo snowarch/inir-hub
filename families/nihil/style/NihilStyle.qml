@@ -62,9 +62,12 @@ Singleton {
     readonly property real pieceAlpha: root.clamp(Number(root.theme?.opacity ?? 1), 0.55, 1)
     readonly property real _tintHue: root.m3.m3primary.hslHue < 0 ? 0 : root.m3.m3primary.hslHue
     function tone(lightness: real, alpha: real): color { return Qt.hsla(root._tintHue, root.tint, lightness, alpha) }
-    readonly property color piece: root.tone(root.dark ? Math.min(0.13, Math.max(0.09, root._base)) : 0.94, root.pieceAlpha)
-    readonly property color pieceRaised: root.tone(root.dark ? 0.2 : 0.86, 1)
-    readonly property color pieceHover: root.tone(root.dark ? 0.25 : 0.8, 1)
+    readonly property color piece: root.tone(root.dark ? 0.085 : 0.93, root.pieceAlpha)
+    readonly property color pieceRaised: root.tone(root.dark ? 0.16 : 0.85, 1)
+    readonly property color pieceHover: root.tone(root.dark ? 0.22 : 0.79, 1)
+    // The paper tile: the one piece of a block printed the other way round, the block's lead.
+    readonly property color plate: root.ink
+    readonly property color onPlate: root.tone(root.dark ? 0.07 : 0.97, 1)
     readonly property color well: root.tone(root.dark ? 0.06 : 0.99, 1)
     // The colour of the ground itself, the ink a lit piece prints in when the signal is the ink.
     readonly property color paper: root.tone(root.dark ? 0.08 : 0.98, 1)
@@ -80,33 +83,36 @@ Singleton {
     // Measure: one unit scaled with the shell's type size and NiHiL's own scale row.
     readonly property real scale: (root.options?.theme?.scale ?? 1) * (Appearance.fontSizeScale ?? 1)
     function s(px: real): real { return Math.round(px * root.scale) }
-    readonly property real button: root.s(54)
-    readonly property real gap: root.s(9)
-    readonly property real edge: root.s(16)
+    readonly property real button: root.s(46)
+    // Tiles stand a seam apart, packed into blocks.
+    readonly property real seam: root.s(4)
+    readonly property real tileRadius: root.s(12 * root.corners)
+    readonly property real gap: root.seam
+    readonly property real edge: root.s(10)
     // Corners: `corners` softens or tightens every piece; `softKeys` turns round keys into squircles.
     readonly property real corners: root.clamp(Number(root.theme?.corners ?? 1), 0.35, 1.25)
-    readonly property bool softKeys: String(root.theme?.keys ?? "round") === "soft"
+    readonly property bool roundKeys: String(root.theme?.keys ?? "tile") === "round"
     function keyRadius(width: real, height: real, square: bool): real {
         const side = Math.min(width, height)
-        return square || root.softKeys ? Math.round(side * 0.3 * Math.min(1, root.corners)) : side / 2
+        return root.roundKeys && !square ? side / 2 : Math.min(side / 2, root.tileRadius)
     }
-    readonly property real rowRadius: root.s(14 * root.corners)
-    readonly property real rowHeight: root.s(52)
+    readonly property real rowRadius: root.s(10 * root.corners)
+    readonly property real rowHeight: root.s(48)
     // A section is one piece; its rows sit `sectionPad` in, their corners concentric with the piece's.
-    readonly property real sectionPad: root.s(6)
+    readonly property real sectionPad: root.s(4)
     readonly property real sectionRowRadius: Math.max(root.s(4), root.cardRadius - root.sectionPad)
     readonly property bool squareDots: String(root.theme?.dotShape ?? "round") === "square"
-    readonly property real cardRadius: root.s(26 * root.corners)
+    readonly property real cardRadius: root.s(16 * root.corners)
     readonly property real pad: root.s(16)
     // The bar floats: its pieces stand off the screen's edge by `barMargin`; the room it keeps is both.
-    readonly property real barMargin: root.s(14)
+    readonly property real barMargin: root.s(8)
     readonly property real barZone: root.button + root.barMargin * 2
     // A panel is one piece holding a grid of `cell` keys `cellGap` apart (the control and power panels are four cells
     // wide), `panelPad` in from its rounded edge.
-    readonly property real cell: root.s(52)
-    readonly property real cellGap: root.s(8)
-    readonly property real panelPad: root.s(11)
-    readonly property real panelRadius: root.s(24 * root.corners)
+    readonly property real cell: root.s(68)
+    readonly property real cellGap: root.seam
+    readonly property real panelPad: root.s(10)
+    readonly property real panelRadius: root.s(16 * root.corners)
     function cells(n: int): real { return n * root.cell + (n - 1) * root.cellGap }
 
     // Type: Hanken Grotesk to read, figures in its tabular numbers so a clock or a percent never shifts; Doto, a
@@ -122,6 +128,7 @@ Singleton {
     readonly property string grotesk: String(root.theme?.font ?? "grotesk") === "system" && root.systemFont.length > 0
         ? root.systemFont : root.loaded(root.sansLoader, "sans-serif")
     readonly property string dots: root.loaded(root.dotsLoader, root.grotesk)
+    readonly property real textMicro: root.s(11)
     readonly property real textSmall: root.s(12)
     readonly property real textBody: root.s(14)
     readonly property real textLarge: root.s(17)

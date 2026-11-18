@@ -8,8 +8,8 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// Volume and brightness as a pill over the bar: the glyph on a round piece, the level as a row of dots lit from the
-// left, the figure at the end. It shows when the level moves and leaves after a moment.
+// Volume and brightness as two tiles over the bar: the glyph on the signal's, the level in strokes and the figure on the
+// other. It shows when the level moves and leaves after a moment.
 Scope {
     id: root
 
@@ -63,42 +63,47 @@ Scope {
             readonly property bool barBottom: Config.options?.nihil?.bar?.bottom ?? true
             anchors { bottom: barBottom; top: !barBottom }
             margins { bottom: barBottom ? NihilStyle.barZone : 0; top: barBottom ? 0 : NihilStyle.barZone }
-            implicitWidth: pill.width
-            implicitHeight: pill.height
+            implicitWidth: pill.implicitWidth
+            implicitHeight: pill.implicitHeight
             mask: Region {}
 
-            NButton {
+            Row {
                 id: pill
-                width: NihilStyle.s(320)
-                height: NihilStyle.button
+                spacing: NihilStyle.seam
                 opacity: root.shown ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
+
                 NButton {
-                    x: NihilStyle.s(4); y: NihilStyle.s(4)
-                    width: parent.height - NihilStyle.s(8); height: width
+                    width: NihilStyle.s(56); height: width
+                    square: true
+                    interactive: false
                     lit: true
                     icon: root.glyph
-                    iconSize: NihilStyle.s(20)
+                    iconSize: NihilStyle.s(26)
                 }
-                DotGrid {
-                    x: parent.height + NihilStyle.s(4)
-                    width: parent.width - x - figure.width - NihilStyle.s(24)
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: width / 16
-                    columns: 16
-                    rows: 1
-                    level: root.level
-                    columnFirst: false
-                    litColor: NihilStyle.ink
-                    offColor: NihilStyle.pieceRaised
-                }
-                NText {
-                    id: figure
-                    anchors.right: parent.right
-                    anchors.rightMargin: NihilStyle.s(18)
-                    anchors.verticalCenter: parent.verticalCenter
-                    figures: true
-                    text: Math.round(root.level * 100)
+                NTile {
+                    id: meter
+                    width: NihilStyle.s(320); height: NihilStyle.s(56)
+                    NTicks {
+                        x: meter.pad
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: meter.width - meter.pad * 2 - figure.width - NihilStyle.s(14)
+                        height: NihilStyle.s(24)
+                        count: 32
+                        level: root.level
+                        marked: true
+                    }
+                    NFigure {
+                        id: figure
+                        anchors.right: parent.right
+                        anchors.rightMargin: meter.pad
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: NihilStyle.s(50)
+                        horizontalAlignment: Text.AlignRight
+                        size: NihilStyle.s(28)
+                        text: Math.round(root.level * 100)
+                        color: meter.ink
+                    }
                 }
             }
         }

@@ -1,18 +1,19 @@
 import QtQuick
 
-// NiHiL's button: a flat round piece (a circle, a squircle with `square`, a pill when it is wider than tall) with one
-// glyph or its own content. `lit` paints it in the signal colour; `split` paints its left half lit, as the bar's tray
-// chevron is.
+// NiHiL's tile: a flat block with one glyph or its own content. `lit` prints it in the signal colour, `paper` the other
+// way round (white on a dark desk), the lead of its block.
 Rectangle {
     id: root
 
     property string icon: ""
-    property real iconSize: Math.round(Math.min(root.width, root.height) * 0.42)
+    property real iconSize: Math.round(Math.min(root.width, root.height) * 0.46)
     property bool lit: false
-    property bool split: false
+    property bool paper: false
     property bool square: false
+    // A tile that only shows something leaves the hand alone.
+    property bool interactive: true
     property color tone: NihilStyle.piece
-    property color ink: root.lit ? NihilStyle.onAccent : NihilStyle.ink
+    property color ink: root.lit ? NihilStyle.onAccent : root.paper ? NihilStyle.onPlate : NihilStyle.ink
     readonly property bool hovered: mouse.containsMouse
     readonly property bool pressed: mouse.pressed
     property alias mouseArea: mouse
@@ -24,18 +25,11 @@ Rectangle {
     implicitWidth: NihilStyle.button
     implicitHeight: NihilStyle.button
     radius: NihilStyle.keyRadius(width, height, root.square)
-    color: root.lit ? NihilStyle.accent : root.hovered ? Qt.tint(root.tone, NihilStyle.hoverVeil) : root.tone
-    scale: root.pressed ? 0.94 : 1
+    color: root.lit ? NihilStyle.accent : root.paper ? NihilStyle.plate
+        : root.hovered ? Qt.tint(root.tone, NihilStyle.hoverVeil) : root.tone
+    scale: root.pressed ? 0.97 : 1
     Behavior on scale { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-
-    Item {
-        visible: root.split
-        width: Math.round(parent.width / 2)
-        height: parent.height
-        clip: true
-        Rectangle { width: root.width; height: root.height; radius: root.radius; color: NihilStyle.accent }
-    }
 
     NIcon {
         anchors.centerIn: parent
@@ -45,13 +39,13 @@ Rectangle {
         color: root.ink
     }
 
-    // Above the button's own hand: a key inside (a chevron, the time in the status pill) answers for itself, while the
-    // words and glyphs let every other click through.
+    // Above the tile's own hand: a key inside answers for itself, words and glyphs let every other click through.
     Item { id: holder; anchors.fill: parent; z: 1 }
 
     MouseArea {
         id: mouse
         anchors.fill: parent
+        enabled: root.interactive
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton

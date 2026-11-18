@@ -28,7 +28,9 @@ Rectangle {
 
     height: Math.max(NihilStyle.s(50), words.implicitHeight + NihilStyle.s(22))
     radius: NihilStyle.rowRadius
-    color: root.marked ? NihilStyle.pieceHover : NihilStyle.pieceRaised
+    color: root.marked ? NihilStyle.plate : NihilStyle.pieceRaised
+    readonly property color inkOn: root.marked ? NihilStyle.onPlate : NihilStyle.ink
+    readonly property color inkOff: root.marked ? Qt.alpha(NihilStyle.onPlate, 0.62) : NihilStyle.inkSoft
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
 
     MouseArea {
@@ -39,22 +41,13 @@ Rectangle {
         onClicked: root.used()
     }
 
-    Rectangle {
-        visible: root.marked
-        x: NihilStyle.s(6)
-        anchors.verticalCenter: parent.verticalCenter
-        width: NihilStyle.s(4); height: parent.height - NihilStyle.s(24)
-        radius: width / 2
-        color: NihilStyle.accent
-    }
-
     NIcon {
         id: glyph
-        x: NihilStyle.s(16)
+        x: NihilStyle.s(12)
         anchors.verticalCenter: parent.verticalCenter
         text: root.image ? "image" : root.row.pinned ? "push_pin" : "notes"
         size: NihilStyle.s(18)
-        color: root.row.pinned ? NihilStyle.accent : NihilStyle.inkSoft
+        color: root.row.pinned ? NihilStyle.accent : root.inkOff
     }
 
     NText {
@@ -68,7 +61,8 @@ Rectangle {
         textFormat: Text.PlainText
         wrapMode: Text.Wrap
         maximumLineCount: 2
-        color: root.image ? NihilStyle.inkSoft : NihilStyle.ink
+        font.weight: Font.DemiBold
+        color: root.image ? root.inkOff : root.inkOn
     }
 
     Row {
@@ -84,6 +78,7 @@ Rectangle {
             visible: root.row.pinned || Cliphist.isPinnable(root.row.entry)
             width: NihilStyle.s(32); height: width
             tone: "transparent"
+            ink: root.row.pinned ? NihilStyle.onAccent : root.inkOn
             icon: "push_pin"
             iconSize: NihilStyle.s(16)
             lit: root.row.pinned
@@ -94,6 +89,7 @@ Rectangle {
             visible: !root.row.pinned
             width: NihilStyle.s(32); height: width
             tone: "transparent"
+            ink: root.inkOn
             icon: "close"
             iconSize: NihilStyle.s(16)
             onClicked: Cliphist.deleteEntry(root.row.entry)

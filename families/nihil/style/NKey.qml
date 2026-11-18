@@ -1,6 +1,6 @@
 import QtQuick
 
-// A pill key with a glyph and a word (Bluetooth, Settings, Energy Saver), centred, lit in the signal when on. `opens`
+// A key with a glyph and a word (Bluetooth, Settings, Energy Saver), centred, lit in the signal when on. `opens`
 // adds a chevron at its end that leads to the key's list (`opened`); the rest of the key still toggles.
 NButton {
     id: root
@@ -29,7 +29,7 @@ NButton {
             width: Math.min(implicitWidth, root.width - NihilStyle.s(root.glyph.length > 0 ? 48 : 20) - (root.opens ? NihilStyle.s(22) : 0))
             text: root.label
             font.pixelSize: NihilStyle.s(13)
-            font.weight: Font.Medium
+            font.weight: Font.Bold
             color: root.ink
             horizontalAlignment: Text.AlignHCenter
             wrapMode: root.stacked ? Text.WordWrap : Text.NoWrap

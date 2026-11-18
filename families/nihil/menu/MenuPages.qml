@@ -7,7 +7,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The settings behind each of the menu's pills, one column of rows per page.
+// The settings behind each of the menu's tiles, one column of rows per page.
 Column {
     id: root
 
@@ -23,8 +23,8 @@ Column {
         spacing: root.spacing
         MenuRow {
             width: root.w; label: Translation.tr("Faces"); key: "nihil.widgets.design"; fallback: "nihil"
-            choices: [{ value: "nihil", label: "NiHiL" }, { value: "material", label: Translation.tr("Material") },
-                { value: "instrument", label: Translation.tr("Instrument") }, { value: "readout", label: Translation.tr("Readout") }]
+            choices: [{ value: "nihil", label: "NiHiL" }, { value: "instrument", label: Translation.tr("Instrument") },
+                { value: "readout", label: Translation.tr("Readout") }]
         }
         MenuRow {
             width: root.w; label: Translation.tr("Clock"); key: "nihil.clock.style"; fallback: "dots"
@@ -88,25 +88,29 @@ Column {
     }
 
     // About.
-    Column {
+    NTile {
+        id: about
         visible: root.page === "about"
-        spacing: NihilStyle.s(10)
         width: root.w
-        NText {
-            width: root.w
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
-            figures: true
-            text: Translation.tr("NiHiL %1").arg(Plugins.manifests?.nihil?.version ?? "")
-            font.pixelSize: NihilStyle.textBody
-        }
-        NText {
-            width: root.w
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
-            text: Translation.tr("Flat pieces, round keys, one signal colour, the time in dots. A family of iNiR.")
-            color: NihilStyle.inkSoft
-            elide: Text.ElideNone
+        height: words.implicitHeight + about.pad * 2
+        Column {
+            id: words
+            x: about.pad
+            y: about.pad
+            width: about.width - about.pad * 2
+            spacing: NihilStyle.s(6)
+            NFigure {
+                size: NihilStyle.s(30)
+                text: Plugins.manifests?.nihil?.version ?? ""
+                color: about.ink
+            }
+            NText {
+                width: parent.width
+                wrapMode: Text.WordWrap
+                elide: Text.ElideNone
+                text: Translation.tr("Tiles packed in blocks, three inks and one signal colour. A family of iNiR.")
+                color: about.inkSoft
+            }
         }
     }
 }

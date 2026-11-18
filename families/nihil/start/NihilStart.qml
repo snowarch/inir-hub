@@ -7,87 +7,94 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// Start (the shell's search key): one piece over the middle of the bar. The apps on the left; on the right the search
-// field, the home folders, storage and memory, what plays, the weather, the battery and the power keys. Typing
-// filters the apps; Enter opens the first.
+// Start (the shell's search key): one block over the middle of the bar. The search line leads on paper with the apps
+// under it; beside them what plays, the machine's readings, the home folders and the power keys. Typing filters the
+// apps, the arrows walk them, Enter opens the one marked.
 NPopup {
     id: root
 
     open: NihilState.startOpen
     namespace: "nihil:start"
-    onDismissed: GlobalStates.searchOpen = false
+    onDismissed: root.done()
     onOpenChanged: {
         if (!root.open) return
         field.text = ""
+        apps.at = 0
         field.forceActiveFocus()
         ResourceUsage.ensureRunning()
     }
 
-    readonly property real g: NihilStyle.cellGap
-
     function done(): void { GlobalStates.searchOpen = false }
 
-    NCard {
-        id: card
-        width: NihilStyle.cells(4) * 2 + root.g + NihilStyle.panelPad * 2
-        height: side.y + side.height + NihilStyle.panelPad * 2
+    NRack {
+        id: rack
+        width: NihilStyle.s(768)
+        height: side.implicitHeight
         x: Math.round((parent.width - width) / 2)
         y: root.barBottom ? parent.height - height - root.edgeBottom : root.edgeTop
 
-        StartApps {
-            id: apps
-            width: NihilStyle.cells(4)
-            height: parent.height
-            query: field.text
-            onLaunched: root.done()
-        }
-
-        NButton {
+        NTile {
             id: search
-            x: NihilStyle.cells(4) + root.g
-            width: NihilStyle.cells(4)
-            height: NihilStyle.cell
-            tone: NihilStyle.pieceRaised
+            width: apps.width
+            height: NihilStyle.s(76)
+            paper: true
+            interactive: true
             onClicked: field.forceActiveFocus()
-            NButton {
+
+            NIcon {
                 id: lens
-                x: NihilStyle.s(6)
+                x: search.pad
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.height - NihilStyle.s(12); height: width
-                icon: "search"
+                text: "search"
+                size: NihilStyle.s(26)
+                weight: 2.4
+                color: search.ink
             }
             TextInput {
                 id: field
                 anchors.left: lens.right
                 anchors.leftMargin: NihilStyle.s(12)
                 anchors.right: parent.right
-                anchors.rightMargin: NihilStyle.s(16)
+                anchors.rightMargin: search.pad
                 anchors.verticalCenter: parent.verticalCenter
                 font.family: NihilStyle.grotesk
-                font.pixelSize: NihilStyle.textBody
-                color: NihilStyle.ink
+                font.pixelSize: NihilStyle.s(26)
+                font.weight: Font.Bold
+                font.letterSpacing: -NihilStyle.s(1) * 0.5
+                color: search.ink
                 selectionColor: NihilStyle.accent
                 selectedTextColor: NihilStyle.onAccent
+                selectByMouse: true
                 clip: true
-                Keys.onReturnPressed: apps.launch(apps.first)
-                Keys.onEnterPressed: apps.launch(apps.first)
+                onTextChanged: apps.at = 0
+                Keys.onReturnPressed: apps.launch(apps.marked)
+                Keys.onEnterPressed: apps.launch(apps.marked)
                 Keys.onEscapePressed: root.done()
+                Keys.onUpPressed: apps.walk(-1)
+                Keys.onDownPressed: apps.walk(1)
                 NText {
-                    anchors.fill: parent
+                    anchors.verticalCenter: parent.verticalCenter
                     visible: field.text.length === 0
-                    figures: true
-                    text: Translation.tr("Search this PC").toUpperCase()
-                    color: NihilStyle.inkSoft
+                    text: Translation.tr("Search")
+                    font: field.font
+                    color: Qt.alpha(search.ink, 0.42)
                 }
             }
         }
 
+        StartApps {
+            id: apps
+            y: search.height + NihilStyle.seam
+            width: NihilStyle.s(404)
+            height: rack.height - y
+            query: field.text
+            onLaunched: root.done()
+        }
+
         StartSide {
             id: side
-            x: search.x
-            y: search.height + root.g
-            w: NihilStyle.cells(4)
-            live: root.open
+            x: apps.width + NihilStyle.seam
+            width: rack.width - x
             onDone: root.done()
         }
     }

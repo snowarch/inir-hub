@@ -5,7 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// One setting in NiHiL's menu: a raised pill with its name, and its value as a chip at the right end (lit while on).
+// One setting in NiHiL's menu: a tile with its name, and its value as a chip at the right end (on paper while on).
 // A tap moves the value to the next of `choices` ([{ value, label }]), or flips a yes/no key; `action` instead runs it.
 NButton {
     id: root
@@ -26,8 +26,8 @@ NButton {
         : String(root.choices[root.at]?.label ?? "")
     readonly property bool on: root.action !== null ? root.actionOn : root.isSwitch ? Boolean(root.value) : root.at > 0
 
-    height: NihilStyle.s(50)
-    tone: NihilStyle.pieceRaised
+    height: NihilStyle.s(56)
+    square: true
     onClicked: {
         if (root.action !== null) { root.action(); return }
         if (root.isSwitch) { Config.setNestedValue(root.key, !root.value); return }
@@ -36,13 +36,13 @@ NButton {
 
     NText {
         anchors.left: parent.left
-        anchors.leftMargin: NihilStyle.s(20)
+        anchors.leftMargin: NihilStyle.s(14)
         anchors.right: chip.left
         anchors.rightMargin: NihilStyle.s(10)
         anchors.verticalCenter: parent.verticalCenter
         text: root.label
         font.pixelSize: NihilStyle.textBody
-        font.weight: Font.Medium
+        font.weight: Font.Bold
     }
     Rectangle {
         id: chip
@@ -51,16 +51,17 @@ NButton {
         anchors.verticalCenter: parent.verticalCenter
         height: parent.height - NihilStyle.s(16)
         width: Math.max(height, value.implicitWidth + NihilStyle.s(22))
-        radius: height / 2
-        color: root.on ? NihilStyle.accent : NihilStyle.piece
+        radius: NihilStyle.rowRadius
+        color: root.on ? NihilStyle.plate : NihilStyle.pieceRaised
         Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
         NText {
             id: value
             anchors.centerIn: parent
             figures: true
             text: root.shown.toUpperCase()
-            font.pixelSize: NihilStyle.textSmall
-            color: root.on ? NihilStyle.onAccent : NihilStyle.ink
+            font.pixelSize: NihilStyle.textMicro
+            font.weight: Font.Bold
+            color: root.on ? NihilStyle.onPlate : NihilStyle.ink
         }
     }
 }

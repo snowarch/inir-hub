@@ -25,3 +25,11 @@ NSpinner 1.0 NSpinner.qml
 NEmpty 1.0 NEmpty.qml
 NSwatch 1.0 NSwatch.qml
 NHueDots 1.0 NHueDots.qml
+NCaps 1.0 NCaps.qml
+NFigure 1.0 NFigure.qml
+NTicks 1.0 NTicks.qml
+NRack 1.0 NRack.qml
+NTile 1.0 NTile.qml
+NStat 1.0 NStat.qml
+NPlayer 1.0 NPlayer.qml
+NFader 1.0 NFader.qml

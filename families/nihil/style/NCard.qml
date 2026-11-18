@@ -14,7 +14,7 @@ Rectangle {
     layer.effect: MultiEffect {
         shadowEnabled: true
         shadowColor: NihilStyle.shadow
-        shadowBlur: 0.6
+        shadowBlur: 0.7
         shadowVerticalOffset: NihilStyle.s(4)
     }
 

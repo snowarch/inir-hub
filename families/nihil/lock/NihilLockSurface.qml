@@ -10,9 +10,8 @@ import qs.modules.common.functions
 import qs.modules.shared.lock
 import qs.modules.nihil.style
 
-// NiHiL's lock: the wallpaper softened, the time in large dots (hours lit, minutes in ink), the day in the serif
-// under it, and at the foot one pill for the password, each typed letter a dot, beside a lit key that unlocks.
-// Power and restart wait at the left; the battery at the right.
+// NiHiL's lock: the wallpaper softened and one block in its middle. The hours in heavy dots on paper, the minutes beside
+// them on the signal's tile, the day and the charge, then power, restart, the password and the key that unlocks.
 MouseArea {
     id: root
 
@@ -69,132 +68,156 @@ MouseArea {
         brightness: NihilStyle.dark ? -0.18 : 0.08
     }
 
-    // The time and the day.
+    // One block in the middle: the hours on paper, the minutes beside them, the day, the way in.
     Column {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: Math.round(parent.height * 0.28)
-        spacing: NihilStyle.s(28)
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: NihilStyle.s(40)
-            DotText {
-                text: root.hours
-                fuse: root.fused
-                color: root.twoTone ? NihilStyle.accent : NihilStyle.ink
-                dot: NihilStyle.s(22)
-                spacing: root.fused ? NihilStyle.s(2) : NihilStyle.s(7)
-            }
-            DotText {
-                text: root.minutes
-                fuse: root.fused
-                color: NihilStyle.ink
-                dot: NihilStyle.s(22)
-                spacing: root.fused ? NihilStyle.s(2) : NihilStyle.s(7)
-            }
-        }
-        NText {
-            anchors.horizontalCenter: parent.horizontalCenter
-            dots: true
-            text: DateTime.date
-            font.pixelSize: NihilStyle.s(28)
-            color: NihilStyle.ink
-        }
-    }
+        id: block
+        readonly property real wide: NihilStyle.s(556)
+        readonly property real half: (block.wide - NihilStyle.seam) / 2
+        anchors.centerIn: parent
+        spacing: NihilStyle.seam
 
-    // The password.
-    Row {
-        id: entry
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: NihilStyle.s(64)
-        spacing: NihilStyle.cellGap
         property real shake: 0
-        transform: Translate { x: entry.shake }
+        transform: Translate { x: block.shake }
         SequentialAnimation {
             id: shakeAnim
-            NumberAnimation { target: entry; property: "shake"; to: NihilStyle.s(10); duration: 50 }
-            NumberAnimation { target: entry; property: "shake"; to: -NihilStyle.s(10); duration: 80 }
-            NumberAnimation { target: entry; property: "shake"; to: 0; duration: 60 }
+            NumberAnimation { target: block; property: "shake"; to: NihilStyle.s(10); duration: 50 }
+            NumberAnimation { target: block; property: "shake"; to: -NihilStyle.s(10); duration: 80 }
+            NumberAnimation { target: block; property: "shake"; to: 0; duration: 60 }
         }
         Connections {
             target: root.context
             function onFailed(): void { shakeAnim.restart() }
         }
 
-        NButton {
-            width: NihilStyle.s(320)
-            height: NihilStyle.button
-            onClicked: root.focusField()
-            TextInput {
-                id: field
-                anchors.fill: parent
-                opacity: 0
-                echoMode: TextInput.Password
-                inputMethodHints: Qt.ImhSensitiveData
-                text: root.context.currentText
-                enabled: !root.context.unlockInProgress
-                onTextChanged: root.context.currentText = text
-                Keys.onReturnPressed: root.submit()
-                Keys.onEnterPressed: root.submit()
-                Keys.onEscapePressed: root.context.clearText()
+        Row {
+            spacing: NihilStyle.seam
+            NTile {
+                id: hoursTile
+                width: block.half
+                height: NihilStyle.s(232)
+                paper: true
+                DotText {
+                    anchors.centerIn: parent
+                    text: root.hours
+                    fuse: root.fused
+                    color: hoursTile.ink
+                    dot: NihilStyle.s(23)
+                    spacing: root.fused ? NihilStyle.s(1) : NihilStyle.s(3)
+                }
             }
-            NText {
-                anchors.centerIn: parent
-                visible: root.context.currentText.length === 0
-                figures: true
-                text: (root.context.showFailure ? Translation.tr("Try again") : Translation.tr("Password")).toUpperCase()
-                color: root.context.showFailure ? NihilStyle.accent : NihilStyle.inkSoft
-            }
-            Row {
-                anchors.centerIn: parent
-                spacing: NihilStyle.s(7)
-                Repeater {
-                    model: Math.min(root.context.currentText.length, 22)
-                    delegate: Rectangle {
-                        width: NihilStyle.s(8); height: width
-                        radius: width / 2
-                        color: NihilStyle.ink
-                    }
+            NTile {
+                id: minutesTile
+                width: block.half
+                height: NihilStyle.s(232)
+                lit: root.twoTone
+                DotText {
+                    anchors.centerIn: parent
+                    text: root.minutes
+                    fuse: root.fused
+                    color: minutesTile.ink
+                    dot: NihilStyle.s(23)
+                    spacing: root.fused ? NihilStyle.s(1) : NihilStyle.s(3)
                 }
             }
         }
-        NButton {
-            lit: true
-            icon: root.context.unlockInProgress ? "more_horiz"
-                : root.context.targetAction === LockContext.ActionEnum.Poweroff ? "power_settings_new"
-                : root.context.targetAction === LockContext.ActionEnum.Reboot ? "restart_alt" : "arrow_forward"
-            iconSize: NihilStyle.s(24)
-            onClicked: root.submit()
-        }
-    }
 
-    Row {
-        anchors.left: parent.left
-        anchors.leftMargin: NihilStyle.edge
-        anchors.verticalCenter: entry.verticalCenter
-        spacing: NihilStyle.gap
-        NButton { icon: "power_settings_new"; onClicked: root.power(LockContext.ActionEnum.Poweroff) }
-        NButton { icon: "restart_alt"; onClicked: root.power(LockContext.ActionEnum.Reboot) }
-    }
-
-    NButton {
-        visible: Battery.available
-        anchors.right: parent.right
-        anchors.rightMargin: NihilStyle.edge
-        anchors.verticalCenter: entry.verticalCenter
-        width: NihilStyle.s(120)
         Row {
-            anchors.centerIn: parent
-            spacing: NihilStyle.s(8)
-            NIcon {
-                anchors.verticalCenter: parent.verticalCenter
-                text: Battery.isCharging ? "bolt" : "battery_full"
-                color: Battery.isLow && !Battery.isCharging ? NihilStyle.accent : NihilStyle.ink
+            spacing: NihilStyle.seam
+            NTile {
+                id: dayTile
+                width: block.wide - (charge.visible ? charge.width + NihilStyle.seam : 0)
+                height: NihilStyle.s(72)
+                NText {
+                    x: dayTile.pad
+                    width: dayTile.width - dayTile.pad * 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: DateTime.date
+                    font.pixelSize: NihilStyle.textTitle
+                    font.weight: Font.Black
+                    color: dayTile.ink
+                }
             }
-            NText {
-                anchors.verticalCenter: parent.verticalCenter
-                figures: true
-                text: Math.round(Battery.percentage * 100) + "%"
+            NStat {
+                id: charge
+                visible: Battery.available
+                width: NihilStyle.s(132)
+                height: NihilStyle.s(72)
+                figure: String(Math.round(Battery.percentage * 100))
+                figureSize: NihilStyle.s(30)
+                unit: Battery.isCharging ? Translation.tr("Charging") : "%"
+                strokeColor: Battery.isLow && !Battery.isCharging ? NihilStyle.accent : ink
+            }
+        }
+
+        Row {
+            spacing: NihilStyle.seam
+            NButton {
+                id: offKey
+                width: NihilStyle.s(64); height: width
+                square: true
+                icon: "power_settings_new"
+                iconSize: NihilStyle.s(26)
+                onClicked: root.power(LockContext.ActionEnum.Poweroff)
+            }
+            NButton {
+                id: againKey
+                width: NihilStyle.s(64); height: width
+                square: true
+                icon: "restart_alt"
+                iconSize: NihilStyle.s(26)
+                onClicked: root.power(LockContext.ActionEnum.Reboot)
+            }
+            NButton {
+                width: block.wide - offKey.width - againKey.width - goKey.width - NihilStyle.seam * 3
+                height: NihilStyle.s(64)
+                square: true
+                onClicked: root.focusField()
+                TextInput {
+                    id: field
+                    anchors.fill: parent
+                    opacity: 0
+                    echoMode: TextInput.Password
+                    inputMethodHints: Qt.ImhSensitiveData
+                    text: root.context.currentText
+                    enabled: !root.context.unlockInProgress
+                    onTextChanged: root.context.currentText = text
+                    Keys.onReturnPressed: root.submit()
+                    Keys.onEnterPressed: root.submit()
+                    Keys.onEscapePressed: root.context.clearText()
+                }
+                NText {
+                    x: NihilStyle.s(16)
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.context.currentText.length === 0
+                    text: root.context.showFailure ? Translation.tr("Try again") : Translation.tr("Password")
+                    font.pixelSize: NihilStyle.s(18)
+                    font.weight: Font.Black
+                    color: root.context.showFailure ? NihilStyle.accent : NihilStyle.inkSoft
+                }
+                Row {
+                    x: NihilStyle.s(16)
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: NihilStyle.s(5)
+                    Repeater {
+                        model: Math.min(root.context.currentText.length, 16)
+                        delegate: Rectangle {
+                            width: NihilStyle.s(12); height: width
+                            radius: NihilStyle.squareDots ? NihilStyle.s(2) : width / 2
+                            color: NihilStyle.ink
+                        }
+                    }
+                }
+            }
+            NButton {
+                id: goKey
+                width: NihilStyle.s(84); height: NihilStyle.s(64)
+                square: true
+                lit: true
+                icon: root.context.unlockInProgress ? "more_horiz"
+                    : root.context.targetAction === LockContext.ActionEnum.Poweroff ? "power_settings_new"
+                    : root.context.targetAction === LockContext.ActionEnum.Reboot ? "restart_alt" : "arrow_forward"
+                iconSize: NihilStyle.s(28)
+                onClicked: root.submit()
             }
         }
     }

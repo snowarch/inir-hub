@@ -137,7 +137,7 @@ Singleton {
                     root.level("nihil.theme.tint", Translation.tr("Wallpaper tint"), Translation.tr("Lets the wallpaper's hue into the greys."), 0, 0, 0.35, 0.01, "percent"),
                     root.level("nihil.theme.opacity", Translation.tr("Solidity"), Translation.tr("How much wallpaper shows through."), 1, 0.55, 1, 0.01, "percent"),
                     root.level("nihil.theme.corners", Translation.tr("Corners"), Translation.tr("From tight to soft."), 1, 0.35, 1.25, 0.05, "percent"),
-                    root.pick("nihil.theme.keys", Translation.tr("Keys"), "", "round", [{ value: "round", label: "Round" }, { value: "soft", label: "Soft" }])
+                    root.pick("nihil.theme.keys", Translation.tr("Keys"), "", "tile", [{ value: "tile", label: "Tile" }, { value: "round", label: "Round" }])
                 ] },
                 { title: Translation.tr("Type and dots"), rows: [
                     root.pick("nihil.theme.dotShape", Translation.tr("Dots"), "", "round", [{ value: "round", label: "Round" }, { value: "square", label: "Square" }]),
@@ -177,7 +177,7 @@ Singleton {
             ]
         },
         {
-            key: "bar", label: Translation.tr("Bar"), glyph: "dock_to_bottom", line: Translation.tr("Round keys, floating at the edge."),
+            key: "bar", label: Translation.tr("Bar"), glyph: "dock_to_bottom", line: Translation.tr("Tiles packed along the screen's edge."),
             sections: [
                 { title: Translation.tr("Place"), rows: [
                     root.pick("nihil.bar.bottom", Translation.tr("Edge"), "", true, [{ value: true, label: "Bottom" }, { value: false, label: "Top" }]),

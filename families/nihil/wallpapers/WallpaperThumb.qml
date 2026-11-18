@@ -8,8 +8,8 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.nihil.style
 
-// One wallpaper in the grid: its picture (the cached thumbnail, the picture itself while there is none, a video's
-// first frame), its name under it; the one in use carries a lit badge, the one the keys are on rises a touch.
+// One wallpaper in the block: the picture filling its tile (the cached thumbnail, the picture itself while there is none,
+// a video's first frame). The one in use carries the signal's tile; the one the hand or the keys are on shows its name.
 Item {
     id: root
 
@@ -26,13 +26,10 @@ Item {
 
     ClippingRectangle {
         id: frame
-        x: NihilStyle.s(5)
-        y: NihilStyle.s(5) - (root.focused ? NihilStyle.s(2) : 0)
-        width: root.width - NihilStyle.s(10)
-        height: Math.round(width * 10 / 16)
+        width: root.width - NihilStyle.seam
+        height: root.height - NihilStyle.seam
         radius: NihilStyle.rowRadius
         color: NihilStyle.well
-        Behavior on y { NumberAnimation { duration: NihilStyle.quick } }
 
         Image {
             id: picture
@@ -61,43 +58,43 @@ Item {
 
         Rectangle {
             visible: root.current
-            x: NihilStyle.s(8); y: NihilStyle.s(8)
-            width: badge.implicitWidth + NihilStyle.s(20)
-            height: NihilStyle.s(26)
-            radius: height / 2
+            x: NihilStyle.s(6)
+            y: NihilStyle.s(6)
+            width: NihilStyle.s(30); height: width
+            radius: NihilStyle.s(7)
             color: NihilStyle.accent
-            Row {
-                id: badge
-                anchors.centerIn: parent
-                spacing: NihilStyle.s(4)
-                NIcon { anchors.verticalCenter: parent.verticalCenter; text: "check"; size: NihilStyle.s(14); color: NihilStyle.onAccent }
-                NText {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: Translation.tr("In use")
-                    font.pixelSize: NihilStyle.textSmall
-                    font.weight: Font.DemiBold
-                    color: NihilStyle.onAccent
-                }
-            }
+            NIcon { anchors.centerIn: parent; text: "check"; size: NihilStyle.s(18); weight: 2.6; color: NihilStyle.onAccent }
         }
         Rectangle {
             visible: root.video
             anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.margins: NihilStyle.s(8)
-            width: NihilStyle.s(26); height: width; radius: width / 2
+            anchors.top: parent.top
+            anchors.margins: NihilStyle.s(6)
+            width: NihilStyle.s(30); height: width
+            radius: NihilStyle.s(7)
             color: NihilStyle.piece
-            NIcon { anchors.centerIn: parent; text: "play_arrow"; size: NihilStyle.s(16); color: NihilStyle.ink }
+            NIcon { anchors.centerIn: parent; text: "play_arrow"; size: NihilStyle.s(18); color: NihilStyle.ink }
         }
-    }
-
-    NText {
-        x: frame.x + NihilStyle.s(4)
-        y: frame.y + frame.height + NihilStyle.s(7)
-        width: frame.width - NihilStyle.s(8)
-        text: FileUtils.fileNameForPath(root.path).replace(/\.[^.]+$/, "")
-        font.pixelSize: NihilStyle.textSmall
-        color: root.current || root.focused ? NihilStyle.ink : NihilStyle.inkSoft
+        Rectangle {
+            visible: root.focused
+            x: NihilStyle.s(6)
+            width: Math.min(name.implicitWidth + NihilStyle.s(16), frame.width - NihilStyle.s(12))
+            height: NihilStyle.s(26)
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: NihilStyle.s(6)
+            radius: NihilStyle.s(7)
+            color: NihilStyle.plate
+            NText {
+                id: name
+                x: NihilStyle.s(8)
+                width: parent.width - NihilStyle.s(16)
+                anchors.verticalCenter: parent.verticalCenter
+                text: FileUtils.fileNameForPath(root.path).replace(/\.[^.]+$/, "")
+                font.pixelSize: NihilStyle.textSmall
+                font.weight: Font.Bold
+                color: NihilStyle.onPlate
+            }
+        }
     }
 
     MouseArea {

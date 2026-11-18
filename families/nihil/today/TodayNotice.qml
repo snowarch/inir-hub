@@ -8,8 +8,8 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// One notification kept in Today: the app's glyph on a round piece, its name and when, the summary and two lines of
-// body. A tap does its first action, the cross lets it go.
+// One notification kept in Today, a tile of its own: the app's mark, its name and when, the summary in heavy type and
+// two lines of body. A tap does its first action, the cross lets it go.
 Rectangle {
     id: root
 
@@ -27,9 +27,9 @@ Rectangle {
         return then.toLocaleDateString(Qt.locale(), "d MMM")
     }
 
-    height: words.implicitHeight + NihilStyle.s(24)
-    radius: NihilStyle.rowRadius
-    color: tap.containsMouse ? NihilStyle.pieceHover : NihilStyle.pieceRaised
+    height: Math.max(words.implicitHeight + NihilStyle.s(22), NihilStyle.s(64))
+    radius: NihilStyle.tileRadius
+    color: tap.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
 
     MouseArea {
@@ -45,12 +45,14 @@ Rectangle {
 
     Rectangle {
         id: glyph
-        x: NihilStyle.s(12); y: NihilStyle.s(12)
-        width: NihilStyle.s(34); height: width; radius: width / 2
-        color: root.critical ? NihilStyle.accent : NihilStyle.piece
+        x: NihilStyle.s(10)
+        y: NihilStyle.s(10)
+        width: NihilStyle.s(40); height: width
+        radius: NihilStyle.rowRadius
+        color: root.critical ? NihilStyle.accent : NihilStyle.pieceRaised
         IconImage {
             anchors.centerIn: parent
-            implicitSize: NihilStyle.s(18)
+            implicitSize: NihilStyle.s(22)
             source: Quickshell.iconPath(root.notice?.appIcon || AppSearch.guessIcon(root.notice?.appName ?? ""), "dialog-information")
         }
     }
@@ -58,30 +60,19 @@ Rectangle {
     Column {
         id: words
         x: glyph.x + glyph.width + NihilStyle.s(12)
-        y: NihilStyle.s(12)
-        width: parent.width - x - close.width - NihilStyle.s(14)
-        spacing: NihilStyle.s(2)
-        Row {
+        y: NihilStyle.s(10)
+        width: parent.width - x - close.width - NihilStyle.s(12)
+        spacing: NihilStyle.s(1)
+        NCaps {
             width: parent.width
-            spacing: NihilStyle.s(6)
-            NText {
-                width: Math.min(implicitWidth, parent.width - stamp.width - parent.spacing)
-                text: root.notice?.appName ?? ""
-                font.pixelSize: NihilStyle.textSmall
-                color: root.critical ? NihilStyle.accent : NihilStyle.inkSoft
-            }
-            NText {
-                id: stamp
-                figures: true
-                text: "· " + root.when(root.notice?.time ?? Date.now())
-                font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
-            }
+            text: (root.notice?.appName ?? "") + " · " + root.when(root.notice?.time ?? Date.now())
+            color: root.critical ? NihilStyle.accent : NihilStyle.inkSoft
         }
         NText {
             width: parent.width
             text: root.notice?.summary ?? ""
-            font.weight: Font.Medium
+            font.pixelSize: NihilStyle.s(15)
+            font.weight: Font.Black
         }
         NText {
             width: parent.width
@@ -98,13 +89,13 @@ Rectangle {
     NButton {
         id: close
         anchors.right: parent.right
-        anchors.rightMargin: NihilStyle.s(8)
-        y: NihilStyle.s(8)
+        anchors.rightMargin: NihilStyle.s(6)
+        y: NihilStyle.s(6)
         width: NihilStyle.s(28); height: width
-        tone: "transparent"
+        tone: NihilStyle.pieceRaised
         icon: "close"
-        iconSize: NihilStyle.s(16)
-        opacity: tap.containsMouse || close.hovered ? 1 : 0.45
+        iconSize: NihilStyle.s(15)
+        opacity: tap.containsMouse || close.hovered ? 1 : 0
         onClicked: Notifications.discardNotification(root.notice.notificationId)
     }
 }

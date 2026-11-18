@@ -1,7 +1,7 @@
 import QtQuick
 import qs.services
 
-// A line to type in, sunk into its piece. `value` is what is kept: `edited` follows each key, `committed` is Enter or
+// A line to type in, a tile of its own. `value` is what is kept: `edited` follows each key, `committed` is Enter or
 // leaving the field. Escape puts the kept value back, and so does a line `accepts` turns down.
 Rectangle {
     id: root
@@ -29,8 +29,8 @@ Rectangle {
 
     implicitWidth: NihilStyle.s(230)
     implicitHeight: NihilStyle.s(40)
-    radius: NihilStyle.keyRadius(width, height, false)
-    color: input.activeFocus ? NihilStyle.pieceRaised : NihilStyle.well
+    radius: NihilStyle.tileRadius
+    color: input.activeFocus ? NihilStyle.pieceRaised : NihilStyle.piece
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
 
     NIcon {
@@ -58,7 +58,8 @@ Rectangle {
         selectedTextColor: NihilStyle.onAccent
         font.family: NihilStyle.grotesk
         font.features: root.mono ? { "tnum": 1 } : ({})
-        font.pixelSize: NihilStyle.textBody
+        font.pixelSize: Math.max(NihilStyle.textBody, Math.round(root.height * 0.3))
+        font.weight: Font.Bold
         Accessible.role: Accessible.EditableText
         Accessible.name: root.placeholder
         onTextEdited: root.edited(input.text)
@@ -84,7 +85,8 @@ Rectangle {
         text: root.placeholder
         color: NihilStyle.inkSoft
         font.family: input.font.family
-        font.pixelSize: NihilStyle.textBody
+        font.pixelSize: input.font.pixelSize
+        font.weight: Font.Bold
     }
 
     NButton {
