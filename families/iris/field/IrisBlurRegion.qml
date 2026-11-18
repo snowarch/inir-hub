@@ -152,7 +152,11 @@ Region {
         if (root.nativeRaster) root.nativeRegion = Qt.createComponent("IrisFieldRegion.qml").createObject(root, { owner: root })
         root.apply()
     }
-    Component.onDestruction: if (root.window && CompositorService.blurRegions) root.window.BackgroundEffect.blurRegion = null
+    // The window can go first: its attached effect is gone with it, and so is the region.
+    Component.onDestruction: {
+        const effect = root.window?.BackgroundEffect
+        if (effect && CompositorService.blurRegions) effect.blurRegion = null
+    }
 
     // The field's own distances (IrisField.frag), so a join is measured on the shape it draws.
     function boxDistance(s: var, x: real, y: real): real {

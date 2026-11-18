@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.108",
+    "version": "2.33.109",
     "changes": {
+      "2.33.109": [
+        "Closing a surface no longer logs an error when its window goes first"
+      ],
       "2.33.108": [
           "Prism Settings: Home shows your desktop, the poster art reads vivid and folders match the B · Carpeta study",
           "Group descriptions are never cut, a group's own choice shows all its options, menus no longer stretch",
