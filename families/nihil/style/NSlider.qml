@@ -11,6 +11,7 @@ Item {
     property real stepSize: 0.05
     property bool knob: true
     property color fillColor: NihilStyle.accent
+    readonly property bool lightFill: Qt.colorEqual(root.fillColor, NihilStyle.accent)
     property string name: ""
     signal moved(real value)
     signal seekRequested(real value)
@@ -48,35 +49,54 @@ Item {
     Keys.onRightPressed: root.nudge(1)
     Keys.onUpPressed: root.nudge(1)
 
+    // A hairline with ticks, the level drawn in light, and a needle where it stands.
     Rectangle {
+        id: track
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width
-        height: NihilStyle.s(4)
-        radius: height / 2
-        color: NihilStyle.pieceRaised
+        height: 1
+        color: NihilStyle.hair
+    }
+    Repeater {
+        model: 11
         Rectangle {
-            width: root.side / 2 + root.shown * (root.width - root.side)
-            height: parent.height
-            radius: parent.radius
-            color: root.fillColor
+            required property int index
+            x: root.side / 2 + index / 10 * (root.width - root.side)
+            anchors.verticalCenter: parent.verticalCenter
+            width: 1
+            height: index % 5 === 0 ? NihilStyle.s(7) : NihilStyle.s(4)
+            color: index / 10 <= root.shown ? NihilStyle.inkSoft : NihilStyle.inkFaint
         }
+    }
+    NSpectrum {
+        anchors.verticalCenter: parent.verticalCenter
+        width: root.side / 2 + root.shown * (root.width - root.side)
+        height: NihilStyle.s(2)
+        visible: root.lightFill
+    }
+    Rectangle {
+        anchors.verticalCenter: parent.verticalCenter
+        width: root.side / 2 + root.shown * (root.width - root.side)
+        height: NihilStyle.s(2)
+        visible: !root.lightFill
+        color: root.fillColor
     }
 
     Rectangle {
         visible: root.knob
         anchors.verticalCenter: parent.verticalCenter
-        x: root.shown * (root.width - width)
-        width: root.side
-        height: root.side
-        radius: width / 2
+        x: root.shown * (root.width - root.side) + root.side / 2 - width / 2
+        width: NihilStyle.s(3)
+        height: hand.pressed || hand.containsMouse ? NihilStyle.s(18) : NihilStyle.s(14)
+        radius: 1
         color: NihilStyle.ink
-        scale: hand.pressed ? 1.18 : 1
-        Behavior on scale { NumberAnimation { duration: NihilStyle.quick } }
+        Behavior on height { NumberAnimation { duration: NihilStyle.quick } }
     }
 
     MouseArea {
         id: hand
         anchors.fill: parent
+        hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         property real last: 0
         onPressed: event => hand.last = root.held(event.x)

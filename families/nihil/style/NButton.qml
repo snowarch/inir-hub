@@ -28,7 +28,9 @@ MouseArea {
         anchors.fill: parent
         radius: root.radius
         color: root.lit ? NihilStyle.accent : root.pressed ? NihilStyle.pieceRaised
-            : root.containsMouse || root.activeFocus ? NihilStyle.piece : root.tone
+            : root.containsMouse || root.activeFocus ? NihilStyle.pieceRaised : root.tone
+        border.width: 1
+        border.color: root.lit ? "transparent" : root.containsMouse || root.activeFocus ? NihilStyle.hair : "transparent"
         scale: root.pressed ? 0.97 : 1
         Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
         Behavior on scale { NumberAnimation { duration: NihilStyle.quick } }

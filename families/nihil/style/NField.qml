@@ -33,7 +33,19 @@ Rectangle {
     implicitHeight: NihilStyle.s(40)
     radius: NihilStyle.tileRadius
     color: input.activeFocus ? NihilStyle.pieceRaised : NihilStyle.piece
+    border.width: 1
+    border.color: input.activeFocus ? NihilStyle.hair : "transparent"
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+
+    // Where the keys are, the light runs along the foot of the line.
+    NSpectrum {
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: input.activeFocus ? parent.width - root.radius * 2 : 0
+        height: 1
+        opacity: 0.9
+        Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+    }
 
     NIcon {
         id: mark
@@ -61,7 +73,7 @@ Rectangle {
         font.family: NihilStyle.grotesk
         font.features: root.mono ? { "tnum": 1 } : ({})
         font.pixelSize: Math.max(NihilStyle.textBody, Math.round(root.height * 0.3))
-        font.weight: Font.Bold
+        font.weight: Font.Medium
         Accessible.role: Accessible.EditableText
         Accessible.name: root.placeholder
         onTextEdited: root.edited(input.text)
@@ -88,7 +100,7 @@ Rectangle {
         color: NihilStyle.inkSoft
         font.family: input.font.family
         font.pixelSize: input.font.pixelSize
-        font.weight: Font.Bold
+        font.weight: Font.Medium
     }
 
     NButton {

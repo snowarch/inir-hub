@@ -18,7 +18,8 @@ PanelWindow {
     readonly property string output: root.modelData.name
     readonly property bool primary: Quickshell.screens[0]?.name === root.output
     readonly property bool focusedHere: (GlobalStates.focusedScreen?.name ?? root.output) === root.output
-    readonly property bool open: NihilState.overviewOpen
+    // With the compositor's overview, this page only carries the apps and the search, over it or alone.
+    readonly property bool open: NihilState.overviewOpen && (!NihilState.nativeStage || NihilState.view !== "windows")
     property real shown: root.open ? 1 : 0
     Behavior on shown { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
 
@@ -78,9 +79,13 @@ PanelWindow {
         if (!root.open) return
         root.selected = root.firstSelection()
         keys.forceActiveFocus()
+        if (root.view === "search") Qt.callLater(() => entry.resume())
     }
     // Back on the windows, the keys come home from the search field or the app grid.
-    onViewChanged: if (root.open && root.view === "windows") keys.forceActiveFocus()
+    onViewChanged: {
+        if (root.open && root.view === "windows") keys.forceActiveFocus()
+        else if (root.open && root.view === "search") Qt.callLater(() => entry.resume())
+    }
     function firstSelection(): int {
         const list = root.activeWindows
         switch (root.nihil?.overview?.selectWindow ?? "pointer") {

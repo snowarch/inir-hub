@@ -21,6 +21,16 @@ Scope {
         OverviewScreen {}
     }
 
+    // On the compositor's own overview: the poster behind its workspaces and NiHiL's parts over them.
+    Loader {
+        active: NihilState.nativeStage
+        sourceComponent: PosterBackdrop {}
+    }
+    Variants {
+        model: NihilState.nativeStage ? Quickshell.screens : []
+        StageChrome {}
+    }
+
     Variants {
         model: NihilState.pips
         WindowPip {}

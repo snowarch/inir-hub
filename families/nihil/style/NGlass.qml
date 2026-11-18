@@ -1,7 +1,8 @@
 import QtQuick
 import Quickshell
 
-// A piece of NiHiL glass. `region` is its shape for the compositor's blur; with `tracks` the flare follows the pointer.
+// A piece of NiHiL glass. `region` is its shape for the compositor's blur; with `tracks` the light follows the pointer.
+// `spark` puts a four-point flare on the light (what is live); `form` overrides the material for one piece.
 Item {
     id: root
 
@@ -10,14 +11,17 @@ Item {
     property real rim: NihilStyle.glassRim
     property real flare: NihilStyle.glassFlare
     property real grain: NihilStyle.glassGrain
+    property int form: NihilStyle.form
     property real shadow: 1
     property real ignite: 0
+    property real spark: 0
     property bool tracks: false
-    property point light: Qt.point(root.width * 0.2, -root.height * 0.15)
-    readonly property real pad: NihilStyle.s(34)
+    property point light: Qt.point(root.width * 0.18, -root.height * 0.12)
+    readonly property real pad: NihilStyle.s(30)
     readonly property Region region: Region { item: root; radius: root.radius }
 
     Behavior on ignite { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+    Behavior on spark { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutCubic } }
 
     HoverHandler {
         enabled: root.tracks
@@ -29,7 +33,7 @@ Item {
         y: -root.pad
         width: root.width + root.pad * 2
         height: root.height + root.pad * 2
-        visible: root.width > 0 && root.height > 0
+        visible: root.width > 0 && root.height > 0 && root.opacity > 0
         fragmentShader: Qt.resolvedUrl("glass.frag.qsb")
 
         readonly property size box: Qt.size(root.width, root.height)
@@ -41,10 +45,12 @@ Item {
         readonly property real grain: root.grain
         readonly property real ignite: root.ignite
         readonly property real shadow: root.shadow
+        readonly property real form: root.form
+        readonly property real ribs: NihilStyle.ribs
+        readonly property real rainbow: NihilStyle.rainbow
+        readonly property real spark: NihilStyle.sparks ? root.spark : 0
         readonly property color tint: root.tint
-        readonly property color rimA: NihilStyle.flareA
-        readonly property color rimB: NihilStyle.flareB
-        readonly property color flareA: NihilStyle.flareA
-        readonly property color flareB: NihilStyle.flareB
+        readonly property color specA: NihilStyle.specA
+        readonly property color specB: NihilStyle.specB
     }
 }

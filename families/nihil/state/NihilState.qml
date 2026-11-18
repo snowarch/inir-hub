@@ -12,6 +12,10 @@ Singleton {
     id: root
 
     readonly property var nihil: Config.options?.nihil
+    // The windows view is the compositor's own overview, with NiHiL's parts injected over and behind it, wherever the
+    // compositor has one (Niri and Umbriel). "shell" draws NiHiL's own pages instead.
+    readonly property bool nativeStage: (root.nihil?.overview?.engine ?? "compositor") === "compositor"
+        && (CompositorService.niriNative || CompositorService.isUmbriel)
 
     property bool overviewOpen: false
     // "windows", "apps" or "search".
@@ -128,6 +132,11 @@ Singleton {
 
     // Keeps the shell's shared flags and NiHiL's overview saying the same thing.
     onOverviewOpenChanged: {
+        if (root.nativeStage) {
+            const wantsStage = root.overviewOpen && root.view === "windows"
+            if (wantsStage && !NiriService.inOverview) NiriService.toggleOverview()
+            else if (!root.overviewOpen && NiriService.inOverview) NiriService.toggleOverview()
+        }
         CompositorService.setSortingConsumer("nihil-overview", root.overviewOpen)
         if (root.overviewOpen) WindowPreviewService.captureForTaskView()
         if (GlobalStates.overviewOpen !== root.overviewOpen) GlobalStates.overviewOpen = root.overviewOpen
@@ -146,6 +155,19 @@ Singleton {
             else if (root.view === "search") root.closeOverview()
         }
     }
+
+    // The compositor's overview opened or closed on its own (its key, a hot corner, a click on a window): NiHiL follows.
+    Connections {
+        target: NiriService
+        enabled: root.nativeStage
+        function onInOverviewChanged(): void {
+            if (NiriService.inOverview && !root.overviewOpen) root.openOverview("windows")
+            else if (!NiriService.inOverview && root.overviewOpen && root.view === "windows") root.closeOverview()
+        }
+    }
+    // Back from the apps or a search to the windows: the compositor's overview comes back under NiHiL's parts.
+    onViewChanged: if (root.nativeStage && root.overviewOpen && root.view === "windows" && !NiriService.inOverview)
+        NiriService.toggleOverview()
 
     // The session starts where the person asked.
     Connections {
