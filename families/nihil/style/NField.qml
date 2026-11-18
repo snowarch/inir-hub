@@ -22,6 +22,8 @@ Rectangle {
     signal stepped(int by)
 
     function take(): void { input.forceActiveFocus(); input.selectAll() }
+    // Takes the keys with what is written kept, the cursor after it: typing goes on from there.
+    function resume(): void { input.forceActiveFocus(); input.cursorPosition = input.length }
     function clear(): void { input.text = ""; root.edited("") }
 
     onValueChanged: if (!input.activeFocus) input.text = root.value

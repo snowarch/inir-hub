@@ -1,2 +1,3 @@
 module qs.modules.nihil.notifications
 NihilNotificationPopup 1.0 NihilNotificationPopup.qml
+NotificationCard 1.0 NotificationCard.qml

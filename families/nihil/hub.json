@@ -1,7 +1,12 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.3.0",
+    "version": "2.0.0",
     "changes": {
+        "2.0.0": [
+            "NiHiL is rebuilt: a panel, a dash, a workspace strip and live windows in one overview",
+            "Procedural glass with grain, a chromatic rim and flare, every part of it yours to shape",
+            "Four desktop layouts to start from"
+        ],
         "1.3.0": [
             "NiHiL is rebuilt as a rack: packed black, paper and signal tiles, heavy figures and its own glyphs in every panel",
             "Bar, Start, Control, Today, Power, Menu, Wallpapers and Clipboard share one player, faders and stat tiles"
@@ -19,7 +24,7 @@
             "NiHiL: a floating bar, dot-matrix clock and widgets, Start, quick controls, a power card and its own menu, in one signal colour"
         ]
     },
-    "summary": "Nothing but dots: a floating bar, dot-matrix widgets and one signal colour.",
+    "summary": "Vertical workspaces, a full overview and glass you shape completely.",
     "authors": [
         "snowarch"
     ],

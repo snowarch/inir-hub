@@ -2,14 +2,13 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell.Widgets
-import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.nihil.style
 
-// One wallpaper in the block: the picture filling its tile (the cached thumbnail, the picture itself while there is none,
-// a video's first frame). The one in use carries the signal's tile; the one the hand or the keys are on shows its name.
+// One wallpaper: the cached thumbnail filling its place, the picture itself while there is none, a video's first frame.
+// The one in use carries a check; the one under the hand or the keys shows its name.
 Item {
     id: root
 
@@ -17,22 +16,23 @@ Item {
     property bool current: false
     property bool focused: false
     property bool live: true
+    property bool fallback: false
+
     readonly property bool hovered: hand.containsMouse
+    readonly property bool video: Wallpapers.isVideoFile(root.path)
+
     signal picked()
 
-    readonly property bool video: Wallpapers.isVideoFile(root.path)
-    property bool fallback: false
     onPathChanged: root.fallback = false
 
     ClippingRectangle {
         id: frame
-        width: root.width - NihilStyle.seam
-        height: root.height - NihilStyle.seam
-        radius: NihilStyle.rowRadius
-        color: NihilStyle.well
+        anchors.fill: parent
+        anchors.margins: NihilStyle.s(4)
+        radius: NihilStyle.rCard
+        color: NihilStyle.piece
 
         Image {
-            id: picture
             anchors.fill: parent
             asynchronous: true
             cache: false
@@ -45,54 +45,66 @@ Item {
                 : root.fallback ? "file://" + root.path
                 : "file://" + Wallpapers.getExpectedThumbnailPath(root.path, "large")
             onStatusChanged: {
-                if (status !== Image.Error || root.fallback || root.video) return
+                if (status !== Image.Error || root.fallback || root.video)
+                    return
                 Wallpapers.ensureThumbnailForPath(root.path, "large")
                 root.fallback = true
             }
         }
-        Rectangle {
-            anchors.fill: parent
-            color: NihilStyle.ink
-            opacity: hand.pressed ? 0.12 : 0
-        }
 
         Rectangle {
             visible: root.current
-            x: NihilStyle.s(6)
-            y: NihilStyle.s(6)
-            width: NihilStyle.s(30); height: width
-            radius: NihilStyle.s(7)
+            x: NihilStyle.s(8)
+            y: NihilStyle.s(8)
+            width: NihilStyle.s(26)
+            height: NihilStyle.s(26)
+            radius: width / 2
             color: NihilStyle.accent
-            NIcon { anchors.centerIn: parent; text: "check"; size: NihilStyle.s(18); weight: 2.6; color: NihilStyle.onAccent }
+
+            NIcon {
+                anchors.centerIn: parent
+                text: "check"
+                size: NihilStyle.s(16)
+                color: NihilStyle.onAccent
+            }
         }
+
         Rectangle {
             visible: root.video
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: NihilStyle.s(6)
-            width: NihilStyle.s(30); height: width
-            radius: NihilStyle.s(7)
-            color: NihilStyle.piece
-            NIcon { anchors.centerIn: parent; text: "play_arrow"; size: NihilStyle.s(18); color: NihilStyle.ink }
-        }
-        Rectangle {
-            visible: root.focused
-            x: NihilStyle.s(6)
-            width: Math.min(name.implicitWidth + NihilStyle.s(16), frame.width - NihilStyle.s(12))
+            anchors.margins: NihilStyle.s(8)
+            width: NihilStyle.s(26)
             height: NihilStyle.s(26)
+            radius: width / 2
+            color: NihilStyle.scrim
+
+            NIcon {
+                anchors.centerIn: parent
+                text: "play"
+                size: NihilStyle.s(14)
+            }
+        }
+
+        Rectangle {
+            x: NihilStyle.s(8)
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: NihilStyle.s(6)
-            radius: NihilStyle.s(7)
-            color: NihilStyle.plate
+            anchors.bottomMargin: NihilStyle.s(8)
+            width: Math.min(name.implicitWidth + NihilStyle.s(18), frame.width - NihilStyle.s(16))
+            height: NihilStyle.s(26)
+            radius: height / 2
+            color: NihilStyle.scrim
+            opacity: root.focused ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+
             NText {
                 id: name
-                x: NihilStyle.s(8)
-                width: parent.width - NihilStyle.s(16)
+                x: NihilStyle.s(9)
+                width: parent.width - NihilStyle.s(18)
                 anchors.verticalCenter: parent.verticalCenter
                 text: FileUtils.fileNameForPath(root.path).replace(/\.[^.]+$/, "")
+                elide: Text.ElideRight
                 font.pixelSize: NihilStyle.textSmall
-                font.weight: Font.Bold
-                color: NihilStyle.onPlate
             }
         }
     }

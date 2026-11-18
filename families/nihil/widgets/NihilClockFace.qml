@@ -1,86 +1,63 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
-import qs
 import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// The clock: the hour in dots, straight on the wallpaper. Hours in the signal colour and minutes in ink (two-tone),
-// side by side when it is wide, hours over minutes when it is square. A small clock is a round piece: the time in
-// figures and the day under it.
-NihilFace {
+// The hour, thin and large, and the day under it.
+NihilWidgetFace {
     id: root
 
-    readonly property var options: Config.options?.nihil?.clock ?? ({})
-    readonly property bool fused: (root.options.style ?? "dots") === "fused"
-    readonly property bool twoTone: root.options.twoTone ?? true
-    readonly property string hours: DateTime.time.split(":")[0] ?? "00"
-    readonly property string minutes: (DateTime.time.split(":")[1] ?? "00").slice(0, 2)
-    readonly property bool stacked: root.large
-    // Columns: two digits each (5 + 1 + 5), a gap of two between the pairs; seven rows, or fifteen stacked.
-    readonly property real pitch: root.stacked ? Math.min(root.width / 11, root.height / 15.2)
-        : Math.min(root.width / 24, root.height / 7)
+    readonly property string format: root.widget.timeFormat ?? "system"
+    readonly property string pattern: root.format === "24h" ? "HH:mm" : root.format === "12h" ? "hh:mm AP"
+        : (Config.options?.time?.format ?? "hh:mm")
+    readonly property date now: DateTime.clock.date
+    readonly property string written: Qt.locale().toString(root.now, root.pattern)
+    readonly property string hour: root.written.replace(/\s*[AaPp][Mm]$/, "")
+    readonly property string period: root.written.slice(root.hour.length).trim()
+    readonly property bool weatherShown: root.large && Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")
 
-    Row {
-        visible: !root.small
+    Column {
         anchors.centerIn: parent
-        spacing: root.stacked ? 0 : root.pitch * 2 - figureH.spacing
-        Column {
-            spacing: root.pitch * 1.2
-            DotText {
-                id: figureH
-                text: root.hours
-                dot: root.pitch * (root.fused ? 0.92 : 0.8)
-                spacing: root.pitch - dot
-                fuse: root.fused
-                color: root.twoTone ? NihilStyle.accent : root.bareInk
-            }
-            DotText {
-                visible: root.stacked
-                text: root.minutes
-                dot: figureH.dot
-                spacing: figureH.spacing
-                fuse: root.fused
-                color: root.bareInk
-            }
-        }
-        DotText {
-            visible: !root.stacked
-            text: root.minutes
-            dot: figureH.dot
-            spacing: figureH.spacing
-            fuse: root.fused
-            color: root.bareInk
-        }
-    }
+        width: parent.width
+        spacing: root.dp(2)
 
-    // Small: a round piece with the time and the day.
-    Rectangle {
-        visible: root.small
-        anchors.centerIn: parent
-        width: Math.min(parent.width, parent.height)
-        height: width
-        radius: width / 2
-        color: NihilStyle.piece
-        Column {
-            anchors.centerIn: parent
-            spacing: root.dp(4)
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: root.dp(6)
+
             NText {
-                anchors.horizontalCenter: parent.horizontalCenter
+                id: figure
                 figures: true
-                font.bold: true
-                font.pixelSize: root.dp(40)
-                text: DateTime.time
+                text: root.hour
+                font.weight: Font.Light
+                font.pixelSize: Math.min(root.contentHeight * (root.small ? 0.56 : 0.62),
+                    root.contentWidth / Math.max(3, root.hour.length * 0.62 + (root.period.length > 0 ? 1.4 : 0)))
             }
             NText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                figures: true
+                anchors.baseline: figure.baseline
+                visible: root.period.length > 0
+                text: root.period
+                font.pixelSize: figure.font.pixelSize * 0.26
                 color: NihilStyle.inkSoft
-                font.pixelSize: root.dp(12)
-                font.capitalization: Font.AllUppercase
-                text: Translation.locale.toString(DateTime.clock.date, "dddd")
             }
+        }
+        NText {
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            text: Translation.locale.toString(root.now, root.small ? "ddd d" : "dddd, d MMMM")
+            elide: Text.ElideRight
+            font.pixelSize: root.dp(root.small ? 13 : 15)
+            color: NihilStyle.inkSoft
+        }
+        NText {
+            width: parent.width
+            visible: root.weatherShown
+            topPadding: root.dp(6)
+            horizontalAlignment: Text.AlignHCenter
+            text: `${Weather.data?.temp ?? ""}  ${Weather.describeWeather(Weather.data?.wCode, Weather.isNightNow())}`
+            elide: Text.ElideRight
+            font.pixelSize: root.dp(13)
+            color: NihilStyle.inkSoft
         }
     }
 }

@@ -1,244 +1,266 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
-import Quickshell
-import Quickshell.Io
+import QtQuick.Window
 import qs.services
 import qs.modules.common
+import qs.modules.nihil
 import qs.modules.nihil.style
+import "NihilOptions.js" as Options
+import "../state/NihilProfiles.js" as Profiles
 
-// NiHiL's Settings: a window of its own, the rail of pages on the left and the open page beside it, over the
-// wallpaper when the person keeps it there. Opened at a page by the shell through QS_SETTINGS_PAGE and _SECTION.
-ApplicationWindow {
+// NiHiL's Settings, a window of its own over the family's field: the pages down the side, a search that reaches every
+// option, and the page. Every row comes from NihilOptions.js.
+Window {
     id: root
 
-    property string pageKey: "home"
-    property string jumpTo: ""
+    property string pageId: "profiles"
     property string query: ""
-    readonly property bool searching: root.query.trim().length > 0
-    readonly property bool compact: root.width < NihilStyle.s(1000)
-    readonly property var page: SettingsModel.page(root.pageKey)
-    readonly property bool backdrop: Config.options?.nihil?.settings?.backdrop ?? true
-    readonly property real gutter: NihilStyle.s(12)
 
-    function open(key: string, section: string): void {
-        root.query = ""
-        search.clear()
-        root.pageKey = SettingsModel.resolve(key)
-        root.jumpTo = section
+    readonly property var page: Options.pages.find(item => item.id === root.pageId) ?? Options.pages[0]
+    readonly property var everyRow: Options.allRows()
+    readonly property var found: {
+        const words = root.query.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0)
+        if (words.length === 0)
+            return []
+        return root.everyRow.filter(row => {
+            const text = [Translation.tr(row.label), Translation.tr(row.note), Translation.tr(row.section), row.label].join(" ").toLowerCase()
+            return words.every(word => text.includes(word))
+        })
     }
-    function stepPage(by: int): void {
-        const pages = SettingsModel.pages
-        const at = pages.findIndex(entry => entry.key === root.pageKey)
-        root.open(pages[(at + by + pages.length) % pages.length].key, "")
+    readonly property var foundSections: {
+        const bySection = []
+        for (const row of root.found) {
+            const title = Translation.tr(row.page) + ", " + Translation.tr(row.section)
+            let section = bySection.find(item => item.title === title)
+            if (!section) {
+                section = { title: title, rows: [] }
+                bySection.push(section)
+            }
+            section.rows.push(row)
+        }
+        return bySection
+    }
+
+    // A list option arrives as a QML list; rows compare and write plain arrays.
+    function plain(value: var): var {
+        return value !== null && typeof value === "object" && value.length !== undefined ? Array.from(value) : value
+    }
+
+    function read(key: string): var {
+        return root.plain(key.split(".").reduce((node, part) => node?.[part], Config.options?.nihil))
+    }
+
+    function factory(key: string): var {
+        return root.plain(key.split(".").reduce((node, part) => node?.[part], factoryValues))
+    }
+
+    function write(key: string, value: var): void {
+        const updates = {}
+        updates["nihil." + key] = value
+        if (Profiles.keys.includes(key))
+            updates["nihil.profile"] = "custom"
+        Config.setNestedValues(updates)
+    }
+
+    // Where a level's slider starts once it stops being automatic.
+    function levelStart(option: var): real {
+        const factoryValue = root.factory(option.key)
+        if (factoryValue !== option.fit)
+            return factoryValue
+        const middle = (option.from + option.to) / 2
+        return Number((Math.round(middle / option.step) * option.step).toFixed(3))
+    }
+
+    function openMenu(option: var, anchor: Item): void {
+        menu.show(option, anchor, root.read(option.key))
+    }
+
+    function restoreAll(): void {
+        const updates = { "nihil.profile": root.factory("profile") }
+        for (const row of root.everyRow)
+            updates["nihil." + row.key] = root.factory(row.key)
+        Config.setNestedValues(updates)
     }
 
     visible: true
     title: Translation.tr("NiHiL Settings")
-    width: 1180
-    height: 780
-    minimumWidth: 720
-    minimumHeight: 560
-    color: NihilStyle.paper
+    width: 1120
+    height: 760
+    minimumWidth: 860
+    minimumHeight: 520
+    color: NihilStyle.base
     onClosing: Qt.quit()
 
-    Component.onCompleted: {
-        const start = String(Quickshell.env("QS_SETTINGS_PAGE") ?? "")
-        if (start.length > 0) root.open(start, String(Quickshell.env("QS_SETTINGS_SECTION") ?? ""))
-    }
+    // How NiHiL came: a fresh copy of its options, never written to.
+    NihilConfigSchema { id: factoryValues }
 
-    // A page asked for by the shell while this window is already up.
-    FileView {
-        id: pageAsk
-        property bool armed: false
-        property bool present: false
-        path: `${Directories.stateUserPath}/nihil/settings-page`
-        // A file that is not there yet cannot be watched.
-        watchChanges: pageAsk.present
-        onFileChanged: reload()
-        onSaved: pageAsk.present = true
-        onLoaded: {
-            const asked = pageAsk.text().trim().split(" ")[0]
-            if (pageAsk.armed && asked.length > 0) root.open(asked, "")
-            pageAsk.armed = true
-            pageAsk.present = true
-        }
-        onLoadFailed: {
-            pageAsk.armed = true
-            pageAsk.setText("")
-        }
-    }
-
-    Shortcut { sequence: "Ctrl+F"; onActivated: search.take() }
-    Shortcut { sequence: "Ctrl+PgDown"; onActivated: root.stepPage(1) }
-    Shortcut { sequence: "Ctrl+PgUp"; onActivated: root.stepPage(-1) }
-    Shortcut { sequence: "Ctrl+W"; onActivated: root.close() }
-
-    Image {
+    NFieldPaint {
         anchors.fill: parent
-        visible: root.backdrop
-        source: root.backdrop ? Wallpapers.effectiveWallpaperUrl : ""
-        sourceSize.width: 1280
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        cache: false
+        form: Config.options?.nihil?.field?.form ?? 1
+        seed: Config.options?.nihil?.field?.seed ?? 0.37
+        glow: Config.options?.nihil?.field?.glow ?? 1
     }
-    Rectangle {
+
+    Item {
         anchors.fill: parent
-        visible: root.backdrop
-        // Dense enough that small words keep their contrast over the brightest wallpaper.
-        color: NihilStyle.tone(NihilStyle.dark ? 0.05 : 0.95, NihilStyle.dark ? 0.8 : 0.88)
-    }
+        focus: true
+        Keys.onEscapePressed: {
+            if (menu.shown)
+                menu.close()
+            else if (root.query.length > 0)
+                search.clear()
+        }
 
-    Rectangle {
-        id: rail
-        x: root.gutter
-        y: root.gutter
-        width: root.compact ? NihilStyle.s(70) : NihilStyle.s(238)
-        height: parent.height - root.gutter * 2
-        radius: NihilStyle.cardRadius
-        color: NihilStyle.piece
-
-        Item {
-            id: brand
-            x: NihilStyle.s(19)
+        Column {
+            id: side
+            x: NihilStyle.s(16)
             y: NihilStyle.s(20)
-            width: parent.width - x * 2
-            height: root.compact ? NihilStyle.s(14) : NihilStyle.s(58)
+            width: NihilStyle.s(232)
+            spacing: NihilStyle.s(4)
 
-            DotText {
-                visible: !root.compact
-                text: "NIHIL"
-                dot: NihilStyle.s(4)
-                color: NihilStyle.ink
+            NText {
+                x: NihilStyle.s(10)
+                bottomPadding: NihilStyle.s(10)
+                text: "NiHiL"
+                font.pixelSize: NihilStyle.textTitle
+                font.weight: Font.Light
             }
-            Row {
-                visible: !root.compact
-                anchors.bottom: parent.bottom
-                spacing: NihilStyle.s(6)
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: NihilStyle.s(7)
-                    height: width
-                    radius: NihilStyle.squareDots ? 0 : width / 2
-                    color: NihilStyle.accent
-                }
-                NText {
-                    figures: true
-                    text: SettingsModel.accentWord.toUpperCase()
-                    font.pixelSize: NihilStyle.s(10)
-                    color: NihilStyle.inkSoft
-                }
-            }
-            Rectangle {
-                visible: root.compact
-                anchors.centerIn: parent
-                width: NihilStyle.s(12)
-                height: width
-                radius: NihilStyle.squareDots ? 0 : width / 2
-                color: NihilStyle.accent
-            }
-        }
 
-        NScroller {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.topMargin: root.compact ? NihilStyle.s(50) : NihilStyle.s(146)
-            anchors.bottomMargin: NihilStyle.s(10)
-            sidePad: root.compact ? 0 : NihilStyle.s(10)
-            spacing: NihilStyle.s(2)
+            NField {
+                id: search
+                width: side.width
+                glyph: "search"
+                placeholder: Translation.tr("Search options")
+                clearable: true
+                onEdited: text => root.query = text
+            }
+
+            Item {
+                width: 1
+                height: NihilStyle.s(10)
+            }
+
             Repeater {
-                model: SettingsModel.pages
-                NavPill {
+                model: Options.pages
+
+                delegate: MouseArea {
+                    id: entry
+
                     required property var modelData
-                    entry: modelData
-                    compact: root.compact
-                    chosen: !root.searching && root.pageKey === modelData.key
-                    onClicked: root.open(modelData.key, "")
-                    onHoveredChanged: {
-                        if (!root.compact) return
-                        tip.word = hovered ? modelData.label : ""
-                        tip.y = mapToItem(root.contentItem, 0, 0).y + (height - tip.height) / 2
+                    readonly property bool here: root.query.length === 0 && root.pageId === entry.modelData.id
+
+                    width: side.width
+                    height: NihilStyle.s(42)
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        search.clear()
+                        root.query = ""
+                        root.pageId = entry.modelData.id
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: NihilStyle.rKey
+                        color: entry.here ? NihilStyle.pieceRaised : entry.containsMouse ? NihilStyle.piece : "transparent"
+                        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                    }
+                    NIcon {
+                        id: mark
+                        x: NihilStyle.s(12)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: entry.modelData.glyph
+                        size: NihilStyle.s(20)
+                        color: entry.here ? NihilStyle.accent : NihilStyle.ink
+                    }
+                    NText {
+                        anchors.left: mark.right
+                        anchors.leftMargin: NihilStyle.s(12)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Translation.tr(entry.modelData.title)
+                        font.pixelSize: NihilStyle.textBody
+                        font.weight: entry.here ? Font.Medium : Font.Normal
                     }
                 }
             }
         }
-    }
 
-    Item {
-        id: stage
-        anchors.left: rail.right
-        anchors.leftMargin: NihilStyle.s(14)
-        anchors.right: parent.right
-        anchors.rightMargin: NihilStyle.s(8)
-        anchors.top: parent.top
-        anchors.topMargin: root.compact ? root.gutter + search.height : 0
-        anchors.bottom: parent.bottom
-
-        SettingsPage {
+        Item {
+            id: stage
+            anchors.left: side.right
+            anchors.leftMargin: NihilStyle.s(12)
+            anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: Math.min(parent.width, NihilStyle.s(1320))
-            visible: !root.searching
-            page: root.page
-            jump: root.jumpTo
-            onLanded: root.jumpTo = ""
-        }
-        Loader {
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: Math.min(parent.width, NihilStyle.s(1320))
-            active: root.searching
-            sourceComponent: SearchResults {
-                query: root.query
-                onOpenPage: key => root.open(key, "")
+
+            NText {
+                id: heading
+                x: NihilStyle.s(20)
+                y: NihilStyle.s(20)
+                text: root.query.length > 0 ? Translation.tr("Search") : Translation.tr(root.page.title)
+                font.pixelSize: NihilStyle.textTitle
+                font.weight: Font.Light
+            }
+
+            Loader {
+                id: body
+                anchors.fill: parent
+                anchors.topMargin: heading.y + heading.height + NihilStyle.s(12)
+                active: root.query.length === 0 || root.found.length > 0
+                sourceComponent: root.query.length > 0 ? foundPage
+                    : root.page.view === "profiles" ? profilesPage
+                    : root.page.view === "about" ? aboutPage : optionsPage
+            }
+
+            Column {
+                anchors.centerIn: parent
+                visible: root.query.length > 0 && root.found.length === 0
+                spacing: NihilStyle.s(6)
+
+                NIcon {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "search_off"
+                    size: NihilStyle.s(36)
+                    color: NihilStyle.inkSoft
+                }
+                NText {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Translation.tr("No option by that name")
+                    font.pixelSize: NihilStyle.textLarge
+                }
             }
         }
-    }
 
-    // In the rail while there is room for it, over the page once the rail folds to its glyphs.
-    NField {
-        id: search
-        x: root.compact ? stage.x + NihilStyle.s(6) : rail.x + NihilStyle.s(12)
-        y: root.compact ? root.gutter : rail.y + NihilStyle.s(92)
-        width: root.compact ? stage.width - NihilStyle.s(12) : rail.width - NihilStyle.s(24)
-        glyph: "search"
-        placeholder: Translation.tr("Search settings")
-        clearable: true
-        onEdited: text => root.query = text
-    }
+        Component {
+            id: optionsPage
+            OptionsPage {
+                sections: root.page.sections
+                host: root
+            }
+        }
+        Component {
+            id: foundPage
+            OptionsPage {
+                sections: root.foundSections
+                host: root
+            }
+        }
+        Component {
+            id: profilesPage
+            ProfilesView {}
+        }
+        Component {
+            id: aboutPage
+            AboutView {
+                host: root
+            }
+        }
 
-    // The name of a page while the rail shows only glyphs.
-    Rectangle {
-        id: tip
-        property string word: ""
-        visible: root.compact && tip.word.length > 0
-        x: rail.x + rail.width + NihilStyle.s(6)
-        z: 10
-        width: tipWord.implicitWidth + NihilStyle.s(22)
-        height: NihilStyle.s(30)
-        radius: NihilStyle.keyRadius(width, height, false)
-        color: NihilStyle.pieceRaised
-        NText { id: tipWord; anchors.centerIn: parent; text: tip.word; font.pixelSize: NihilStyle.textSmall }
-    }
-
-    // A press of the pointer ends keyboard travel: the focus ring lets go, a field being left keeps what it has, and
-    // the press carries on to whatever is under it.
-    MouseArea {
-        id: pointer
-        anchors.fill: parent
-        z: 100
-        acceptedButtons: Qt.AllButtons
-        onPressed: event => {
-            const held = root.activeFocusItem
-            const inField = held?.cursorPosition !== undefined && held.contains(held.mapFromItem(pointer, event.x, event.y))
-            if (!inField) root.contentItem.forceActiveFocus(Qt.MouseFocusReason)
-            event.accepted = false
+        ChoiceMenu {
+            id: menu
+            anchors.fill: parent
+            onPicked: value => root.write(menu.option.key, value)
         }
     }
 }

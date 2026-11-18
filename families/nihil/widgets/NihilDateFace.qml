@@ -1,53 +1,64 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
-import qs
 import qs.services
-import qs.modules.common
 import qs.modules.nihil.style
 
-// The date on a round piece: the month in small figures, the day in big dots, the weekday in the serif under it in
-// the signal colour. Wider sizes keep the circle and let the year sit under the day.
-NihilFace {
+// The day of the month as the one large thing, its names beside it and, with room, how far the year has gone.
+NihilWidgetFace {
     id: root
 
-    readonly property date now: DateTime.clock.date
-    readonly property real diameter: Math.min(root.width, root.height)
+    readonly property date today: root.widget.today
+    readonly property real yearGone: root.widget.dayOfYear / Math.max(1, root.widget.daysInYear)
 
-    Rectangle {
-        anchors.centerIn: parent
-        width: root.diameter
-        height: width
-        radius: width / 2
-        color: NihilStyle.piece
+    NText {
+        id: day
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: root.small ? 0 : -root.dp(10)
+        figures: true
+        text: root.today.getDate()
+        font.weight: Font.Light
+        font.pixelSize: Math.min(root.contentHeight * 0.72, root.contentWidth * 0.46)
+    }
 
-        Column {
-            anchors.centerIn: parent
-            spacing: root.diameter * 0.04
-            NText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                figures: true
-                font.pixelSize: Math.round(root.diameter * 0.075)
-                font.capitalization: Font.AllUppercase
-                color: NihilStyle.inkSoft
-                text: Translation.locale.toString(root.now, "MMM")
-            }
-            DotText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: Translation.locale.toString(root.now, "dd")
-                dot: root.diameter * 0.045
-                spacing: dot * 0.3
-                fuse: (Config.options?.nihil?.clock?.style ?? "dots") === "fused"
-            }
-            NText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                dots: true
-                font.pixelSize: Math.round(root.diameter * 0.1)
-                font.weight: Font.DemiBold
-                font.capitalization: Font.AllUppercase
-                color: NihilStyle.accent
-                text: Translation.locale.toString(root.now, "dddd")
-            }
+    Column {
+        anchors.left: day.right
+        anchors.leftMargin: root.dp(12)
+        anchors.right: parent.right
+        anchors.verticalCenter: day.verticalCenter
+        spacing: root.dp(2)
+
+        NText {
+            width: parent.width
+            visible: root.widget.showWeekday
+            text: Translation.locale.toString(root.today, "dddd")
+            elide: Text.ElideRight
+            font.pixelSize: root.dp(root.small ? 14 : 18)
+        }
+        NText {
+            width: parent.width
+            text: Translation.locale.toString(root.today, root.widget.showYear ? "MMMM yyyy" : "MMMM")
+            elide: Text.ElideRight
+            font.pixelSize: root.dp(root.small ? 12 : 14)
+            color: NihilStyle.inkSoft
+        }
+    }
+
+    Column {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        visible: !root.small
+        spacing: root.dp(5)
+
+        NText {
+            figures: true
+            text: Translation.tr("Day %1 of %2").arg(root.widget.dayOfYear).arg(root.widget.daysInYear)
+            font.pixelSize: root.dp(12)
+            color: NihilStyle.inkSoft
+        }
+        FaceBar {
+            width: parent.width
+            level: root.yearGone
         }
     }
 }

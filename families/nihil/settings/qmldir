@@ -1,8 +1,7 @@
 module qs.modules.nihil.settings
-singleton SettingsModel 1.0 SettingsModel.qml
 NihilSettingsApp 1.0 NihilSettingsApp.qml
-NavPill 1.0 NavPill.qml
-PageSection 1.0 PageSection.qml
-SearchResults 1.0 SearchResults.qml
+OptionsPage 1.0 OptionsPage.qml
 SettingRow 1.0 SettingRow.qml
-SettingsPage 1.0 SettingsPage.qml
+ChoiceMenu 1.0 ChoiceMenu.qml
+ProfilesView 1.0 ProfilesView.qml
+AboutView 1.0 AboutView.qml

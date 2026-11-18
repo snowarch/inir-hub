@@ -1,72 +1,74 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
-import qs
 import qs.services
 import qs.modules.nihil.style
 
-// The battery as a field of dots on a piece: the charge, what it is doing and the time left over it, the charge as
-// dots lit from the left (grey while it drains, the signal colour while it charges or runs low).
-NihilFace {
+// The charge as a figure over its line. The line turns to the error colour only when the battery is low and not charging.
+NihilWidgetFace {
     id: root
 
-    readonly property real level: Battery.available ? Battery.percentage : 0
-    readonly property bool charging: Battery.isCharging
-    readonly property string state: !Battery.available ? Translation.tr("No battery")
-        : root.charging ? Translation.tr("Charging") : Battery.isPluggedIn ? Translation.tr("Plugged in")
-        : Translation.tr("Discharging")
-    readonly property real secondsLeft: root.charging ? (Battery.timeToFull ?? 0) : (Battery.timeToEmpty ?? 0)
-    readonly property string timeLeft: root.secondsLeft > 0
-        ? `${Math.floor(root.secondsLeft / 3600)}:${String(Math.floor(root.secondsLeft % 3600 / 60)).padStart(2, "0")}` : ""
+    readonly property int charge: Math.round(Battery.percentage * 100)
+    readonly property bool warned: Battery.isLowAndNotCharging
+    readonly property color tint: root.warned ? NihilStyle.m3.m3error : NihilStyle.accent
+    readonly property string saying: String(root.widget.timeLabel ?? "").length > 0 ? root.widget.timeLabel
+        : Battery.isCharging ? Translation.tr("Charging")
+        : Battery.isFull ? Translation.tr("Fully charged") : Translation.tr("On battery")
 
-    Rectangle {
+    FaceBlank {
+        visible: !Battery.available
+        face: root
+        glyph: "power"
+        title: Translation.tr("On power")
+        detail: Translation.tr("This computer has no battery")
+    }
+
+    Item {
         anchors.fill: parent
-        radius: root.radius
-        color: NihilStyle.piece
+        visible: Battery.available
 
-        Item {
-            id: head
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: root.dp(16) }
-            height: root.dp(22)
-            NText {
-                anchors.left: parent.left
-                figures: true
-                font.pixelSize: root.dp(15)
-                text: `${Math.round(root.level * 100)}%`
-                color: Battery.isLow && !root.charging ? NihilStyle.accent : NihilStyle.ink
-            }
-            NText {
-                visible: !root.small
-                anchors.horizontalCenter: parent.horizontalCenter
-                figures: true
-                font.pixelSize: root.dp(14)
-                text: root.state
-            }
-            NText {
-                anchors.right: parent.right
-                figures: true
-                font.pixelSize: root.dp(15)
-                text: root.small ? "" : root.timeLeft
-            }
-            NIcon {
-                visible: root.small && root.charging
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                text: "bolt"
-                size: root.dp(18)
-                color: NihilStyle.accent
-            }
+        NIcon {
+            anchors.right: parent.right
+            anchors.top: parent.top
+            text: Battery.isCharging ? "bolt" : "battery"
+            size: root.dp(22)
+            color: Battery.isCharging ? NihilStyle.accent : NihilStyle.inkSoft
         }
-        DotGrid {
-            anchors { left: parent.left; right: parent.right; top: head.bottom; bottom: parent.bottom }
-            anchors.margins: root.dp(12)
-            anchors.topMargin: root.dp(8)
-            columns: root.small ? 5 : 11
-            rows: root.large ? 9 : 4
-            columnFirst: true
-            level: root.level
-            litColor: root.charging || Battery.isLow ? NihilStyle.accent : NihilStyle.inkSoft
-            offColor: NihilStyle.pieceRaised
+
+        Column {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            spacing: root.dp(4)
+
+            Row {
+                spacing: root.dp(2)
+
+                NText {
+                    id: figure
+                    figures: true
+                    text: root.charge
+                    font.weight: Font.Light
+                    font.pixelSize: Math.min(root.contentHeight * 0.56, root.contentWidth * 0.42)
+                    color: root.warned ? root.tint : NihilStyle.ink
+                }
+                NText {
+                    anchors.baseline: figure.baseline
+                    text: "%"
+                    font.pixelSize: figure.font.pixelSize * 0.36
+                    color: NihilStyle.inkSoft
+                }
+            }
+            NText {
+                width: parent.width
+                text: root.saying
+                elide: Text.ElideRight
+                font.pixelSize: root.dp(13)
+                color: NihilStyle.inkSoft
+            }
+            FaceBar {
+                width: parent.width
+                level: Battery.percentage
+                tint: root.tint
+            }
         }
     }
 }

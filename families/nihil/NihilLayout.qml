@@ -4,7 +4,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.services
 
-// NiHiL's persistent surfaces for ShellLayoutController: the floating bar, top or bottom.
+// NiHiL's persistent surface for ShellLayoutController: the panel, top or bottom.
 QtObject {
     readonly property var surfaces: [
         {
@@ -23,31 +23,29 @@ QtObject {
     readonly property var rebuilds: ["nihilBar"]
 
     function surfaceState(surfaceId: string, desc: var, outputName: string): var {
-        if (surfaceId !== "nihilBar")
-            return null
+        if (surfaceId !== "nihilBar") return null
         return {
             ok: true,
             id: surfaceId,
-            slot: (Config.options?.nihil?.bar?.bottom ?? true) ? "bottom" : "top",
+            slot: Config.options?.nihil?.panel?.position ?? "top",
             scope: desc.layoutScope,
             outputName: outputName,
-            enabledOutputs: Config.options?.nihil?.bar?.screenList ?? [],
-            source: "nihil.bar.bottom"
+            enabledOutputs: Config.options?.nihil?.panel?.screenList ?? [],
+            source: "nihil.panel.position"
         }
     }
     function moveSurface(surfaceId: string, slot: string): bool {
-        if (surfaceId !== "nihilBar")
-            return false
-        Config.setNestedValue("nihil.bar.bottom", slot === "bottom")
+        if (surfaceId !== "nihilBar") return false
+        Config.setNestedValue("nihil.panel.position", slot)
         return true
     }
-    function resetSlot(surfaceId: string): string { return surfaceId === "nihilBar" ? "bottom" : "" }
+    function resetSlot(surfaceId: string): string { return surfaceId === "nihilBar" ? "top" : "" }
     function desktopInsets(outputName: string, result: var): var {
-        if (!ShellLayoutController.panelEnabled("nBar") || (Config.options?.nihil?.bar?.autoHide ?? false)
-                || !ShellLayoutController.outputEnabled(Config.options?.nihil?.bar?.screenList ?? [], outputName))
+        if (!ShellLayoutController.panelEnabled("nBar") || (Config.options?.nihil?.panel?.visibility ?? "always") !== "always"
+                || !ShellLayoutController.outputEnabled(Config.options?.nihil?.panel?.screenList ?? [], outputName))
             return result
-        result.barEdge = (Config.options?.nihil?.bar?.bottom ?? true) ? "bottom" : "top"
-        result.barThickness = NihilStyle.barZone
+        result.barEdge = Config.options?.nihil?.panel?.position ?? "top"
+        result.barThickness = NihilStyle.barHeight
         ShellLayoutController.applyInset(result, result.barEdge, result.barThickness)
         return result
     }

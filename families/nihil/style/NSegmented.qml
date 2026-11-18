@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.services
 
-// One choice of a few, side by side: a lit plate slides to the one chosen. The shell's own segmented control too
-// (part control.segmented): `options` is [{ value, label, glyph }], `picked` asks for the change.
+// One choice of a few. Also the shell's segmented control (part control.segmented): `options` is
+// [{ value, label, glyph }], `picked` asks for the change.
 Rectangle {
     id: root
 
@@ -16,22 +16,11 @@ Rectangle {
     readonly property int at: root.options.findIndex(option => option.value === root.current)
     readonly property real inset: NihilStyle.s(3)
     readonly property real slot: (root.width - root.inset * 2) / Math.max(1, root.options.length)
-    function shownLabel(option: var): string { return Translation.tr(String(option?.label ?? "")).toUpperCase() }
-    readonly property real widest: {
-        let most = 0
-        for (const option of root.options) {
-            const glyph = String(option?.glyph ?? "").length > 0 ? NihilStyle.s(22) : 0
-            most = Math.max(most, metrics.advanceWidth(root.shownLabel(option)) + glyph)
-        }
-        return most
-    }
 
-    FontMetrics { id: metrics; font.family: NihilStyle.grotesk; font.pixelSize: NihilStyle.textSmall }
-
-    implicitWidth: (root.widest + NihilStyle.s(22)) * root.options.length + root.inset * 2
-    implicitHeight: NihilStyle.s(36)
-    radius: NihilStyle.keyRadius(width, height, false)
-    color: NihilStyle.pieceRaised
+    implicitWidth: NihilStyle.s(92) * root.options.length + root.inset * 2
+    implicitHeight: NihilStyle.s(34)
+    radius: NihilStyle.rKey
+    color: NihilStyle.piece
 
     activeFocusOnTab: true
     Accessible.role: Accessible.List
@@ -70,7 +59,7 @@ Rectangle {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 Accessible.role: Accessible.RadioButton
-                Accessible.name: root.shownLabel(segment.modelData)
+                Accessible.name: word.text
                 Accessible.checked: segment.chosen
                 onClicked: root.picked(segment.modelData.value)
                 Row {
@@ -80,23 +69,19 @@ Rectangle {
                         anchors.verticalCenter: parent.verticalCenter
                         visible: segment.glyph.length > 0
                         text: segment.glyph
-                        size: NihilStyle.s(16)
+                        size: NihilStyle.s(15)
                         color: word.color
                     }
                     NText {
                         id: word
                         anchors.verticalCenter: parent.verticalCenter
-                        width: Math.min(implicitWidth, segment.width - NihilStyle.s(segment.glyph.length > 0 ? 30 : 8))
-                        figures: true
-                        text: root.shownLabel(segment.modelData)
+                        width: Math.min(implicitWidth, segment.width - NihilStyle.s(segment.glyph.length > 0 ? 28 : 8))
+                        text: Translation.tr(String(segment.modelData?.label ?? ""))
                         font.pixelSize: NihilStyle.textSmall
                         color: segment.chosen ? NihilStyle.onAccent : segment.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
-                        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
                     }
                 }
             }
         }
     }
-
-    NFocus { shown: root.activeFocus }
 }

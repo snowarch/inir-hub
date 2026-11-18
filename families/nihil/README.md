@@ -1,36 +1,24 @@
 # NiHiL
 
-A family for iNiR in the spirit of a phone's dot-matrix glyph light: flat near-black pieces floating on the
-wallpaper, round keys, the time drawn in dots, and one signal colour for whatever is on.
+A desktop family for iNiR built around vertical workspaces and one full overview: a dash, a workspace strip, live windows,
+an app grid with folders and a search, all on procedural glass you shape completely.
 
-## What it has
+## Using it
 
-- **Bar:** floating pieces on the wallpaper. Quick controls and NiHiL's menu sit on the left. Start, search and
-  your apps are in the middle, with the icons in one colour. The tray chevron and the status pill sit on the right.
-- **Desktop faces:** clock (dots or fused), battery, RAM and disk, date, now playing, weather and photo. Each face
-  comes in small, medium and large, and the faces are NiHiL's own.
-- **Start:** every app (type to search), the home folders, storage and memory, a small player, the weather, the
-  battery and the power keys.
-- **Quick controls:** Bluetooth, airplane mode, Wi-Fi, a record player, brightness and volume, night light, keep
-  awake, energy saver, dark mode and screen snip.
-- **Power menu:** a goodbye with your name in dots, power off, restart, lock, sleep and sign out.
-- **Lock screen:** the time in large dots, with one password pill where each letter you type is a dot.
-- **Menu:** NiHiL's own settings.
-  - *Widgets:* faces, clock style, two-tone clock.
-  - *Menus:* signal or dynamic colour, bar position, hide the bar, one-colour icons, size.
-  - *Wallpapers:* choose one, light or dark, lock blur.
-  - *Extras:* all settings, change family.
+Pick NiHiL in the family switcher. Press Super to open the overview, type to search, and open Settings from the panel or
+the overview to change anything.
 
-## Set up
+## Options
 
-Pick NiHiL in Settings › Families. The signal colour is the scheme's red; switch it to **Dynamic** (tap the word
-under NiHiL in its menu) to take the wallpaper's own colour. **Extras › All settings** opens NiHiL's Settings window:
-every page, live search, and the signal colour, pieces, corners, dots, type and motion to make it yours.
+Settings holds every option, and its search reaches all of them.
 
-`inir nihil toggle start|control|tray|power|menu` opens a panel from a keybind.
+- **Profiles**: four whole desktop layouts to wear, overwrite with your own and restore.
+- **Layout**: the panel, dash, workspace strip, workspace preview, search and workspace switcher.
+- **Appearance**: palette, glass, shape, type, the procedural field and the overview's background.
+- **Behavior**: the overview, Super key, hot corner, windows, dash actions, motion and windows asking for attention.
+- **App grid**: pages, icons, order, folders and search results.
+- **Modules**: each surface on or off, and the volume popup, notifications and lock screen.
 
-## Credits
+## License
 
-Inspired by the NothingOS desktop concept shared on nothing.community. Fonts: Hanken Grotesk for reading and
-Doto (its round, heaviest cut, kept as `DotoRound.ttf`) for the dot figures, both under the SIL Open Font License
-(`assets/fonts`).
+GPL-3.0-only.

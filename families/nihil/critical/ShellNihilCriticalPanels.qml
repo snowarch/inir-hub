@@ -7,40 +7,47 @@ import qs
 import qs.modules.common
 import qs.modules.shared.background
 import qs.modules.nihil.bar as NihilBarModule
+import qs.modules.nihil.overview as NihilOverviewModule
 import qs.modules.nihil.state
 
-// NiHiL's first frame: the bar, the desktop (the shared background in NiHiL's faces) and its commands.
+// NiHiL's first frame: the panel, the desktop, the overview and its commands.
 Item {
     id: root
 
-    /// NiHiL's panels: `control`, `start`, `power`, `menu`, `tray`.
+    NihilVerbs {}
+
+    /// NiHiL's surfaces: `overview`, `apps`, `search`, `control`, `today`, `power`.
     ///
     /// ```kdl
-    /// Mod+A { spawn "inir" "nihil" "toggle" "control"; }
+    /// Mod+A { spawn "inir" "nihil" "toggle" "apps"; }
     /// ```
     IpcHandler {
         target: "nihil"
-        /// Open or close one of NiHiL's panels by name (`control`, `start`, `power`, `menu`, `tray`)
+        /// Open or close one of NiHiL's surfaces by name (`overview`, `apps`, `search`, `control`, `today`, `power`)
         function toggle(panel: string): void { NihilState.toggle(panel) }
-        /// Close every NiHiL panel
+        /// Close every NiHiL surface
         function close(): void { NihilState.closeAll() }
+        /// The overview key: one press and two quick presses do what Settings says
+        function superKey(): void { NihilState.pressSuper() }
+        /// Apply a desktop profile (`vertical`, `horizontal`, `corner`, `dock`)
+        function profile(id: string): void { NihilState.applyProfile(id) }
     }
 
     component CriticalPanelLoader: LazyLoader {
         required property string identifier
-        property bool extraCondition: true
-        active: Config.ready
-            && (Config.options?.enabledPanels ?? []).includes(identifier)
-            && extraCondition
+        active: Config.ready && (Config.options?.enabledPanels ?? []).includes(identifier)
     }
 
     CriticalPanelLoader {
         identifier: "nBar"
         component: NihilBarModule.NihilBar {}
     }
-
     CriticalPanelLoader {
         identifier: "nBackground"
         component: Background { family: "nihil" }
+    }
+    CriticalPanelLoader {
+        identifier: "nOverview"
+        component: NihilOverviewModule.NihilOverview {}
     }
 }

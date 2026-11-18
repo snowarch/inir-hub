@@ -1,2 +1,3 @@
 module qs.modules.nihil.critical
 ShellNihilCriticalPanels 1.0 ShellNihilCriticalPanels.qml
+NihilVerbs 1.0 NihilVerbs.qml

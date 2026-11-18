@@ -4,19 +4,16 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs
-import qs.modules.common
+import qs.services
 
-// A NiHiL panel's window: the whole focused screen, clear, its pieces set in it by the panel. A click on nothing or
-// Escape closes it (`dismissed`); the pieces rise from the bar's edge as it opens and sink back as it closes.
+// A NiHiL panel's window: the focused screen, clear, its glass set in it by the panel. A click on nothing or Escape
+// emits `dismissed`. Put the glass's `region` in `blurPieces` so the compositor blurs behind it.
 PanelWindow {
     id: root
 
     required property bool open
     property string namespace: "nihil"
-    readonly property bool barBottom: Config.options?.nihil?.bar?.bottom ?? true
-    // Where the panel's pieces may stand: the screen less the bar's room.
-    readonly property real edgeTop: root.barBottom ? NihilStyle.edge : NihilStyle.barZone
-    readonly property real edgeBottom: root.barBottom ? NihilStyle.barZone : NihilStyle.edge
+    property list<Region> blurPieces
     property real shown: root.open ? 1 : 0
     default property alias content: stage.data
     signal dismissed()
@@ -30,6 +27,9 @@ PanelWindow {
     WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors { top: true; bottom: true; left: true; right: true }
 
+    BackgroundEffect.blurRegion: CompositorService.blurRegions && NihilStyle.blur && root.open ? zone : null
+    Region { id: zone; regions: root.blurPieces }
+
     Behavior on shown { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
 
     MouseArea {
@@ -42,7 +42,7 @@ PanelWindow {
         anchors.fill: parent
         focus: root.open
         opacity: root.shown
-        transform: Translate { y: (1 - root.shown) * NihilStyle.s(14) * (root.barBottom ? 1 : -1) }
+        transform: Translate { y: (1 - root.shown) * NihilStyle.s(10) }
         Keys.onEscapePressed: root.dismissed()
     }
 }

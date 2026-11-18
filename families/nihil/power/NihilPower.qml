@@ -8,131 +8,106 @@ import qs.modules.common.functions
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The power menu (the shell's session key): one block over the Start key. The name on paper says goodbye; shutting down
-// is the signal's tile, restarting beside it, and the three lighter ways out under them.
+// The way out: one bar of glass with five keys over the dimmed desktop. The pointer or the arrows move the light between
+// them, Enter or a click takes that way.
 NPopup {
     id: root
 
     open: NihilState.powerOpen
     namespace: "nihil:power"
+    blurPieces: [dock.region]
     onDismissed: GlobalStates.sessionOpen = false
 
-    readonly property real g: NihilStyle.seam
-    readonly property real wide: NihilStyle.s(372)
-    readonly property string name: {
-        const own = Config.options?.nihil?.power?.greeting ?? ""
-        return own.length > 0 ? own : SystemInfo.username
+    readonly property var ways: [
+        { id: "lock", glyph: "lock", word: Translation.tr("Lock") },
+        { id: "suspend", glyph: "bedtime", word: Translation.tr("Sleep") },
+        { id: "logout", glyph: "logout", word: Translation.tr("Sign out") },
+        { id: "reboot", glyph: "restart", word: Translation.tr("Restart") },
+        { id: "poweroff", glyph: "power_settings_new", word: Translation.tr("Shut down") }
+    ]
+    property int current: 0
+
+    onOpenChanged: {
+        if (!root.open)
+            return
+        root.current = 0
+        keys.forceActiveFocus()
     }
 
-    function act(what: string): void {
+    function step(by: int): void {
+        root.current = (root.current + by + root.ways.length) % root.ways.length
+    }
+
+    function take(id: string): void {
         GlobalStates.sessionOpen = false
-        if (what === "poweroff") Session.poweroff()
-        else if (what === "reboot") Session.reboot()
-        else if (what === "lock") Session.lock()
-        else if (what === "suspend") Session.suspend()
-        else if (what === "logout") Session.logout()
+        if (id === "lock") Session.lock()
+        else if (id === "suspend") Session.suspend()
+        else if (id === "logout") Session.logout()
+        else if (id === "reboot") Session.reboot()
+        else if (id === "poweroff") Session.poweroff()
     }
 
-    component Way: NButton {
-        id: way
-        property string glyph: ""
-        property string word: ""
-        property real glyphSize: NihilStyle.s(26)
-        property real wordSize: NihilStyle.s(15)
-        square: true
-        NIcon {
-            x: NihilStyle.s(14)
-            y: NihilStyle.s(14)
-            text: way.glyph
-            size: way.glyphSize
-            weight: 2.2
-            color: way.ink
-        }
-        NText {
-            x: NihilStyle.s(14)
-            width: way.width - NihilStyle.s(20)
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: NihilStyle.s(10)
-            text: way.word
-            font.pixelSize: way.wordSize
-            font.weight: Font.Black
-            color: way.ink
-        }
-    }
+    NGlass {
+        id: dock
+        anchors.centerIn: parent
+        width: line.implicitWidth + NihilStyle.s(24)
+        height: line.implicitHeight + NihilStyle.s(24)
+        radius: NihilStyle.rPanel
+        ignite: 1
 
-    NRack {
-        width: root.wide
-        height: column.implicitHeight
-        x: NihilStyle.edge
-        y: root.barBottom ? parent.height - height - root.edgeBottom : root.edgeTop
+        // Takes no click of its own, so a press between two keys does not close the menu.
+        MouseArea { anchors.fill: parent }
 
-        Column {
-            id: column
-            spacing: root.g
+        FocusScope {
+            id: keys
+            anchors.fill: parent
+            focus: true
 
-            NTile {
-                id: head
-                width: root.wide
-                height: NihilStyle.s(112)
-                paper: true
-                caption: Translation.tr("Goodbye,")
-                NFigure {
-                    x: head.pad
-                    width: head.width - head.pad * 2
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: NihilStyle.s(6)
-                    size: NihilStyle.s(52)
-                    text: root.name
-                    elide: Text.ElideRight
-                    color: head.ink
-                }
-            }
+            Keys.onLeftPressed: root.step(-1)
+            Keys.onRightPressed: root.step(1)
+            Keys.onTabPressed: root.step(1)
+            Keys.onBacktabPressed: root.step(-1)
+            Keys.onReturnPressed: root.take(root.ways[root.current].id)
+            Keys.onEnterPressed: root.take(root.ways[root.current].id)
 
             Row {
-                spacing: root.g
-                Way {
-                    width: (root.wide - root.g) / 2
-                    height: NihilStyle.s(136)
-                    lit: true
-                    glyph: "power_settings_new"
-                    glyphSize: NihilStyle.s(36)
-                    word: Translation.tr("Shut down")
-                    wordSize: NihilStyle.textTitle
-                    onClicked: root.act("poweroff")
-                }
-                Way {
-                    width: (root.wide - root.g) / 2
-                    height: NihilStyle.s(136)
-                    glyph: "restart_alt"
-                    glyphSize: NihilStyle.s(36)
-                    word: Translation.tr("Restart")
-                    wordSize: NihilStyle.textTitle
-                    onClicked: root.act("reboot")
-                }
-            }
+                id: line
+                anchors.centerIn: parent
+                spacing: NihilStyle.gap
 
-            Row {
-                spacing: root.g
-                Way {
-                    width: (root.wide - root.g * 2) / 3
-                    height: NihilStyle.s(96)
-                    glyph: "lock"
-                    word: Translation.tr("Lock")
-                    onClicked: root.act("lock")
-                }
-                Way {
-                    width: (root.wide - root.g * 2) / 3
-                    height: NihilStyle.s(96)
-                    glyph: "bedtime"
-                    word: Translation.tr("Sleep")
-                    onClicked: root.act("suspend")
-                }
-                Way {
-                    width: (root.wide - root.g * 2) / 3
-                    height: NihilStyle.s(96)
-                    glyph: "logout"
-                    word: Translation.tr("Sign out")
-                    onClicked: root.act("logout")
+                Repeater {
+                    model: root.ways
+                    delegate: NButton {
+                        id: way
+                        required property var modelData
+                        required property int index
+
+                        width: NihilStyle.s(104)
+                        height: NihilStyle.s(104)
+                        radius: NihilStyle.rCard
+                        lit: root.current === way.index
+                        activeFocusOnTab: false
+                        onEntered: root.current = way.index
+                        onClicked: root.take(way.modelData.id)
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: NihilStyle.s(10)
+
+                            NIcon {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: way.modelData.glyph
+                                size: NihilStyle.s(30)
+                                color: way.ink
+                            }
+                            NText {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: way.modelData.word
+                                font.pixelSize: NihilStyle.textSmall
+                                color: way.ink
+                            }
+                        }
+                    }
                 }
             }
         }

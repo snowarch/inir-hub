@@ -6,6 +6,7 @@ import Quickshell.Wayland
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.nihil.style
 
 // A request for a password from the system: built only while one is open, on the screen in use when it came.
 Scope {
@@ -30,8 +31,9 @@ Scope {
             WlrLayershell.namespace: "quickshell:polkit"
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+            BackgroundEffect.blurRegion: CompositorService.blurRegions && NihilStyle.blur ? card.glassRegion : null
 
-            NihilPolkitCard { anchors.fill: parent }
+            NihilPolkitCard { id: card; anchors.fill: parent }
         }
     }
 }

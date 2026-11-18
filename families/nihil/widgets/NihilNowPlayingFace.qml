@@ -1,189 +1,134 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
 import Quickshell.Widgets
-import qs
 import qs.services
 import qs.modules.nihil.style
 
-// What plays. Medium and large: a dark piece with the cover fading in from its right, a note glyph, the title in
-// figures and the artist in the serif, the time as a bar (played in the signal colour), the play key a lit pill
-// beside small skip keys. Small: a round play key over the title.
-NihilFace {
+// What is playing: the cover, the names, the keys and how far along it is. With nothing playing it offers the last player.
+NihilWidgetFace {
     id: root
 
     readonly property var player: MprisController.activePlayer
-    readonly property bool has: root.player !== null
-    readonly property bool playing: MprisController.isPlaying
-    readonly property string title: root.has ? MprisController.titleOf(root.player) : Translation.tr("Nothing playing")
-    readonly property string artist: root.has ? MprisController.artistOf(root.player) : ""
-    readonly property string art: root.has ? MprisController.artUrlOf(root.player) : ""
-    property int tick: 0
-    readonly property real length: root.has ? MprisController.lengthOf(root.player) : 0
-    readonly property real position: (root.tick, root.has ? MprisController.positionOf(root.player) : 0)
-    readonly property real progress: root.length > 0 ? Math.max(0, Math.min(1, root.position / root.length)) : 0
+    readonly property bool playing: root.player?.isPlaying ?? false
+    readonly property real length: root.player?.length ?? 0
+    property real position: 0
+    readonly property real keySize: root.dp(root.small ? 30 : 34)
+    readonly property real coverSize: root.small ? 0 : root.large ? Math.min(root.contentWidth, root.contentHeight - root.dp(112))
+        : root.contentHeight
+
+    function readPosition(): void {
+        root.position = root.player?.position ?? 0
+    }
+
+    onPlayerChanged: root.readPosition()
 
     Timer {
-        running: root.live && root.widget.motionActive && root.playing && !root.small
         interval: 1000
         repeat: true
-        onTriggered: root.tick++
+        triggeredOnStart: true
+        running: root.moving && root.playing
+        onTriggered: root.readPosition()
     }
 
-    // Medium and large.
-    Rectangle {
-        id: card
-        visible: !root.small
-        anchors.fill: parent
-        radius: root.radius
-        color: NihilStyle.piece
-
-        ClippingRectangle {
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: root.large ? parent.width : parent.width * 0.6
-            height: root.large ? parent.height * 0.62 : parent.height
-            radius: root.radius
-            color: "transparent"
-            visible: root.art.length > 0
-            Image {
-                id: cover
-                anchors.fill: parent
-                source: root.art
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                sourceSize.width: 512
-                visible: false
-            }
-            MultiEffect {
-                anchors.fill: cover
-                source: cover
-                maskEnabled: true
-                maskSource: fade
-            }
-            Item {
-                id: fade
-                anchors.fill: parent
-                visible: false
-                layer.enabled: true
-                Rectangle {
-                    anchors.fill: parent
-                    gradient: Gradient {
-                        orientation: root.large ? Gradient.Vertical : Gradient.Horizontal
-                        GradientStop { position: 0; color: "transparent" }
-                        GradientStop { position: 0.55; color: NihilStyle.ink }
-                    }
-                }
-            }
-        }
-
-        NButton {
-            x: root.dp(14); y: root.dp(14)
-            width: root.dp(42); height: width
-            tone: NihilStyle.pieceRaised
-            icon: "music_note"
-            iconSize: root.dp(22)
-            onClicked: if (!root.has) MprisController.resumeLast()
-        }
-
-        Column {
-            anchors { left: parent.left; right: parent.right; bottom: controls.top; margins: root.dp(16); bottomMargin: root.dp(8) }
-            spacing: root.dp(2)
-            NText {
-                width: parent.width * (root.large ? 0.9 : 0.55)
-                figures: true
-                font.bold: true
-                font.pixelSize: root.dp(15)
-                font.capitalization: Font.AllUppercase
-                text: root.title
-            }
-            NText {
-                width: parent.width * 0.55
-                font.pixelSize: root.dp(13)
-                color: NihilStyle.inkSoft
-                text: root.artist
-                visible: text.length > 0
-            }
-        }
-
-        Row {
-            id: controls
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: root.dp(14) }
-            height: root.dp(30)
-            spacing: root.dp(8)
-            Item {
-                width: parent.width - play.width - prev.width - next.width - parent.spacing * 3
-                height: parent.height
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width
-                    height: root.dp(5)
-                    radius: height / 2
-                    color: NihilStyle.ink
-                    Rectangle {
-                        width: parent.width * root.progress
-                        height: parent.height
-                        radius: parent.radius
-                        color: NihilStyle.accent
-                    }
-                }
-            }
-            NButton {
-                id: play
-                width: root.dp(54); height: parent.height
-                lit: true
-                icon: root.playing ? "pause" : "play_arrow"
-                iconSize: root.dp(20)
-                onClicked: root.has ? MprisController.togglePlaying() : MprisController.resumeLast()
-            }
-            NButton {
-                id: prev
-                width: parent.height; height: width
-                tone: NihilStyle.pieceRaised
-                icon: "skip_previous"
-                iconSize: root.dp(16)
-                onClicked: MprisController.previous()
-            }
-            NButton {
-                id: next
-                width: parent.height; height: width
-                tone: NihilStyle.pieceRaised
-                icon: "skip_next"
-                iconSize: root.dp(16)
-                onClicked: MprisController.next()
-            }
-        }
+    FaceBlank {
+        visible: !root.player
+        face: root
+        glyph: "music"
+        title: Translation.tr("Nothing playing")
+        detail: Translation.tr("Music you play shows up here")
     }
 
-    // Small: the play key, lit, on a round piece; the title under it.
-    Rectangle {
-        visible: root.small
-        anchors.centerIn: parent
-        width: Math.min(parent.width, parent.height)
-        height: width
-        radius: width / 2
+    NButton {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        visible: !root.player && !root.small && MprisController.lastPlayedApp() !== null
+        icon: "play"
+        label: Translation.tr("Resume")
+        onClicked: MprisController.resumeLast()
+    }
+
+    ClippingRectangle {
+        id: cover
+        visible: Boolean(root.player) && !root.small
+        anchors.horizontalCenter: root.large ? parent.horizontalCenter : undefined
+        width: root.coverSize
+        height: root.coverSize
+        radius: Math.max(root.dp(6), root.radius - root.padding)
         color: NihilStyle.piece
-        Column {
+
+        NIcon {
             anchors.centerIn: parent
-            spacing: root.dp(10)
+            text: "music"
+            size: parent.width * 0.4
+            color: NihilStyle.inkFaint
+        }
+        Image {
+            anchors.fill: parent
+            source: root.player?.trackArtUrl ?? ""
+            sourceSize.width: 384
+            sourceSize.height: 384
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+        }
+    }
+
+    Column {
+        visible: Boolean(root.player)
+        x: root.medium ? cover.width + root.dp(14) : 0
+        width: parent.width - x
+        anchors.bottom: parent.bottom
+        spacing: root.dp(4)
+
+        NText {
+            width: parent.width
+            text: root.player?.trackTitle || Translation.tr("Unknown track")
+            elide: Text.ElideRight
+            font.pixelSize: root.dp(root.small ? 14 : 16)
+            font.weight: Font.Medium
+        }
+        NText {
+            width: parent.width
+            visible: text.length > 0
+            text: root.player?.trackArtist ?? ""
+            elide: Text.ElideRight
+            font.pixelSize: root.dp(13)
+            color: NihilStyle.inkSoft
+        }
+        FaceBar {
+            width: parent.width
+            visible: root.length > 0
+            level: root.position / Math.max(1, root.length)
+        }
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: root.dp(4)
+
             NButton {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: root.dp(64); height: width
-                lit: true
-                icon: root.playing ? "pause" : "play_arrow"
-                iconSize: root.dp(30)
-                onClicked: root.has ? MprisController.togglePlaying() : MprisController.resumeLast()
+                width: root.keySize
+                height: root.keySize
+                visible: !root.small
+                enabled: root.player?.canGoPrevious ?? false
+                icon: "previous"
+                Accessible.name: Translation.tr("Previous track")
+                onClicked: root.player.previous()
             }
-            NText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: Math.min(implicitWidth, root.width * 0.7)
-                horizontalAlignment: Text.AlignHCenter
-                figures: true
-                font.pixelSize: root.dp(12)
-                font.capitalization: Font.AllUppercase
-                text: root.title
+            NButton {
+                width: root.keySize
+                height: root.keySize
+                lit: true
+                enabled: root.player?.canTogglePlaying ?? false
+                icon: root.playing ? "pause" : "play"
+                Accessible.name: root.playing ? Translation.tr("Pause") : Translation.tr("Play")
+                onClicked: root.player.togglePlaying()
+            }
+            NButton {
+                width: root.keySize
+                height: root.keySize
+                enabled: root.player?.canGoNext ?? false
+                icon: "next"
+                Accessible.name: Translation.tr("Next track")
+                onClicked: root.player.next()
             }
         }
     }

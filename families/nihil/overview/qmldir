@@ -1,0 +1,10 @@
+module qs.modules.nihil.overview
+NihilOverview 1.0 NihilOverview.qml
+OverviewScreen 1.0 OverviewScreen.qml
+Dash 1.0 Dash.qml
+WindowCard 1.0 WindowCard.qml
+WorkspacePage 1.0 WorkspacePage.qml
+WorkspaceThumb 1.0 WorkspaceThumb.qml
+DashMenu 1.0 DashMenu.qml
+WindowPip 1.0 WindowPip.qml
+WindowShot 1.0 WindowShot.qml

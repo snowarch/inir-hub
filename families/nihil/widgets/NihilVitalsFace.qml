@@ -1,99 +1,70 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import qs
 import qs.services
 import qs.modules.nihil.style
 
-// The machine at a glance. Small: memory as a field of dots under its share. Medium: memory and the disk as two pies
-// on a pill, their shares between them. Large: both, the dots over the pies.
-NihilFace {
+// How hard the machine is working: one line for each part, in the error colour only past nine tenths.
+NihilWidgetFace {
     id: root
 
-    readonly property real memory: ResourceUsage.memoryUsedPercentage ?? 0
-    readonly property real disk: ResourceUsage.diskUsedPercentage ?? 0
-
-    component MemoryCard: Rectangle {
-        radius: root.radius
-        color: NihilStyle.piece
-        NText {
-            id: share
-            x: root.dp(16); y: root.dp(14)
-            figures: true
-            font.pixelSize: root.dp(20)
-            color: NihilStyle.accent
-            text: `${Math.round(root.memory * 100)}%`
-        }
-        NText {
-            x: share.x
-            anchors.top: share.bottom
-            figures: true
-            font.pixelSize: root.dp(14)
-            text: Translation.tr("RAM")
-        }
-        NIcon {
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.margins: root.dp(16)
-            text: "memory"
-            size: root.dp(22)
-        }
-        DotGrid {
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: root.dp(14) }
-            height: parent.height * 0.48
-            columns: 7
-            rows: 4
-            level: root.memory
-            columnFirst: true
-            offColor: NihilStyle.pieceRaised
-        }
+    readonly property var parts: {
+        const list = [
+            { name: Translation.tr("Processor"), level: ResourceUsage.cpuUsage, note: ResourceUsage.cpuTemp > 0 ? `${ResourceUsage.cpuTemp}°` : "" },
+            { name: Translation.tr("Memory"), level: ResourceUsage.memoryUsedPercentage, note: "" }
+        ]
+        if (ResourceUsage.gpuUsage > 0 || ResourceUsage.gpuTemp > 0)
+            list.push({ name: Translation.tr("Graphics"), level: ResourceUsage.gpuUsage, note: ResourceUsage.gpuTemp > 0 ? `${ResourceUsage.gpuTemp}°` : "" })
+        if (root.large && ResourceUsage.swapTotal > 0)
+            list.push({ name: Translation.tr("Swap"), level: ResourceUsage.swapUsedPercentage, note: "" })
+        return root.small ? list.slice(0, 2) : list
     }
 
-    component Pies: Rectangle {
-        radius: height / 2
-        color: NihilStyle.piece
-        Row {
-            anchors.centerIn: parent
-            spacing: -root.dp(14)
-            PieDial {
-                width: root.dp(76); height: width
-                value: root.memory
-                offColor: NihilStyle.pieceRaised
-            }
-            Rectangle {
-                z: 1
-                anchors.verticalCenter: parent.verticalCenter
-                width: root.dp(64); height: width; radius: width / 2
-                color: NihilStyle.well
-                Column {
-                    anchors.centerIn: parent
-                    NText { anchors.horizontalCenter: parent.horizontalCenter; figures: true; font.pixelSize: root.dp(11); text: `${Translation.tr("RAM")} ${Math.round(root.memory * 100)}` }
-                    NText { anchors.horizontalCenter: parent.horizontalCenter; figures: true; font.pixelSize: root.dp(11); text: `${Translation.tr("DISK")} ${Math.round(root.disk * 100)}`; color: NihilStyle.inkSoft }
+    Column {
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width
+        spacing: root.dp(root.small ? 8 : 12)
+
+        Repeater {
+            model: root.parts
+
+            delegate: Column {
+                id: part
+                required property var modelData
+                readonly property bool high: part.modelData.level >= 0.9
+
+                width: parent.width
+                spacing: root.dp(4)
+
+                Item {
+                    width: parent.width
+                    height: percent.implicitHeight
+
+                    NText {
+                        anchors.left: parent.left
+                        anchors.right: percent.left
+                        anchors.rightMargin: root.dp(8)
+                        anchors.baseline: percent.baseline
+                        text: part.modelData.note.length > 0 ? `${part.modelData.name}  ${part.modelData.note}` : part.modelData.name
+                        elide: Text.ElideRight
+                        font.pixelSize: root.dp(12)
+                        color: NihilStyle.inkSoft
+                    }
+                    NText {
+                        id: percent
+                        anchors.right: parent.right
+                        figures: true
+                        text: `${Math.round(part.modelData.level * 100)}%`
+                        font.pixelSize: root.dp(root.small ? 14 : 16)
+                        color: part.high ? NihilStyle.m3.m3error : NihilStyle.ink
+                    }
+                }
+                FaceBar {
+                    width: parent.width
+                    level: part.modelData.level
+                    tint: part.high ? NihilStyle.m3.m3error : NihilStyle.accent
                 }
             }
-            PieDial {
-                width: root.dp(76); height: width
-                value: root.disk
-                offColor: NihilStyle.pieceRaised
-            }
         }
-    }
-
-    MemoryCard {
-        visible: root.small
-        anchors.fill: parent
-    }
-    Pies {
-        visible: root.medium
-        anchors.centerIn: parent
-        width: Math.min(parent.width, root.dp(300))
-        height: Math.min(parent.height, root.dp(120))
-    }
-    Column {
-        visible: root.large
-        anchors.fill: parent
-        spacing: root.dp(14)
-        MemoryCard { width: parent.width; height: parent.height - pies.height - parent.spacing }
-        Pies { id: pies; width: parent.width; height: root.dp(120) }
     }
 }

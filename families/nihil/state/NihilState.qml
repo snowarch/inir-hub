@@ -1,80 +1,253 @@
 pragma Singleton
-pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import qs
-import qs.services
 import qs.modules.common
+import qs.services
+import "NihilProfiles.js" as Profiles
 
-// NiHiL's own panels, open or not; one open at a time. Start is the shell's search (GlobalStates.searchOpen) and the
-// power menu its session screen (GlobalStates.sessionOpen), so the shared keys open NiHiL's.
+// What is open in NiHiL, and the desktop as the overview reads it.
 Singleton {
     id: root
 
+    readonly property var nihil: Config.options?.nihil
+
+    property bool overviewOpen: false
+    // "windows", "apps" or "search".
+    property string view: "windows"
+    property string query: ""
+    // What the search looks through: "all", "windows" or "recent".
+    property string searchScope: "all"
+    // Windows left in place for this opening, whatever the mode says.
+    property bool holdStatic: false
     property bool controlOpen: false
-    property bool trayOpen: false
-    // NiHiL's quick menu, opened by its bar button; everything else lives in its Settings window.
-    property bool menuOpen: false
-    // Today: the date, the month and every notification, opened from the time in the status pill.
     property bool todayOpen: false
-    readonly property bool startOpen: GlobalStates.searchOpen
+    // Windows pinned as floating thumbnails.
+    property var pips: []
+
     readonly property bool powerOpen: GlobalStates.sessionOpen
-    // The wallpapers and the clipboard answer the shell's own keys, so a keybind made for any family opens NiHiL's.
+    readonly property bool clipboardOpen: GlobalStates.clipboardOpen
     readonly property bool wallpapersOpen: GlobalStates.wallpaperSelectorOpen || GlobalStates.wallpaperLauncherOpen
         || GlobalStates.coverflowSelectorOpen
-    readonly property bool clipboardOpen: GlobalStates.clipboardOpen
-    readonly property bool anyOpen: root.controlOpen || root.trayOpen || root.menuOpen || root.startOpen || root.powerOpen
-        || root.todayOpen || root.wallpapersOpen || root.clipboardOpen
 
-    function closeAll(): void {
+    function openOverview(which: string): void {
+        root.view = which
+        root.query = ""
+        root.searchScope = "all"
+        root.holdStatic = false
         root.controlOpen = false
-        root.trayOpen = false
-        GlobalStates.searchOpen = false
-        GlobalStates.sessionOpen = false
-        GlobalStates.wallpaperSelectorOpen = false
-        GlobalStates.wallpaperLauncherOpen = false
-        GlobalStates.coverflowSelectorOpen = false
-        GlobalStates.clipboardOpen = false
-        root.menuOpen = false
         root.todayOpen = false
+        root.overviewOpen = true
+    }
+    function closeOverview(): void {
+        root.overviewOpen = false
+        root.query = ""
+        root.view = "windows"
+        root.searchScope = "all"
+        root.holdStatic = false
+    }
+    function toggleOverview(which: string): void {
+        if (root.overviewOpen && root.view === which) root.closeOverview()
+        else root.openOverview(which)
+    }
+    function setQuery(text: string): void {
+        root.query = text
+        root.view = text.length > 0 || root.searchScope !== "all" ? "search" : "windows"
+    }
+    function searchFor(text: string, scope: string): void {
+        root.openOverview("search")
+        root.searchScope = scope
+        root.query = text
+    }
+    function closeAll(): void {
+        root.closeOverview()
+        root.controlOpen = false
+        root.todayOpen = false
+        GlobalStates.sessionOpen = false
     }
     function toggle(which: string): void {
-        const was = which === "control" ? root.controlOpen : which === "tray" ? root.trayOpen
-            : which === "start" ? root.startOpen
-            : which === "power" ? root.powerOpen : which === "menu" ? root.menuOpen
-            : which === "today" ? root.todayOpen : which === "wallpapers" ? root.wallpapersOpen
-            : which === "clipboard" ? root.clipboardOpen : false
-        root.closeAll()
-        if (was) return
-        if (which === "control") root.controlOpen = true
-        else if (which === "tray") root.trayOpen = true
-        else if (which === "start") GlobalStates.searchOpen = true
-        else if (which === "power") GlobalStates.sessionOpen = true
-        else if (which === "menu") root.menuOpen = true
-        else if (which === "today") root.todayOpen = true
-        else if (which === "wallpapers") GlobalStates.wallpaperSelectorOpen = true
-        else if (which === "clipboard") GlobalStates.clipboardOpen = true
-    }
-
-    // NiHiL's Settings window, at a page of it. Already open, it hears the page through this file and comes forward.
-    FileView { id: pageAsk; path: `${Directories.stateUserPath}/nihil/settings-page` }
-    function openSettings(page: string): void {
-        root.closeAll()
-        if (page.length > 0) {
-            pageAsk.setText(`${page} ${Date.now()}`)
-            GlobalStates.openSettingsAt(page)
-        } else {
-            GlobalStates.openSettings()
+        switch (which) {
+        case "overview": root.toggleOverview("windows"); break
+        case "apps": root.toggleOverview("apps"); break
+        case "search": root.toggleOverview("search"); break
+        case "control": root.controlOpen = !root.controlOpen; break
+        case "today": root.todayOpen = !root.todayOpen; break
+        case "power": GlobalStates.sessionOpen = !GlobalStates.sessionOpen; break
         }
-        const open = (NiriService.windows ?? []).find(entry => entry.title === Translation.tr("NiHiL Settings"))
-        if (open) NiriService.focusWindow(open.id)
     }
 
+    // One action by name: the Super key, the hot corner.
+    function trigger(action: string): void {
+        switch (action) {
+        case "follow": root.toggleOverview("windows"); break
+        case "windows": root.openOverview("windows"); break
+        case "apps": root.toggleOverview("apps"); break
+        case "staticWindows":
+        case "staticWorkspace":
+            root.openOverview("windows")
+            root.holdStatic = true
+            break
+        case "searchWindows": root.searchFor("", "windows"); break
+        case "recentFiles": root.searchFor("", "recent"); break
+        }
+    }
+    // A second press soon after the first is the double action.
+    property double _lastSuper: 0
+    function pressSuper(): void {
+        const now = Date.now()
+        const twice = now - root._lastSuper < 320
+        root._lastSuper = twice ? 0 : now
+        root.trigger(twice ? (root.nihil?.overview?.superKeyDouble ?? "apps") : (root.nihil?.overview?.superKey ?? "follow"))
+    }
+
+    // What a window's mouse buttons and icon can be set to do.
+    function windowAction(action: string, win: var): void {
+        switch (action) {
+        case "activate":
+            NiriService.focusWindow(win.id)
+            root.closeOverview()
+            break
+        case "close": NiriService.closeWindow(win.id); break
+        case "minimize": MinimizedWindows.minimize(win.id); break
+        case "next": {
+            const list = root.cycleOn(root.outputOf(win))
+            const at = list.findIndex(ws => ws.id === win.workspace_id)
+            const next = list[at + 1] ?? list[0]
+            if (next) NiriService.moveWindowToWorkspaceById(win.id, next.id, false)
+            break
+        }
+        case "search": root.searchFor(win.title ?? "", "windows"); break
+        case "thumbnail": root.pin(win); break
+        }
+    }
+    function pin(win: var): void {
+        if (!root.pips.some(item => item.id === win.id)) root.pips = [...root.pips, { id: win.id, appId: win.app_id }]
+    }
+    function unpin(id: var): void { root.pips = root.pips.filter(item => item.id !== id) }
+
+    // Keeps the shell's shared flags and NiHiL's overview saying the same thing.
+    onOverviewOpenChanged: {
+        CompositorService.setSortingConsumer("nihil-overview", root.overviewOpen)
+        if (root.overviewOpen) WindowPreviewService.captureForTaskView()
+        if (GlobalStates.overviewOpen !== root.overviewOpen) GlobalStates.overviewOpen = root.overviewOpen
+        if (!root.overviewOpen && GlobalStates.searchOpen) GlobalStates.searchOpen = false
+    }
     Connections {
         target: GlobalStates
-        function onSearchOpenChanged() { if (GlobalStates.searchOpen) { root.controlOpen = false; root.trayOpen = false } }
-        function onSessionOpenChanged() { if (GlobalStates.sessionOpen) { root.controlOpen = false; root.trayOpen = false } }
+        function onOverviewOpenChanged(): void {
+            if (GlobalStates.overviewOpen !== root.overviewOpen) {
+                if (GlobalStates.overviewOpen) root.openOverview("windows")
+                else root.closeOverview()
+            }
+        }
+        function onSearchOpenChanged(): void {
+            if (GlobalStates.searchOpen) root.openOverview("search")
+            else if (root.view === "search") root.closeOverview()
+        }
+    }
+
+    // The session starts where the person asked.
+    Connections {
+        target: Config
+        enabled: !root._started
+        function onReadyChanged(): void { root.start() }
+    }
+    property bool _started: false
+    function start(): void {
+        if (root._started || !Config.ready) return
+        root._started = true
+        const startup = root.nihil?.overview?.startup ?? "desktop"
+        if (startup !== "desktop") root.openOverview(startup === "apps" ? "apps" : "windows")
+    }
+    Component.onCompleted: root.start()
+
+    // A window asking for attention, handled once each time it asks.
+    property var _urgent: ({})
+    Connections {
+        target: NiriService
+        function onWindowsChanged(): void {
+            const mode = root.nihil?.attention?.mode ?? "show"
+            const seen = {}
+            for (const win of NiriService.windows ?? []) {
+                if (!win.is_urgent) continue
+                seen[win.id] = true
+                if (root._urgent[win.id] || mode === "hide") continue
+                if (mode === "focus") {
+                    NiriService.focusWindow(win.id)
+                } else {
+                    const pinned = (TaskbarApps.apps ?? []).some(app => app.appId === win.app_id && app.pinned)
+                    if (pinned || !(root.nihil?.attention?.favoritesNotify ?? false))
+                        Quickshell.execDetached(["notify-send", "-a", String(win.app_id ?? ""), String(win.title ?? ""),
+                            Translation.tr("Needs your attention")])
+                }
+            }
+            root._urgent = seen
+        }
+    }
+
+    // The desktop, per screen.
+    function workspacesOn(output: string): var {
+        return (NiriService.allWorkspaces ?? []).filter(ws => ws.output === output).sort((a, b) => a.idx - b.idx)
+    }
+    function outputOf(win: var): string {
+        return (NiriService.allWorkspaces ?? []).find(ws => ws.id === win.workspace_id)?.output ?? NiriService.currentOutput
+    }
+    // The workspaces a step moves through: the empty last one can be left out.
+    function cycleOn(output: string): var {
+        const list = root.workspacesOn(output)
+        const last = list[list.length - 1]
+        if ((root.nihil?.switcher?.ignoreLast ?? false) && list.length > 1 && last && root.windowsOn(last.id).length === 0)
+            return list.slice(0, -1)
+        return list
+    }
+    function windowsOn(workspaceId: var): var {
+        const list = (NiriService.windows ?? []).filter(win => win.workspace_id === workspaceId)
+        const order = root.nihil?.overview?.sortWindows ?? "position"
+        if (order === "stable") return list.sort((a, b) => a.id - b.id)
+        if (order === "recent") {
+            const recent = NiriService.mruWindowIds ?? []
+            const rank = id => { const at = recent.indexOf(id); return at < 0 ? recent.length : at }
+            return list.sort((a, b) => rank(a.id) - rank(b.id))
+        }
+        return list
+    }
+    function activeIndexOn(output: string): int {
+        return Math.max(0, root.workspacesOn(output).findIndex(ws => ws.is_active))
+    }
+    function stepWorkspace(output: string, by: int): void {
+        const list = root.cycleOn(output)
+        if (list.length === 0) return
+        const at = list.findIndex(ws => ws.is_active)
+        const wrap = root.nihil?.switcher?.wrap ?? false
+        const next = wrap ? list[(at + by + list.length) % list.length] : list[at + by]
+        if (next) NiriService.switchToWorkspaceById(next.id)
+    }
+
+    // Profiles: whole desktop layouts. A preset can be saved over and restored to how it came.
+    readonly property var profiles: Profiles.list
+    readonly property var savedProfiles: root.nihil?.savedProfiles ?? ({})
+    function profileValues(id: string): var {
+        const preset = Profiles.list.find(item => item.id === id)
+        return root.savedProfiles[id] ?? preset?.values ?? null
+    }
+    function applyProfile(id: string): void {
+        const values = root.profileValues(id)
+        if (!values) return
+        const updates = { "nihil.profile": id }
+        for (const key in values) updates["nihil." + key] = values[key]
+        Config.setNestedValues(updates)
+    }
+    // Keeps the current structure as this profile.
+    function saveProfile(id: string): void {
+        const values = {}
+        for (const key of Profiles.keys) values[key] = Config.getNestedValue("nihil." + key, undefined)
+        Config.setNestedValue("nihil.savedProfiles", Object.assign({}, root.savedProfiles, { [id]: values }))
+    }
+    function restoreProfile(id: string): void {
+        const saved = Object.assign({}, root.savedProfiles)
+        delete saved[id]
+        Config.setNestedValue("nihil.savedProfiles", saved)
+        root.applyProfile(id)
     }
 }
