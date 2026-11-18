@@ -16,7 +16,7 @@ Item {
     signal clicked()
     signal trailingClicked()
 
-    implicitHeight: root.current ? PrismTheme.dp(34) : PrismTheme.dp(28)
+    implicitHeight: PrismTheme.dp(30)
     Behavior on implicitHeight { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
 
     // The open page: a raised plate, no colour, no edge bar (B · Carpeta).
@@ -25,7 +25,7 @@ Item {
         x: -PrismTheme.dp(8)
         width: root.edge - x - PrismTheme.dp(10)
         height: parent.height
-        radius: PrismTheme.dp(10)
+        radius: height / 2
         color: PrismTheme.raised
     }
     Rectangle {
@@ -38,9 +38,8 @@ Item {
     }
     Item {
         id: line
-        y: root.current ? PrismTheme.dp(11) : 0
         width: parent.width
-        height: PrismTheme.dp(28)
+        height: parent.height
         PrismGlyph {
             id: icon
             x: PrismTheme.dp(2)

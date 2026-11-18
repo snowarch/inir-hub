@@ -99,35 +99,35 @@ Singleton {
     readonly property var tints: ({ red: "#ff453a", grey: "#8e8e93" }) // iris-literal: danger and its quiet fallback
     function tint(name: string): color { return root.tints[name] ?? root.tints.grey }
 
-    // Each page's art in three colours (`.claude/ref/language`, the Design Archive posters: a ribbon's start, its end
-    // and its core), all from one place (his 11-15: the wallpaper's colours, or a contrast to the person's accent): the
-    // accent, the highlight and the wallpaper's own light, set at one glowing lightness in OKLCH. A colour too near
-    // another gives way to the accent's opposite, so a ribbon always travels across a contrast; with no hue to read
-    // (a grey wallpaper and accent) the art keeps the posters' blue and amber. A page's tint only orders the three
-    // (start, end, core), so pages differ and every one of them wears the desktop's colours.
-    readonly property var artHues: {
-        const hueOf = c => Qt.color(c).hslSaturation < 0.12 ? -1 : IrisStyle.oklchHue(Qt.color(c))
-        const apart = (x, y) => { const d = Math.abs(x - y) % 360; return Math.min(d, 360 - d) }
-        // iris-literal: the posters' blue, used only when the desktop gives no hue
-        const a = hueOf(IrisStyle.baseAccent) < 0 ? 264 : hueOf(IrisStyle.baseAccent)
-        let b = hueOf(IrisStyle.secondaryAccent)
-        if (b < 0 || apart(a, b) < 45) b = (a + 165) % 360
-        let c = hueOf(IrisStyle.wallpaperLight)
-        if (c < 0 || apart(c, a) < 35 || apart(c, b) < 35) c = (a + 300) % 360
-        return [a, b, c]
+    // Each page's art in three colours, the desktop's own and nothing else (his 11-17: "los acentos deben de ser usados
+    // del wallpaper o theming"): the accent, the highlight and the wallpaper's light, each keeping its own hue and as
+    // much colour as it has, held to one lightness and capped quiet. A grey wallpaper gives grey art; no colour is
+    // invented to make a contrast. A page's tint only orders the three, so neighbours lead with different ones.
+    function chromaOf(c: color): real {
+        const lin = x => x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
+        const r = lin(c.r), g = lin(c.g), b = lin(c.b)
+        const l_ = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+        const m_ = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+        const s_ = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+        const a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_
+        const bb = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_
+        return Math.sqrt(a * a + bb * bb)
     }
+    readonly property var artSources: [IrisStyle.baseAccent, IrisStyle.secondaryAccent, IrisStyle.wallpaperLight].map(c => Qt.color(c))
     readonly property var artOrders: ({ blue: [0, 1, 2], violet: [0, 2, 1], pink: [1, 0, 2], green: [2, 0, 1], amber: [1, 2, 0],
         red: [2, 1, 0], teal: [2, 0, 1], indigo: [0, 2, 1], orange: [1, 0, 2], grey: [0, 1, 2], holo: [0, 1, 2] })
-    // `turn` walks the order round, so neighbours on a page lead with different hues (his 11-15: folders side by side
-    // shared their colours); the page's first folder keeps the poster's.
     function palette(name: string): var { return root.paletteAt(name, 0) }
     function paletteAt(name: string, turn: int): var {
         const base = root.artOrders[name] ?? root.artOrders.grey
         const k = ((turn % 3) + 3) % 3
         const order = base.slice(k).concat(base.slice(0, k))
-        // Light over the night glows bright; pigment on paper sits a step deeper so it still reads as ink.
-        return order.map((index, place) => IrisStyle.oklch(root.light ? 0.6 : 0.66 + (place === 2 ? 0.1 : 0), place === 2 ? 0.14 : 0.2, root.artHues[index]))
+        return order.map((index, place) => {
+            const c = root.artSources[index]
+            return IrisStyle.oklch(root.light ? 0.62 : 0.6 + (place === 2 ? 0.06 : 0), Math.min(root.chromaOf(c), 0.1), IrisStyle.oklchHue(c))
+        })
     }
+    // The graphs' one mark (Technical Minimalism, his 11-17): the person's accent, the line that names what a page is about.
+    readonly property color mark: IrisStyle.accent
     // The art's paper in light: the posters' warm off-white, a step from the white cards it shows behind.
     readonly property color paperLight: "#eeeae1" // iris-literal: the art's paper in light, Prism's own
 

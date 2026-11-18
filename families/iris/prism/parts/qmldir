@@ -20,4 +20,6 @@ PrismSheet 1.0 PrismSheet.qml
 PrismFolder 1.0 PrismFolder.qml
 PrismShelf 1.0 PrismShelf.qml
 PrismLeaf 1.0 PrismLeaf.qml
-PrismMonitor 1.0 PrismMonitor.qml
+PrismGraph 1.0 PrismGraph.qml
+PrismIndex 1.0 PrismIndex.qml
+PrismBand 1.0 PrismBand.qml

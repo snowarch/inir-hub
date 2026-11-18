@@ -60,13 +60,38 @@ Column {
     }
     function setIds(list: var): void { Config.setNestedValue("iris.appearance.settingsHome", list) }
 
-    PrismHeading {
+    // The head as the drawing's captions: the name, and Edit at its end.
+    Item {
         width: root.width
-        eyebrow: Translation.tr("Home")
-        title: Translation.tr("Every day")
-        titleSize: PrismTheme.head
-        link: root.editing ? Translation.tr("Done") : Translation.tr("Edit")
-        onLinkClicked: root.editing = !root.editing
+        height: PrismTheme.dp(26)
+        PrismText {
+            anchors.verticalCenter: parent.verticalCenter
+            mono: true
+            text: Translation.tr("Every day").toUpperCase()
+            color: PrismTheme.ink3
+            font.pixelSize: PrismTheme.dp(9.5)
+            font.letterSpacing: PrismTheme.dp(9.5) * 0.1
+        }
+        PrismText {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            mono: true
+            text: (root.editing ? Translation.tr("Done") : Translation.tr("Edit")).toUpperCase()
+            color: editArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+            font.pixelSize: PrismTheme.dp(9.5)
+            font.letterSpacing: PrismTheme.dp(9.5) * 0.1
+            MouseArea {
+                id: editArea
+                anchors.fill: parent
+                anchors.margins: -PrismTheme.dp(6)
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                Accessible.role: Accessible.Button
+                Accessible.name: root.editing ? Translation.tr("Done") : Translation.tr("Edit")
+                onClicked: root.editing = !root.editing
+            }
+        }
+        Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: PrismTheme.line }
     }
     Item { width: 1; height: PrismTheme.dp(12) }
 
@@ -95,11 +120,9 @@ Column {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: height / 2
-                    // On, the capsule lifts a little under its white circle; a hairline of light keeps it on the page.
+                    radius: PrismTheme.dp(16)
+                    // On, the tile lifts a little under its accent disc; no outline, its fill alone sets it off.
                     color: press.pressed ? PrismTheme.fillPress : press.containsMouse || tile.on ? PrismTheme.fillHover : PrismTheme.fill
-                    border.width: 1
-                    border.color: tile.on ? Qt.alpha(PrismTheme.ink, 0.1) : "transparent"
                     scale: press.pressed ? 0.97 : 1
                     Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
                     Behavior on scale { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
@@ -109,15 +132,15 @@ Column {
                     id: mark
                     x: PrismTheme.dp(8)
                     anchors.verticalCenter: parent.verticalCenter
-                    width: PrismTheme.dp(36); height: width; radius: width / 2
-                    color: tile.on ? PrismTheme.solid : PrismTheme.sunk
+                    width: PrismTheme.dp(34); height: width; radius: PrismTheme.dp(11)
+                    color: tile.on ? PrismTheme.accent : PrismTheme.sunk
                     Behavior on color { ColorAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
                     PrismGlyph {
                         anchors.centerIn: parent
                         text: tile.offer ? "add" : tile.modelData.glyph
                         filled: tile.on
                         iconSize: PrismTheme.dp(18)
-                        color: tile.on ? PrismTheme.inkSolid : PrismTheme.ink
+                        color: tile.on ? PrismTheme.inkAccent : PrismTheme.ink
                     }
                 }
                 Column {
@@ -137,10 +160,12 @@ Column {
                     // What it holds now; a tile on offer says where it lives instead.
                     PrismText {
                         width: parent.width
-                        text: tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData)
+                        text: String(tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData)).toUpperCase()
                         elide: Text.ElideRight
+                        mono: true
                         color: PrismTheme.ink2
-                        font.pixelSize: PrismTheme.caption
+                        font.pixelSize: PrismTheme.dp(9.5)
+                        font.letterSpacing: PrismTheme.dp(9.5) * 0.06
                     }
                 }
                 MouseArea {

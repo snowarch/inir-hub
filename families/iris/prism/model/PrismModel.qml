@@ -62,8 +62,8 @@ Singleton {
         lock: { name: "Lock", glyph: "lock", tint: "indigo" },
         login: { name: "Login", glyph: "login", tint: "violet" },
         sources: { glyph: "cloud_sync", tint: "blue" },
-        system: { glyph: "storefront", tint: "pink", view: "PrismHub.qml" },
-        about: { name: "About", glyph: "info", tint: "holo", view: "PrismAbout.qml", cluster: 4, after: "system" }
+        system: { glyph: "storefront", tint: "pink", view: "IrisHubPage.qml" },
+        about: { name: "About", glyph: "info", tint: "holo", view: "IrisAboutPage.qml", cluster: 4, after: "system" }
     })
 
     // An area too long for one page is read as several (his 11-07: Style was "un chorizo", 126 rows in 31 groups): each
@@ -364,7 +364,7 @@ Singleton {
         return out
     }
     // What a group holds now in one line: its own chip (the keyboard's layout), else the first value it chooses, with
-    // that value's name beside it; a group of only actions or lists says how many settings it holds.
+    // that value's name beside it; a group of only actions or lists names what it holds.
     function glanceOf(entry: var): var {
         const _ = root.revision
         const rows = Array.from(entry?.rows ?? [])
@@ -377,7 +377,9 @@ Singleton {
             // A row named like its group says only its value: "On Notch" under Notch said the name twice.
             if (said.length > 0) return { say: said, label: row.label === entry.title ? "" : Translation.tr(row.label), row: row }
         }
-        return { say: "", label: rows.length === 1 ? Translation.tr("One setting") : Translation.tr("%1 settings").arg(rows.length) }
+        // Nothing chosen to say: what it holds, by name, for a list to show; a folder or a tab says nothing rather
+        // than "One setting".
+        return { say: "", label: "", names: rows.map(row => Translation.tr(String(row.label ?? ""))).filter(name => name.length > 0).join(" · ") }
     }
     // How a row lays out beside another: a switch, a field (a range, hue, text or a short choice: name over the control
     // when two share a line or a narrow column), or "" (it needs its own line).

@@ -15,6 +15,9 @@ Item {
     property string tint: "grey"
     property int turn: 0
     property string flashPath: ""
+    // Where it stands on the page: its number of how many.
+    property int number: 0
+    property int count: 0
     readonly property string title: String(root.entry?.title ?? "")
 
     readonly property real r: PrismTheme.dp(22)
@@ -68,6 +71,19 @@ Item {
         slope: PrismTheme.dp(46)
         radius: root.r
         fill: PrismTheme.card
+    }
+
+    // Its number on the back sheet's art, the drawing's sheet count.
+    PrismText {
+        visible: root.number > 0
+        anchors.right: parent.right
+        anchors.rightMargin: root.padX
+        y: Math.round((PrismTheme.dp(26) - height) / 2) + PrismTheme.dp(2)
+        mono: true
+        text: String(root.number).padStart(2, "0") + " / " + String(root.count).padStart(2, "0")
+        color: PrismTheme.light ? PrismTheme.ink2 : PrismTheme.spotInk2
+        font.pixelSize: PrismTheme.dp(9.5)
+        font.letterSpacing: PrismTheme.dp(9.5) * 0.1
     }
 
     Column {

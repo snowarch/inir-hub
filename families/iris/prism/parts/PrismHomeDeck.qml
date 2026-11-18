@@ -29,7 +29,7 @@ Item {
         id: wall
         width: root.stacked ? root.width : Math.round((root.width - PrismTheme.dp(10)) * 0.58)
         height: root.cardHeight
-        radius: PrismTheme.dp(24)
+        radius: PrismTheme.dp(20)
         color: PrismTheme.night
         Image {
             anchors.fill: parent
@@ -65,9 +65,11 @@ Item {
             anchors.bottomMargin: PrismTheme.dp(18)
             spacing: PrismTheme.dp(2)
             PrismText {
-                text: PrismModel.wallpaperKind(root.wallPath)
+                mono: true
+                text: String(PrismModel.wallpaperKind(root.wallPath)).toUpperCase()
                 color: Qt.alpha(PrismTheme.paper, 0.7)
-                font.pixelSize: PrismTheme.small
+                font.pixelSize: PrismTheme.dp(9.5)
+                font.letterSpacing: PrismTheme.dp(9.5) * 0.1
             }
             PrismText {
                 width: parent.width
@@ -111,8 +113,8 @@ Item {
         y: root.stacked ? wall.height + PrismTheme.dp(10) : 0
         width: root.stacked ? root.width : root.width - wall.width - PrismTheme.dp(10)
         height: root.cardHeight
-        radius: PrismTheme.dp(24)
-        color: PrismTheme.fill
+        radius: PrismTheme.dp(20)
+        color: PrismTheme.light ? PrismTheme.sunk : PrismTheme.night
 
         Column {
             anchors.fill: parent
@@ -121,19 +123,13 @@ Item {
             Item {
                 width: parent.width
                 height: PrismTheme.dp(34)
-                Column {
+                PrismText {
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 0
-                    PrismText {
-                        text: Translation.tr("Now")
-                        color: PrismTheme.ink2
-                        font.pixelSize: PrismTheme.small
-                    }
-                    PrismText {
-                        text: Translation.tr("Sound & light")
-                        font.pixelSize: PrismTheme.row
-                        font.weight: Font.Bold
-                    }
+                    mono: true
+                    text: Translation.tr("Sound & light").toUpperCase()
+                    color: PrismTheme.ink3
+                    font.pixelSize: PrismTheme.dp(9.5)
+                    font.letterSpacing: PrismTheme.dp(9.5) * 0.1
                 }
                 // Mute answers in place: the circle goes solid while the sound is off.
                 PrismRound {

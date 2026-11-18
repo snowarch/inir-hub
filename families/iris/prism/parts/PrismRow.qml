@@ -117,9 +117,12 @@ Item {
     Item {
         id: line
         width: parent.width
+        // The control fills a flat line's height and sets a tall one's, so the flat height stands on its own: read through
+        // the line, a row turning tall as its width shrinks (a colour pick's discs no longer fitting) re-entered it.
+        readonly property real flat: Math.max(root.compact || root.dense ? PrismTheme.dp(48) : PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
         height: root.tall
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
-            : Math.max(root.compact || root.dense ? PrismTheme.dp(48) : PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
+            : line.flat
         opacity: root.locked ? 0.45 : 1
 
         // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
@@ -235,7 +238,7 @@ Item {
             x: root.tall ? 0 : parent.width - (root.compact ? 0 : tail.width + PrismTheme.dp(8)) - width
             y: root.tall ? name.y + name.height + PrismTheme.dp(10) : 0
             width: root.tall ? parent.width : root.compact ? Math.max(PrismTheme.dp(40), kind.item ? kind.item.implicitWidth : 0) : root.controlWidth
-            height: root.tall ? (kind.item ? kind.item.height : 0) : parent.height
+            height: root.tall ? (kind.item ? kind.item.height : 0) : line.flat
             enabled: !root.locked
             Loader {
                 id: kind

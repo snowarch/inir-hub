@@ -55,6 +55,14 @@ Item {
     readonly property var page: PrismModel.page(PrismState.page)
     readonly property bool changesView: PrismState.page === "changes"
     // A page iRiS draws as a view of its own (Community Hub, Keyboard shortcuts, About) fills the middle below its title.
+    readonly property bool home: !PrismState.searching && !root.changesView && root.page.pageId === "general"
+    readonly property string greeting: {
+        const hour = DateTime.clock.date.getHours()
+        const said = hour >= 5 && hour < 12 ? Translation.tr("Good morning") : hour >= 12 && hour < 19 ? Translation.tr("Good afternoon")
+            : hour >= 19 ? Translation.tr("Good evening") : Translation.tr("Good night")
+        const name = String(SystemInfo.displayName || SystemInfo.username || "")
+        return name.length > 0 ? said + ", " + name : said
+    }
     readonly property bool hosted: !PrismState.searching && !root.changesView && String(root.page.view ?? "").length > 0
     readonly property var sections: PrismState.searching || root.changesView || root.hosted ? [] : PrismModel.sectionsOf(root.page.pageId)
     // A long page is read in parts of a screenful or two (whole groups, about 24 rows each); a short one stacks every
@@ -126,8 +134,8 @@ Item {
     // Where each group's folder stands on the scroll: the page card holds the first, the shelf the rest.
     function tops(): var {
         if (root.shownSections.length === 0 || !leaf.visible) return []
-        const out = [{ title: String(root.shownSections[0].title), top: leaf.y + content.y }]
-        for (const section of root.shownSections.slice(1)) {
+        const out = root.home ? [] : [{ title: String(root.shownSections[0].title), top: leaf.y + content.y }]
+        for (const section of root.shownSections.slice(root.home ? 0 : 1)) {
             const box = shelf.boxOf(String(section.title))
             if (box) out.push({ title: String(section.title), top: shelf.y + box.y + content.y })
         }
@@ -365,7 +373,12 @@ Item {
                     visible: !PrismState.searching && !root.changesView
                     width: content.width
                     page: root.page
-                    lead: root.shownSections[0] ?? null
+                    // Home's card is the person's own: a greeting, the everyday tiles and the desktop drawn; its groups
+                    // all stand on the shelf.
+                    lead: root.home ? null : root.shownSections[0] ?? null
+                    tabTitle: root.home ? root.greeting : ""
+                    tabLine: root.home ? Translation.locale.toString(DateTime.clock.date, "dddd d MMMM") + (Weather.enabled && Weather.hasData ? "  ·  " + String(Weather.data?.temp ?? "") : "") : ""
+                    side: root.home ? homeSide : null
                     groups: root.sections
                     flashPath: root.flashPath
                     restorable: PrismModel.restorableOf(root.page.pageId)
@@ -382,7 +395,8 @@ Item {
                     id: shelf
                     visible: leaf.visible && shelf.groups.length > 0
                     width: content.width
-                    groups: root.shownSections.slice(1)
+                    groups: root.home ? root.shownSections : root.shownSections.slice(1)
+                    first: root.home ? 1 : 2
                     tint: root.page.tint
                     flashPath: root.flashPath
                 }
@@ -450,13 +464,16 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: root.railWidth
             height: parent.height
-            PageTop {
+            PrismBand {
                 id: hostedTop
-                x: PrismTheme.dp(32)
-                width: parent.width - PrismTheme.dp(64)
+                x: PrismTheme.dp(4)
+                y: PrismTheme.dp(16)
+                width: parent.width - PrismTheme.dp(20)
+                page: root.page
             }
             Loader {
                 anchors.top: hostedTop.bottom
+                anchors.topMargin: PrismTheme.dp(8)
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -489,6 +506,11 @@ Item {
             opacity: root.railShown
             height: parent.height
             active: root.active && rail.visible
+            pageId: root.hosted || PrismState.searching || root.changesView ? "" : String(root.page.pageId ?? "")
+            pageName: String(root.page.name ?? "")
+            groups: root.groups
+            current: root.bandOf(root.currentGroup)
+            onPickGroup: title => root.showGroup(title)
             onSeeAllChanges: PrismState.go("changes")
             onReach: row => root.reach(row)
         }
@@ -515,13 +537,19 @@ Item {
             z: 20
         }
     }
-    // Home's sheet holds the tiles touched every day; Wallpaper's the wallpapers to go back to.
+    // Home: the tiles touched every day by the drawing; under both the wallpaper with sound and light, then every
+    // page of Settings as an index. Wallpaper's sheet holds the wallpapers to go back to.
+    Component {
+        id: homeSide
+        PrismHome { onReach: row => root.reach(row) }
+    }
     Component {
         id: homeExtra
         Column {
+            spacing: PrismTheme.dp(30)
+            PrismHome { visible: !leaf.sideWell; width: parent.width; onReach: row => root.reach(row) }
             PrismHomeDeck { width: parent.width }
-            Item { width: 1; height: PrismTheme.dp(24) }
-            PrismHome { width: parent.width; onReach: row => root.reach(row) }
+            PrismIndex { width: parent.width }
         }
     }
     Component {
