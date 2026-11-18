@@ -5,6 +5,7 @@ EditorFacts 1.0 EditorFacts.qml
 EditorRange 1.0 EditorRange.qml
 singleton EditorSkin 1.0 EditorSkin.qml
 EditorStatus 1.0 EditorStatus.qml
+EditorStyleSwitch 1.0 EditorStyleSwitch.qml
 EditorSurface 1.0 EditorSurface.qml
 EditorText 1.0 EditorText.qml
 EditorTools 1.0 EditorTools.qml

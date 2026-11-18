@@ -15,7 +15,7 @@ EditorSurface {
     color: EditorSkin.colors.low
     clip: true
     Component.onCompleted: root.playback.videoOutput = output
-    Component.onDestruction: root.playback.videoOutput = null
+    Component.onDestruction: if (root.playback.videoOutput === output) root.playback.videoOutput = null
     VideoOutput {
         id: output
         anchors.centerIn: parent

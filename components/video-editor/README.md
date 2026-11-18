@@ -15,8 +15,9 @@ GIF and MP3 exports create numbered adjacent files. Existing copies are never ov
 A failed or cancelled export leaves the input intact. Snapshots are numbered JPEGs in your XDG Pictures
 folder (usually `~/Pictures`); they capture the original frame before editing transformations.
 
-Controls, fonts, colors, rounding and shadows follow the active family. Theme, font and text scale
-changes update live. All 18 Hub languages are supported.
+Controls, fonts, colors, rounding and shadows follow the active family, with Classic, Folio and Prism
+styles and a header toggle between a floating Window and a desktop Overlay. Theme, font and text scale changes update
+live. All 18 Hub languages are supported.
 
 ## Requirements
 
@@ -81,6 +82,7 @@ also add the same command through Settings › Shortcuts or `~/.config/umbriel/c
 | `inir video-editor open` | Open/reset to an empty editor |
 | `inir video-editor openFile /absolute/path/clip.mp4` | Open a local path or file URL |
 | `inir video-editor prompt /absolute/path/recording.mp4` | Show the recording-finished prompt |
+| `inir video-editor toggleHost` | Switch between floating window and desktop overlay |
 | `inir video-editor close` | Close the editor and prompt; stop workers |
 
 Shortcuts: Space plays/pauses, Left/Right steps frames, Home/End seeks to trim boundaries,
@@ -88,17 +90,21 @@ I/O sets in/out, S cycles speed, P saves a frame, and Escape returns from export
 
 ## Options and storage
 
-The component keeps two options in `~/.config/inir/plugins/video-editor.json`:
+The component keeps its options in `~/.config/inir/plugins/video-editor.json`:
 
 ```json
 {
   "showEditPrompt": true,
-  "openInLosslessCut": false
+  "openInLosslessCut": false,
+  "windowed": true,
+  "style": ""
 }
 ```
 
 `showEditPrompt` enables the recording-finished prompt. `openInLosslessCut` routes its Edit button to
-LosslessCut instead of the built-in editor. The options file is watched for changes and re-read when opening the editor or prompt.
+LosslessCut instead of the built-in editor. `windowed` switches between a floating window (`true`) and a
+desktop overlay (`false`). `style` selects the editor skin (`"classic"`, `"folio"`, `"prism"`; empty defaults to Folio).
+The options file is watched for changes and re-read when opening the editor or prompt.
 
 When iNiR's recorder finishes successfully, its “Recording saved” notification supplies the exact
 path. The prompt appears on the screen focused at completion, and **Edit Video** opens that clip.
@@ -112,8 +118,9 @@ Very short recordings can finish before `RecorderStatus` exposes their PID. Keep
 notifications enabled for those clips; the `prompt` IPC remains available for other recorders.
 `showEditPrompt: false` stops automatic capture/probing and disables the prompt.
 
-Edits exist only in the current window; no project or edit history is saved. Closing the window stops
-playback and workers. Cached thumbnails remain available for subsequent opens.
+Edits exist only while the editor is open; no project or edit history is saved. Switching between floating Window
+and desktop Overlay keeps the current clip and edits active, while closing the editor stops playback and workers.
+Cached thumbnails remain available for subsequent opens.
 
 ## Permissions
 

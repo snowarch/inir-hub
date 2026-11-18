@@ -3,7 +3,7 @@
     "kind": "component",
     "name": "Video Editor",
     "summary": "Trim, crop, compress, and export local videos",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parts": {
         "panel": "Panel.qml"
     },

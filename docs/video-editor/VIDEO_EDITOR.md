@@ -1,7 +1,9 @@
 # Video Editor
 
 Open **Video Editor** from the app launcher in Material, iRiS or Waffle, on Niri or Umbriel.
-Drop a local video into the window, or click **Browse Files**. This edits one clip at a time.
+Drop a local video into the editor, or click **Browse Files**. This edits one clip at a time.
+Use the header controls to switch between **Classic**, **Folio** and **Prism** styles, or to toggle
+between a floating **Window** and a desktop **Overlay** without losing the active clip or edits.
 
 Drag the timeline handles to trim, choose a crop preset and move/resize the outline, rotate or flip,
 and adjust speed or mute. **Compress** shows MP4 quality/resolution, an approximate size estimate,
@@ -37,7 +39,9 @@ for those clips.
 
 Options are in `~/.config/inir/plugins/video-editor.json`. `showEditPrompt` defaults to `true`
 (`false` disables automatic capture and the prompt); `openInLosslessCut` defaults to `false` and
-sends the prompt's Edit button to LosslessCut when enabled.
+sends the prompt's Edit button to LosslessCut when enabled; `windowed` toggles between a floating
+window and a desktop overlay; `style` (`""`, `"classic"`, `"folio"`, `"prism"`) stores the chosen
+skin (empty wears Folio).
 
 ## Permissions and saved state
 
@@ -46,4 +50,4 @@ authorized filesystem scope includes selected input videos, adjacent exports/rep
 snapshots, its own options and `$XDG_CACHE_HOME/inir/video-editor/` cache. This scope exceeds the Hub
 helper guide's usual state/cache-only rule and requires acceptance of that exception for publication.
 
-Edits are held in memory until the window closes. Only the two options and cached thumbnails persist.
+Edits are held in memory until the editor closes. Only the plugin options and cached thumbnails persist.
