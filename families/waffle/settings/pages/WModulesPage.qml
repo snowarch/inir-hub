@@ -95,7 +95,7 @@ WSettingsPage {
                 { value: "ii", displayName: Translation.tr("Material (ii)") },
                 { value: "waffle", displayName: Translation.tr("Windows 11 (Waffle)") },
                 { value: "iris", displayName: "iRiS" }
-            ]
+            ].concat(Plugins.families.filter(id => !["ii", "waffle", "iris"].includes(id)).map(id => ({ value: id, displayName: String(Plugins.manifests[id]?.name ?? id) })))
             onSelected: newValue => {
                 if (newValue !== Config.options?.panelFamily) {
                     Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", newValue])
@@ -108,7 +108,7 @@ WSettingsPage {
                 { value: "ii", label: Translation.tr("Material in the switch shortcut") },
                 { value: "waffle", label: Translation.tr("Windows 11 in the switch shortcut") },
                 { value: "iris", label: Translation.tr("iRiS in the switch shortcut") }
-            ]
+            ].concat(Plugins.families.filter(id => !["ii", "waffle", "iris"].includes(id)).map(id => ({ value: id, label: Translation.tr("%1 in the switch shortcut").arg(String(Plugins.manifests[id]?.name ?? id)) })))
             WSettingsSwitch {
                 required property var modelData
                 readonly property var cycle: Array.from(Config.options?.familyCycle ?? ["ii", "waffle", "iris"])

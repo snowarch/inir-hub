@@ -528,6 +528,14 @@ QtObject {
     }
     // The state of what this row depends on, said where the person is looking, so a row never reads as broken.
     // A Design with its own palette offers its colour first (AIRISU's vermilion seal, its kerria amber).
+    // The three built-in families first, then every other installed family by its manifest name (NiHiL, a
+    // person's own), so a family added from the Hub can be picked here without editing this list.
+    function familyChoices(): var {
+        const known = [{label:"iRiS",value:"iris",glyph:"visibility"},{label:"Material",value:"ii",glyph:"dashboard"},{label:"Windows 11",value:"waffle",glyph:"window"}]
+        const extra = Plugins.families.filter(id => !known.some(family => family.value === id))
+            .map(id => ({ label: String(Plugins.manifests[id]?.name ?? id), value: id, glyph: String(Plugins.manifests[id]?.icon ?? "deployed_code") }))
+        return known.concat(extra)
+    }
     function designChoice(table: string): var {
         return IrisDesign.palette.length > 0 ? [{ label: IrisDesign.name, value: "design", get swatch() { return IrisStyle[table].design } }] : []
     }
@@ -1551,9 +1559,9 @@ QtObject {
         { section: "general", group: "Settings window", label: "Opens as", description: "Over the desktop shows each change behind it.", path: "iris.appearance.settingsHost", kind: "choice", tune: true, fallback: "overlay", choices: [{ label: "Over the desktop", value: "overlay", glyph: "layers" }, { label: "Window", value: "window", glyph: "web_asset" }], keywords: ["settings", "window", "overlay", "floating", "tile", "maximize"] },
         { section: "general", group: "Settings window", label: "Layout", description: "How Settings lays out its areas.", path: "iris.appearance.settingsLayout", kind: "choice", tune: true, fallback: "classic", showIf: () => IrisDesign.skin("settingsPage").length === 0, choices: [{ label: "Classic", value: "classic", glyph: "view_sidebar", detail: "A sidebar of areas beside the page." }, { label: "Folio", value: "folio", glyph: "article", detail: "Reads like a page." }], keywords: ["settings", "layout", "classic", "sidebar", "folio", "deck", "console", "pliego", "baraja", "consola", "cards", "tiles"] },
         { section: "general", group: "Settings window", label: "Original design", description: "The Settings of v2.33 with today's options.", path: "iris.appearance.settingsOriginal", kind: "switch", tune: true, fallback: false, showIf: () => IrisDesign.skin("settingsPage").length === 0, keywords: ["settings", "design", "original", "old", "classic", "v2.33", "list", "tiles", "plates", "viejo", "anterior", "clásico", "lista", "diseño"] },
-        { section: "general", group: "Shell", label: "Family", description: "The whole shell's look.", path: "panelFamily", kind: "choice", fallback: "ii", choices: [{label:"iRiS",value:"iris",glyph:"visibility"},{label:"Material",value:"ii",glyph:"dashboard"},{label:"Windows 11",value:"waffle",glyph:"window"}], keywords: ["family", "material", "waffle", "windows", "ii", "switch", "familia"] },
+        { section: "general", group: "Shell", label: "Family", description: "The whole shell's look.", path: "panelFamily", kind: "choice", fallback: "ii", get choices() { return root.familyChoices() }, keywords: ["family", "material", "waffle", "windows", "ii", "switch", "familia"] },
         { section: "general", group: "Shell", label: "Low power", description: "Turns glass, blur and heavy effects off.", path: "performance.lowPower", kind: "switch", fallback: false, keywords: ["performance", "battery", "effects", "glass", "blur", "rendimiento"] },
-        { section: "general", group: "Shell", label: "Switch shortcut goes through", description: "The families the switch shortcut steps through.", path: "familyCycle", kind: "pieces", tune: true, fallback: ["ii", "waffle", "iris"], choices: [{label:"iRiS",value:"iris"},{label:"Material",value:"ii"},{label:"Windows 11",value:"waffle"}], keywords: ["family", "cycle", "shortcut", "keybind", "switch"] },
+        { section: "general", group: "Shell", label: "Switch shortcut goes through", description: "The families the switch shortcut steps through.", path: "familyCycle", kind: "pieces", tune: true, fallback: ["ii", "waffle", "iris"], get choices() { return root.familyChoices().map(family => ({ label: family.label, value: family.value })) }, keywords: ["family", "cycle", "shortcut", "keybind", "switch"] },
         { section: "general", group: "Shell", label: "Animated switch", description: "A short transition instead of a cut.", path: "familyTransitionAnimation", kind: "switch", tune: true, fallback: true, keywords: ["family", "transition", "animation"] },
 
         { section: "spotlight", group: "Web search", label: "Search the web with", description: "What ? and Search the web use in Spotlight.", path: "search.engineBaseUrl", kind: "choice", fallback: "https://www.google.com/search?q=",

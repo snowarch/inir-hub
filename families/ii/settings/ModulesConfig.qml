@@ -282,6 +282,41 @@ ContentPage {
 
                     onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", "iris"])
                 }
+
+                // Every other installed family (NiHiL, one from the Hub) by its manifest name and icon.
+                Repeater {
+                    model: Plugins.families.filter(id => !["ii", "waffle", "iris"].includes(id))
+                    RippleButton {
+                        id: extraFamily
+                        required property string modelData
+                        readonly property bool current: modulesPage.activeFamily === extraFamily.modelData
+                        Layout.fillWidth: true
+                        implicitHeight: 64
+                        buttonRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius : Appearance.rounding.small
+                        colBackground: extraFamily.current ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer1
+                        colBackgroundHover: extraFamily.current ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colLayer1Hover
+                        colRipple: extraFamily.current ? Appearance.colors.colPrimaryContainerActive : Appearance.colors.colLayer1Active
+
+                        ColumnLayout {
+                            anchors.centerIn: parent
+                            spacing: 4
+                            MaterialSymbol {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: String(Plugins.manifests[extraFamily.modelData]?.icon ?? "deployed_code")
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: extraFamily.current ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSurface
+                            }
+                            StyledText {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: String(Plugins.manifests[extraFamily.modelData]?.name ?? extraFamily.modelData)
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: extraFamily.current ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnSurface
+                            }
+                        }
+
+                        onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", extraFamily.modelData])
+                    }
+                }
             }
 
             ConfigSwitch {
@@ -308,7 +343,8 @@ ContentPage {
                     { value: "ii", label: "Material", icon: "dashboard" },
                     { value: "waffle", label: "Windows 11", icon: "window" },
                     { value: "iris", label: "iRiS", icon: "visibility" }
-                ]
+                ].concat(Plugins.families.filter(id => !["ii", "waffle", "iris"].includes(id))
+                    .map(id => ({ value: id, label: String(Plugins.manifests[id]?.name ?? id), icon: String(Plugins.manifests[id]?.icon ?? "deployed_code") })))
                 Repeater {
                     // "In this order" is read left to right: the cycle first, numbered, then the ones left out
                     // (it read "2 Material, Windows 11, 1 iRiS").
