@@ -4,13 +4,11 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common.widgets
-import qs.modules.iris.style
-import qs.modules.iris.components
 import "../state"
 
 Item {
     id: root
-    readonly property real d: IrisStyle.density
+    readonly property real d: ConnectStyle.density
     readonly property bool compact: root.width > 0 && root.width < Math.round(440 * root.d)
     implicitHeight: mainRow.implicitHeight
 
@@ -19,11 +17,11 @@ Item {
         anchors.fill: parent
         spacing: Math.round((root.compact ? 6 : 10) * root.d)
 
-        IrisSquircle {
+        ConnectSquircle {
             Layout.preferredWidth: Math.round((root.compact ? 30 : 34) * root.d)
             Layout.preferredHeight: Math.round((root.compact ? 30 : 34) * root.d)
             glyph: AndroidState.connected ? "phone_android" : "smartphone"
-            tint: AndroidState.connected ? IrisStyle.accent : IrisStyle.identity.gray
+            tint: AndroidState.connected ? ConnectStyle.accent : ConnectStyle.gray
         }
 
         ColumnLayout {
@@ -37,17 +35,17 @@ Item {
                 Layout.fillWidth: true
                 spacing: Math.round(6 * root.d)
 
-                IrisText {
+                StyledText {
                     Layout.maximumWidth: Math.round((root.compact ? 115 : 190) * root.d)
                     elide: Text.ElideRight
                     text: AndroidState.connected ? AndroidState.deviceName : Translation.tr("No device connected")
-                    color: IrisStyle.text
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: root.compact ? IrisStyle.typeBody : IrisStyle.typeHeadline
-                    font.weight: IrisStyle.weight(Font.Bold)
+                    color: ConnectStyle.text
+                    font.family: ConnectStyle.fontTitle
+                    font.pixelSize: root.compact ? ConnectStyle.typeBody : ConnectStyle.typeHeadline
+                    font.weight: ConnectStyle.weight(Font.Bold)
                 }
 
-                IrisPlate {
+                ConnectPlate {
                     id: devBadge
                     visible: AndroidState.devices.length > 0
                     Layout.preferredWidth: devBadgeRow.implicitWidth + Math.round(10 * root.d)
@@ -56,28 +54,29 @@ Item {
                     implicitHeight: Math.round(18 * root.d)
                     radius: Math.round(9 * root.d)
                     lit: AndroidState.devicesOpen
-                    color: AndroidState.devicesOpen ? IrisStyle.accentFill : IrisStyle.formPlate
+                    color: AndroidState.devicesOpen ? ConnectStyle.accentFill : ConnectStyle.formPlate
 
                     Row {
                         id: devBadgeRow
                         anchors.centerIn: parent
                         spacing: Math.round(2 * root.d)
 
-                        IrisText {
+                        StyledText {
                             anchors.verticalCenter: parent.verticalCenter
                             text: AndroidState.devices.length > 1
                                 ? `${AndroidState.devices.length} disp.`
                                 : "Cambiar"
-                            color: AndroidState.devicesOpen ? IrisStyle.inkOnAccentFill : IrisStyle.subtext
+                            color: AndroidState.devicesOpen ? ConnectStyle.inkOnAccentFill : ConnectStyle.subtext
+                            font.family: ConnectStyle.fontMain
                             font.pixelSize: Math.max(9, Math.round(10 * root.d))
-                            font.weight: IrisStyle.weight(Font.Bold)
+                            font.weight: ConnectStyle.weight(Font.Bold)
                         }
 
                         MaterialSymbol {
                             anchors.verticalCenter: parent.verticalCenter
                             text: AndroidState.devicesOpen ? "expand_less" : "expand_more"
                             iconSize: Math.round(13 * root.d)
-                            color: AndroidState.devicesOpen ? IrisStyle.inkOnAccentFill : IrisStyle.subtext
+                            color: AndroidState.devicesOpen ? ConnectStyle.inkOnAccentFill : ConnectStyle.subtext
                         }
                     }
 
@@ -99,11 +98,11 @@ Item {
                     width: Math.round(6 * root.d)
                     height: width
                     radius: width / 2
-                    color: AndroidState.connected ? IrisStyle.success : IrisStyle.muted
-                    Behavior on color { ColorAnimation { duration: IrisStyle.revealDuration } }
+                    color: AndroidState.connected ? ConnectStyle.success : ConnectStyle.muted
+                    Behavior on color { ColorAnimation { duration: ConnectStyle.revealDuration } }
                 }
 
-                IrisText {
+                StyledText {
                     Layout.fillWidth: true
                     elide: Text.ElideRight
                     text: {
@@ -119,8 +118,9 @@ Item {
                             ? `KDE Connect (${AndroidState.deviceIp})`
                             : "KDE Connect"
                     }
-                    color: IrisStyle.subtext
-                    font.pixelSize: IrisStyle.typeCaption
+                    color: ConnectStyle.subtext
+                    font.family: ConnectStyle.fontMain
+                    font.pixelSize: ConnectStyle.typeCaption
                 }
             }
         }
@@ -132,7 +132,7 @@ Item {
             readonly property int btnSize: Math.round((root.compact ? 28 : 32) * root.d)
             readonly property int glyphSize: Math.round((root.compact ? 16 : 17) * root.d)
 
-            IrisIconButton {
+            ConnectIconButton {
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize
                 iconSize: parent.glyphSize
@@ -142,7 +142,7 @@ Item {
                 onClicked: AndroidState.toggleSheet("notifications")
             }
 
-            IrisIconButton {
+            ConnectIconButton {
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize
                 iconSize: parent.glyphSize
@@ -152,7 +152,7 @@ Item {
                 onClicked: AndroidState.mediaVisible = !AndroidState.mediaVisible
             }
 
-            IrisIconButton {
+            ConnectIconButton {
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize
                 iconSize: parent.glyphSize
@@ -162,7 +162,7 @@ Item {
                 onClicked: AndroidState.toggleSheet("wireless")
             }
 
-            IrisIconButton {
+            ConnectIconButton {
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize
                 iconSize: parent.glyphSize
@@ -171,7 +171,7 @@ Item {
                 onClicked: AndroidState.wakeAndUnlock()
             }
 
-            IrisIconButton {
+            ConnectIconButton {
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize
                 iconSize: parent.glyphSize
@@ -181,7 +181,7 @@ Item {
                 onClicked: AndroidState.verticalLayout = !AndroidState.verticalLayout
             }
 
-            IrisIconButton {
+            ConnectIconButton {
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize
                 iconSize: parent.glyphSize
@@ -191,7 +191,7 @@ Item {
                 onClicked: AndroidState.windowed = !AndroidState.windowed
             }
 
-            IrisIconButton {
+            ConnectIconButton {
                 visible: !AndroidState.windowed
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize
@@ -202,7 +202,7 @@ Item {
                 onClicked: AndroidState.pinned = !AndroidState.pinned
             }
 
-            IrisIconButton {
+            ConnectIconButton {
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize
                 iconSize: parent.glyphSize
@@ -211,7 +211,7 @@ Item {
                 onClicked: AndroidState.refresh()
             }
 
-            IrisIconButton {
+            ConnectIconButton {
                 visible: !AndroidState.windowed
                 implicitWidth: parent.btnSize
                 implicitHeight: parent.btnSize

@@ -4,13 +4,11 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common.widgets
-import qs.modules.iris.style
-import qs.modules.iris.components
 import "../state"
 
 Item {
     id: root
-    readonly property real d: IrisStyle.density
+    readonly property real d: ConnectStyle.density
     readonly property bool shown: AndroidState.devicesOpen
     Layout.fillWidth: true
     implicitHeight: root.shown ? sheetPlate.implicitHeight : 0
@@ -20,25 +18,25 @@ Item {
 
     Behavior on implicitHeight {
         NumberAnimation {
-            duration: IrisStyle.morphDuration
+            duration: ConnectStyle.morphDuration
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: IrisStyle.morphCurve
+            easing.bezierCurve: ConnectStyle.morphCurve
         }
     }
     Behavior on opacity {
         NumberAnimation {
-            duration: IrisStyle.revealDuration
+            duration: ConnectStyle.revealDuration
             easing.type: Easing.OutCubic
         }
     }
 
-    IrisPlate {
+    ConnectPlate {
         id: sheetPlate
         width: parent.width
         height: root.implicitHeight
         implicitHeight: col.implicitHeight + Math.round(24 * root.d)
-        radius: IrisStyle.radiusCard
-        color: IrisStyle.fill
+        radius: ConnectStyle.radiusCard
+        color: ConnectStyle.fill
         clip: true
 
         ColumnLayout {
@@ -52,21 +50,21 @@ Item {
                 Layout.fillWidth: true
                 spacing: Math.round(8 * root.d)
 
-                IrisText {
+                StyledText {
                     Layout.fillWidth: true
                     text: `${Translation.tr("Devices")} (${AndroidState.devices.length})`
-                    color: IrisStyle.text
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: IrisStyle.typeLabel
-                    font.weight: IrisStyle.weight(Font.Bold)
+                    color: ConnectStyle.text
+                    font.family: ConnectStyle.fontTitle
+                    font.pixelSize: ConnectStyle.typeLabel
+                    font.weight: ConnectStyle.weight(Font.Bold)
                 }
 
-                IrisButton {
+                ConnectButton {
                     text: Translation.tr("Scan network")
                     onClicked: AndroidState.rescanNetwork()
                 }
 
-                IrisButton {
+                ConnectButton {
                     text: "ADB Wi-Fi"
                     onClicked: {
                         AndroidState.devicesOpen = false
@@ -75,30 +73,31 @@ Item {
                 }
             }
 
-            IrisText {
+            StyledText {
                 visible: AndroidState.devices.length === 0
                 Layout.fillWidth: true
                 text: Translation.tr("No devices detected via USB, Wireless ADB, or KDE Connect.")
-                color: IrisStyle.subtext
-                font.pixelSize: IrisStyle.typeMeta
+                color: ConnectStyle.subtext
+                font.family: ConnectStyle.fontMain
+                font.pixelSize: ConnectStyle.typeMeta
                 wrapMode: Text.WordWrap
             }
 
             Repeater {
                 model: AndroidState.devices
 
-                delegate: IrisPlate {
+                delegate: ConnectPlate {
                     id: devRow
                     required property var modelData
                     readonly property bool isCurrent: devRow.modelData.id === AndroidState.selectedDeviceId
                     Layout.fillWidth: true
                     implicitHeight: Math.round(48 * root.d)
-                    radius: IrisStyle.radiusTile
+                    radius: ConnectStyle.radiusTile
                     lit: devRow.isCurrent
                     color: devRow.isCurrent
-                        ? IrisStyle.tintFill(IrisStyle.accent)
-                        : (devMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate)
-                    Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration } }
+                        ? ConnectStyle.tintFill(ConnectStyle.accent)
+                        : (devMouse.containsMouse ? ConnectStyle.fillHover : ConnectStyle.formPlate)
+                    Behavior on color { ColorAnimation { duration: ConnectStyle.feedbackDuration } }
 
                     RowLayout {
                         anchors.fill: parent
@@ -106,27 +105,28 @@ Item {
                         anchors.rightMargin: Math.round(12 * root.d)
                         spacing: Math.round(10 * root.d)
 
-                        IrisSquircle {
+                        ConnectSquircle {
                             Layout.preferredWidth: Math.round(30 * root.d)
                             Layout.preferredHeight: Math.round(30 * root.d)
                             glyph: devRow.modelData.online ? "phone_android" : "phonelink_off"
-                            tint: devRow.isCurrent ? IrisStyle.accent : (devRow.modelData.online ? IrisStyle.secondaryAccent : IrisStyle.identity.gray)
+                            tint: devRow.isCurrent ? ConnectStyle.accent : (devRow.modelData.online ? ConnectStyle.secondaryAccent : ConnectStyle.gray)
                         }
 
                         Column {
                             Layout.fillWidth: true
                             spacing: Math.round(1 * root.d)
 
-                            IrisText {
+                            StyledText {
                                 width: parent.width
                                 elide: Text.ElideRight
                                 text: devRow.modelData.name
-                                color: IrisStyle.text
-                                font.pixelSize: IrisStyle.typeBody
-                                font.weight: IrisStyle.weight(devRow.isCurrent ? Font.Bold : Font.Medium)
+                                color: ConnectStyle.text
+                                font.family: ConnectStyle.fontMain
+                                font.pixelSize: ConnectStyle.typeBody
+                                font.weight: ConnectStyle.weight(devRow.isCurrent ? Font.Bold : Font.Medium)
                             }
 
-                            IrisText {
+                            StyledText {
                                 width: parent.width
                                 elide: Text.ElideRight
                                 text: {
@@ -137,18 +137,19 @@ Item {
                                     const addr = d.ip || d.serial || ""
                                     return addr.length > 0 ? `${badge} • ${addr}` : badge
                                 }
-                                color: IrisStyle.subtext
-                                font.pixelSize: IrisStyle.typeCaption
+                                color: ConnectStyle.subtext
+                                font.family: ConnectStyle.fontMain
+                                font.pixelSize: ConnectStyle.typeCaption
                             }
                         }
 
-                        IrisText {
+                        StyledText {
                             visible: (devRow.modelData.batteryLevel ?? -1) >= 0
                             text: `${devRow.modelData.batteryLevel}%`
-                            color: IrisStyle.subtext
-                            font.family: IrisStyle.fontNumbers
-                            font.pixelSize: IrisStyle.typeMeta
-                            font.weight: IrisStyle.weight(Font.Bold)
+                            color: ConnectStyle.subtext
+                            font.family: ConnectStyle.fontNumbers
+                            font.pixelSize: ConnectStyle.typeMeta
+                            font.weight: ConnectStyle.weight(Font.Bold)
                         }
 
                         MaterialSymbol {
@@ -156,7 +157,7 @@ Item {
                             text: "check_circle"
                             iconSize: Math.round(18 * root.d)
                             fill: 1
-                            color: IrisStyle.accent
+                            color: ConnectStyle.accent
                         }
                     }
 

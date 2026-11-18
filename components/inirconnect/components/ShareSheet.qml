@@ -4,13 +4,11 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common.widgets
-import qs.modules.iris.style
-import qs.modules.iris.components
 import "../state"
 
 Item {
     id: root
-    readonly property real d: IrisStyle.density
+    readonly property real d: ConnectStyle.density
     readonly property bool shown: AndroidState.shareOpen
     Layout.fillWidth: true
     implicitHeight: root.shown ? sheetPlate.implicitHeight : 0
@@ -20,25 +18,25 @@ Item {
 
     Behavior on implicitHeight {
         NumberAnimation {
-            duration: IrisStyle.morphDuration
+            duration: ConnectStyle.morphDuration
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: IrisStyle.morphCurve
+            easing.bezierCurve: ConnectStyle.morphCurve
         }
     }
     Behavior on opacity {
         NumberAnimation {
-            duration: IrisStyle.revealDuration
+            duration: ConnectStyle.revealDuration
             easing.type: Easing.OutCubic
         }
     }
 
-    IrisPlate {
+    ConnectPlate {
         id: sheetPlate
         width: parent.width
         height: root.implicitHeight
         implicitHeight: col.implicitHeight + Math.round(24 * root.d)
-        radius: IrisStyle.radiusCard
-        color: IrisStyle.fill
+        radius: ConnectStyle.radiusCard
+        color: ConnectStyle.fill
         clip: true
 
         ColumnLayout {
@@ -52,24 +50,24 @@ Item {
                 Layout.fillWidth: true
                 spacing: Math.round(8 * root.d)
 
-                IrisText {
+                StyledText {
                     Layout.fillWidth: true
                     text: AndroidState.connected
                         ? `${Translation.tr("Send to")} ${AndroidState.deviceName}`
                         : Translation.tr("Send file or text")
-                    color: IrisStyle.text
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: IrisStyle.typeLabel
-                    font.weight: IrisStyle.weight(Font.Bold)
+                    color: ConnectStyle.text
+                    font.family: ConnectStyle.fontTitle
+                    font.pixelSize: ConnectStyle.typeLabel
+                    font.weight: ConnectStyle.weight(Font.Bold)
                 }
 
-                IrisButton {
+                ConnectButton {
                     emphasized: true
                     text: Translation.tr("Choose file...")
                     onClicked: AndroidState.shareFileDialog()
                 }
 
-                IrisButton {
+                ConnectButton {
                     text: Translation.tr("Browse folders")
                     onClicked: AndroidState.browseFiles()
                 }
@@ -79,11 +77,11 @@ Item {
                 Layout.fillWidth: true
                 spacing: Math.round(8 * root.d)
 
-                IrisPlate {
+                ConnectPlate {
                     Layout.fillWidth: true
                     implicitHeight: Math.round(34 * root.d)
-                    radius: IrisStyle.radiusRow
-                    color: IrisStyle.fillQuiet
+                    radius: ConnectStyle.radiusRow
+                    color: ConnectStyle.fillQuiet
 
                     TextInput {
                         id: shareInput
@@ -91,8 +89,9 @@ Item {
                         anchors.leftMargin: Math.round(10 * root.d)
                         anchors.rightMargin: Math.round(10 * root.d)
                         verticalAlignment: TextInput.AlignVCenter
-                        color: IrisStyle.text
-                        font.pixelSize: IrisStyle.typeMeta
+                        color: ConnectStyle.text
+                        font.family: ConnectStyle.fontMain
+                        font.pixelSize: ConnectStyle.typeMeta
                         clip: true
                         text: ""
                         onAccepted: {
@@ -102,17 +101,18 @@ Item {
                             }
                         }
 
-                        IrisText {
+                        StyledText {
                             anchors.verticalCenter: parent.verticalCenter
                             visible: shareInput.text.length === 0 && !shareInput.activeFocus
                             text: Translation.tr("Paste a path (/path/file), URL link, or text...")
-                            color: IrisStyle.muted
-                            font.pixelSize: IrisStyle.typeMeta
+                            color: ConnectStyle.muted
+                            font.family: ConnectStyle.fontMain
+                            font.pixelSize: ConnectStyle.typeMeta
                         }
                     }
                 }
 
-                IrisButton {
+                ConnectButton {
                     enabled: shareInput.text.trim().length > 0
                     text: Translation.tr("Send")
                     onClicked: {
@@ -122,13 +122,13 @@ Item {
                 }
             }
 
-            IrisText {
+            StyledText {
                 visible: AndroidState.recentFiles.length > 0
                 text: Translation.tr("RECENT FILES (CLICK TO SEND)")
-                color: IrisStyle.subtext
-                font.family: IrisStyle.fontLabel
-                font.pixelSize: IrisStyle.typeCaption
-                font.weight: IrisStyle.weight(Font.Bold)
+                color: ConnectStyle.subtext
+                font.family: ConnectStyle.fontLabel
+                font.pixelSize: ConnectStyle.typeCaption
+                font.weight: ConnectStyle.weight(Font.Bold)
                 font.letterSpacing: 0.6
             }
 
@@ -142,14 +142,14 @@ Item {
                 Repeater {
                     model: AndroidState.recentFiles
 
-                    delegate: IrisPlate {
+                    delegate: ConnectPlate {
                         id: fileChip
                         required property var modelData
                         Layout.fillWidth: true
                         implicitHeight: Math.round(34 * root.d)
-                        radius: IrisStyle.radiusTile
-                        color: fileMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate
-                        Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration } }
+                        radius: ConnectStyle.radiusTile
+                        color: fileMouse.containsMouse ? ConnectStyle.fillHover : ConnectStyle.formPlate
+                        Behavior on color { ColorAnimation { duration: ConnectStyle.feedbackDuration } }
 
                         RowLayout {
                             anchors.fill: parent
@@ -160,22 +160,23 @@ Item {
                             MaterialSymbol {
                                 text: "description"
                                 iconSize: Math.round(16 * root.d)
-                                color: IrisStyle.accent
+                                color: ConnectStyle.accent
                             }
 
-                            IrisText {
+                            StyledText {
                                 Layout.fillWidth: true
                                 elide: Text.ElideMiddle
                                 text: fileChip.modelData.name
-                                color: IrisStyle.text
-                                font.pixelSize: IrisStyle.typeCaption
-                                font.weight: IrisStyle.weight(Font.Medium)
+                                color: ConnectStyle.text
+                                font.family: ConnectStyle.fontMain
+                                font.pixelSize: ConnectStyle.typeCaption
+                                font.weight: ConnectStyle.weight(Font.Medium)
                             }
 
                             MaterialSymbol {
                                 text: "send"
                                 iconSize: Math.round(14 * root.d)
-                                color: IrisStyle.subtext
+                                color: ConnectStyle.subtext
                             }
                         }
 

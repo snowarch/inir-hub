@@ -3,13 +3,12 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.services
-import qs.modules.iris.style
-import qs.modules.iris.components
+import qs.modules.common.widgets
 import "../state"
 
 Item {
     id: root
-    readonly property real d: IrisStyle.density
+    readonly property real d: ConnectStyle.density
     readonly property bool shown: AndroidState.wirelessOpen
     property string activeTab: "qr" // "qr", "manual", "usb"
 
@@ -21,25 +20,25 @@ Item {
 
     Behavior on implicitHeight {
         NumberAnimation {
-            duration: IrisStyle.morphDuration
+            duration: ConnectStyle.morphDuration
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: IrisStyle.morphCurve
+            easing.bezierCurve: ConnectStyle.morphCurve
         }
     }
     Behavior on opacity {
         NumberAnimation {
-            duration: IrisStyle.revealDuration
+            duration: ConnectStyle.revealDuration
             easing.type: Easing.OutCubic
         }
     }
 
-    IrisPlate {
+    ConnectPlate {
         id: sheetPlate
         width: parent.width
         height: root.implicitHeight
         implicitHeight: col.implicitHeight + Math.round(24 * root.d)
-        radius: IrisStyle.radiusCard
-        color: IrisStyle.fill
+        radius: ConnectStyle.radiusCard
+        color: ConnectStyle.fill
         clip: true
 
         ColumnLayout {
@@ -54,23 +53,23 @@ Item {
                 Layout.fillWidth: true
                 spacing: Math.round(8 * root.d)
 
-                IrisSquircle {
+                ConnectSquircle {
                     width: Math.round(28 * root.d)
                     height: width
                     glyph: "wifi_tethering"
-                    tint: IrisStyle.accent
+                    tint: ConnectStyle.accent
                 }
 
-                IrisText {
+                StyledText {
                     Layout.fillWidth: true
                     text: Translation.tr("Wireless Debugging (ADB)")
-                    color: IrisStyle.text
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: IrisStyle.typeLabel
-                    font.weight: IrisStyle.weight(Font.Bold)
+                    color: ConnectStyle.text
+                    font.family: ConnectStyle.fontTitle
+                    font.pixelSize: ConnectStyle.typeLabel
+                    font.weight: ConnectStyle.weight(Font.Bold)
                 }
 
-                IrisIconButton {
+                ConnectIconButton {
                     implicitWidth: Math.round(26 * root.d)
                     implicitHeight: Math.round(26 * root.d)
                     iconSize: Math.round(16 * root.d)
@@ -91,31 +90,32 @@ Item {
                         { id: "usb", label: Translation.tr("USB to Wi-Fi"), icon: "usb" }
                     ]
 
-                    delegate: IrisPlate {
+                    delegate: ConnectPlate {
                         id: tabBtn
                         required property var modelData
                         Layout.fillWidth: true
                         Layout.preferredHeight: Math.round(30 * root.d)
-                        radius: IrisStyle.radiusTile
+                        radius: ConnectStyle.radiusTile
                         lit: root.activeTab === modelData.id
-                        color: lit ? IrisStyle.accentFill : (tabMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate)
+                        color: lit ? ConnectStyle.accentFill : (tabMouse.containsMouse ? ConnectStyle.fillHover : ConnectStyle.formPlate)
 
                         RowLayout {
                             anchors.centerIn: parent
                             spacing: Math.round(5 * root.d)
 
-                            IrisSquircle {
+                            ConnectSquircle {
                                 width: Math.round(16 * root.d)
                                 height: width
                                 glyph: tabBtn.modelData.icon
-                                tint: tabBtn.lit ? IrisStyle.inkOnAccentFill : IrisStyle.subtext
+                                tint: tabBtn.lit ? ConnectStyle.inkOnAccentFill : ConnectStyle.subtext
                             }
 
-                            IrisText {
+                            StyledText {
                                 text: tabBtn.modelData.label
-                                color: tabBtn.lit ? IrisStyle.inkOnAccentFill : IrisStyle.text
+                                color: tabBtn.lit ? ConnectStyle.inkOnAccentFill : ConnectStyle.text
+                                font.family: ConnectStyle.fontMain
                                 font.pixelSize: Math.round(11 * root.d)
-                                font.weight: tabBtn.lit ? IrisStyle.weight(Font.Bold) : IrisStyle.weight(Font.Normal)
+                                font.weight: tabBtn.lit ? ConnectStyle.weight(Font.Bold) : ConnectStyle.weight(Font.Normal)
                             }
                         }
 
@@ -123,6 +123,7 @@ Item {
                             id: tabMouse
                             anchors.fill: parent
                             hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: root.activeTab = tabBtn.modelData.id
                         }
                     }
@@ -143,7 +144,7 @@ Item {
                     radius: Math.round(12 * root.d)
                     color: "#FFFFFF" // literal: QR scanner requires high-contrast white backdrop
                     border.width: 1
-                    border.color: IrisStyle.hairline
+                    border.color: ConnectStyle.hairline
 
                     Image {
                         anchors.centerIn: parent
@@ -163,16 +164,17 @@ Item {
                         Column {
                             anchors.centerIn: parent
                             spacing: Math.round(6 * root.d)
-                            IrisSquircle {
+                            ConnectSquircle {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 width: Math.round(24 * root.d)
                                 height: width
                                 glyph: "sync"
-                                tint: IrisStyle.accent
+                                tint: ConnectStyle.accent
                             }
-                            IrisText {
+                            StyledText {
                                 text: Translation.tr("Generating...")
                                 color: "#221F1B" // literal: dark text over high-contrast white scrim
+                                font.family: ConnectStyle.fontMain
                                 font.pixelSize: Math.round(10 * root.d)
                             }
                         }
@@ -188,7 +190,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         spacing: Math.round(6 * root.d)
 
-                        IrisSquircle {
+                        ConnectSquircle {
                             width: Math.round(18 * root.d)
                             height: width
                             glyph: {
@@ -198,13 +200,13 @@ Item {
                                 return "qr_code_scanner"
                             }
                             tint: {
-                                if (AndroidState.qrStatus === "connected") return IrisStyle.identity.green
-                                if (AndroidState.qrStatus === "error" || AndroidState.qrStatus === "timeout") return IrisStyle.identity.red
-                                return IrisStyle.accent
+                                if (AndroidState.qrStatus === "connected") return ConnectStyle.green
+                                if (AndroidState.qrStatus === "error" || AndroidState.qrStatus === "timeout") return ConnectStyle.red
+                                return ConnectStyle.accent
                             }
                         }
 
-                        IrisText {
+                        StyledText {
                             text: {
                                 if (AndroidState.qrStatus === "connected") return Translation.tr("Device paired and connected!")
                                 if (AndroidState.qrStatus === "pairing") return Translation.tr("Device detected. Pairing...")
@@ -213,18 +215,20 @@ Item {
                                 if (AndroidState.qrStatus === "error") return Translation.tr("Pairing failed.")
                                 return Translation.tr("Waiting for phone to scan QR code...")
                             }
-                            color: IrisStyle.text
-                            font.pixelSize: IrisStyle.typeCaption
-                            font.weight: IrisStyle.weight(Font.Bold)
+                            color: ConnectStyle.text
+                            font.family: ConnectStyle.fontMain
+                            font.pixelSize: ConnectStyle.typeCaption
+                            font.weight: ConnectStyle.weight(Font.Bold)
                         }
                     }
 
-                    IrisText {
+                    StyledText {
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignHCenter
                         wrapMode: Text.WordWrap
                         text: Translation.tr("1. On your phone: Developer options > Wireless debugging\n2. Tap 'Pair device with QR code' and point camera here.")
-                        color: IrisStyle.subtext
+                        color: ConnectStyle.subtext
+                        font.family: ConnectStyle.fontMain
                         font.pixelSize: Math.max(9, Math.round(10 * root.d))
                     }
 
@@ -232,7 +236,7 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         spacing: Math.round(8 * root.d)
 
-                        IrisButton {
+                        ConnectButton {
                             text: Translation.tr("Regenerate QR Code")
                             onClicked: AndroidState.startQrPairing()
                         }
@@ -246,11 +250,12 @@ Item {
                 visible: root.activeTab === "manual"
                 spacing: Math.round(8 * root.d)
 
-                IrisText {
+                StyledText {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     text: Translation.tr("In 'Wireless debugging', tap 'Pair with pairing code'. Enter IP, popup port and 6-digit code:")
-                    color: IrisStyle.subtext
+                    color: ConnectStyle.subtext
+                    font.family: ConnectStyle.fontMain
                     font.pixelSize: Math.max(9, Math.round(10.5 * root.d))
                 }
 
@@ -259,12 +264,12 @@ Item {
                     spacing: Math.round(8 * root.d)
 
                     // IP Field
-                    IrisPlate {
+                    ConnectPlate {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 2
                         implicitHeight: Math.round(34 * root.d)
-                        radius: IrisStyle.radiusRow
-                        color: IrisStyle.fillQuiet
+                        radius: ConnectStyle.radiusRow
+                        color: ConnectStyle.fillQuiet
 
                         TextInput {
                             id: manualIp
@@ -272,21 +277,21 @@ Item {
                             anchors.leftMargin: Math.round(10 * root.d)
                             anchors.rightMargin: Math.round(10 * root.d)
                             verticalAlignment: TextInput.AlignVCenter
-                            color: IrisStyle.text
-                            font.family: IrisStyle.fontMono
-                            font.pixelSize: IrisStyle.typeMeta
+                            color: ConnectStyle.text
+                            font.family: ConnectStyle.fontMono
+                            font.pixelSize: ConnectStyle.typeMeta
                             clip: true
                             text: AndroidState.deviceIp.length > 0 ? AndroidState.deviceIp : "192.168.1.50"
                         }
                     }
 
                     // Pairing Port Field
-                    IrisPlate {
+                    ConnectPlate {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         implicitHeight: Math.round(34 * root.d)
-                        radius: IrisStyle.radiusRow
-                        color: IrisStyle.fillQuiet
+                        radius: ConnectStyle.radiusRow
+                        color: ConnectStyle.fillQuiet
 
                         TextInput {
                             id: manualPairPort
@@ -294,29 +299,30 @@ Item {
                             anchors.leftMargin: Math.round(8 * root.d)
                             anchors.rightMargin: Math.round(8 * root.d)
                             verticalAlignment: TextInput.AlignVCenter
-                            color: IrisStyle.text
-                            font.family: IrisStyle.fontMono
-                            font.pixelSize: IrisStyle.typeMeta
+                            color: ConnectStyle.text
+                            font.family: ConnectStyle.fontMono
+                            font.pixelSize: ConnectStyle.typeMeta
                             clip: true
                             text: ""
 
-                            IrisText {
+                            StyledText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: manualPairPort.text.length === 0 && !manualPairPort.activeFocus
                                 text: Translation.tr("Pair port")
-                                color: IrisStyle.muted
-                                font.pixelSize: IrisStyle.typeMeta
+                                color: ConnectStyle.muted
+                                font.family: ConnectStyle.fontMain
+                                font.pixelSize: ConnectStyle.typeMeta
                             }
                         }
                     }
 
                     // 6-digit Code Field
-                    IrisPlate {
+                    ConnectPlate {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         implicitHeight: Math.round(34 * root.d)
-                        radius: IrisStyle.radiusRow
-                        color: IrisStyle.fillQuiet
+                        radius: ConnectStyle.radiusRow
+                        color: ConnectStyle.fillQuiet
 
                         TextInput {
                             id: manualCode
@@ -324,18 +330,19 @@ Item {
                             anchors.leftMargin: Math.round(8 * root.d)
                             anchors.rightMargin: Math.round(8 * root.d)
                             verticalAlignment: TextInput.AlignVCenter
-                            color: IrisStyle.text
-                            font.family: IrisStyle.fontMono
-                            font.pixelSize: IrisStyle.typeMeta
+                            color: ConnectStyle.text
+                            font.family: ConnectStyle.fontMono
+                            font.pixelSize: ConnectStyle.typeMeta
                             clip: true
                             text: ""
 
-                            IrisText {
+                            StyledText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: manualCode.text.length === 0 && !manualCode.activeFocus
                                 text: Translation.tr("6-digit code")
-                                color: IrisStyle.muted
-                                font.pixelSize: IrisStyle.typeMeta
+                                color: ConnectStyle.muted
+                                font.family: ConnectStyle.fontMain
+                                font.pixelSize: ConnectStyle.typeMeta
                             }
                         }
                     }
@@ -346,12 +353,12 @@ Item {
                     spacing: Math.round(8 * root.d)
 
                     // Connect Port Field (Optional if different)
-                    IrisPlate {
+                    ConnectPlate {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         implicitHeight: Math.round(34 * root.d)
-                        radius: IrisStyle.radiusRow
-                        color: IrisStyle.fillQuiet
+                        radius: ConnectStyle.radiusRow
+                        color: ConnectStyle.fillQuiet
 
                         TextInput {
                             id: manualConnectPort
@@ -359,23 +366,24 @@ Item {
                             anchors.leftMargin: Math.round(10 * root.d)
                             anchors.rightMargin: Math.round(10 * root.d)
                             verticalAlignment: TextInput.AlignVCenter
-                            color: IrisStyle.text
-                            font.family: IrisStyle.fontMono
-                            font.pixelSize: IrisStyle.typeMeta
+                            color: ConnectStyle.text
+                            font.family: ConnectStyle.fontMono
+                            font.pixelSize: ConnectStyle.typeMeta
                             clip: true
                             text: ""
 
-                            IrisText {
+                            StyledText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: manualConnectPort.text.length === 0 && !manualConnectPort.activeFocus
                                 text: Translation.tr("Connection port (main screen, e.g. 39485)")
-                                color: IrisStyle.muted
-                                font.pixelSize: IrisStyle.typeMeta
+                                color: ConnectStyle.muted
+                                font.family: ConnectStyle.fontMain
+                                font.pixelSize: ConnectStyle.typeMeta
                             }
                         }
                     }
 
-                    IrisButton {
+                    ConnectButton {
                         emphasized: true
                         text: Translation.tr("Pair and Connect")
                         onClicked: {
@@ -396,11 +404,12 @@ Item {
                 visible: root.activeTab === "usb"
                 spacing: Math.round(8 * root.d)
 
-                IrisText {
+                StyledText {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     text: Translation.tr("Connect your phone via USB cable once to enable permanent wireless mode on port 5555. No QR scanning or pairing codes needed.")
-                    color: IrisStyle.subtext
+                    color: ConnectStyle.subtext
+                    font.family: ConnectStyle.fontMain
                     font.pixelSize: Math.max(9, Math.round(10.5 * root.d))
                 }
 
@@ -408,7 +417,7 @@ Item {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: Math.round(8 * root.d)
 
-                    IrisButton {
+                    ConnectButton {
                         emphasized: true
                         text: Translation.tr("Enable permanent Wi-Fi (adb tcpip 5555)")
                         onClicked: AndroidState.enableUsbTcpip()
@@ -417,12 +426,12 @@ Item {
             }
 
             // Live Output / Status
-            IrisPlate {
+            ConnectPlate {
                 Layout.fillWidth: true
                 visible: AndroidState.statusMessage.length > 0
                 implicitHeight: statusRow.implicitHeight + Math.round(10 * root.d)
-                radius: IrisStyle.radiusTile
-                color: IrisStyle.fillQuiet
+                radius: ConnectStyle.radiusTile
+                color: ConnectStyle.fillQuiet
 
                 RowLayout {
                     id: statusRow
@@ -430,18 +439,19 @@ Item {
                     anchors.margins: Math.round(6 * root.d)
                     spacing: Math.round(6 * root.d)
 
-                    IrisSquircle {
+                    ConnectSquircle {
                         width: Math.round(16 * root.d)
                         height: width
                         glyph: "info"
-                        tint: IrisStyle.accent
+                        tint: ConnectStyle.accent
                     }
 
-                    IrisText {
+                    StyledText {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                         text: AndroidState.statusMessage
-                        color: IrisStyle.text
+                        color: ConnectStyle.text
+                        font.family: ConnectStyle.fontMain
                         font.pixelSize: Math.max(9, Math.round(10 * root.d))
                     }
                 }

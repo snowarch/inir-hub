@@ -6,7 +6,7 @@
     "description": "Manage your Android device from iNiR: live ADB & KDE Connect telemetry (battery, network, signal), wireless pairing, screen mirroring via scrcpy, screenshots, screen recording, wake/unlock, find phone, and file browsing.",
     "icon": "smartphone",
     "preview": "preview.webp",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "author": "ltar",
     "license": "MIT",
     "minInir": "2.33.0",

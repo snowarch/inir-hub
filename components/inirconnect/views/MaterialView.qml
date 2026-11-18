@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.modules.common
-import qs.modules.iris.style
 import "../state"
 import "../components"
 
@@ -13,7 +12,7 @@ Item {
     property bool windowed: false
     property bool open: false
     readonly property alias frame: cardFrame
-    readonly property real d: IrisStyle.density
+    readonly property real d: ConnectStyle.density
 
     readonly property real availW: root.width > 0 ? root.width : (root.QsWindow.window?.screen?.width ?? 1920)
     readonly property real availH: root.height > 0 ? root.height : (root.QsWindow.window?.screen?.height ?? 1080)
@@ -119,9 +118,9 @@ Item {
         x: root.windowed ? 0 : Math.round((root.availW - width) / 2)
         y: root.windowed ? 0 : Math.round(52 * root.d)
         radius: root.windowed ? 0 : 22
-        color: Appearance.m3colors.m3surfaceContainer
+        color: ConnectStyle.surface
         border.width: root.windowed ? 0 : 1
-        border.color: Appearance.m3colors.m3outlineVariant
+        border.color: ConnectStyle.border
         opacity: root.warming ? 0.01 : cardFrame.panelOpacity
         scale: root.windowed ? 1.0 : 0.94
 
@@ -390,7 +389,7 @@ Item {
                     width: Math.round(4 * root.d)
                     height: Math.max(Math.round(24 * root.d), bodyScroll.visibleArea.heightRatio * bodyScroll.height)
                     radius: width / 2
-                    color: IrisStyle.subtext
+                    color: ConnectStyle.subtext
                     opacity: 0.45
                 }
             }

@@ -5,23 +5,21 @@ import QtQuick.Layouts
 import qs.services
 import qs.modules.common.functions
 import qs.modules.common.widgets
-import qs.modules.iris.style
-import qs.modules.iris.components
 import "../state"
 
 ColumnLayout {
     id: root
-    readonly property real d: IrisStyle.density
+    readonly property real d: ConnectStyle.density
     spacing: Math.round(6 * root.d)
     implicitHeight: titleText.implicitHeight + grid.implicitHeight + spacing
 
-    IrisText {
+    StyledText {
         id: titleText
         text: Translation.tr("QUICK ACTIONS")
-        color: IrisStyle.subtext
-        font.family: IrisStyle.fontLabel
+        color: ConnectStyle.subtext
+        font.family: ConnectStyle.fontLabel
         font.pixelSize: Math.max(9, Math.round(10 * root.d))
-        font.weight: IrisStyle.weight(Font.Bold)
+        font.weight: ConnectStyle.weight(Font.Bold)
         font.letterSpacing: 0.8
     }
 
@@ -57,22 +55,22 @@ ColumnLayout {
                 implicitHeight: Math.round(38 * root.d)
 
                 property real lit: tile.modelData.active ? 1 : 0
-                Behavior on lit { NumberAnimation { duration: IrisStyle.revealDuration; easing.type: Easing.OutCubic } }
+                Behavior on lit { NumberAnimation { duration: ConnectStyle.revealDuration; easing.type: Easing.OutCubic } }
 
-                readonly property color fg: ColorUtils.mix(IrisStyle.inkOnAccentFill, IrisStyle.text, tile.lit)
+                readonly property color fg: ColorUtils.mix(ConnectStyle.inkOnAccentFill, ConnectStyle.text, tile.lit)
 
-                IrisPlate {
+                ConnectPlate {
                     anchors.fill: parent
-                    radius: IrisStyle.radiusTile
+                    radius: ConnectStyle.radiusTile
                     lit: tile.modelData.active
                     color: ColorUtils.mix(
-                        IrisStyle.accentFill,
-                        tileMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.formPlate,
+                        ConnectStyle.accentFill,
+                        tileMouse.containsMouse ? ConnectStyle.fillHover : ConnectStyle.formPlate,
                         tile.lit
                     )
-                    scale: tileMouse.pressed ? IrisStyle.pressScale(0.97) : 1.0
-                    Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
-                    Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration } }
+                    scale: tileMouse.pressed ? ConnectStyle.pressScale(0.97) : 1.0
+                    Behavior on scale { NumberAnimation { duration: ConnectStyle.feedbackDuration; easing.type: ConnectStyle.feedbackEasing } }
+                    Behavior on color { ColorAnimation { duration: ConnectStyle.feedbackDuration } }
 
                     RowLayout {
                         anchors.fill: parent
@@ -87,13 +85,14 @@ ColumnLayout {
                             color: tile.fg
                         }
 
-                        IrisText {
+                        StyledText {
                             Layout.fillWidth: true
                             elide: Text.ElideRight
                             text: tile.modelData.label
                             color: tile.fg
-                            font.pixelSize: IrisStyle.typeCaption
-                            font.weight: IrisStyle.weight(Font.Medium)
+                            font.family: ConnectStyle.fontMain
+                            font.pixelSize: ConnectStyle.typeCaption
+                            font.weight: ConnectStyle.weight(Font.Medium)
                         }
                     }
                 }
