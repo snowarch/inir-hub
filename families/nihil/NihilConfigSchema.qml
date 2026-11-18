@@ -7,23 +7,31 @@ JsonObject {
     property string profile: "vertical"
 
     property JsonObject look: JsonObject {
-        // "obsidian", "amber", "azure", "ember", "ultramarine" or "wallpaper".
-        property string palette: "obsidian"
-        property real glass: 0.42
+        // The colours the glass splits light into: "spectral", "mono", "ember", "ice" or "wallpaper".
+        property string palette: "spectral"
+        // "smoke", "frost", "fluted" or "prism".
+        property string material: "smoke"
+        // Reeds across fluted glass.
+        property int ribs: 14
+        property real glass: 0.58
         property bool blur: true
-        property real grain: 0.5
-        property real rim: 0.7
+        property real grain: 0.55
+        property real rim: 0.75
         property real flare: 0.6
+        // Four-point stars where the light lands.
+        property bool sparks: true
         property real corners: 1
         property real scale: 1
         // Multiplies every animation; 0 turns movement off.
         property real motion: 1
-        // "grotesk" or "system".
+        // Body text: "grotesk" or "system".
         property string font: "grotesk"
+        // Titles: "condensed" (Anton), "grotesk" or "system".
+        property string display: "condensed"
     }
     property JsonObject field: JsonObject {
-        // 0 drift, 1 eclipse, 2 fluted, 3 stippled ridge.
-        property int form: 1
+        // 0 beam, 1 fluted streaks, 2 haze, 3 void.
+        property int form: 0
         property real seed: 0.37
         property real glow: 1
     }
@@ -35,6 +43,9 @@ JsonObject {
         // In the overview: "same" keeps the glass, "transparent" drops it.
         property string overviewStyle: "same"
         property list<string> screenList: []
+        property bool windowTitle: true
+        property bool statusWords: true
+        property bool rules: true
     }
     property JsonObject modules: JsonObject {
         // Turn a whole surface off.
@@ -49,6 +60,11 @@ JsonObject {
         property bool notifications: true
     }
     property JsonObject overview: JsonObject {
+        // "compositor" puts NiHiL's parts over Niri's or Umbriel's own overview; "shell" draws the whole overview.
+        property string engine: "compositor"
+        // What the poster behind the compositor's overview names: "workspace", "clock" or "off".
+        property string poster: "workspace"
+        property real posterWallpaper: 0.18
         // "default" spreads the windows, "static" leaves them in place, "hover" spreads them under the pointer.
         property string mode: "default"
         // "desktop", "overview" or "apps": where the session starts.

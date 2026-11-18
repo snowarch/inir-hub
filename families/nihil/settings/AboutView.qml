@@ -38,18 +38,21 @@ Item {
         width: Math.min(parent.width - NihilStyle.s(48), NihilStyle.s(460))
         spacing: NihilStyle.s(6)
 
-        NText {
+        NSpark {
+            anchors.horizontalCenter: parent.horizontalCenter
+            size: NihilStyle.s(34)
+        }
+        NDisplay {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "NiHiL"
-            font.pixelSize: NihilStyle.s(72)
-            font.weight: Font.Light
+            size: NihilStyle.s(120)
+            bloom: 1
         }
-        NText {
-            anchors.horizontalCenter: parent.horizontalCenter
-            visible: root.version.length > 0
-            figures: true
-            text: Translation.tr("Version %1").arg(root.version)
-            color: NihilStyle.inkSoft
+        NRule {
+            width: parent.width
+            start: root.version.length > 0 ? Translation.tr("Version %1").arg(root.version) : ""
+            middle: "▶ ⋈ ◀"
+            end: "GPL-3.0"
         }
         NText {
             width: parent.width
@@ -57,6 +60,7 @@ Item {
             bottomPadding: NihilStyle.s(18)
             horizontalAlignment: Text.AlignHCenter
             text: Translation.tr("Vertical workspaces, a full overview and glass you shape completely.")
+            color: NihilStyle.inkSoft
             wrapMode: Text.Wrap
         }
         NButton {

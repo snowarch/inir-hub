@@ -12,13 +12,20 @@ Item {
 
     required property var option
     required property var host
+    property bool first: false
 
-    readonly property var value: root.host.read(root.option.key)
-    readonly property bool changed: JSON.stringify(root.value) !== JSON.stringify(root.host.factory(root.option.key))
+    // A compositor row reads and writes the compositor's own setting, for Niri and Umbriel alike.
+    readonly property var compositorSpec: root.option.type === "compositor"
+        ? CompositorRows.rows.find(row => row.comp === root.option.comp && row.key === root.option.key) ?? null : null
+    readonly property var value: root.compositorSpec ? CompositorConfig.value(root.compositorSpec) : root.host.read(root.option.key)
+    readonly property var factoryValue: root.compositorSpec ? (CompositorConfig.factory(root.compositorSpec) ?? root.compositorSpec.fallback)
+        : root.host.factory(root.option.key)
+    readonly property bool changed: JSON.stringify(root.value) !== JSON.stringify(root.factoryValue)
     readonly property bool isFit: root.option.fit !== undefined && root.value === root.option.fit
 
     function write(value: var): void {
-        root.host.write(root.option.key, value)
+        if (root.compositorSpec) CompositorConfig.set(root.compositorSpec, value)
+        else root.host.write(root.option.key, value)
     }
 
     function stepped(value: real): real {
@@ -38,7 +45,24 @@ Item {
         }
     }
 
-    implicitHeight: Math.max(NihilStyle.s(52), words.implicitHeight + NihilStyle.s(16))
+    implicitHeight: Math.max(NihilStyle.s(56), words.implicitHeight + NihilStyle.s(20))
+
+    Rectangle {
+        visible: !root.first
+        width: parent.width
+        height: 1
+        color: NihilStyle.line
+    }
+    HoverHandler { id: hover }
+    // Changed from how NiHiL came: a short line of light at the row's edge.
+    NSpectrum {
+        visible: root.changed
+        vertical: true
+        x: -NihilStyle.s(18)
+        anchors.verticalCenter: parent.verticalCenter
+        width: NihilStyle.s(2)
+        height: parent.height - NihilStyle.s(24)
+    }
 
     Column {
         id: words
@@ -47,11 +71,15 @@ Item {
         anchors.rightMargin: NihilStyle.s(12)
         anchors.verticalCenter: parent.verticalCenter
 
+        spacing: NihilStyle.s(2)
+
         NText {
             width: parent.width
             text: Translation.tr(root.option.label)
             elide: Text.ElideRight
             font.pixelSize: NihilStyle.textBody
+            font.weight: Font.Medium
+            color: hover.hovered ? NihilStyle.ink : Qt.alpha(NihilStyle.ink, 0.88)
         }
         NText {
             width: parent.width
@@ -75,7 +103,7 @@ Item {
         opacity: root.changed ? 1 : 0
         enabled: root.changed
         Accessible.name: Translation.tr("Restore the original value")
-        onClicked: root.write(root.host.factory(root.option.key))
+        onClicked: root.write(root.factoryValue)
     }
 
     Loader {
@@ -83,7 +111,8 @@ Item {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         sourceComponent: root.option.type === "switch" ? switchControl
-            : root.option.type === "level" ? levelControl
+            : root.option.type === "level" || (root.compositorSpec?.kind === "range") ? levelControl
+            : root.compositorSpec?.kind === "switch" ? switchControl
             : root.option.type === "screens" ? screensControl
             : root.option.options.length <= 3 ? segmentControl : menuControl
     }
@@ -147,13 +176,14 @@ Item {
                 name: Translation.tr(root.option.label)
                 onMoved: value => root.write(root.stepped(value))
             }
-            NText {
+            NDisplay {
                 anchors.verticalCenter: parent.verticalCenter
-                width: NihilStyle.s(64)
+                width: NihilStyle.s(72)
                 horizontalAlignment: Text.AlignRight
-                figures: true
                 text: root.figure(Number(root.value))
-                color: NihilStyle.inkSoft
+                size: NihilStyle.s(20)
+                bloom: 0
+                color: root.changed ? NihilStyle.ink : NihilStyle.inkSoft
             }
         }
     }

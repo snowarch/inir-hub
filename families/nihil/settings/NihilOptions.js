@@ -22,6 +22,15 @@ function level(key, label, from, to, step, unit, note, extra) {
     return row
 }
 
+// A setting of the compositor itself (a row of CompositorRows), written to Niri's or Umbriel's own config.
+function compositor(comp, key, label, kind, note, range) {
+    var row = { type: "compositor", comp: comp, key: key, label: label, note: note || "", kind: kind, options: [] }
+    if (range) {
+        row.from = range[0]; row.to = range[1]; row.step = range[2]; row.unit = range[3] || ""
+    }
+    return row
+}
+
 function screens(key, label, note) {
     return { type: "screens", key: key, label: label, note: note || "" }
 }
@@ -53,6 +62,9 @@ var pages = [
                 choice("panel.visibility", "Shown", [["always", "Always"], ["desktop", "On an empty desktop"],
                                                      ["overview", "In the overview"], ["hidden", "Never"]]),
                 choice("panel.overviewStyle", "In the overview", [["same", "Keep the glass"], ["transparent", "Transparent"]]),
+                toggle("panel.windowTitle", "Focused app's name"),
+                toggle("panel.statusWords", "Network in words", "Wired, or the network's name, beside its mark"),
+                toggle("panel.rules", "Rules between groups"),
                 screens("panel.screenList", "Screens", "With none marked it shows on all of them")
             ] },
             { title: "Dash", rows: [
@@ -119,25 +131,37 @@ var pages = [
         id: "appearance", title: "Appearance", glyph: "palette",
         sections: [
             { title: "Colour", rows: [
-                choice("look.palette", "Palette", [["obsidian", "Obsidian"], ["amber", "Amber"], ["azure", "Azure"], ["ember", "Ember"],
-                                                   ["ultramarine", "Ultramarine"], ["wallpaper", "From the wallpaper"]])
+                choice("look.palette", "Light", [["spectral", "Spectral"], ["mono", "Mono"], ["ember", "Ember"], ["ice", "Ice"],
+                                                 ["wallpaper", "From the wallpaper"]], "The colours the glass splits light into")
             ] },
             { title: "Glass", rows: [
+                choice("look.material", "Material", [["smoke", "Smoked"], ["frost", "Frosted"], ["fluted", "Fluted"], ["prism", "Prism"]]),
+                level("look.ribs", "Rib width", 6, 32, 1, "px", "How wide each reed of fluted glass is"),
                 level("look.glass", "Opacity", 0, 1, 0.01, "percent"),
                 toggle("look.blur", "Blur what is behind"),
                 level("look.grain", "Grain", 0, 1, 0.01, "percent"),
                 level("look.rim", "Rim light", 0, 1, 0.01, "percent"),
-                level("look.flare", "Flare", 0, 1, 0.01, "percent")
+                level("look.flare", "Flare", 0, 1, 0.01, "percent"),
+                toggle("look.sparks", "Sparks", "Four-point stars where the light lands")
             ] },
             { title: "Shape and type", rows: [
                 level("look.corners", "Roundness", 0, 2, 0.05, "times"),
                 level("look.scale", "Interface size", 0.75, 1.5, 0.01, "times"),
-                choice("look.font", "Typeface", [["grotesk", "Hanken Grotesk"], ["system", "System"]])
+                choice("look.display", "Titles", [["condensed", "Condensed"], ["grotesk", "Grotesk"], ["system", "System"]]),
+                choice("look.font", "Text", [["grotesk", "Hanken Grotesk"], ["system", "System"]])
             ] },
             { title: "Field", rows: [
-                choice("field.form", "Form", [[0, "Drift"], [1, "Eclipse"], [2, "Fluted"], [3, "Stippled ridge"]]),
+                choice("field.form", "Form", [[0, "Beam"], [1, "Fluted streaks"], [2, "Haze"], [3, "Void"]]),
                 level("field.seed", "Variation", 0, 1, 0.01),
                 level("field.glow", "Glow", 0, 2, 0.05, "times")
+            ] },
+            { title: "Overview stage", rows: [
+                choice("overview.engine", "Overview", [["compositor", "The compositor's own"], ["shell", "Drawn by NiHiL"]],
+                       "The compositor's moves live windows with no lag; NiHiL's own works anywhere"),
+                choice("overview.poster", "Poster title", [["workspace", "The workspace"], ["clock", "The time"], ["off", "None"]]),
+                level("overview.posterWallpaper", "Wallpaper under the poster", 0, 1, 0.01, "percent"),
+                compositor("layout", "overview.zoom", "Workspace size", "range", "How big the compositor draws each workspace", [0.2, 0.75, 0.05, "percent"]),
+                compositor("glass", "overview", "Blur behind the overview", "switch")
             ] },
             { title: "Overview background", rows: [
                 choice("overview.background", "Behind the overview", [["desktop", "Sharp wallpaper"], ["transparent", "Nothing"],

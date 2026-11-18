@@ -9,8 +9,8 @@ import qs.modules.nihil.style
 import "NihilOptions.js" as Options
 import "../state/NihilProfiles.js" as Profiles
 
-// NiHiL's Settings, a window of its own over the family's field: the pages down the side, a search that reaches every
-// option, and the page. Every row comes from NihilOptions.js.
+// NiHiL's Settings as a printed index over the family's field: the pages numbered down a pane of glass, a search that
+// reaches every option, and each page opened under its own poster head. Every row comes from NihilOptions.js.
 Window {
     id: root
 
@@ -78,7 +78,7 @@ Window {
 
     function restoreAll(): void {
         const updates = { "nihil.profile": root.factory("profile") }
-        for (const row of root.everyRow)
+        for (const row of root.everyRow.filter(item => item.type !== "compositor"))
             updates["nihil." + row.key] = root.factory(row.key)
         Config.setNestedValues(updates)
     }
@@ -89,7 +89,7 @@ Window {
     height: 760
     minimumWidth: 860
     minimumHeight: 520
-    color: NihilStyle.base
+    color: NihilStyle.void_
     onClosing: Qt.quit()
 
     // How NiHiL came: a fresh copy of its options, never written to.
@@ -97,10 +97,13 @@ Window {
 
     NFieldPaint {
         anchors.fill: parent
-        form: Config.options?.nihil?.field?.form ?? 1
+        form: Config.options?.nihil?.field?.form ?? 0
         seed: Config.options?.nihil?.field?.seed ?? 0.37
-        glow: Config.options?.nihil?.field?.glow ?? 1
+        glow: (Config.options?.nihil?.field?.glow ?? 1) * 0.7
     }
+
+    readonly property int pageIndex: Options.pages.findIndex(item => item.id === root.page.id)
+    readonly property int rowCount: (root.page.sections ?? []).reduce((sum, section) => sum + section.rows.length, 0)
 
     Item {
         anchors.fill: parent
@@ -112,76 +115,114 @@ Window {
                 search.clear()
         }
 
-        Column {
+        // The index: the family's mark, the search, then every page as a numbered line of the condensed face. The page
+        // on show is set in bone with a line of light beside it; the rest wait in faint ink.
+        NGlass {
             id: side
-            x: NihilStyle.s(16)
-            y: NihilStyle.s(20)
-            width: NihilStyle.s(232)
-            spacing: NihilStyle.s(4)
+            x: NihilStyle.s(12)
+            y: NihilStyle.s(12)
+            width: NihilStyle.s(264)
+            height: parent.height - NihilStyle.s(24)
+            radius: NihilStyle.rPanel
 
-            NText {
-                x: NihilStyle.s(10)
-                bottomPadding: NihilStyle.s(10)
-                text: "NiHiL"
-                font.pixelSize: NihilStyle.textTitle
-                font.weight: Font.Light
-            }
+            Column {
+                id: index
+                x: NihilStyle.s(20)
+                y: NihilStyle.s(22)
+                width: parent.width - NihilStyle.s(40)
+                spacing: NihilStyle.s(2)
 
-            NField {
-                id: search
-                width: side.width
-                glyph: "search"
-                placeholder: Translation.tr("Search options")
-                clearable: true
-                onEdited: text => root.query = text
-            }
-
-            Item {
-                width: 1
-                height: NihilStyle.s(10)
-            }
-
-            Repeater {
-                model: Options.pages
-
-                delegate: MouseArea {
-                    id: entry
-
-                    required property var modelData
-                    readonly property bool here: root.query.length === 0 && root.pageId === entry.modelData.id
-
-                    width: side.width
-                    height: NihilStyle.s(42)
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        search.clear()
-                        root.query = ""
-                        root.pageId = entry.modelData.id
-                    }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: NihilStyle.rKey
-                        color: entry.here ? NihilStyle.pieceRaised : entry.containsMouse ? NihilStyle.piece : "transparent"
-                        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-                    }
-                    NIcon {
+                Item {
+                    width: parent.width
+                    height: mark.height
+                    NDisplay {
                         id: mark
-                        x: NihilStyle.s(12)
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: entry.modelData.glyph
-                        size: NihilStyle.s(20)
-                        color: entry.here ? NihilStyle.accent : NihilStyle.ink
+                        text: "NiHiL"
+                        size: NihilStyle.s(40)
+                        bloom: 0.8
                     }
-                    NText {
-                        anchors.left: mark.right
-                        anchors.leftMargin: NihilStyle.s(12)
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: Translation.tr(entry.modelData.title)
-                        font.pixelSize: NihilStyle.textBody
-                        font.weight: entry.here ? Font.Medium : Font.Normal
+                    NSpark { x: mark.width - size * 0.2; y: -size * 0.15; size: NihilStyle.s(18) }
+                }
+                NLabel {
+                    bottomPadding: NihilStyle.s(16)
+                    text: Translation.tr("Settings")
+                }
+
+                NField {
+                    id: search
+                    width: parent.width
+                    glyph: "search"
+                    placeholder: Translation.tr("Search options")
+                    clearable: true
+                    onEdited: text => root.query = text
+                }
+
+                Item { width: 1; height: NihilStyle.s(14) }
+                Rectangle { width: parent.width; height: 1; color: NihilStyle.hair }
+                Item { width: 1; height: NihilStyle.s(6) }
+
+                Repeater {
+                    model: Options.pages
+
+                    delegate: MouseArea {
+                        id: entry
+
+                        required property var modelData
+                        required property int index
+                        readonly property bool here: root.query.length === 0 && root.pageId === entry.modelData.id
+
+                        width: index.width
+                        height: NihilStyle.s(40)
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            search.clear()
+                            root.query = ""
+                            root.pageId = entry.modelData.id
+                        }
+
+                        NSpectrum {
+                            vertical: true
+                            x: -NihilStyle.s(20)
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: NihilStyle.s(2)
+                            height: parent.height - NihilStyle.s(14)
+                            opacity: entry.here ? 1 : 0
+                            Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
+                        }
+                        NLabel {
+                            id: number
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: NihilStyle.s(30)
+                            text: String(entry.index + 1).padStart(2, "0")
+                            color: entry.here ? NihilStyle.ink : NihilStyle.inkFaint
+                        }
+                        NDisplay {
+                            anchors.left: number.right
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: Translation.tr(entry.modelData.title)
+                            elide: Text.ElideRight
+                            size: NihilStyle.s(22)
+                            bloom: entry.here ? 0.6 : 0
+                            color: entry.here ? NihilStyle.ink : entry.containsMouse ? NihilStyle.inkSoft : NihilStyle.inkFaint
+                        }
                     }
+                }
+            }
+
+            NRule {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: NihilStyle.s(20)
+                start: Translation.tr("Restore all")
+                end: "▶ ⋈ ◀"
+                MouseArea {
+                    width: parent.width / 2
+                    height: parent.height
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.restoreAll()
                 }
             }
         }
@@ -189,24 +230,77 @@ Window {
         Item {
             id: stage
             anchors.left: side.right
-            anchors.leftMargin: NihilStyle.s(12)
+            anchors.leftMargin: NihilStyle.s(28)
             anchors.right: parent.right
+            anchors.rightMargin: NihilStyle.s(28)
             anchors.top: parent.top
             anchors.bottom: parent.bottom
 
-            NText {
-                id: heading
-                x: NihilStyle.s(20)
-                y: NihilStyle.s(20)
-                text: root.query.length > 0 ? Translation.tr("Search") : Translation.tr(root.page.title)
-                font.pixelSize: NihilStyle.textTitle
-                font.weight: Font.Light
+            // The page's poster head: its number, its name set large with bloom, and a rule saying what it holds.
+            Item {
+                id: hero
+                y: NihilStyle.s(24)
+                width: parent.width
+                height: heading.height + NihilStyle.s(40)
+
+                NLabel {
+                    text: root.query.length > 0 ? Translation.tr("Search")
+                        : String(root.pageIndex + 1).padStart(2, "0") + "  /  " + String(Options.pages.length).padStart(2, "0")
+                }
+                NDisplay {
+                    id: heading
+                    y: NihilStyle.s(14)
+                    width: parent.width - specimen.width - NihilStyle.s(20)
+                    text: root.query.length > 0 ? root.query : Translation.tr(root.page.title)
+                    elide: Text.ElideRight
+                    size: NihilStyle.s(84)
+                    bloom: 0.9
+                }
+                NSpark { x: Math.min(heading.contentWidth, heading.width) - size * 0.2; y: NihilStyle.s(8); size: NihilStyle.s(30) }
+
+                // The material as it is set now: a square of the family's glass with its light, its spark and its type.
+                NGlass {
+                    id: specimen
+                    anchors.right: parent.right
+                    y: NihilStyle.s(4)
+                    width: NihilStyle.s(132)
+                    height: NihilStyle.s(96)
+                    radius: NihilStyle.rCard
+                    ignite: 0.6
+                    spark: 1
+                    NIcon {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.margins: NihilStyle.s(12)
+                        text: root.query.length > 0 ? "search" : (root.page.glyph ?? "tune")
+                        size: NihilStyle.s(18)
+                    }
+                    NDisplay {
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.margins: NihilStyle.s(12)
+                        text: "Aa"
+                        capitals: false
+                        size: NihilStyle.s(34)
+                        bloom: 0.6
+                    }
+                }
+
+                NRule {
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    start: root.query.length > 0
+                        ? Translation.tr("%1 found").arg(root.found.length)
+                        : root.rowCount > 0 ? Translation.tr("%1 options").arg(root.rowCount) : Translation.tr(root.page.title)
+                    middle: "⋈"
+                    end: Translation.tr("Saved as you go")
+                }
             }
 
             Loader {
                 id: body
                 anchors.fill: parent
-                anchors.topMargin: heading.y + heading.height + NihilStyle.s(12)
+                anchors.topMargin: hero.y + hero.height + NihilStyle.s(8)
                 active: root.query.length === 0 || root.found.length > 0
                 sourceComponent: root.query.length > 0 ? foundPage
                     : root.page.view === "profiles" ? profilesPage
@@ -218,16 +312,16 @@ Window {
                 visible: root.query.length > 0 && root.found.length === 0
                 spacing: NihilStyle.s(6)
 
-                NIcon {
+                NDisplay {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "search_off"
-                    size: NihilStyle.s(36)
-                    color: NihilStyle.inkSoft
+                    text: Translation.tr("Nothing")
+                    size: NihilStyle.s(56)
+                    color: NihilStyle.inkFaint
+                    bloom: 0
                 }
-                NText {
+                NLabel {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Translation.tr("No option by that name")
-                    font.pixelSize: NihilStyle.textLarge
                 }
             }
         }

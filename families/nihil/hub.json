@@ -3,8 +3,10 @@
     "version": "2.0.0",
     "changes": {
         "2.0.0": [
-            "NiHiL is rebuilt: a panel, a dash, a workspace strip and live windows in one overview",
-            "Procedural glass with grain, a chromatic rim and flare, every part of it yours to shape",
+            "NiHiL is rebuilt as a spectral poster under glass: condensed titles that bloom, hairline rules, light lines and stars",
+            "The overview is the compositor's own on Niri and Umbriel, with NiHiL's search, dash, index and a poster around it",
+            "New Settings: a numbered index, a poster head per page, every option, compositor rows and profiles drawn as screens",
+            "Control, Today, Power, lock, OSD, notifications, the app grid and the desktop widgets redrawn in the same language",
             "Four desktop layouts to start from"
         ],
         "1.3.0": [

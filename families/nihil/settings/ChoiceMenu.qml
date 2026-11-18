@@ -69,28 +69,29 @@ Item {
                             root.close()
                         }
 
+                        // The chosen one is a bone plate; hover is a faint tint.
                         Rectangle {
                             anchors.fill: parent
                             radius: NihilStyle.rKey
-                            color: row.containsMouse ? NihilStyle.pieceRaised : "transparent"
+                            color: row.chosen ? NihilStyle.ink : (row.containsMouse ? NihilStyle.piece : "transparent")
                             Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
                         }
                         NText {
-                            x: NihilStyle.s(10)
-                            width: parent.width - NihilStyle.s(40)
+                            x: NihilStyle.s(12)
+                            width: parent.width - NihilStyle.s(44)
                             anchors.verticalCenter: parent.verticalCenter
                             text: Translation.tr(row.modelData.label)
                             elide: Text.ElideRight
-                            color: row.chosen ? NihilStyle.accent : NihilStyle.ink
+                            font.weight: row.chosen ? Font.DemiBold : Font.Normal
+                            color: row.chosen ? NihilStyle.void_ : NihilStyle.ink
                         }
-                        NIcon {
+                        NSpark {
                             anchors.right: parent.right
-                            anchors.rightMargin: NihilStyle.s(10)
+                            anchors.rightMargin: NihilStyle.s(12)
                             anchors.verticalCenter: parent.verticalCenter
                             visible: row.chosen
-                            text: "check"
-                            size: NihilStyle.s(16)
-                            color: NihilStyle.accent
+                            size: NihilStyle.s(14)
+                            tint: NihilStyle.void_
                         }
                     }
                 }
