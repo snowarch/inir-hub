@@ -1,0 +1,87 @@
+{
+  "id": "nihil",
+  "kind": "family",
+  "name": "NiHiL",
+  "summary": "Nothing but dots: a floating bar, dot-matrix widgets and one signal colour.",
+  "tagline": "Floating bar, dot-matrix clock, quick controls and a power card.",
+  "icon": "blur_circular",
+  "version": "1.1.0",
+  "provides": "modules/nihil",
+  "parts": {
+    "critical": "critical/ShellNihilCriticalPanels.qml",
+    "panels": "ShellNihilPanelsImpl.qml",
+    "style": "NihilFamilyStyle.qml",
+    "config": "NihilConfigSchema.qml",
+    "layout": "NihilLayout.qml",
+    "lockSurface": "lock/NihilLockSurface.qml",
+    "widgetFace.clock": "widgets/NihilClockFace.qml",
+    "widgetFace.battery": "widgets/NihilBatteryFace.qml",
+    "widgetFace.vitals": "widgets/NihilVitalsFace.qml",
+    "widgetFace.date": "widgets/NihilDateFace.qml",
+    "widgetFace.nowPlaying": "widgets/NihilNowPlayingFace.qml",
+    "widgetFace.weather": "widgets/NihilWeatherFace.qml",
+    "widgetFace.photo": "widgets/NihilPhotoFace.qml",
+    "settingsApp": "settings/NihilSettingsApp.qml",
+    "control.switch": "style/NSwitch.qml",
+    "control.scrubber": "style/NSlider.qml",
+    "control.segmented": "style/NSegmented.qml"
+  },
+  "configKey": "nihil",
+  "enabledPanels": [
+    "nBar",
+    "nBackground",
+    "nStart",
+    "nControl",
+    "nTray",
+    "nPower",
+    "nMenu",
+    "nOsd",
+    "nNotificationPopup",
+    "nLock",
+    "nPolkit",
+    "iiBootGreeting",
+    "iiCheatsheet",
+    "iiOnScreenKeyboard",
+    "iiOverlay",
+    "iiOverview",
+    "iiRegionSelector",
+    "iiWallpaperSelector",
+    "iiWallpaperLauncher",
+    "iiCoverflowSelector",
+    "iiClipboard",
+    "iiShellUpdate",
+    "iiMascotCompanion"
+  ],
+  "widgetDesign": {
+    "key": "nihil.design",
+    "shared": "nihil.widgets.design",
+    "prefix": "nihil",
+    "face": "nihil",
+    "faceLabel": "NiHiL",
+    "plain": "material",
+    "choices": [
+      "nihil",
+      "material",
+      "instrument",
+      "readout"
+    ]
+  },
+  "flags": {
+    "sharedDesktop": true,
+    "widgetFreeSize": false
+  },
+  "switch": {
+    "name": "Switch to NiHiL Panel Family",
+    "description": "A floating bar, dot-matrix widgets and one signal colour",
+    "icon": "blur_circular",
+    "keywords": [
+      "family",
+      "panel",
+      "nihil",
+      "dots",
+      "minimal",
+      "glyph",
+      "layout"
+    ]
+  }
+}

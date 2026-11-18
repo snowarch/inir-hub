@@ -1,0 +1,13 @@
+module qs.modules.nihil.settings.views
+Specimen 1.0 Specimen.qml
+AccentPicker 1.0 AccentPicker.qml
+LightDark 1.0 LightDark.qml
+QuickKeys 1.0 QuickKeys.qml
+WallpaperCard 1.0 WallpaperCard.qml
+SoundDevices 1.0 SoundDevices.qml
+BrightnessView 1.0 BrightnessView.qml
+Displays 1.0 Displays.qml
+ScreensPicker 1.0 ScreensPicker.qml
+Shortcuts 1.0 Shortcuts.qml
+Families 1.0 Families.qml
+About 1.0 About.qml

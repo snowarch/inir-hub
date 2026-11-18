@@ -1,0 +1,30 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.1.0",
+    "changes": {
+        "1.1.0": [
+            "NiHiL has its own Settings window: every page, live search, and full control of the signal colour, pieces, corners, dots, type and motion"
+        ],
+        "1.0.0": [
+            "NiHiL: a floating bar, dot-matrix clock and widgets, Start, quick controls, a power card and its own menu, in one signal colour"
+        ]
+    },
+    "summary": "Nothing but dots: a floating bar, dot-matrix widgets and one signal colour.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "GPL-3.0-only",
+    "tags": [
+        "family"
+    ],
+    "minInir": "3.1.2",
+    "provides": "modules/nihil",
+    "requires": [
+        "ii"
+    ],
+    "preview": "preview.webp",
+    "permissions": [
+        "process",
+        "files"
+    ]
+}
