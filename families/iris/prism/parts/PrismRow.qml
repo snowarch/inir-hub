@@ -27,7 +27,9 @@ Item {
     property bool dense: false
     // The group's master row under a head that already says its name: the control alone, the row's whole width.
     property bool headless: false
-    readonly property bool tall: root.headless || root.stacked || (root.compact && root.below === ""
+    // An open choice keeps its place under the name: its chips fold open under the line, the pill never jumps up
+    // over what the row says.
+    readonly property bool tall: root.headless || root.stacked || (root.compact && (root.below === "" || root.below === "chips")
         && ["range", "hue", "text", "choice"].includes(root.kind))
     property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
