@@ -1,6 +1,6 @@
 module qs.modules.nihil.bar
-NihilBar 1.0 NihilBar.qml
-BarContent 1.0 BarContent.qml
-NihilMark 1.0 NihilMark.qml
-AppCircle 1.0 AppCircle.qml
-StatusPill 1.0 StatusPill.qml
+IrisBar 1.0 IrisBar.qml
+IrisCustomModule 1.0 IrisCustomModule.qml
+IrisIsland 1.0 IrisIsland.qml
+IrisTray 1.0 IrisTray.qml
+IrisTools 1.0 IrisTools.qml

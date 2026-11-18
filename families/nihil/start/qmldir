@@ -1,5 +1,0 @@
-module qs.modules.nihil.start
-NihilStart 1.0 NihilStart.qml
-StartApps 1.0 StartApps.qml
-StartSide 1.0 StartSide.qml
-StartMusic 1.0 StartMusic.qml

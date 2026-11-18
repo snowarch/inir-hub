@@ -1,4 +1,0 @@
-module qs.modules.nihil.menu
-NihilMenu 1.0 NihilMenu.qml
-MenuRow 1.0 MenuRow.qml
-MenuPages 1.0 MenuPages.qml

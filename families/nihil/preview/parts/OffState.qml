@@ -1,0 +1,32 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Layouts
+import qs.modules.common.widgets
+import qs.modules.nihil.style
+import qs.modules.nihil.components
+
+Rectangle {
+    id: off
+    property string text: ""
+    anchors.centerIn: parent
+    // A scene is laid out wider than its frame and shrunk into it (IrisGroupPreview's `world`): the words stand at
+    // their own size in the frame, never at the scene's (Side Panels' wide scene shrank them to a third, unreadable).
+    readonly property real shrunk: (off.parent?.preview?.width ?? 0) > 0 && (off.parent?.width ?? 0) > 0
+        ? off.parent.preview.width / off.parent.width : 1
+    scale: off.shrunk < 0.999 ? Math.min(4, 1 / Math.max(0.05, off.shrunk)) : 1
+    implicitWidth: offRow.implicitWidth + Math.round(28 * IrisStyle.density)
+    implicitHeight: Math.round(36 * IrisStyle.density)
+    radius: 0
+    color: IrisStyle.plateSelection ? "transparent" : IrisStyle.sceneVeilStrong
+    border.width: 1
+    border.color: IrisStyle.border
+    RowLayout {
+        id: offRow
+        anchors.centerIn: parent
+        spacing: Math.round(8 * IrisStyle.density)
+        // The veil is dark in every scheme: its ink is the one made for imagery, never the page's.
+        MaterialSymbol { text: "visibility_off"; iconSize: Math.round(16 * IrisStyle.density); color: IrisStyle.onSceneSecondary }
+        IrisText { text: off.text; color: IrisStyle.onScene; font.weight: IrisStyle.weight(Font.DemiBold) }
+    }
+}

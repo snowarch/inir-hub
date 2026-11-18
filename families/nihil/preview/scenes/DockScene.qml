@@ -1,0 +1,267 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Effects
+import Quickshell.Widgets
+import qs.services
+import qs.modules.common.widgets
+import qs.modules.nihil.style
+import qs.modules.nihil.frame
+import qs.modules.nihil.components
+import qs.modules.nihil.pieces
+import qs.modules.nihil.field as Field
+import qs.modules.nihil.preview.parts
+
+PreviewScene {
+    id: dockRoot
+    subject: Qt.rect(dockRoot.plateX, dockRoot.plateY, dockRoot.plateW, dockRoot.plateH)
+    readonly property string edge: IrisFrame.dockEdge
+    readonly property bool vertical: dockRoot.edge === "left" || dockRoot.edge === "right"
+    readonly property real naturalWidth: Math.round((dockRoot.vertical ? 620 : 760) * dockRoot.d)
+    readonly property real naturalHeight: dockRoot.vertical ? Math.max(Math.round(300 * dockRoot.d), Math.round(dockRoot.length + 64 * dockRoot.d)) : Math.round(300 * dockRoot.d)
+    // The desk reflows around the Dock: it needs the Dock's length and the window's first rows, not the whole 760 px.
+    narrowest: dockRoot.vertical ? Math.round(dockRoot.reach + 240 * dockRoot.d) : Math.round(dockRoot.length + 80 * dockRoot.d)
+    lowest: dockRoot.vertical ? dockRoot.naturalHeight : Math.round(dockRoot.reach + 110 * dockRoot.d)
+    readonly property bool enabledDock: dockRoot.opt("nihil.dock.enable", true)
+    readonly property bool autoHide: dockRoot.opt("nihil.dock.autoHide", true)
+    readonly property bool reserve: !dockRoot.autoHide && dockRoot.opt("nihil.dock.reserveSpace", true)
+    readonly property bool revealOnEmpty: dockRoot.opt("nihil.dock.revealOnEmpty", true)
+    readonly property bool notch: dockRoot.opt("nihil.dock.notch", true)
+    readonly property string material: String(dockRoot.opt("nihil.dock.material", "inherit"))
+    readonly property bool blur: dockRoot.material === "glass" || dockRoot.material === "blur"
+        || (dockRoot.material === "inherit" && (dockRoot.opt("nihil.dock.blur", false) || IrisStyle.glassy))
+    readonly property bool badges: dockRoot.opt("nihil.dock.badges", true)
+    readonly property bool launcher: dockRoot.opt("nihil.dock.launcher", true)
+    readonly property bool magnify: dockRoot.opt("nihil.dock.magnification", false)
+    readonly property real icon: Math.max(28, Math.min(64, Number(dockRoot.opt("nihil.dock.iconSize", 40)))) * dockRoot.d
+    readonly property var apps: (TaskbarApps.apps ?? []).filter(app => app && !app.separator && String(app.appId ?? "").length > 0 && app.appId !== "SEPARATOR").slice(0, 6)
+    readonly property int count: dockRoot.apps.length + (dockRoot.launcher ? 1 : 0)
+    readonly property real length: dockRoot.count * (dockRoot.icon + 10 * dockRoot.d) + 16 * dockRoot.d
+    readonly property real thick: dockRoot.icon + 18 * dockRoot.d
+    readonly property real span: dockRoot.vertical ? height : width
+    readonly property real depth: dockRoot.vertical ? width : height
+    readonly property real restInset: IrisFrame.band + (dockRoot.notch ? 0 : Math.round(10 * dockRoot.d))
+    property bool hidden: false
+    property int hover: -1
+    property real slide: dockRoot.hidden ? -dockRoot.thick - 4 : dockRoot.restInset
+    Behavior on slide { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+    readonly property real alongStart: Math.round((dockRoot.span - dockRoot.length) / 2)
+    readonly property real acrossAt: dockRoot.edge === "bottom" ? height - dockRoot.slide - dockRoot.thick
+        : dockRoot.edge === "right" ? width - dockRoot.slide - dockRoot.thick : dockRoot.slide
+    readonly property real plateX: dockRoot.vertical ? dockRoot.acrossAt : dockRoot.alongStart
+    readonly property real plateY: dockRoot.vertical ? dockRoot.alongStart : dockRoot.acrossAt
+    readonly property real plateW: dockRoot.vertical ? dockRoot.thick : dockRoot.length
+    readonly property real plateH: dockRoot.vertical ? dockRoot.length : dockRoot.thick
+    readonly property real reach: dockRoot.reserve ? dockRoot.restInset + dockRoot.thick + Math.round(10 * dockRoot.d) : IrisFrame.band
+    // Its parts, laid along the dock and across from its edge: the plate (look), an icon (icons), the apps on it, where
+    // it meets the edge (notch) and the edge it lives on (visibility).
+    spots: {
+        if (!dockRoot.enabledDock) return []
+        const d = dockRoot.d, w = dockRoot.width, h = dockRoot.height, edge = dockRoot.edge
+        const at = (along, across) => edge === "bottom" ? Qt.point(along, h - across) : edge === "top" ? Qt.point(along, across)
+            : edge === "left" ? Qt.point(across, along) : Qt.point(w - across, along)
+        const box = (along, across, long, deep) => {
+            const a = at(along, across), b = at(along + long, across + deep)
+            return Qt.rect(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y))
+        }
+        const spot = (group, along, across, part, radius) => { const p = at(along, across); return { group: group, x: p.x, y: p.y, part: part, radius: radius } }
+        const s0 = dockRoot.alongStart, len = dockRoot.length, c0 = Math.max(0, dockRoot.slide), t = dockRoot.thick, icon = dockRoot.icon
+        const step = icon + 10 * d
+        const first = dockRoot.launcher ? 1 : 0
+        const middle = Math.floor(dockRoot.count / 2)
+        const mid = s0 + 8 * d + middle * step
+        return [
+            spot("Look", s0 + len, c0 + t, box(s0, c0, len, t), Math.min(t / 2, 18 * d)),
+            // On the middle icon's inner edge, the icon's own: above the plate it read as the window's.
+            spot("Icons", mid + icon / 2, c0 + 9 * d + icon, box(mid, c0 + 9 * d, icon, icon), icon * 0.25),
+            spot("Apps", s0 - 18 * d, c0 + t / 2, box(s0 + 8 * d + first * step, c0 + 5 * d, Math.max(icon, dockRoot.apps.length * step - 10 * d), t - 10 * d), 12 * d),
+            spot("Notch", s0 + len + 16 * d, Math.max(11 * d, c0 / 2), box(s0 - 10 * d, 0, len + 20 * d, c0 + t / 2), 10 * d),
+            spot("Visibility", dockRoot.span - 28 * d, (c0 + t) / 2, box(0, 0, dockRoot.span, c0 + t + 14 * d), 0)
+        ]
+    }
+
+    property int step: 0
+    readonly property int steps: dockRoot.count + 3
+    readonly property bool gliding: dockRoot.step >= 2 && dockRoot.step < dockRoot.steps - 1
+    function iconAlong(index: int): real {
+        return dockRoot.alongStart + 8 * dockRoot.d + index * (dockRoot.icon + 10 * dockRoot.d) + dockRoot.icon / 2
+    }
+    function spot(along: real, inset: real): point {
+        const across = dockRoot.edge === "bottom" ? height - inset : dockRoot.edge === "right" ? width - inset : inset
+        return dockRoot.vertical ? Qt.point(across, along) : Qt.point(along, across)
+    }
+    function inset(side: string): real {
+        if (side === dockRoot.edge) return dockRoot.reach
+        // A bottom Dock puts the caption on top: the window starts under it.
+        if (side === "top" && dockRoot.edge === "bottom") return Math.round(54 * dockRoot.d)
+        return Math.round((side === "top" || side === "bottom" ? 28 : 40) * dockRoot.d)
+    }
+    Timer {
+        running: dockRoot.playing && dockRoot.enabledDock
+        interval: 620
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: dockRoot.step = (dockRoot.step + 1) % dockRoot.steps
+        onRunningChanged: if (!running) dockRoot.step = 1
+    }
+    Binding { dockRoot.hidden: dockRoot.autoHide && dockRoot.enabledDock && (dockRoot.step === 0 || dockRoot.step === dockRoot.steps - 1) }
+    Binding { dockRoot.hover: dockRoot.magnify && dockRoot.gliding ? dockRoot.step - 2 : -1 }
+    Pointer {
+        readonly property point aim: dockRoot.step === 0 ? Qt.point(dockRoot.width * 0.62, dockRoot.height * 0.36)
+            : dockRoot.step === dockRoot.steps - 1 ? Qt.point(dockRoot.width * 0.34, dockRoot.height * 0.3)
+            : dockRoot.step === 1 ? dockRoot.spot(dockRoot.span / 2, IrisFrame.band)
+            : dockRoot.spot(dockRoot.iconAlong(dockRoot.step - 2), dockRoot.restInset + dockRoot.thick * 0.65)
+        visible: dockRoot.enabledDock && dockRoot.playing
+        x: aim.x - width / 3
+        y: aim.y - height / 3
+    }
+
+    Rectangle {
+        x: dockRoot.inset("left")
+        y: dockRoot.inset("top")
+        // From the targets, not the animating x/y, or the size overshoots while they move.
+        width: parent.width - dockRoot.inset("left") - dockRoot.inset("right")
+        height: parent.height - dockRoot.inset("top") - dockRoot.inset("bottom")
+        radius: 0
+        color: IrisStyle.sceneSurface
+        border.width: 1
+        border.color: IrisStyle.border
+        Behavior on x { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+        Behavior on y { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+        Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+        Behavior on height { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+        WindowPage { anchors.fill: parent }
+        Rectangle {
+            visible: dockRoot.reserve
+            x: dockRoot.edge === "right" ? parent.width - 1 : 0
+            y: dockRoot.edge === "bottom" ? parent.height - 1 : 0
+            width: dockRoot.vertical ? 1 : parent.width
+            height: dockRoot.vertical ? parent.height : 1
+            color: IrisStyle.accent
+        }
+    }
+
+    ClippingRectangle {
+        visible: dockRoot.blur && dockRoot.enabledDock
+        x: dockRoot.plateX; y: dockRoot.plateY
+        width: dockRoot.plateW; height: dockRoot.plateH
+        radius: dockRoot.notch ? Math.round(16 * dockRoot.d) : dockRoot.thick / 2
+        color: "transparent"
+        ShaderEffectSource {
+            id: dockBlurSource
+            x: -dockRoot.plateX; y: -dockRoot.plateY
+            width: dockRoot.width; height: dockRoot.height
+            visible: false
+            sourceItem: dockRoot.wallpaperView.textureItem
+            live: true
+        }
+        MultiEffect { anchors.fill: dockBlurSource; source: dockBlurSource; blurEnabled: true; blur: 1; blurMax: 48 }
+    }
+
+    Field.IrisField {
+        anchors.fill: parent
+        backdropOverride: dockRoot.glass
+        visible: dockRoot.enabledDock
+        framed: false
+        tint: dockRoot.blur ? IrisStyle.veilStrong : IrisStyle.bodySurface
+        shapes: {
+            const out = []
+            const deep = Math.max(8, IrisStyle.fuseDeep * 2)
+            const f = IrisStyle.fuseDeep
+            const W = dockRoot.width, H = dockRoot.height, band = IrisFrame.band
+            out.push(dockRoot.edge === "top" ? { x: -2 * f, y: -deep, width: W + 4 * f, height: band + deep }
+                : dockRoot.edge === "left" ? { x: -deep, y: -2 * f, width: band + deep, height: H + 4 * f }
+                : dockRoot.edge === "right" ? { x: W - band, y: -2 * f, width: band + deep, height: H + 4 * f }
+                : { x: -2 * f, y: H - band, width: W + 4 * f, height: band + deep })
+            Object.assign(out[0], { radius: 0, fuse: f, id: "edge", paints: true })
+            out.push({ x: dockRoot.plateX, y: dockRoot.plateY, width: dockRoot.plateW, height: dockRoot.plateH,
+                radius: IrisStyle.dockShape !== "auto" ? IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, dockRoot.notch), dockRoot.thick)
+                    : dockRoot.notch ? Math.round(16 * dockRoot.d) : dockRoot.thick / 2,
+                fuse: dockRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "dock", joins: dockRoot.notch ? "edge" : "", paints: true })
+            return out
+        }
+    }
+
+    Grid {
+        visible: dockRoot.enabledDock
+        columns: dockRoot.vertical ? 1 : Math.max(1, dockRoot.count)
+        x: dockRoot.vertical ? dockRoot.plateX + (dockRoot.thick - dockRoot.icon) / 2 : dockRoot.plateX + 8 * dockRoot.d
+        y: dockRoot.vertical ? dockRoot.plateY + 8 * dockRoot.d : dockRoot.plateY + (dockRoot.thick - dockRoot.icon) / 2
+        spacing: Math.round(10 * dockRoot.d)
+        Repeater {
+            model: (dockRoot.launcher ? [{ launcher: true }] : []).concat(dockRoot.apps)
+            Item {
+                id: dockIcon
+                required property var modelData
+                required property int index
+                readonly property int distance: dockRoot.hover < 0 ? 9 : Math.abs(dockRoot.hover - dockIcon.index)
+                width: dockRoot.icon
+                height: width
+                scale: dockIcon.distance === 0 ? 1.45 : dockIcon.distance === 1 ? 1.18 : 1
+                transformOrigin: ({ top: Item.Top, left: Item.Left, right: Item.Right })[dockRoot.edge] ?? Item.Bottom
+                z: 3 - Math.min(3, dockIcon.distance)
+                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
+                // The slot as the Design answers it (IrisDesign part `dockSlot`), the pointer standing on the magnified one.
+                Item {
+                    id: slotHost
+                    anchors.fill: parent
+                    readonly property bool hovered: dockIcon.distance === 0
+                    readonly property bool down: false
+                    readonly property bool visualFocus: false
+                    readonly property var skinData: ({ box: Qt.rect(0, 0, dockIcon.width, dockIcon.height), launches: 0 })
+                    IrisSkin { part: "dockSlot"; host: slotHost }
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    visible: dockIcon.modelData.launcher === true
+                    radius: 0
+                    color: IrisStyle.fill
+                    border.width: IrisStyle.edgeWidth
+                    border.color: IrisStyle.text
+                    MaterialSymbol { anchors.centerIn: parent; text: "apps"; iconSize: Math.round(dockRoot.icon * 0.5); color: IrisStyle.text }
+                }
+                SmartAppIcon {
+                    layer.enabled: true
+                    layer.effect: IrisInkEffect {}
+                    anchors.fill: parent
+                    visible: dockIcon.modelData.launcher !== true
+                    implicitSize: parent.width
+                    icon: IrisPieces.appIcon(dockIcon.modelData.appId ?? "")
+                    fallback: "application-x-executable"
+                }
+                IrisBadge {
+                    visible: IrisDesign.has("badge") && dockRoot.badges && dockIcon.modelData.launcher !== true && dockIcon.index % 3 === 1
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: -Math.round(3 * dockRoot.d)
+                    count: dockIcon.index
+                    size: Math.round(17 * dockRoot.d)
+                }
+                Rectangle {
+                    visible: !IrisDesign.has("badge") && dockRoot.badges && dockIcon.modelData.launcher !== true && dockIcon.index % 3 === 1
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: -Math.round(3 * dockRoot.d)
+                    width: Math.round(17 * dockRoot.d); height: width; radius: width / 2
+                    color: IrisStyle.badge
+                    IrisText { anchors.centerIn: parent; text: dockIcon.index; color: IrisStyle.inkOnBadge; font.pixelSize: Math.round((IrisStyle.typeCaption) / Math.max(1, IrisStyle.typeScale)); font.weight: IrisStyle.weight(Font.Bold) }
+                }
+            }
+        }
+    }
+
+    OffState { visible: !dockRoot.enabledDock; text: Translation.tr("Dock off") }
+    Caption {
+        // a bottom Dock takes the lower edge: the line goes to the top corner instead of over the icons
+        anchors.bottom: dockRoot.edge === "bottom" ? undefined : parent.bottom
+        anchors.top: dockRoot.edge === "bottom" ? parent.top : undefined
+        anchors.leftMargin: dockRoot.edge === "left" ? dockRoot.restInset + dockRoot.thick + Math.round(14 * dockRoot.d) : Math.round(14 * dockRoot.d)
+        glyph: dockRoot.autoHide ? "unfold_less" : !dockRoot.reserve ? "layers"
+            : ({ top: "vertical_align_top", left: "align_horizontal_left", right: "align_horizontal_right" })[dockRoot.edge] ?? "vertical_align_bottom"
+        text: !dockRoot.enabledDock ? ""
+            : dockRoot.autoHide ? (dockRoot.revealOnEmpty ? Translation.tr("Hides over windows · stays on empty workspaces") : Translation.tr("Hides until the pointer reaches the edge"))
+            : !dockRoot.reserve ? Translation.tr("Windows run under the Dock")
+            : dockRoot.vertical ? Translation.tr("Windows stop beside the Dock")
+            : dockRoot.edge === "top" ? Translation.tr("Windows start below the Dock") : Translation.tr("Windows stop above the Dock")
+    }
+}

@@ -1,0 +1,4 @@
+module qs.modules.nihil.polkit
+FullscreenPolkitWindow 1.0 FullscreenPolkitWindow.qml
+IrisPolkit 1.0 IrisPolkit.qml
+IrisPolkitContent 1.0 IrisPolkitContent.qml

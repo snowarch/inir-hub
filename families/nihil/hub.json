@@ -1,30 +1,35 @@
 {
-    "$schema": "../../schema/hub.schema.json",
-    "version": "1.1.0",
-    "changes": {
-        "1.1.0": [
-            "NiHiL has its own Settings window: every page, live search, and full control of the signal colour, pieces, corners, dots, type and motion"
-        ],
-        "1.0.0": [
-            "NiHiL: a floating bar, dot-matrix clock and widgets, Start, quick controls, a power card and its own menu, in one signal colour"
-        ]
-    },
-    "summary": "Nothing but dots: a floating bar, dot-matrix widgets and one signal colour.",
-    "authors": [
-        "snowarch"
+  "$schema": "../../schema/hub.schema.json",
+  "version": "2.0.1",
+  "changes": {
+    "2.0.0": [
+      "NiHiL is rebuilt: a complete one-bit family with every surface, in black ink and white paper"
     ],
-    "license": "GPL-3.0-only",
-    "tags": [
-        "family"
-    ],
-    "minInir": "3.1.2",
-    "provides": "modules/nihil",
-    "requires": [
-        "ii"
-    ],
-    "preview": "preview.webp",
-    "permissions": [
-        "process",
-        "files"
+    "2.0.1": [
+      "One-bit ink and paper across every surface, printed pictures and a printed keybinds sheet"
     ]
+  },
+  "summary": "One-bit desktop: ink, paper, hard shadows and old-computer windows.",
+  "authors": [
+    "snowarch"
+  ],
+  "license": "GPL-3.0-only",
+  "tags": [
+    "family"
+  ],
+  "permissions": [
+    "process",
+    "network",
+    "files"
+  ],
+  "hosts": [
+    "bing.com",
+    "brave.com",
+    "duckduckgo.com",
+    "google.com",
+    "startpage.com"
+  ],
+  "minInir": "3.1.2",
+  "provides": "modules/nihil",
+  "preview": "preview.webp"
 }

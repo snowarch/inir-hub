@@ -1,0 +1,1838 @@
+pragma Singleton
+
+import QtQuick
+import QtQml
+import Quickshell
+import qs
+import qs.modules.common
+import qs.modules.common.functions
+import qs.services
+
+QtObject {
+    id: root
+
+    readonly property var options: Config.options?.nihil ?? ({})
+    readonly property var appearance: root.options?.appearance ?? ({})
+
+
+    // --- Recompose: one clock for structural change -------------------------
+    // An option that changes what a surface is *made of* (the Island's
+    // composition, its clock, its bubbles, a panel's sections) is never applied
+    // while the shapes are visible: every such value is published here, latched,
+    // and swapped at the bottom of one shared dip. Consumers read the latched
+    // value and multiply their content by `recompose`, so a recomposition is one
+    // transition for the whole family instead of one animation per part racing
+    // the others. Geometry still springs across the swap: the silhouette is
+    // continuous, its contents are replaced.
+    readonly property var structuralPaths: ["bar.composition", "bar.clockStyle", "bar.trailing",
+        "bar.auxiliary", "bar.pieces", "bar.fullStart", "bar.fullCenter", "bar.fullEnd", "bar.navItems", "bar.desktopBlocks", "bar.mediaBlocks",
+        "controlCenter.sections", "controlCenter.controls", "appearance.design"]
+    function readPath(path: string): var {
+        let node = root.options
+        for (const part of path.split(".")) {
+            if (node === undefined || node === null) return undefined
+            node = node[part]
+        }
+        return node
+    }
+    readonly property var structuralSource: {
+        const out = {}
+        for (const path of root.structuralPaths) {
+            const value = root.readPath(path)
+            out[path] = value === undefined ? null : (Array.isArray(value) ? Array.from(value) : value)
+        }
+        return out
+    }
+    readonly property string structuralKey: JSON.stringify(root.structuralSource)
+    property var structure: root.structuralSource
+    property real recomposeValue: 1
+    readonly property real recompose: root.recomposeValue
+    function structuralValue(path: string, fallback: var): var {
+        const value = root.structure?.[path]
+        return value === undefined || value === null ? fallback : value
+    }
+    onStructuralKeyChanged: {
+        if (!root.motionEnabled) { root.structure = root.structuralSource; return }
+        root.recomposeIn.stop()
+        root.recomposeOut.restart()
+    }
+    readonly property NumberAnimation recomposeOut: NumberAnimation {
+        target: root; property: "recomposeValue"; to: 0
+        duration: root.duration(80); easing.type: Easing.OutQuad
+        onFinished: {
+            root.structure = root.structuralSource
+            root.recomposeIn.restart()
+        }
+    }
+    readonly property NumberAnimation recomposeIn: NumberAnimation {
+        target: root; property: "recomposeValue"; to: 1
+        duration: root.duration(200); easing.type: Easing.BezierSpline; easing.bezierCurve: root.emergeCurve
+    }
+
+    readonly property bool cluster: String(root.structuralValue("bar.composition", "unified")) === "cluster"
+    // What each Island design draws of its own (bar/island/designs/<id>/); the engine draws the rest. Read by the
+    // Island to load them and by Settings to offer only the rows that still act under the worn design.
+    readonly property var islandDesignParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
+        dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"], headline: ["Face.qml"], rings: ["Face.qml"], aura: ["Face.qml"],
+        status: ["Face.qml"], forecast: ["Face.qml"], world: ["Face.qml"], comet: ["Face.qml"], lumen: ["Face.qml"], glyph: ["Face.qml"], tide: ["Face.qml"] })
+    // The light the edge designs (Aura, Comet, Lumen) draw with: five stops of one palette (Settings › Island › Face ›
+    // Colours). "day" follows the hour's sky: night, dawn, day, dusk.
+    function islandLight(name: string, hour: int): var {
+        const id = root.identity
+        switch (name) {
+        case "accent": return [root.accent, root.secondaryAccent, root.accent, root.secondaryAccent, root.accent]
+        case "sunset": return [id.orange, id.red, id.pink, id.purple, id.yellow]
+        case "ocean": return [id.teal, id.sky, id.blue, id.indigo, id.green]
+        case "mint": return [id.green, id.teal, id.pink, id.orange, id.green]
+        case "wallpaper": return [root.wallpaperLight, root.accent, root.secondaryAccent, root.wallpaperLight, root.accent]
+        case "day":
+            if (hour < 5 || hour >= 21) return [id.indigo, id.blue, id.purple, id.indigo, id.blue]
+            if (hour < 9) return [id.pink, id.orange, id.yellow, id.pink, id.purple]
+            if (hour < 17) return [id.sky, id.blue, id.teal, id.sky, id.green]
+            return [id.orange, id.red, id.purple, id.pink, id.orange]
+        default: return [id.blue, id.purple, id.pink, id.orange, id.green]
+        }
+    }
+    readonly property var islandLightChoices: ["spectrum", "accent", "day", "wallpaper", "sunset", "ocean", "mint"]
+    // The live activities that may take the Island, first to last (Settings › Island › Live activities › Order). A
+    // saved order missing a kind (an older file, a hand edit) keeps it, after the ones it names.
+    readonly property var islandActivityKinds: ["record", "timer", "task", "camera", "call", "media"]
+    function islandActivityOrder(order: var): var {
+        const asked = Array.from(order ?? []).map(String).filter((kind, at, all) => root.islandActivityKinds.includes(kind) && all.indexOf(kind) === at)
+        return asked.concat(root.islandActivityKinds.filter(kind => !asked.includes(kind)))
+    }
+
+    readonly property real density: Math.max(0.8, Math.min(1.35, Number(root.appearance?.density ?? 1.0)))
+    // How a Settings row offers a list too long for a segmented control: "inline" opens it in place under the row as a
+    // grid (2026-10-11), "menu" floats NiHiL's menu over the button. One word switches every row.
+    readonly property string choiceList: "inline"
+    // Every measure of Settings' pages, rows and window comes from this one factor, so its scale changes in one place.
+    // Whole steps only: at 0.88 every 14·d and 16·d inset landed on a fraction of a pixel and the text went soft
+    // (2026-10-11, rejected: "hace que el texto se renderice feo").
+    readonly property real settingsDensity: root.density
+    // Density scales geometry only; type has its own scale.
+    readonly property real typeScale: Math.max(0.75, Math.min(1.6, (Appearance.fontSizeScale ?? 1.0) * root.tweak("text", 0.85, 1.25)))
+    // The Signal scale (DESIGN.md S2). Read: title-l 24, title 18, headline 15, body 14, meta 12. Label (mono caps): 11,
+    // 10 at its smallest. Dot: 72 / 48 / 32 / 22, never under 22. The older names are kept and land on the scale.
+    readonly property int typeDotXL: Math.round(72 * root.typeScale)
+    readonly property int typeDotL: Math.round(48 * root.typeScale)
+    readonly property int typeDotM: Math.round(32 * root.typeScale)
+    readonly property int typeDotS: Math.round(22 * root.typeScale)
+    readonly property int typeTitleL: Math.round(24 * root.typeScale)
+    readonly property int typeLabelMono: Math.round(11 * root.typeScale)
+    readonly property int typeCaption: Math.round(10 * root.typeScale)
+    readonly property int typeFootnote: Math.round(11 * root.typeScale)
+    readonly property int typeMeta: Math.round(12 * root.typeScale)
+    // A row's name: body size, the one most surfaces read at.
+    readonly property int typeLabel: Math.round(14 * root.typeScale)
+    readonly property int typeBody: Math.round(14 * root.typeScale)
+    readonly property int typeHeadline: Math.round(15 * root.typeScale)
+    readonly property int typeTitle: Math.round(18 * root.typeScale)
+    readonly property int typeTitleLarge: root.typeTitleL
+    readonly property int typeDisplay: root.typeDotM
+    // The one figure that owns a surface (the Island's desktop clock): read from across the room, nothing beside it competes.
+    readonly property int typeHero: root.typeDotL
+    // Geist's tracking in whole pixels: none up to 15 px, -2 % to 23, -3.5 % from 24 (Vercel's heading steps, softened).
+    function tracking(px: real): int {
+        return px < 16 ? 0 : Math.round(-px * (px < 24 ? 0.02 : 0.035))
+    }
+    // The Label voice's air between capitals (+0.08 em) and the Dot voice's (+0.02 em), in pixels.
+    function labelTracking(px: real): real { return Math.round(px * 0.08 * 10) / 10 }
+    function dotTracking(px: real): real { return -Math.round(px * 0.01 * 10) / 10 }
+
+    readonly property var theme: root.appearance?.theme ?? ({})
+    function wrapHue(hue, fallback: real): real {
+        const value = Number(hue)
+        return (((isNaN(value) ? fallback : value) % 360) + 360) % 360 / 360
+    }
+    // `theme` is rebuilt on every Config write; the tweaks reach consumers through a string that only
+    // changes when one of their values does, so a write elsewhere re-evaluates nothing downstream.
+    readonly property var tweakNames: ["text", "fill", "lines", "contrast", "shadow", "shape", "melt", "press",
+        "bounce", "contentTiming", "lightReach", "openTime", "moveTime"]
+    readonly property string tweakKey: JSON.stringify(root.tweakNames.map(name => root.theme?.[name] ?? 100))
+    readonly property var tweaks: {
+        const values = JSON.parse(root.tweakKey)
+        const out = {}
+        root.tweakNames.forEach((name, index) => out[name] = values[index])
+        return out
+    }
+    function tweak(name: string, low: real, high: real): real {
+        const tweaks = root.tweaks ?? {}
+        const value = Number((name in tweaks ? tweaks[name] : root.theme?.[name]) ?? 100)
+        return Math.max(low, Math.min(high, (isNaN(value) ? 100 : value) / 100 * IrisMood.factor(name)))
+    }
+    function surfaceRadius(id: string, fallback: int): int {
+        const radius = Number(root.appearance?.surfaces?.[id]?.radius ?? 0)
+        if (radius > 0) return Math.round(radius * root.density)
+        if (id === "cards" && Number(root.cardDesign.radius ?? 0) > 0)
+            return Math.round(Number(root.cardDesign.radius) * root.density)
+        return fallback
+    }
+    function surfaceLight(id: string, light: color): color {
+        return Qt.color("transparent") // printed bodies are flat ink and paper
+    }
+
+    // A card design is a named bundle of the knobs below it. Anything the user sets
+    // explicitly still wins: 0 and "inherit" mean "whatever the design says".
+    readonly property var cardDesigns: ({
+        welded:   { label: "Welded",   gap: 0,  radius: 0,  light: "inherit",   pad: 100, grabber: false },
+        floating: { label: "Floating", gap: 12, radius: 0,  light: "inherit",   pad: 100, grabber: true },
+        plain:    { label: "Plain",    gap: 0,  radius: 14, light: "off",       pad: 88,  grabber: false },
+        vibrant:  { label: "Vibrant",  gap: 0,  radius: 0,  light: "wallpaper", pad: 118, grabber: false }
+    })
+    readonly property var cardDesign: root.cardDesigns[String(root.appearance?.surfaces?.cards?.design ?? "welded")]
+        ?? root.cardDesigns.welded
+    readonly property real cardGap: {
+        const own = Number(root.appearance?.surfaces?.cards?.gap ?? 0)
+        return Math.round((own > 0 ? own : Number(root.cardDesign.gap ?? 0)) * root.density)
+    }
+    // A card fuses with its opener only when asked to and when its design leaves no air.
+    readonly property bool cardJoins: (root.appearance?.surfaces?.cards?.joinOrigin ?? false) && root.cardGap === 0
+    readonly property real cardPad: {
+        const own = Number(root.appearance?.surfaces?.cards?.pad ?? 0)
+        const percent = own > 0 ? own : Number(root.cardDesign.pad ?? 100)
+        return Math.round(16 * root.density * Math.max(0.5, Math.min(1.6, percent / 100)))
+    }
+    readonly property bool cardGrabber: {
+        const own = String(root.appearance?.surfaces?.cards?.grabber ?? "auto")
+        return own === "auto" ? Boolean(root.cardDesign.grabber ?? false) : own === "on"
+    }
+    readonly property int radius: Math.round(Math.max(16, Math.min(40, Number(root.appearance?.expandedRadius ?? 22))) * root.density)
+    readonly property int radiusSmall: Math.max(4, Math.round(root.radius * 0.58))
+    // A capsule's (or a disc's) corner: half its side.
+    function capsule(side: real): real { return 0; return root.look === "synth" ? Math.min(side / 2, root.synthKeyRadius * 1.6) : side / 2 }
+    readonly property int spaceSmall: Math.max(4, Math.round(6 * root.density))
+
+    readonly property var presets: ({
+        nihil: { fill: 1.0, shape: 1.0, textStrong: 0.82, textSecondary: 0.62, textTertiary: 0.40,
+            subtext: "#aeaeb2", muted: "#8e8e93", hairline: "#262628", hairlineStrong: "#48484a" },
+        soft: { fill: 0.78, shape: 1.22, textStrong: 0.78, textSecondary: 0.58, textTertiary: 0.36,
+            subtext: "#a1a1a6", muted: "#838388", hairline: "#1f1f21", hairlineStrong: "#3a3a3c" },
+        crisp: { fill: 1.12, shape: 0.7, textStrong: 0.86, textSecondary: 0.66, textTertiary: 0.42,
+            subtext: "#b4b4b9", muted: "#929297", hairline: "#2c2c2e", hairlineStrong: "#545456" },
+        round: { fill: 0.9, shape: 1.5, textStrong: 0.8, textSecondary: 0.6, textTertiary: 0.38,
+            subtext: "#a8a8ad", muted: "#8a8a8f", hairline: "#222224", hairlineStrong: "#404042" },
+        angular: { fill: 1.08, shape: 0.42, textStrong: 0.86, textSecondary: 0.64, textTertiary: 0.42,
+            subtext: "#b0b0b5", muted: "#909095", hairline: "#2a2a2c", hairlineStrong: "#505052" },
+        contrast: { fill: 1.6, shape: 1.0, textStrong: 0.94, textSecondary: 0.8, textTertiary: 0.6,
+            subtext: "#d1d1d6", muted: "#aeaeb2", hairline: "#3a3a3c", hairlineStrong: "#6c6c70" },
+        // AIRISU's: fills a step up, bone ink. Its forms are everyone's (the ladder below).
+        night: { fill: 1.15, shape: 1.0, textStrong: 0.90, textSecondary: 0.66, textTertiary: 0.44,
+            subtext: "#b8b5ae", muted: "#8c8a85", hairline: "#2a2b2e", hairlineStrong: "#48484a" }
+    })
+    // A Design that brings its own preset wears it whatever the Style row says (it is part of what the Design is).
+    readonly property string presetName: root.presets[IrisDesign.preset] ? IrisDesign.preset
+        : root.presets[root.appearance?.preset ?? ""] ? root.appearance.preset : "nihil"
+    readonly property var preset: root.presets[root.presetName]
+
+    readonly property Instantiator bundledFaces: Instantiator {
+        model: ["Light", "Regular", "Medium", "SemiBold", "Bold"].map(weight => `inter/Inter-${weight}`)
+            .concat(["Light", "Regular", "Medium", "SemiBold", "Bold"].map(weight => `inter/InterDisplay-${weight}`))
+            .concat(["Light", "Regular", "Medium", "SemiBold", "Bold", "ExtraBold", "Black"].map(weight => `rubik/Rubik-${weight}`))
+            .concat(["Light", "Regular", "Medium", "SemiBold", "Bold"].map(weight => `montserrat/Montserrat-${weight}`))
+            .map(face => Quickshell.shellPath(`assets/fonts/${face}.ttf`))
+            .concat(["Regular", "Medium", "SemiBold", "Bold"].map(weight => root.ownFace(`archivo/Archivo-${weight}`)))
+            .concat(["Medium", "Bold", "ExtraBold"].map(weight => root.ownFace(`archivo/ArchivoSemiExpanded-${weight}`)))
+        delegate: FontLoader {
+            required property string modelData
+            source: modelData
+        }
+    }
+    // Archivo and Geist are NiHiL's own faces and ship with it (assets/fonts); Inter, Rubik and Montserrat are the base's.
+    function ownFace(face: string): url {
+        return Qt.resolvedUrl(`../assets/fonts/${face}.ttf`)
+    }
+    // One family in three voices (DESIGN.md S2): Geist to read, Geist Mono for labels, Archivo SemiExpanded for the
+    // one number (no dot or pixel faces: 10-23, his order). Loaded from the shell itself, so it does not wait on
+    // fontconfig; a missing file falls back to the bundled Inter and the system mono instead of a blank face.
+    readonly property FontLoader geistRead: FontLoader { source: root.ownFace("geist/Geist") }
+    readonly property FontLoader geistMono: FontLoader { source: root.ownFace("geist/GeistMono") }
+    readonly property FontLoader archivoFigures: FontLoader { source: root.ownFace("archivo/ArchivoSemiExpanded-SemiBold") }
+    function loadedFace(loader: FontLoader, fallback: string): string {
+        return loader.status === FontLoader.Ready && loader.name.length > 0 ? loader.name : fallback
+    }
+    // NiHiL's own faces are its Design's (designs/iris/design.json); the loaders above only bring the files.
+    readonly property string faceText: IrisDesign.baseFont("text") || root.loadedFace(root.geistRead, "Inter")
+    readonly property string faceTitle: IrisDesign.baseFont("title") || root.faceText
+    readonly property string faceLabel: IrisDesign.baseFont("mono") || root.loadedFace(root.geistMono, "JetBrainsMono Nerd Font")
+    readonly property string faceFigures: IrisDesign.baseFont("dot") || root.loadedFace(root.archivoFigures, root.faceText)
+    readonly property var defaultFaces: ({
+        "nihil.appearance.fontFamily": root.faceText,
+        "nihil.appearance.titleFontFamily": root.faceTitle,
+        "nihil.appearance.numbersFontFamily": root.faceFigures
+    })
+    function face(path: string, value: var): string {
+        const configured = String(value ?? "")
+        return configured.length > 0 ? configured : (root.defaultFaces[path] ?? root.faceText)
+    }
+    // A Design's type is part of it (AIRISU: Archivo to read, Archivo SemiExpanded for titles and figures).
+    readonly property string fontMain: IrisDesign.font("text") || root.face("nihil.appearance.fontFamily", root.appearance?.fontFamily)
+    // A look sets titles in its own face unless the person chose one: Synth's label mono, Gel's round Rubik.
+    readonly property string fontTitle: IrisDesign.font("title")
+        || (String(root.appearance?.titleFontFamily ?? "").length === 0 && root.look === "synth" && root.synthMono ? "Geist Mono" // iris-literal: Synth's label face
+            : String(root.appearance?.titleFontFamily ?? "").length === 0 && root.look === "gel" && root.gelRound ? "Rubik" // iris-literal: Gel's face
+            : root.face("nihil.appearance.titleFontFamily", root.appearance?.titleFontFamily))
+    // 220 font.weight bindings hang off this one. Read straight through `theme`, it is recomputed
+    // every time Config is reloaded — which is every write of any key — and drags all 220 with it,
+    // measured at six dropped frames per write. The name changes only when the weight really does.
+    readonly property string weightName: String(root.theme?.weight ?? "regular")
+    readonly property int weightShift: ({ light: -1, bold: 1 })[root.weightName] ?? 0
+    readonly property var weightSteps: [Font.Light, Font.Normal, Font.Medium, Font.DemiBold, Font.Bold, Font.ExtraBold]
+    function weight(base: int): int {
+        const steps = root.weightSteps
+        const at = steps.reduce((best, w, i) => Math.abs(w - base) < Math.abs(steps[best] - base) ? i : best, 0)
+        return steps[Math.max(0, Math.min(steps.length - 1, at + root.weightShift))]
+    }
+    readonly property int figureWeight: ({ light: Font.Light, regular: Font.Normal })[IrisDesign.worn("type.figureWeight", root.appearance?.figureWeight)] ?? Font.Bold
+    // How a Design's leaning figures are drawn: native glyphs are rasterised upright and step once sheared, curves thin
+    // out at bar sizes; distance fields are made to be transformed.
+    readonly property int leanGlyphs: Text.QtRendering
+    // The Figure voice (was Dot): clock digits, a widget's one number, area titles. The Figures row picks it.
+    readonly property string fontDot: IrisDesign.font("dot") || root.face("nihil.appearance.numbersFontFamily", root.appearance?.numbersFontFamily)
+    // Small figures (a count, a percentage in a row) read in the Read voice with tabular digits, unless the person
+    // chose a face of their own for figures; past 22 px a figure takes the Dot voice (`figureFace`).
+    readonly property string fontNumbers: IrisDesign.font("numbers")
+        || (String(root.appearance?.numbersFontFamily ?? "").length > 0 ? root.fontDot : IrisDesign.baseFont("numbers") || root.fontMain)
+    // The figure face is Nothing's; Apple sets every figure in the numbers face, bold and tabular.
+    function figureFace(px: real): string { return px >= 22 && root.mono ? root.fontDot : root.fontNumbers }
+    // A figure in the look a control wears: Synth's thin display face, Gel's round one, else the numbers face.
+    function figureFaceOf(item, px: real): string {
+        const look = root.lookOf(item)
+        return look === "synth" ? root.fontSynthFigure : look === "gel" ? root.fontGel : root.figureFace(px)
+    }
+    // The Label voice: data and labels in capitals.
+    readonly property string fontMono: IrisDesign.font("mono") || root.faceLabel
+    readonly property string fontRead: root.fontMain
+    readonly property string fontLabel: root.fontMono
+
+    // NiHiL is dark by construction. The light scheme turns its material and ink over; Ink sits between them, washi
+    // and sumi, softer than white. Auto follows the system (dark or light); each scheme is tuned on its own.
+    readonly property string schemeChoice: String(root.appearance?.scheme ?? "auto")
+    // The colour theme in use, when the person chose one that is not the wallpaper's: it is what the apps wear.
+    readonly property string colourTheme: String(ThemeService.currentTheme ?? "auto")
+    // Auto: the system's dark or light, and Ink when the apps wear the Ink theme.
+    readonly property string schemeWanted: ["dark", "ink", "light"].includes(root.schemeChoice) ? root.schemeChoice
+        : root.colourTheme === "iris-ink" ? "ink" : Appearance.m3colors.darkmode ? "dark" : "light"
+    // A Design drawn for some schemes only (paper, a night cockpit) shows its first where the person's isn't one of them.
+    readonly property string scheme: IrisDesign.schemes.includes(root.schemeWanted) ? root.schemeWanted : IrisDesign.schemes[0]
+    // With a colour theme chosen and the shell asked to match it, the accent, the highlight and the material are the theme's.
+    readonly property bool followsTheme: root.colourTheme !== "auto" && Boolean(root.appearance?.followTheme ?? true)
+    // A paper scheme: the material is light and the ink dark.
+    readonly property bool light: root.scheme !== "dark"
+    readonly property bool ink: root.scheme === "ink"
+    readonly property var tuneOptions: root.appearance?.tune ?? ({})
+    // What the person tuned for the scheme in use, as primitives so a config write that changes none does not re-run bindings.
+    // Tone, colour strength and widget colour are solved into the palette (IrisWashi); these remain for what is not colour.
+    readonly property int tone: Math.max(-30, Math.min(30, Number(root.tuneOptions?.[root.scheme]?.tone ?? 0)))
+    // How colourful the desktop widgets read in this scheme, 40..160 %: their data colours (solved) and their glass.
+    readonly property real widgetColour: Math.max(40, Math.min(160, Number(root.tuneOptions?.[root.scheme]?.widgets ?? (root.ink ? 120 : root.light ? 110 : 100)))) / 100
+    function toned(c: color): color {
+        if (root.tone === 0) return c
+        return Qt.hsla(Math.max(0, c.hslHue), c.hslSaturation, Math.max(0, Math.min(1, c.hslLightness + root.tone / 100)), c.a)
+    }
+
+    // --- The palette ------------------------------------------------------------------------------------------------
+    // Every colour role below comes from one solve (inir-accel's washi through IrisWashi): papers, ink, accent,
+    // highlight, status, identity and widget data for each scheme, each held to its contrast on every ground of the
+    // material in use. Surfaces consume these roles as they are; glass and Lume only decide how thick the paper is.
+    readonly property var washi: IrisWashi.palette(root.scheme)
+    readonly property var washiDark: IrisWashi.palette("dark")
+    readonly property var washiLight: IrisWashi.palette("light")
+    // The look (DESIGN.md "Layers", L4) is the dialect NiHiL speaks: Apple (the accent marks what is chosen), Nothing
+    // (ink body, one signal), Synth (keys and faders), Gel (glossy capsules). Every look takes its colour from L1 (accent,
+    // highlight, signal), never from a literal of its own, so the person's colours reach every look. A colour theme the
+    // person follows and the anime layer are choices of colour: under them Nothing speaks Apple.
+    readonly property var lookIds: ["apple", "nothing", "synth", "gel", "prism"]
+    function lookAllowed(look: string): string {
+        if (!root.lookIds.includes(look)) return "apple"
+        return look === "nothing" && (root.followsTheme || root.animeEnabled) ? "apple" : look
+    }
+    readonly property string look: root.lookAllowed(String(IrisDesign.worn("look.look", root.appearance?.look)))
+    readonly property bool mono: root.look === "nothing"
+    // L5: a place (a surface's root names it with `irisPlace`) wears NiHiL's look or one of its own. The look of the
+    // bodies (corners, plates, selection, voices) is NiHiL's; a place's own look reaches the controls drawn in it.
+    readonly property var places: root.appearance?.places ?? ({})
+    readonly property var placeNames: ["island", "dock", "control", "settings", "spotlight", "orbit", "lock", "widgets", "notifications", "osd"]
+    function wornAt(place: string): string {
+        const own = String(root.places?.[place] ?? "")
+        return place.length > 0 && own.length > 0 ? root.lookAllowed(own) : root.look
+    }
+    readonly property bool placesDiffer: root.placeNames.some(place => root.wornAt(place) !== root.look)
+    // Every look in use somewhere: Settings shows a look's own options only while something wears it.
+    readonly property var looksWorn: root.lookIds.filter(look => look === root.look || root.placeNames.some(place => root.wornAt(place) === look))
+    function nothingAt(place: string): bool { return root.wornAt(place) === "nothing" }
+    function placeOf(item): string {
+        for (let p = item; p; p = p.parent)
+            if (typeof p.irisPlace === "string") return p.irisPlace
+        return ""
+    }
+    // The look a control draws; with every place on NiHiL's look it never walks.
+    function lookOf(item): string { return root.placesDiffer ? root.wornAt(root.placeOf(item)) : root.look }
+    function wearsNothing(item): bool { return root.lookOf(item) === "nothing" }
+    // Each look's own make (Settings › Colour › Look), read once here.
+    readonly property var lookOptions: root.appearance?.looks ?? ({})
+    // Nothing's large figures: Nothing OS's dot matrix (IrisDotMatrix) or Archivo SemiExpanded.
+    readonly property bool nothingDots: String(root.lookOptions?.nothing?.figures ?? "dots") === "dots"
+    readonly property var synthOptions: root.lookOptions?.synth ?? ({})
+    readonly property var gelOptions: root.lookOptions?.gel ?? ({})
+    readonly property var nothingOptions: root.lookOptions?.nothing ?? ({})
+    // Where a look's colour comes from: the person's accent, highlight or signal; "classic" is the look's own lamp.
+    function lookColour(source: string, classic: color): color {
+        if (source === "classic") return classic
+        if (source === "signal") return root.signal
+        if (source === "highlight") return root.vivid(root.baseSecondaryAccent, true)
+        return root.vivid(root.baseAccent, true)
+    }
+    // A lamp needs a hue: a grey accent or highlight lights in the signal.
+    function lamp(c: color): color { return c.hslSaturation < 0.08 ? root.signal : c }
+    readonly property bool synthMono: root.synthOptions?.mono ?? true
+    // Each look is a whole dialect of NiHiL, worn by every surface through the tokens below and not by its controls alone
+    // (his 10-30: "que todo iris se transforme con cada elección"): corners, plates, marks, voices, the chosen thing and
+    // the bodies' edge. The traits are the Designs' own (IrisDesign.trait); a Design keeps the ones it sets.
+    readonly property var lookTraits: ({
+        nothing: { marks: "glyph", selection: "plate", captions: "mono", plate: "line" },
+        synth: root.synthMono ? { marks: "key", selection: "plate", captions: "mono", titles: "lower", plate: "key" }
+            : { marks: "key", selection: "plate", plate: "key" },
+        gel: { marks: "gloss", selection: "plate", plate: "gloss" },
+        prism: { marks: "tile", selection: "plate", captions: "mono", hover: "wash", index: true, sections: "line" }
+    })[root.look] ?? ({})
+    function trait(name: string): var {
+        const own = IrisDesign.trait(name)
+        return own !== undefined && own !== null && own !== "" ? own : root.lookTraits[name]
+    }
+    // Machined keys for Synth, soft pebbles for Gel: every fixed corner of the shell follows (`corner`, `iconRadius`,
+    // `capsule`).
+    readonly property real lookCorner: ({ synth: 0.42, gel: 1.3 })[root.look] ?? 1
+    // How a plate (a group, a tile, a card) is made: a fill (Apple), a hairline (Nothing), an opaque key panel on its
+    // drop edge (Synth), a gloss under a light cap (Gel). IrisPlate draws it.
+    readonly property string plateStyle: String(root.trait("plate") ?? "flat")
+    readonly property string marksStyle: String(root.trait("marks") ?? "tile")
+    readonly property color plateEdge: root.plateStyle === "line" ? ColorUtils.applyAlpha(root.text, root.light ? 0.2 : 0.18)
+        : root.plateStyle === "gloss" ? Qt.rgba(1, 1, 1, (root.light ? 0.7 : 0.1) * root.gelGloss / 0.6) : Qt.color("transparent") // iris-literal: gel's lit rim
+    readonly property color synthPanel: ColorUtils.mix(root.text, root.surfaceOpaque, root.light ? 0.05 : 0.07)
+    // The chosen thing in a look that marks it with a plate: Synth's lit key, Gel's glossy body, the accent plate.
+    // `plateOfLook` answers for any look, so a place wearing its own (the Control Center's lit tiles) asks with its look.
+    function plateOfLook(look: string): color {
+        return look === "synth" ? root.synthOn : look === "gel" ? root.gelBody : look === "prism" ? root.prismSolid
+            : look === "nothing" && !root.mono ? (root.nothingSignal ? root.signal : root.text) : root.accentFill
+    }
+    function inkOnPlateOfLook(look: string): color {
+        return look === "synth" ? root.inkOnSynthOn : look === "gel" ? root.inkOnGel : look === "prism" ? root.inkOnPrism
+            : look === "nothing" && !root.mono ? (root.nothingSignal ? root.inkOnSignal : root.paper) : root.inkOnAccentFill
+    }
+    // Prism (`.claude/ref/iris-prism`): black and white. What is chosen, on or filled is one solid of white light (the
+    // ink on a light body) with its reverse printed on it; where a level ends, the white breaks into its spectrum.
+    readonly property color prismSolid: root.text
+    readonly property color inkOnPrism: root.light ? "#ffffff" : "#000000" // iris-literal: the reverse of Prism's solid
+    readonly property color prismSmoke: ColorUtils.mix(root.text, root.surfaceOpaque, root.light ? 0.1 : 0.14)
+    readonly property color lookPlate: root.plateOfLook(root.look)
+    readonly property color inkOnLookPlate: root.inkOnPlateOfLook(root.look)
+    // Synth: an instrument panel. A switch is a key that sinks and lights its LED, a level a fader over ticks, a choice
+    // a row of keys. Keys light in the person's accent and levels run in the highlight unless they pick the classic
+    // lamps (Teenage Engineering's orange and blue).
+    readonly property color synthOn: root.lamp(root.lookColour(String(root.synthOptions?.keys ?? "accent"), "#ff5b00")) // iris-literal: Synth's classic orange
+    readonly property color synthLevel: root.lamp(root.lookColour(String(root.synthOptions?.levels ?? "highlight"), "#0096ff")) // iris-literal: Synth's classic blue
+    readonly property color synthKey: ColorUtils.mix(root.text, root.surfaceOpaque, root.light ? 0.12 : 0.15)
+    readonly property color synthKeyEdge: ColorUtils.mix("#000000", root.surfaceOpaque, root.light ? 0.2 : 0.5)
+    readonly property color synthCap: root.light ? "#ffffff" : "#ecebe6" // iris-literal: a fader's cap, a chosen key
+    readonly property color synthInkOnCap: "#1d1d1b" // iris-literal: the ink printed on a cap
+    readonly property color synthLedOff: ColorUtils.mix(root.text, root.surfaceOpaque, 0.28)
+    readonly property color inkOnSynthOn: root.onTintFor(root.synthOn)
+    // How far a key stands on its drop edge (0 lays the keys flat on the panel).
+    readonly property real synthDepthBase: Math.max(0, Math.min(6, Number(root.synthOptions?.depth ?? 3)))
+    readonly property int synthDepth: Math.round(root.synthDepthBase * root.density)
+    readonly property int synthKeyRadius: Math.round(5 * root.density)
+    readonly property int synthCapRadius: Math.round(3 * root.density)
+    readonly property string fontSynthLabel: root.synthMono ? "Geist Mono" : root.fontMain // iris-literal: Synth's label face
+    readonly property string fontSynthFigure: "Inter Display"
+    // Gel: glossy capsules of the person's colour, a light cap over their upper half. The source is held mid-tone so
+    // the gel reads as gel over a pastel accent; a grey one stays grey, Aqua's graphite.
+    readonly property color gelSource: root.lookColour(String(root.gelOptions?.body ?? "accent"), root.baseAccent)
+    readonly property color gelBody: root.gelSource.hslSaturation < 0.08
+        ? Qt.hsla(0, 0, Math.min(0.56, Math.max(0.42, root.gelSource.hslLightness)), 1)
+        : Qt.hsla(root.gelSource.hslHue, Math.max(0.62, root.gelSource.hslSaturation), Math.min(0.56, Math.max(0.44, root.gelSource.hslLightness)), 1)
+    readonly property color gelTop: Qt.lighter(root.gelBody, 1.5)
+    readonly property color gelBottom: Qt.darker(root.gelBody, 1.3)
+    readonly property color inkOnGel: root.onTintFor(root.gelBody)
+    // The light over a gel's upper half (0 is a plain candy, 1 a mirror cap), and the pearl of a knob.
+    readonly property real gelGloss: Math.max(0, Math.min(100, Number(root.gelOptions?.gloss ?? 60))) / 100
+    readonly property color gelShineTop: Qt.rgba(1, 1, 1, root.gelGloss)
+    readonly property color gelShineBottom: Qt.rgba(1, 1, 1, 0.07 * root.gelGloss)
+    readonly property color gelPearlTop: "#ffffff" // iris-literal: Gel's pearl knob
+    readonly property color gelPearlBottom: "#d9e4ee" // iris-literal: the pearl's lower shade
+    readonly property bool gelRound: root.gelOptions?.round ?? true
+    readonly property string fontGel: root.gelRound ? "Rubik" : root.fontMain // iris-literal: Gel's face
+    // Nothing marks the chosen thing with the inverted plate (ink) or the signal colour.
+    readonly property bool nothingSignal: String(root.nothingOptions?.chosen ?? "ink") === "signal"
+    readonly property bool signalChosen: root.mono && root.nothingSignal
+    readonly property bool neutralBody: root.mono && !["midnight", "wallpaper", "theme"].includes(root.materialName)
+    readonly property var neutralRoles: ["surface", "surfaceHigh", "surfaceHighest", "text", "textSecondary", "textTertiary", "fillInk"]
+    // A Design's fixed roles are what it is (a blueprint's blue paper): Nothing's grey leaves them as they are.
+    readonly property var fixedRoles: IrisDesign.roles(root.scheme) ?? ({})
+    // The same light, no hue: a warm paper or a wallpaper-tinted black reads as its grey.
+    function neutral(c: color): color {
+        const v = Math.pow(ColorUtils.relativeLuminance(c), 1 / 2.2)
+        return Qt.rgba(v, v, v, c.a)
+    }
+    function role(name: string, fallback: string): color {
+        const c = Qt.color(root.washi?.[name] ?? fallback)
+        return root.neutralBody && root.neutralRoles.includes(name) && root.fixedRoles[name] === undefined ? root.neutral(c) : c
+    }
+    // The paper under inverted ink: what a chosen segment's label, an on tile's glyph and a primary button's word wear.
+    readonly property color paper: root.surfaceOpaque
+    // The one colour: live, needs you, an error, a verb that can't be undone. Nothing's red by default, the wallpaper's
+    // own vivid colour, or a hex the person picked.
+    readonly property color signalRed: "#d71921" // iris-literal: Nothing's red
+    // iris-literal: the signal colours Settings offers beside Nothing's red and the wallpaper's.
+    readonly property var signalSwatches: ({ orange: "#ff8a00", blue: "#2f7bf6", green: "#36c46b", pink: "#ff4fa3", acid: "#c6ff1a" })
+    readonly property string signalChoice: String(root.appearance?.signal ?? "nothing")
+    readonly property color signal: IrisDesign.inkAccent ? root.text : root.signalChoice === "wallpaper" ? root.vividHighlight(Appearance.wallpaperDominantColor, root.signalRed) : /^#[0-9a-fA-F]{6}$/.test(root.signalChoice) ? Qt.color(root.signalChoice) : root.signalRed
+    // The signal as text: moved only as far as 4.5:1 on the paper needs (the pure red is a mark, 3:1, not a word).
+    readonly property color signalInk: root.readableAccent(root.signal)
+    readonly property color inkOnSignal: root.onTintFor(root.signal)
+    // S4's inks: an empty dot of a meter, the hairline ring of an off switch, the 8 px paper grid behind a stage.
+    readonly property color dotEmpty: ColorUtils.applyAlpha(root.text, 0.2) // iris-literal: an unlit dot still reads
+    function unlit(ink: color): color { return ColorUtils.applyAlpha(ink, 0.2) } // iris-literal: the same unlit dot on any ink
+    readonly property color ringInk: ColorUtils.applyAlpha(root.text, 0.42) // iris-literal: the off switch's hairline
+    readonly property color paperDot: ColorUtils.applyAlpha(root.text, 0.08) // iris-literal: S3's 6-8 %
+
+    // A tonal container of any colour and the same hue as ink on it (Material's filled tonal): the calm way to say "on".
+    function containerOf(c: color): color { return ColorUtils.mix(root.surfaceOpaque, c, root.light ? 0.8 : 0.72) }
+    function onContainerOf(c: color): color {
+        return Lume.mark(c, Math.pow(ColorUtils.relativeLuminance(root.containerOf(c)), 1 / 2.2), 0, root.light, 4.5)
+    }
+    // Any colour a widget or a section names stands for one of the identity hues: the nearest, as this scheme solved it.
+    function identityOf(c: color): color {
+        const seed = Qt.color(c)
+        if (!seed.valid || seed.hslHue < 0 || seed.hslSaturation < 0.1) return root.identity.gray
+        let best = "blue", bestDistance = 2
+        for (const name in root.identityHues) {
+            const d = Math.abs(root.identityHues[name] - seed.hslHue)
+            const distance = Math.min(d, 1 - d)
+            if (distance < bestDistance) { bestDistance = distance; best = name }
+        }
+        return root.identity[best]
+    }
+    // iris-literal: the HSL hue each identity colour is known by, to map a named colour onto the palette.
+    readonly property var identityHues: ({ red: 0.01, orange: 0.09, yellow: 0.14, green: 0.37, teal: 0.52, sky: 0.55,
+        blue: 0.6, indigo: 0.67, purple: 0.78, pink: 0.95 })
+    function materialSwatch(name: string): color {
+        const c = Qt.color(root.washi?.materials?.[name] ?? "#000000")
+        return root.mono && ["black", "graphite"].includes(name) ? root.neutral(c) : c
+    }
+    readonly property string materialName: root.followsTheme ? "theme" : String(root.theme?.surface ?? "black")
+    // What each scheme calls its materials (Settings, the previews): the three stored names stay black, graphite, midnight.
+    readonly property var materialLabels: root.ink ? ({ black: "Washi", graphite: "Kraft", midnight: "Mist" })
+        : root.light ? ({ black: "Snow", graphite: "Silver", midnight: "Sky" }) : ({ black: "Black", graphite: "Graphite", midnight: "Midnight" })
+    function materialLabel(name: string): string {
+        return root.materialLabels[name] ?? (name === "wallpaper" ? "Wallpaper" : name === "theme" ? "Theme" : name)
+    }
+    readonly property color surfaceOpaque: root.role("surface", "#000000")
+    readonly property color darkSurfaceOpaque: Qt.color(root.washiDark?.materials?.[root.materialName] ?? "#000000")
+    readonly property color surfaceHighOpaque: root.role("surfaceHigh", "#1c1c1e")
+    readonly property color surfaceHighestOpaque: root.role("surfaceHighest", "#2c2c2e")
+    readonly property real tintAmount: Math.max(0, Math.min(1, Number(root.appearance?.tint ?? 0) / 100))
+    readonly property color tintSeed: root.accent
+    function tinted(base: color, strength: real): color {
+        return root.tintAmount <= 0 ? base : ColorUtils.mix(base, root.tintSeed, 1 - strength * root.tintAmount)
+    }
+    readonly property color surface: root.surfaceOpaque
+    readonly property color bodySurface: root.surfaceOpaque
+
+    readonly property var glassOptions: root.appearance?.glass ?? ({})
+    // Off is the flat plate, the factory's (his 11-07: flat and black, or Niri's blur; Niri's cost 7-8x its CPU in motion).
+    readonly property string glassRequested: ["wallpaper", "compositor"].includes(String(root.glassOptions?.mode ?? ""))
+        ? root.glassOptions.mode : "off"
+    // Blur is the compositor's or nothing (his 11-07): where Niri cannot blur, the body is the flat plate, never the
+    // wallpaper's glass standing in for it. Glass on the wallpaper is only ever the person's own pick.
+    readonly property bool compositorGlassReady: root.glassRequested === "compositor" && IrisCompositorBlur.active
+        && IrisCompositorBlur.usable
+    readonly property bool glassy: Appearance.effectsEnabled && !IrisDesign.refusesGlass
+        && (root.glassRequested === "wallpaper" || root.compositorGlassReady)
+    readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
+    readonly property bool glassCompositor: root.glassy && root.compositorGlassReady
+    readonly property bool glassWallpaper: root.glassy && root.glassRequested === "wallpaper"
+    readonly property real glassBlurAmount: Math.max(0, Math.min(1, Number(root.glassOptions?.blur ?? 100) / 100))
+    // Solved at the panel's 7:1 so secondary ink still reads on the worst part; the chosen tint is a floor.
+    readonly property real wallpaperGlassTint: {
+        const chosen = Math.max(0.12, Math.min(0.96, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
+        const needed = IrisMood.sampled ? root.legibleVeil("panel", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
+        return Math.max(chosen, Math.min(0.9, needed))
+    }
+    // Under Blur with windows on the workspace what is behind is theirs: read as a mixed desktop, as Places do. The apps
+    // and the accent keep the wallpaper's tint, or every window opened would regenerate every app theme. 4.5:1 there,
+    // not 7: an always-thick Blur left nothing to see through.
+    readonly property bool bodiesCovered: root.glassCompositor && Lume.covered(root.placeOutput)
+    readonly property real glassTint: root.bodiesCovered
+        ? Math.max(root.wallpaperGlassTint, Math.min(0.9, root.legibleVeil("glass", 0.72, 0.18, 1))) : root.wallpaperGlassTint
+    // What the apps wear: the paper itself, solved with the shell's palette (IrisWashi `apps`). Frost over the wallpaper
+    // changes with every window behind it; an app window is opaque, so it wears the paper the frost is held to.
+    readonly property string appsOutput: String(Quickshell.screens[0]?.name ?? "")
+    readonly property bool appsSurfaceReady: true
+    readonly property color appsSurface: root.surfaceOpaque
+    readonly property color bodyTint: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.bodySurface
+    readonly property color bodyScrim: root.bodyTint
+    // iris-literal: the field paints every body with its own soft edge; an opaque chassis on top drew a harder, stair-stepped one. Not 0: a transparent ClippingRectangle stops painting.
+    // Pictures go through the same one-bit screen as the wallpaper while the person keeps it printed.
+    readonly property bool printed: Config.family?.appearance?.printed ?? true
+    readonly property color bodyClip: Qt.rgba(0, 0, 0, 0.004)
+    readonly property color placeSurface: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.surface
+    readonly property real glassLip: 0
+    // What a plain body is made of (Style › Texture, his 11-02: Material's global styles on one engine, every Design the
+    // same; "flat" is the factory's since his 11-07, "solid" Ricelin's card). `top` and `foot` how far its tint leans to the light up there and
+    // down here, `edge` the lit top or the hairline, `sheen` the lit top's strength, `tint` the glass's thickness, `cast`
+    // its shadow. Afterglow and Light leak light themselves; Light streak keeps a plain body under its own light.
+    readonly property var bodyRecipes: ({
+        solid: { top: 0.2, foot: 0.06, edge: "light", sheen: 1, tint: 1, cast: 1 },
+        aurora: { top: 0.09, foot: 0.09, edge: "line", sheen: 0.5, tint: 0.72, cast: 0.6 },
+        angel: { top: 0.14, foot: 0.03, edge: "light", sheen: 2.2, tint: 0.84, cast: 0.5 },
+        regalia: { top: 0.13, foot: 0.13, edge: "line", sheen: 1, tint: 1.6, cast: 1.2 },
+        flat: { top: 0, foot: 0, edge: "line", sheen: 1, tint: 1, cast: 0.4 },
+        streak: { top: 0.12, foot: 0.04, edge: "light", sheen: 0.4, tint: 0.9, cast: 0.8 }
+    })
+    readonly property string textureName: String(IrisDesign.worn("material.texture", root.appearance?.texture))
+    readonly property var bodyRecipe: root.bodyRecipes[root.textureName] ?? root.bodyRecipes.flat
+    function bodyLean(ink: color, amount: real): vector4d {
+        return root.selfLit ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(ink.r, ink.g, ink.b, amount)
+    }
+    readonly property vector4d bodyTop: root.bodyLean(root.light ? "#ffffff" : root.text, root.bodyRecipe.top * (root.light ? 3 : 1))
+    readonly property vector4d bodyFoot: root.bodyLean(root.text, root.bodyRecipe.foot * (root.light ? 0.6 : 1))
+    readonly property bool afterglow: root.textureName === "afterglow"
+    readonly property var afterglowOptions: root.appearance?.afterglow ?? ({})
+    function afterglowPercent(name: string, fallback: real): real {
+        const value = Number(root.afterglowOptions?.[name] ?? fallback)
+        return Math.max(0, Math.min(100, isNaN(value) ? fallback : value)) / 100
+    }
+    // iris-literal: each grade is a fixed colour grade (shadow hue, key light, bloom), not a theme colour.
+    readonly property var afterglowGrades: ({
+        dusk: { label: "Dusk", shadow: "#0f4a42", light: "#ffbe73", bloom: "#ff9442" },
+        cyber: { label: "Cyber", shadow: "#0d2f66", light: "#cfefff", bloom: "#55c8ff" },
+        fog: { label: "Fog", shadow: "#33402a", light: "#e6efc4", bloom: "#bcd98c" },
+        // Acid: a fluorescent lime key over violet blacks, the vibrating pair of a rave flyer.
+        acid: { label: "Acid", shadow: "#2a0f57", light: "#ecff9e", bloom: "#b8ff1f" }
+    })
+    readonly property string afterglowGrade: ["dusk", "cyber", "fog", "acid", "wallpaper"].includes(String(root.afterglowOptions?.grade ?? ""))
+        ? root.afterglowOptions.grade : "dusk"
+    function afterglowColours(grade: string): var {
+        if (grade !== "wallpaper") return root.afterglowGrades[grade] ?? root.afterglowGrades.dusk
+        const seed = Qt.color(Appearance.wallpaperDominantColor)
+        const hue = seed.hslHue < 0 ? 0.5 : seed.hslHue
+        return { shadow: Qt.hsla((hue + 0.5) % 1, 0.62, 0.17, 1), light: Qt.hsla(hue, 0.85, 0.8, 1),
+            bloom: root.vividHighlight(seed, root.afterglowGrades.dusk.bloom) }
+    }
+    readonly property var afterglowPalette: root.afterglowColours(root.afterglowGrade)
+    readonly property real afterglowAtmosphere: root.afterglowPercent("atmosphere", 45)
+    readonly property real afterglowChrome: root.afterglowPercent("chrome", 35)
+    readonly property real afterglowBloom: root.afterglowPercent("bloom", 35)
+    readonly property real afterglowSignal: root.afterglowPercent("signal", 0)
+    readonly property real afterglowBloomRadius: Math.round(9 * root.density)
+    // How far past a silhouette the field draws: the bloom's tail.
+    readonly property real afterglowReach: root.afterglow && !root.light && root.afterglowBloom > 0 ? 3.5 * root.afterglowBloomRadius : 0
+    readonly property bool afterglowWallpaper: root.afterglow && (root.afterglowOptions?.wallpaper ?? true)
+    function colourVector(c: color, w: real): vector4d { return Qt.vector4d(c.r, c.g, c.b, w) }
+    readonly property vector4d afterglowMix: Qt.vector4d(root.afterglow ? 1 : 0, root.afterglowChrome, root.afterglowBloom, root.afterglowSignal)
+    readonly property vector4d afterglowShadow: root.colourVector(Qt.color(root.afterglowPalette.shadow), root.light ? 1 : 0)
+    readonly property vector4d afterglowLight: root.colourVector(Qt.color(root.afterglowPalette.light), root.afterglowAtmosphere)
+    readonly property vector4d afterglowBloomInk: root.colourVector(Qt.color(root.afterglowPalette.bloom), root.afterglowBloomRadius)
+    readonly property vector4d afterglowShape: Qt.vector4d(Math.round(8 * root.density), 3, 1.25 * root.density, 0)
+    // Light leak (DESIGN §0.3): analog light on film. One light per output exposes the bodies (a grain gradient of the
+    // grade inside, a burn on the rim it enters by), the plates the field does not draw (IrisLeakPlate) and the wallpaper
+    // (IrisLeakWallpaper), so all of it is one exposure.
+    readonly property bool leak: root.textureName === "leak"
+    // The field draws the material with a texture: groups and fills go sheer so it shows through them.
+    // Light streak (Style › Texture, his 11-02: "Apple + light streak aurora + original"): NiHiL taken as a long
+    // exposure. The Island is the light: the edges that face it carry a streak (a hot one-pixel core, a soft fall,
+    // tapering away from it), your three colours hang inside the material as aurora curtains, strongest near the edges
+    // and quiet where text sits, and a body that moves leaves a trail of its lit edge. Nothing moves at rest.
+    readonly property bool streak: root.textureName === "streak"
+    readonly property var streakOptions: root.appearance?.streak ?? ({})
+    function streakPercent(name: string, fallback: real): real {
+        const value = Number(root.streakOptions?.[name] ?? fallback)
+        return Math.max(0, Math.min(100, isNaN(value) ? fallback : value)) / 100
+    }
+    readonly property real streakAurora: root.streakPercent("aurora", 55)
+    readonly property real streakLight: root.streakPercent("light", 75)
+    readonly property real streakTrails: root.streakPercent("trails", 60)
+    // The curtains' colours. "aurora": the accent and its two neighbours on the wheel, as a real aurora runs green to
+    // violet; "wallpaper": the same from the wallpaper's colour; "colours": accent, wallpaper and highlight as they are
+    // (a warm wallpaper gives three warm curtains).
+    readonly property string streakColours: ["aurora", "colours", "wallpaper"].includes(String(root.streakOptions?.colours ?? "")) ? root.streakOptions.colours : "aurora"
+    function streakNeighbours(c: color): var {
+        const h = c.hslHue < 0 ? 0.6 : c.hslHue
+        const s = Math.max(0.62, c.hslSaturation)
+        return [Qt.hsla(h, s, 0.58, 1), Qt.hsla((h + 0.15) % 1, s, 0.6, 1), Qt.hsla((h + 0.83) % 1, s, 0.6, 1)]
+    }
+    readonly property var streakHues: {
+        if (root.streakColours === "wallpaper")
+            return root.streakNeighbours(Qt.color(root.vividHighlight(Appearance.wallpaperDominantColor, root.baseAccent)))
+        if (root.streakColours === "colours")
+            return [root.vivid(root.baseAccent, true), Qt.color(root.vividHighlight(Appearance.wallpaperDominantColor, root.baseAccent)),
+                root.vivid(root.baseSecondaryAccent, true)]
+        return root.streakNeighbours(Qt.color(root.vivid(root.baseAccent, true)))
+    }
+    // w: where each curtain hangs across the output, 0..1.
+    readonly property vector4d streakMix: Qt.vector4d(root.streak ? 1 : 0, root.streakAurora, root.streakLight, root.streakTrails)
+    readonly property vector4d streakHue0: root.colourVector(root.streakHues[0], 0.2)
+    readonly property vector4d streakHue1: root.colourVector(root.streakHues[1], 0.52)
+    readonly property vector4d streakHue2: root.colourVector(root.streakHues[2], 0.82)
+    // The light hangs under the Island, a sixth of the output's short side in from its edge: the field and every plate
+    // read it here. x, y on the output; z one device pixel; w the fall's reach.
+    function streakLightOn(output: size, islandEdge: string): vector4d {
+        const w = Math.max(1, output.width), h = Math.max(1, output.height)
+        const inset = 0.16 * Math.min(w, h)
+        const x = islandEdge === "left" ? inset : islandEdge === "right" ? w - inset : w / 2
+        const y = islandEdge === "bottom" ? h - inset : islandEdge === "left" || islandEdge === "right" ? h / 2 : inset
+        return Qt.vector4d(x, y, root.devicePx, root.streakReach)
+    }
+    // How far past a silhouette the streak's fall reaches.
+    readonly property real streakReach: root.streak && root.streakLight + root.streakAurora > 0 ? Math.round(64 * root.density) : 0
+    readonly property bool textured: root.afterglow || root.leak || root.streak
+    // A texture that paints its own body light, so the plain body's lean and lit top step aside.
+    readonly property bool selfLit: root.afterglow || root.leak
+    readonly property var leakOptions: root.appearance?.leak ?? ({})
+    function leakPercent(name: string, fallback: real): real {
+        const value = Number(root.leakOptions?.[name] ?? fallback)
+        return Math.max(0, Math.min(100, isNaN(value) ? fallback : value)) / 100
+    }
+    // iris-literal: each grade is a fixed film colour: five stops from its warm end to its cool end, the white its
+    // hottest light runs to, and the glow that stands for it (wallpaperLight).
+    readonly property var leakGrades: ({
+        prism: { label: "Prism", core: "#fff6ea", glow: "#b48cff", stops: ["#ff5a3c", "#ffcf6b", "#d8fbff", "#4f86ff", "#a35dff"] },
+        ember: { label: "Ember", core: "#fff0d4", glow: "#ff9a3c", stops: ["#fff0d4", "#ffb25a", "#f2581f", "#a3241a", "#3d0f0f"] },
+        orchid: { label: "Orchid", core: "#ffe6f5", glow: "#ff5fb8", stops: ["#ffd0ee", "#ff6cc4", "#e0369c", "#7a3dff", "#2b2bd0"] },
+        polaroid: { label: "Polaroid", core: "#fff4dc", glow: "#ff9e7a", stops: ["#fff4dc", "#ffbf78", "#ff6aa0", "#55cfff", "#3567e0"] },
+        // The dusty grades of the grain gradients (.claude/ref/iris-leak): pale light, a muted middle, a coloured night.
+        haze: { label: "Haze", core: "#f2e4f1", glow: "#8f8ff0", stops: ["#e6c9e8", "#c3a5de", "#7b7ddc", "#4a4fb3", "#25264a"] },
+        tide: { label: "Tide", core: "#e6f3f6", glow: "#4ea6d6", stops: ["#cfe7ee", "#86c3dc", "#3a8fbd", "#1d5683", "#0c2138"] },
+        moss: { label: "Moss", core: "#eef7e6", glow: "#86c79c", stops: ["#d9efcc", "#a3d6ab", "#5aa184", "#2a6058", "#10292b"] }
+    })
+    readonly property string leakGrade: ["prism", "ember", "orchid", "polaroid", "haze", "tide", "moss", "accent", "wallpaper"].includes(String(root.leakOptions?.grade ?? ""))
+        ? root.leakOptions.grade : "haze"
+    function leakColours(grade: string): var {
+        if (grade === "accent") {
+            // The highlight's hue at the warm end, the accent's at the cool end, the arc between them pale in the middle:
+            // the film takes the theme's two colours at fixed strengths, so it reads the same in every scheme.
+            const a = Qt.color(root.accent)
+            const h = Qt.color(root.secondaryAccent)
+            const cool = a.hslHue < 0 ? 0.62 : a.hslHue
+            const warm = h.hslHue < 0 ? (cool + 0.12) % 1 : h.hslHue
+            const arc = ((cool - warm + 1.5) % 1) - 0.5
+            const hue = (t, s, l) => Qt.hsla((warm + arc * t + 1) % 1, s, l, 1)
+            return { core: hue(0, 0.7, 0.95), glow: hue(1, 0.85, 0.66),
+                stops: [hue(0, 0.9, 0.62), hue(0.15, 0.9, 0.74), hue(0.5, 0.55, 0.88), hue(1, 0.82, 0.62), hue(1.1, 0.75, 0.46)] }
+        }
+        if (grade !== "wallpaper") return root.leakGrades[grade] ?? root.leakGrades.prism
+        // The wallpaper's hue spread into a spectrum: warmer and paler beside it, its complement at the cool end.
+        const seed = Qt.color(Appearance.wallpaperDominantColor)
+        const hue = seed.hslHue < 0 ? 0.08 : seed.hslHue
+        const at = (shift, s, l) => Qt.hsla((hue + shift + 1) % 1, s, l, 1)
+        return { core: at(0.02, 0.7, 0.95), glow: root.vividHighlight(seed, root.leakGrades.prism.glow),
+            stops: [at(-0.07, 0.9, 0.58), at(0, 0.9, 0.7), at(0.04, 0.6, 0.88), at(0.45, 0.8, 0.62), at(0.6, 0.7, 0.5)] }
+    }
+    readonly property var leakPalette: root.leakColours(root.leakGrade)
+    // iris-literal: where the light falls, as three soft shapes: centre in the output's uv and radii in output heights
+    // (`at`), rotation, intensity, a ring's width (0: filled) and how much brighter its top is (`form`), and where on the
+    // grade it sits: offset, by distance, by height, across (`hue`). Each is one of the textures it comes from: Lens the
+    // prismatic eye over a hot horizon, Burn a corner of film burnt by the light, Orbs grain-gradient spheres, Beam a
+    // spectrum falling down one side under a stroke of light.
+    readonly property var leakShapes: ({
+        lens: [{ at: [0.5, 0.47, 0.6, 0.3], form: [0, 0.95, 0, 0.2], hue: [0.22, 0.62, 0.18, 0] },
+            { at: [0.5, 0.53, 0.72, 0.022], form: [0, 1.4, 0, 0], hue: [0.06, 0.14, 0, 0] },
+            { at: [0.5, 0.5, 0.95, 0.55], form: [0, 0.22, 0, 0], hue: [0.85, 0, 0, 0] }],
+        burn: [{ at: [0.72, 0.85, 1.1, 0.32], form: [-0.45, 1.5, 0, 0], hue: [0, 0.62, 0, 0] },
+            { at: [0.95, 0.15, 0.5, 0.4], form: [0.3, 0.6, 0, 0], hue: [0.35, 0.4, 0, 0] },
+            { at: [0.1, 0, 0.7, 0.45], form: [0, 0.35, 0, 0], hue: [0.7, 0.25, 0, 0] }],
+        orbs: [{ at: [0.36, 0.48, 0.42, 0.42], form: [0, 1.15, 0, 0], hue: [0.18, 0.7, 0, 0] },
+            { at: [0.68, 0.66, 0.2, 0.2], form: [0, 0.95, 0, 0], hue: [0.15, 0.7, 0, 0] },
+            { at: [0.62, 0.18, 0.3, 0.22], form: [0, 0.45, 0, 0], hue: [0.55, 0.4, 0, 0] }],
+        beam: [{ at: [0.8, 0.45, 0.06, 1.0], form: [0.05, 1.3, 0, 0], hue: [0.3, 0.1, 0, 0.5] },
+            { at: [0.28, 0.09, 0.42, 0.05], form: [-0.06, 1.1, 0, 0], hue: [0.5, 0, 0, 0.45] },
+            { at: [0.22, 1.0, 0.6, 0.28], form: [0, 0.8, 0, 0], hue: [0.1, 0.5, 0, 0.25] }],
+        // Haze: the grain gradient itself. A wide pale light from one corner, a band of the grade's middle running
+        // across under it, and the night left whole in the far corner.
+        haze: [{ at: [0.14, 0.1, 0.9, 0.58], form: [-0.35, 1.55, 0, 0], hue: [0.0, 0.35, 0, 0] },
+            { at: [0.58, 0.62, 1.1, 0.34], form: [-0.32, 1.3, 0, 0], hue: [0.62, 0.16, 0, 0] },
+            { at: [0.98, 0.95, 0.42, 0.3], form: [0.4, 0.3, 0, 0], hue: [0.62, 0.2, 0, 0] }]
+    })
+    readonly property string leakShapeName: ["lens", "burn", "orbs", "beam", "haze"].includes(String(root.leakOptions?.shape ?? ""))
+        ? root.leakOptions.shape : "haze"
+    readonly property var leakSources: root.leakShapes[root.leakShapeName]
+    // Where the person moved the light (Light leak › Position, or a drag in its preview): the whole shape shifts, in
+    // fractions of the output, so a preset keeps its composition.
+    function leakAxis(name: string): real {
+        const value = Number(root.leakOptions?.[name] ?? 0)
+        return Math.max(-50, Math.min(50, isNaN(value) ? 0 : value)) / 100
+    }
+    // Transient, never persisted: the light where a drag in the Settings preview holds it, so the desktop follows the
+    // drag; the preview writes x/y once on release and clears it.
+    property var leakHeld: null
+    readonly property real leakOffsetX: root.leakHeld ? root.leakHeld.x : root.leakAxis("x")
+    readonly property real leakOffsetY: root.leakHeld ? root.leakHeld.y : root.leakAxis("y")
+    function leakSource(index: int, key: string): vector4d {
+        const v = root.leakSources[index][key]
+        return key === "at" ? Qt.vector4d(v[0] + root.leakOffsetX, v[1] + root.leakOffsetY, v[2], v[3])
+            : Qt.vector4d(v[0], v[1], v[2], v[3])
+    }
+    readonly property real leakLight: root.leakPercent("light", 60)
+    readonly property real leakSpill: root.leakPercent("spill", 35)
+    readonly property real leakPrism: root.leakPercent("prism", 15)
+    readonly property real leakGrain: root.leakPercent("grain", 55)
+    readonly property real leakStreaks: root.leakPercent("streaks", 0)
+    readonly property real leakWallpaperAmount: root.leakPercent("wallpaper", 50)
+    // How strongly the frame's band is exposed (blended into the bodies welded to it) and the desktop widgets' plates.
+    readonly property real leakFrame: root.leakPercent("frame", 100)
+    readonly property real leakWidgets: root.leakPercent("widgets", 100)
+    // The film's grain in pixels before density; dust and bokeh 0..2 (1 as designed); the lens's corners and the film
+    // gate on or off; a new picture developing as a Polaroid does.
+    readonly property real leakGrainSize: {
+        const value = Number(root.leakOptions?.grainSize ?? 1.6)
+        return Math.max(1, Math.min(4, isNaN(value) ? 1.6 : value))
+    }
+    readonly property real leakDust: {
+        const value = Number(root.leakOptions?.dust ?? 0)
+        return Math.max(0, Math.min(200, isNaN(value) ? 0 : value)) / 100
+    }
+    readonly property real leakGate: (root.leakOptions?.gate ?? false) ? 1 : 0
+    readonly property bool leakDevelop: root.leakOptions?.develop ?? true
+    // Picture: the wallpaper exposed by the leak. Light: the darkroom and the light alone, the texture itself.
+    readonly property string leakBackdrop: String(root.leakOptions?.backdrop ?? "picture") === "light" ? "light" : "picture"
+    readonly property bool leakWallpaper: root.leak && (root.leakBackdrop === "light" || root.leakWallpaperAmount > 0)
+    // IrisLeakWallpaper's leakMix: x how much of the picture shows, y how strongly it is exposed.
+    readonly property vector4d leakWallpaperMix: Qt.vector4d(root.leakBackdrop === "light" ? 0 : 1, root.leakWallpaperAmount,
+        root.leakSpill, root.leakPrism)
+    readonly property real leakSpillRadius: Math.round(14 * root.density)
+    // How far past a silhouette the field draws: where the spill's window ends (IrisField.frag).
+    readonly property real leakReach: root.leak && root.leakSpill > 0 ? Math.ceil(3.8 * root.leakSpillRadius) : 0
+    readonly property vector4d leakMix: Qt.vector4d(root.leak ? 1 : 0, root.leakLight, root.leakSpill, root.leakPrism)
+    readonly property vector4d leakFilm: Qt.vector4d(root.leakGrain, root.leakStreaks, Math.max(1, root.leakGrainSize * root.density), root.leakSpillRadius)
+    // IrisField's leakShape: x the burn's depth at the rim facing the light (one for every body), y the band's share of
+    // the spill, z the frame's exposure.
+    readonly property vector4d leakBody: Qt.vector4d(Math.round(6 * root.density), 0.6, root.leakFrame, 0)
+    readonly property vector4d leakStop0: root.colourVector(Qt.color(root.leakPalette.stops[0]), root.light ? 1 : 0)
+    readonly property vector4d leakStop1: root.colourVector(Qt.color(root.leakPalette.stops[1]), 0)
+    readonly property vector4d leakStop2: root.colourVector(Qt.color(root.leakPalette.stops[2]), 0)
+    readonly property vector4d leakStop3: root.colourVector(Qt.color(root.leakPalette.stops[3]), 0)
+    readonly property vector4d leakStop4: root.colourVector(Qt.color(root.leakPalette.stops[4]), 0)
+    readonly property vector4d leakCore: root.colourVector(Qt.color(root.leakPalette.core), 0)
+    readonly property vector4d leakAt0: root.leakSource(0, "at")
+    readonly property vector4d leakAt1: root.leakSource(1, "at")
+    readonly property vector4d leakAt2: root.leakSource(2, "at")
+    readonly property vector4d leakForm0: root.leakSource(0, "form")
+    readonly property vector4d leakForm1: root.leakSource(1, "form")
+    readonly property vector4d leakForm2: root.leakSource(2, "form")
+    readonly property vector4d leakHue0: root.leakSource(0, "hue")
+    readonly property vector4d leakHue1: root.leakSource(1, "hue")
+    readonly property vector4d leakHue2: root.leakSource(2, "hue")
+    // The cut edge of Blur glass (IrisField.frag): lit where it faces up, a line elsewhere.
+    readonly property real glassEdgeLight: Math.max(0, Math.min(1, root.bodyRecipe.sheen * Number(root.glassOptions?.edgeLight ?? 14) / 100))
+    readonly property real glassEdgeLine: Math.max(0, Math.min(0.6, Number(root.glassOptions?.edgeLine ?? 0) / 100))
+    readonly property color glassEdgeColour: {
+        const name = String(root.glassOptions?.edgeColour ?? "scene")
+        if (name === "white") return Qt.rgba(1, 1, 1, 1)
+        if (name === "accent") return root.accent
+        if (name === "highlight") return root.secondaryAccent
+        const l = root.wallpaperLight
+        return Qt.rgba(l.r * 0.45 + 0.55, l.g * 0.45 + 0.55, l.b * 0.45 + 0.55, 1)
+    }
+    readonly property real wallpaperVeil: IrisMood.sampled
+        ? Math.max(0.22, Math.min(0.72, root.legibleVeil("glass", IrisMood.luminance, IrisMood.contrast * 0.5, 0.6))) : 0.22
+    // A lit layer on glass: on paper, lit is lighter than the frost (the bleached washi of Light), never a grey film over it.
+    readonly property color litLayer: root.light ? ColorUtils.mix(root.surfaceOpaque, Qt.color(root.washiLight?.materials?.black ?? "#ffffff"), root.ink ? 0.45 : 0.25) : root.fillInk
+    // On paper a group is a faint well of the ink, the same step the solid ramp takes (washi darkens, it never greys);
+    // at night a faint lift of the ink. Sheer over glass and over a textured material (Afterglow, Light leak).
+    readonly property color surfaceHigh: root.glassy || root.textured
+        ? ColorUtils.applyAlpha(root.light ? root.text : root.fillInk, root.fillAlpha(root.light ? 0.06 : 0.07))
+        : root.tinted(root.surfaceHighOpaque, 0.16)
+    readonly property color surfaceHighest: root.glassy || root.textured
+        ? ColorUtils.applyAlpha(root.light ? root.text : root.fillInk, root.fillAlpha(root.light ? 0.1 : 0.12))
+        : root.tinted(root.surfaceHighestOpaque, 0.2)
+    // What sits raised on a group (a segmented thumb): the brighter step in the dark, a lit plate on paper.
+    readonly property color raised: root.light ? ColorUtils.applyAlpha(root.litLayer, root.glassy ? 0.86 : 1) : root.fillHover
+    readonly property color field: root.surfaceHighest
+    // Sumi on paper, paper white at night: the paper's own hue, 7:1 on its deepest group.
+    readonly property color text: root.role("text", "#f5f5f7")
+    readonly property color quietInk: root.text
+    readonly property color subtext: ColorUtils.applyAlpha(root.quietInk, root.inkLevel(Math.max(0.78, root.preset.textStrong - 0.02), 0.9))
+    readonly property color muted: ColorUtils.applyAlpha(root.quietInk, root.inkLevel(Math.max(0.64, root.preset.textSecondary + 0.04), 0.8))
+    // A group's caption: secondary ink, as every other caption.
+    readonly property color label: root.subtext
+    // A colour picked from a wallpaper or artwork for light and glow (never for text): saturated and mid-bright.
+    function vividHighlight(seed, fallback): color {
+        const c = Qt.color(seed)
+        if (!c.valid || c.hslHue < 0 || c.hslSaturation < 0.1) return fallback
+        return Qt.hsla(c.hslHue, Math.max(0.62, Math.min(0.95, c.hslSaturation + 0.2)),
+            Math.max(0.54, Math.min(0.66, c.hslLightness)), 1)
+    }
+    // The paper's level as Lume reads it: what a colour blended at runtime (anime palettes, a tint) is solved against.
+    readonly property real markLevel: Math.pow(ColorUtils.relativeLuminance(root.surfaceHighestOpaque), 1 / 2.2)
+    function readableAccent(c: color): color { return Lume.mark(c, root.markLevel, 0, root.light, 4.5) }
+    function readableHighlight(c: color): color { return Lume.mark(c, root.markLevel, 0, root.light, 3) }
+    readonly property var widgetPaletteNames: ["wallpaper", "system", "spectrum", "mono"]
+    // Data in widgets (rings, bars, figures): three colours of the identity band, solved with the palette. The
+    // vibrance setting is part of the solve (iris.widgets.vibrance).
+    function widgetPalette(name: string, vibrance: real): var {
+        const set = root.washi?.widgets?.[name] ?? root.washi?.widgets?.wallpaper ?? []
+        return [0, 1, 2].map(i => Qt.color(set[i] ?? root.accent))
+    }
+    // Swatches for Settings: each choice as this scheme would solve it.
+    readonly property var accents: root.washi?.accents ?? ({})
+    readonly property var highlights: root.washi?.highlights ?? ({})
+    // A choice as this scheme would solve it, for previews of looks that are not in use (saved themes).
+    // A custom hue other than the one in use is not in the palette: Lume solves it the same way, close to the solver.
+    function accentFrom(choice: string, hue: real): color {
+        if (choice === "custom" && Number(hue) !== Number(root.appearance?.theme?.accentHue ?? 212))
+            return root.readableAccent(Qt.hsla(root.wrapHue(hue, 212), 0.7, 0.5, 1))
+        return Qt.color(root.accents[choice] ?? root.accents.blue ?? "#a8c7fa")
+    }
+    function highlightFrom(choice: string, hue: real, accent: color): color {
+        if (choice === "accent") return accent
+        if (choice === "custom" && Number(hue) !== Number(root.appearance?.theme?.highlightHue ?? 32))
+            return root.readableHighlight(Qt.hsla(root.wrapHue(hue, 32), 0.92, 0.58, 1))
+        return Qt.color(root.highlights[choice] ?? root.highlights.orange ?? "#ff9f0a")
+    }
+    readonly property var animePalettes: ({
+        sakura: { label: "Sakura", accent: "#f2a7d6", highlight: "#ff86b4" },
+        "neo-tokyo": { label: "Neo Tokyo", accent: "#4fd8ec", highlight: "#ff4fa3" },
+        "unit-01": { label: "Unit-01", accent: "#b39ddb", highlight: "#8fd06a" },
+        "magical-girl": { label: "Magical Girl", accent: "#ff6b8a", highlight: "#ffca5c" },
+        "spirit-forest": { label: "Spirit Forest", accent: "#5fd39a", highlight: "#f0b95c" }
+    })
+    readonly property string animeDefaultPalette: "sakura"
+    function animePaletteEntry(palette: string): var {
+        const name = String(palette ?? "")
+        return Object.prototype.hasOwnProperty.call(root.animePalettes, name)
+            ? root.animePalettes[name] : root.animePalettes[root.animeDefaultPalette]
+    }
+    // An anime palette pulls the solved colour toward its own, then is solved again: it never costs legibility.
+    function animeBlend(base: color, seed: color, strength: real): color {
+        const raw = Number(strength)
+        const t = isNaN(raw) ? 0 : Math.max(0, Math.min(1, raw))
+        return t <= 0 ? base : ColorUtils.mix(base, seed, 1 - t)
+    }
+    function animeAccent(base: color, palette: string, strength: real): color {
+        return root.readableAccent(root.animeBlend(base, Qt.color(root.animePaletteEntry(palette).accent), strength))
+    }
+    function animeHighlight(base: color, palette: string, strength: real): color {
+        return root.readableHighlight(root.animeBlend(base, Qt.color(root.animePaletteEntry(palette).highlight), strength))
+    }
+    readonly property var animeLayer: root.appearance?.anime ?? ({})
+    readonly property bool animeEnabled: Boolean(root.animeLayer?.enabled ?? false)
+    readonly property string animePaletteName: {
+        const name = String(root.animeLayer?.palette ?? root.animeDefaultPalette)
+        return Object.prototype.hasOwnProperty.call(root.animePalettes, name) ? name : root.animeDefaultPalette
+    }
+    readonly property real animeStrength: {
+        const raw = Number(root.animeLayer?.strength ?? 0)
+        return isNaN(raw) ? 0 : Math.max(0, Math.min(1, raw / 100))
+    }
+    readonly property bool animeHighlightOn: Boolean(root.animeLayer?.highlight ?? false)
+    // The accent: actions, selection, links, live marks. 4.5:1 on every ground, and on paper a fill under white ink.
+    readonly property string accentChoice: IrisDesign.colourChoice("accent", String(root.appearance?.accent ?? "ink"), root.followsTheme)
+    readonly property string highlightChoice: IrisDesign.colourChoice("highlight", String(root.appearance?.highlight ?? "orange"), root.followsTheme)
+    readonly property color baseAccent: root.vivid(root.accentFrom(root.accentChoice, root.appearance?.theme?.accentHue ?? 212), false)
+    // The person's hue at the strength Apple gives an accent (systemBlue's), not the solver's pastel: #accbeb next to
+    // #dfe7ef ink made a chosen word, a lit switch and a thumb read as the rest (his 10-30). A grey accent stays grey;
+    // a Design with its own palette (AIRISU's vermilion) keeps it exact.
+    function vivid(tint: color, fill: bool): color {
+        if (IrisDesign.current !== "nihil" || tint.hslSaturation < 0.12) return tint
+        return Qt.hsla(tint.hslHue, Math.max(0.78, tint.hslSaturation), root.light ? (fill ? 0.5 : 0.42) : (fill ? 0.58 : 0.68), 1)
+    }
+    // Prism's light (his 11-07: "los colores de prism deben de ser estéticos, el beam y el contorno, no colores fuertes ni
+    // simulados; todos los colores de la shell deben de salir de un lugar"): the one place the beam, its fan, a slab's rim
+    // and the spectrum on a widget's data take their colours from. A spectrum's order (violet to red) at one even lightness
+    // and a calm chroma in OKLCH, each band leaning to the person's accent: the band nearest its hue carries the most
+    // colour, the far side of the wheel the least, so the light reads as the theme's own and never as neon.
+    readonly property var prismStops: {
+        const seed = Qt.color(root.baseAccent)
+        const seedHue = root.oklchHue(seed)
+        const lightness = root.light ? 0.66 : 0.82
+        // iris-literal: OKLCH hues of a prism's bands, violet to red
+        return [305, 268, 225, 160, 105, 62, 25].map(hue => {
+            const near = 0.5 + 0.5 * Math.cos((hue - seedHue) * Math.PI / 180)
+            return root.oklch(lightness, (root.light ? 0.07 : 0.06) + 0.06 * near, hue)
+        })
+    }
+    // OKLCH to an sRGB colour, the chroma eased back until it fits the gamut.
+    function oklch(l: real, c: real, h: real): color {
+        const toSrgb = x => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055
+        for (let chroma = c; chroma >= 0; chroma -= 0.005) {
+            const a = chroma * Math.cos(h * Math.PI / 180), b = chroma * Math.sin(h * Math.PI / 180)
+            const l_ = Math.pow(l + 0.3963377774 * a + 0.2158037573 * b, 3)
+            const m_ = Math.pow(l - 0.1055613458 * a - 0.0638541728 * b, 3)
+            const s_ = Math.pow(l - 0.0894841775 * a - 1.2914855480 * b, 3)
+            const rgb = [4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_,
+                -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_,
+                -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_]
+            if (rgb.every(v => v >= -0.0005 && v <= 1.0005) || chroma < 0.005) {
+                const [r, g, bl] = rgb.map(v => toSrgb(Math.max(0, Math.min(1, v))))
+                return Qt.rgba(r, g, bl, 1)
+            }
+        }
+        return Qt.rgba(l, l, l, 1)
+    }
+    // A colour's OKLCH hue in degrees.
+    function oklchHue(c: color): real {
+        const lin = x => x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
+        const r = lin(c.r), g = lin(c.g), b = lin(c.b)
+        const l_ = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+        const m_ = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+        const s_ = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+        const a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_
+        const bb = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_
+        return (Math.atan2(bb, a) * 180 / Math.PI + 360) % 360
+    }
+    // Under Signal the accent is the ink itself: what was an accent mark reads as ink, and an accent fill with its
+    // own ink on it turns into the inverted plate (ink fill, paper word), Nothing's "chosen".
+    readonly property color accent: root.animeEnabled
+        ? root.animeAccent(root.baseAccent, root.animePaletteName, root.animeStrength) : root.signalChosen ? root.signalInk : root.mono ? root.text : root.baseAccent
+    // The person's accent as Apple draws it, also where Nothing's ink took `accent` (a place that keeps Apple).
+    readonly property color appleAccent: root.animeEnabled || !root.mono ? root.accent : root.baseAccent
+    readonly property color appleAccentFill: !root.mono ? root.accentFill : root.washi?.accentFill ? Qt.color(root.washi.accentFill) : root.baseAccent
+    readonly property color appleInkOnAccentFill: !root.mono ? root.inkOnAccentFill : root.washi?.onAccentFill ? Qt.color(root.washi.onAccentFill) : root.role("onAccent", "#101318")
+    readonly property color inkOnAccent: root.animeEnabled || root.signalChosen || IrisDesign.current === "nihil" && !root.mono ? root.onTintFor(root.accent) : root.mono ? root.paper : root.role("onAccent", "#101318")
+    // Colour over imagery (the lock, artwork veils), which stays dark in every scheme: the night palette's roles.
+    readonly property color mediaInk: root.neutral(Qt.color(root.washiDark?.text ?? "#f2f2f0"))
+    readonly property color accentOnMedia: root.animeEnabled ? Lume.mark(root.accent, 0.35, 0, false, 3)
+        : root.mono ? root.mediaInk : Qt.color(root.washiDark?.accent ?? "#a8c7fa")
+    readonly property color highlightOnMedia: root.mono ? root.mediaInk : Qt.color(root.washiDark?.highlight ?? "#ff9f0a")
+    // Where you are: the accent's tonal container, and the accent's hue as ink on it.
+    // A filled accent under the pointer: a tenth of its own ink over it.
+    readonly property color accentHover: ColorUtils.mix(root.accent, root.inkOnAccent, 0.9)
+    // The lit top of a tile's gradient (squircle icons, section marks): one step for every tile.
+    function tileTop(c: color): color { return Qt.lighter(c, 1.18) }
+    readonly property color accentContainer: root.mono ? root.text : root.role("accentContainer", "#1f3a5f")
+    readonly property color inkOnAccentContainer: root.mono ? root.paper : root.role("onAccentContainer", "#d6e3ff")
+    // The highlight: the glanced detail (a clock separator, a day number, a timer). A figure: 3:1 on every ground.
+    readonly property color baseSecondaryAccent: root.highlightFrom(root.highlightChoice, root.appearance?.theme?.highlightHue ?? 32, root.baseAccent)
+    readonly property color secondaryAccent: {
+        if (root.mono && !(root.animeEnabled && root.animeHighlightOn)) return root.text
+        const base = root.baseSecondaryAccent
+        return root.animeEnabled && root.animeHighlightOn
+            ? root.animeHighlight(base, root.animePaletteName, root.animeStrength) : base
+    }
+    // The clock's own accent, the one the person picked for its separator and day (`nihil.bar.clockAccent`): every
+    // surface that sets the day as a figure wears it, so the Control Center and Today never disagree with the Island.
+    readonly property color clockAccent: ({ accent: root.accent, plain: root.text })[String(root.options?.bar?.clockAccent ?? "highlight")]
+        ?? root.secondaryAccent
+    // A wallpaper or theme accent already is the apps' palette.
+    readonly property bool appsShareAccent: Boolean(root.appearance?.accentForApps ?? true)
+        && !["theme", "wallpaper"].includes(root.accentChoice)
+    readonly property color appsAccent: root.baseAccent
+    readonly property string auraName: ["off", "subtle", "vivid"].includes(root.appearance?.aura ?? "")
+        ? root.appearance.aura : "subtle"
+    readonly property real auraStrength: ({ off: 0, subtle: 0.2, vivid: 0.36 })[root.auraName]
+    readonly property color wallpaperLight: root.afterglow ? root.vividHighlight(Qt.color(root.afterglowPalette.bloom), root.accent)
+        : root.leak ? root.vividHighlight(Qt.color(root.leakPalette.glow), root.accent)
+        : root.vividHighlight(Appearance.wallpaperDominantColor, root.vividHighlight(Appearance.colors.colPrimary, root.accent))
+    function surfaceWidth(id: string, fallback: int): int {
+        const width = Number(root.appearance?.surfaces?.[id]?.width ?? 0)
+        return width > 0 ? Math.round(width * root.density) : fallback
+    }
+    readonly property int lightContour: Math.max(4, Math.round(6 * root.density))
+    readonly property int lightReach: Math.round(92 * root.density * root.tweak("lightReach", 0.5, 3))
+    function aura(light: color): color { return ColorUtils.applyAlpha(light, root.auraStrength * light.a) }
+    function auraFading(light: color): color { return ColorUtils.applyAlpha(light, root.auraStrength * light.a * 0.35) }
+    function skyLight(glyph: string): color {
+        switch (glyph) {
+        case "clear_day": return root.identity.orange
+        case "partly_cloudy_day": return root.identity.sky
+        case "cloud": case "foggy": return root.identity.gray
+        case "rainy": return root.identity.blue
+        case "thunderstorm": return root.identity.purple
+        case "weather_snowy": case "cloudy_snowing": case "weather_hail": return root.identity.sky
+        case "bedtime": case "partly_cloudy_night": return root.identity.indigo
+        default: return root.wallpaperLight
+        }
+    }
+    readonly property string badgeStyle: String(root.theme?.badge ?? "alert")
+    readonly property color badge: root.badgeStyle === "accent" ? root.accent
+        : root.badgeStyle === "highlight" ? root.secondaryAccent
+        : root.badgeStyle === "neutral" ? root.surfaceHighestOpaque
+        : root.dangerFill
+    readonly property color inkOnBadge: root.badgeStyle === "alert" ? root.inkOnDangerFill
+        : root.badgeStyle === "neutral" ? root.text
+        : root.badgeStyle === "highlight" ? root.onTintFor(root.secondaryAccent) : root.inkOnAccent
+    readonly property color badgeInk: root.badgeStyle === "alert" ? root.danger
+        : root.badgeStyle === "neutral" ? root.text : root.badge
+    // Status: done and alert read as text (4.5:1), a warning as a mark (3:1); the same hues in every scheme.
+    // Under Signal done is ink, and a warning and an error are the signal: one colour that means "look".
+    readonly property color success: root.mono ? root.text : root.role("success", "#8de0a3")
+    readonly property color warning: root.mono ? root.signalInk : root.role("warning", "#ffb340")
+    readonly property color danger: root.mono ? root.signalInk : root.role("danger", "#ff6961")
+    // The night palette's red: a veil over imagery stays dark in every scheme.
+    readonly property color dangerOnMedia: root.mono ? Lume.mark(root.signal, 0.35, 0, false, 4.5) : Qt.color(root.washiDark?.danger ?? "#ff6961")
+    readonly property color inkOnDanger: root.mono ? root.onTintFor(root.signalInk) : root.role("onDanger", "#160000")
+    // A filled alert (a badge): the shu pigment with its own ink; `danger` stays the red that reads as text.
+    // The accent as a filled shape (a seal, a lit plate): the solver's pigment, which a Design palette keeps exact
+    // (AIRISU's vermilion hanko) where the accent that is text has to move to read.
+    readonly property color accentFill: root.signalChosen ? root.signal : root.mono || !root.washi?.accentFill ? root.accent : root.vivid(Qt.color(root.washi.accentFill), true)
+    readonly property color inkOnAccentFill: root.signalChosen ? root.inkOnSignal : root.mono || !root.washi?.onAccentFill ? root.inkOnAccent
+        : IrisDesign.current === "nihil" ? root.onTintFor(root.accentFill) : Qt.color(root.washi.onAccentFill)
+    readonly property color dangerFill: root.mono ? root.signal : root.role("dangerFill", "#e57766")
+    readonly property color inkOnDangerFill: root.mono ? root.inkOnSignal : root.role("onDangerFill", "#22110d")
+    function line(base: color): color {
+        const t = root.tweak("lines", 0, 2)
+        return t <= 1 ? ColorUtils.mix(base, root.surfaceOpaque, t) : ColorUtils.mix(root.text, base, (t - 1) * 0.35)
+    }
+    function ruleOf(reference: color): color {
+        const k = Math.max(0, Math.min(1, (reference.r + reference.g + reference.b) / 3 / 0.96))
+        return ColorUtils.mix(root.text, root.surfaceOpaque, k)
+    }
+    // The sheerest ink that lands on `target` over `base`: a fill instead of a plate. Laid on the body it reads the same
+    // as the opaque colour, and what the body draws under it (its lit edge, the light off the wallpaper) still shows.
+    function liftOver(target: color, base: color): color {
+        const t = Qt.color(target), b = Qt.color(base)
+        const need = (tc, bc) => tc > bc ? (tc - bc) / Math.max(0.0001, 1 - bc) : tc < bc ? (bc - tc) / Math.max(0.0001, bc) : 0
+        const a = Math.max(need(t.r, b.r), need(t.g, b.g), need(t.b, b.b))
+        if (a < 0.002) return Qt.rgba(b.r, b.g, b.b, 0)
+        const ink = (tc, bc) => Math.max(0, Math.min(1, bc + (tc - bc) / a))
+        return Qt.rgba(ink(t.r, b.r), ink(t.g, b.g), ink(t.b, b.b), Math.min(1, a) * t.a)
+    }
+    // Rules are ink, never paint: on solid the scheme's rule as the fill it is over the body, so Lines at 0 draws no
+    // line (it drew the body's own colour, a dark crack across every card and over the lit edge).
+    readonly property color hairline: root.text
+    readonly property color hairlineStrong: root.glassy ? ColorUtils.applyAlpha(root.text, Math.min(0.45, 0.14 * root.tweak("lines", 0, 2)))
+        : root.liftOver(root.line(root.ruleOf(Qt.color(root.preset.hairlineStrong))), root.surfaceOpaque)
+    readonly property color scrim: Appearance.colors.colScrim
+
+    function fillAlpha(level: real): real { return Math.min(0.5, level * root.preset.fill * root.tweak("fill", 0.3, 2)) }
+    // Fills are the ink itself at low alpha: sumi in the paper's hue darkens paper in its own colour, never a grey film.
+    readonly property color fillInk: root.afterglow && !root.light
+        ? ColorUtils.mix(Qt.color(root.afterglowPalette.light), root.text, 0.5 * root.afterglowAtmosphere)
+        : root.tinted(root.role("fillInk", root.text.toString()), 0.22)
+    readonly property color fillQuiet: root.surfaceOpaque
+    readonly property color fill: root.surfaceOpaque
+    // A plate Design (AIRISU `hover: "plate"`) answers the pointer with an opaque plate of ink laid on the body, clearly
+    // above every resting fill and crisp at its cut, never a film the wallpaper shows through; pressed, a step brighter.
+    readonly property bool plateHover: IrisDesign.trait("hover") === "plate"
+    function hoverPlate(ink: color, level: real): color {
+        const base = Qt.color(root.bodySurface)
+        return ColorUtils.mix(Qt.rgba(Qt.color(ink).r, Qt.color(ink).g, Qt.color(ink).b, 1), Qt.rgba(base.r, base.g, base.b, 1), level)
+    }
+    // The plate is laid in the accent's pigment, not the ink's: an ink plate on a coloured body was the grey hover of any
+    // dark theme, while a coat of the chosen pigment reads as the same lacquer warmed (below the chosen row's full coat).
+    readonly property color fillHover: root.surfaceHighestOpaque
+    readonly property color fillActive: ColorUtils.mix(root.text, root.surfaceOpaque, 0.3)
+    // A strong fill (a slider's level, a scrubber) is ink, not a film: the body's hue at 60 % turned paper's levels brown.
+    // On paper the strong fill is ink: at the night's 0.6 it read as a dark grey slab beside the controls; 0.46 is a pencil line.
+    // A level's fill (sliders, scrubbers, the Island's levels). Dark at 0.6 read as a disabled grey beside lit tiles.
+    readonly property color fillStrong: root.text
+    // The palette solves the accent as text on this wash (washi.go): it stays within that, whatever Fills says.
+    function tintFill(tint: color): color { return ColorUtils.applyAlpha(tint, Math.min(0.15, root.fillAlpha(0.13))) }
+    // The unread part of a reading (rings, gauges): the reading's own colour, faint but present on every material.
+    function trackOf(tint: color): color { return ColorUtils.applyAlpha(tint, root.fillAlpha(0.38)) }
+    // A reading's arc fades in over its first stroke of length: a round cap alone drew a dot on an empty ring.
+    function arcInk(tint: color, length: real, stroke: real): color { return ColorUtils.applyAlpha(tint, tint.a * Math.max(0, Math.min(1, length / Math.max(1, stroke)))) }
+    function tintFillHover(tint: color): color { return ColorUtils.applyAlpha(tint, root.fillAlpha(0.2)) }
+    function tintBorder(tint: color): color { return ColorUtils.applyAlpha(tint, 0.7) }
+
+    function textLevel(level: real): real { return Math.min(1, level * root.tweak("contrast", 0.6, 1.5)) }
+    function inkLevel(level: real, glassFloor: real): real { return Math.max(root.textLevel(level), root.glassy ? glassFloor : 0) }
+    readonly property color textStrong: ColorUtils.applyAlpha(root.text, root.textLevel(root.preset.textStrong))
+    readonly property color textSecondary: ColorUtils.applyAlpha(root.quietInk, root.inkLevel(Math.max(0.66, root.preset.textSecondary), 0.8))
+    readonly property color textTertiary: ColorUtils.applyAlpha(root.quietInk, root.inkLevel(Math.max(0.5, root.preset.textTertiary), 0.6))
+    function strongOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.textLevel(root.preset.textStrong)) }
+    function secondaryOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.inkLevel(Math.max(0.66, root.preset.textSecondary), 0.8)) }
+    function tertiaryOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.inkLevel(Math.max(0.5, root.preset.textTertiary), 0.6)) }
+    readonly property color border: root.text
+    readonly property color borderStrong: root.text
+    readonly property string rimTint: String(root.theme?.rimTint ?? "neutral")
+    // Glass keeps its lit edge whatever this is: without it glass vanishes over a dark desktop.
+    readonly property string edgeStyle: root.afterglow ? "none" : IrisDesign.edge.length > 0 ? IrisDesign.edge
+        : !root.textured && root.bodyRecipe.edge === "light" ? "light"
+        : !(root.theme?.rim ?? true) ? "none" : String(root.theme?.edges ?? "line") === "light" ? "light" : "line"
+    readonly property bool edgeLit: root.edgeStyle === "light" && (root.glassEdgeLight > 0 || root.glassEdgeLine > 0)
+    // Bodies (Island, Dock, bubbles, panels) wear the look's edge: Nothing's hairline, Synth's machined edge, Gel's lit rim.
+    readonly property color rim: root.look === "nothing" ? ColorUtils.applyAlpha(root.text, root.light ? 0.24 : 0.2)
+        : root.look === "synth" ? root.synthKeyEdge
+        : root.look === "gel" ? Qt.rgba(1, 1, 1, root.light ? 0.8 : 0.32) // iris-literal: gel's lit rim
+        : root.lineRim
+    readonly property color lineRim: root.edgeStyle !== "line" ? Qt.color("transparent")
+        : root.rimTint === "accent" ? ColorUtils.applyAlpha(root.accent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
+        : root.rimTint === "highlight" ? ColorUtils.applyAlpha(root.secondaryAccent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
+        : root.border
+    // One edge width for every body, the line and the lit glass edge alike, counted in device pixels: 1 is the sharpest
+    // line the screen can draw at any scale (a logical pixel at 1.5x was a smeared 1.5 px band). Two knobs used to
+    // disagree: the line at 1 px, the glass edge at 2.
+    readonly property int edgeWidth: Math.max(1, Math.min(3, Math.round(IrisDesign.edgeWidth > 0 ? IrisDesign.edgeWidth : Number(root.theme?.rimWidth ?? 1))))
+    // One device pixel in logical pixels, on the densest screen (a finer line on the others beats a blurred one there).
+    readonly property real deviceRatio: Math.max(1, ...(Quickshell.screens ?? []).map(s => Number(s?.devicePixelRatio ?? 1) || 1))
+    readonly property real devicePx: 1 / root.deviceRatio
+    readonly property real glow: Math.max(0, Math.min(1, Number(root.theme?.glow ?? 0) / 100))
+    readonly property color onTint: "#ffffff"
+    readonly property color inkOnPale: "#101318"
+    // Ink on any filled colour: white or near-black, whichever reads more (lightness alone sent white onto yellow).
+    function onTintFor(tint: color): color {
+        return ColorUtils.contrastRatio(root.onTint, tint) >= ColorUtils.contrastRatio(root.inkOnPale, tint) ? root.onTint : root.inkOnPale
+    }
+
+    // Content on a light backdrop (a widget over a bright wallpaper): the Island's ink turned over.
+    // Near-black ink, frost instead of veil, and each accent's own hue taken deep enough to read.
+    readonly property color inkOnLight: Qt.color(root.washiLight?.text ?? "#1d1d1f")
+    readonly property color inkOnLightSoft: ColorUtils.applyAlpha(root.inkOnLight, 0.78)
+    readonly property color inkOnLightMuted: ColorUtils.applyAlpha(root.inkOnLight, 0.62)
+    readonly property color inkOnLightFaint: ColorUtils.applyAlpha(root.inkOnLight, 0.42)
+    readonly property color frost: Qt.color(root.washiLight?.materials?.black ?? "#f5f5f7")
+    // The light ink of a bare widget over a dark wallpaper: it does not follow the scheme, the wallpaper decides.
+    readonly property color inkOnDark: Qt.color(root.washiDark?.text ?? "#f5f5f7")
+    readonly property real frostShadow: 0.5
+    // A colour on a light backdrop Lume has not read: its hue at 3:1 on the light frost, as every mark on paper is solved.
+    function deepAccent(seed, fallback): color {
+        const c = Qt.color(seed)
+        if (!c.valid || c.hslHue < 0 || c.hslSaturation < 0.1) return fallback ?? root.inkOnLight
+        return Lume.mark(c, Math.pow(ColorUtils.relativeLuminance(root.frost), 1 / 2.2), 0, true, 3)
+    }
+    // A coloured mark (state, identity, alert) on a bare backdrop Lume has read: its hue, held at `contrast` (3 for glyphs, 4.5 for figures).
+    function markOn(seed: color, sample: var, darkInk: bool, contrast: real): color {
+        return sample ? Lume.mark(seed, sample.level, sample.spread, darkInk, contrast) : seed
+    }
+    function fillQuietOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.fillAlpha(0.08)) }
+    function fillOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.fillAlpha(0.12)) }
+    function fillHoverOf(ink: color): color { return root.plateHover ? root.hoverPlate(ink, 0.24) : ColorUtils.applyAlpha(ink, root.fillAlpha(0.18)) }
+    function fillActiveOf(ink: color): color { return root.plateHover ? root.hoverPlate(ink, 0.34) : ColorUtils.applyAlpha(ink, root.fillAlpha(0.26)) }
+    function hairlineOf(ink: color): color { return ColorUtils.applyAlpha(ink, Math.min(0.3, 0.14 * root.tweak("lines", 0, 2))) }
+    // The frost a light-backdrop widget needs so its darkest patches still carry dark ink: the same
+    // solve as legibleVeil, mirrored (4.5:1 glass, 3:1 transparent, floor scaled by the opacity).
+    function legibleFrost(material: string, level: real, spread: real, strength: real): real {
+        const legible = Lume.frost(level, spread, root.materialSpread[material] ?? 1, root.frost, root.inkOnLight,
+            root.materialContrast[material] ?? 4.5, (root.materialVeil[material] ?? 0.3) * strength, 0.86)
+        if (!root.light || level < 0 || strength <= 0) return legible
+        return Math.max(legible, root.paperFloor(root.frost, level, strength), material === "clear" ? 0 : root.paperGlass * strength)
+    }
+    // A paper scheme's frost stays a light paper over a dark region (a thinner one is a grey film or takes the wallpaper's
+    // hue), but it is still glass: the composite may sit a step under the paper and the frost never passes Lume's 0.86
+    // cap, so the blurred wallpaper always shows. Held at the paper itself (0.95) it read as solid.
+    // Glass on paper reads as frosted paper whatever the wallpaper: the least frost a legible solve allows (0.17 over a
+    // mid wallpaper) left a clear pane glowing with the wallpaper's colour instead of a light widget.
+    readonly property real paperGlass: 0.66
+    function paperFloor(paper: color, level: real, strength: real): real {
+        const paperLevel = Math.pow(ColorUtils.relativeLuminance(paper), 1 / 2.2)
+        const target = (paperLevel - 0.06) * Math.min(1, strength)
+        return level < target ? Math.min(0.86, (target - level) / Math.max(0.001, paperLevel - level)) : 0
+    }
+
+    readonly property color veilLight: ColorUtils.applyAlpha(root.darkSurfaceOpaque, 0.22)
+    readonly property color veil: ColorUtils.applyAlpha(root.darkSurfaceOpaque, 0.42)
+    readonly property color veilStrong: ColorUtils.applyAlpha(root.darkSurfaceOpaque, 0.62)
+    readonly property color veilHeavy: ColorUtils.applyAlpha(root.darkSurfaceOpaque, 0.76)
+    // Blurred artwork under surface text (the media tiles): the veil takes the scheme, so their ink still reads.
+    readonly property color artVeil: root.light ? ColorUtils.applyAlpha(root.surfaceOpaque, 0.56) : root.veil
+    readonly property color artVeilHeavy: root.light ? ColorUtils.applyAlpha(root.surfaceOpaque, 0.84) : root.veilHeavy
+    function glowing(alpha: real): color {
+        const ink = ColorUtils.mix(root.accent, Qt.color("black"), root.glow)
+        return ColorUtils.applyAlpha(ink, Math.min(0.9, alpha * (1 + 0.4 * root.glow)))
+    }
+    readonly property real shadowThrough: root.glassy ? 0.4 : 1
+    readonly property real shadowLight: root.ink ? 0.5 : root.light ? 0.55 : 1
+    // Umbriel blurs every pixel of a shell surface above its rule's alpha threshold (0.1, 15-umbriel.sh): a shadow over
+    // it would blur a ring outside each body, so under its blur the shadow stays below that line.
+    readonly property real shadowCeiling: root.glassCompositor && CompositorService.isUmbriel ? 0.09 : 0.9
+    // Printed, never soft: the shadow is solid ink, thrown down and to the right.
+    readonly property color shadow: root.text
+    readonly property real shadowThrow: Math.round(6 * root.density)
+    readonly property color onMedia: "#ffffff"
+    readonly property color onMediaSecondary: ColorUtils.applyAlpha(root.onMedia, 0.72)
+    // The visualizer's one look (Now Playing › Visualizer): its drawing, how many bands, and whose colour.
+    readonly property var visualizerOptions: Config.options?.nihil?.player?.visualizer ?? ({})
+    readonly property string visualizerStyle: ["capsules", "rise", "dots", "wave", "ring"].includes(String(root.visualizerOptions?.style ?? ""))
+        ? String(root.visualizerOptions.style) : "capsules"
+    readonly property int visualizerBars: Math.max(3, Math.min(9, Math.round(Number(root.visualizerOptions?.bars ?? 5))))
+    readonly property string visualizerColour: String(root.visualizerOptions?.colour ?? "art")
+    // The artwork's colour as a mark: its most colourful swatch, lifted to read on the Island; ink when the art has none.
+    function artTintOf(colors): color {
+        let best = null
+        let bestScore = -1
+        for (const c of (colors ?? [])) {
+            const score = Math.max(0, c.hslSaturation) * (1 - Math.abs(c.hslLightness - 0.5))
+            if (score > bestScore) { bestScore = score; best = c }
+        }
+        if (!best || best.hslSaturation < 0.14 || best.hslHue < 0) return root.text
+        return Qt.hsla(best.hslHue, Math.max(0.5, best.hslSaturation), Math.max(0.64, Math.min(0.76, best.hslLightness + 0.22)), 1)
+    }
+    // `art` is the host's own colour (the artwork's tint on the Island), the rest are NiHiL's.
+    function visualizerTint(art: color): color {
+        return root.visualizerColour === "accent" ? root.accent : root.visualizerColour === "highlight" ? root.secondaryAccent
+            : root.visualizerColour === "ink" ? root.text : art
+    }
+    // What a sound device is, read from its own name: earbuds, headphones, a screen's speakers or a speaker.
+    function soundDeviceGlyph(node, input: bool): string {
+        if (input) return "mic"
+        const name = String(node?.name ?? "") + " " + String(node?.description ?? "")
+        return /airpod|buds/i.test(name) ? "earbuds" : /head|bluez/i.test(name) ? "headphones"
+            : /hdmi|displayport/i.test(name) ? "tv" : "speaker"
+    }
+    readonly property color onMediaTertiary: ColorUtils.applyAlpha(root.onMedia, 0.56)
+    readonly property color onMediaFill: ColorUtils.applyAlpha(root.onMedia, 0.2)
+    readonly property color onMediaFillHover: ColorUtils.applyAlpha(root.onMedia, 0.3)
+    readonly property color mediaScrim: Qt.rgba(0, 0, 0, 0.34)
+    readonly property color mediaGlass: Qt.rgba(0, 0, 0, 0.16)
+    readonly property color plateShadow: root.glowing(Math.min(0.9, 0.36 * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
+    // A grey sky is no light: it only greyed the face. On paper the wash is half as strong, a tint and not a film.
+    // On paper a face's colour is a faint pigment wash, never a lamp behind it.
+    function skyWash(light: color): color { return ColorUtils.applyAlpha(light, light.hslSaturation < 0.15 ? 0 : root.light ? 0.1 : 0.46) }
+    function skyWashFade(light: color): color { return ColorUtils.applyAlpha(light, 0.05) }
+    readonly property color glassShadow: Qt.rgba(0, 0, 0, Math.min(0.6, 0.22 * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
+    readonly property real glassBlur: 1
+    readonly property real glassWash: 0.55
+    readonly property color clearRim: ColorUtils.applyAlpha(root.text, 0.07)
+    readonly property int glassBlurMax: 48
+    readonly property real glassSaturation: 0.3
+    // The glass a widget shows the wallpaper through gains or loses colour with the scheme's Widget colour.
+    // On paper the frost is light: a saturation boost under it glows (a lit pane of the wallpaper's colour), so it stays neutral.
+    readonly property real widgetGlassSaturation: root.light ? Math.min(0, (root.widgetColour - 1) * 0.5)
+        : Math.max(-1, Math.min(1, root.glassSaturation + (root.widgetColour - 1) * 0.5))
+    readonly property var materialVeil: ({ glass: 0.3, clear: 0.04, panel: 0.3 })
+    // "panel": a surface that is mostly reading (Settings): 7:1 for its main ink so secondary ink still reads.
+    readonly property var materialContrast: ({ glass: 4.5, clear: 3, panel: 7 })
+    readonly property var materialSpread: ({ glass: 1.0, clear: 1.2, panel: 1.2 })
+    // Lume solves the veil (services/Lume.qml); the materials' contrast targets and floors are NiHiL's.
+    function legibleVeil(material: string, level: real, spread: real, strength: real): real {
+        const contrast = root.materialContrast[material] ?? 4.5
+        const floor = (root.materialVeil[material] ?? 0.3) * strength
+        // Light: the backing is a frost and the ink dark, so the solve is the mirrored one.
+        return root.light ? Math.max(Lume.frost(level, spread, root.materialSpread[material] ?? 1, root.surfaceOpaque, root.text, contrast, floor, 0.86),
+                level < 0 || strength <= 0 || material === "clear" ? 0 : root.paperFloor(root.surfaceOpaque, Math.max(0, level - spread), strength),
+                material === "clear" || strength <= 0 ? 0 : root.paperGlass * strength)
+            : Lume.veil(level, spread, root.materialSpread[material] ?? 1, root.surfaceOpaque, root.text, contrast, floor, 0.86)
+    }
+    // A place whose picture is only its backdrop (Session, Settings' welcome, the desktop menu's head) wears the scheme
+    // over it: a frost of paper and the scheme's ink in Light and Ink, the dark veil and white ink in Dark (his 10-30: Ink
+    // left them black). Pictures that are the content (covers, photos, thumbnails) keep the media ink.
+    readonly property color sceneSurface: root.light ? root.surfaceOpaque : root.darkSurfaceOpaque
+    readonly property color onScene: root.light ? root.text : root.onMedia
+    readonly property color onSceneSecondary: ColorUtils.applyAlpha(root.onScene, 0.72)
+    readonly property color onSceneTertiary: ColorUtils.applyAlpha(root.onScene, 0.56)
+    readonly property color onSceneFill: ColorUtils.applyAlpha(root.onScene, root.light ? 0.1 : 0.2)
+    readonly property color onSceneFillHover: ColorUtils.applyAlpha(root.onScene, root.light ? 0.16 : 0.3)
+    readonly property color accentOnScene: root.light ? root.accent : root.accentOnMedia
+    readonly property color dangerOnScene: root.light ? root.danger : root.dangerOnMedia
+    readonly property color sceneVeil: root.light ? ColorUtils.applyAlpha(root.surfaceOpaque, 0.62) : root.veil
+    readonly property color sceneVeilStrong: root.light ? ColorUtils.applyAlpha(root.surfaceOpaque, 0.78) : root.veilStrong
+    function sceneVeilOver(level: real, spread: real): real {
+        return root.light ? Math.max(0.62, root.legibleVeil("panel", level, spread, 1)) : root.mediaVeil(level, spread)
+    }
+    // A Place over imagery keeps its dark veil and onMedia ink in every scheme (§0.3); Lume solves how thick,
+    // at the reading contrast so the secondary ink still holds. `veil` is the floor: a dark wallpaper looks as before.
+    function mediaVeil(level: real, spread: real): real {
+        return Lume.veil(level, spread, root.materialSpread.panel, root.darkSurfaceOpaque, root.onMedia,
+            root.materialContrast.panel, root.veil.a, 0.86)
+    }
+
+    // Lume for Places: a Place keeps the glass tint the person chose and plates only its reading surfaces
+    // (sidebar, cards), as thick as what sits behind it on the focused output needs. Under Blur with windows
+    // open that is unknown, so it is read as a mixed desktop of windows.
+    readonly property string placeOutput: String(GlobalStates.focusedScreen?.name ?? "")
+    readonly property bool placeCovered: root.glassCompositor && Lume.covered(root.placeOutput)
+    readonly property real placePlate: {
+        if (!root.glassy) return 0
+        let level = 0.72, spread = 0.18
+        if (!root.placeCovered) {
+            const screen = Lume.screenNamed(root.placeOutput)
+            const sample = screen ? Lume.read(root.placeOutput, screen.width * 0.2, screen.height * 0.12,
+                screen.width * 0.6, screen.height * 0.76) : null
+            if (!sample) return 0
+            level = sample.level
+            spread = sample.spread
+        }
+        return Lume.plateOver(root.glassTint, root.legibleVeil("glass", level, spread, 0))
+    }
+    readonly property color readingPlate: ColorUtils.applyAlpha(root.surfaceOpaque, root.placePlate)
+    // On solid a reading surface is a fill too, the same colour on the bare body: as an opaque plate the sidebar hid the
+    // body's lit edge and its light on one half of the window and kept them on the other.
+    // Flat at night is black (his 11-07): a reading surface is the black a breath lifted, as glass's white veil reads
+    // over its dark sheet, never iOS's #1c1c1e cell, which read as opaque grey slabs on the black body.
+    readonly property color flatLift: ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.06) // iris-literal: the black's lift, glass's veil without glass
+    readonly property color readingCard: root.glassy ? Lume.stack(root.readingPlate, root.surfaceHigh)
+        : root.textured ? root.surfaceHigh : !root.light ? root.flatLift : root.liftOver(root.surfaceHigh, root.surfaceOpaque)
+    // A group of Settings rows over the reading surface (a form's plate): a step out of it, lighter in both schemes,
+    // as a grouped form sits over its pane (macOS Tahoe). readingCard alone left the groups a shade from the sheet.
+    // On glass the reading sheet carries legibility and the plate is a veil of white over it (nearly opaque in light, a
+    // breath in dark); mixing readingCard (2 % alpha in light) toward white kept its dark rgb and gave grey slabs.
+    // Ink's plate is its own paper a step brighter, never white: a white veil read as bleached cards on washi (his 10-30).
+    readonly property color formPlate: root.plateStyle === "key" ? root.synthPanel : !root.glassy ? root.readingCard
+        : root.ink ? ColorUtils.applyAlpha(ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.32), 0.82) // iris-literal: paper lift
+        : root.light ? Qt.rgba(1, 1, 1, 0.66) : Qt.rgba(1, 1, 1, 0.055) // iris-literal: white veils of a form's plate
+    // A Settings group as an island (his 11-04 22:30, Dynamic Island). The sheet under it is already the Island's black
+    // in dark (glass at his 96 % tint read black on black, nest 11-04), so an island lifts off it as iOS's dark cells do
+    // off black; in a light scheme it is a Live Activity's light plate (HIG: the Lock Screen presentation follows the
+    // appearance) on a soft shadow. Either way the rows on it keep the scheme's ink. Synth's panel keeps its make.
+    readonly property color islandPlate: root.plateStyle === "key" ? root.synthPanel
+        : root.ink ? root.formPlate
+        : root.light ? (root.glassy ? Qt.rgba(1, 1, 1, 0.84) : root.liftOver(root.surfaceHigh, root.surfaceOpaque)) // iris-literal: a light island's plate
+        : root.glassy ? Qt.rgba(1, 1, 1, 0.075) : ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.075) // iris-literal: a dark island's lift (mix weighs its first colour: the other order was 92 % white with glass off)
+    readonly property color islandShadow: root.light && !root.ink ? Qt.rgba(0, 0, 0, 0.07) : "transparent" // iris-literal: a light island's shadow
+    // The Settings island (what a change did and its Undo, a display change waiting for Keep): the Dynamic Island's own
+    // black in both schemes, the one live object over the sheet; on a dark sheet it stands a step off the sheet's black
+    // so its silhouette reads without a line. Its ink is the Island's white whatever the scheme.
+    readonly property color liveIsland: root.light ? Qt.rgba(0.024, 0.024, 0.03, 1) : ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.12) // iris-literal: the Island's black
+    readonly property color liveIslandInk: Qt.rgba(1, 1, 1, 0.96) // iris-literal: the Island's white
+    readonly property color liveIslandQuiet: Qt.rgba(1, 1, 1, 0.58) // iris-literal: its second line
+    readonly property color liveIslandKey: Qt.rgba(1, 1, 1, 0.13) // iris-literal: a key on the black
+    readonly property color liveIslandKeyHover: Qt.rgba(1, 1, 1, 0.21) // iris-literal: a key on the black, hovered
+    readonly property color liveIslandShadow: Qt.rgba(0, 0, 0, root.light ? 0.22 : 0.42) // iris-literal: its lift off the sheet
+    // A value on the black in its own colour, bright enough to read there in either scheme (HIG: bold colour on black).
+    function liveIslandHue(tint: color): color { return root.vividHighlight(tint, root.liveIslandInk) }
+    readonly property color readingSidebar: root.glassy
+        ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.readingCard
+
+    // Fixed meanings (a category, a section, today): one band of lightness and chroma for every hue, solved per scheme.
+    readonly property var identitySet: root.washi?.identity ?? ({})
+    readonly property QtObject identity: QtObject {
+        readonly property color blue: root.text
+        readonly property color sky: root.text
+        readonly property color teal: root.text
+        readonly property color green: root.text
+        readonly property color yellow: root.text
+        readonly property color orange: root.text
+        readonly property color red: root.text
+        readonly property color pink: root.text
+        readonly property color indigo: root.text
+        readonly property color purple: root.text
+        readonly property color lavender: root.text
+        readonly property color gray: root.text
+    }
+
+    function identityColor(name: string): color { return root.identity[name] ?? root.identity.lavender }
+    // A category's tint washed over a plate (a bound key, its combo's caps): enough to tell categories apart at a
+    // glance, never louder than the sign printed on it.
+    readonly property real tintWash: root.light ? 0.2 : 0.26
+
+    readonly property real shapeScale: root.preset.shape * root.tweak("shape", 0.3, 1.6)
+    // Large containers stop growing well before a pill, so content keeps a concentric margin.
+    function corner(px: real): int { return 0;
+        const cap = px >= 18 ? 1.3 : px >= 10 ? 1.4 : 1.6
+        return Math.max(2, Math.round(px * Math.min(root.shapeScale, cap) * root.lookCorner * root.density))
+    }
+    function concentricPad(outerRadius: real, floor: real): int {
+        return Math.max(Math.round(floor), Math.round(outerRadius * 0.3 + 7 * root.density))
+    }
+    // A plate inset `inset` inside a body of radius `outer` rounds by what is left, so the gap stays even round the
+    // curve (a fixed radius there pinched or flared it); `floor` is its corner when that would vanish (HIG: concentric
+    // with a fallback).
+    function concentric(outer: real, inset: real, floor: real): int { return 0;
+        return Math.max(Math.round(floor), Math.round(outer - inset))
+    }
+    // The one ladder of forms (11-02, his pick: Ricelin's), for every Design: a surface asks for its role and nothing
+    // else, so a hover, a key, a clip, a blur and a morph all follow from it. A body or a sheet is an open body, a plate
+    // or a card its card, a tile the piece on a card, a row or a chip what sits on a tile.
+    // The rungs are the worn Design's (shape.ladder in its design.json; NiHiL's own is Ricelin's).
+    readonly property int radiusPanel: root.corner(IrisDesign.rung("panel"))   // Control Center, Settings frame
+    readonly property int radiusSheet: root.corner(IrisDesign.rung("sheet"))   // Spotlight, media card, wallpaper picker
+    readonly property int radiusPlate: root.corner(IrisDesign.rung("plate"))   // widget and lock plates, dialogs, blocks
+    readonly property int radiusCard: root.corner(IrisDesign.rung("card"))     // side-panel sections, menus
+    readonly property int radiusTile: root.corner(IrisDesign.rung("tile"))     // grouped cards, tiles, results
+    readonly property int radiusRow: root.corner(IrisDesign.rung("row"))       // list rows, menu items, small buttons
+    readonly property int radiusChip: root.corner(IrisDesign.rung("chip"))     // chips, thumbnails, small marks
+    readonly property int radiusMicro: root.corner(IrisDesign.rung("micro"))   // bars inside skeletons, swatches
+    // The rung of a piece that knows only its size: what a Design's own panel or key asks for.
+    function formOf(side: real): int {
+        return side >= 96 * root.density ? root.radiusCard : side >= 40 * root.density ? root.radiusTile
+            : side >= 20 * root.density ? root.radiusChip : root.radiusMicro
+    }
+    // The outline of a w x h piece of radius `radius`, laid `inset` inside its box (half a stroke), as a closed convex
+    // polygon for a Shape, clockwise from the upper left, for what cuts a polygon further (a coat, a blade). `corners`
+    // [upper left, upper right, lower right, lower left]: 0 square (where a piece abuts another), 1 round. Arcs are
+    // sampled every ~2 px, well under a pixel of error at these radii.
+    function outline(w: real, h: real, radius: real, inset: real, corners: var): var {
+        const kinds = corners ?? [1, 1, 1, 1]
+        const s = Math.max(0, inset ?? 0)
+        const r = Math.max(0, Math.min(radius, Math.min(w, h) / 2) - s)
+        const out = []
+        const round = (cx, cy, from, x, y) => {
+            const n = Math.max(1, Math.ceil(0.5 * Math.PI * r / 2))
+            for (let i = 0; i <= n; i++) {
+                const a = from + 0.5 * Math.PI * i / n
+                out.push(Qt.point(cx + r * Math.cos(a), cy + r * Math.sin(a)))
+            }
+        }
+        const pts = [[s, s, s + r, s + r, Math.PI], [w - s, s, w - s - r, s + r, 1.5 * Math.PI],
+            [w - s, h - s, w - s - r, h - s - r, 0], [s, h - s, s + r, h - s - r, 0.5 * Math.PI]]
+        for (let i = 0; i < 4; i++) {
+            const c = pts[i]
+            if (kinds[i] === 0 || r < 0.25) out.push(Qt.point(c[0], c[1]))
+            else round(c[2], c[3], c[4])
+        }
+        out.push(out[0])
+        return out
+    }
+    readonly property real meltDepth: {
+        const t = root.tweak("melt", 0, 2)
+        return t <= 1 ? t : 1 + (t - 1) * 0.5
+    }
+    readonly property int fuse: 0
+    readonly property int fuseDeep: 0
+    readonly property real islandBandScale: Math.max(32, Math.min(64, Number(root.options?.bar?.height ?? 42))) / 42
+    readonly property int fuseEdge: 0
+    readonly property int weld: Math.max(2, Math.round(3 * root.density))
+    // A line of bubbles melted into a wall: the fillet's radius is the line's own round, so its end is one S of two equal
+    // arcs (the cap around the last bubble, then the wall); Bubbles › Notch curve softens or tightens it.
+    function edgeFuseFor(thickness: real, curve: real): int {
+        return Math.max(8, Math.round(root.pieceRadius(thickness) * 4 * (1 - Math.SQRT1_2) * Math.max(0.2, Math.min(2, curve / 100))))
+    }
+    readonly property string pieceShape: String(IrisDesign.worn("shape.piece", root.theme?.pieceShape))
+    readonly property string controlPlate: {
+        const value = String(root.appearance?.controlPlate ?? "none")
+        return ["veil", "glass", "solid"].includes(value) ? value : "none"
+    }
+    readonly property bool controlPlated: root.controlPlate !== "none"
+    // On paper the veil darkens in the body's ink: the dark media veil left dark plates under dark ink.
+    function plateFillFor(material: string): color {
+        if (material === "veil") return root.light ? ColorUtils.applyAlpha(root.fillInk, root.fillAlpha(0.2)) : root.veil
+        // Glass draws its own body, sheen, bevel and shadow (IrisGlassPlate): the control's colour stays clear.
+        return material === "solid" ? root.readingCard : material === "glass" ? "transparent" : root.fill
+    }
+    function profileRadius(profile: string, size: real): real { return 0;
+        const half = size / 2
+        if (profile === "squircle") return Math.min(half, size * 0.34 * Math.max(0.6, root.shapeScale))
+        if (profile === "square") return Math.min(half, size * 0.22 * Math.max(0.6, root.shapeScale))
+        return half
+    }
+    function pieceRadius(size: real): real { return 0; return root.profileRadius(root.pieceShape, size) }
+    // The active Design's traits (IrisDesign.traits), as primitives the surfaces bind to.
+    // Settings › Style › Icons: the plate (NiHiL's tinted squircle, an app-icon tile, or none), the colour icons carry,
+    // the glyph set, shape, fill and weight. They reach icons only: a cover, a poster or a hover plate is a tile.
+    readonly property var iconOptions: root.appearance?.icons ?? ({})
+    // NiHiL draws a mark as its widgets head themselves (his 11-02: the widgets are the look): the glyph alone, filled, in
+    // its area's colour. A plate behind it is the person's pick (Icons › Icon pack: NiHiL, Tiles).
+    readonly property bool glyphPack: String(root.iconOptions.style ?? "glyph") === "glyph"
+    // A line voice (Nothing, a Design whose marks are glyphs) draws its marks in ink and its buttons as hairlines.
+    readonly property bool lineMarks: root.trait("marks") === "glyph" || root.mono
+    readonly property bool plainMarks: root.lineMarks || root.glyphPack
+    // Settings › Settings window › Original design: today's pages as v2.33 drew them (plated marks, an area's groups in
+    // one list, a sidebar without captions); a Design that draws its own page keeps it.
+    readonly property bool settingsOriginal: root.appearance?.settingsOriginal === true && IrisDesign.skin("settingsPage").length === 0
+    // Settings' marks: in Original a plate whatever the icon pack, unless a line voice draws glyphs.
+    readonly property bool settingsPlainMarks: root.settingsOriginal ? root.lineMarks : root.plainMarks
+    // Auto: each area's colour, and the ink in a line voice.
+    readonly property string iconColour: {
+        const wanted = String(root.iconOptions.colour ?? "auto")
+        return ["area", "accent", "mono"].includes(wanted) ? wanted : root.lineMarks ? "mono" : "area"
+    }
+    // The colour an icon of an area wears: its own, the accent for every area, or a grey plate (mono).
+    function iconHue(area: color): color {
+        return root.iconColour === "accent" ? root.accent : root.iconColour === "mono" ? root.identity.gray : area
+    }
+    // The glyph set every glyph of the shell is drawn from while NiHiL is worn (FamilyStyle.glyphFont).
+    // A set this machine lacks stays Rounded: an update brings no fonts, and a missing face prints each glyph's name.
+    readonly property var glyphFonts: ({ standard: "Material Symbols Outlined", sharp: "Material Symbols Sharp" })
+    readonly property string glyphFont: {
+        const font = root.glyphFonts[String(root.iconOptions.glyphs ?? "rounded")] ?? ""
+        return font.length > 0 && Qt.fontFamilies().includes(font) ? font : ""
+    }
+    readonly property string iconShape: String(root.iconOptions.shape ?? "auto")
+    readonly property int iconWeight: ({ light: Font.Light, bold: Font.DemiBold })[String(root.iconOptions.weight ?? "regular")] ?? Font.Normal
+    // A glyph's fill: what the surface would draw, unless the person fixed one.
+    // Auto: a glyph alone is filled as a widget's head is, outlined in a line voice.
+    function iconFill(auto: real): real {
+        const wanted = String(root.iconOptions.fill ?? "auto")
+        return wanted === "filled" ? 1 : wanted === "outlined" ? 0 : auto
+    }
+    readonly property bool plateSelection: root.trait("selection") === "plate"
+    readonly property bool indexed: IrisDesign.trait("index") === true
+    // Signal: every caption and group head speaks in the Label voice, in every Design.
+    readonly property bool monoCaptions: root.mono || root.trait("captions") === "mono"
+    // A side panel's section is headed by a bar of its line colour, as a station sign marks a line, instead of a glyph.
+    readonly property bool lineSections: IrisDesign.trait("sections") === "line"
+    // The shell's shared toasts (reloaded, copied, failed) take the Design's own toast under NiHiL when it has one.
+    readonly property string toastSkin: IrisDesign.skin("toast")
+    readonly property bool lowerTitles: root.trait("titles") === "lower"
+    // Where you are and what is chosen (a row, a cell, a tile): the accent wash in NiHiL, a solid plate of the accent with
+    // its own ink in a plate Design (never the text colour as a plate: a white slab on every chosen row).
+    // `selectionInk` marks (the chosen glyph, a check), `selectionLabel` the label on it.
+    // Signal: chosen is inverted in every Design (ink plate, paper word); the current row of a list is one step of ink.
+    readonly property bool invertSelection: root.plateSelection || root.mono
+    readonly property color selectionFill: root.invertSelection ? root.lookPlate : root.tintFill(root.accent)
+    readonly property color selectionInk: root.invertSelection ? root.inkOnLookPlate : root.accent
+    readonly property color selectionLabel: root.invertSelection ? root.inkOnLookPlate : root.text
+    // A detail on the chosen row (its comment, its verb): the second tone of the plate's ink in a plate Design.
+    readonly property color selectionDetail: root.invertSelection ? ColorUtils.mix(root.inkOnLookPlate, root.lookPlate, 0.72) : root.subtext
+    // The current row of a list (Spotlight's result, a browse tile): a plate Design lays it one step of ink over the body
+    // and keeps the ink, leaving the seal to what marks it; a whole row of the accent read as an alarm bar on every query.
+    readonly property color rowSelectionFill: root.invertSelection ? ColorUtils.mix(root.text, root.surfaceOpaque, 0.12) : root.selectionFill // iris-literal: one step of ink
+    readonly property color rowSelectionLabel: root.invertSelection ? root.text : root.selectionLabel
+    readonly property color rowSelectionDetail: root.invertSelection ? root.subtext : root.selectionDetail
+    readonly property color rowSelectionInk: root.invertSelection ? root.accent : root.selectionInk
+    // A list's place as a part number: 01, 02… (indexed Designs).
+    function indexLabel(i: int): string { return (i + 1 < 10 ? "0" : "") + (i + 1) }
+    // Auto is what the Island and the Dock always did: a capsule when melted into the edge, the bubbles' shape when floating.
+    // Linked, both take the bubbles' shape whatever their own choice.
+    readonly property bool linkShapes: Boolean(root.theme?.linkShapes ?? false)
+    readonly property string linkedShape: root.pieceShape === "circle" ? "round" : root.pieceShape
+    readonly property string barShape: root.linkShapes ? root.linkedShape : String(root.options?.bar?.shape ?? "auto")
+    readonly property string dockShape: root.linkShapes ? root.linkedShape : String(root.options?.dock?.shape ?? "auto")
+    function bodyProfile(shape: string, notched: bool): string {
+        if (shape === "round") return "circle"
+        if (shape === "squircle" || shape === "square") return shape
+        return notched ? "circle" : root.pieceShape
+    }
+    // A primitive, so bindings that read the open Island's corners do not re-run on every config write.
+    readonly property int islandOpenCorners: Math.round(Number(root.appearance?.surfaces?.island?.radius ?? 0) * root.density)
+    // An open body's corners step down with its resting ones, so a square Island opens square; a size chosen wins.
+    function openedRadius(shape: string, base: real): real {
+        if (root.islandOpenCorners > 0) return root.islandOpenCorners
+        return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
+    }
+    // A small piece's own corner (a cover, a poster, a workspace tile, the Dock's hover plate): the family's shape.
+    function tileRadius(size: real): int { return 0; return Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : IrisDesign.tileShare) * Math.min(1.2, root.shapeScale)) }
+    // An icon plate's corner: the icon shape when one is chosen, else the tile's.
+    function iconRadius(size: real): int { return 0; return root.iconShape === "round" ? Math.round(size / 2) : root.iconShape === "square" ? Math.round(size * 0.12)
+        : root.tileRadius(size) }
+    // The tile pack's plates: the black and the white a plate can wear, the glyph carrying the colour.
+    readonly property color plateBlackTop: root.toned(IrisDesign.plate("black", 0))
+    readonly property color plateBlackBase: root.toned(IrisDesign.plate("black", 1))
+    readonly property color plateWhiteTop: root.toned(IrisDesign.plate("white", 0))
+    readonly property color plateWhiteBase: root.toned(IrisDesign.plate("white", 1))
+
+
+    readonly property bool motionEnabled: (root.appearance?.motion ?? true) && Appearance.animationsEnabled
+
+    // --- Arrival: the family grows inward once the shell has its first frame ------------------
+    // Boot, a reload and a family switch all end in shellEntryReady; the chassis rides this one
+    // value in from slightly past the screen edges. Reduced motion arrives at once.
+    property real arrival: 0
+    readonly property bool arriving: root.arrival < 1
+    readonly property NumberAnimation arrive: NumberAnimation {
+        target: root; property: "arrival"; from: 0; to: 1
+        duration: root.duration(Math.round(root.emergeDuration * 1.25))
+        easing.type: Easing.BezierSpline; easing.bezierCurve: root.emergeCurve
+    }
+    function startArrival(): void {
+        root.arrive.stop()
+        if (!root.motionEnabled) { root.arrival = 1; return }
+        root.arrival = 0
+        root.arrive.start()
+    }
+    readonly property Connections arrivalGate: Connections {
+        target: GlobalStates
+        function onShellEntryReadyChanged(): void {
+            if (GlobalStates.shellEntryReady) root.startArrival()
+            else { root.arrive.stop(); root.arrival = 0 }
+        }
+    }
+    Component.onCompleted: if (GlobalStates.shellEntryReady) root.startArrival()
+    function duration(ms: int): int {
+        return root.motionEnabled ? Appearance.calcEffectiveDuration(ms) : 0
+    }
+
+    readonly property var curves: ({ expressive: [0.16, 1, 0.3, 1], standard: [0.2, 0, 0, 1], gentle: [0.4, 0, 0.2, 1], swift: [0.3, 0.9, 0.2, 1], fold: [0.3, 0, 0.2, 1] })
+    readonly property var directCurve: {
+        const name = String(root.theme?.curve ?? "expressive")
+        if (name !== "custom") return root.curves[name] ?? root.curves.expressive
+        const p = root.theme?.curvePoints ?? []
+        const at = (i, low, high, fallback) => Math.max(low, Math.min(high, Number(p[i] ?? fallback)))
+        return [at(0, 0, 1, 0.16), at(1, -0.5, 1.5, 1), at(2, 0, 1, 0.3), at(3, -0.5, 1.5, 1)]
+    }
+    readonly property var morphStyles: ({
+        direct: { curve: true, emerge: { response: 1.8 }, recede: { response: 1.2, curve: "fold" }, move: { response: 1 },
+            rise: 0.3, span: 0.35, fall: 0.12, reveal: "drop" },
+        liquid: { emerge: { response: 1.9, bounce: 0.22 }, recede: { response: 1.3, bounce: 0 }, move: { response: 1.15, bounce: 0.08 },
+            rise: 0.34, span: 0.42, fall: 0.24, reveal: "drop" },
+        glide: { emerge: { response: 2.1, bounce: 0 }, recede: { response: 1.5, bounce: 0 }, move: { response: 1.35, bounce: 0 },
+            rise: 0.3, span: 0.5, fall: 0.28, reveal: "drop" },
+        snap: { emerge: { response: 1.25, bounce: 0.06 }, recede: { response: 0.95, bounce: 0 }, move: { response: 0.85, bounce: 0 },
+            rise: 0.18, span: 0.34, fall: 0.2, reveal: "fade" },
+        elastic: { emerge: { response: 2.2, bounce: 0.34 }, recede: { response: 1.4, bounce: 0 }, move: { response: 1.5, bounce: 0.24 },
+            rise: 0.36, span: 0.4, fall: 0.28, reveal: "inflate" },
+        instant: { emerge: { response: 1, bounce: 0 }, recede: { response: 1, bounce: 0 }, move: { response: 1, bounce: 0 },
+            rise: 0.01, span: 0.01, fall: 0.01, reveal: "fade" },
+        // AIRISU's camera (concept › Motion): fast out, short brake, nothing that bounces. Roll 220 to open, whip 140 to
+        // move, the content arriving a beat after the body (rolling shot).
+        tuned: { curve: true, emerge: { response: 1, curve: "standard" }, recede: { response: 0.64, curve: "standard" },
+            move: { response: 0.64, curve: "standard" }, rise: 0.18, span: 0.3, fall: 0.12, reveal: "drop" }
+    })
+    readonly property string morphName: root.morphStyles[IrisDesign.morph] ? IrisDesign.morph
+        : root.morphStyles[root.appearance?.morph ?? ""] ? root.appearance.morph : "direct"
+    readonly property var morph: root.morphStyles[root.morphName]
+
+    readonly property string revealName: String(root.morph?.reveal ?? "curtain")
+    readonly property real absorbShare: 0.55
+    readonly property real pullLag: 1.8
+    readonly property real dropRise: Math.max(0, Math.min(0.7, 0.06 + 0.4 * (root.tweak("contentTiming", 0.3, 1.7) - 1)))
+    readonly property real dropSpan: 0.3
+    readonly property bool revealDrops: root.revealName === "drop" && root.motionEnabled
+    readonly property bool revealInflates: root.revealName === "inflate" && root.motionEnabled
+    readonly property bool revealFades: root.revealName === "fade" || !root.motionEnabled
+
+    readonly property int baseDuration: IrisDesign.motionDuration > 0 ? IrisDesign.motionDuration
+        : Math.max(100, Math.min(400, Number(root.appearance?.motionDuration ?? 220)))
+    function resolveStyleSpring(style: var, entry: var, fallbackResponse: real, timeTweak: string): var {
+        const response = Math.round(root.baseDuration * Math.max(0.2, Number(entry?.response ?? fallbackResponse)) * root.tweak(timeTweak, 0.4, 2.5))
+        const bounce = Number(entry?.bounce ?? 0) * root.tweak("bounce", 0, 2)
+        const curve = !style?.curve ? null : entry?.curve ? root.curves[entry.curve] : root.directCurve
+        return { response: root.duration(response), bounce: curve ? 0 : Math.max(0, Math.min(0.6, bounce)), curve: curve }
+    }
+    function resolveSpring(entry: var, fallbackResponse: real, timeTweak: string): var {
+        return root.resolveStyleSpring(root.morph, entry, fallbackResponse, timeTweak)
+    }
+    // A surface may move in a style of its own ("" follows the family). It changes timing only:
+    // how content arrives stays the family's.
+    function surfaceMorph(id: string): string {
+        const name = String(root.appearance?.surfaces?.[id]?.morph ?? "")
+        return name.length > 0 && name !== root.morphName && root.morphStyles[name] ? name : ""
+    }
+    readonly property var emergeSpring: root.resolveSpring(root.morph?.emerge, 1.9, "openTime")
+    readonly property var recedeSpring: root.resolveSpring(root.morph?.recede, 1.3, "openTime")
+    readonly property var moveSpring: root.resolveSpring(root.morph?.move, 1.15, "moveTime")
+    // A surface's own material: "" follows the family's glass, "solid" or "glass" override it.
+    function surfaceMaterial(id: string): string {
+        const name = String(root.appearance?.surfaces?.[id]?.material ?? "")
+        return name === "solid" || name === "glass" ? name : ""
+    }
+    // The field's per-shape `glass` value for a surface.
+    function surfaceGlass(id: string): string {
+        return "solid";
+        const name = root.surfaceMaterial(id)
+        return name === "solid" ? "solid" : name === "glass" ? (root.glassCompositor ? "compositor" : "wallpaper") : "inherit"
+    }
+    function surfaceSpeed(id: string): real {
+        return id.length === 0 ? 1 : Math.max(0.4, Math.min(2.5, Number(root.appearance?.surfaces?.[id]?.speed ?? 100) / 100))
+    }
+    function springFor(intent: string, surface: string): var {
+        const own = root.surfaceMorph(surface)
+        // A surface set to None appears and leaves on the next frame (IrisSpring jumps on a zero response).
+        if (own === "instant") return { response: 0, bounce: 0 }
+        const style = own.length > 0 ? root.morphStyles[own] : null
+        const base = style
+            ? (intent === "move" ? root.resolveStyleSpring(style, style.move, 1.15, "moveTime")
+                : intent === "emerge" ? root.resolveStyleSpring(style, style.emerge, 1.9, "openTime")
+                : root.resolveStyleSpring(style, style.recede, 1.3, "openTime"))
+            : intent === "move" ? root.moveSpring : intent === "emerge" ? root.emergeSpring : root.recedeSpring
+        const speed = root.surfaceSpeed(surface)
+        return speed === 1 ? base : Object.assign({}, base, { response: Math.round(base.response / speed) })
+    }
+    function pressScale(base: real): real { return 1 - (1 - base) * root.tweak("press", 0, 2) }
+
+    function springState(t: real, bounce: real): var {
+        const w = 2 * Math.PI
+        const zeta = 1 - bounce
+        if (zeta < 0.9999) {
+            const wd = w * Math.sqrt(1 - zeta * zeta)
+            const e = Math.exp(-zeta * w * t)
+            const b = -zeta * w / wd
+            const c = Math.cos(wd * t), s = Math.sin(wd * t)
+            const d = e * (-c + b * s)
+            return { y: 1 + d, v: -zeta * w * d + e * (wd * s + b * wd * c) }
+        }
+        const e = Math.exp(-w * t)
+        return { y: 1 - (1 + w * t) * e, v: w * w * t * e }
+    }
+    function springSettle(bounce: real): real {
+        let last = 0
+        for (let t = 0; t < 4; t += 0.004)
+            if (Math.abs(root.springState(t, bounce).y - 1) >= 0.002) last = t
+        return Math.max(0.4, last)
+    }
+    // At most ten segments: Qt 6.11 segfaults on a 12-segment BezierSpline.
+    function springCurve(bounce: real): var {
+        const segments = 8
+        const settle = root.springSettle(bounce)
+        const points = []
+        for (let i = 0; i < segments; ++i) {
+            const u0 = i / segments, u1 = (i + 1) / segments, h = 1 / segments
+            const a = root.springState(u0 * settle, bounce)
+            const last = i === segments - 1
+            const b = last ? { y: 1, v: 0 } : root.springState(u1 * settle, bounce)
+            points.push(u0 + h / 3, a.y + a.v * settle * h / 3, u1 - h / 3, b.y - b.v * settle * h / 3, u1, b.y)
+        }
+        return points
+    }
+    function curveOf(spring: var): var {
+        return spring.curve ? spring.curve.concat([1, 1]) : root.springCurve(spring.bounce)
+    }
+    function durationOf(spring: var): int {
+        return spring.curve ? spring.response : Math.round(spring.response * root.springSettle(spring.bounce))
+    }
+    function cubicBezier(curve: var, x: real): real {
+        if (x <= 0) return 0
+        if (x >= 1) return 1
+        const cx = 3 * curve[0], bx = 3 * (curve[2] - curve[0]) - cx, ax = 1 - cx - bx
+        const cy = 3 * curve[1], by = 3 * (curve[3] - curve[1]) - cy, ay = 1 - cy - by
+        let t = x
+        for (let i = 0; i < 8; ++i) {
+            const fx = ((ax * t + bx) * t + cx) * t - x
+            const d = (3 * ax * t + 2 * bx) * t + cx
+            if (Math.abs(fx) < 1e-5 || Math.abs(d) < 1e-6) break
+            t = Math.max(0, Math.min(1, t - fx / d))
+        }
+        return ((ay * t + by) * t + cy) * t
+    }
+    readonly property var emergeCurve: root.curveOf(root.emergeSpring)
+    readonly property var recedeCurve: root.curveOf(root.recedeSpring)
+    readonly property var moveCurve: root.curveOf(root.moveSpring)
+    readonly property int emergeDuration: root.durationOf(root.emergeSpring)
+    readonly property int recedeDuration: root.durationOf(root.recedeSpring)
+    readonly property int moveDuration: root.durationOf(root.moveSpring)
+    readonly property real contentRise: Math.min(0.95, Number(root.morph?.rise ?? 0.34) * root.tweak("contentTiming", 0.3, 1.7))
+    readonly property real contentSpan: Math.max(0.01, Number(root.morph?.span ?? 0.42))
+    readonly property real contentFall: Math.max(0.02, Number(root.morph?.fall ?? 0.24))
+    function ramp(t: real, rise: real, span: real): real {
+        return Math.max(0, Math.min(1, (t - rise) / Math.max(0.01, span)))
+    }
+    function contentAt(t: real): real { return root.ramp(t, root.contentRise, root.contentSpan) }
+    // A floating body's shadow arrives with its settle, never under a shape that is still growing.
+    function shadowAt(t: real): real { return Math.pow(Math.max(0, Math.min(1, t)), 4) }
+
+    readonly property int morphDuration: root.moveDuration
+    readonly property int settleDuration: root.emergeDuration
+    readonly property int revealDuration: duration(140)
+    readonly property int feedbackDuration: duration(100)
+    readonly property int feedbackEasing: Easing.OutCubic
+    readonly property var morphCurve: root.moveCurve
+
+    // `inir iris tokens`: each key pair's contrast on the body as it is seen; over glass the worst of the wallpaper's
+    // mean, darkest and brightest reading (and, under Blur, a mixed desktop of windows). Afterglow's shading is not modelled.
+    function audit(): var {
+        const over = (fg, bg) => Qt.rgba(fg.r * fg.a + bg.r * (1 - fg.a), fg.g * fg.a + bg.g * (1 - fg.a), fg.b * fg.a + bg.b * (1 - fg.a), 1)
+        const grey = level => Qt.rgba(level, level, level, 1)
+        const screen = Lume.screenNamed(root.appsOutput)
+        const sample = screen ? Lume.read(root.appsOutput, 0, 0, screen.width, screen.height) : null
+        const bodies = {}
+        if (!root.glassy || !sample) bodies.solid = root.surfaceOpaque
+        else {
+            bodies.mean = over(root.bodyTint, sample.color)
+            bodies.dark = over(root.bodyTint, grey(Math.max(0, sample.level - sample.spread)))
+            bodies.bright = over(root.bodyTint, grey(Math.min(1, sample.level + sample.spread)))
+            if (root.bodiesCovered) {
+                bodies.windowsDark = over(root.bodyTint, grey(0.54))
+                bodies.windowsBright = over(root.bodyTint, grey(0.9))
+            }
+        }
+        // [ink, what it sits on (null: the body), contrast it needs]
+        const pairs = {
+            text: [root.text, null, 7], textSecondary: [root.textSecondary, null, 4.5], textTertiary: [root.textTertiary, null, 3],
+            subtext: [root.subtext, null, 4.5], muted: [root.muted, null, 3], label: [root.label, null, 4.5],
+            accentText: [root.accent, null, 4.5], highlight: [root.secondaryAccent, null, 3], success: [root.success, null, 3],
+            danger: [root.danger, null, 3], textOnGroup: [root.text, root.surfaceHigh, 7],
+            secondaryOnGroup: [root.textSecondary, root.surfaceHigh, 4.5], accentOnGroup: [root.accent, root.surfaceHigh, 4.5],
+            accentOnTint: [root.accent, root.tintFill(root.accent), 4.5], inkOnAccent: [root.inkOnAccent, root.accent, 4.5],
+            textOnReadingCard: [root.text, root.readingCard, 7], secondaryOnReadingCard: [root.textSecondary, root.readingCard, 4.5],
+            inkOnBadge: [root.inkOnBadge, root.badge, 3],
+            accentFill: [root.accent, null, 3], group: [root.surfaceHigh, null, 1.1], fill: [root.fill, null, 1.1],
+            fillHover: [root.fillHover, null, 1.2], raised: [root.raised, root.surfaceHigh, 1.1], border: [root.border, null, 1.3],
+            hairline: [root.hairline, null, 1.15]
+        }
+        const contrast = {}
+        const fails = []
+        for (const name in pairs) {
+            const [ink, under, need] = pairs[name]
+            let worst = 99
+            for (const key in bodies) {
+                const bg = under ? over(under, bodies[key]) : bodies[key]
+                worst = Math.min(worst, ColorUtils.contrastRatio(over(ink, bg), bg))
+            }
+            contrast[name] = Math.round(worst * 100) / 100
+            if (worst < need) fails.push(name + " " + contrast[name] + " < " + need)
+        }
+        const out = {}
+        for (const key in bodies) out[key] = bodies[key].toString()
+        return {
+            scheme: root.scheme, material: root.materialName, glass: root.glassy ? (root.glassCompositor ? "compositor" : "wallpaper") : "off",
+            texture: root.afterglow ? "afterglow:" + root.afterglowGrade : root.leak ? "leak:" + root.leakGrade + "/" + root.leakShapeName : "solid", accent: root.accentChoice,
+            preset: root.presetName, glassTint: Math.round(root.glassTint * 100) / 100, bodies: out, fails: fails, contrast: contrast,
+            tokens: { surface: root.surfaceOpaque.toString(), surfaceHigh: root.surfaceHigh.toString(), accent: root.accent.toString(),
+                highlight: root.secondaryAccent.toString(), text: root.text.toString(), textSecondary: root.textSecondary.toString(),
+                fill: root.fill.toString(), border: root.border.toString(), hairline: root.hairline.toString(), readingCard: root.readingCard.toString(), appsSurface: root.appsSurface.toString(),
+                appsAccent: root.appsShareAccent ? root.appsAccent.toString() : "" }
+        }
+    }
+}

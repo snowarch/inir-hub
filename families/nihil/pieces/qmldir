@@ -1,0 +1,2 @@
+module qs.modules.nihil.pieces
+singleton IrisPieces 1.0 IrisPieces.qml
