@@ -72,7 +72,7 @@ ClippingRectangle {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: NihilStyle.s(14)
         spacing: NihilStyle.gap
-        NButton { width: NihilStyle.s(46); height: NihilStyle.s(46); split: true; icon: "tune" }
+        NButton { width: NihilStyle.s(46); height: NihilStyle.s(46); lit: true; icon: "tune" }
         NButton { width: NihilStyle.s(46); height: NihilStyle.s(46); icon: "blur_circular" }
         NButton {
             width: Math.min(NihilStyle.s(220), root.width * 0.32)
