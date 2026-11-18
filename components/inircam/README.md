@@ -56,6 +56,17 @@ Mod+Shift+C { spawn "inir" "inircam" "toggle"; }
 
 Tapo cameras want a camera account from the Tapo app (Settings → Advanced → Camera Account), not the app login.
 
+## Adding a whole NVR
+
+An NVR or DVR hides several cameras behind one address, one login and a channel number, so **Cameras → From NVR** adds them in one go:
+
+1. Pick the brand — Dahua, Imou and Amcrest share one path, Hikvision and Reolink have their own.
+2. Enter the address, the RTSP port (554 unless you changed it) and the NVR's login.
+3. Give a channel range to try and press **Scan channels**. Each channel is asked with `ffprobe`; the ones that answer are listed with their resolution and codec.
+4. Untick anything you don't want and press **Add cameras**. Each one is saved with the main and the substream address already filled in.
+
+The scan stops by itself after three empty channels in a row, so a range that runs past the NVR's real channel count costs a few seconds, not a minute. A login that fails on the very first channel stops the scan and says so; a channel that refuses later is treated as a channel that isn't there, because that is what Dahua and Imou answer for one.
+
 ## Pinned cameras
 
 The pin button in the panel, or `inir inircam pin <cameraId>`, gives a camera its own window: drag it by its header, resize it from its grip, and use its buttons to toggle always-on-top, open it in the panel, or close it. Pins survive a restart and are kept in the state folder.

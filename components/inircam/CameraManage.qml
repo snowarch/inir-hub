@@ -13,6 +13,7 @@ Item {
     property var pinnedIds: []
 
     signal add()
+    signal addNvr()
     signal edited(var camera)
     signal deleted(var camera)
     signal pinToggled(string id)
@@ -32,6 +33,10 @@ Item {
                 font.weight: Font.DemiBold
             }
             Item { Layout.fillWidth: true }
+            RippleButton {
+                buttonText: Translation.tr("From NVR")
+                onClicked: root.addNvr()
+            }
             RippleButton {
                 buttonText: Translation.tr("Add camera")
                 onClicked: root.add()

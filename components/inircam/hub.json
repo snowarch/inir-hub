@@ -1,12 +1,12 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "changes": {
     "1.1.0": [
-      "The panel answers other items: the camera list, and a request to keep the frames running"
+      "The panel answers other items: the camera list, and a request to keep the frames running while they are shown"
     ],
-    "1.1.1": [
-      "Installing the panel installs the Cameras desktop card with it"
+    "1.2.0": [
+      "Add a whole NVR at once: give it the address and the login, scan its channels, keep the ones that answer"
     ]
   },
   "summary": "Live camera panel: RTSP feeds, grid, wall, enlarged views and pins",
@@ -29,8 +29,5 @@
   "hosts": [],
   "minInir": "3.1.0",
   "provides": "modules/inircam",
-  "preview": "preview.webp",
-  "requires": [
-    "inircam-widget"
-  ]
+  "preview": "preview.webp"
 }

@@ -58,6 +58,12 @@ Scope {
 
     function openForm(camera, mode) {
         root.formInitialMode = mode || "manual"
+        // Adding a whole NVR is its own surface: no single camera to edit, channels instead.
+        if (!camera && root.formInitialMode === "nvr") {
+            root.editing = null
+            root.view = "nvr"
+            return
+        }
         root.editing = camera ? Object.assign({}, camera) : {
             id: "",
             name: "",
@@ -79,6 +85,23 @@ Scope {
         root.editing = null
         root.view = "manage"
         root.notice = Translation.tr("Camera saved")
+    }
+
+    // Every channel the scan kept becomes one camera, named after the NVR and its number.
+    function addCameras(cameras) {
+        if (!cameras || cameras.length === 0) return
+        // A batch is created in one go: the number keeps the ids apart when two channels land
+        // in the same millisecond.
+        const stamp = String(Date.now())
+        for (let i = 0; i < cameras.length; i++) {
+            const camera = Object.assign({}, cameras[i])
+            if (!camera.id) camera.id = `${stamp}-${i + 1}`
+            store.addCamera(camera)
+        }
+        root.view = "manage"
+        root.notice = cameras.length === 1
+            ? Translation.tr("Camera added")
+            : Translation.tr("Cameras added: %1").replace("%1", String(cameras.length))
     }
 
     function deleteCamera(camera) {
@@ -305,7 +328,8 @@ Scope {
                                 enlarged: Translation.tr("Enlarged"),
                                 wall: Translation.tr("All cameras"),
                                 manage: Translation.tr("Cameras"),
-                                form: root.editing && root.editing.id ? Translation.tr("Edit camera") : Translation.tr("Add camera")
+                                form: root.editing && root.editing.id ? Translation.tr("Edit camera") : Translation.tr("Add camera"),
+                                nvr: Translation.tr("Add from an NVR")
                             })[root.view] ?? ""
                             color: Appearance.colors.colOnSurfaceVariant
                             font.pixelSize: Appearance.font.pixelSize.small
@@ -392,9 +416,18 @@ Scope {
                             cameras: store.cameras
                             pinnedIds: pins.pins.map(p => p.cameraId)
                             onAdd: root.openForm(null)
+                            onAddNvr: root.openForm(null, "nvr")
                             onEdited: camera => root.openForm(camera)
                             onDeleted: camera => root.deleteCamera(camera)
                             onPinToggled: id => pins.toggle(id)
+                        }
+
+                        NvrForm {
+                            anchors.fill: parent
+                            visible: root.view === "nvr"
+                            probe: cameraProbe
+                            onAdded: cameras => root.addCameras(cameras)
+                            onCancelled: root.view = "manage"
                         }
 
                         CameraForm {
