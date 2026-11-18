@@ -9,8 +9,8 @@ import qs.modules.common.functions
 import qs.modules.shared.lock
 import qs.modules.nihil.style
 
-// The lock: the wallpaper melted behind a large thin clock, and one capsule of glass for the password, its dots lit as
-// they are typed. Power and restart wait in the corner, the charge in the other.
+// The lock: the wallpaper melted behind the time set as a poster's title, and one ticket of glass for the password,
+// a bar of ink for each key typed. Power and restart wait in the corner, the charge in the other.
 MouseArea {
     id: root
 
@@ -75,25 +75,27 @@ MouseArea {
         brightness: NihilStyle.dark ? -0.22 : 0.06
     }
 
-    Column {
+    // The time is the poster's title: set across the page in the condensed face with its bloom, the day on a rule
+    // under it, sparks where the light lands.
+    NDisplay {
         id: clock
         anchors.horizontalCenter: parent.horizontalCenter
-        y: Math.round(parent.height * 0.24)
-        spacing: NihilStyle.s(6)
-
-        NText {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: DateTime.time
-            font.pixelSize: NihilStyle.s(132)
-            font.weight: Font.Light
-            color: NihilStyle.ink
-        }
-        NText {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: DateTime.date
-            font.pixelSize: NihilStyle.textLarge
-            color: NihilStyle.inkSoft
-        }
+        y: Math.round(parent.height * 0.14)
+        text: DateTime.time
+        size: Math.min(parent.height * 0.42, parent.width * 0.5 / Math.max(2.5, text.length * 0.42))
+        bloom: 1
+    }
+    NSpark { x: clock.x + clock.width - size * 0.3; y: clock.y + size * 0.2; size: NihilStyle.s(60) }
+    NSpark { x: clock.x - size * 0.6; y: clock.y + clock.height - size; size: NihilStyle.s(34) }
+    NRule {
+        id: day
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: clock.bottom
+        anchors.topMargin: NihilStyle.s(10)
+        width: Math.max(clock.width, NihilStyle.s(420))
+        start: DateTime.date
+        middle: "▶ ⋈ ◀"
+        end: Translation.tr("Locked")
     }
 
     NGlass {
@@ -103,9 +105,9 @@ MouseArea {
 
         anchors.horizontalCenter: parent.horizontalCenter
         y: Math.round(parent.height * 0.62)
-        width: NihilStyle.s(360)
-        height: NihilStyle.s(60)
-        radius: height / 2
+        width: NihilStyle.s(380)
+        height: NihilStyle.s(58)
+        radius: NihilStyle.rCard
         ignite: field.activeFocus ? 1 : 0
         transform: Translate { x: capsule.nudge }
 
@@ -130,12 +132,20 @@ MouseArea {
             Keys.onEscapePressed: root.context.clearText()
         }
 
-        NText {
+        NLabel {
             anchors.centerIn: parent
             visible: root.context.currentText.length === 0
             text: root.context.showFailure ? Translation.tr("Try again") : Translation.tr("Password")
-            font.pixelSize: NihilStyle.textBody
-            color: root.context.showFailure ? NihilStyle.m3.m3error : NihilStyle.inkSoft
+            strong: root.context.showFailure
+            color: root.context.showFailure ? NihilStyle.live : NihilStyle.inkSoft
+        }
+        NSpectrum {
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width - NihilStyle.s(40)
+            height: 1
+            opacity: field.activeFocus ? 0.9 : 0
+            Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
         }
 
         Row {
@@ -145,9 +155,9 @@ MouseArea {
             Repeater {
                 model: Math.min(root.context.currentText.length, 18)
                 delegate: Rectangle {
-                    width: NihilStyle.s(8)
-                    height: width
-                    radius: width / 2
+                    width: NihilStyle.s(3)
+                    height: NihilStyle.s(16)
+                    radius: 1
                     color: NihilStyle.ink
                 }
             }
@@ -165,14 +175,13 @@ MouseArea {
         }
     }
 
-    NText {
+    NLabel {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.margins: NihilStyle.s(32)
         visible: root.showBattery && Battery.available
-        text: (Battery.isCharging ? Translation.tr("Charging") + "  " : "") + Math.round(Battery.percentage * 100) + "%"
-        font.pixelSize: NihilStyle.textBody
-        color: Battery.isLow && !Battery.isCharging ? NihilStyle.m3.m3error : NihilStyle.inkSoft
+        text: (Battery.isCharging ? Translation.tr("Charging") + "   " : "") + Math.round(Battery.percentage * 100) + "%"
+        strong: Battery.isLow && !Battery.isCharging
     }
 
     Row {

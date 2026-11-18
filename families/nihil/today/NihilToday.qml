@@ -6,7 +6,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// Today on one pane of glass: the day, the month to walk, then every notification newest first under the keys that
+// Today as a page under glass: the day's figure set large, the month to walk on a ruled table, then every notification newest first under the keys that
 // silence or clear them.
 NPopup {
     id: root
@@ -52,12 +52,12 @@ NPopup {
             width: pane.width - root.inset * 2
             height: NihilStyle.s(36)
 
-            NText {
+            Rectangle { width: parent.width; height: 1; color: NihilStyle.hair }
+            NLabel {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                text: Translation.tr("Notifications")
-                font.pixelSize: NihilStyle.textLarge
-                font.weight: Font.Medium
+                strong: true
+                text: Translation.tr("Notifications") + "   " + String(root.notices.length).padStart(2, "0")
             }
             Row {
                 anchors.right: parent.right
@@ -117,15 +117,16 @@ NPopup {
                 visible: root.notices.length === 0
                 spacing: NihilStyle.s(4)
 
-                NText {
+                NDisplay {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Translation.tr("All caught up")
-                    font.pixelSize: NihilStyle.textLarge
+                    size: NihilStyle.s(30)
+                    color: NihilStyle.inkFaint
+                    bloom: 0
                 }
-                NText {
+                NLabel {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Notifications.silent ? Translation.tr("Do not disturb is on") : Translation.tr("New notifications land here")
-                    color: NihilStyle.inkSoft
                 }
             }
         }

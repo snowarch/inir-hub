@@ -93,77 +93,110 @@ Scope {
             mask: Region {}
             BackgroundEffect.blurRegion: CompositorService.blurRegions && NihilStyle.blur ? capsule.region : null
 
+            // A ticket of glass: the level's figure set large on the left, its name and the ruled track beside it.
             NGlass {
                 id: capsule
                 anchors.centerIn: parent
-                width: NihilStyle.s(340)
-                height: NihilStyle.s(56)
-                radius: height / 2
+                width: NihilStyle.s(360)
+                height: NihilStyle.s(78)
+                radius: NihilStyle.rCard
                 opacity: root.shown ? 1 : 0
-                scale: root.shown ? 1 : 0.94
+                scale: root.shown ? 1 : 0.96
+                ignite: root.shown ? 0.4 : 0
                 Behavior on opacity { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
                 Behavior on scale { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
 
-                NIcon {
-                    id: mark
-                    x: NihilStyle.s(20)
+                NDisplay {
+                    id: figure
+                    x: NihilStyle.s(18)
                     anchors.verticalCenter: parent.verticalCenter
-                    text: root.glyph
-                    size: NihilStyle.s(22)
-                    color: NihilStyle.ink
+                    width: NihilStyle.s(78)
+                    text: String(Math.round(root.level * 100)).padStart(2, "0")
+                    size: NihilStyle.s(52)
+                    bloom: 0.8
+                }
+                Rectangle {
+                    id: split
+                    anchors.left: figure.right
+                    anchors.leftMargin: NihilStyle.s(10)
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 1
+                    height: parent.height - NihilStyle.s(28)
+                    color: NihilStyle.hair
+                }
+
+                Row {
+                    anchors.left: split.right
+                    anchors.leftMargin: NihilStyle.s(16)
+                    y: NihilStyle.s(20)
+                    spacing: NihilStyle.s(8)
+                    NIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.glyph
+                        size: NihilStyle.s(14)
+                        color: root.muted ? NihilStyle.live : NihilStyle.ink
+                    }
+                    NLabel {
+                        anchors.verticalCenter: parent.verticalCenter
+                        strong: true
+                        text: root.kind === "brightness" ? Translation.tr("Light")
+                            : root.muted ? Translation.tr("Muted") : Translation.tr("Sound")
+                    }
+                }
+                NSpark {
+                    anchors.right: parent.right
+                    anchors.rightMargin: NihilStyle.s(14)
+                    y: NihilStyle.s(14)
+                    size: NihilStyle.s(14)
                 }
 
                 Item {
                     id: track
-                    anchors.left: mark.right
+                    anchors.left: split.right
                     anchors.leftMargin: NihilStyle.s(16)
-                    anchors.right: figure.left
-                    anchors.rightMargin: NihilStyle.s(14)
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: NihilStyle.s(2)
+                    anchors.right: parent.right
+                    anchors.rightMargin: NihilStyle.s(20)
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: NihilStyle.s(20)
+                    height: NihilStyle.s(8)
 
                     readonly property real reach: track.width * Math.max(0, Math.min(1, root.level))
 
                     Rectangle {
-                        anchors.fill: parent
-                        radius: height / 2
-                        color: NihilStyle.inkFaint
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                        height: 1
+                        color: NihilStyle.hair
                     }
-                    Rectangle {
-                        width: track.reach
-                        height: parent.height
-                        radius: height / 2
-                        color: NihilStyle.accent
-                        Behavior on width { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
-                    }
-                    // The flare: a soft halo and a hot core riding the tip of the filament.
                     Repeater {
-                        model: [{ size: 26, alpha: 0.16 }, { size: 13, alpha: 0.34 }, { size: 5, alpha: 1 }]
+                        model: 11
                         delegate: Rectangle {
-                            required property var modelData
-                            width: NihilStyle.s(modelData.size)
-                            height: width
-                            radius: width / 2
-                            x: track.reach - width / 2
+                            required property int index
+                            x: Math.round((track.width - 1) * index / 10)
+                            width: 1
+                            height: index % 5 === 0 ? track.height : track.height / 2
                             y: (track.height - height) / 2
-                            color: modelData.alpha === 1 ? NihilStyle.ink : NihilStyle.accent
-                            opacity: root.level > 0 ? modelData.alpha : 0
-                            Behavior on x { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
+                            color: NihilStyle.hair
                         }
                     }
-                }
-
-                NText {
-                    id: figure
-                    anchors.right: parent.right
-                    anchors.rightMargin: NihilStyle.s(20)
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: NihilStyle.s(34)
-                    horizontalAlignment: Text.AlignRight
-                    text: Math.round(root.level * 100)
-                    font.pixelSize: NihilStyle.textBody
-                    figures: true
-                    color: NihilStyle.inkSoft
+                    Item {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: Math.max(2, track.reach)
+                        height: NihilStyle.s(2)
+                        clip: true
+                        Behavior on width { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
+                        NSpectrum { width: track.width; height: parent.height }
+                    }
+                    // The needle at the level, lit at its tip.
+                    Rectangle {
+                        x: track.reach - width / 2
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: NihilStyle.s(3)
+                        height: NihilStyle.s(14)
+                        radius: 1
+                        color: NihilStyle.ink
+                        Behavior on x { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
+                    }
                 }
             }
         }

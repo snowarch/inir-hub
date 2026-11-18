@@ -4,9 +4,10 @@ import QtQuick
 Rectangle {
     id: root
 
+    property bool vertical: false
     readonly property bool full: NihilStyle.rainbow >= 0.5
     gradient: Gradient {
-        orientation: Gradient.Horizontal
+        orientation: root.vertical ? Gradient.Vertical : Gradient.Horizontal
         GradientStop { position: 0.0; color: root.full ? "#FF4D3A" : NihilStyle.specA }
         GradientStop { position: 0.25; color: root.full ? "#FFB23E" : Qt.tint(NihilStyle.specA, "#55FFFFFF") }
         GradientStop { position: 0.5; color: root.full ? "#F2F0E8" : "#F2F0E8" }

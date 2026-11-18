@@ -19,6 +19,7 @@
     "lockSurface": "lock/NihilLockSurface.qml",
     "settingsApp": "settings/NihilSettingsApp.qml",
     "widgetFace.battery": "widgets/NihilBatteryFace.qml",
+    "widgetFace.calendar": "widgets/NihilCalendarFace.qml",
     "widgetFace.clock": "widgets/NihilClockFace.qml",
     "widgetFace.date": "widgets/NihilDateFace.qml",
     "widgetFace.nowPlaying": "widgets/NihilNowPlayingFace.qml",

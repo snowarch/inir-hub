@@ -26,7 +26,9 @@ Item {
     // Seen: the desktop under the face is showing. Anything that ticks follows this.
     readonly property bool moving: root.widget.powerActive && root.widget.visible && root.widget.motionActive
 
-    readonly property string material: root.widget.look.material(root.widget)
+    // A family look may name the widget's material; NiHiL's widgets are glass unless the widget asks for no plate.
+    readonly property string material: typeof root.widget.look?.material === "function"
+        ? root.widget.look.material(root.widget) : (root.widget.showBackground === false ? "clear" : "glass")
     readonly property bool clear: root.material === "clear"
 
     readonly property bool stacked: root.widget.stacked

@@ -18,6 +18,16 @@ NGlass {
 
     implicitHeight: content.implicitHeight + NihilStyle.s(32)
     radius: NihilStyle.rCard
+    spark: root.critical ? 1 : 0
+
+    NSpectrum {
+        visible: root.critical
+        vertical: true
+        x: 0
+        y: NihilStyle.s(14)
+        width: NihilStyle.s(2)
+        height: root.height - NihilStyle.s(28)
+    }
     ignite: root.critical ? 1 : 0
 
     MouseArea {
@@ -43,12 +53,11 @@ NGlass {
             width: content.width - NihilStyle.s(48) - dismiss.width
             spacing: NihilStyle.s(3)
 
-            NText {
+            NLabel {
                 width: parent.width
-                text: root.notification.appName
-                elide: Text.ElideRight
-                font.pixelSize: NihilStyle.textSmall
-                color: root.critical ? NihilStyle.m3.m3error : NihilStyle.inkSoft
+                text: root.notification.appName + "   " + DateTime.time
+                strong: root.critical
+                color: root.critical ? NihilStyle.live : NihilStyle.inkSoft
             }
             NText {
                 width: parent.width
@@ -89,6 +98,9 @@ NGlass {
 
         NButton {
             id: dismiss
+            width: NihilStyle.s(28)
+            height: NihilStyle.s(28)
+            iconSize: NihilStyle.s(14)
             icon: "close"
             onClicked: Notifications.discardNotification(root.notification.notificationId)
         }

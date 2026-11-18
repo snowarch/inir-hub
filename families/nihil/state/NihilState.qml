@@ -179,6 +179,10 @@ Singleton {
     function start(): void {
         if (root._started || !Config.ready) return
         root._started = true
+        if (root.nativeStage && NiriService.inOverview && !root.overviewOpen) {
+            root.openOverview("windows")
+            return
+        }
         const startup = root.nihil?.overview?.startup ?? "desktop"
         if (startup !== "desktop") root.openOverview(startup === "apps" ? "apps" : "windows")
     }

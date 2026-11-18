@@ -28,9 +28,19 @@ Rectangle {
     }
 
     height: Math.max(words.implicitHeight + NihilStyle.s(20), NihilStyle.s(60))
-    radius: NihilStyle.rCard
-    color: tap.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+    radius: NihilStyle.r(6)
+    color: Qt.alpha(NihilStyle.ink, tap.containsMouse ? 0.06 : 0)
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+
+    // A ruled list: a hairline under each notice, a line of light on the edge of one that is critical.
+    Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: NihilStyle.line }
+    NSpectrum {
+        visible: root.critical
+        vertical: true
+        width: NihilStyle.s(2)
+        height: parent.height - NihilStyle.s(16)
+        y: NihilStyle.s(8)
+    }
 
     MouseArea {
         id: tap
@@ -54,18 +64,18 @@ Rectangle {
         y: NihilStyle.s(10)
         width: parent.width - x - NihilStyle.s(36)
 
-        NText {
+        spacing: NihilStyle.s(2)
+
+        NLabel {
             width: parent.width
-            text: (root.entry?.appName ?? "") + ", " + root.when(root.entry?.time ?? Date.now())
-            elide: Text.ElideRight
-            font.pixelSize: NihilStyle.textSmall
-            color: root.critical ? NihilStyle.m3.m3error : NihilStyle.inkSoft
+            text: (root.entry?.appName ?? "") + "   " + root.when(root.entry?.time ?? Date.now())
+            strong: root.critical
         }
         NText {
             width: parent.width
             text: root.entry?.summary ?? ""
             elide: Text.ElideRight
-            font.weight: Font.Medium
+            font.weight: Font.DemiBold
         }
         NText {
             width: parent.width

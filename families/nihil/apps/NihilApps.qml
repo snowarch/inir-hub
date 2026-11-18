@@ -31,6 +31,9 @@ FocusScope {
     readonly property real cellHeight: root.iconSize + NihilStyle.s(56)
 
     property int selected: 0
+    // What the poster foot names: the tile under the pointer, else the one the keys hold.
+    property var hovered: null
+    readonly property var named: root.hovered ?? catalog.pageItems[root.selected] ?? null
     property string openFolderId: ""
     readonly property var openFolder: catalog.folders.find(folder => folder.id === root.openFolderId) ?? null
 
@@ -148,8 +151,9 @@ FocusScope {
     Item {
         id: pages
         anchors.centerIn: parent
+        anchors.verticalCenterOffset: -foot.height / 2
         width: root.pageWidth
-        height: root.pageHeight
+        height: root.pageHeight - foot.height
 
         Grid {
             id: tiles
@@ -177,11 +181,15 @@ FocusScope {
                     width: root.cellWidth
                     height: root.cellHeight
                     iconSize: root.iconSize
-                    selected: root.selected === tile.index
+                    selected: root.selected === tile.index && root.hovered === null
                     onActivated: root.activate(tile.modelData)
                     onOpenFolder: root.openFolderId = tile.modelData.id
                     onPreviewUsed: app => root.activate(app)
                     onDropped: (sceneX, sceneY) => root.landed(tile.modelData, sceneX, sceneY)
+                    onContainsMouseChanged: {
+                        if (tile.containsMouse) root.hovered = tile.modelData
+                        else if (root.hovered === tile.modelData) root.hovered = null
+                    }
                 }
             }
         }
@@ -200,17 +208,15 @@ FocusScope {
             visible: catalog.items.length === 0
             spacing: NihilStyle.s(6)
 
-            NIcon {
+            NDisplay {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "search_off"
-                size: NihilStyle.s(36)
-                color: NihilStyle.inkSoft
+                text: catalog.filtering ? Translation.tr("Nothing") : Translation.tr("Empty")
+                size: NihilStyle.s(96)
+                color: NihilStyle.inkFaint
             }
-            NText {
+            NLabel {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: catalog.filtering ? Translation.tr("No apps match") : Translation.tr("No apps to show")
-                font.pixelSize: NihilStyle.textLarge
-                color: NihilStyle.inkSoft
             }
         }
     }
@@ -232,32 +238,70 @@ FocusScope {
         onClicked: catalog.goToPage(catalog.shownPage + 1)
     }
 
-    Row {
-        visible: (root.options.pageIndicators ?? true) && catalog.pageCount > 1
+    // The poster foot: the named app set large on the left, the pages as a numbered rule on the right.
+    Item {
+        id: foot
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: NihilStyle.s(10)
-        spacing: NihilStyle.s(4)
+        anchors.bottomMargin: NihilStyle.s(14)
+        width: root.pageWidth
+        height: NihilStyle.s(64)
 
-        Repeater {
-            model: catalog.pageCount
-            delegate: MouseArea {
-                id: dot
-                required property int index
-                readonly property bool here: catalog.shownPage === dot.index
+        Rectangle { width: parent.width; height: 1; color: NihilStyle.hair }
 
-                width: NihilStyle.s(24)
-                height: NihilStyle.s(24)
-                cursorShape: Qt.PointingHandCursor
-                onClicked: catalog.goToPage(dot.index)
+        NDisplay {
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            width: parent.width - pager.width - NihilStyle.s(24)
+            text: root.named?.name ?? ""
+            size: NihilStyle.s(34)
+            bloom: 0.5
+            elide: Text.ElideRight
+        }
 
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: dot.here ? NihilStyle.s(18) : NihilStyle.s(6)
-                    height: NihilStyle.s(6)
-                    radius: height / 2
-                    color: dot.here ? NihilStyle.accent : NihilStyle.inkFaint
-                    Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+        Row {
+            id: pager
+            visible: (root.options.pageIndicators ?? true) && catalog.pageCount > 1
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            spacing: NihilStyle.s(2)
+
+            NLabel {
+                anchors.verticalCenter: parent.verticalCenter
+                rightPadding: NihilStyle.s(18)
+                text: Translation.tr("%1 apps").arg(String(catalog.items.length).padStart(3, "0"))
+            }
+            NLabel {
+                anchors.verticalCenter: parent.verticalCenter
+                rightPadding: NihilStyle.s(10)
+                text: Translation.tr("Page")
+            }
+            Repeater {
+                model: catalog.pageCount
+                delegate: MouseArea {
+                    id: dot
+                    required property int index
+                    readonly property bool here: catalog.shownPage === dot.index
+
+                    width: NihilStyle.s(34)
+                    height: NihilStyle.s(30)
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    onClicked: catalog.goToPage(dot.index)
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: NihilStyle.r(3)
+                        color: NihilStyle.ink
+                        opacity: dot.here ? 1 : dot.containsMouse ? 0.12 : 0
+                        Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+                    }
+                    NLabel {
+                        anchors.centerIn: parent
+                        text: String(dot.index + 1).padStart(2, "0")
+                        color: dot.here ? NihilStyle.void_ : NihilStyle.inkSoft
+                        strong: dot.here
+                    }
                 }
             }
         }

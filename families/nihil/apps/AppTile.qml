@@ -72,12 +72,23 @@ MouseArea {
         scale: root.drag.active ? 1.08 : 1
         Behavior on scale { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
 
-        Rectangle {
-            anchors.fill: parent
-            radius: NihilStyle.rCard
-            color: NihilStyle.piece
-            opacity: root.lit ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+        // Lit: hairline corners frame the tile and a spark sits on the icon; the name turns into a bone plate.
+        Repeater {
+            model: 4
+            delegate: Item {
+                id: corner
+                required property int index
+                readonly property bool atRight: corner.index % 2 === 1
+                readonly property bool atLow: corner.index >= 2
+                x: corner.atRight ? carried.width - width : 0
+                y: corner.atLow ? carried.height - height : 0
+                width: NihilStyle.s(10)
+                height: NihilStyle.s(10)
+                opacity: root.lit ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+                Rectangle { width: parent.width; height: 1; y: corner.atLow ? parent.height - 1 : 0; color: NihilStyle.inkSoft }
+                Rectangle { width: 1; height: parent.height; x: corner.atRight ? parent.width - 1 : 0; color: NihilStyle.inkSoft }
+            }
         }
 
         Column {
@@ -101,7 +112,9 @@ MouseArea {
                     anchors.fill: parent
                     visible: root.isFolder
                     radius: NihilStyle.rCard
-                    color: NihilStyle.pieceRaised
+                    color: NihilStyle.piece
+                    border.width: 1
+                    border.color: NihilStyle.hair
 
                     Grid {
                         anchors.centerIn: parent
@@ -128,34 +141,60 @@ MouseArea {
                     }
                 }
 
+                NSpark {
+                    x: parent.width - width * 0.6
+                    y: -height * 0.4
+                    size: NihilStyle.s(18)
+                    opacity: root.lit ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
+                }
+
                 Rectangle {
                     visible: (root.options.packageBadge ?? true) && (root.item.package ?? "").length > 0
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     width: badge.implicitWidth + NihilStyle.s(8)
                     height: NihilStyle.s(16)
-                    radius: height / 2
-                    color: NihilStyle.pieceRaised
+                    radius: NihilStyle.r(3)
+                    color: NihilStyle.void_
+                    border.width: 1
+                    border.color: NihilStyle.hair
 
-                    NText {
+                    NLabel {
                         id: badge
                         anchors.centerIn: parent
-                        text: String(root.item.package ?? "").slice(0, 1).toUpperCase()
-                        font.pixelSize: NihilStyle.s(10)
+                        text: String(root.item.package ?? "").slice(0, 1)
                     }
                 }
             }
 
-            NText {
+            Item {
                 width: parent.width
+                height: name.implicitHeight + NihilStyle.s(6)
                 visible: root.showName
-                horizontalAlignment: Text.AlignHCenter
-                text: root.item.name ?? ""
-                elide: root.wholeName ? Text.ElideNone : Text.ElideRight
-                wrapMode: root.wholeName ? Text.Wrap : Text.NoWrap
-                maximumLineCount: root.wholeName ? 3 : 1
-                font.pixelSize: NihilStyle.textSmall
-                color: root.lit ? NihilStyle.ink : NihilStyle.inkSoft
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width, name.contentWidth + NihilStyle.s(12))
+                    height: parent.height
+                    radius: NihilStyle.r(3)
+                    color: NihilStyle.ink
+                    opacity: root.lit ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+                }
+                NText {
+                    id: name
+                    anchors.centerIn: parent
+                    width: parent.width - NihilStyle.s(8)
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.item.name ?? ""
+                    elide: root.wholeName ? Text.ElideNone : Text.ElideRight
+                    wrapMode: root.wholeName ? Text.Wrap : Text.NoWrap
+                    maximumLineCount: root.wholeName ? 3 : 1
+                    font.pixelSize: NihilStyle.textSmall
+                    font.weight: root.lit ? Font.DemiBold : Font.Medium
+                    color: root.lit ? NihilStyle.void_ : NihilStyle.inkSoft
+                }
             }
         }
     }

@@ -25,7 +25,7 @@ Variants {
         readonly property var workspaces: NihilState.workspacesOn(root.output)
         readonly property int at: NihilState.activeIndexOn(root.output)
         readonly property var workspace: root.workspaces[root.at]
-        // The workspace's name, else what lives there, else its number: a word wide enough to show past the
+        // The workspace's name, else what lives there, else the day: a word wide enough to show past the
         // workspace standing in front of it.
         readonly property string title: {
             if (root.subject === "clock") return DateTime.time
@@ -34,7 +34,7 @@ Variants {
             const wins = NihilState.windowsOn(root.workspace?.id)
             const lead = wins.find(win => win.is_focused) ?? wins[0]
             if (lead) return AppSearch.lookupDesktopEntry(lead.app_id ?? "")?.name ?? String(lead.app_id ?? "")
-            return String(root.at + 1).padStart(2, "0")
+            return Qt.locale().dayName(new Date().getDay(), Locale.LongFormat)
         }
         readonly property bool live: NiriService.inOverview
 
@@ -68,30 +68,47 @@ Variants {
             smooth: true
         }
 
-        // The title fills the page's width, stretched if a short word needs it, and sits a little above the middle.
+        // The compositor shrinks the workspaces to `zoom` of the screen and centres them, which leaves a gutter on each
+        // side. The title runs up the left gutter like a poster's spine, as tall as the gutter is wide, so the live
+        // workspace never hides it.
+        readonly property real zoom: Number(CompositorConfig.value({ comp: "layout", key: "overview.zoom",
+            read: "overview_zoom", fallback: 0.5 })) || 0.5
+        readonly property real gutter: root.width * (1 - NihilStyle.clamp(root.zoom, 0.2, 0.9)) / 2
+
         Item {
             id: stage
-            visible: root.subject !== "off"
-            anchors.fill: parent
-            readonly property real wide: root.width * 0.96
-            readonly property real tall: root.height * 0.8
+            visible: root.subject !== "off" && root.gutter > NihilStyle.s(120)
+            x: (root.gutter - width) / 2
+            width: root.gutter * 0.78
+            height: root.height
+            readonly property real reach: root.height * 0.82
+
             NDisplay {
                 id: title
                 anchors.centerIn: parent
-                anchors.verticalCenterOffset: -root.height * 0.03
-                size: stage.tall
+                width: implicitWidth
+                height: implicitHeight
+                size: stage.width * 1.12
                 text: root.title
-                color: Qt.alpha(NihilStyle.ink, 0.92)
+                color: Qt.alpha(NihilStyle.ink, 0.94)
                 bloom: 0.8
-                transform: Scale {
-                    origin.x: title.width / 2
-                    origin.y: title.height / 2
-                    xScale: stage.wide / Math.max(1, title.implicitWidth)
-                    yScale: Math.min(1, stage.wide / Math.max(1, title.implicitWidth) * 1.6)
-                }
+                rotation: -90
+                scale: Math.min(1, stage.reach / Math.max(1, title.implicitWidth))
             }
-            NSpark { x: root.width * 0.06; y: root.height * 0.2; size: NihilStyle.s(72) }
-            NSpark { x: root.width * 0.9; y: root.height * 0.68; size: NihilStyle.s(52) }
+            NSpark { x: stage.width + NihilStyle.s(8); y: root.height * 0.14; size: NihilStyle.s(48) }
+        }
+        NSpark { visible: stage.visible; x: root.width - root.gutter * 0.5; y: root.height * 0.82; size: NihilStyle.s(36) }
+
+        // The page's head over the right gutter: which workspace of how many, set as a poster's issue number.
+        NDisplay {
+            visible: stage.visible
+            anchors.right: parent.right
+            anchors.rightMargin: NihilStyle.s(28)
+            y: root.height * 0.08
+            text: String(root.at + 1).padStart(2, "0")
+            size: NihilStyle.s(88)
+            color: Qt.alpha(NihilStyle.ink, 0.22)
+            bloom: 0
         }
 
         // The poster's foot: the day, the mark, the time.

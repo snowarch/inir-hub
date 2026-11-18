@@ -36,33 +36,34 @@ NihilWidgetFace {
             anchors.right: parent.right
             anchors.top: parent.top
             text: root.night ? "moon" : "sun"
-            size: root.dp(root.small ? 24 : 30)
-            color: NihilStyle.accent
+            size: root.dp(root.small ? 18 : 22)
+            color: NihilStyle.inkSoft
+        }
+        NSpark {
+            anchors.right: parent.right
+            anchors.rightMargin: root.dp(root.small ? 22 : 28)
+            anchors.top: parent.top
+            size: root.dp(14)
         }
 
         Column {
             width: parent.width
             spacing: root.dp(2)
 
-            NText {
-                figures: true
+            NDisplay {
                 text: root.widget.temperatureText ?? root.sky.temp
-                font.weight: Font.Light
-                font.pixelSize: root.dp(root.small ? 40 : 52)
+                bloom: 0.7
+                size: root.dp(root.small ? 54 : 72)
             }
-            NText {
+            NLabel {
                 width: parent.width
+                strong: true
                 text: Weather.describeWeather(root.sky.wCode, root.night)
-                elide: Text.ElideRight
-                font.pixelSize: root.dp(14)
             }
-            NText {
+            NLabel {
                 width: parent.width
                 visible: Weather.showVisibleCity || Weather.stale
                 text: Weather.stale ? Weather.updatedLabel : Weather.visibleCity
-                elide: Text.ElideRight
-                font.pixelSize: root.dp(12)
-                color: NihilStyle.inkSoft
             }
         }
 
@@ -81,13 +82,12 @@ NihilWidgetFace {
                     id: fact
                     required property var modelData
                     width: parent.width / (root.large ? 2 : 3)
+                    spacing: root.dp(3)
 
-                    NText {
+                    Rectangle { width: parent.width - root.dp(8); height: 1; color: NihilStyle.hair }
+                    NLabel {
                         width: parent.width
                         text: fact.modelData.name
-                        elide: Text.ElideRight
-                        font.pixelSize: root.dp(11)
-                        color: NihilStyle.inkSoft
                     }
                     NText {
                         width: parent.width
@@ -95,6 +95,7 @@ NihilWidgetFace {
                         text: fact.modelData.value
                         elide: Text.ElideRight
                         font.pixelSize: root.dp(14)
+                        font.weight: Font.Medium
                     }
                 }
             }

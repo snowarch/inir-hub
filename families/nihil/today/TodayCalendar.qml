@@ -26,16 +26,20 @@ Column {
 
     Item {
         width: root.width
-        height: NihilStyle.s(72)
+        height: NihilStyle.s(104)
 
-        NText {
+        NDisplay {
             id: day
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            figures: true
-            text: root.now.getDate()
-            font.pixelSize: NihilStyle.s(64)
-            font.weight: Font.Light
+            text: String(root.now.getDate()).padStart(2, "0")
+            size: NihilStyle.s(112)
+            bloom: 0.8
+        }
+        NSpark {
+            x: day.width - size * 0.3
+            y: NihilStyle.s(4)
+            size: NihilStyle.s(22)
         }
         Column {
             anchors.left: day.right
@@ -43,19 +47,20 @@ Column {
             anchors.right: keys.left
             anchors.verticalCenter: parent.verticalCenter
 
-            NText {
+            spacing: NihilStyle.s(4)
+
+            NDisplay {
                 width: parent.width
                 text: Qt.locale().dayName(root.now.getDay(), Locale.LongFormat)
                 elide: Text.ElideRight
-                font.weight: Font.Medium
-                font.capitalization: Font.Capitalize
+                size: NihilStyle.s(30)
+                bloom: 0
             }
-            NText {
+            NLabel {
                 width: parent.width
-                text: Qt.locale().standaloneMonthName(root.first.getMonth(), Locale.LongFormat) + " " + root.first.getFullYear()
-                elide: Text.ElideRight
-                font.capitalization: Font.Capitalize
-                color: root.shift === 0 ? NihilStyle.inkSoft : NihilStyle.accent
+                text: Qt.locale().standaloneMonthName(root.first.getMonth(), Locale.LongFormat) + "  " + root.first.getFullYear()
+                strong: root.shift !== 0
+                color: root.shift === 0 ? NihilStyle.inkSoft : NihilStyle.live
 
                 MouseArea {
                     anchors.fill: parent
@@ -81,17 +86,17 @@ Column {
         }
     }
 
+    Rectangle { width: root.width; height: 1; color: NihilStyle.hair }
     Row {
         Repeater {
             model: 7
-            delegate: NText {
+            delegate: NLabel {
                 id: dayName
                 required property int index
                 width: root.cell
                 horizontalAlignment: Text.AlignHCenter
                 text: Qt.locale().dayName((root.startDay + dayName.index) % 7, Locale.NarrowFormat)
-                font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
+                color: NihilStyle.inkFaint
             }
         }
     }
@@ -116,17 +121,17 @@ Column {
                     anchors.centerIn: parent
                     width: NihilStyle.s(30)
                     height: NihilStyle.s(30)
-                    radius: width / 2
+                    radius: NihilStyle.r(5)
                     visible: step.today
-                    color: NihilStyle.accent
+                    color: NihilStyle.ink
                 }
                 NText {
                     anchors.centerIn: parent
                     visible: step.inMonth
                     figures: true
                     text: step.number
-                    font.weight: step.today ? Font.DemiBold : Font.Normal
-                    color: step.today ? NihilStyle.onAccent : NihilStyle.ink
+                    font.weight: step.today ? Font.Bold : Font.Medium
+                    color: step.today ? NihilStyle.void_ : NihilStyle.ink
                 }
             }
         }

@@ -3,7 +3,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// The hour, thin and large, and the day under it.
+// The hour set as a poster's title, the day on a rule under it.
 NihilWidgetFace {
     id: root
 
@@ -16,48 +16,33 @@ NihilWidgetFace {
     readonly property string period: root.written.slice(root.hour.length).trim()
     readonly property bool weatherShown: root.large && Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")
 
-    Column {
-        anchors.centerIn: parent
-        width: parent.width
-        spacing: root.dp(2)
+    NLabel {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        text: root.period.length > 0 ? root.period : Translation.locale.toString(root.now, "dddd")
+    }
+    NSpark {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        size: root.dp(16)
+    }
 
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: root.dp(6)
+    NDisplay {
+        id: figure
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: -root.dp(4)
+        text: root.hour
+        bloom: 0.7
+        size: Math.min(root.contentHeight * (root.small ? 0.62 : 0.72), root.contentWidth / Math.max(2.4, root.hour.length * 0.44))
+    }
 
-            NText {
-                id: figure
-                figures: true
-                text: root.hour
-                font.weight: Font.Light
-                font.pixelSize: Math.min(root.contentHeight * (root.small ? 0.56 : 0.62),
-                    root.contentWidth / Math.max(3, root.hour.length * 0.62 + (root.period.length > 0 ? 1.4 : 0)))
-            }
-            NText {
-                anchors.baseline: figure.baseline
-                visible: root.period.length > 0
-                text: root.period
-                font.pixelSize: figure.font.pixelSize * 0.26
-                color: NihilStyle.inkSoft
-            }
-        }
-        NText {
-            width: parent.width
-            horizontalAlignment: Text.AlignHCenter
-            text: Translation.locale.toString(root.now, root.small ? "ddd d" : "dddd, d MMMM")
-            elide: Text.ElideRight
-            font.pixelSize: root.dp(root.small ? 13 : 15)
-            color: NihilStyle.inkSoft
-        }
-        NText {
-            width: parent.width
-            visible: root.weatherShown
-            topPadding: root.dp(6)
-            horizontalAlignment: Text.AlignHCenter
-            text: `${Weather.data?.temp ?? ""}  ${Weather.describeWeather(Weather.data?.wCode, Weather.isNightNow())}`
-            elide: Text.ElideRight
-            font.pixelSize: root.dp(13)
-            color: NihilStyle.inkSoft
-        }
+    NRule {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        start: Translation.locale.toString(root.now, root.small ? "ddd d" : "ddd d MMM")
+        middle: root.small ? "" : "⋈"
+        end: root.weatherShown ? String(Weather.data?.temp ?? "") : Translation.locale.toString(root.now, "yyyy")
     }
 }
