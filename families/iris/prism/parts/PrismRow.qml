@@ -25,7 +25,9 @@ Item {
     property bool compact: false
     // Inside a folder: the study's tighter line.
     property bool dense: false
-    readonly property bool tall: root.stacked || (root.compact && root.below === ""
+    // The group's master row under a head that already says its name: the control alone, the row's whole width.
+    property bool headless: false
+    readonly property bool tall: root.headless || root.stacked || (root.compact && root.below === ""
         && ["range", "hue", "text", "choice"].includes(root.kind))
     property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
@@ -66,11 +68,19 @@ Item {
     // Past what the line's end holds they are laid out under it, each with its name.
     readonly property bool manySwatches: root.swatched && (root.choices.length - 1) * PrismTheme.dp(26) + PrismTheme.dp(96) > root.controlWidth
     readonly property bool listed: root.kind === "pieces" || Boolean(root.spec.flags)
+    // A face's cards: only the faces this computer has (its own default always).
+    readonly property var faces: {
+        if (!root.spec.previewFont) return []
+        const installed = Qt.fontFamilies()
+        return root.choices.filter(choice => Array.isArray(choice.values) || String(choice.value ?? "") === "" || installed.includes(String(choice.value)))
+    }
     // What goes under the line, if anything.
     readonly property string below: {
         if (root.listed) return "pieces"
         if (root.kind === "designs") return "designs"
         if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "faces"
+        if (root.kind === "choice" && root.choices.length > 1 && root.choices.every(choice => choice.palette)) return "palettes"
+        if (root.kind === "choice" && root.spec.previewFont && root.faces.length > 1) return "typefaces"
         if (root.kind === "choice" && root.manySwatches) return "swatches"
         if (root.kind === "choice" && root.open && !root.swatched) return "chips"
         if (root.kind === "list" && root.spec.view) return "view"
@@ -87,6 +97,9 @@ Item {
         if (root.kind === "zone") return "zone"
         if (root.kind === "designs") return "now"
         if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "now"
+        if (root.below === "palettes") return "now"
+        // A face's whole installed list stays one press away at the end; a pairing is only its cards.
+        if (root.below === "typefaces") return root.spec.installedFonts ? "choice" : "now"
         if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
         if (root.kind === "choice" && root.choices.length > 0) return "choice"
         if (root.kind === "choice" || root.kind === "list" || root.listed) return "now"
@@ -120,14 +133,15 @@ Item {
         // The control fills a flat line's height and sets a tall one's, so the flat height stands on its own: read through
         // the line, a row turning tall as its width shrinks (a colour pick's discs no longer fitting) re-entered it.
         readonly property real flat: Math.max(root.compact || root.dense ? PrismTheme.dp(48) : PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
-        height: root.tall
+        height: root.headless ? (control.height > 0 ? PrismTheme.dp(6) + control.height + PrismTheme.dp(10) : PrismTheme.dp(4))
+            : root.tall
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
             : line.flat
         opacity: root.locked ? 0.45 : 1
 
         // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
         Rectangle {
-            visible: root.changed
+            visible: root.changed && !root.headless
             x: -PrismTheme.dp(16)
             width: PrismTheme.dp(3)
             height: PrismTheme.dp(16)
@@ -150,6 +164,7 @@ Item {
         }
         Column {
             id: name
+            visible: !root.headless
             anchors.left: parent.left
             anchors.right: root.tall || root.compact ? tail.left : root.aboutShown ? about.left : control.left
             anchors.rightMargin: root.tall ? PrismTheme.dp(4) : PrismTheme.dp(16)
@@ -236,8 +251,8 @@ Item {
             // Stacked: under the name, as wide as the row.
             // In a folder the control stands flush at the line's end (the study) and the pin waits beside it.
             x: root.tall ? 0 : parent.width - (root.compact ? 0 : tail.width + PrismTheme.dp(8)) - width
-            y: root.tall ? name.y + name.height + PrismTheme.dp(10) : 0
-            width: root.tall ? parent.width : root.compact ? Math.max(PrismTheme.dp(40), kind.item ? kind.item.implicitWidth : 0) : root.controlWidth
+            y: root.headless ? PrismTheme.dp(6) : root.tall ? name.y + name.height + PrismTheme.dp(10) : 0
+            width: root.headless ? parent.width - tail.width - PrismTheme.dp(8) : root.tall ? parent.width : root.compact ? Math.max(PrismTheme.dp(40), kind.item ? kind.item.implicitWidth : 0) : root.controlWidth
             height: root.tall ? (kind.item ? kind.item.height : 0) : line.flat
             enabled: !root.locked
             Loader {
@@ -256,7 +271,7 @@ Item {
             id: tail
             anchors.right: root.compact && !root.tall ? control.left : parent.right
             anchors.rightMargin: root.compact && !root.tall ? PrismTheme.dp(6) : 0
-            y: root.tall ? PrismTheme.dp(8) : Math.round((parent.height - height) / 2)
+            y: root.headless ? Math.max(0, control.y + Math.round((Math.min(control.height, PrismTheme.dp(32)) - PrismTheme.dp(28)) / 2)) : root.tall ? PrismTheme.dp(8) : Math.round((parent.height - height) / 2)
             spacing: 0
             width: root.compact ? Math.max(PrismTheme.dp(28), implicitWidth) : PrismTheme.dp(56)
             layoutDirection: Qt.RightToLeft
@@ -300,11 +315,12 @@ Item {
             anchors.left: parent.left
             // A gallery of faces or whole looks takes the row's whole width (twice the columns, half the scroll);
             // everything else sits under the row's name.
-            readonly property bool full: root.below === "faces" || root.below === "themes"
+            readonly property bool full: ["faces", "themes", "palettes", "typefaces"].includes(root.below)
             anchors.leftMargin: slot.full ? 0 : name.x
             width: slot.full ? parent.width : parent.width - name.x - (root.compact ? 0 : PrismTheme.dp(56))
             height: item ? item.implicitHeight : 0
             sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow,
+                palettes: palettesBelow, typefaces: typefacesBelow,
                 view: viewBelow, icon: iconBelow, curve: curveBelow, niriMotion: niriBelow, widgets: widgetsBelow, themes: themesBelow })[root.below] ?? null
         }
     }
@@ -451,6 +467,25 @@ Item {
             width: slot.width
             choices: root.choices
             current: root.value
+            onPicked: value => PrismModel.write(root.row, value)
+        }
+    }
+    Component {
+        id: palettesBelow
+        PrismPalettes {
+            width: slot.width
+            choices: root.choices
+            current: root.value
+            onPicked: value => PrismModel.write(root.row, value)
+        }
+    }
+    Component {
+        id: typefacesBelow
+        PrismTypefaces {
+            width: slot.width
+            choices: root.faces
+            current: root.value
+            sample: String(root.spec.path ?? "").includes("numbers") ? "24" : "Ag"
             onPicked: value => PrismModel.write(root.row, value)
         }
     }

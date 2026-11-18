@@ -36,21 +36,25 @@ Item {
     implicitHeight: head.height + PrismTheme.dp(14) + Math.max(0, ...root.laid.map(col => col.rows)) * root.rowHeight
 
     component Caption: PrismText {
-        mono: true
-        color: PrismTheme.ink3
-        font.pixelSize: root.cap
-        font.letterSpacing: root.cap * 0.1
+        color: PrismTheme.ink2
+        font.pixelSize: PrismTheme.small
     }
 
     Item {
         id: head
         width: root.width
         height: PrismTheme.dp(28)
-        Caption { anchors.verticalCenter: parent.verticalCenter; text: Translation.tr("Index").toUpperCase() }
+        PrismText {
+            anchors.verticalCenter: parent.verticalCenter
+            text: Translation.tr("Every page")
+            font.pixelSize: PrismTheme.row
+            font.weight: Font.DemiBold
+        }
         Caption {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            text: Translation.tr("%1 pages").arg(root.chapters.reduce((sum, c) => sum + c.pages.length, 0)).toUpperCase()
+            text: Translation.tr("%1 pages").arg(root.chapters.reduce((sum, c) => sum + c.pages.length, 0))
+            color: PrismTheme.ink3
         }
         Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: PrismTheme.line }
     }
@@ -73,10 +77,11 @@ Item {
                         Item {
                             width: parent.width
                             height: root.rowHeight
-                            Caption {
+                            PrismText {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: String(chapter.modelData.n).padStart(2, "0") + "  " + Translation.tr(chapter.modelData.title).toUpperCase()
-                                color: PrismTheme.ink2
+                                text: Translation.tr(chapter.modelData.title)
+                                font.pixelSize: PrismTheme.small
+                                font.weight: Font.DemiBold
                             }
                         }
                         Repeater {
@@ -95,14 +100,8 @@ Item {
                                     radius: PrismTheme.dp(9)
                                     color: hit.containsMouse ? PrismTheme.fill : "transparent"
                                 }
-                                Caption {
-                                    id: number
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: PrismTheme.dp(34)
-                                    text: String(chapter.modelData.n).padStart(2, "0") + "." + String(page.index + 1)
-                                }
                                 PrismText {
-                                    anchors.left: number.right
+                                    anchors.left: parent.left
                                     anchors.right: count.left
                                     anchors.rightMargin: PrismTheme.dp(8)
                                     anchors.verticalCenter: parent.verticalCenter
@@ -115,7 +114,7 @@ Item {
                                     anchors.right: parent.right
                                     anchors.verticalCenter: parent.verticalCenter
                                     visible: page.changed > 0
-                                    text: String(page.changed).padStart(2, "0")
+                                    text: String(page.changed)
                                     color: PrismTheme.mark
                                 }
                                 MouseArea {

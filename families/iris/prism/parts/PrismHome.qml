@@ -66,20 +66,17 @@ Column {
         height: PrismTheme.dp(26)
         PrismText {
             anchors.verticalCenter: parent.verticalCenter
-            mono: true
-            text: Translation.tr("Every day").toUpperCase()
-            color: PrismTheme.ink3
-            font.pixelSize: PrismTheme.dp(9.5)
-            font.letterSpacing: PrismTheme.dp(9.5) * 0.1
+            text: Translation.tr("Every day")
+            font.pixelSize: PrismTheme.row
+            font.weight: Font.DemiBold
         }
         PrismText {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            mono: true
-            text: (root.editing ? Translation.tr("Done") : Translation.tr("Edit")).toUpperCase()
-            color: editArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
-            font.pixelSize: PrismTheme.dp(9.5)
-            font.letterSpacing: PrismTheme.dp(9.5) * 0.1
+            text: root.editing ? Translation.tr("Done") : Translation.tr("Edit")
+            color: editArea.containsMouse ? PrismTheme.ink : PrismTheme.accentInk
+            font.pixelSize: PrismTheme.small
+            font.weight: Font.DemiBold
             MouseArea {
                 id: editArea
                 anchors.fill: parent
@@ -160,12 +157,10 @@ Column {
                     // What it holds now; a tile on offer says where it lives instead.
                     PrismText {
                         width: parent.width
-                        text: String(tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData)).toUpperCase()
+                        text: String(tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData))
                         elide: Text.ElideRight
-                        mono: true
                         color: PrismTheme.ink2
-                        font.pixelSize: PrismTheme.dp(9.5)
-                        font.letterSpacing: PrismTheme.dp(9.5) * 0.06
+                        font.pixelSize: PrismTheme.small
                     }
                 }
                 MouseArea {

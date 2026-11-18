@@ -3,9 +3,11 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.iris.components
 import qs.modules.iris.settings
 import qs.modules.iris.style
+import qs.modules.iris.state
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
@@ -56,13 +58,39 @@ Item {
     readonly property bool changesView: PrismState.page === "changes"
     // A page iRiS draws as a view of its own (Community Hub, Keyboard shortcuts, About) fills the middle below its title.
     readonly property bool home: !PrismState.searching && !root.changesView && root.page.pageId === "general"
+    // Home is the person's own (his 11-18): its blocks in their order, its head's look, its greeting.
+    readonly property var homeLook: Config.options?.iris?.appearance ?? ({})
+    readonly property var homeBlocks: Array.from(root.homeLook.settingsHomeBlocks ?? ["everyday", "deck", "groups", "index"]).map(String)
+    readonly property string homeGreeting: String(root.homeLook.settingsHomeGreeting ?? "name")
+    property bool homeArranging: false
     readonly property string greeting: {
+        if (root.homeGreeting === "hour") return Qt.formatTime(DateTime.clock.date, "hh:mm")
         const hour = DateTime.clock.date.getHours()
         const said = hour >= 5 && hour < 12 ? Translation.tr("Good morning") : hour >= 12 && hour < 19 ? Translation.tr("Good afternoon")
             : hour >= 19 ? Translation.tr("Good evening") : Translation.tr("Good night")
         const name = String(SystemInfo.displayName || SystemInfo.username || "")
-        return name.length > 0 ? said + ", " + name : said
+        return name.length > 0 && root.homeGreeting === "name" ? said + ", " + name : said
     }
+    // A page drawn to its own measure: its head is a drawing of what it sets, and every group stands on the shelf.
+    readonly property Component heroNow: PrismState.searching || root.changesView || root.home ? null
+        : (({ colour: colourHero, typeIcons: typeHero, lock: lockHero })[String(root.page.pageId)] ?? null)
+    readonly property bool shelved: root.home || root.heroNow !== null
+    // The page's own keys on its head.
+    readonly property var pageActions: root.home
+        ? [{ id: "editHome", glyph: root.homeArranging ? "check" : "edit", text: root.homeArranging ? "Done" : "Make it yours", solid: true }]
+        : root.page.pageId === "controlCenter" ? [{ id: "arrange", glyph: "dashboard_customize", text: "Arrange it", solid: true }] : []
+    function act(id: string): void {
+        if (id === "editHome") { root.homeArranging = !root.homeArranging; return }
+        if (id === "lockEdit") { root.closeRequested(); IrisState.lockEdit = true; return }
+        if (id === "lockNow") { root.closeRequested(); Session.lock(); return }
+        if (id === "arrange") {
+            root.closeRequested()
+            IrisState.morphOwner = ""
+            GlobalStates.controlPanelOpen = true
+            IrisState.controlEdit = true
+        }
+    }
+    onHomeChanged: if (!root.home) root.homeArranging = false
     readonly property bool hosted: !PrismState.searching && !root.changesView && String(root.page.view ?? "").length > 0
     readonly property var sections: PrismState.searching || root.changesView || root.hosted ? [] : PrismModel.sectionsOf(root.page.pageId)
     // A long page is read in parts of a screenful or two (whole groups, about 24 rows each); a short one stacks every
@@ -375,10 +403,14 @@ Item {
                     page: root.page
                     // Home's card is the person's own: a greeting, the everyday tiles and the desktop drawn; its groups
                     // all stand on the shelf.
-                    lead: root.home ? null : root.shownSections[0] ?? null
+                    lead: root.shelved ? null : root.shownSections[0] ?? null
                     tabTitle: root.home ? root.greeting : ""
                     tabLine: root.home ? Translation.locale.toString(DateTime.clock.date, "dddd d MMMM") + (Weather.enabled && Weather.hasData ? "  ·  " + String(Weather.data?.temp ?? "") : "") : ""
-                    side: root.home ? homeSide : null
+                    side: root.home && root.homeBlocks[0] === "everyday" ? homeSide : null
+                    hero: root.heroNow
+                    actions: root.pageActions
+                    artKind: root.home ? String(root.homeLook.settingsHomeArt ?? "flow") : "flow"
+                    onAction: id => root.act(id)
                     groups: root.sections
                     flashPath: root.flashPath
                     restorable: PrismModel.restorableOf(root.page.pageId)
@@ -389,14 +421,15 @@ Item {
                     onRestore: PrismModel.restore(root.page.pageId)
                     onToggleRail: root.toggleRail()
                 }
-                Item { visible: leaf.visible && shelf.groups.length > 0; width: 1; height: PrismTheme.dp(14) }
+                Item { visible: shelf.visible; width: 1; height: PrismTheme.dp(14) }
                 // Every other group, a folder each.
                 PrismShelf {
                     id: shelf
-                    visible: leaf.visible && shelf.groups.length > 0
+                    // Home's groups stand among its blocks, where the person put them.
+                    visible: leaf.visible && !root.home && shelf.groups.length > 0
                     width: content.width
-                    groups: root.home ? root.shownSections : root.shownSections.slice(1)
-                    first: root.home ? 1 : 2
+                    groups: root.shelved ? root.shownSections : root.shownSections.slice(1)
+                    first: root.shelved ? 1 : 2
                     tint: root.page.tint
                     flashPath: root.flashPath
                 }
@@ -541,17 +574,37 @@ Item {
     // page of Settings as an index. Wallpaper's sheet holds the wallpapers to go back to.
     Component {
         id: homeSide
-        PrismHome { onReach: row => root.reach(row) }
+        PrismHome { editing: root.homeArranging; onReach: row => root.reach(row) }
     }
     Component {
         id: homeExtra
         Column {
+            id: blocks
             spacing: PrismTheme.dp(30)
-            PrismHome { visible: !leaf.sideWell; width: parent.width; onReach: row => root.reach(row) }
-            PrismHomeDeck { width: parent.width }
-            PrismIndex { width: parent.width }
+            Loader {
+                active: root.homeArranging
+                visible: active
+                width: blocks.width
+                sourceComponent: PrismHomeArrange { onDone: root.homeArranging = false }
+            }
+            Repeater {
+                model: root.homeBlocks.filter(id => !(id === "everyday" && leaf.siding))
+                delegate: Loader {
+                    required property string modelData
+                    width: blocks.width
+                    sourceComponent: ({ everyday: homeEveryday, deck: homeDeck, groups: homeGroups, index: homeIndex })[modelData] ?? null
+                }
+            }
         }
     }
+    Component { id: homeEveryday; PrismHome { editing: root.homeArranging; onReach: row => root.reach(row) } }
+    Component { id: homeDeck; PrismHomeDeck {} }
+    Component { id: homeIndex; PrismIndex {} }
+    Component { id: homeGroups; PrismShelf { groups: root.shownSections; first: 1; tint: root.page.tint; flashPath: root.flashPath } }
+    // The pages drawn to their measure.
+    Component { id: colourHero; PrismColourHero { onPickGroup: title => root.showGroup(title) } }
+    Component { id: typeHero; PrismTypeHero { onPickGroup: title => root.showGroup(title) } }
+    Component { id: lockHero; PrismLockHero { onAction: id => root.act(id); onPickGroup: title => root.showGroup(title) } }
     Component {
         id: wallpaperExtra
         PrismWallpaperHero {

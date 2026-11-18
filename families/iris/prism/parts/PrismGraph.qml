@@ -32,7 +32,11 @@ Item {
     readonly property real px: Math.round((root.width - root.pw) / 2)
     readonly property real py: Math.round(root.padTop + (root.height - root.padTop - root.padBottom - root.ph) / 2)
 
-    function caption(text: string): string { return String(text ?? "").toUpperCase() }
+    // Labels said as written, in the text face (his 11-18: no drafting-sheet capitals).
+    function caption(text: string): string {
+        const said = String(text ?? "").split(" ").map(word => ["OKLCH", "GTK", "QT"].includes(word) ? word : word.toLowerCase()).join(" ")
+        return said.charAt(0).toUpperCase() + said.slice(1)
+    }
 
     Canvas {
         id: canvas
@@ -49,7 +53,7 @@ Item {
             const ink = { line: root.line, faint: root.faint, mark: root.mark, dash: root.faint, fill: root.faint, markfill: root.mark }
             const fillOf = style => style === "markfill" ? Qt.rgba(root.mark.r, root.mark.g, root.mark.b, 0.16)
                 : style === "fill" ? Qt.rgba(root.line.r, root.line.g, root.line.b, 0.1) : null
-            const mono = size => `500 ${Math.round(size)}px "${PrismTheme.fontMono}"`
+            const mono = size => `500 ${Math.round(size * 1.08)}px "${PrismTheme.fontMain}"`
             const stroke = (style, closedFill) => {
                 ctx.lineWidth = style === "mark" || style === "markfill" ? 1.5 : 1.1
                 ctx.strokeStyle = ink[style] ?? root.line
@@ -74,7 +78,7 @@ Item {
                 ctx.fillStyle = color ?? root.line
                 ctx.textAlign = align ?? "left"
                 ctx.textBaseline = "middle"
-                ctx.fillText(String(text), x, y)
+                ctx.fillText(root.caption(String(text)), x, y)
             }
             const tick = (x, y, dx, dy) => { ctx.beginPath(); ctx.moveTo(x - dx, y - dy); ctx.lineTo(x + dx, y + dy); ctx.stroke() }
 
@@ -126,7 +130,7 @@ Item {
                     ctx.fillStyle = root.line
                     ctx.textAlign = it[4] ?? "left"
                     ctx.textBaseline = "alphabetic"
-                    ctx.fillText(String(it[3]), X(it[1]), Y(it[2]))
+                    ctx.fillText(root.caption(String(it[3])), X(it[1]), Y(it[2]))
                 } else if (kind === "dim") {
                     // A dimension: the measured span, a tick at each end and its size said in its middle on a gap.
                     const x1 = X(it[1]), y1 = Y(it[2]), x2 = X(it[3]), y2 = Y(it[4])
@@ -172,40 +176,16 @@ Item {
     onLineChanged: canvas.requestPaint()
     onMarkChanged: canvas.requestPaint()
 
-    // The plate's marks: its number and page, a code, a note and its scale.
-    component Mark: PrismText {
-        mono: true
-        color: PrismTheme.ink3
-        font.pixelSize: root.labelSize
-        font.letterSpacing: root.labelSize * 0.1
-    }
-    Mark {
-        visible: root.chrome
-        x: root.m
-        y: PrismTheme.dp(12)
-        text: "FIG. " + String(root.number).padStart(2, "0") + "  ·  " + root.caption(Translation.tr(root.pageName))
-    }
-    Mark {
-        visible: root.chrome
-        anchors.right: parent.right
-        anchors.rightMargin: root.m
-        y: PrismTheme.dp(12)
-        text: root.caption(root.figure.code)
-    }
-    Mark {
+    // The plate's one mark: a note on what it shows, in the text face (his 11-18: no figure numbers, codes or scales).
+    PrismText {
         visible: root.chrome && text.length > 0
+        color: PrismTheme.ink3
+        font.pixelSize: PrismTheme.caption
         x: root.m
         anchors.bottom: parent.bottom
         anchors.bottomMargin: PrismTheme.dp(10)
         width: parent.width * 0.62
+        elide: Text.ElideRight
         text: root.caption(root.figure.note)
-    }
-    Mark {
-        visible: root.chrome
-        anchors.right: parent.right
-        anchors.rightMargin: root.m
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: PrismTheme.dp(10)
-        text: "NTS"
     }
 }

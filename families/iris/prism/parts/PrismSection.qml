@@ -27,6 +27,8 @@ Item {
     signal reach(var row)
     // Only the rows: the folder around them draws the sheet and says the name (the page card, a folder on the shelf).
     property bool bare: false
+    // The group's master row, whose name the head already says: it shows its control alone.
+    property string headlessKey: ""
 
     readonly property real pad: root.bare ? 0 : PrismTheme.dp(24)
     readonly property real inner: root.width - root.pad * 2
@@ -198,6 +200,7 @@ Item {
                     PrismRow {
                         width: parent.paired ? root.half : body.width
                         row: entry.modelData.rows[0]
+                        headless: String(row.key ?? "") === root.headlessKey && root.headlessKey.length > 0
                         stacked: parent.stackedPair
                         compact: root.compact
                         dense: root.bare

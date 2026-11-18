@@ -65,11 +65,10 @@ Item {
             anchors.bottomMargin: PrismTheme.dp(18)
             spacing: PrismTheme.dp(2)
             PrismText {
-                mono: true
-                text: String(PrismModel.wallpaperKind(root.wallPath)).toUpperCase()
-                color: Qt.alpha(PrismTheme.paper, 0.7)
-                font.pixelSize: PrismTheme.dp(9.5)
-                font.letterSpacing: PrismTheme.dp(9.5) * 0.1
+                readonly property string kind: String(PrismModel.wallpaperKind(root.wallPath))
+                text: kind.charAt(0).toUpperCase() + kind.slice(1).toLowerCase()
+                color: Qt.alpha(PrismTheme.paper, 0.78)
+                font.pixelSize: PrismTheme.small
             }
             PrismText {
                 width: parent.width
@@ -125,11 +124,9 @@ Item {
                 height: PrismTheme.dp(34)
                 PrismText {
                     anchors.verticalCenter: parent.verticalCenter
-                    mono: true
-                    text: Translation.tr("Sound & light").toUpperCase()
-                    color: PrismTheme.ink3
-                    font.pixelSize: PrismTheme.dp(9.5)
-                    font.letterSpacing: PrismTheme.dp(9.5) * 0.1
+                    text: Translation.tr("Sound & light")
+                    font.pixelSize: PrismTheme.row
+                    font.weight: Font.DemiBold
                 }
                 // Mute answers in place: the circle goes solid while the sound is off.
                 PrismRound {

@@ -250,6 +250,11 @@ JsonObject {
         property bool settingsOriginal: false
         // What iRiS Settings' Home holds, in order: rows by path, nightLight and gameMode for the live switches.
         property list<string> settingsHome: ["iris.appearance.scheme", "iris.appearance.accent", "iris.appearance.look", "iris.appearance.glass.mode", "notifications.silent", "nightLight", "gameMode"]
+        // Prism's Home, the person's own (his 11-18): which blocks it shows, in order ("everyday", "deck", "index",
+        // "groups"), what its head wears ("flow", "wallpaper", "accent") and how it greets ("name", "plain", "hour").
+        property list<string> settingsHomeBlocks: ["everyday", "deck", "groups", "index"]
+        property string settingsHomeArt: "flow"
+        property string settingsHomeGreeting: "name"
         // Looks saved from iRiS Studio: [{ name, values: { "iris.…": value } }].
         property list<var> saved: []
         property string themeId: "iris" // the iRiS theme last applied (curated id or a file in ~/.config/inir/iris/themes)

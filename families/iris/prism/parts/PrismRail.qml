@@ -36,11 +36,10 @@ Item {
     readonly property real room: player.y - PrismTheme.dp(20) - root.changesTop
     readonly property int shown: Math.max(1, Math.floor(root.room / root.changeRow))
 
+    // Small print in the text face, said as written (his 11-18: no mono capitals, no counters).
     component Caption: PrismText {
-        mono: true
-        color: PrismTheme.ink3
-        font.pixelSize: root.cap
-        font.letterSpacing: root.cap * 0.1
+        color: PrismTheme.ink2
+        font.pixelSize: PrismTheme.small
     }
     component Head: Item {
         id: head
@@ -50,22 +49,27 @@ Item {
         signal linkClicked()
         width: column.width
         height: PrismTheme.dp(26)
-        Caption { anchors.verticalCenter: parent.verticalCenter; text: head.title.toUpperCase() }
+        PrismText {
+            anchors.verticalCenter: parent.verticalCenter
+            text: head.title
+            font.pixelSize: PrismTheme.body
+            font.weight: Font.DemiBold
+        }
         Caption {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             visible: head.link.length === 0
             text: head.count
+            color: PrismTheme.ink3
         }
         PrismText {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             visible: head.link.length > 0
-            mono: true
-            text: head.link.toUpperCase()
-            color: linkArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
-            font.pixelSize: root.cap
-            font.letterSpacing: root.cap * 0.1
+            text: head.link
+            color: linkArea.containsMouse ? PrismTheme.ink : PrismTheme.accentInk
+            font.pixelSize: PrismTheme.small
+            font.weight: Font.DemiBold
             MouseArea {
                 id: linkArea
                 anchors.fill: parent
@@ -139,7 +143,7 @@ Item {
                 Caption {
                     width: parent.width
                     text: (Translation.locale.toString(DateTime.clock.date, "ddd d MMM")
-                        + (Weather.enabled && Weather.hasData ? "  ·  " + String(Weather.data?.temp ?? "") : "")).toUpperCase()
+                        + (Weather.enabled && Weather.hasData ? "  ·  " + String(Weather.data?.temp ?? "") : ""))
                 }
             }
             PrismRound {
@@ -160,7 +164,7 @@ Item {
         Head {
             visible: root.indexed
             title: Translation.tr("On this page")
-            count: String(root.groups.length).padStart(2, "0")
+            count: String(root.groups.length)
         }
         Column {
             visible: root.indexed
@@ -193,15 +197,8 @@ Item {
                         radius: 1
                         color: PrismTheme.mark
                     }
-                    Caption {
-                        id: number
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: PrismTheme.dp(28)
-                        text: String(group.index + 1).padStart(2, "0")
-                        color: group.here ? PrismTheme.ink : PrismTheme.ink3
-                    }
                     PrismText {
-                        anchors.left: number.right
+                        anchors.left: parent.left
                         anchors.right: dot.left
                         anchors.rightMargin: PrismTheme.dp(8)
                         anchors.verticalCenter: parent.verticalCenter
@@ -237,7 +234,7 @@ Item {
         Head {
             id: changesHead
             title: root.home ? Translation.tr("Your changes") : Translation.tr("Changed here")
-            count: String(root.changes.length).padStart(2, "0")
+            count: String(root.changes.length)
             link: root.allChanges.length > (root.home ? root.shown : 0) ? Translation.tr("All %1").arg(root.allChanges.length) : ""
             onLinkClicked: root.seeAllChanges()
         }
@@ -292,7 +289,7 @@ Item {
                         Caption {
                             width: parent.width
                             text: (root.home ? Translation.tr(String(PrismModel.page(change.modelData.page).name ?? "")) + "  ·  " : "")
-                                + String(PrismModel.sayNow(change.modelData)).toUpperCase()
+                                + String(PrismModel.sayNow(change.modelData))
                             color: PrismTheme.ink2
                         }
                     }

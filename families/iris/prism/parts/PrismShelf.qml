@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.modules.iris.prism.core
+import qs.modules.iris.prism.model
 
 // The page's other groups, each a folder, side by side under the page card (the B · Carpeta study): three to a row
 // where the page is wide, two where it is not, never an empty place.
@@ -24,6 +25,9 @@ Item {
             const kind = String(row?.kind ?? ""), spec = row?.spec ?? {}
             return kind === "pieces" || Boolean(spec.flags) || kind === "designs" || (kind === "list" && Boolean(spec.view))
                 || ["icon", "curve", "niriMotion", "widgets", "themes"].includes(kind) || (kind === "choice" && spec.cards === "island")
+                // A gallery of faces or palettes reads across the page, not down a narrow folder.
+                || (kind === "choice" && Boolean(spec.previewFont))
+                || (kind === "choice" && spec.tiles === true && PrismModel.choicesOf(row).every(choice => choice.palette))
         })
     }
     // [[index, …], …]: each row of the shelf. Short groups fill their rows in the page's order and a wide one keeps

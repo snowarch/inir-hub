@@ -3,8 +3,8 @@ import qs.services
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 
-// One sidebar line: glyph and name (B · Carpeta, his 11-17 pick). The open page stands on a raised plate, white mark
-// and white name, no colour; a hovered line takes a quiet plate.
+// One sidebar line: glyph and name (B · Carpeta, his 11-17 pick). The open page stands on a plate tinted with the
+// accent, its mark in the accent (his 11-18: the accent leads where you are); a hovered line takes a quiet plate.
 Item {
     id: root
     property string glyph: "circle"
@@ -16,24 +16,24 @@ Item {
     signal clicked()
     signal trailingClicked()
 
-    implicitHeight: PrismTheme.dp(30)
+    implicitHeight: PrismTheme.dp(34)
     Behavior on implicitHeight { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
 
-    // The open page: a raised plate, no colour, no edge bar (B · Carpeta).
+    // The open page: a plate in the accent's tint, no edge bar.
     Rectangle {
         visible: root.current
         x: -PrismTheme.dp(8)
         width: root.edge - x - PrismTheme.dp(10)
         height: parent.height
-        radius: height / 2
-        color: PrismTheme.raised
+        radius: PrismTheme.dp(11)
+        color: PrismTheme.accentPlate
     }
     Rectangle {
         visible: !root.current
         x: -PrismTheme.dp(8)
         width: root.edge - x - PrismTheme.dp(10)
         height: parent.height
-        radius: height / 2
+        radius: PrismTheme.dp(11)
         color: area.containsMouse || tailArea.containsMouse ? PrismTheme.fill : "transparent"
     }
     Item {
@@ -46,8 +46,8 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: root.glyph
             filled: root.current
-            iconSize: PrismTheme.dp(16)
-            color: root.current || area.containsMouse ? PrismTheme.ink : PrismTheme.ink3
+            iconSize: PrismTheme.dp(18)
+            color: root.current ? PrismTheme.accentInk : area.containsMouse ? PrismTheme.ink : PrismTheme.ink2
         }
         PrismText {
             anchors.left: icon.right
@@ -57,7 +57,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: root.text
             elide: Text.ElideRight
-            font.pixelSize: PrismTheme.dp(12.5)
+            font.pixelSize: PrismTheme.body
             font.weight: root.current ? Font.DemiBold : Font.Normal
             color: root.current || area.containsMouse ? PrismTheme.ink : PrismTheme.inkNav
         }

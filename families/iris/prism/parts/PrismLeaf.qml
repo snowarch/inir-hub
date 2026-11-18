@@ -34,9 +34,17 @@ Item {
     property Component side: null
     property string tabTitle: ""
     property string tabLine: ""
+    // A page drawn to its own measure (Colour's palette, Type's specimen, Lock's screen): it takes the sheet's whole
+    // width under the head, and every group of the page stands on the shelf below.
+    property Component hero: null
+    // The page's own keys on the art: [{ id, glyph, text, solid }].
+    property var actions: []
+    // What the head wears: the page's light ("flow"), or on Home the person's wallpaper or accent.
+    property string artKind: "flow"
     signal pickGroup(string title)
     signal restore()
     signal toggleRail()
+    signal action(string id)
 
     readonly property string pageId: String(root.page?.pageId ?? "")
     readonly property real pad: PrismTheme.dp(26)
@@ -53,7 +61,7 @@ Item {
     readonly property bool monitor: root.pageId === "display" && root.output !== null
     readonly property bool keys: root.pageId === "keyboard" && CompositorConfig.has("input", "keyboard.layout")
     // The graph stands beside the rows where the sheet is wide enough for both; the keyboard's own map takes its place.
-    readonly property bool sideWell: !root.keys && root.inner >= PrismTheme.dp(640)
+    readonly property bool sideWell: !root.keys && root.hero === null && root.inner >= PrismTheme.dp(640)
     readonly property real wellWidth: Math.min(PrismTheme.dp(420), Math.round(root.inner * 0.44))
     readonly property real wellHeight: Math.round(root.wellWidth * 0.7)
     readonly property string subtitle: {
@@ -75,7 +83,7 @@ Item {
     readonly property var figureRow: root.monitor ? (Array.from(root.lead?.rows ?? []).find(row => row.spec?.comp === "display" && row.spec?.key === "rate") ?? null) : null
     readonly property string figureSaid: { const _ = PrismModel.revision; return root.figureRow ? String(PrismModel.sayNow(root.figureRow)) : "" }
     readonly property bool hasFigure: root.figureSaid.length > 0 && /^[0-9]/.test(root.figureSaid)
-    readonly property var leadRows: Array.from(root.lead?.rows ?? []).filter(row => !root.hasFigure || row !== root.figureRow)
+    readonly property var leadRows: Array.from(leadHead.bodyRows ?? []).filter(row => !root.hasFigure || row !== root.figureRow)
     // A row that lays something out under its line needs the sheet's whole width.
     function wide(row: var): bool {
         const kind = String(row?.kind ?? ""), spec = row?.spec ?? {}
@@ -88,28 +96,33 @@ Item {
     // Nothing short to stand by the graph: the page at a glance instead.
     readonly property bool siding: root.sideWell && root.side !== null
     readonly property bool glancing: root.sideWell && !root.siding && root.headRows.length === 0
-    readonly property var glanceRows: root.groups.slice(0, 7).map((group, i) => ({ title: String(group.title), n: i + 1, glance: PrismModel.glanceOf(group) }))
+    readonly property var glanceRows: root.groups.slice(1, 8).map((group, i) => ({ title: String(group.title), n: i + 1, glance: PrismModel.glanceOf(group) }))
     readonly property var glance: root.lead ? PrismModel.glanceOf(root.lead) : null
+    // Under the page's name: what the page is about (the area's own line), or what it shows now (the screen).
     readonly property string leadLine: {
         if (root.tabLine.length > 0) return root.tabLine
-        if (root.monitor) return String(root.output.current_resolution ?? "").replace("x", " × ") + " · " + Translation.tr("Resolution")
-        if (!root.glance) return ""
-        const say = String(root.glance.say ?? ""), label = String(root.glance.label ?? "")
-        return say.length > 0 && label.length > 0 ? say + " · " + label : say.length > 0 ? say : label
+        if (root.monitor) return [root.subtitle, String(root.output.current_resolution ?? "").replace("x", " × ")].filter(part => part.length > 0).join("  ·  ")
+        return Translation.tr(String(root.page?.subtitle ?? ""))
     }
+    // The first group's own head, on the sheet: the page's name is the tab's.
+    readonly property bool leadHeadShown: root.lead !== null && !root.siding
+    readonly property real leadHeadHeight: root.leadHeadShown ? leadHead.implicitHeight + PrismTheme.dp(12) : 0
 
     // ── Where things stand.
     readonly property real tabTextY: root.sheetY + PrismTheme.dp(14)
     readonly property real contentY: root.sheetY + root.rise + PrismTheme.dp(22)
-    readonly property real wellY: root.contentY
-    readonly property real headBottom: root.siding ? root.contentY + (sideBox.item ? sideBox.item.implicitHeight : 0)
+    readonly property real wellY: root.contentY + (root.keys ? root.leadHeadHeight : 0)
+    readonly property real headBottom: root.hero !== null ? root.contentY + (heroBox.item ? heroBox.item.implicitHeight : 0)
+        : root.siding ? root.contentY + (sideBox.item ? sideBox.item.implicitHeight : 0)
         : root.glancing ? root.contentY + glanceList.implicitHeight
-        : root.contentY + (root.headRows.length > 0 ? headSection.implicitHeight : 0)
+        : root.contentY + root.leadHeadHeight + (root.headRows.length > 0 ? headSection.implicitHeight : 0)
     readonly property real wellBottom: root.sideWell ? root.wellY + root.wellHeight : root.keys ? root.wellY + keysWell.height : root.contentY - PrismTheme.dp(20)
     readonly property real upper: Math.max(root.headBottom, root.wellBottom)
     readonly property real extraY: root.upper + PrismTheme.dp(22)
     readonly property real tailY: root.extraY + (extraBox.item ? extraBox.item.implicitHeight + PrismTheme.dp(22) : 0)
-    readonly property real tailBottom: root.tailY + (root.tailRows.length > 0 ? tailSection.implicitHeight : -PrismTheme.dp(22))
+    // The first group's head over its wide rows when nothing short stood beside the graph.
+    readonly property real tailHead: root.leadHeadShown && root.glancing ? root.leadHeadHeight : 0
+    readonly property real tailBottom: root.tailY + root.tailHead + (root.tailRows.length > 0 ? tailSection.implicitHeight : -PrismTheme.dp(22))
     readonly property bool hasFoot: root.hasFigure || root.monitor
     readonly property real footY: root.tailBottom + PrismTheme.dp(18)
 
@@ -129,12 +142,37 @@ Item {
         strength: PrismTheme.light ? 0.6 : 0.72
         mute: 0.5
     }
+    Image {
+        id: wallArt
+        visible: false
+        layer.enabled: root.artKind === "wallpaper"
+        width: art.width
+        height: art.height
+        source: root.artKind === "wallpaper" ? Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? "")) : ""
+        sourceSize.width: Math.round(art.width)
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        // A step of smoke so the names on it read over a bright picture.
+        Rectangle { anchors.fill: parent; color: PrismTheme.night; opacity: 0.22 }
+    }
+    Rectangle {
+        id: tintArt
+        visible: false
+        layer.enabled: root.artKind === "accent"
+        width: art.width
+        height: art.height
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0; color: PrismTheme.accent }
+            GradientStop { position: 1; color: Qt.darker(PrismTheme.accent, 1.9) }
+        }
+    }
     Shape {
         width: root.width
         height: art.height
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
-            fillItem: art
+            fillItem: root.artKind === "wallpaper" && wallArt.status === Image.Ready ? wallArt : root.artKind === "accent" ? tintArt : art
             strokeColor: "transparent"
             strokeWidth: -1
             PathSvg {
@@ -161,38 +199,15 @@ Item {
         spacing: PrismTheme.dp(8)
         PrismRound { overArt: true; smoked: true; glyph: "arrow_back"; enabled_: PrismState.canBack; onClicked: PrismState.goBack() }
         PrismRound { overArt: true; smoked: true; glyph: "arrow_forward"; enabled_: PrismState.canForward; onClicked: PrismState.goForward() }
+        // Where the page lives, in words, quiet on the art.
         PrismText {
             anchors.verticalCenter: parent.verticalCenter
             leftPadding: PrismTheme.dp(8)
-            mono: true
-            text: [String(root.page?.group ?? ""), String(root.page?.name ?? "")].filter(part => part.length > 0).map(part => Translation.tr(part)).join("  /  ").toUpperCase()
+            visible: text.length > 0
+            text: Translation.tr(String(root.page?.group ?? ""))
             color: PrismTheme.light ? PrismTheme.ink2 : PrismTheme.spotInk2
-            font.pixelSize: PrismTheme.dp(9.5)
-            font.letterSpacing: PrismTheme.dp(9.5) * 0.1
-        }
-    }
-    // The page's name, and the thing it changes.
-    Column {
-        anchors.right: parent.right
-        anchors.rightMargin: PrismTheme.dp(28)
-        y: PrismTheme.dp(20)
-        PrismText {
-            anchors.right: parent.right
-            text: Translation.tr(String(root.page?.name ?? ""))
-            font.pixelSize: PrismTheme.display
-            font.weight: Font.Bold
-            font.letterSpacing: -PrismTheme.display * 0.035
-            lineHeight: 1.02
-        }
-        PrismText {
-            anchors.right: parent.right
-            visible: root.subtitle.length > 0
-            text: root.subtitle
-            color: PrismTheme.light ? PrismTheme.ink2 : Qt.rgba(1, 1, 1, 0.55) // iris-literal: the second name, white on the art
-            font.pixelSize: PrismTheme.display
-            font.weight: Font.Bold
-            font.letterSpacing: -PrismTheme.display * 0.035
-            lineHeight: 1.02
+            font.pixelSize: PrismTheme.small
+            font.weight: Font.Medium
         }
     }
     // The page's own keys, on the art just over the sheet's lower edge.
@@ -202,6 +217,16 @@ Item {
         y: root.sheetY + root.rise - height - PrismTheme.dp(12)
         height: PrismTheme.dp(32)
         spacing: PrismTheme.dp(8)
+        Repeater {
+            model: root.actions
+            delegate: PrismPill {
+                required property var modelData
+                tone: modelData.solid ? "solid" : "dark"
+                glyph: String(modelData.glyph ?? "")
+                text: Translation.tr(String(modelData.text ?? ""))
+                onClicked: root.action(String(modelData.id))
+            }
+        }
         PrismPill {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.restorable > 0
@@ -239,14 +264,14 @@ Item {
         y: root.tabTextY
         spacing: PrismTheme.dp(2)
         PrismText {
-            text: root.tabTitle.length > 0 ? root.tabTitle : Translation.tr(String(root.lead?.title ?? root.page?.name ?? ""))
-            font.pixelSize: PrismTheme.dp(20)
+            text: root.tabTitle.length > 0 ? root.tabTitle : Translation.tr(String(root.page?.name ?? ""))
+            font.pixelSize: PrismTheme.dp(26)
             font.weight: Font.Bold
-            font.letterSpacing: -PrismTheme.dp(20) * 0.025
+            font.letterSpacing: -PrismTheme.dp(26) * 0.03
         }
         PrismText {
             visible: root.leadLine.length > 0
-            width: Math.min(implicitWidth, root.width * 0.5 - 2 * root.pad)
+            width: Math.min(implicitWidth, root.width * 0.62 - 2 * root.pad)
             text: root.leadLine
             color: PrismTheme.ink2
             font.pixelSize: PrismTheme.dp(13)
@@ -264,6 +289,7 @@ Item {
         color: PrismTheme.light ? PrismTheme.sunk : PrismTheme.night
         PrismGraph {
             anchors.fill: parent
+            chrome: false
             pageId: root.pageId
             pageName: String(root.page?.name ?? "")
             number: PrismModel.index(root.pageId) + 1
@@ -301,16 +327,35 @@ Item {
         width: root.inner - root.wellWidth - root.gutter
         sourceComponent: root.side
     }
+    // The page's own drawing, to its measure.
+    Loader {
+        id: heroBox
+        active: root.hero !== null
+        x: root.pad
+        y: root.contentY
+        width: root.inner
+        sourceComponent: root.hero
+    }
+    // The first group's head: its name, what it is for, its master switch.
+    PrismGroupHead {
+        id: leadHead
+        visible: root.leadHeadShown
+        x: root.pad
+        y: root.glancing ? root.tailY : root.contentY
+        width: root.sideWell && !root.glancing ? root.inner - root.wellWidth - root.gutter : root.inner
+        entry: root.lead ?? ({ title: "", rows: [] })
+    }
     // The rows beside the graph.
     PrismSection {
         id: headSection
         visible: !root.siding && !root.glancing && root.headRows.length > 0
         bare: true
         x: root.pad
-        y: root.contentY
+        y: root.contentY + root.leadHeadHeight
+        headlessKey: leadHead.headlessKey
         width: root.sideWell ? root.inner - root.wellWidth - root.gutter : root.inner
         title: String(root.lead?.title ?? "")
-        rows: root.sideWell ? root.headRows : []
+        rows: root.sideWell && leadHead.on ? root.headRows : []
         flashPath: root.flashPath
     }
     // Or the page at a glance: every group, numbered, what it holds now; a press goes to it.
@@ -341,16 +386,7 @@ Item {
                     color: PrismTheme.line
                 }
                 PrismText {
-                    id: n
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: PrismTheme.dp(30)
-                    mono: true
-                    text: String(entry.modelData.n).padStart(2, "0")
-                    color: PrismTheme.ink3
-                    font.pixelSize: PrismTheme.dp(10)
-                }
-                PrismText {
-                    anchors.left: n.right
+                    anchors.left: parent.left
                     anchors.right: say.left
                     anchors.rightMargin: PrismTheme.dp(12)
                     anchors.verticalCenter: parent.verticalCenter
@@ -397,10 +433,11 @@ Item {
         visible: root.tailRows.length > 0
         bare: true
         x: root.pad
-        y: root.tailY
+        y: root.tailY + root.tailHead
         width: root.inner
+        headlessKey: leadHead.headlessKey
         title: String(root.lead?.title ?? "")
-        rows: root.tailRows
+        rows: leadHead.on ? root.tailRows : []
         flashPath: root.flashPath
     }
 
@@ -468,11 +505,9 @@ Item {
             anchors.bottomMargin: PrismTheme.dp(6)
             PrismText {
                 anchors.right: parent.right
-                mono: true
-                text: (Quickshell.screens.length > 1 ? Translation.tr("Main screen") : Translation.tr("Only screen")).toUpperCase()
+                text: Quickshell.screens.length > 1 ? Translation.tr("Main screen") : Translation.tr("Only screen")
                 color: PrismTheme.ink3
-                font.pixelSize: PrismTheme.dp(9.5)
-                font.letterSpacing: PrismTheme.dp(9.5) * 0.1
+                font.pixelSize: PrismTheme.small
             }
             PrismText {
                 anchors.right: parent.right

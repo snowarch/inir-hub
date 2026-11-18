@@ -181,11 +181,10 @@ Item {
                         topPadding: PrismTheme.dp(14)
                         bottomPadding: PrismTheme.dp(4)
                         leftPadding: PrismTheme.dp(4)
-                        mono: true
-                        text: Translation.tr(group.modelData).toUpperCase()
-                        color: PrismTheme.ink3
-                        font.pixelSize: PrismTheme.dp(9)
-                        font.letterSpacing: PrismTheme.dp(9) * 0.08
+                        text: Translation.tr(group.modelData)
+                        color: PrismTheme.ink
+                        font.pixelSize: PrismTheme.small
+                        font.weight: Font.DemiBold
                     }
                     Repeater {
                         model: group.pages
@@ -291,11 +290,10 @@ Item {
                 PrismText {
                     topPadding: PrismTheme.dp(18)
                     bottomPadding: PrismTheme.dp(6)
-                    text: Translation.tr("Pinned").toUpperCase()
-                    color: PrismTheme.ink3
-                    font.pixelSize: PrismTheme.caption
+                    text: Translation.tr("Pinned")
+                    color: PrismTheme.ink
+                    font.pixelSize: PrismTheme.small
                     font.weight: Font.DemiBold
-                    font.letterSpacing: 0.6
                 }
                 Repeater {
                     model: ScriptModel { objectProp: "key"; values: pinned.rows }
