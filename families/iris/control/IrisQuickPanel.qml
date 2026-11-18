@@ -461,14 +461,21 @@ ColumnLayout {
                                                 font.weight: IrisStyle.weight(Font.DemiBold)
                                             }
                                         }
-                                        IrisIconButton {
-                                            visible: rowHover.hovered && !root.editing
-                                            materialIcon: "close"
-                                            iconSize: Math.round(14 * root.d)
-                                            implicitWidth: Math.round(20 * root.d)
-                                            implicitHeight: Math.round(20 * root.d)
-                                            Accessible.name: Translation.tr("Dismiss")
-                                            onClicked: groupRow.dismissAll()
+                                        // Always a key tall: showing it on hover never moves the row under the pointer, which re-read the hover mid-binding.
+                                        Item {
+                                            Layout.preferredWidth: rowDismiss.visible ? rowDismiss.implicitWidth : 0
+                                            implicitHeight: rowDismiss.implicitHeight
+                                            IrisIconButton {
+                                                id: rowDismiss
+                                                anchors.centerIn: parent
+                                                visible: rowHover.hovered && !root.editing
+                                                materialIcon: "close"
+                                                iconSize: Math.round(14 * root.d)
+                                                implicitWidth: Math.round(20 * root.d)
+                                                implicitHeight: Math.round(20 * root.d)
+                                                Accessible.name: Translation.tr("Dismiss")
+                                                onClicked: groupRow.dismissAll()
+                                            }
                                         }
                                     }
                                     IrisText {
