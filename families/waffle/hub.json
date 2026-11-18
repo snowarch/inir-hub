@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.18",
+    "version": "2.34.19",
     "changes": {
+      "2.34.19": ["Settings lists every installed family (NiHiL, one from the Hub) next to the three built in"],
         "2.34.18": ["Changing the palette type from the widgets panel no longer passes the choice through a shell", "On Umbriel, the overview backdrop no longer covers your wallpaper with a blurred copy"],
         "2.34.17": ["Synced lyrics under the lock screen's player: Waffle Settings › Interface › Lock Screen (thanks Turxx)", "Your login screen wears Waffle: its clock, then your face and password. Settings › Interface (thanks NVitschDEV)", "Escape closes the Action and Notification centers fully, and the quick toggles open on their first page", "Bar menus and panels are built the first time you open them, so the shell starts lighter", "Day and month names follow the shell's language, not the system's", "The wallpaper waits for a fullscreen game to settle before it hides"],
         "2.34.16": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in Waffle Settings › Interface › Floating tools", "Live pins show on the desktop under Waffle too", "Text fields open their right-click menu in Waffle's look", "Task View previews stay live when focus moves", "A fresh install starts with no wallpaper or backdrop dim"],
