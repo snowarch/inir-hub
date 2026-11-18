@@ -56,50 +56,67 @@ NScroller {
     bottomPad: NihilStyle.s(32)
     sidePad: NihilStyle.s(14)
 
-    // A profile drawn as a plan of the screen: the panel, where the dash stands, how the workspaces line up.
+    // A profile drawn as a small screen: the panel, where the dash stands, how the workspaces line up.
     component Plan: Rectangle {
         id: plan
         property string profile: ""
+        property bool worn: false
         readonly property bool dashLeft: plan.profile === "vertical"
         readonly property bool dashBottom: plan.profile === "horizontal" || plan.profile === "dock"
         readonly property bool rowOfWorkspaces: plan.profile === "horizontal"
-        width: NihilStyle.s(112)
-        height: NihilStyle.s(70)
-        radius: NihilStyle.r(4)
-        color: "transparent"
+        readonly property real u: plan.width / 100
+        radius: NihilStyle.r(10)
+        color: Qt.alpha("#000000", 0.28)
         border.width: 1
-        border.color: NihilStyle.hair
+        border.color: plan.worn ? Qt.alpha(NihilStyle.accent, 0.5) : NihilStyle.hair
+        clip: true
 
-        Rectangle { visible: plan.profile !== "corner"; x: 4; y: 4; width: parent.width - 8; height: 2; color: NihilStyle.inkSoft }
+        // The panel.
+        Rectangle {
+            visible: plan.profile !== "corner"
+            x: plan.u * 3; y: plan.u * 3; width: plan.width - plan.u * 6; height: plan.u * 3.2
+            radius: height / 2; color: NihilStyle.pieceRaised
+        }
+        // The hot corner.
+        Rectangle {
+            visible: plan.profile === "corner"
+            x: plan.u * 3; y: plan.u * 3; width: plan.u * 5; height: width
+            radius: width / 2; color: NihilStyle.accent
+        }
+        // The dash.
         Rectangle {
             visible: plan.dashLeft
-            x: 5; y: parent.height * 0.3; width: 4; height: parent.height * 0.45; radius: 2; color: NihilStyle.ink
+            x: plan.u * 3; y: plan.height * 0.3; width: plan.u * 3.4; height: plan.height * 0.44
+            radius: width / 2; color: NihilStyle.pieceRaised
         }
         Rectangle {
             visible: plan.dashBottom
-            x: parent.width * 0.3; y: parent.height - 9; width: parent.width * 0.4; height: 4; radius: 2; color: NihilStyle.ink
+            x: plan.width * 0.32; y: plan.height - plan.u * 7; width: plan.width * 0.36; height: plan.u * 3.6
+            radius: height / 2; color: NihilStyle.pieceRaised
         }
+        // The workspaces.
         Repeater {
-            model: 3
+            model: plan.profile === "dock" ? 0 : 3
             delegate: Rectangle {
                 required property int index
-                x: plan.rowOfWorkspaces ? plan.width * 0.24 + index * plan.width * 0.18 : plan.width - 16
-                y: plan.rowOfWorkspaces ? 11 : plan.height * 0.24 + index * plan.height * 0.18
-                width: plan.rowOfWorkspaces ? plan.width * 0.15 : 9
-                height: plan.rowOfWorkspaces ? 7 : plan.height * 0.14
-                radius: 1
-                visible: plan.profile !== "dock"
-                color: index === 0 ? NihilStyle.ink : NihilStyle.inkFaint
+                x: plan.rowOfWorkspaces ? plan.width * 0.3 + index * plan.width * 0.14 : plan.width - plan.u * 13
+                y: plan.rowOfWorkspaces ? plan.u * 9 : plan.height * 0.26 + index * plan.height * 0.17
+                width: plan.rowOfWorkspaces ? plan.width * 0.12 : plan.u * 9
+                height: plan.rowOfWorkspaces ? plan.u * 6 : plan.height * 0.13
+                radius: plan.u * 1.2
+                color: index === 0 ? Qt.alpha(NihilStyle.ink, 0.3) : NihilStyle.piece
             }
         }
+        // The windows.
         Rectangle {
-            x: parent.width * 0.3; y: parent.height * 0.3
-            width: parent.width * (plan.dashLeft || plan.profile === "corner" ? 0.44 : 0.4); height: parent.height * 0.36
-            radius: 2; color: "transparent"; border.width: 1; border.color: NihilStyle.inkSoft
-        }
-        NSpark {
-            visible: plan.profile === "corner"
-            x: -size * 0.3; y: -size * 0.3; size: NihilStyle.s(18)
+            x: plan.width * (plan.dashLeft ? 0.2 : 0.16)
+            y: plan.height * (plan.rowOfWorkspaces ? 0.4 : 0.26)
+            width: plan.width * (plan.rowOfWorkspaces || plan.profile === "dock" ? 0.68 : 0.56)
+            height: plan.height * (plan.dashBottom ? 0.42 : 0.5)
+            radius: plan.u * 1.6
+            color: NihilStyle.piece
+            border.width: 1
+            border.color: NihilStyle.hair
         }
     }
 
@@ -128,41 +145,42 @@ NScroller {
                 readonly property bool isSaved: root.saved[card.modelData.id] !== undefined
 
                 width: root.cardWidth
-                height: NihilStyle.s(164)
+                height: NihilStyle.s(14) * 2 + plan.height + about.height + NihilStyle.s(70)
                 radius: NihilStyle.rCard
-                ignite: card.isWorn ? 0.6 : 0
-                spark: card.isWorn ? 1 : 0
+                ignite: card.isWorn ? 0.7 : 0
 
                 Plan {
-                    anchors.right: parent.right
-                    anchors.rightMargin: NihilStyle.s(16)
-                    y: NihilStyle.s(18)
+                    id: plan
+                    x: NihilStyle.s(14)
+                    y: NihilStyle.s(14)
+                    width: card.width - NihilStyle.s(28)
+                    height: Math.round(width * 0.5)
                     profile: card.modelData.id
+                    worn: card.isWorn
                 }
 
                 Column {
+                    id: about
                     x: NihilStyle.s(18)
-                    y: NihilStyle.s(16)
-                    width: card.width - NihilStyle.s(36) - NihilStyle.s(124)
-                    spacing: NihilStyle.s(4)
+                    anchors.top: plan.bottom
+                    anchors.topMargin: NihilStyle.s(14)
+                    width: card.width - NihilStyle.s(36)
+                    spacing: NihilStyle.s(3)
 
-                    NLabel {
-                        text: card.isWorn ? Translation.tr("In use") : Translation.tr("Profile")
-                        strong: card.isWorn
-                    }
-                    NDisplay {
+                    NText {
                         width: parent.width
                         text: Translation.tr(card.modelData.name)
-                        elide: Text.ElideRight
-                        size: NihilStyle.s(30)
-                        bloom: card.isWorn ? 0.7 : 0
+                        font.pixelSize: NihilStyle.textLarge
+                        font.weight: Font.DemiBold
                     }
                     NText {
                         width: parent.width
+                        height: NihilStyle.s(34)
                         text: Translation.tr(card.modelData.description)
                         wrapMode: Text.Wrap
                         maximumLineCount: 2
                         elide: Text.ElideRight
+                        verticalAlignment: Text.AlignTop
                         color: NihilStyle.inkSoft
                     }
                 }

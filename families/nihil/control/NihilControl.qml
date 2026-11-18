@@ -10,9 +10,9 @@ import qs.modules.common.models.quickToggles
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// Quick controls as one printed sheet under glass in the corner: the two radios set large, what plays, the two levels
-// with their figures and a table of eight keys. A radio's
-// chevron and the volume's open their lists on the same pane.
+// Quick controls as a glass pane in the corner, built of raised cards: the time with settings and power at hand, the
+// two radios, what plays, the two levels and six keys. A radio's chevron and the volume's open their lists on the
+// same pane.
 NPopup {
     id: root
 
@@ -26,8 +26,8 @@ NPopup {
     onOpenChanged: if (!root.open) root.page = ""
 
     readonly property bool barBottom: (Config.options?.nihil?.panel?.position ?? "top") === "bottom"
-    readonly property real inset: NihilStyle.s(14)
-    readonly property real wide: NihilStyle.s(372)
+    readonly property real inset: NihilStyle.s(12)
+    readonly property real wide: NihilStyle.s(380)
     readonly property real inner: root.wide - root.inset * 2
     readonly property var monitor: Brightness.getMonitorForScreen(root.screen)
     readonly property bool hasBrightness: Number.isFinite(root.monitor?.brightness)
@@ -43,8 +43,16 @@ NPopup {
     DarkModeToggle { id: darkMode }
     ScreenSnipToggle { id: snip }
 
-    // A radio: a column of the sheet. Its name in small capitals, its state set large, the chevron to its list. On, a
-    // line of light runs down its edge.
+    // A card: a raised piece of the pane.
+    component Card: Rectangle {
+        radius: NihilStyle.rCard
+        color: NihilStyle.piece
+        border.width: 1
+        border.color: NihilStyle.line
+    }
+
+    // A radio: a card with its round badge, its name and what it is on. The badge fills with the accent when on; the
+    // chevron opens its list.
     component Radio: MouseArea {
         id: radio
 
@@ -57,71 +65,68 @@ NPopup {
         signal tapped()
         signal opened()
 
-        width: (root.inner - 1) / 2
-        height: NihilStyle.s(78)
+        width: (root.inner - NihilStyle.s(8)) / 2
+        height: NihilStyle.s(64)
         enabled: radio.usable
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         opacity: radio.usable ? 1 : 0.45
         onClicked: radio.tapped()
 
-        Rectangle {
+        Card {
             anchors.fill: parent
-            radius: NihilStyle.r(6)
-            color: NihilStyle.ink
-            opacity: radio.containsMouse ? 0.06 : 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+            color: radio.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
         }
-        NSpectrum {
-            vertical: true
-            x: 0
-            y: NihilStyle.s(10)
-            width: NihilStyle.s(2)
-            height: parent.height - NihilStyle.s(20)
-            opacity: radio.on ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
-        }
-        NIcon {
+        Rectangle {
+            id: badge
             x: NihilStyle.s(12)
-            y: NihilStyle.s(12)
-            text: radio.glyph
-            size: NihilStyle.s(15)
-            color: radio.on ? NihilStyle.ink : NihilStyle.inkSoft
+            anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(34)
+            height: width
+            radius: width / 2
+            color: radio.on ? NihilStyle.accent : NihilStyle.pieceRaised
+            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+            NIcon {
+                anchors.centerIn: parent
+                text: radio.glyph
+                size: NihilStyle.s(17)
+                color: radio.on ? NihilStyle.accentInk : NihilStyle.ink
+            }
         }
-        NLabel {
-            x: NihilStyle.s(34)
-            y: NihilStyle.s(12)
-            width: parent.width - x - NihilStyle.s(36)
-            height: NihilStyle.s(15)
-            text: radio.name
-        }
-        NDisplay {
-            x: NihilStyle.s(12)
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: NihilStyle.s(10)
-            width: parent.width - NihilStyle.s(44)
-            text: radio.state_
-            elide: Text.ElideRight
-            size: NihilStyle.s(26)
-            bloom: radio.on ? 0.6 : 0
-            color: radio.on ? NihilStyle.ink : NihilStyle.inkSoft
+        Column {
+            anchors.left: badge.right
+            anchors.leftMargin: NihilStyle.s(10)
+            anchors.right: chevron.left
+            anchors.verticalCenter: parent.verticalCenter
+            NText {
+                width: parent.width
+                text: radio.name
+                font.weight: Font.DemiBold
+            }
+            NText {
+                width: parent.width
+                text: radio.state_
+                font.pixelSize: NihilStyle.textSmall
+                color: NihilStyle.inkSoft
+            }
         }
         NButton {
+            id: chevron
             visible: radio.usable
             anchors.right: parent.right
             anchors.rightMargin: NihilStyle.s(4)
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: NihilStyle.s(8)
-            width: NihilStyle.s(28)
-            height: NihilStyle.s(28)
+            anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(26)
+            height: NihilStyle.s(26)
             icon: "chevron_right"
             iconSize: NihilStyle.s(16)
             onClicked: radio.opened()
         }
     }
 
-    // A level: its name and figure on a line, the slider under it. The name mutes, the chevron opens its list.
-    component Level: Column {
+    // A level: its glyph (which mutes), the slider, the share as a quiet figure and the chevron to its list.
+    component Level: Item {
         id: level
 
         property string name: ""
@@ -134,66 +139,55 @@ NPopup {
         signal moved(real value)
         signal opened()
 
-        width: root.inner
-        spacing: NihilStyle.s(4)
+        width: root.inner - NihilStyle.s(24)
+        height: NihilStyle.s(34)
 
-        Item {
-            width: parent.width
-            height: NihilStyle.s(28)
-
-            MouseArea {
-                id: keyArea
-                width: keyRow.implicitWidth
-                height: parent.height
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: level.keyed()
-
-                Row {
-                    id: keyRow
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: NihilStyle.s(8)
-                    NIcon {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: level.glyph
-                        size: NihilStyle.s(15)
-                        color: level.lit ? NihilStyle.live : keyArea.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
-                    }
-                    NLabel {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: level.name
-                        strong: keyArea.containsMouse
-                    }
-                }
-            }
-            NDisplay {
-                anchors.right: more.visible ? more.left : parent.right
-                anchors.rightMargin: more.visible ? NihilStyle.s(4) : 0
-                anchors.verticalCenter: parent.verticalCenter
-                text: String(Math.round(level.value * 100)).padStart(2, "0")
-                size: NihilStyle.s(24)
-                bloom: 0.4
-            }
-            NButton {
-                id: more
-                visible: level.opens
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                width: NihilStyle.s(24)
-                height: NihilStyle.s(24)
-                icon: "chevron_right"
-                iconSize: NihilStyle.s(14)
-                onClicked: level.opened()
-            }
+        NButton {
+            id: keyButton
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(30)
+            height: NihilStyle.s(30)
+            icon: level.glyph
+            iconSize: NihilStyle.s(17)
+            lit: level.lit
+            Accessible.name: level.name
+            onClicked: level.keyed()
         }
         NSlider {
-            width: parent.width
+            anchors.left: keyButton.right
+            anchors.leftMargin: NihilStyle.s(8)
+            anchors.right: figure.left
+            anchors.rightMargin: NihilStyle.s(10)
+            anchors.verticalCenter: parent.verticalCenter
             value: level.value
             onMoved: value => level.moved(value)
         }
+        NText {
+            id: figure
+            anchors.right: more.visible ? more.left : parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(34)
+            horizontalAlignment: Text.AlignRight
+            text: Math.round(level.value * 100) + "%"
+            figures: true
+            font.pixelSize: NihilStyle.textSmall
+            color: NihilStyle.inkSoft
+        }
+        NButton {
+            id: more
+            visible: level.opens
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(26)
+            height: NihilStyle.s(26)
+            icon: "chevron_right"
+            iconSize: NihilStyle.s(15)
+            onClicked: level.opened()
+        }
     }
 
-    // One of the eight keys: a cell of the sheet's table, its glyph over its word. On, the cell is a bone plate.
+    // One of the six keys: a pill with its glyph and word. On, it is a raised plate with the glyph in the accent.
     component Key: MouseArea {
         id: key
 
@@ -204,8 +198,8 @@ NPopup {
 
         signal tapped()
 
-        width: root.inner / 4
-        height: NihilStyle.s(66)
+        width: (root.inner - NihilStyle.s(16)) / 3
+        height: NihilStyle.s(40)
         enabled: key.usable
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
@@ -214,41 +208,30 @@ NPopup {
 
         Rectangle {
             anchors.fill: parent
-            anchors.margins: NihilStyle.s(3)
-            radius: NihilStyle.r(6)
-            color: NihilStyle.ink
-            opacity: key.on ? 1 : key.containsMouse ? 0.08 : 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+            radius: height / 2
+            color: key.on ? NihilStyle.chosen : key.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+            border.width: 1
+            border.color: key.on ? NihilStyle.hair : NihilStyle.line
+            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
         }
-        NSpark {
-            visible: key.on
-            x: parent.width - size - NihilStyle.s(4)
-            y: NihilStyle.s(4)
-            size: NihilStyle.s(12)
-            tint: NihilStyle.void_
+        Row {
+            anchors.centerIn: parent
+            spacing: NihilStyle.s(7)
+            NIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                text: key.glyph
+                size: NihilStyle.s(16)
+                color: key.on ? NihilStyle.accent : NihilStyle.inkSoft
+            }
+            NText {
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(implicitWidth, key.width - NihilStyle.s(44))
+                text: key.word
+                font.pixelSize: NihilStyle.textSmall
+                font.weight: key.on ? Font.DemiBold : Font.Medium
+                color: key.on ? NihilStyle.ink : NihilStyle.inkSoft
+            }
         }
-        NIcon {
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: NihilStyle.s(14)
-            text: key.glyph
-            size: NihilStyle.s(19)
-            color: key.on ? NihilStyle.void_ : NihilStyle.ink
-        }
-        NLabel {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: NihilStyle.s(11)
-            width: parent.width - NihilStyle.s(8)
-            horizontalAlignment: Text.AlignHCenter
-            text: key.word
-            color: key.on ? NihilStyle.void_ : NihilStyle.inkSoft
-        }
-    }
-
-    component Hair: Rectangle {
-        width: root.inner
-        height: 1
-        color: NihilStyle.hair
     }
 
     NGlass {
@@ -259,7 +242,7 @@ NPopup {
         x: parent.width - width - NihilStyle.edge
         y: root.barBottom ? parent.height - height - NihilStyle.barHeight - NihilStyle.edge * 2
             : NihilStyle.barHeight + NihilStyle.edge * 2
-        ignite: root.open ? 0.5 : 0
+        ignite: root.open ? 0.35 : 0
         Behavior on height { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
 
         MouseArea { anchors.fill: parent }
@@ -283,17 +266,60 @@ NPopup {
             visible: root.page.length === 0
             spacing: NihilStyle.s(12)
 
-            // The sheet's head: what it is, and the hour it is read at.
+            // The head: the day, then settings and power at hand.
             Item {
                 width: root.inner
-                height: NihilStyle.s(18)
-                NLabel { anchors.verticalCenter: parent.verticalCenter; text: Translation.tr("Control"); strong: true }
-                NLabel { anchors.centerIn: parent; text: "▶ ⋈ ◀"; color: NihilStyle.inkFaint }
-                NLabel { anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: DateTime.time }
+                height: NihilStyle.s(30)
+                Row {
+                    anchors.left: parent.left
+                    anchors.leftMargin: NihilStyle.s(4)
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: NihilStyle.s(10)
+                    NText {
+                        anchors.baseline: parent.children[1].baseline
+                        text: DateTime.time
+                        figures: true
+                        font.pixelSize: NihilStyle.textLarge
+                        font.weight: Font.DemiBold
+                    }
+                    NText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: DateTime.date
+                        font.pixelSize: NihilStyle.textSmall
+                        color: NihilStyle.inkSoft
+                    }
+                }
+                Row {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: NihilStyle.s(4)
+                    NButton {
+                        width: NihilStyle.s(30)
+                        height: NihilStyle.s(30)
+                        icon: "settings"
+                        iconSize: NihilStyle.s(16)
+                        Accessible.name: Translation.tr("Settings")
+                        onClicked: {
+                            NihilState.controlOpen = false
+                            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
+                        }
+                    }
+                    NButton {
+                        width: NihilStyle.s(30)
+                        height: NihilStyle.s(30)
+                        icon: "power_settings_new"
+                        iconSize: NihilStyle.s(16)
+                        Accessible.name: Translation.tr("Power")
+                        onClicked: {
+                            NihilState.controlOpen = false
+                            NihilState.toggle("power")
+                        }
+                    }
+                }
             }
-            Hair {}
 
             Row {
+                spacing: NihilStyle.s(8)
                 Radio {
                     glyph: Network.ethernet ? "lan" : Network.wifiEnabled ? "wifi" : "wifi_off"
                     name: Translation.tr("Wi-Fi")
@@ -303,7 +329,6 @@ NPopup {
                     onTapped: net.mainAction()
                     onOpened: root.page = "wifi"
                 }
-                Rectangle { width: 1; height: NihilStyle.s(78); color: NihilStyle.hair }
                 Radio {
                     glyph: bt.toggled ? "bluetooth" : "bluetooth_disabled"
                     name: Translation.tr("Bluetooth")
@@ -316,34 +341,46 @@ NPopup {
                     onOpened: root.page = "bluetooth"
                 }
             }
-            Hair {}
-
-            Item {
+            Card {
                 visible: !!root.player
                 width: root.inner
-                height: visible ? NihilStyle.s(44) : 0
+                height: visible ? NihilStyle.s(60) : 0
 
+                Image {
+                    id: art
+                    x: NihilStyle.s(10)
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: NihilStyle.s(40)
+                    height: width
+                    sourceSize: Qt.size(width * 2, height * 2)
+                    fillMode: Image.PreserveAspectCrop
+                    source: root.player?.trackArtUrl ?? ""
+                    visible: status === Image.Ready
+                }
                 Column {
-                    anchors.left: parent.left
+                    anchors.left: art.visible ? art.right : parent.left
+                    anchors.leftMargin: NihilStyle.s(12)
                     anchors.right: transport.left
                     anchors.rightMargin: NihilStyle.gap
                     anchors.verticalCenter: parent.verticalCenter
 
-                    NLabel {
-                        width: parent.width
-                        text: root.player?.trackArtist ?? ""
-                    }
                     NText {
                         width: parent.width
                         text: root.player?.trackTitle ?? ""
-                        elide: Text.ElideRight
                         font.weight: Font.DemiBold
+                    }
+                    NText {
+                        width: parent.width
+                        text: root.player?.trackArtist ?? ""
+                        font.pixelSize: NihilStyle.textSmall
+                        color: NihilStyle.inkSoft
                     }
                 }
 
                 Row {
                     id: transport
                     anchors.right: parent.right
+                    anchors.rightMargin: NihilStyle.s(6)
                     anchors.verticalCenter: parent.verticalCenter
 
                     NButton {
@@ -362,27 +399,36 @@ NPopup {
                 }
             }
 
-            Level {
-                name: Translation.tr("Sound")
-                glyph: root.muted ? "volume_mute" : "volume_up"
-                lit: root.muted
-                value: root.muted ? 0 : Audio.value
-                opens: true
-                onKeyed: if (Audio.sink?.audio) Audio.sink.audio.muted = !root.muted
-                onMoved: value => Audio.setSinkVolume(value)
-                onOpened: root.page = "output"
-            }
-            Level {
-                name: Translation.tr("Light")
-                visible: root.hasBrightness
-                glyph: "light_mode"
-                value: root.hasBrightness ? root.monitor.brightness : 0
-                onMoved: value => root.monitor?.setBrightness(Math.max(0.01, value))
+            Card {
+                width: root.inner
+                height: levelColumn.implicitHeight + NihilStyle.s(16)
+                Column {
+                    id: levelColumn
+                    x: NihilStyle.s(12)
+                    y: NihilStyle.s(8)
+                    Level {
+                        name: Translation.tr("Sound")
+                        glyph: root.muted ? "volume_mute" : "volume_up"
+                        lit: root.muted
+                        value: root.muted ? 0 : Audio.value
+                        opens: true
+                        onKeyed: if (Audio.sink?.audio) Audio.sink.audio.muted = !root.muted
+                        onMoved: value => Audio.setSinkVolume(value)
+                        onOpened: root.page = "output"
+                    }
+                    Level {
+                        name: Translation.tr("Light")
+                        visible: root.hasBrightness
+                        glyph: "light_mode"
+                        value: root.hasBrightness ? root.monitor.brightness : 0
+                        onMoved: value => root.monitor?.setBrightness(Math.max(0.01, value))
+                    }
+                }
             }
 
-            Hair {}
             Grid {
-                columns: 4
+                columns: 3
+                spacing: NihilStyle.s(8)
 
                 Key {
                     glyph: "bedtime"
@@ -429,22 +475,6 @@ NPopup {
                     onTapped: {
                         NihilState.controlOpen = false
                         snip.mainAction()
-                    }
-                }
-                Key {
-                    glyph: "settings"
-                    word: Translation.tr("Settings")
-                    onTapped: {
-                        NihilState.controlOpen = false
-                        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
-                    }
-                }
-                Key {
-                    glyph: "power"
-                    word: Translation.tr("Power")
-                    onTapped: {
-                        NihilState.controlOpen = false
-                        NihilState.toggle("power")
                     }
                 }
             }

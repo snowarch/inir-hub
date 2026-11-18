@@ -33,48 +33,63 @@ Item {
         onTriggered: root.armed = false
     }
 
-    Column {
-        anchors.centerIn: parent
-        width: Math.min(parent.width - NihilStyle.s(48), NihilStyle.s(460))
-        spacing: NihilStyle.s(6)
+    NGlass {
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: Math.max(0, (parent.height - height) / 2 - NihilStyle.s(40))
+        width: Math.min(parent.width, NihilStyle.s(460))
+        height: card.implicitHeight + NihilStyle.s(64)
+        radius: NihilStyle.rPanel
+        ignite: 0.8
 
-        NSpark {
-            anchors.horizontalCenter: parent.horizontalCenter
-            size: NihilStyle.s(34)
-        }
-        NDisplay {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "NiHiL"
-            size: NihilStyle.s(120)
-            bloom: 1
-        }
-        NRule {
-            width: parent.width
-            start: root.version.length > 0 ? Translation.tr("Version %1").arg(root.version) : ""
-            middle: "▶ ⋈ ◀"
-            end: "GPL-3.0"
-        }
-        NText {
-            width: parent.width
-            topPadding: NihilStyle.s(14)
-            bottomPadding: NihilStyle.s(18)
-            horizontalAlignment: Text.AlignHCenter
-            text: Translation.tr("Vertical workspaces, a full overview and glass you shape completely.")
-            color: NihilStyle.inkSoft
-            wrapMode: Text.Wrap
-        }
-        NButton {
-            anchors.horizontalCenter: parent.horizontalCenter
-            icon: "undo"
-            label: root.armed ? Translation.tr("Press again to restore everything") : Translation.tr("Restore every option")
-            lit: root.armed
-            onClicked: {
-                if (!root.armed) {
-                    root.armed = true
-                    return
+        Column {
+            id: card
+            anchors.centerIn: parent
+            width: parent.width - NihilStyle.s(64)
+            spacing: NihilStyle.s(6)
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: NihilStyle.s(56)
+                height: width
+                radius: NihilStyle.r(16)
+                gradient: Gradient {
+                    orientation: Gradient.Vertical
+                    GradientStop { position: 0; color: NihilStyle.specB }
+                    GradientStop { position: 1; color: NihilStyle.specA }
                 }
-                root.armed = false
-                root.host.restoreAll()
+            }
+            Item { width: 1; height: NihilStyle.s(10) }
+            NDisplay {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "NiHiL"
+                size: NihilStyle.s(40)
+            }
+            NLabel {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: (root.version.length > 0 ? Translation.tr("Version %1").arg(root.version) + "  ·  " : "") + "GPL-3.0"
+            }
+            NText {
+                width: parent.width
+                topPadding: NihilStyle.s(12)
+                bottomPadding: NihilStyle.s(18)
+                horizontalAlignment: Text.AlignHCenter
+                text: Translation.tr("Vertical workspaces, a full overview and glass you shape completely.")
+                color: NihilStyle.inkSoft
+                wrapMode: Text.Wrap
+            }
+            NButton {
+                anchors.horizontalCenter: parent.horizontalCenter
+                icon: "undo"
+                label: root.armed ? Translation.tr("Press again to restore everything") : Translation.tr("Restore every option")
+                lit: root.armed
+                onClicked: {
+                    if (!root.armed) {
+                        root.armed = true
+                        return
+                    }
+                    root.armed = false
+                    root.host.restoreAll()
+                }
             }
         }
     }

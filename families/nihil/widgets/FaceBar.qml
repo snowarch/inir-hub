@@ -1,7 +1,7 @@
 import QtQuick
 import qs.modules.nihil.style
 
-// How full something is: a hairline track with ten ticks, filled with light up to the level.
+// How full something is: a rounded track, filled with the accent's light up to the level.
 Item {
     id: root
 
@@ -10,42 +10,35 @@ Item {
     readonly property bool lightFill: Qt.colorEqual(root.tint, NihilStyle.accent)
     readonly property real shown: NihilStyle.clamp(root.level, 0, 1)
 
-    implicitHeight: NihilStyle.s(6)
+    implicitHeight: NihilStyle.s(5)
 
     Rectangle {
+        id: track
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width
-        height: 1
-        color: NihilStyle.hair
-    }
-    Repeater {
-        model: 11
-        delegate: Rectangle {
-            required property int index
-            x: Math.round((root.width - 1) * index / 10)
-            width: 1
-            height: index % 5 === 0 ? root.height : root.height / 2
-            y: (root.height - height) / 2
-            color: NihilStyle.hair
-        }
+        height: root.height
+        radius: height / 2
+        color: Qt.alpha(NihilStyle.ink, 0.12)
     }
     Item {
         anchors.verticalCenter: parent.verticalCenter
-        width: Math.max(2, root.width * root.shown)
-        height: NihilStyle.s(2)
+        width: Math.max(track.height, root.width * root.shown)
+        height: track.height
         clip: true
         Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
 
-        NSpectrum {
-            visible: root.lightFill
-            width: root.width
-            height: parent.height
-        }
         Rectangle {
-            visible: !root.lightFill
             width: root.width
             height: parent.height
+            radius: height / 2
             color: root.tint
+            gradient: root.lightFill ? fill : null
+        }
+        Gradient {
+            id: fill
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0; color: NihilStyle.specA }
+            GradientStop { position: 1; color: NihilStyle.specB }
         }
     }
 }

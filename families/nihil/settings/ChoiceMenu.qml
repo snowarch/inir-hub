@@ -8,22 +8,22 @@ import qs.modules.nihil.style
 Item {
     id: root
 
-    property var option: null
-    property var current
+    // The row that asked: its choices, its value, and where a pick is written.
+    property var row: null
     property point at: Qt.point(0, 0)
 
-    readonly property bool shown: root.option !== null
+    readonly property bool shown: root.row !== null
+    readonly property var current: root.row?.value
 
     signal picked(var value)
 
-    function show(option: var, anchor: Item, current: var): void {
-        root.option = option
-        root.current = current
+    function show(row: var, anchor: Item): void {
+        root.row = row
         root.at = anchor.mapToItem(root, anchor.width, anchor.height + NihilStyle.s(4))
     }
 
     function close(): void {
-        root.option = null
+        root.row = null
     }
 
     visible: root.shown
@@ -53,12 +53,12 @@ Item {
                 width: parent.width
 
                 Repeater {
-                    model: root.option?.options ?? []
+                    model: root.row?.choices ?? []
 
                     delegate: MouseArea {
                         id: row
                         required property var modelData
-                        readonly property bool chosen: row.modelData.value === root.current
+                        readonly property bool chosen: String(row.modelData.value) === String(root.current)
 
                         width: rows.width
                         height: NihilStyle.s(38)
@@ -69,29 +69,29 @@ Item {
                             root.close()
                         }
 
-                        // The chosen one is a bone plate; hover is a faint tint.
                         Rectangle {
                             anchors.fill: parent
                             radius: NihilStyle.rKey
-                            color: row.chosen ? NihilStyle.ink : (row.containsMouse ? NihilStyle.piece : "transparent")
+                            color: row.chosen ? NihilStyle.chosen : (row.containsMouse ? NihilStyle.piece : "transparent")
                             Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
                         }
                         NText {
                             x: NihilStyle.s(12)
                             width: parent.width - NihilStyle.s(44)
                             anchors.verticalCenter: parent.verticalCenter
-                            text: Translation.tr(row.modelData.label)
+                            text: row.modelData.label
                             elide: Text.ElideRight
                             font.weight: row.chosen ? Font.DemiBold : Font.Normal
-                            color: row.chosen ? NihilStyle.void_ : NihilStyle.ink
+                            color: NihilStyle.ink
                         }
-                        NSpark {
+                        NIcon {
                             anchors.right: parent.right
-                            anchors.rightMargin: NihilStyle.s(12)
+                            anchors.rightMargin: NihilStyle.s(10)
                             anchors.verticalCenter: parent.verticalCenter
                             visible: row.chosen
-                            size: NihilStyle.s(14)
-                            tint: NihilStyle.void_
+                            text: "check"
+                            size: NihilStyle.s(16)
+                            color: NihilStyle.accent
                         }
                     }
                 }

@@ -4,7 +4,7 @@ import QtQuick
 import qs.services
 import qs.modules.nihil.style
 
-// The temperature as the one large thing, what the sky is doing under it and, with room, the day's facts.
+// The temperature as the one large thing, what the sky is doing at the foot or under it and, with room, the day's facts.
 NihilWidgetFace {
     id: root
 
@@ -36,32 +36,34 @@ NihilWidgetFace {
             anchors.right: parent.right
             anchors.top: parent.top
             text: root.night ? "moon" : "sun"
-            size: root.dp(root.small ? 18 : 22)
-            color: NihilStyle.inkSoft
-        }
-        NSpark {
-            anchors.right: parent.right
-            anchors.rightMargin: root.dp(root.small ? 22 : 28)
-            anchors.top: parent.top
-            size: root.dp(14)
+            size: root.dp(root.small ? 20 : 26)
+            color: NihilStyle.accent
         }
 
+        NDisplay {
+            id: temperature
+            text: root.widget.temperatureText ?? root.sky.temp
+            size: root.dp(root.small ? 44 : 58)
+        }
+
+        // Small: the sky sits on the bottom edge, Apple's way; with room it follows the figure and the facts take the foot.
         Column {
             width: parent.width
             spacing: root.dp(2)
+            y: root.small ? parent.height - height : temperature.height + root.dp(2)
 
-            NDisplay {
-                text: root.widget.temperatureText ?? root.sky.temp
-                bloom: 0.7
-                size: root.dp(root.small ? 54 : 72)
-            }
-            NLabel {
+            NText {
                 width: parent.width
-                strong: true
                 text: Weather.describeWeather(root.sky.wCode, root.night)
+                font.pixelSize: root.dp(15)
+                font.weight: Font.DemiBold
+                elide: Text.ElideRight
             }
-            NLabel {
+            NText {
                 width: parent.width
+                font.pixelSize: root.dp(12)
+                color: NihilStyle.inkSoft
+                elide: Text.ElideRight
                 visible: Weather.showVisibleCity || Weather.stale
                 text: Weather.stale ? Weather.updatedLabel : Weather.visibleCity
             }
@@ -84,10 +86,11 @@ NihilWidgetFace {
                     width: parent.width / (root.large ? 2 : 3)
                     spacing: root.dp(3)
 
-                    Rectangle { width: parent.width - root.dp(8); height: 1; color: NihilStyle.hair }
-                    NLabel {
+                    NText {
                         width: parent.width
                         text: fact.modelData.name
+                        font.pixelSize: root.dp(11)
+                        color: NihilStyle.inkSoft
                     }
                     NText {
                         width: parent.width

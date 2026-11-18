@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import qs
@@ -9,9 +10,8 @@ import qs.services
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The poster the compositor's overview stands on. Niri draws this surface in its backdrop, behind the workspaces it
-// shrinks, so the live windows float in front of the type the way an object stands before a poster's title. The field
-// and the giant workspace name are this surface's only content; nothing here takes input.
+// What the compositor's overview stands on. Niri draws this surface in its backdrop, behind the workspaces it shrinks:
+// the wallpaper, blurred and dimmed under a soft vignette, or the family's field. Nothing here takes input.
 Variants {
     model: Quickshell.screens
 
@@ -21,21 +21,8 @@ Variants {
         required property var modelData
         readonly property string output: root.modelData.name
         readonly property var options: Config.options?.nihil?.overview
-        readonly property string subject: root.options?.poster ?? "workspace"
-        readonly property var workspaces: NihilState.workspacesOn(root.output)
-        readonly property int at: NihilState.activeIndexOn(root.output)
-        readonly property var workspace: root.workspaces[root.at]
-        // The workspace's name, else what lives there, else the day: a word wide enough to show past the
-        // workspace standing in front of it.
-        readonly property string title: {
-            if (root.subject === "clock") return DateTime.time
-            const name = String(root.workspace?.name ?? "")
-            if (name.length > 0) return name
-            const wins = NihilState.windowsOn(root.workspace?.id)
-            const lead = wins.find(win => win.is_focused) ?? wins[0]
-            if (lead) return AppSearch.lookupDesktopEntry(lead.app_id ?? "")?.name ?? String(lead.app_id ?? "")
-            return Qt.locale().dayName(new Date().getDay(), Locale.LongFormat)
-        }
+        // "wallpaper" (blurred), "field" (the procedural field) or "off" (graphite).
+        readonly property string subject: ({ workspace: "wallpaper", clock: "wallpaper" })[root.options?.poster] ?? root.options?.poster ?? "wallpaper"
         readonly property bool live: NiriService.inOverview
 
         screen: root.modelData
@@ -52,71 +39,40 @@ Variants {
 
         NFieldPaint {
             anchors.fill: parent
+            visible: root.subject === "field"
             form: Config.options?.nihil?.field?.form ?? 0
             seed: Config.options?.nihil?.field?.seed ?? 0.37
             glow: Config.options?.nihil?.field?.glow ?? 1
         }
 
         Image {
+            id: picture
             anchors.fill: parent
-            visible: (root.options?.posterWallpaper ?? 0.18) > 0
-            opacity: root.options?.posterWallpaper ?? 0.18
-            source: Wallpapers.effectiveWallpaperUrl
-            sourceSize.width: 480
+            visible: false
+            source: root.subject === "wallpaper" ? Wallpapers.effectiveWallpaperUrl : ""
+            sourceSize.width: 640
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
-            smooth: true
         }
-
-        // The compositor shrinks the workspaces to `zoom` of the screen and centres them, which leaves a gutter on each
-        // side. The title runs up the left gutter like a poster's spine, as tall as the gutter is wide, so the live
-        // workspace never hides it.
-        readonly property real zoom: Number(CompositorConfig.value({ comp: "layout", key: "overview.zoom",
-            read: "overview_zoom", fallback: 0.5 })) || 0.5
-        readonly property real gutter: root.width * (1 - NihilStyle.clamp(root.zoom, 0.2, 0.9)) / 2
-
-        Item {
-            id: stage
-            visible: root.subject !== "off" && root.gutter > NihilStyle.s(120)
-            x: (root.gutter - width) / 2
-            width: root.gutter * 0.78
-            height: root.height
-            readonly property real reach: root.height * 0.82
-
-            NDisplay {
-                id: title
-                anchors.centerIn: parent
-                width: implicitWidth
-                height: implicitHeight
-                size: stage.width * 1.12
-                text: root.title
-                color: Qt.alpha(NihilStyle.ink, 0.94)
-                bloom: 0.8
-                rotation: -90
-                scale: Math.min(1, stage.reach / Math.max(1, title.implicitWidth))
+        MultiEffect {
+            anchors.fill: parent
+            visible: root.subject === "wallpaper" && picture.status === Image.Ready
+            source: picture
+            blurEnabled: true
+            blur: 1
+            blurMax: 48
+            saturation: -0.15
+            opacity: NihilStyle.clamp(Number(root.options?.posterWallpaper ?? 0.6), 0, 1)
+        }
+        // A vignette that settles the edges, so the workspaces read as the light in the middle.
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.alpha(NihilStyle.void_, 0.55) }
+                GradientStop { position: 0.35; color: Qt.alpha(NihilStyle.void_, 0.15) }
+                GradientStop { position: 0.7; color: Qt.alpha(NihilStyle.void_, 0.2) }
+                GradientStop { position: 1; color: Qt.alpha(NihilStyle.void_, 0.65) }
             }
-            NSpark { x: stage.width + NihilStyle.s(8); y: root.height * 0.14; size: NihilStyle.s(48) }
-        }
-        NSpark { visible: stage.visible; x: root.width - root.gutter * 0.5; y: root.height * 0.82; size: NihilStyle.s(36) }
-
-        // The page's head over the right gutter: which workspace of how many, set as a poster's issue number.
-        NDisplay {
-            visible: stage.visible
-            anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(28)
-            y: root.height * 0.08
-            text: String(root.at + 1).padStart(2, "0")
-            size: NihilStyle.s(88)
-            color: Qt.alpha(NihilStyle.ink, 0.22)
-            bloom: 0
-        }
-
-        // The poster's foot: the day, the mark, the time.
-        NRule {
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: NihilStyle.s(26) }
-            start: DateTime.date
-            middle: "⋈"
-            end: DateTime.time
         }
     }
 }

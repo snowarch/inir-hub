@@ -14,6 +14,7 @@ import qs.services
 import qs.services.deferred
 import qs.modules.nihil.state
 import qs.modules.nihil.polkit
+import qs.modules.nihil.dock
 
 // NiHiL's panels after the first frame, each loaded while it is open, and the shared tools it wears as they are.
 Item {
@@ -59,6 +60,13 @@ Item {
     OnDemandPanelLoader { identifier: "nPower"; open: GlobalStates.sessionOpen; source: "./power/NihilPower.qml" }
     OnDemandPanelLoader { identifier: "nClipboard"; open: NihilState.clipboardOpen; closeGraceMs: 250; source: "./clipboard/NihilClipboard.qml" }
     OnDemandPanelLoader { identifier: "nWallpapers"; open: NihilState.wallpapersOpen; closeGraceMs: 250; source: "./wallpapers/NihilWallpapers.qml" }
+    // The dock answers to its own switch in Settings, so a NiHiL set up before it existed gets it too.
+    LazyLoader {
+        readonly property bool wanted: Config.ready && (Config.options?.nihil?.modules?.dock ?? true)
+        loading: wanted && GlobalStates.shellEntryReady
+        activeAsync: wanted && GlobalStates.deferredPanelsReady
+        component: NihilDock {}
+    }
     DeferredPanelLoader { identifier: "nPolkit"; component: NihilPolkit {} }
     DeferredPanelLoader { identifier: "nLock"; component: Lock {} }
 

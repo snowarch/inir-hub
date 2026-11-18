@@ -46,7 +46,7 @@ Item {
     ClippingRectangle {
         anchors.fill: parent
         radius: NihilStyle.rCard
-        color: NihilStyle.base
+        color: NihilStyle.void_
         Image {
             anchors.fill: parent
             source: Wallpapers.effectiveWallpaperUrl

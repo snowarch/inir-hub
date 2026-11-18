@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Window
+import Quickshell
 import qs.services
 import qs.modules.common
 import qs.modules.nihil
@@ -9,8 +10,8 @@ import qs.modules.nihil.style
 import "NihilOptions.js" as Options
 import "../state/NihilProfiles.js" as Profiles
 
-// NiHiL's Settings as a printed index over the family's field: the pages numbered down a pane of glass, a search that
-// reaches every option, and each page opened under its own poster head. Every row comes from NihilOptions.js.
+// NiHiL's Settings: a pane of glass with the search and the pages, and the page itself beside it under a quiet head.
+// Every row comes from NihilOptions.js.
 Window {
     id: root
 
@@ -18,13 +19,23 @@ Window {
     property string query: ""
 
     readonly property var page: Options.pages.find(item => item.id === root.pageId) ?? Options.pages[0]
-    readonly property var everyRow: Options.allRows()
+    // Every row search can find: NiHiL's own, and each compositor group as the running compositor offers it.
+    readonly property var everyRow: {
+        CompositorConfig.revision
+        const rows = Options.allRows()
+        for (const page of Options.pages)
+            for (const section of page.sections ?? [])
+                if (section.group)
+                    for (const spec of CompositorRows.of(section.group))
+                        rows.push({ type: "compositor", spec: spec, label: spec.label, note: spec.description ?? "", page: page.title, section: section.title })
+        return rows.filter(row => root.shown(row))
+    }
     readonly property var found: {
         const words = root.query.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0)
         if (words.length === 0)
             return []
         return root.everyRow.filter(row => {
-            const text = [Translation.tr(row.label), Translation.tr(row.note), Translation.tr(row.section), row.label].join(" ").toLowerCase()
+            const text = [Translation.tr(row.label), Translation.tr(row.note), Translation.tr(row.section), row.label, row.key ?? ""].join(" ").toLowerCase()
             return words.every(word => text.includes(word))
         })
     }
@@ -72,13 +83,32 @@ Window {
         return Number((Math.round(middle / option.step) * option.step).toFixed(3))
     }
 
-    function openMenu(option: var, anchor: Item): void {
-        menu.show(option, anchor, root.read(option.key))
+    function openMenu(row: Item, anchor: Item): void {
+        menu.show(row, anchor)
     }
 
+    // A row with `when` shows only while what it depends on holds: a path on ("path"), off ("!path"), at a value
+    // ("path=value"), or more than one screen ("#screens").
+    function shown(row: var): bool {
+        const when = String(row.when ?? "")
+        if (when.length === 0) return true
+        if (when === "#screens") return Quickshell.screens.length > 1
+        if (when.startsWith("!")) return Config.getNestedValue(when.slice(1), false) !== true
+        const at = when.indexOf("=")
+        if (at > 0) return String(Config.getNestedValue(when.slice(0, at), "")) === when.slice(at + 1)
+        return Config.getNestedValue(when, false) === true
+    }
+
+    function act(name: string): void {
+        const inir = Quickshell.shellPath("scripts/inir")
+        if (name === "wallpapers") Quickshell.execDetached([inir, "wallpaperSelector", "open"])
+        else if (name === "nextWallpaper") Quickshell.execDetached([inir, "wallpaperSelector", "next"])
+    }
+
+    // Restores NiHiL's own options; the shell's and the compositor's settings are left as they are.
     function restoreAll(): void {
         const updates = { "nihil.profile": root.factory("profile") }
-        for (const row of root.everyRow.filter(item => item.type !== "compositor"))
+        for (const row of Options.allRows().filter(item => !item.base && item.type !== "compositor" && item.type !== "action"))
             updates["nihil." + row.key] = root.factory(row.key)
         Config.setNestedValues(updates)
     }
@@ -95,15 +125,15 @@ Window {
     // How NiHiL came: a fresh copy of its options, never written to.
     NihilConfigSchema { id: factoryValues }
 
+    Component.onCompleted: CompositorConfig.ensure()
+
     NFieldPaint {
         anchors.fill: parent
         form: Config.options?.nihil?.field?.form ?? 0
         seed: Config.options?.nihil?.field?.seed ?? 0.37
-        glow: (Config.options?.nihil?.field?.glow ?? 1) * 0.7
+        glow: (Config.options?.nihil?.field?.glow ?? 1) * 0.45
     }
 
-    readonly property int pageIndex: Options.pages.findIndex(item => item.id === root.page.id)
-    readonly property int rowCount: (root.page.sections ?? []).reduce((sum, section) => sum + section.rows.length, 0)
 
     Item {
         anchors.fill: parent
@@ -115,38 +145,46 @@ Window {
                 search.clear()
         }
 
-        // The index: the family's mark, the search, then every page as a numbered line of the condensed face. The page
-        // on show is set in bone with a line of light beside it; the rest wait in faint ink.
+        // The side: the family's name, the search, and every page with its glyph. The page on show sits on a raised
+        // plate of glass.
         NGlass {
             id: side
             x: NihilStyle.s(12)
             y: NihilStyle.s(12)
-            width: NihilStyle.s(264)
+            width: NihilStyle.s(244)
             height: parent.height - NihilStyle.s(24)
             radius: NihilStyle.rPanel
 
             Column {
                 id: index
-                x: NihilStyle.s(20)
-                y: NihilStyle.s(22)
-                width: parent.width - NihilStyle.s(40)
+                x: NihilStyle.s(14)
+                y: NihilStyle.s(18)
+                width: parent.width - NihilStyle.s(28)
                 spacing: NihilStyle.s(2)
 
-                Item {
-                    width: parent.width
-                    height: mark.height
-                    NDisplay {
-                        id: mark
-                        text: "NiHiL"
-                        size: NihilStyle.s(40)
-                        bloom: 0.8
+                Row {
+                    x: NihilStyle.s(8)
+                    height: NihilStyle.s(34)
+                    spacing: NihilStyle.s(8)
+                    Rectangle {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: NihilStyle.s(22)
+                        height: width
+                        radius: NihilStyle.r(7)
+                        gradient: Gradient {
+                            orientation: Gradient.Vertical
+                            GradientStop { position: 0; color: NihilStyle.specB }
+                            GradientStop { position: 1; color: NihilStyle.specA }
+                        }
                     }
-                    NSpark { x: mark.width - size * 0.2; y: -size * 0.15; size: NihilStyle.s(18) }
+                    NText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "NiHiL"
+                        font.pixelSize: NihilStyle.textLarge
+                        font.weight: Font.DemiBold
+                    }
                 }
-                NLabel {
-                    bottomPadding: NihilStyle.s(16)
-                    text: Translation.tr("Settings")
-                }
+                Item { width: 1; height: NihilStyle.s(10) }
 
                 NField {
                     id: search
@@ -157,9 +195,7 @@ Window {
                     onEdited: text => root.query = text
                 }
 
-                Item { width: 1; height: NihilStyle.s(14) }
-                Rectangle { width: parent.width; height: 1; color: NihilStyle.hair }
-                Item { width: 1; height: NihilStyle.s(6) }
+                Item { width: 1; height: NihilStyle.s(12) }
 
                 Repeater {
                     model: Options.pages
@@ -168,11 +204,11 @@ Window {
                         id: entry
 
                         required property var modelData
-                        required property int index
                         readonly property bool here: root.query.length === 0 && root.pageId === entry.modelData.id
+                        readonly property real lead: entry.modelData.heading ? NihilStyle.s(34) : 0
 
                         width: index.width
-                        height: NihilStyle.s(40)
+                        height: NihilStyle.s(36) + entry.lead
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
@@ -181,126 +217,90 @@ Window {
                             root.pageId = entry.modelData.id
                         }
 
-                        NSpectrum {
-                            vertical: true
-                            x: -NihilStyle.s(20)
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: NihilStyle.s(2)
-                            height: parent.height - NihilStyle.s(14)
-                            opacity: entry.here ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
-                        }
+                        // The pages of the computer itself start under their own quiet heading.
                         NLabel {
-                            id: number
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: NihilStyle.s(30)
-                            text: String(entry.index + 1).padStart(2, "0")
-                            color: entry.here ? NihilStyle.ink : NihilStyle.inkFaint
+                            visible: entry.lead > 0
+                            x: NihilStyle.s(10)
+                            y: NihilStyle.s(14)
+                            text: Translation.tr(entry.modelData.heading ?? "")
+                            color: NihilStyle.inkFaint
                         }
-                        NDisplay {
-                            anchors.left: number.right
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.topMargin: entry.lead
+                            radius: NihilStyle.rKey
+                            color: entry.here ? NihilStyle.chosen : entry.containsMouse ? NihilStyle.piece : "transparent"
+                            border.width: entry.here ? 1 : 0
+                            border.color: NihilStyle.hair
+                            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                        }
+                        NIcon {
+                            id: glyph
+                            x: NihilStyle.s(10)
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: entry.lead / 2
+                            text: entry.modelData.glyph ?? "tune"
+                            size: NihilStyle.s(18)
+                            color: entry.here ? NihilStyle.accent : NihilStyle.inkSoft
+                        }
+                        NText {
+                            anchors.left: glyph.right
+                            anchors.leftMargin: NihilStyle.s(10)
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: entry.lead / 2
                             text: Translation.tr(entry.modelData.title)
-                            elide: Text.ElideRight
-                            size: NihilStyle.s(22)
-                            bloom: entry.here ? 0.6 : 0
-                            color: entry.here ? NihilStyle.ink : entry.containsMouse ? NihilStyle.inkSoft : NihilStyle.inkFaint
+                            color: entry.here || entry.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                            font.weight: entry.here ? Font.DemiBold : Font.Medium
                         }
                     }
                 }
             }
 
-            NRule {
+            NLabel {
                 anchors.left: parent.left
-                anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                anchors.margins: NihilStyle.s(20)
-                start: Translation.tr("Restore all")
-                end: "▶ ⋈ ◀"
-                MouseArea {
-                    width: parent.width / 2
-                    height: parent.height
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.restoreAll()
-                }
+                anchors.margins: NihilStyle.s(22)
+                text: Translation.tr("Saved as you go")
+                color: NihilStyle.inkFaint
             }
         }
 
         Item {
             id: stage
             anchors.left: side.right
-            anchors.leftMargin: NihilStyle.s(28)
+            anchors.leftMargin: NihilStyle.s(36)
             anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(28)
+            anchors.rightMargin: NihilStyle.s(36)
             anchors.top: parent.top
             anchors.bottom: parent.bottom
 
-            // The page's poster head: its number, its name set large with bloom, and a rule saying what it holds.
-            Item {
+            // The page's head: its name and one line on what it holds.
+            Column {
                 id: hero
-                y: NihilStyle.s(24)
+                y: NihilStyle.s(34)
                 width: parent.width
-                height: heading.height + NihilStyle.s(40)
+                spacing: NihilStyle.s(6)
 
-                NLabel {
-                    text: root.query.length > 0 ? Translation.tr("Search")
-                        : String(root.pageIndex + 1).padStart(2, "0") + "  /  " + String(Options.pages.length).padStart(2, "0")
-                }
                 NDisplay {
-                    id: heading
-                    y: NihilStyle.s(14)
-                    width: parent.width - specimen.width - NihilStyle.s(20)
-                    text: root.query.length > 0 ? root.query : Translation.tr(root.page.title)
-                    elide: Text.ElideRight
-                    size: NihilStyle.s(84)
-                    bloom: 0.9
-                }
-                NSpark { x: Math.min(heading.contentWidth, heading.width) - size * 0.2; y: NihilStyle.s(8); size: NihilStyle.s(30) }
-
-                // The material as it is set now: a square of the family's glass with its light, its spark and its type.
-                NGlass {
-                    id: specimen
-                    anchors.right: parent.right
-                    y: NihilStyle.s(4)
-                    width: NihilStyle.s(132)
-                    height: NihilStyle.s(96)
-                    radius: NihilStyle.rCard
-                    ignite: 0.6
-                    spark: 1
-                    NIcon {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.margins: NihilStyle.s(12)
-                        text: root.query.length > 0 ? "search" : (root.page.glyph ?? "tune")
-                        size: NihilStyle.s(18)
-                    }
-                    NDisplay {
-                        anchors.left: parent.left
-                        anchors.bottom: parent.bottom
-                        anchors.margins: NihilStyle.s(12)
-                        text: "Aa"
-                        capitals: false
-                        size: NihilStyle.s(34)
-                        bloom: 0.6
-                    }
-                }
-
-                NRule {
-                    anchors.bottom: parent.bottom
                     width: parent.width
-                    start: root.query.length > 0
-                        ? Translation.tr("%1 found").arg(root.found.length)
-                        : root.rowCount > 0 ? Translation.tr("%1 options").arg(root.rowCount) : Translation.tr(root.page.title)
-                    middle: "⋈"
-                    end: Translation.tr("Saved as you go")
+                    text: root.query.length > 0 ? Translation.tr("Results") : Translation.tr(root.page.title)
+                    size: NihilStyle.s(30)
+                }
+                NText {
+                    width: parent.width
+                    text: root.query.length > 0
+                        ? (root.found.length === 1 ? Translation.tr("1 option matches") : Translation.tr("%1 options match").arg(root.found.length))
+                        : Translation.tr(root.page.summary ?? "")
+                    color: NihilStyle.inkSoft
+                    font.pixelSize: NihilStyle.textBody
                 }
             }
 
             Loader {
                 id: body
                 anchors.fill: parent
-                anchors.topMargin: hero.y + hero.height + NihilStyle.s(8)
+                anchors.topMargin: hero.y + hero.height + NihilStyle.s(22)
                 active: root.query.length === 0 || root.found.length > 0
                 sourceComponent: root.query.length > 0 ? foundPage
                     : root.page.view === "profiles" ? profilesPage
@@ -310,18 +310,23 @@ Window {
             Column {
                 anchors.centerIn: parent
                 visible: root.query.length > 0 && root.found.length === 0
-                spacing: NihilStyle.s(6)
+                spacing: NihilStyle.s(8)
 
-                NDisplay {
+                NIcon {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: Translation.tr("Nothing")
-                    size: NihilStyle.s(56)
+                    text: "search_off"
+                    size: NihilStyle.s(32)
                     color: NihilStyle.inkFaint
-                    bloom: 0
+                }
+                NText {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Translation.tr("No option by that name")
+                    font.pixelSize: NihilStyle.textLarge
+                    font.weight: Font.Medium
                 }
                 NLabel {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: Translation.tr("No option by that name")
+                    text: Translation.tr("Try another word")
                 }
             }
         }
@@ -354,7 +359,7 @@ Window {
         ChoiceMenu {
             id: menu
             anchors.fill: parent
-            onPicked: value => root.write(menu.option.key, value)
+            onPicked: value => menu.row?.write(value)
         }
     }
 }

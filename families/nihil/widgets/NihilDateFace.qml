@@ -2,42 +2,40 @@ import QtQuick
 import qs.services
 import qs.modules.nihil.style
 
-// The day of the month as the poster's figure, its names beside it and, with room, how far the year has gone.
+// The month in the accent, the day of the month large, its weekday beside it and, with room, how far the year has gone.
 NihilWidgetFace {
     id: root
 
     readonly property date today: root.widget.today
     readonly property real yearGone: root.widget.dayOfYear / Math.max(1, root.widget.daysInYear)
 
+    NText {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        text: Translation.locale.toString(root.today, root.widget.showYear ? "MMMM yyyy" : "MMMM")
+        font.pixelSize: root.dp(13)
+        font.weight: Font.DemiBold
+        color: NihilStyle.accent
+    }
+
     NDisplay {
         id: day
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: root.small ? 0 : -root.dp(8)
-        text: String(root.today.getDate()).padStart(2, "0")
-        bloom: 0.7
-        size: Math.min(root.contentHeight * 0.78, root.contentWidth * 0.5)
+        anchors.verticalCenterOffset: root.small ? root.dp(6) : -root.dp(2)
+        text: root.today.getDate()
+        size: Math.min(root.contentHeight * (root.small ? 0.5 : 0.48), root.contentWidth * 0.42)
     }
-
-    Column {
+    NText {
         anchors.left: day.right
-        anchors.leftMargin: root.dp(12)
+        anchors.leftMargin: root.dp(10)
         anchors.right: parent.right
-        anchors.verticalCenter: day.verticalCenter
-        spacing: root.dp(4)
-
-        NDisplay {
-            width: parent.width
-            visible: root.widget.showWeekday
-            text: Translation.locale.toString(root.today, "dddd")
-            elide: Text.ElideRight
-            bloom: 0
-            size: root.dp(root.small ? 18 : 24)
-        }
-        NLabel {
-            width: parent.width
-            text: Translation.locale.toString(root.today, root.widget.showYear ? "MMMM yyyy" : "MMMM")
-        }
+        anchors.baseline: day.baseline
+        visible: root.widget.showWeekday
+        text: Translation.locale.toString(root.today, "dddd")
+        font.pixelSize: root.dp(root.small ? 14 : 17)
+        font.weight: Font.DemiBold
+        color: NihilStyle.inkSoft
     }
 
     Column {
@@ -45,19 +43,23 @@ NihilWidgetFace {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         visible: !root.small
-        spacing: root.dp(6)
+        spacing: root.dp(7)
 
         Item {
             width: parent.width
             height: gone.implicitHeight
-            NLabel {
+            NText {
                 id: gone
                 text: Translation.tr("Day %1 of %2").arg(root.widget.dayOfYear).arg(root.widget.daysInYear)
+                font.pixelSize: root.dp(12)
+                color: NihilStyle.inkSoft
             }
-            NLabel {
+            NText {
                 anchors.right: parent.right
-                strong: true
                 text: Math.round(root.yearGone * 100) + "%"
+                figures: true
+                font.pixelSize: root.dp(12)
+                font.weight: Font.DemiBold
             }
         }
         FaceBar {

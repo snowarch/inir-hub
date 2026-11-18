@@ -39,7 +39,9 @@ Rectangle {
         width: root.slot
         height: root.height - root.inset * 2
         radius: Math.max(0, root.radius - root.inset)
-        color: NihilStyle.accent
+        color: NihilStyle.chosen
+        border.width: 1
+        border.color: NihilStyle.hair
         Behavior on x { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
     }
 
@@ -78,7 +80,8 @@ Rectangle {
                         width: Math.min(implicitWidth, segment.width - NihilStyle.s(segment.glyph.length > 0 ? 28 : 8))
                         text: Translation.tr(String(segment.modelData?.label ?? ""))
                         font.pixelSize: NihilStyle.textSmall
-                        color: segment.chosen ? NihilStyle.onAccent : segment.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                        color: segment.chosen || segment.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                        font.weight: segment.chosen ? Font.DemiBold : Font.Medium
                     }
                 }
             }

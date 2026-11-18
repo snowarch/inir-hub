@@ -5,7 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// One notification kept in Today: the app's mark, its name and when, the summary and two lines of body. A tap does its
+// One notification kept in Today, on its own card: the app's mark, its name and when, the summary and two lines of body. A tap does its
 // first action, the cross lets it go.
 Rectangle {
     id: root
@@ -27,20 +27,12 @@ Rectangle {
         return then.toLocaleDateString(Qt.locale(), "d MMM")
     }
 
-    height: Math.max(words.implicitHeight + NihilStyle.s(20), NihilStyle.s(60))
-    radius: NihilStyle.r(6)
-    color: Qt.alpha(NihilStyle.ink, tap.containsMouse ? 0.06 : 0)
+    height: Math.max(words.implicitHeight + NihilStyle.s(22), NihilStyle.s(60))
+    radius: NihilStyle.rCard
+    color: tap.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+    border.width: 1
+    border.color: root.critical ? Qt.alpha(NihilStyle.danger, 0.5) : NihilStyle.line
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-
-    // A ruled list: a hairline under each notice, a line of light on the edge of one that is critical.
-    Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: NihilStyle.line }
-    NSpectrum {
-        visible: root.critical
-        vertical: true
-        width: NihilStyle.s(2)
-        height: parent.height - NihilStyle.s(16)
-        y: NihilStyle.s(8)
-    }
 
     MouseArea {
         id: tap
@@ -52,24 +44,26 @@ Rectangle {
 
     NAppIcon {
         id: mark
-        x: NihilStyle.s(10)
-        y: NihilStyle.s(10)
+        x: NihilStyle.s(12)
+        y: NihilStyle.s(12)
         appId: root.entry?.appIcon || root.entry?.appName || ""
         size: NihilStyle.s(32)
     }
 
     Column {
         id: words
-        x: mark.x + mark.width + NihilStyle.s(10)
-        y: NihilStyle.s(10)
+        x: mark.x + mark.width + NihilStyle.s(12)
+        y: NihilStyle.s(11)
         width: parent.width - x - NihilStyle.s(36)
 
         spacing: NihilStyle.s(2)
 
-        NLabel {
+        NText {
             width: parent.width
-            text: (root.entry?.appName ?? "") + "   " + root.when(root.entry?.time ?? Date.now())
-            strong: root.critical
+            text: (root.entry?.appName ?? "") + "  ·  " + root.when(root.entry?.time ?? Date.now())
+            font.pixelSize: NihilStyle.textLabel
+            font.weight: Font.Medium
+            color: root.critical ? NihilStyle.danger : NihilStyle.inkSoft
         }
         NText {
             width: parent.width

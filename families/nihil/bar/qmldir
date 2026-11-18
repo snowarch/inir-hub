@@ -1,2 +1,3 @@
 module qs.modules.nihil.bar
 NihilBar 1.0 NihilBar.qml
+NihilTrayMenu 1.0 NihilTrayMenu.qml

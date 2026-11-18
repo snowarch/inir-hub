@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 
 // A piece of NiHiL glass. `region` is its shape for the compositor's blur; with `tracks` the light follows the pointer.
-// `spark` puts a four-point flare on the light (what is live); `form` overrides the material for one piece.
+// `ignite` raises the glow from its bottom edge (what is active); `form` overrides the material for one piece.
 Item {
     id: root
 
@@ -14,14 +14,12 @@ Item {
     property int form: NihilStyle.form
     property real shadow: 1
     property real ignite: 0
-    property real spark: 0
     property bool tracks: false
-    property point light: Qt.point(root.width * 0.18, -root.height * 0.12)
+    property point light: Qt.point(root.width * 0.5, -root.height * 0.4)
     readonly property real pad: NihilStyle.s(30)
     readonly property Region region: Region { item: root; radius: root.radius }
 
     Behavior on ignite { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
-    Behavior on spark { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutCubic } }
 
     HoverHandler {
         enabled: root.tracks
@@ -47,8 +45,6 @@ Item {
         readonly property real shadow: root.shadow
         readonly property real form: root.form
         readonly property real ribs: NihilStyle.ribs
-        readonly property real rainbow: NihilStyle.rainbow
-        readonly property real spark: NihilStyle.sparks ? root.spark : 0
         readonly property color tint: root.tint
         readonly property color specA: NihilStyle.specA
         readonly property color specB: NihilStyle.specB

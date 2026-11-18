@@ -8,8 +8,8 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// Volume and brightness as one capsule of glass: the level is a filament of light with a flare at its tip. It comes up
-// when a level moves and leaves after a moment.
+// Volume and brightness as one pill of glass: glyph, a rounded track lit in the accent, the share. It comes up when a
+// level moves and leaves after a moment.
 Scope {
     id: root
 
@@ -93,110 +93,65 @@ Scope {
             mask: Region {}
             BackgroundEffect.blurRegion: CompositorService.blurRegions && NihilStyle.blur ? capsule.region : null
 
-            // A ticket of glass: the level's figure set large on the left, its name and the ruled track beside it.
+            // A pill of glass: the glyph, the level as a rounded track filled with the accent's light, and its share.
             NGlass {
                 id: capsule
                 anchors.centerIn: parent
-                width: NihilStyle.s(360)
-                height: NihilStyle.s(78)
-                radius: NihilStyle.rCard
+                width: NihilStyle.s(300)
+                height: NihilStyle.s(50)
+                radius: height / 2
                 opacity: root.shown ? 1 : 0
                 scale: root.shown ? 1 : 0.96
-                ignite: root.shown ? 0.4 : 0
+                ignite: root.shown ? 0.3 : 0
                 Behavior on opacity { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
                 Behavior on scale { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
 
-                NDisplay {
-                    id: figure
+                NIcon {
+                    id: glyph
                     x: NihilStyle.s(18)
                     anchors.verticalCenter: parent.verticalCenter
-                    width: NihilStyle.s(78)
-                    text: String(Math.round(root.level * 100)).padStart(2, "0")
-                    size: NihilStyle.s(52)
-                    bloom: 0.8
+                    text: root.glyph
+                    size: NihilStyle.s(19)
+                    color: root.muted ? NihilStyle.danger : NihilStyle.ink
                 }
                 Rectangle {
-                    id: split
-                    anchors.left: figure.right
-                    anchors.leftMargin: NihilStyle.s(10)
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 1
-                    height: parent.height - NihilStyle.s(28)
-                    color: NihilStyle.hair
-                }
-
-                Row {
-                    anchors.left: split.right
-                    anchors.leftMargin: NihilStyle.s(16)
-                    y: NihilStyle.s(20)
-                    spacing: NihilStyle.s(8)
-                    NIcon {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: root.glyph
-                        size: NihilStyle.s(14)
-                        color: root.muted ? NihilStyle.live : NihilStyle.ink
-                    }
-                    NLabel {
-                        anchors.verticalCenter: parent.verticalCenter
-                        strong: true
-                        text: root.kind === "brightness" ? Translation.tr("Light")
-                            : root.muted ? Translation.tr("Muted") : Translation.tr("Sound")
-                    }
-                }
-                NSpark {
-                    anchors.right: parent.right
-                    anchors.rightMargin: NihilStyle.s(14)
-                    y: NihilStyle.s(14)
-                    size: NihilStyle.s(14)
-                }
-
-                Item {
                     id: track
-                    anchors.left: split.right
-                    anchors.leftMargin: NihilStyle.s(16)
-                    anchors.right: parent.right
-                    anchors.rightMargin: NihilStyle.s(20)
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: NihilStyle.s(20)
-                    height: NihilStyle.s(8)
-
-                    readonly property real reach: track.width * Math.max(0, Math.min(1, root.level))
-
-                    Rectangle {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width
-                        height: 1
-                        color: NihilStyle.hair
-                    }
-                    Repeater {
-                        model: 11
-                        delegate: Rectangle {
-                            required property int index
-                            x: Math.round((track.width - 1) * index / 10)
-                            width: 1
-                            height: index % 5 === 0 ? track.height : track.height / 2
-                            y: (track.height - height) / 2
-                            color: NihilStyle.hair
-                        }
-                    }
+                    anchors.left: glyph.right
+                    anchors.leftMargin: NihilStyle.s(14)
+                    anchors.right: figure.left
+                    anchors.rightMargin: NihilStyle.s(12)
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: NihilStyle.s(6)
+                    radius: height / 2
+                    color: Qt.alpha(NihilStyle.ink, 0.12)
                     Item {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: Math.max(2, track.reach)
-                        height: NihilStyle.s(2)
+                        width: Math.max(track.height, track.width * Math.max(0, Math.min(1, root.level)))
+                        height: parent.height
                         clip: true
                         Behavior on width { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
-                        NSpectrum { width: track.width; height: parent.height }
+                        Rectangle {
+                            width: track.width
+                            height: parent.height
+                            radius: height / 2
+                            gradient: Gradient {
+                                orientation: Gradient.Horizontal
+                                GradientStop { position: 0; color: NihilStyle.specA }
+                                GradientStop { position: 1; color: NihilStyle.specB }
+                            }
+                        }
                     }
-                    // The needle at the level, lit at its tip.
-                    Rectangle {
-                        x: track.reach - width / 2
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: NihilStyle.s(3)
-                        height: NihilStyle.s(14)
-                        radius: 1
-                        color: NihilStyle.ink
-                        Behavior on x { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
-                    }
+                }
+                NText {
+                    id: figure
+                    anchors.right: parent.right
+                    anchors.rightMargin: NihilStyle.s(20)
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: NihilStyle.s(36)
+                    horizontalAlignment: Text.AlignRight
+                    text: Math.round(root.level * 100) + "%"
+                    figures: true
+                    font.pixelSize: NihilStyle.textSmall
+                    font.weight: Font.DemiBold
                 }
             }
         }

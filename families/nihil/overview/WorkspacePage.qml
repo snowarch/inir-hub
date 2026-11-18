@@ -46,7 +46,7 @@ Item {
     ClippingRectangle {
         anchors.fill: parent
         radius: root.nihil?.stage?.radius ?? 30
-        color: (root.nihil?.stage?.background ?? true) ? NihilStyle.base : "transparent"
+        color: (root.nihil?.stage?.background ?? true) ? NihilStyle.void_ : "transparent"
         Image {
             anchors.fill: parent
             visible: root.nihil?.stage?.background ?? true

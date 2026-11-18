@@ -43,7 +43,7 @@ Item {
         anchors.fill: parent
         visible: root.plated && !root.clear
         radius: root.radius
-        tint: root.material === "glass" ? NihilStyle.glassTint : NihilStyle.base
+        tint: root.material === "glass" ? NihilStyle.glassTint : NihilStyle.void_
         ignite: root.widget.stackDropHint ? 1 : 0
     }
 

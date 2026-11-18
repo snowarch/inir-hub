@@ -31,9 +31,8 @@ FocusScope {
     readonly property real cellHeight: root.iconSize + NihilStyle.s(56)
 
     property int selected: 0
-    // What the poster foot names: the tile under the pointer, else the one the keys hold.
+    // The tile under the pointer; while one is, the keys' choice steps back.
     property var hovered: null
-    readonly property var named: root.hovered ?? catalog.pageItems[root.selected] ?? null
     property string openFolderId: ""
     readonly property var openFolder: catalog.folders.find(folder => folder.id === root.openFolderId) ?? null
 
@@ -151,9 +150,9 @@ FocusScope {
     Item {
         id: pages
         anchors.centerIn: parent
-        anchors.verticalCenterOffset: -foot.height / 2
+        anchors.verticalCenterOffset: -NihilStyle.s(24)
         width: root.pageWidth
-        height: root.pageHeight - foot.height
+        height: root.pageHeight - NihilStyle.s(48)
 
         Grid {
             id: tiles
@@ -208,15 +207,17 @@ FocusScope {
             visible: catalog.items.length === 0
             spacing: NihilStyle.s(6)
 
-            NDisplay {
+            NIcon {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: catalog.filtering ? Translation.tr("Nothing") : Translation.tr("Empty")
-                size: NihilStyle.s(96)
+                text: catalog.filtering ? "search_off" : "apps"
+                size: NihilStyle.s(30)
                 color: NihilStyle.inkFaint
             }
-            NLabel {
+            NText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: catalog.filtering ? Translation.tr("No apps match") : Translation.tr("No apps to show")
+                font.weight: Font.DemiBold
+                color: NihilStyle.inkSoft
             }
         }
     }
@@ -238,70 +239,38 @@ FocusScope {
         onClicked: catalog.goToPage(catalog.shownPage + 1)
     }
 
-    // The poster foot: the named app set large on the left, the pages as a numbered rule on the right.
-    Item {
-        id: foot
+    // The pages as dots under the grid, the one on show drawn long in the accent.
+    Row {
+        id: pager
+        visible: (root.options.pageIndicators ?? true) && catalog.pageCount > 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: NihilStyle.s(14)
-        width: root.pageWidth
-        height: NihilStyle.s(64)
+        anchors.bottomMargin: NihilStyle.s(22)
+        spacing: NihilStyle.s(2)
 
-        Rectangle { width: parent.width; height: 1; color: NihilStyle.hair }
+        Repeater {
+            model: catalog.pageCount
+            delegate: MouseArea {
+                id: dot
+                required property int index
+                readonly property bool here: catalog.shownPage === dot.index
 
-        NDisplay {
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            width: parent.width - pager.width - NihilStyle.s(24)
-            text: root.named?.name ?? ""
-            size: NihilStyle.s(34)
-            bloom: 0.5
-            elide: Text.ElideRight
-        }
+                width: mark.width + NihilStyle.s(10)
+                height: NihilStyle.s(20)
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+                Accessible.role: Accessible.Button
+                Accessible.name: Translation.tr("Page %1").arg(dot.index + 1)
+                onClicked: catalog.goToPage(dot.index)
 
-        Row {
-            id: pager
-            visible: (root.options.pageIndicators ?? true) && catalog.pageCount > 1
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            spacing: NihilStyle.s(2)
-
-            NLabel {
-                anchors.verticalCenter: parent.verticalCenter
-                rightPadding: NihilStyle.s(18)
-                text: Translation.tr("%1 apps").arg(String(catalog.items.length).padStart(3, "0"))
-            }
-            NLabel {
-                anchors.verticalCenter: parent.verticalCenter
-                rightPadding: NihilStyle.s(10)
-                text: Translation.tr("Page")
-            }
-            Repeater {
-                model: catalog.pageCount
-                delegate: MouseArea {
-                    id: dot
-                    required property int index
-                    readonly property bool here: catalog.shownPage === dot.index
-
-                    width: NihilStyle.s(34)
-                    height: NihilStyle.s(30)
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-                    onClicked: catalog.goToPage(dot.index)
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: NihilStyle.r(3)
-                        color: NihilStyle.ink
-                        opacity: dot.here ? 1 : dot.containsMouse ? 0.12 : 0
-                        Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
-                    }
-                    NLabel {
-                        anchors.centerIn: parent
-                        text: String(dot.index + 1).padStart(2, "0")
-                        color: dot.here ? NihilStyle.void_ : NihilStyle.inkSoft
-                        strong: dot.here
-                    }
+                Rectangle {
+                    id: mark
+                    anchors.centerIn: parent
+                    width: dot.here ? NihilStyle.s(22) : NihilStyle.s(7)
+                    height: NihilStyle.s(7)
+                    radius: height / 2
+                    color: dot.here ? NihilStyle.accent : Qt.alpha(NihilStyle.ink, dot.containsMouse ? 0.5 : 0.25)
+                    Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutQuint } }
                 }
             }
         }

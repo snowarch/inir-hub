@@ -1,6 +1,6 @@
 import QtQuick
 
-// A label in small tracked capitals: what names a part, never what it says.
+// A quiet caption: what names a part, set small and soft.
 Text {
     property bool strong: false
 
@@ -9,9 +9,7 @@ Text {
     verticalAlignment: Text.AlignVCenter
     renderType: Text.NativeRendering
     font.family: NihilStyle.grotesk
-    font.pixelSize: NihilStyle.textLabel
-    font.weight: Font.DemiBold
-    font.capitalization: Font.AllUppercase
-    font.letterSpacing: NihilStyle.labelTracking
+    font.pixelSize: NihilStyle.textSmall
+    font.weight: strong ? Font.DemiBold : Font.Medium
     font.features: { "tnum": 1 }
 }

@@ -17,7 +17,8 @@ NGlass {
     signal menuAsked(var app, point at)
 
     readonly property var options: Config.options?.nihil?.dash
-    readonly property string position: root.options?.position ?? "left"
+    // The overview follows `dash.position`; the desktop dock sets its own edge.
+    property string position: root.options?.position ?? "left"
     readonly property bool vertical: root.position === "left" || root.position === "right"
     readonly property string showApps: (Config.options?.nihil?.modules?.appGrid ?? true) ? (root.options?.showApps ?? "end") : "hidden"
     readonly property var activeWorkspace: NihilState.workspacesOn(root.output).find(ws => ws.is_active)
@@ -40,7 +41,7 @@ NGlass {
     implicitWidth: root.vertical ? root.across : root.along
     implicitHeight: root.vertical ? root.along : root.across
     radius: root.options?.radius ?? 20
-    tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.base, root.options?.opacity ?? 0.2)
+    tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.void_, root.options?.opacity ?? 0.2)
     tracks: true
 
     function windowsOf(app: var): var { return (NiriService.windows ?? []).filter(win => win.app_id === app.appId) }

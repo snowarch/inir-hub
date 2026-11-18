@@ -4,7 +4,7 @@ import QtQuick
 import qs.services
 import qs.modules.nihil.style
 
-// How hard the machine is working: one line for each part, its figure lit past nine tenths.
+// How hard the machine is working: one line for each part, its share turning red past nine tenths.
 NihilWidgetFace {
     id: root
 
@@ -40,27 +40,29 @@ NihilWidgetFace {
                     width: parent.width
                     height: percent.implicitHeight
 
-                    NLabel {
+                    NText {
                         anchors.left: parent.left
                         anchors.right: percent.left
                         anchors.rightMargin: root.dp(8)
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: root.dp(3)
-                        text: part.modelData.note.length > 0 ? `${part.modelData.name}   ${part.modelData.note}` : part.modelData.name
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: part.modelData.note.length > 0 ? `${part.modelData.name}  ·  ${part.modelData.note}` : part.modelData.name
+                        font.pixelSize: root.dp(13)
+                        color: NihilStyle.inkSoft
                     }
-                    NDisplay {
+                    NText {
                         id: percent
                         anchors.right: parent.right
-                        text: String(Math.round(part.modelData.level * 100)).padStart(2, "0")
-                        bloom: part.high ? 0.8 : 0.3
-                        size: root.dp(root.small ? 22 : 28)
-                        color: part.high ? NihilStyle.live : NihilStyle.ink
+                        text: Math.round(part.modelData.level * 100) + "%"
+                        figures: true
+                        font.pixelSize: root.dp(root.small ? 14 : 16)
+                        font.weight: Font.DemiBold
+                        color: part.high ? NihilStyle.danger : NihilStyle.ink
                     }
                 }
                 FaceBar {
                     width: parent.width
                     level: part.modelData.level
-                    tint: NihilStyle.accent
+                    tint: part.high ? NihilStyle.danger : NihilStyle.accent
                 }
             }
         }

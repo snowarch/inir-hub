@@ -6,8 +6,8 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// Today as a page under glass: the day's figure set large, the month to walk on a ruled table, then every notification newest first under the keys that
-// silence or clear them.
+// Today as a glass pane under the time: the day named, the month on a card, then every notification newest first
+// under the keys that silence or clear them.
 NPopup {
     id: root
 
@@ -32,7 +32,7 @@ NPopup {
         x: Math.round((parent.width - width) / 2)
         y: root.barBottom ? parent.height - height - NihilStyle.barHeight - NihilStyle.edge * 2
             : NihilStyle.barHeight + NihilStyle.edge * 2
-        ignite: root.open ? 0.5 : 0
+        ignite: root.open ? 0.35 : 0
         Behavior on height { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
 
         MouseArea { anchors.fill: parent }
@@ -52,12 +52,12 @@ NPopup {
             width: pane.width - root.inset * 2
             height: NihilStyle.s(36)
 
-            Rectangle { width: parent.width; height: 1; color: NihilStyle.hair }
-            NLabel {
+            NText {
                 anchors.left: parent.left
+                anchors.leftMargin: NihilStyle.s(4)
                 anchors.verticalCenter: parent.verticalCenter
-                strong: true
-                text: Translation.tr("Notifications") + "   " + String(root.notices.length).padStart(2, "0")
+                text: Translation.tr("Notifications")
+                font.weight: Font.DemiBold
             }
             Row {
                 anchors.right: parent.right
@@ -98,7 +98,7 @@ NPopup {
                 Column {
                     id: notes
                     width: list.width
-                    spacing: NihilStyle.s(4)
+                    spacing: NihilStyle.s(6)
 
                     Repeater {
                         model: root.notices
@@ -117,14 +117,20 @@ NPopup {
                 visible: root.notices.length === 0
                 spacing: NihilStyle.s(4)
 
-                NDisplay {
+                NIcon {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Notifications.silent ? "notifications_paused" : "notifications"
+                    size: NihilStyle.s(26)
+                    color: NihilStyle.inkFaint
+                }
+                NText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Translation.tr("All caught up")
-                    size: NihilStyle.s(30)
-                    color: NihilStyle.inkFaint
-                    bloom: 0
+                    font.weight: Font.DemiBold
+                    color: NihilStyle.inkSoft
                 }
                 NLabel {
+                    color: NihilStyle.inkFaint
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Notifications.silent ? Translation.tr("Do not disturb is on") : Translation.tr("New notifications land here")
                 }

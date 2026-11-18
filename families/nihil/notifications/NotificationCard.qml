@@ -7,7 +7,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 
 // One notification on glass: the app's mark, who sent it, the summary and the body, then its actions. A click opens it,
-// resting on it keeps it, the cross lets it go. An urgent one carries the flare.
+// resting on it keeps it, the cross lets it go. An urgent one glows from its edge.
 NGlass {
     id: root
 
@@ -18,17 +18,8 @@ NGlass {
 
     implicitHeight: content.implicitHeight + NihilStyle.s(32)
     radius: NihilStyle.rCard
-    spark: root.critical ? 1 : 0
 
-    NSpectrum {
-        visible: root.critical
-        vertical: true
-        x: 0
-        y: NihilStyle.s(14)
-        width: NihilStyle.s(2)
-        height: root.height - NihilStyle.s(28)
-    }
-    ignite: root.critical ? 1 : 0
+    ignite: root.critical ? 0.8 : 0.15
 
     MouseArea {
         anchors.fill: parent
@@ -53,11 +44,12 @@ NGlass {
             width: content.width - NihilStyle.s(48) - dismiss.width
             spacing: NihilStyle.s(3)
 
-            NLabel {
+            NText {
                 width: parent.width
-                text: root.notification.appName + "   " + DateTime.time
-                strong: root.critical
-                color: root.critical ? NihilStyle.live : NihilStyle.inkSoft
+                text: root.notification.appName + "  ·  " + Translation.tr("Now")
+                font.pixelSize: NihilStyle.textLabel
+                font.weight: Font.Medium
+                color: root.critical ? NihilStyle.danger : NihilStyle.inkSoft
             }
             NText {
                 width: parent.width

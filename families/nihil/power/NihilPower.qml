@@ -8,8 +8,8 @@ import qs.modules.common.functions
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The way out as a poster: the chosen way set large over the dimmed desktop, five numbered keys under it. The pointer or the arrows move the light between
-// them, Enter or a click takes that way.
+// The way out: a glass card over the dimmed desktop, five round keys under the name of the chosen one. The pointer or
+// the arrows move the choice, Enter or a click takes that way.
 NPopup {
     id: root
 
@@ -47,50 +47,43 @@ NPopup {
         else if (id === "poweroff") Session.poweroff()
     }
 
-    // The chosen way set as the poster's title, over the dimmed desktop. It changes as the light moves.
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(NihilStyle.void_, 0.62)
+        color: NihilStyle.scrim
         opacity: root.open ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
     }
 
-    Item {
-        id: stage
-        anchors.fill: parent
-
-        NDisplay {
-            id: title
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: dock.y - height - NihilStyle.s(28)
-            text: root.ways[root.current].word
-            size: Math.min(parent.height * 0.26, parent.width * 0.7 / Math.max(3, text.length * 0.46))
-            bloom: 0.9
-        }
-        NSpark {
-            x: title.x + title.width - size * 0.4
-            y: title.y - size * 0.1
-            size: NihilStyle.s(44)
-        }
-        NLabel {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: title.top
-            anchors.bottomMargin: NihilStyle.s(6)
-            text: String(root.current + 1).padStart(2, "0") + "  /  " + String(root.ways.length).padStart(2, "0")
-        }
-    }
-
     NGlass {
         id: dock
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: parent.height * 0.12
-        width: line.implicitWidth + NihilStyle.s(12)
-        height: line.implicitHeight + NihilStyle.s(12)
-        radius: NihilStyle.rCard
+        anchors.centerIn: parent
+        width: line.implicitWidth + NihilStyle.s(48)
+        height: line.implicitHeight + head.implicitHeight + NihilStyle.s(78)
+        radius: NihilStyle.rPanel
+        ignite: root.open ? 0.45 : 0
 
         // Takes no click of its own, so a press between two keys does not close the menu.
         MouseArea { anchors.fill: parent }
+
+        Column {
+            id: head
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: NihilStyle.s(26)
+            spacing: NihilStyle.s(2)
+            NText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: root.ways[root.current].word
+                font.pixelSize: NihilStyle.textLarge
+                font.weight: Font.DemiBold
+            }
+            NText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: DateTime.uptime ? Translation.tr("Up for %1").arg(DateTime.uptime) : ""
+                visible: text.length > 0
+                font.pixelSize: NihilStyle.textSmall
+                color: NihilStyle.inkSoft
+            }
+        }
 
         FocusScope {
             id: keys
@@ -106,7 +99,9 @@ NPopup {
 
             Row {
                 id: line
-                anchors.centerIn: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: head.y + head.implicitHeight + NihilStyle.s(22)
+                spacing: NihilStyle.s(14)
 
                 Repeater {
                     model: root.ways
@@ -116,60 +111,34 @@ NPopup {
                         required property int index
                         readonly property bool lit: root.current === way.index
 
-                        width: NihilStyle.s(112)
-                        height: NihilStyle.s(86)
+                        width: NihilStyle.s(64)
+                        height: NihilStyle.s(64)
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
+                        Accessible.role: Accessible.Button
+                        Accessible.name: way.modelData.word
                         onEntered: root.current = way.index
                         onClicked: root.take(way.modelData.id)
 
                         Rectangle {
                             anchors.fill: parent
-                            radius: NihilStyle.r(8)
-                            color: NihilStyle.ink
-                            opacity: way.lit ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
-                        }
-                        Rectangle {
-                            visible: way.index > 0 && !way.lit && root.current !== way.index - 1
-                            width: 1
-                            height: parent.height * 0.5
-                            anchors.verticalCenter: parent.verticalCenter
-                            color: NihilStyle.hair
-                        }
-                        NLabel {
-                            x: NihilStyle.s(10)
-                            y: NihilStyle.s(9)
-                            text: String(way.index + 1).padStart(2, "0")
-                            color: way.lit ? NihilStyle.void_ : NihilStyle.inkFaint
+                            radius: width / 2
+                            color: way.lit ? (way.modelData.id === "poweroff" ? NihilStyle.danger : NihilStyle.accent) : NihilStyle.piece
+                            border.width: way.lit ? 0 : 1
+                            border.color: NihilStyle.line
+                            scale: way.pressed ? 0.94 : 1
+                            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                            Behavior on scale { NumberAnimation { duration: NihilStyle.quick } }
                         }
                         NIcon {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            y: NihilStyle.s(24)
+                            anchors.centerIn: parent
                             text: way.modelData.glyph
                             size: NihilStyle.s(24)
-                            color: way.lit ? NihilStyle.void_ : NihilStyle.ink
-                        }
-                        NLabel {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: NihilStyle.s(12)
-                            text: way.modelData.word
-                            color: way.lit ? NihilStyle.void_ : NihilStyle.inkSoft
+                            color: way.lit ? NihilStyle.accentInk : NihilStyle.ink
                         }
                     }
                 }
             }
         }
-    }
-
-    NRule {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: dock.bottom
-        anchors.topMargin: NihilStyle.s(18)
-        width: dock.width
-        start: Translation.tr("Arrows move, Enter takes")
-        middle: "⋈"
-        end: DateTime.time
     }
 }

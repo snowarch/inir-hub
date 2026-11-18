@@ -5,8 +5,8 @@ import Quickshell
 import qs.modules.common
 
 // Every measure, ink and material of NiHiL, all of it driven by `nihil.look`.
-// The language is a poster under glass: bone type on matte black, smoked glass that splits light at its rim, and the
-// spectrum kept for light only (rims, flares, the one live mark). Everything else is ink.
+// Graphite smoked glass, one typeface, one accent. Light lives at the edges of the glass: a specular line on top and
+// a soft glow rising from the bottom edge of what is active. Nothing is decoration.
 Singleton {
     id: root
 
@@ -20,94 +20,82 @@ Singleton {
     readonly property var m3: Appearance.m3colors
     readonly property bool dark: true
 
-    // The light each palette splits into. `rainbow` 1 is the whole spectrum, 0 the two lights with white between.
+    // Each palette is the accent and the two lights its glow mixes.
     readonly property var palettes: ({
-        spectral: { a: "#FF5B3A", b: "#4CC9FF", rainbow: 1, ink: "#EDEAE3", void_: "#0B0B0C" },
-        mono: { a: "#F4F2EE", b: "#C9CDD4", rainbow: 0, ink: "#EDEAE3", void_: "#0A0A0A" },
-        ember: { a: "#FF3D1F", b: "#FFB547", rainbow: 0, ink: "#F1E9DF", void_: "#0D0908" },
-        ice: { a: "#7FDBFF", b: "#A994FF", rainbow: 0, ink: "#E8ECF1", void_: "#090B0E" },
-        wallpaper: { a: "", b: "", rainbow: 0.35, ink: "#EDEAE3", void_: "#0B0B0C" }
+        aurora: { accent: "#A3B1FF", a: "#6F7CFF", b: "#C08BFF" },
+        mono: { accent: "#ECECEE", a: "#B9BDC6", b: "#ECECEE" },
+        ember: { accent: "#FF9A6B", a: "#FF5A36", b: "#FFB45C" },
+        ice: { accent: "#8AD4FF", a: "#3FA9FF", b: "#7C8CFF" },
+        moss: { accent: "#A9DDB1", a: "#4FBF8A", b: "#C6E38A" },
+        wallpaper: { accent: "", a: "", b: "" }
     })
-    // Names from the first NiHiL land on the closest light.
-    readonly property var _renamed: ({ obsidian: "spectral", amber: "ember", azure: "ice", ultramarine: "ice" })
+    // Names from earlier NiHiL land on the closest light.
+    readonly property var _renamed: ({ spectral: "aurora", obsidian: "mono", amber: "ember", azure: "ice", ultramarine: "aurora" })
     readonly property string paletteName: {
-        const name = String(root.opt("palette", "spectral"))
+        const name = String(root.opt("palette", "aurora"))
         const known = root._renamed[name] ?? name
-        return root.palettes[known] ? known : "spectral"
+        return root.palettes[known] ? known : "aurora"
     }
     readonly property var palette: root.palettes[root.paletteName]
-    readonly property color specA: root.paletteName === "wallpaper" ? root.m3.m3primary : root.palette.a
-    readonly property color specB: root.paletteName === "wallpaper" ? root.m3.m3tertiary : root.palette.b
-    readonly property real rainbow: root.palette.rainbow
+    readonly property bool fromWallpaper: root.paletteName === "wallpaper"
+    readonly property color accent: root.fromWallpaper ? Qt.lighter(root.m3.m3primary, 1.15) : root.palette.accent
+    readonly property color specA: root.fromWallpaper ? root.m3.m3primary : root.palette.a
+    readonly property color specB: root.fromWallpaper ? root.m3.m3tertiary : root.palette.b
+    readonly property color accentInk: "#0C0D10"
 
-    // Ink.
-    readonly property color void_: root.palette.void_
-    readonly property color carbon: Qt.lighter(root.void_, 1.9)
-    readonly property color ink: root.palette.ink
-    readonly property color inkSoft: Qt.alpha(root.ink, 0.62)
-    readonly property color inkFaint: Qt.alpha(root.ink, 0.34)
-    readonly property color hair: Qt.alpha(root.ink, 0.16)
-    readonly property color line: Qt.alpha(root.ink, 0.1)
-    readonly property color piece: Qt.alpha(root.ink, 0.06)
-    readonly property color pieceRaised: Qt.alpha(root.ink, 0.12)
-    readonly property color scrim: Qt.alpha("#000000", 0.5)
-    // What is chosen is a bone plate with black type on it; the spectrum only lights it.
-    readonly property color accent: root.ink
-    readonly property color onAccent: root.void_
-    // The one live mark: the warm end of the light.
-    readonly property color live: root.specA
-    // Kept for surfaces that still ask by the old names.
-    readonly property color base: root.void_
-    readonly property color mid: root.carbon
-    readonly property color high: root.ink
-    readonly property color flareA: root.specA
-    readonly property color flareB: root.specB
+    // Ink: warm graphite, never pure black or pure white.
+    readonly property color void_: "#0C0D10"
+    readonly property color carbon: "#16171C"
+    readonly property color ink: "#F2F2F4"
+    readonly property color inkSoft: Qt.alpha(root.ink, 0.64)
+    readonly property color inkFaint: Qt.alpha(root.ink, 0.38)
+    readonly property color hair: Qt.alpha(root.ink, 0.09)
+    readonly property color line: Qt.alpha(root.ink, 0.07)
+    readonly property color piece: Qt.alpha(root.ink, 0.055)
+    readonly property color pieceRaised: Qt.alpha(root.ink, 0.1)
+    // What is chosen: a raised plate of light glass. `accent` is for what is on.
+    readonly property color chosen: Qt.alpha(root.ink, 0.13)
+    readonly property color scrim: Qt.alpha("#000000", 0.45)
+    readonly property color live: root.accent
+    readonly property color danger: "#FF6B6B"
 
     // Glass.
     // "smoke", "frost", "fluted" or "prism".
     readonly property string material: String(root.opt("material", "smoke"))
     readonly property int form: ({ smoke: 0, frost: 1, fluted: 2, prism: 3 })[root.material] ?? 0
-    readonly property real glassOpacity: root.clamp(Number(root.opt("glass", 0.58)), 0.05, 1)
-    readonly property color glassTint: Qt.alpha(Qt.tint(root.void_, Qt.alpha("#1A1B1F", 0.5)), root.glassOpacity)
+    readonly property real glassOpacity: root.clamp(Number(root.opt("glass", 0.62)), 0.05, 1)
+    readonly property color glassTint: Qt.alpha("#17181D", root.glassOpacity)
     readonly property bool blur: Boolean(root.opt("blur", true))
-    readonly property real glassGrain: root.clamp(Number(root.opt("grain", 0.55)), 0, 1.5)
-    readonly property real glassRim: root.clamp(Number(root.opt("rim", 0.75)), 0, 1.5)
-    readonly property real glassFlare: root.clamp(Number(root.opt("flare", 0.6)), 0, 1.5)
+    readonly property real glassGrain: root.clamp(Number(root.opt("grain", 0.25)), 0, 1.5)
+    readonly property real glassRim: root.clamp(Number(root.opt("rim", 0.7)), 0, 1.5)
+    readonly property real glassFlare: root.clamp(Number(root.opt("flare", 0.5)), 0, 1.5)
     readonly property real ribs: root.s(Number(root.opt("ribs", 14)))
-    // Four-point flares on what is live.
-    readonly property bool sparks: Boolean(root.opt("sparks", true))
 
     // Measure.
     readonly property real scale: root.clamp(Number(root.opt("scale", 1)), 0.75, 1.5)
     function s(px: real): real { return Math.round(px * root.scale) }
     readonly property real corners: root.clamp(Number(root.opt("corners", 1)), 0, 2)
     function r(px: real): real { return Math.round(px * root.corners * root.scale) }
-    readonly property real rPanel: root.r(18)
-    readonly property real rCard: root.r(12)
-    readonly property real rKey: root.r(7)
+    readonly property real rPanel: root.r(22)
+    readonly property real rCard: root.r(16)
+    readonly property real rKey: root.r(10)
     readonly property real tileRadius: root.rKey
     readonly property real gap: root.s(8)
     readonly property real edge: root.s(12)
-    readonly property real barHeight: root.s(34)
+    readonly property real barHeight: root.s(36)
 
-    // Type: a condensed display face for what leads, a grotesk for the rest, small capitals for labels.
-    readonly property FontLoader sans: FontLoader { source: Qt.resolvedUrl("../assets/fonts/HankenGrotesk.ttf") }
-    readonly property FontLoader condensed: FontLoader { source: Qt.resolvedUrl("../assets/fonts/Anton-Regular.ttf") }
+    // Type: Geist for everything, set by weight and size alone.
+    readonly property FontLoader sans: FontLoader { source: Qt.resolvedUrl("../assets/fonts/Geist.ttf") }
     readonly property string systemFont: String(Config.options?.appearance?.typography?.mainFont ?? "sans-serif")
-    readonly property string grotesk: String(root.opt("font", "grotesk")) === "system" || root.sans.status !== FontLoader.Ready
+    readonly property string grotesk: String(root.opt("font", "geist")) === "system" || root.sans.status !== FontLoader.Ready
         ? root.systemFont : root.sans.name
-    // "condensed", "grotesk" or "system".
-    readonly property string displayChoice: String(root.opt("display", "condensed"))
-    readonly property bool displayCondensed: root.displayChoice === "condensed" && root.condensed.status === FontLoader.Ready
-    readonly property string display: root.displayCondensed ? root.condensed.name
-        : root.displayChoice === "system" ? root.systemFont : root.grotesk
-    readonly property real textLabel: root.s(10)
+    readonly property string display: String(root.opt("display", "geist")) === "system" ? root.systemFont : root.grotesk
+    readonly property real textLabel: root.s(11)
     readonly property real textSmall: root.s(12)
     readonly property real textBody: root.s(13)
-    readonly property real textLarge: root.s(17)
-    readonly property real textTitle: root.s(30)
-    readonly property real textHero: root.s(64)
-    readonly property real labelTracking: root.s(1.6)
+    readonly property real textLarge: root.s(16)
+    readonly property real textTitle: root.s(24)
+    readonly property real textHero: root.s(56)
 
     // Motion: `motion` multiplies every duration, 0 turns movement off.
     readonly property real motion: root.clamp(Number(root.opt("motion", 1)) * Number(Config.options?.nihil?.motion?.speed ?? 1), 0, 4)

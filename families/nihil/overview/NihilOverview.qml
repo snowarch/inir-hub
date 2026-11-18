@@ -21,7 +21,7 @@ Scope {
         OverviewScreen {}
     }
 
-    // On the compositor's own overview: the poster behind its workspaces and NiHiL's parts over them.
+    // On the compositor's own overview: the backdrop behind its workspaces and NiHiL's parts over them.
     Loader {
         active: NihilState.nativeStage
         sourceComponent: PosterBackdrop {}
@@ -86,7 +86,7 @@ Scope {
                 radius: width / 2
                 color: "transparent"
                 border.width: NihilStyle.s(2)
-                border.color: NihilStyle.flareA
+                border.color: NihilStyle.specA
                 opacity: 0
                 property real grow: 0
                 ParallelAnimation {

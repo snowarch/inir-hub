@@ -10,7 +10,7 @@ MouseArea {
     property bool lit: false
     property color tone: NihilStyle.piece
     property real radius: NihilStyle.rKey
-    readonly property color ink: root.lit ? NihilStyle.onAccent : NihilStyle.ink
+    readonly property color ink: root.lit ? NihilStyle.accentInk : NihilStyle.ink
     default property alias content: holder.data
 
     implicitWidth: root.label.length > 0 ? row.implicitWidth + NihilStyle.s(24) : NihilStyle.s(36)

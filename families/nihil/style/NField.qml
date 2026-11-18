@@ -34,18 +34,8 @@ Rectangle {
     radius: NihilStyle.tileRadius
     color: input.activeFocus ? NihilStyle.pieceRaised : NihilStyle.piece
     border.width: 1
-    border.color: input.activeFocus ? NihilStyle.hair : "transparent"
+    border.color: input.activeFocus ? Qt.alpha(NihilStyle.accent, 0.55) : NihilStyle.line
     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-
-    // Where the keys are, the light runs along the foot of the line.
-    NSpectrum {
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: input.activeFocus ? parent.width - root.radius * 2 : 0
-        height: 1
-        opacity: 0.9
-        Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
-    }
 
     NIcon {
         id: mark
@@ -69,7 +59,7 @@ Rectangle {
         selectByMouse: true
         color: NihilStyle.ink
         selectionColor: NihilStyle.accent
-        selectedTextColor: NihilStyle.onAccent
+        selectedTextColor: NihilStyle.accentInk
         font.family: NihilStyle.grotesk
         font.features: root.mono ? { "tnum": 1 } : ({})
         font.pixelSize: Math.max(NihilStyle.textBody, Math.round(root.height * 0.3))

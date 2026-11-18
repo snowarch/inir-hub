@@ -5,7 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// One place in the grid: an app, or a folder showing what it holds. The light comes up under the pointer or the keys.
+// One place in the grid: an app, or a folder showing what it holds. A raised plate comes up under the pointer or the keys.
 // A press and a drag carries the tile; `dropped` says where it landed.
 MouseArea {
     id: root
@@ -72,23 +72,16 @@ MouseArea {
         scale: root.drag.active ? 1.08 : 1
         Behavior on scale { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
 
-        // Lit: hairline corners frame the tile and a spark sits on the icon; the name turns into a bone plate.
-        Repeater {
-            model: 4
-            delegate: Item {
-                id: corner
-                required property int index
-                readonly property bool atRight: corner.index % 2 === 1
-                readonly property bool atLow: corner.index >= 2
-                x: corner.atRight ? carried.width - width : 0
-                y: corner.atLow ? carried.height - height : 0
-                width: NihilStyle.s(10)
-                height: NihilStyle.s(10)
-                opacity: root.lit ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
-                Rectangle { width: parent.width; height: 1; y: corner.atLow ? parent.height - 1 : 0; color: NihilStyle.inkSoft }
-                Rectangle { width: 1; height: parent.height; x: corner.atRight ? parent.width - 1 : 0; color: NihilStyle.inkSoft }
-            }
+        // Lit: the tile sits on a raised plate of light glass.
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: NihilStyle.s(2)
+            radius: NihilStyle.rCard
+            color: NihilStyle.chosen
+            border.width: 1
+            border.color: NihilStyle.hair
+            opacity: root.lit ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
         }
 
         Column {
@@ -141,29 +134,24 @@ MouseArea {
                     }
                 }
 
-                NSpark {
-                    x: parent.width - width * 0.6
-                    y: -height * 0.4
-                    size: NihilStyle.s(18)
-                    opacity: root.lit ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
-                }
 
                 Rectangle {
                     visible: (root.options.packageBadge ?? true) && (root.item.package ?? "").length > 0
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    width: badge.implicitWidth + NihilStyle.s(8)
-                    height: NihilStyle.s(16)
-                    radius: NihilStyle.r(3)
-                    color: NihilStyle.void_
+                    width: NihilStyle.s(18)
+                    height: width
+                    radius: width / 2
+                    color: NihilStyle.carbon
                     border.width: 1
                     border.color: NihilStyle.hair
 
-                    NLabel {
-                        id: badge
+                    NText {
                         anchors.centerIn: parent
-                        text: String(root.item.package ?? "").slice(0, 1)
+                        text: String(root.item.package ?? "").slice(0, 1).toUpperCase()
+                        font.pixelSize: NihilStyle.textLabel
+                        font.weight: Font.DemiBold
+                        color: NihilStyle.inkSoft
                     }
                 }
             }
@@ -173,15 +161,6 @@ MouseArea {
                 height: name.implicitHeight + NihilStyle.s(6)
                 visible: root.showName
 
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width, name.contentWidth + NihilStyle.s(12))
-                    height: parent.height
-                    radius: NihilStyle.r(3)
-                    color: NihilStyle.ink
-                    opacity: root.lit ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
-                }
                 NText {
                     id: name
                     anchors.centerIn: parent
@@ -193,7 +172,7 @@ MouseArea {
                     maximumLineCount: root.wholeName ? 3 : 1
                     font.pixelSize: NihilStyle.textSmall
                     font.weight: root.lit ? Font.DemiBold : Font.Medium
-                    color: root.lit ? NihilStyle.void_ : NihilStyle.inkSoft
+                    color: root.lit ? NihilStyle.ink : NihilStyle.inkSoft
                 }
             }
         }

@@ -35,6 +35,31 @@ function screens(key, label, note) {
     return { type: "screens", key: key, label: label, note: note || "" }
 }
 
+// A setting of the shell itself, kept at its full path in the config (not under `nihil.`); `fallback` is how iNiR
+// ships it. `more` may hold `note`, `options` as [value, label] pairs, `from`, `to`, `step`, `unit`, `fit`/`fitLabel`,
+// `placeholder`, `source` (choices read live: "languages", "iconThemes", "screens", "families") and `when` (a path that
+// must be on, "!path" off, or "path=value").
+function system(path, label, kind, fallback, more) {
+    var row = { type: kind, base: true, key: path, label: label, note: "", fallback: fallback, options: [] }
+    for (var name in (more || {}))
+        row[name] = more[name]
+    row.options = row.options.map(function (option) { return { value: option[0], label: option[1] } })
+    return row
+}
+
+// One thing to do instead of a value: `act` names it for Settings (see NihilSettingsApp.act).
+function action(act, label, note, button) {
+    return { type: "action", act: act, label: label, note: note || "", button: button }
+}
+
+// A whole group of the compositor's own settings (CompositorRows), as Niri or Umbriel can do them right now.
+function compositorGroup(title, group) {
+    return { title: title, group: group, rows: [] }
+}
+
+var idleTimes = [[0, "Never"], [60, "1 min"], [120, "2 min"], [300, "5 min"], [600, "10 min"], [900, "15 min"],
+                 [1800, "30 min"], [3600, "1 hour"]]
+
 var fitted = { fit: 0, fitLabel: "Fit" }
 var fittedLow = { fit: -1, fitLabel: "Fit" }
 var hiddenAtZero = { fit: 0, fitLabel: "Hidden" }
@@ -52,10 +77,10 @@ var windowActions = [["none", "Nothing"], ["activate", "Focus it"], ["close", "C
 
 var pages = [
     {
-        id: "profiles", title: "Profiles", glyph: "dashboard_customize", view: "profiles"
+        id: "profiles", summary: "Start from a whole desktop layout", title: "Profiles", glyph: "dashboard_customize", view: "profiles"
     },
     {
-        id: "layout", title: "Layout", glyph: "desktop",
+        id: "layout", summary: "Where the panel, the dash and the workspaces sit", title: "Layout", glyph: "desktop",
         sections: [
             { title: "Panel", rows: [
                 choice("panel.position", "Position", [["top", "Top"], ["bottom", "Bottom"]]),
@@ -64,7 +89,6 @@ var pages = [
                 choice("panel.overviewStyle", "In the overview", [["same", "Keep the glass"], ["transparent", "Transparent"]]),
                 toggle("panel.windowTitle", "Focused app's name"),
                 toggle("panel.statusWords", "Network in words", "Wired, or the network's name, beside its mark"),
-                toggle("panel.rules", "Rules between groups"),
                 screens("panel.screenList", "Screens", "With none marked it shows on all of them")
             ] },
             { title: "Dash", rows: [
@@ -78,6 +102,14 @@ var pages = [
                 choice("dash.tone", "Tone", [["default", "Palette"], ["light", "Light"], ["dark", "Dark"]]),
                 level("dash.opacity", "Glass opacity", 0, 1, 0.05, "percent"),
                 level("dash.radius", "Corner radius", 0, 48, 1, "px")
+            ] },
+            { title: "Dock", rows: [
+                choice("dock.position", "Position", [["bottom", "Bottom"], ["left", "Left"], ["right", "Right"]]),
+                choice("dock.visibility", "Shown", [["always", "Always"], ["desktop", "On an empty desktop"],
+                                                    ["hover", "Only at the pointer"]],
+                       "Away, it comes back when the pointer reaches the edge"),
+                level("dock.margin", "Space from the edge", 0, 48, 1, "px"),
+                screens("dock.screenList", "Screens", "With none marked it shows on all of them")
             ] },
             { title: "Workspace strip", rows: [
                 choice("thumbnails.position", "Position", edges),
@@ -128,11 +160,11 @@ var pages = [
         ]
     },
     {
-        id: "appearance", title: "Appearance", glyph: "palette",
+        id: "appearance", summary: "Colour, glass, shape and type", title: "Appearance", glyph: "palette",
         sections: [
             { title: "Colour", rows: [
-                choice("look.palette", "Light", [["spectral", "Spectral"], ["mono", "Mono"], ["ember", "Ember"], ["ice", "Ice"],
-                                                 ["wallpaper", "From the wallpaper"]], "The colours the glass splits light into")
+                choice("look.palette", "Accent", [["aurora", "Aurora"], ["ice", "Ice"], ["ember", "Ember"], ["moss", "Moss"],
+                                                  ["mono", "Mono"], ["wallpaper", "From the wallpaper"]], "The accent and the light at the glass's edge")
             ] },
             { title: "Glass", rows: [
                 choice("look.material", "Material", [["smoke", "Smoked"], ["frost", "Frosted"], ["fluted", "Fluted"], ["prism", "Prism"]]),
@@ -141,14 +173,13 @@ var pages = [
                 toggle("look.blur", "Blur what is behind"),
                 level("look.grain", "Grain", 0, 1, 0.01, "percent"),
                 level("look.rim", "Rim light", 0, 1, 0.01, "percent"),
-                level("look.flare", "Flare", 0, 1, 0.01, "percent"),
-                toggle("look.sparks", "Sparks", "Four-point stars where the light lands")
+                level("look.flare", "Edge glow", 0, 1, 0.01, "percent", "The light rising from the bottom of the glass")
             ] },
             { title: "Shape and type", rows: [
                 level("look.corners", "Roundness", 0, 2, 0.05, "times"),
                 level("look.scale", "Interface size", 0.75, 1.5, 0.01, "times"),
-                choice("look.display", "Titles", [["condensed", "Condensed"], ["grotesk", "Grotesk"], ["system", "System"]]),
-                choice("look.font", "Text", [["grotesk", "Hanken Grotesk"], ["system", "System"]])
+                choice("look.display", "Titles", [["geist", "Geist"], ["system", "System"]]),
+                choice("look.font", "Text", [["geist", "Geist"], ["system", "System"]])
             ] },
             { title: "Field", rows: [
                 choice("field.form", "Form", [[0, "Beam"], [1, "Fluted streaks"], [2, "Haze"], [3, "Void"]]),
@@ -158,8 +189,8 @@ var pages = [
             { title: "Overview stage", rows: [
                 choice("overview.engine", "Overview", [["compositor", "The compositor's own"], ["shell", "Drawn by NiHiL"]],
                        "The compositor's moves live windows with no lag; NiHiL's own works anywhere"),
-                choice("overview.poster", "Poster title", [["workspace", "The workspace"], ["clock", "The time"], ["off", "None"]]),
-                level("overview.posterWallpaper", "Wallpaper under the poster", 0, 1, 0.01, "percent"),
+                choice("overview.poster", "Backdrop", [["wallpaper", "Blurred wallpaper"], ["field", "Field"], ["off", "Plain"]]),
+                level("overview.posterWallpaper", "Wallpaper strength", 0, 1, 0.01, "percent"),
                 compositor("layout", "overview.zoom", "Workspace size", "range", "How big the compositor draws each workspace", [0.2, 0.75, 0.05, "percent"]),
                 compositor("glass", "overview", "Blur behind the overview", "switch")
             ] },
@@ -178,7 +209,7 @@ var pages = [
         ]
     },
     {
-        id: "behavior", title: "Behavior", glyph: "tune",
+        id: "behavior", summary: "How the overview, search and keys respond", title: "Behavior", glyph: "tune",
         sections: [
             { title: "Overview", rows: [
                 choice("overview.mode", "Windows", [["default", "Spread out"], ["static", "Stay in place"], ["hover", "Spread under the pointer"]]),
@@ -237,7 +268,7 @@ var pages = [
         ]
     },
     {
-        id: "apps", title: "App grid", glyph: "apps",
+        id: "apps", summary: "How the app grid is laid out and sorted", title: "App grid", glyph: "apps",
         sections: [
             { title: "Pages", rows: [
                 choice("apps.orientation", "Pages turn", [["workspaces", "Like the workspaces"], ["horizontal", "Sideways"], ["vertical", "Up and down"]]),
@@ -291,11 +322,12 @@ var pages = [
         ]
     },
     {
-        id: "modules", title: "Modules", glyph: "widgets",
+        id: "modules", summary: "Turn each part of NiHiL on or off", title: "Modules", glyph: "widgets",
         sections: [
             { title: "Surfaces", rows: [
                 toggle("modules.panel", "Panel"),
                 toggle("modules.dash", "Dash"),
+                toggle("modules.dock", "Dock on the desktop"),
                 toggle("modules.thumbnails", "Workspace strip"),
                 toggle("modules.search", "Search"),
                 toggle("modules.appGrid", "App grid"),
@@ -319,7 +351,210 @@ var pages = [
         ]
     },
     {
-        id: "about", title: "About", glyph: "info", view: "about"
+        id: "screens", heading: "This computer", summary: "Resolution, refresh, rotation, colour and Night Light", title: "Screens", glyph: "desktop",
+        sections: [
+            { title: "Screen", screenPicker: true, group: "Screen", rows: [] },
+            compositorGroup("Colour", "Colour"),
+            { title: "Night Light", rows: [
+                system("light.night.automatic", "On a schedule", "switch", false),
+                system("light.night.from", "From", "text", "19:00", { when: "light.night.automatic", placeholder: "19:00" }),
+                system("light.night.to", "Until", "text", "06:30", { when: "light.night.automatic", placeholder: "06:30" }),
+                system("light.night.enabled", "Night Light now", "switch", false, { when: "!light.night.automatic" }),
+                system("light.night.colorTemperature", "Warmth", "level", 6000, { from: 2500, to: 6500, step: 100, unit: "K" }),
+                system("light.antiFlashbang.enable", "Soften bright flashes", "switch", false,
+                       { note: "A white page opening in the dark comes in dimmed" })
+            ] },
+            { title: "Several screens", rows: [
+                system("display.primaryMonitor", "Main screen for the shell", "choice", "", { source: "screens", when: "#screens" })
+            ] }
+        ]
+    },
+    {
+        id: "windows", summary: "Layout, borders, corners, tabs and motion", title: "Windows", glyph: "windows",
+        sections: [
+            compositorGroup("Layout", "Layout"),
+            compositorGroup("Borders", "Borders"),
+            compositorGroup("Shape", "Shape"),
+            compositorGroup("Tabs", "Tabs"),
+            compositorGroup("Title bars", "Title bars"),
+            compositorGroup("Glass behind apps", "Glass behind apps"),
+            compositorGroup("Movement", "Movement"),
+            compositorGroup("Hot corners", "Hot corners"),
+            { title: "Closing", rows: [
+                system("closeConfirm.enabled", "Confirm before closing windows", "switch", false)
+            ] }
+        ]
+    },
+    {
+        id: "input", summary: "Keyboard layout, mouse, trackpad and pointer", title: "Keyboard and mouse", glyph: "keyboard",
+        sections: [
+            compositorGroup("Keyboard", "Keyboard"),
+            compositorGroup("Mouse", "Mouse"),
+            compositorGroup("Trackpad", "Trackpad"),
+            compositorGroup("Pointer", "Pointer"),
+            compositorGroup("Tablet", "Tablet"),
+            compositorGroup("Touch screen", "Touch screen")
+        ]
+    },
+    {
+        id: "sound", summary: "Do Not Disturb, alerts and ear protection", title: "Sound and alerts", glyph: "bell",
+        sections: [
+            { title: "Notifications", rows: [
+                system("notifications.silent", "Do Not Disturb", "switch", false),
+                system("notifications.quietHours.enable", "Quiet hours", "switch", false, { note: "Do Not Disturb by itself, every day" }),
+                system("notifications.quietHours.start", "From", "text", "22:00", { when: "notifications.quietHours.enable", placeholder: "22:00" }),
+                system("notifications.quietHours.end", "Until", "text", "08:00", { when: "notifications.quietHours.enable", placeholder: "08:00" }),
+                system("notifications.ignoreAppTimeout", "Ignore how long apps ask", "switch", false),
+                system("notifications.timeoutCritical", "Urgent banners stay", "level", 0,
+                       { from: 0, to: 60000, step: 5000, unit: "s", fit: 0, fitLabel: "Until dismissed" }),
+                system("notifications.maxPopupLifetime", "Longest a banner stays", "level", 30000,
+                       { from: 0, to: 120000, step: 5000, unit: "s", fit: 0, fitLabel: "No limit" })
+            ] },
+            { title: "Sounds", rows: [
+                system("sounds.notifications", "Play a sound for notifications", "switch", true),
+                system("sounds.volume", "Alert volume", "level", 0.5, { from: 0, to: 1, step: 0.05, unit: "percent" }),
+                system("sounds.timer", "Timers", "switch", false),
+                system("sounds.pomodoro", "Focus sessions", "switch", false),
+                system("sounds.battery", "Battery warnings", "switch", false)
+            ] },
+            { title: "Ear protection", rows: [
+                system("audio.protection.enable", "Ear protection", "switch", true, { note: "Holds back sudden jumps in volume" }),
+                system("audio.protection.maxAllowedIncrease", "Largest jump", "level", 10, { from: 2, to: 50, step: 2, unit: "share", when: "audio.protection.enable" }),
+                system("audio.protection.maxAllowed", "Volume limit", "level", 100, { from: 50, to: 154, step: 2, unit: "share", when: "audio.protection.enable" })
+            ] }
+        ]
+    },
+    {
+        id: "power", summary: "Battery, sleep, lock and game mode", title: "Power and lock", glyph: "power",
+        sections: [
+            { title: "Battery", rows: [
+                system("battery.low", "Low battery", "level", 20, { from: 5, to: 50, step: 5, unit: "share" }),
+                system("battery.critical", "Critical battery", "level", 5, { from: 1, to: 20, step: 1, unit: "share" }),
+                system("battery.full", "Charged notice", "choice", 101, { options: [[101, "Never"], [80, "80%"], [90, "90%"], [100, "Full"]] }),
+                system("battery.automaticSuspend", "Suspend when almost empty", "switch", false),
+                system("battery.suspend", "At", "level", 3, { from: 1, to: 10, step: 1, unit: "share", when: "battery.automaticSuspend" }),
+                system("battery.chargeLimit.enable", "Limit charging", "switch", false, { note: "Keeps the battery healthy on a laptop that stays plugged in" }),
+                system("battery.chargeLimit.threshold", "Stop at", "level", 80, { from: 50, to: 100, step: 5, unit: "share", when: "battery.chargeLimit.enable" }),
+                system("performance.lowPower", "Low power", "switch", false, { note: "Fewer effects and slower updates" })
+            ] },
+            { title: "When idle", rows: [
+                system("idle.screenOffTimeout", "Turn the screen off after", "choice", 300, { options: idleTimes }),
+                system("idle.lockTimeout", "Lock after", "choice", 600, { options: idleTimes }),
+                system("idle.suspendTimeout", "Suspend after", "choice", 0, { options: idleTimes }),
+                system("idle.lockBeforeSleep", "Lock before sleeping", "switch", true),
+                system("idle.onBattery.enable", "Shorter times on battery", "switch", false),
+                system("idle.onBattery.screenOffTimeout", "On battery, screen off after", "choice", 120, { options: idleTimes, when: "idle.onBattery.enable" }),
+                system("idle.onBattery.lockTimeout", "On battery, lock after", "choice", 300, { options: idleTimes, when: "idle.onBattery.enable" }),
+                system("idle.onBattery.suspendTimeout", "On battery, suspend after", "choice", 600, { options: idleTimes, when: "idle.onBattery.enable" })
+            ] },
+            { title: "Lock", rows: [
+                system("lock.launchOnStartup", "Lock when the session starts", "switch", false),
+                system("lock.security.unlockKeyring", "Unlock the keyring", "switch", true, { note: "Your password also opens the keyring" }),
+                system("lock.enableAnimation", "Play live wallpapers on the lock screen", "switch", false),
+                system("lock.useHyprlock", "Lock with Hyprlock", "switch", false)
+            ] },
+            { title: "Game mode", rows: [
+                system("gameMode.autoDetect", "Turn on for fullscreen apps", "switch", true),
+                system("gameMode.disableAnimations", "Stop shell animations", "switch", false),
+                system("gameMode.disableEffects", "Stop glass and blur", "switch", false),
+                system("gameMode.disableNiriAnimations", "Stop window animations", "switch", false),
+                system("gameMode.suppressNotifications", "Hold notifications", "switch", true),
+                system("gameMode.disableVisualizers", "Stop audio visualizers", "switch", true),
+                system("gameMode.disableReloadToasts", "Hide reload notices", "switch", true)
+            ] }
+        ]
+    },
+    {
+        id: "wallpaper", summary: "The picture, how it changes and which apps take its colours", title: "Wallpaper and themes", glyph: "image",
+        sections: [
+            { title: "Wallpaper", rows: [
+                action("wallpapers", "Choose a wallpaper", "", "Open"),
+                action("nextWallpaper", "Next wallpaper", "From the same folder", "Next"),
+                system("wallpapers.directory", "Wallpapers folder", "text", "", { placeholder: "~/Pictures/Wallpapers" }),
+                system("background.fillMode", "Scaling", "choice", "fill", { options: [["fill", "Fill"], ["fit", "Fit"], ["stretch", "Stretch"], ["tile", "Tile"]] }),
+                system("background.parallax.enable", "Parallax", "switch", false, { when: "background.fillMode=fill", note: "It drifts a little as you change workspace" }),
+                system("background.multiMonitor.enable", "A wallpaper per screen", "switch", false, { when: "#screens" })
+            ] },
+            { title: "Shuffle", rows: [
+                system("background.autoWallpaper.enable", "Shuffle wallpapers", "switch", false),
+                system("background.autoWallpaper.intervalMinutes", "Every", "level", 30, { from: 1, to: 240, step: 1, unit: "min", when: "background.autoWallpaper.enable" }),
+                system("background.autoWallpaper.folder", "From the folder", "text", "", { placeholder: "~/Pictures/Wallpapers", when: "background.autoWallpaper.enable" }),
+                system("background.autoWallpaper.generateColors", "Colours follow", "switch", true, { when: "background.autoWallpaper.enable" })
+            ] },
+            { title: "Change", rows: [
+                system("background.transition.enable", "Animate the change", "switch", true),
+                system("background.transition.type", "Style", "choice", "random", { when: "background.transition.enable", options: [
+                    ["none", "None"], ["crossfade", "Fade"], ["simple", "Simple"], ["left", "From left"], ["right", "From right"],
+                    ["top", "From top"], ["bottom", "From bottom"], ["wipe", "Wipe"], ["wave", "Wave"], ["grow", "Grow"],
+                    ["center", "Center"], ["any", "Any"], ["outer", "Outer"], ["random", "Random"], ["circleSelect", "Circle shader"],
+                    ["circlePit", "Circle pit"], ["magic", "Magic"], ["Doom", "Doom"], ["Peel", "Peel"], ["transition", "Shader fade"],
+                    ["pixelate", "Pixelate"], ["stripes", "Stripes"], ["crt", "CRT"], ["dissolve", "Dissolve"], ["glitch", "Glitch"],
+                    ["ripple", "Ripple"], ["shatter", "Shatter"], ["inirMelt", "iNiR Melt"], ["inirVeil", "Chromatic Veil"],
+                    ["inirFracture", "Glass Fracture"], ["inirInk", "Sumi Wash"], ["inirPrism", "Prism Slices"],
+                    ["shaderRandom", "Random shader"]] }),
+                system("background.transition.duration", "Duration", "level", 800, { from: 200, to: 3000, step: 100, unit: "ms", when: "background.transition.enable" })
+            ] },
+            { title: "Effects", rows: [
+                system("background.effects.enableBlur", "Blur the wallpaper", "switch", true),
+                system("background.effects.blurRadius", "Blur", "level", 22, { from: 4, to: 80, step: 2, unit: "px", when: "background.effects.enableBlur" }),
+                system("background.effects.dim", "Always dim", "level", 0, { from: 0, to: 60, step: 5, unit: "share" }),
+                system("background.effects.dynamicDim", "Dim with windows open", "level", 0, { from: 0, to: 60, step: 5, unit: "share" }),
+                system("background.enableAnimation", "Play live wallpapers", "switch", true),
+                system("background.videoPause", "Pause live wallpapers", "choice", "covered", { options: [["never", "Never"], ["fullscreen", "Behind fullscreen"], ["covered", "When covered"]] }),
+                system("background.pauseAnimationOnBattery", "Pause on battery", "switch", true)
+            ] },
+            { title: "Apps take the colours", rows: [
+                system("appearance.wallpaperTheming.enableAppsAndShell", "GTK and KDE apps", "switch", true),
+                system("appearance.wallpaperTheming.enableQtApps", "Qt apps", "switch", true, { when: "appearance.wallpaperTheming.enableAppsAndShell" }),
+                system("appearance.wallpaperTheming.enableTerminal", "Terminals", "switch", true),
+                system("appearance.wallpaperTheming.enableFirefox", "Firefox", "switch", true),
+                system("appearance.wallpaperTheming.enableChrome", "Chrome and Chromium", "switch", true),
+                system("appearance.wallpaperTheming.enableVSCode", "VS Code", "switch", true),
+                system("appearance.wallpaperTheming.enableZed", "Zed", "switch", true),
+                system("appearance.wallpaperTheming.enableVesktop", "Discord (Vesktop)", "switch", true),
+                system("appearance.wallpaperTheming.enableSpicetify", "Spotify (Spicetify)", "switch", true),
+                system("appearance.wallpaperTheming.enablePearDesktop", "YouTube Music (Pear Desktop)", "switch", true),
+                system("appearance.wallpaperTheming.enableSteam", "Steam", "switch", true),
+                system("appearance.wallpaperTheming.enableNeovim", "Neovim", "switch", false),
+                system("appearance.wallpaperTheming.enableCava", "Cava", "switch", true)
+            ] },
+            { title: "Icons and fonts", rows: [
+                system("appearance.iconTheme", "Icons", "choice", "", { source: "iconThemes" }),
+                system("appearance.typography.syncWithSystem", "Apps use the shell's font", "switch", true)
+            ] }
+        ]
+    },
+    {
+        id: "system", summary: "Language, clock, apps, weather and updates", title: "System", glyph: "settings",
+        sections: [
+            { title: "Language and time", rows: [
+                system("language.ui", "Language", "choice", "auto", { source: "languages" }),
+                system("time.format", "Clock", "choice", "hh:mm", { options: [["hh:mm", "24-hour"], ["h:mm ap", "12-hour"], ["h:mm AP", "12-hour AM/PM"]] }),
+                system("time.secondPrecision", "Exact seconds", "switch", false)
+            ] },
+            { title: "Apps", rows: [
+                system("apps.terminal", "Terminal", "text", "kitty", { placeholder: "kitty" })
+            ] },
+            { title: "Desktop", rows: [
+                system("panelFamily", "Family", "choice", "nihil", { source: "families", note: "The whole desktop changes to it" }),
+                system("familyTransitionAnimation", "Animate the switch", "switch", true)
+            ] },
+            { title: "Weather", rows: [
+                system("weather.enable", "Weather", "switch", true),
+                system("weather.city", "Place", "text", "", { when: "weather.enable", placeholder: "Buenos Aires" }),
+                system("weather.enableGPS", "Use GPS when there is one", "switch", false, { when: "weather.enable" }),
+                system("weather.useUSCS", "Fahrenheit", "switch", false, { when: "weather.enable" }),
+                system("weather.fetchInterval", "Check every", "level", 10, { from: 5, to: 60, step: 5, unit: "min", when: "weather.enable" })
+            ] },
+            { title: "Updates", rows: [
+                system("shellUpdates.enabled", "Watch for new iNiR versions", "switch", true),
+                system("shellUpdates.checkIntervalMinutes", "Check every", "level", 360, { from: 60, to: 1440, step: 60, unit: "min", when: "shellUpdates.enabled" }),
+                system("shellUpdates.openTerminalOnUpdate", "Update in a terminal", "switch", true, { when: "shellUpdates.enabled" })
+            ] }
+        ]
+    },
+    {
+        id: "about", summary: "The family and its defaults", title: "About", glyph: "info", view: "about"
     }
 ]
 

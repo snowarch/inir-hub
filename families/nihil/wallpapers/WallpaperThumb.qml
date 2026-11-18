@@ -65,7 +65,7 @@ Item {
                 anchors.centerIn: parent
                 text: "check"
                 size: NihilStyle.s(16)
-                color: NihilStyle.onAccent
+                color: NihilStyle.accentInk
             }
         }
 

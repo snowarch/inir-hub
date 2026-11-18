@@ -6,7 +6,7 @@ ShaderEffect {
     property real form: 0
     property real grain: NihilStyle.glassGrain
     property real glow: 1
-    property real rainbow: NihilStyle.rainbow
+    property real rainbow: 0
     property color base: NihilStyle.void_
     property color specA: NihilStyle.specA
     property color specB: NihilStyle.specB

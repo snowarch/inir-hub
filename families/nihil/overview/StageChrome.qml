@@ -110,8 +110,8 @@ PanelWindow {
             x: (root.width - width) / 2
             y: root.top + root.margin + (1 - root.shown) * -NihilStyle.s(16)
             width: NihilStyle.s(440) * (root.nihil?.search?.width ?? 1)
-            height: NihilStyle.s(40)
-            radius: NihilStyle.rCard
+            height: NihilStyle.s(42)
+            radius: height / 2
             tracks: true
             NField {
                 anchors.fill: parent
@@ -123,17 +123,6 @@ PanelWindow {
                 onEdited: text => NihilState.setQuery(text)
             }
         }
-        NRule {
-            visible: root.entryShown
-            anchors.top: entryGlass.bottom
-            anchors.topMargin: NihilStyle.s(10)
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: entryGlass.width
-            start: String(root.activeIndex + 1).padStart(2, "0") + " / " + String(root.workspaces.length).padStart(2, "0")
-            middle: root.activeWindows.length === 1 ? Translation.tr("1 window") : Translation.tr("%1 windows").arg(root.activeWindows.length)
-            end: root.output
-        }
-
         Dash {
             id: dash
             output: root.output

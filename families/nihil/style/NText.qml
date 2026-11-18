@@ -10,6 +10,6 @@ Text {
     renderType: Text.NativeRendering
     font.family: NihilStyle.grotesk
     font.pixelSize: NihilStyle.textBody
-    font.weight: Font.Medium
+    font.weight: Font.Normal
     font.features: figures ? { "tnum": 1 } : ({})
 }

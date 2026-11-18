@@ -9,8 +9,8 @@ import qs.modules.common.functions
 import qs.modules.shared.lock
 import qs.modules.nihil.style
 
-// The lock: the wallpaper melted behind the time set as a poster's title, and one ticket of glass for the password,
-// a bar of ink for each key typed. Power and restart wait in the corner, the charge in the other.
+// The lock: the wallpaper melted behind the day and the time, and one pill of glass for the password, a dot for each
+// key typed. Power and restart wait in one corner, the charge in the other.
 MouseArea {
     id: root
 
@@ -75,27 +75,23 @@ MouseArea {
         brightness: NihilStyle.dark ? -0.22 : 0.06
     }
 
-    // The time is the poster's title: set across the page in the condensed face with its bloom, the day on a rule
-    // under it, sparks where the light lands.
-    NDisplay {
-        id: clock
+    // The day over the time, both centred high on the page; the time in Geist's medium weight, tight and large.
+    Column {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: Math.round(parent.height * 0.14)
-        text: DateTime.time
-        size: Math.min(parent.height * 0.42, parent.width * 0.5 / Math.max(2.5, text.length * 0.42))
-        bloom: 1
-    }
-    NSpark { x: clock.x + clock.width - size * 0.3; y: clock.y + size * 0.2; size: NihilStyle.s(60) }
-    NSpark { x: clock.x - size * 0.6; y: clock.y + clock.height - size; size: NihilStyle.s(34) }
-    NRule {
-        id: day
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: clock.bottom
-        anchors.topMargin: NihilStyle.s(10)
-        width: Math.max(clock.width, NihilStyle.s(420))
-        start: DateTime.date
-        middle: "▶ ⋈ ◀"
-        end: Translation.tr("Locked")
+        y: Math.round(parent.height * 0.12)
+        spacing: NihilStyle.s(4)
+        NText {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: Translation.locale.toString(DateTime.clock.date, "dddd, d MMMM")
+            font.pixelSize: NihilStyle.s(20)
+            font.weight: Font.Medium
+            color: Qt.alpha(NihilStyle.ink, 0.82)
+        }
+        NDisplay {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: DateTime.time
+            size: Math.round(Math.min(root.height * 0.17, root.width * 0.11))
+        }
     }
 
     NGlass {
@@ -104,11 +100,11 @@ MouseArea {
         property real nudge: 0
 
         anchors.horizontalCenter: parent.horizontalCenter
-        y: Math.round(parent.height * 0.62)
-        width: NihilStyle.s(380)
-        height: NihilStyle.s(58)
-        radius: NihilStyle.rCard
-        ignite: field.activeFocus ? 1 : 0
+        y: Math.round(parent.height * 0.7)
+        width: NihilStyle.s(320)
+        height: NihilStyle.s(50)
+        radius: height / 2
+        ignite: field.activeFocus ? 0.6 : 0.2
         transform: Translate { x: capsule.nudge }
 
         SequentialAnimation {
@@ -132,32 +128,25 @@ MouseArea {
             Keys.onEscapePressed: root.context.clearText()
         }
 
-        NLabel {
-            anchors.centerIn: parent
+        NText {
+            x: NihilStyle.s(22)
+            anchors.verticalCenter: parent.verticalCenter
             visible: root.context.currentText.length === 0
             text: root.context.showFailure ? Translation.tr("Try again") : Translation.tr("Password")
-            strong: root.context.showFailure
-            color: root.context.showFailure ? NihilStyle.live : NihilStyle.inkSoft
-        }
-        NSpectrum {
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width - NihilStyle.s(40)
-            height: 1
-            opacity: field.activeFocus ? 0.9 : 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
+            color: root.context.showFailure ? NihilStyle.danger : NihilStyle.inkSoft
         }
 
         Row {
-            anchors.centerIn: parent
-            spacing: NihilStyle.s(8)
+            x: NihilStyle.s(22)
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: NihilStyle.s(6)
 
             Repeater {
-                model: Math.min(root.context.currentText.length, 18)
+                model: Math.min(root.context.currentText.length, 22)
                 delegate: Rectangle {
-                    width: NihilStyle.s(3)
-                    height: NihilStyle.s(16)
-                    radius: 1
+                    width: NihilStyle.s(7)
+                    height: width
+                    radius: width / 2
                     color: NihilStyle.ink
                 }
             }
@@ -165,8 +154,10 @@ MouseArea {
 
         NButton {
             anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(8)
+            anchors.rightMargin: NihilStyle.s(7)
             anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(36)
+            height: NihilStyle.s(36)
             lit: true
             icon: root.busy ? "more_horiz"
                 : root.context.targetAction === LockContext.ActionEnum.Poweroff ? "power_settings_new"
@@ -175,13 +166,24 @@ MouseArea {
         }
     }
 
-    NLabel {
+    Row {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        anchors.margins: NihilStyle.s(32)
+        anchors.margins: NihilStyle.s(30)
         visible: root.showBattery && Battery.available
-        text: (Battery.isCharging ? Translation.tr("Charging") + "   " : "") + Math.round(Battery.percentage * 100) + "%"
-        strong: Battery.isLow && !Battery.isCharging
+        spacing: NihilStyle.s(6)
+        NIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            text: Battery.isCharging ? "battery_charging_full" : "battery_full"
+            size: NihilStyle.s(16)
+            color: Battery.isLow && !Battery.isCharging ? NihilStyle.danger : NihilStyle.inkSoft
+        }
+        NText {
+            anchors.verticalCenter: parent.verticalCenter
+            text: Math.round(Battery.percentage * 100) + "%"
+            figures: true
+            color: NihilStyle.inkSoft
+        }
     }
 
     Row {

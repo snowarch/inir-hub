@@ -4,7 +4,7 @@ import QtQuick
 import qs.services
 import qs.modules.nihil.style
 
-// The month as a printed table: its name set large, the days under a rule, today a bone plate. The wheel or the
+// The month: its name in the accent, the days under it, today a round accent dot. The wheel or the
 // arrows turn the months; a click on the name comes back to this one.
 NihilWidgetFace {
     id: root
@@ -21,16 +21,17 @@ NihilWidgetFace {
     Item {
         id: head
         width: parent.width
-        height: month.implicitHeight
+        height: root.dp(24)
 
-        NDisplay {
+        NText {
             id: month
             anchors.left: parent.left
             anchors.right: arrows.left
+            anchors.verticalCenter: parent.verticalCenter
             text: Translation.locale.toString(root.viewing, "MMMM")
-            elide: Text.ElideRight
-            bloom: 0.6
-            size: root.dp(root.small ? 26 : 34)
+            font.pixelSize: root.dp(root.small ? 14 : 16)
+            font.weight: Font.DemiBold
+            color: NihilStyle.accent
 
             MouseArea {
                 anchors.fill: parent
@@ -45,10 +46,13 @@ NihilWidgetFace {
             anchors.verticalCenter: parent.verticalCenter
             spacing: root.dp(2)
 
-            NLabel {
+            NText {
                 anchors.verticalCenter: parent.verticalCenter
                 rightPadding: root.dp(6)
+                visible: root.browsing
                 text: Translation.locale.toString(root.viewing, "yyyy")
+                font.pixelSize: root.dp(12)
+                color: NihilStyle.inkSoft
             }
             Repeater {
                 model: [{ glyph: "chevron_left", shift: -1 }, { glyph: "chevron_right", shift: 1 }]
@@ -71,18 +75,9 @@ NihilWidgetFace {
         }
     }
 
-    Rectangle {
-        id: rule
-        anchors.top: head.bottom
-        anchors.topMargin: root.dp(6)
-        width: parent.width
-        height: 1
-        color: NihilStyle.hair
-    }
-
     Item {
         id: table
-        anchors.top: rule.bottom
+        anchors.top: head.bottom
         anchors.topMargin: root.dp(6)
         anchors.bottom: parent.bottom
         width: parent.width
@@ -92,8 +87,10 @@ NihilWidgetFace {
 
         Repeater {
             model: 7
-            delegate: NLabel {
+            delegate: NText {
                 required property int index
+                font.pixelSize: root.dp(10)
+                font.weight: Font.Medium
                 x: Math.round(index * table.cellW)
                 width: table.cellW
                 height: table.dayRowH
@@ -119,23 +116,17 @@ NihilWidgetFace {
                     anchors.centerIn: parent
                     width: Math.min(parent.width, parent.height) - root.dp(2)
                     height: width
-                    radius: NihilStyle.r(4)
-                    color: NihilStyle.ink
+                    radius: width / 2
+                    color: NihilStyle.accent
                     visible: cell.modelData.isToday
-                }
-                NSpark {
-                    visible: cell.modelData.isToday
-                    x: parent.width / 2 + Math.min(parent.width, parent.height) / 2 - size * 0.55
-                    y: parent.height / 2 - Math.min(parent.width, parent.height) / 2 - size * 0.45
-                    size: root.dp(12)
                 }
                 NText {
                     anchors.centerIn: parent
                     figures: true
                     text: cell.modelData.day
                     font.pixelSize: root.dp(root.small ? 11 : 13)
-                    font.weight: cell.modelData.isToday ? Font.Bold : Font.Medium
-                    color: cell.modelData.isToday ? NihilStyle.void_
+                    font.weight: cell.modelData.isToday ? Font.DemiBold : Font.Normal
+                    color: cell.modelData.isToday ? NihilStyle.accentInk
                         : cell.modelData.currentMonth ? NihilStyle.ink : NihilStyle.inkFaint
                 }
             }

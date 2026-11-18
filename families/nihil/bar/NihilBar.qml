@@ -11,9 +11,9 @@ import qs.services
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The panel is the poster's head rule: three groups of small type with hairlines running between them. The mark and
-// the workspaces on the left open the overview; the time in the middle opens the day; the machine on the right opens
-// quick settings. No pills, no plates at rest: what is open is lit, what is under the pointer brightens.
+// A thin smoked strip. Left: where you are, as dots that grow for the workspace in front, and the window that has
+// the keys. Centre: the day and the time. Right: the tray and the machine as icons. What is open sits on a raised
+// plate; what is under the pointer gets a faint one.
 Variants {
     model: Quickshell.screens
 
@@ -58,14 +58,6 @@ Variants {
             light: Qt.point(bar.width * 0.5, bar.bottom ? bar.height : 0)
             Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
         }
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            y: bar.bottom ? 0 : parent.height - 1
-            height: 1
-            color: NihilStyle.line
-            opacity: glass.opacity
-        }
 
         component Key: MouseArea {
             id: key
@@ -76,82 +68,67 @@ Variants {
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             height: bar.height
             Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                y: bar.bottom ? 0 : parent.height - height
-                height: NihilStyle.s(2)
-                color: NihilStyle.ink
-                opacity: key.lit ? 1 : 0
+                anchors.fill: parent
+                anchors.topMargin: NihilStyle.s(5)
+                anchors.bottomMargin: NihilStyle.s(5)
+                radius: height / 2
+                color: key.lit ? NihilStyle.chosen : NihilStyle.piece
+                border.width: key.lit ? 1 : 0
+                border.color: NihilStyle.hair
+                opacity: key.lit || key.containsMouse ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
             }
         }
 
-        // Left: the mark, where we are, and what has the keys.
+        // Left: the workspaces as dots, the one in front drawn long in the accent.
         Key {
             id: lead
             anchors.left: parent.left
-            anchors.leftMargin: NihilStyle.s(14)
-            width: leadRow.implicitWidth
+            anchors.leftMargin: NihilStyle.s(8)
+            width: dots.implicitWidth + NihilStyle.s(24)
             lit: NihilState.overviewOpen
             Accessible.role: Accessible.Button
             Accessible.name: Translation.tr("Activities")
             onClicked: mouse => NihilState.toggleOverview(mouse.button === Qt.RightButton ? "apps" : "windows")
             onWheel: wheel => NihilState.stepWorkspace(bar.output, wheel.angleDelta.y > 0 ? -1 : 1)
             Row {
-                id: leadRow
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: NihilStyle.s(12)
-                NDisplay {
-                    anchors.verticalCenter: parent.verticalCenter
-                    size: NihilStyle.s(17)
-                    bloom: 0
-                    text: "NiHiL"
-                    capitals: false
-                    color: lead.ink
-                }
-                // One tick per workspace, the active one drawn in light.
-                Row {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: NihilStyle.s(3)
-                    Repeater {
-                        model: bar.workspaces
-                        Item {
-                            required property var modelData
-                            width: modelData.is_active ? NihilStyle.s(18) : NihilStyle.s(6)
-                            height: NihilStyle.s(2)
-                            Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutQuint } }
-                            NSpectrum { anchors.fill: parent; visible: parent.modelData.is_active }
-                            Rectangle {
-                                anchors.fill: parent
-                                visible: !parent.modelData.is_active
-                                color: NihilState.windowsOn(parent.modelData.id).length > 0 ? NihilStyle.inkSoft : NihilStyle.inkFaint
-                            }
-                        }
+                id: dots
+                anchors.centerIn: parent
+                spacing: NihilStyle.s(5)
+                Repeater {
+                    model: bar.workspaces
+                    Rectangle {
+                        required property var modelData
+                        readonly property bool filled: NihilState.windowsOn(modelData.id).length > 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: modelData.is_active ? NihilStyle.s(20) : NihilStyle.s(6)
+                        height: NihilStyle.s(6)
+                        radius: height / 2
+                        color: modelData.is_active ? NihilStyle.accent : filled ? Qt.alpha(NihilStyle.ink, 0.55) : Qt.alpha(NihilStyle.ink, 0.2)
+                        Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutQuint } }
+                        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
                     }
-                }
-                NLabel {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: String(bar.at + 1).padStart(2, "0") + " / " + String(bar.workspaces.length).padStart(2, "0")
-                    color: lead.ink
                 }
             }
         }
-        NLabel {
+        NText {
             id: title
             anchors.left: lead.right
-            anchors.leftMargin: NihilStyle.s(14)
+            anchors.leftMargin: NihilStyle.s(10)
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.min(implicitWidth, Math.max(0, middle.x - x - NihilStyle.s(80)))
+            width: Math.min(implicitWidth, Math.max(0, middle.x - x - NihilStyle.s(40)))
             visible: (bar.panel?.windowTitle ?? true) && bar.focused !== null && width > NihilStyle.s(30)
             text: AppSearch.lookupDesktopEntry(bar.focused?.app_id ?? "")?.name ?? String(bar.focused?.app_id ?? "")
-            color: NihilStyle.inkFaint
+            font.pixelSize: NihilStyle.textSmall
+            font.weight: Font.Medium
+            color: NihilStyle.inkSoft
         }
 
-        // Centre: the time leads, the day beside it.
+        // Centre: the day, then the time.
         Key {
             id: middle
             anchors.horizontalCenter: parent.horizontalCenter
-            width: timeRow.implicitWidth + NihilStyle.s(8)
+            width: timeRow.implicitWidth + NihilStyle.s(28)
             lit: NihilState.todayOpen
             Accessible.role: Accessible.Button
             Accessible.name: Translation.tr("Calendar and notifications")
@@ -159,26 +136,29 @@ Variants {
             Row {
                 id: timeRow
                 anchors.centerIn: parent
-                spacing: NihilStyle.s(10)
-                NLabel {
+                spacing: NihilStyle.s(8)
+                NText {
                     anchors.verticalCenter: parent.verticalCenter
                     text: DateTime.date
-                    color: middle.ink
+                    font.pixelSize: NihilStyle.textSmall
+                    font.weight: Font.Medium
+                    color: middle.lit || middle.containsMouse ? NihilStyle.inkSoft : NihilStyle.inkFaint
                 }
-                NDisplay {
+                NText {
                     anchors.verticalCenter: parent.verticalCenter
-                    size: NihilStyle.s(19)
-                    bloom: 0
                     text: DateTime.time
-                    color: middle.lit || middle.containsMouse ? NihilStyle.ink : Qt.alpha(NihilStyle.ink, 0.88)
+                    figures: true
+                    font.pixelSize: NihilStyle.textBody
+                    font.weight: Font.DemiBold
+                    color: NihilStyle.ink
                 }
                 Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: Notifications.list.length > 0
-                    width: NihilStyle.s(5)
+                    width: NihilStyle.s(6)
                     height: width
                     radius: width / 2
-                    color: NihilStyle.live
+                    color: NihilStyle.accent
                 }
             }
         }
@@ -187,34 +167,64 @@ Variants {
         Row {
             id: right
             anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(10)
+            anchors.rightMargin: NihilStyle.s(8)
             height: parent.height
             spacing: NihilStyle.s(2)
 
+            // The tray as the other families keep it (pinned first, quiet ones out when the shell says so). Left
+            // opens the app or its menu when that is all it has, middle is its second action, right its menu,
+            // the wheel its scroll.
             Repeater {
-                model: SystemTray.items
+                model: [...TrayService.pinnedItems, ...TrayService.unpinnedItems]
                 MouseArea {
                     id: trayItem
-                    required property SystemTrayItem modelData
+                    required property var modelData
                     anchors.verticalCenter: parent.verticalCenter
-                    width: NihilStyle.s(26)
-                    height: NihilStyle.s(26)
+                    width: NihilStyle.s(28)
+                    height: NihilStyle.s(28)
                     hoverEnabled: true
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
                     cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
+                    Accessible.name: trayItem.modelData?.tooltipTitle || trayItem.modelData?.title || trayItem.modelData?.id || ""
+                    readonly property bool asked: trayMenu.item === trayItem.modelData
+                    function openMenu(): void {
+                        const at = trayItem.mapToItem(null, trayItem.width / 2, 0)
+                        trayMenu.show(trayItem.modelData, bar.screen, Qt.point(at.x, 0), bar.bottom)
+                    }
                     onClicked: mouse => {
-                        if (mouse.button !== Qt.RightButton) { trayItem.modelData.activate(); return }
-                        if (!trayItem.modelData.hasMenu) { trayItem.modelData.secondaryActivate(); return }
-                        const at = trayItem.mapToItem(bar.contentItem, 0, trayItem.height)
-                        trayItem.modelData.display(bar, at.x, at.y)
+                        const app = trayItem.modelData
+                        if (!app) return
+                        if (mouse.button === Qt.MiddleButton) app.secondaryActivate()
+                        else if (mouse.button === Qt.RightButton || app.onlyMenu) {
+                            if (app.hasMenu) trayItem.openMenu()
+                            else app.secondaryActivate()
+                        } else if (!TrayService.smartToggle(app)) app.activate()
+                    }
+                    onWheel: wheel => trayItem.modelData?.scroll(wheel.angleDelta.y || wheel.angleDelta.x, wheel.angleDelta.y === 0)
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: height / 2
+                        color: trayItem.asked ? NihilStyle.chosen : NihilStyle.piece
+                        visible: trayItem.asked || trayItem.containsMouse
                     }
                     Image {
                         anchors.centerIn: parent
-                        width: NihilStyle.s(15)
-                        height: NihilStyle.s(15)
-                        sourceSize: Qt.size(width, height)
-                        source: trayItem.modelData.icon
-                        opacity: trayItem.containsMouse ? 1 : 0.72
+                        width: NihilStyle.s(16)
+                        height: NihilStyle.s(16)
+                        sourceSize: Qt.size(width * 2, height * 2)
+                        source: trayItem.modelData ? TrayService.getSafeIcon(trayItem.modelData) : ""
+                        opacity: trayItem.containsMouse || trayItem.asked ? 1 : 0.78
+                    }
+                    Rectangle {
+                        visible: trayItem.modelData?.status === Status.NeedsAttention
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: NihilStyle.s(4)
+                        width: NihilStyle.s(6)
+                        height: width
+                        radius: width / 2
+                        color: NihilStyle.accent
                     }
                 }
             }
@@ -223,7 +233,7 @@ Variants {
 
             Key {
                 id: status
-                width: statusRow.implicitWidth + NihilStyle.s(8)
+                width: statusRow.implicitWidth + NihilStyle.s(24)
                 lit: NihilState.controlOpen
                 Accessible.role: Accessible.Button
                 Accessible.name: Translation.tr("Quick settings")
@@ -278,28 +288,20 @@ Variants {
                     Row {
                         anchors.verticalCenter: parent.verticalCenter
                         visible: Battery.available
-                        spacing: NihilStyle.s(5)
-                        // The charge as a drawn level, not a glyph.
-                        Rectangle {
+                        spacing: NihilStyle.s(4)
+                        NIcon {
                             anchors.verticalCenter: parent.verticalCenter
-                            width: NihilStyle.s(18)
-                            height: NihilStyle.s(8)
-                            radius: NihilStyle.s(2)
-                            color: "transparent"
-                            border.width: 1
-                            border.color: status.ink
-                            Rectangle {
-                                x: NihilStyle.s(2)
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: (parent.width - NihilStyle.s(4)) * Battery.percentage
-                                height: parent.height - NihilStyle.s(4)
-                                radius: 1
-                                color: Battery.isLowAndNotCharging ? NihilStyle.live : status.ink
-                            }
+                            readonly property int step: Math.min(6, Math.floor(Battery.percentage * 7))
+                            text: Battery.isCharging ? "battery_charging_full" : Battery.percentage > 0.95 ? "battery_full" : "battery_" + step + "_bar"
+                            size: NihilStyle.s(14)
+                            color: Battery.isLowAndNotCharging ? NihilStyle.danger : status.ink
                         }
-                        NLabel {
+                        NText {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: Math.round(Battery.percentage * 100) + (Battery.isCharging ? " +" : "")
+                            text: Math.round(Battery.percentage * 100) + "%"
+                            figures: true
+                            font.pixelSize: NihilStyle.textSmall
+                            font.weight: Font.Medium
                             color: status.ink
                         }
                     }
@@ -307,23 +309,6 @@ Variants {
             }
         }
 
-        // The hairlines that run between the groups.
-        Rectangle {
-            readonly property real from: (title.visible ? title.x + title.width : lead.x + lead.width) + NihilStyle.s(16)
-            x: from
-            anchors.verticalCenter: parent.verticalCenter
-            width: Math.max(0, middle.x - NihilStyle.s(16) - from)
-            height: 1
-            color: NihilStyle.hair
-            visible: bar.panel?.rules ?? true
-        }
-        Rectangle {
-            x: middle.x + middle.width + NihilStyle.s(16)
-            anchors.verticalCenter: parent.verticalCenter
-            width: Math.max(0, right.x - NihilStyle.s(16) - x)
-            height: 1
-            color: NihilStyle.hair
-            visible: bar.panel?.rules ?? true
-        }
+        NihilTrayMenu { id: trayMenu }
     }
 }
