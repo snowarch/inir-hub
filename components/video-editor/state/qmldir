@@ -1,4 +1,4 @@
-EditorOptions 1.0 EditorOptions.qml
+singleton EditorOptions 1.0 EditorOptions.qml
 EditorSession 1.0 EditorSession.qml
 PlaybackController 1.0 PlaybackController.qml
 RecordingBridge 1.0 RecordingBridge.qml

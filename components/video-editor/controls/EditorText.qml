@@ -10,7 +10,8 @@ StyledText {
     shouldUseNumberFont: false
     defaultFont: role === "title" ? EditorSkin.titleFont : role === "mono" ? EditorSkin.monoFont : EditorSkin.mainFont
     font.pixelSize: role === "title" ? EditorSkin.title : role === "meta" || role === "mono" ? EditorSkin.meta : EditorSkin.body
-    font.weight: EditorSkin.iris ? IrisStyle.weight(role === "title" ? Font.DemiBold : Font.Normal) : role === "title" ? Font.Bold : Font.Normal
+    font.weight: EditorSkin.iris ? IrisStyle.weight(role === "title" ? EditorSkin.titleWeight : Font.Normal) : role === "title" ? Font.Bold : Font.Normal
+    font.letterSpacing: role === "title" ? EditorSkin.titleTracking : 0
     font.variableAxes: EditorSkin.iris ? ({}) : EditorSkin.waffle ? Looks.font.variableAxes.ui : Appearance.font.variableAxes.main
     color: EditorSkin.colors.text
 }

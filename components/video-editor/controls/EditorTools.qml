@@ -10,31 +10,67 @@ ColumnLayout {
     id: root
     required property EditorSession session
     required property PlaybackController playback
-    spacing: EditorSkin.gap
-    Flow {
+    readonly property int padX: Math.round(EditorSkin.small)
+    readonly property int padY: Math.round(EditorSkin.small * 2 / 3)
+    spacing: EditorSkin.cards ? EditorSkin.small : EditorSkin.gap
+
+    component ToolCard: EditorSurface {
+        id: card
+        property bool divided: false
+        property bool tail: false
+        readonly property int topInset: EditorSkin.cards ? root.padY : (card.divided ? Math.round(EditorSkin.small) : root.padY)
+        readonly property int bottomInset: EditorSkin.cards ? root.padY : (card.tail ? root.padY : 0)
+        default property alias items: cardBody.data
         Layout.fillWidth: true
-        spacing: EditorSkin.small
-        EditorAction { symbol: "skip_previous"; hint: Translation.tr("Go to start (Home)"); onClicked: root.playback.seek(root.session.startMs) }
-        EditorAction { symbol: "navigate_before"; hint: Translation.tr("Previous frame (←)"); onClicked: root.playback.step(-1) }
-        EditorAction { symbol: "navigate_next"; hint: Translation.tr("Next frame (→)"); onClicked: root.playback.step(1) }
-        EditorAction { symbol: "skip_next"; hint: Translation.tr("Go to end (End)"); onClicked: { root.playback.pause(); root.playback.seek(root.session.effectiveEndMs); } }
-        EditorAction { label: Translation.tr("In"); hint: Translation.tr("Set in point here (I)"); onClicked: root.session.setInPoint(root.playback.position) }
-        EditorAction { label: Translation.tr("Out"); hint: Translation.tr("Set out point here (O)"); onClicked: root.session.setOutPoint(root.playback.position) }
-        EditorText {
-            height: EditorSkin.body + EditorSkin.small * 2
-            verticalAlignment: Text.AlignVCenter
-            text: root.session.timecode(root.playback.position) + " / " + root.session.timecode(root.session.durationMs)
-            role: "mono"
+        section: true
+        implicitHeight: cardBody.implicitHeight + card.topInset + card.bottomInset
+        Rectangle {
+            visible: card.divided && !EditorSkin.cards
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.leftMargin: root.padX
+            anchors.rightMargin: root.padX
+            height: 1
+            color: EditorSkin.colors.edge
         }
-        Repeater {
-            model: [0.25, 0.5, 1, 1.5, 2]
-            EditorAction { required property real modelData; label: modelData + "×"; hint: Translation.tr("Playback speed (S to cycle)"); selected: root.session.playbackRate === modelData; onClicked: root.session.playbackRate = modelData }
+        ColumnLayout {
+            id: cardBody
+            anchors.fill: parent
+            anchors.leftMargin: root.padX
+            anchors.rightMargin: root.padX
+            anchors.topMargin: card.topInset
+            anchors.bottomMargin: card.bottomInset
+            spacing: EditorSkin.small
         }
     }
-    ColumnLayout {
-        Layout.fillWidth: true
+
+    ToolCard {
+        Flow {
+            Layout.fillWidth: true
+            spacing: EditorSkin.small
+            EditorAction { symbol: "skip_previous"; hint: Translation.tr("Go to start (Home)"); onClicked: root.playback.seek(root.session.startMs) }
+            EditorAction { symbol: "navigate_before"; hint: Translation.tr("Previous frame (←)"); onClicked: root.playback.step(-1) }
+            EditorAction { symbol: "navigate_next"; hint: Translation.tr("Next frame (→)"); onClicked: root.playback.step(1) }
+            EditorAction { symbol: "skip_next"; hint: Translation.tr("Go to end (End)"); onClicked: { root.playback.pause(); root.playback.seek(root.session.effectiveEndMs); } }
+            EditorAction { label: Translation.tr("In"); hint: Translation.tr("Set in point here (I)"); onClicked: root.session.setInPoint(root.playback.position) }
+            EditorAction { label: Translation.tr("Out"); hint: Translation.tr("Set out point here (O)"); onClicked: root.session.setOutPoint(root.playback.position) }
+            EditorText {
+                height: EditorSkin.body + EditorSkin.small * 2
+                verticalAlignment: Text.AlignVCenter
+                text: root.session.timecode(root.playback.position) + " / " + root.session.timecode(root.session.durationMs)
+                role: "mono"
+            }
+            Repeater {
+                model: [0.25, 0.5, 1, 1.5, 2]
+                EditorAction { required property real modelData; label: modelData + "×"; hint: Translation.tr("Playback speed (S to cycle)"); selected: root.session.playbackRate === modelData; onClicked: root.session.playbackRate = modelData }
+            }
+        }
+    }
+
+    ToolCard {
         visible: !root.session.compressOpen
-        spacing: EditorSkin.small
+        divided: true
         EditorChoices {
             Layout.fillWidth: true
             title: Translation.tr("Aspect Ratio")
@@ -60,10 +96,10 @@ ColumnLayout {
             }
         }
     }
-    ColumnLayout {
-        Layout.fillWidth: true
+
+    ToolCard {
         visible: root.session.compressOpen
-        spacing: EditorSkin.gap
+        divided: true
         Flow {
             Layout.fillWidth: true
             spacing: EditorSkin.small
@@ -111,13 +147,18 @@ ColumnLayout {
 
         EditorAction { visible: root.session.compressFormat === "gif"; label: Translation.tr("Export GIF"); symbol: "gif"; primary: true; onClicked: root.session.exportRequested(false, "gif") }
     }
-    Flow {
-        Layout.fillWidth: true
-        spacing: EditorSkin.small
-        EditorAction { label: Translation.tr("Compress"); symbol: "compress"; selected: root.session.compressOpen; onClicked: root.session.compressOpen = !root.session.compressOpen }
-        EditorAction { label: Translation.tr("Save Copy"); symbol: "content_copy"; onClicked: root.session.exportRequested(false, "mp4") }
-        EditorAction { label: Translation.tr("Audio (MP3)"); symbol: "music_note"; enabled: root.session.metadata.audio?.present === true; hint: Translation.tr("Extract audio track"); onClicked: root.session.exportRequested(false, "mp3") }
-        EditorAction { label: Translation.tr("GIF Animation"); symbol: "gif"; onClicked: root.session.exportRequested(false, "gif") }
-        EditorAction { label: Translation.tr("Save and Replace"); symbol: "check_circle"; primary: true; onClicked: root.session.exportRequested(true, "mp4") }
+
+    ToolCard {
+        divided: true
+        tail: true
+        Flow {
+            Layout.fillWidth: true
+            spacing: EditorSkin.small
+            EditorAction { label: Translation.tr("Compress"); symbol: "compress"; selected: root.session.compressOpen; onClicked: root.session.compressOpen = !root.session.compressOpen }
+            EditorAction { label: Translation.tr("Save Copy"); symbol: "content_copy"; onClicked: root.session.exportRequested(false, "mp4") }
+            EditorAction { label: Translation.tr("Audio (MP3)"); symbol: "music_note"; enabled: root.session.metadata.audio?.present === true; hint: Translation.tr("Extract audio track"); onClicked: root.session.exportRequested(false, "mp3") }
+            EditorAction { label: Translation.tr("GIF Animation"); symbol: "gif"; onClicked: root.session.exportRequested(false, "gif") }
+            EditorAction { label: Translation.tr("Save and Replace"); symbol: "check_circle"; primary: true; onClicked: root.session.exportRequested(true, "mp4") }
+        }
     }
 }

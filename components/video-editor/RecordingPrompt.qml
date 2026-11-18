@@ -37,6 +37,7 @@ PanelWindow {
     EditorSurface {
         id: card
         anchors.fill: parent
+        panel: true
         color: EditorSkin.colors.page
         focus: true
         Keys.onEscapePressed: root.dismissed()

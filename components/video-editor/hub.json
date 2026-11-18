@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "summary": "Trim, crop, compress, and export local videos",
     "description": "Edit one local video: trim, crop, rotate, flip, compress, extract MP3 audio, export GIFs, or save a frame. Native family controls and automatic recording-finished prompts.",
     "authors": [
@@ -21,6 +21,10 @@
     "provides": "modules/video-editor",
     "preview": "preview.webp",
     "changes": {
+        "1.1.0": [
+            "Classic, Folio and Prism style switcher in the editor header.",
+            "Header toggle between floating Window and desktop Overlay."
+        ],
         "1.0.0": [
           "Initial release: single-clip editing with trim, crop, rotate, flip, speed and mute.",
           "MP4 compression, GIF export, MP3 extraction and frame snapshots.",
