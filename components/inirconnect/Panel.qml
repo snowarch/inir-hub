@@ -7,7 +7,6 @@ import Quickshell.Wayland
 import qs
 import qs.services
 import qs.modules.iris.frame
-import qs.modules.iris.style
 import qs.modules.iris.components
 import "state"
 import "views"
@@ -60,20 +59,20 @@ Scope {
             id: floatWin
             title: "iNiR AndroidConnect"
             Binding { target: floatWin; property: "visible"; value: AndroidState.open }
-            color: IrisStyle.surface
+            color: ConnectStyle.surface
 
             readonly property Item viewItem: windowLoader.item
-            readonly property real contentW: Math.round((AndroidState.verticalLayout ? 440 : 640) * IrisStyle.density)
+            readonly property real contentW: Math.round((AndroidState.verticalLayout ? 440 : 640) * ConnectStyle.density)
             readonly property real contentH: {
                 const baseH = AndroidState.verticalLayout ? 680 : 440
                 const natural = Math.round(viewItem?.implicitHeight ?? 0)
-                const minH = Math.round((AndroidState.verticalLayout ? 580 : 420) * IrisStyle.density)
-                return Math.max(minH, natural > 0 ? natural : Math.round(baseH * IrisStyle.density))
+                const minH = Math.round((AndroidState.verticalLayout ? 580 : 420) * ConnectStyle.density)
+                return Math.max(minH, natural > 0 ? natural : Math.round(baseH * ConnectStyle.density))
             }
 
             implicitWidth: floatWin.contentW
             implicitHeight: floatWin.contentH
-            minimumSize: Qt.size(Math.round(360 * IrisStyle.density), Math.round(340 * IrisStyle.density))
+            minimumSize: Qt.size(Math.round(360 * ConnectStyle.density), Math.round(340 * ConnectStyle.density))
             onClosed: AndroidState.open = false
 
             readonly property var niriWindow: (NiriService.windows ?? []).find(w => w.title === floatWin.title && w.pid === Quickshell.processId) ?? null

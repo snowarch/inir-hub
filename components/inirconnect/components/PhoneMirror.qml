@@ -4,25 +4,23 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common.widgets
-import qs.modules.iris.style
-import qs.modules.iris.components
 import "../state"
 
 ColumnLayout {
     id: root
-    readonly property real d: IrisStyle.density
+    readonly property real d: ConnectStyle.density
     spacing: Math.round(8 * root.d)
     implicitHeight: mirrorPlate.implicitHeight + navRow.implicitHeight + spacing
 
-    IrisPlate {
+    ConnectPlate {
         id: mirrorPlate
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.minimumWidth: Math.round(180 * root.d)
         Layout.minimumHeight: Math.round(160 * root.d)
         implicitHeight: Math.round(180 * root.d)
-        radius: IrisStyle.radiusCard
-        color: IrisStyle.formPlate
+        radius: ConnectStyle.radiusCard
+        color: ConnectStyle.formPlate
 
         Rectangle {
             anchors.top: parent.top
@@ -31,7 +29,7 @@ ColumnLayout {
             width: Math.round(32 * root.d)
             height: Math.round(3.5 * root.d)
             radius: height / 2
-            color: IrisStyle.hairline
+            color: ConnectStyle.hairline
         }
 
         Column {
@@ -39,30 +37,30 @@ ColumnLayout {
             width: parent.width - Math.round(24 * root.d)
             spacing: Math.round(10 * root.d)
 
-            IrisSquircle {
+            ConnectSquircle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Math.round(40 * root.d)
                 height: width
                 glyph: AndroidState.connected ? "phone_android" : "phonelink_off"
-                tint: AndroidState.connected ? IrisStyle.accent : IrisStyle.identity.gray
+                tint: AndroidState.connected ? ConnectStyle.accent : ConnectStyle.gray
             }
 
             Column {
                 width: parent.width
                 spacing: Math.round(2 * root.d)
 
-                IrisText {
+                StyledText {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     text: AndroidState.connected ? AndroidState.deviceName : Translation.tr("No device connected")
-                    color: IrisStyle.text
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: IrisStyle.typeBody
-                    font.weight: IrisStyle.weight(Font.Bold)
+                    color: ConnectStyle.text
+                    font.family: ConnectStyle.fontTitle
+                    font.pixelSize: ConnectStyle.typeBody
+                    font.weight: ConnectStyle.weight(Font.Bold)
                 }
 
-                IrisText {
+                StyledText {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
@@ -73,12 +71,13 @@ ColumnLayout {
                             return AndroidState.deviceIp.length > 0 ? `KDE Connect • ${AndroidState.deviceIp}` : "KDE Connect activo"
                         return Translation.tr("Connect via USB or Wireless ADB")
                     }
-                    color: IrisStyle.subtext
-                    font.pixelSize: IrisStyle.typeCaption
+                    color: ConnectStyle.subtext
+                    font.family: ConnectStyle.fontMain
+                    font.pixelSize: ConnectStyle.typeCaption
                 }
             }
 
-            IrisButton {
+            ConnectButton {
                 anchors.horizontalCenter: parent.horizontalCenter
                 emphasized: AndroidState.connected
                 selected: AndroidState.mirrorRunning
@@ -108,7 +107,7 @@ ColumnLayout {
                 { icon: "crop_square", key: "KEYCODE_APP_SWITCH", label: "Recents" }
             ]
 
-            delegate: IrisButton {
+            delegate: ConnectButton {
                 id: navBtn
                 required property var modelData
                 Layout.fillWidth: true

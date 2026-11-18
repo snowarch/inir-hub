@@ -1,1 +1,2 @@
 singleton AndroidState 1.0 AndroidState.qml
+singleton ConnectStyle 1.0 ConnectStyle.qml

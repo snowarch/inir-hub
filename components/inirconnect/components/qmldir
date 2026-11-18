@@ -1,3 +1,7 @@
+ConnectPlate 1.0 ConnectPlate.qml
+ConnectButton 1.0 ConnectButton.qml
+ConnectIconButton 1.0 ConnectIconButton.qml
+ConnectSquircle 1.0 ConnectSquircle.qml
 HeaderBar 1.0 HeaderBar.qml
 StatusCards 1.0 StatusCards.qml
 PhoneMirror 1.0 PhoneMirror.qml

@@ -1,7 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "changes": {
+        "1.0.3": [
+            "Fix dark and light mode contrast in Material and Waffle panel families",
+            "Add family-aware ConnectStyle bridge and adaptive controls while preserving native iRiS styling"
+        ],
         "1.0.2": [
             "Pin mode: keep overlay panel open while using other apps",
             "Theme colors: cards and buttons adapt to shell theme and washi plates",

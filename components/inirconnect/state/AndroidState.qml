@@ -6,7 +6,6 @@ import Quickshell
 import Quickshell.Io
 import qs.services
 import qs.modules.common
-import qs.modules.iris.style
 
 Singleton {
     id: root
@@ -31,8 +30,8 @@ Singleton {
     property string mediaArtUrl: ""
     property var phoneNotifications: []
 
-    readonly property bool isLightTheme: Qt.color(IrisStyle.text).hslLightness < 0.5
-    readonly property string iconInk: Qt.color(IrisStyle.text).toString()
+    readonly property bool isLightTheme: !ConnectStyle.dark
+    readonly property string iconInk: Qt.color(ConnectStyle.text).toString()
 
     Component.onCompleted: iconWriter.syncIcon()
     onIconInkChanged: iconWriter.syncIcon()
