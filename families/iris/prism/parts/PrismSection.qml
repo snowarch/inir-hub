@@ -25,15 +25,19 @@ Item {
     property string note: ""
     // Search and Changes: a press on a row's name opens it where it lives.
     signal reach(var row)
+    // Only the rows: the folder around them draws the sheet and says the name (the page card, a folder on the shelf).
+    property bool bare: false
 
-    readonly property real pad: PrismTheme.dp(24)
+    readonly property real pad: root.bare ? 0 : PrismTheme.dp(24)
     readonly property real inner: root.width - root.pad * 2
     readonly property real gap: PrismTheme.dp(28)
     readonly property bool twoUp: !root.showPage && root.inner >= PrismTheme.dp(640)
     readonly property real half: Math.floor((root.inner - root.gap) / 2)
     // The chart's grey column only where the room holds it; otherwise what a row does sits under its name.
     readonly property real aboutWidth: root.inner < PrismTheme.dp(900) ? 0 : Math.min(PrismTheme.dp(260), root.inner * 0.28)
-    readonly property real controlWidth: Math.min(PrismTheme.dp(300), root.inner * 0.4)
+    readonly property real controlWidth: root.compact ? root.inner : Math.min(PrismTheme.dp(300), root.inner * 0.4)
+    // A folder on the shelf: too narrow for a control beside its name.
+    property bool compact: false
 
     // What the chip says: the first row that names its group's state now (the keyboard's layout), else the note.
     readonly property var chipRow: root.rows.find(row => typeof row.spec?.chip === "function") ?? null
@@ -69,10 +73,11 @@ Item {
         return out
     }
 
-    implicitHeight: card.height
+    implicitHeight: root.bare ? body.implicitHeight : card.height
 
     Rectangle {
         id: card
+        visible: !root.bare
         width: root.width
         height: body.implicitHeight + root.pad * 2 - PrismTheme.dp(8)
         radius: PrismTheme.dp(24)
@@ -88,8 +93,9 @@ Item {
 
         // The head: a mark in the page's tint, the name and its line, the chip.
         Item {
+            visible: !root.bare
             width: parent.width
-            height: Math.max(mark.height, titles.implicitHeight)
+            height: visible ? Math.max(mark.height, titles.implicitHeight) : 0
             PrismThumb {
                 id: mark
                 size: PrismTheme.dp(40)
@@ -157,7 +163,7 @@ Item {
                 }
             }
         }
-        Item { width: 1; height: PrismTheme.dp(10) }
+        Item { width: 1; height: root.bare ? 0 : PrismTheme.dp(10) }
 
         // A write changes Config.revision and with it every row list; the model keys lines by their rows' `key` so a
         // value changing keeps every row's delegate (a plain array rebuilt the whole page on each click, and a handler
@@ -171,7 +177,8 @@ Item {
                 width: body.width
                 readonly property string part: String(entry.modelData.rows[0].spec?.part ?? "")
                 // A search's hits come from many groups: a part's caption there would name one group's inside.
-                readonly property bool partStarts: !root.showPage && entry.part.length > 0
+                // A part named as its folder already is says nothing twice.
+                readonly property bool partStarts: !root.showPage && entry.part.length > 0 && entry.part !== root.title
                     && (entry.modelData.first === 0 || String(root.rows[entry.modelData.first - 1]?.spec?.part ?? "") !== entry.part)
                 PrismText {
                     visible: entry.partStarts
@@ -192,6 +199,8 @@ Item {
                         width: parent.paired ? root.half : body.width
                         row: entry.modelData.rows[0]
                         stacked: parent.stackedPair
+                        compact: root.compact
+                        dense: root.bare
                         showPage: root.showPage
                         aboutWidth: parent.paired ? 0 : root.aboutWidth
                         controlWidth: parent.stackedPair ? root.half : parent.paired ? PrismTheme.dp(64) : root.controlWidth

@@ -154,12 +154,14 @@ Singleton {
     readonly property var rows: {
         const out = []
         let designPlaced = false
-        for (const spec of IrisOptions.settings) {
+        for (let spec of IrisOptions.settings) {
             if (spec.mirror || (spec.section === "general" && spec.group === "Every day") || root.unworn.includes(String(spec.path ?? ""))) continue
             if (root.designRowOf(spec)) {
                 if (!designPlaced) { out.push(root.designRow); designPlaced = true }
                 continue
             }
+            // Prism sets Scale on one segmented line, as its mocks draw it; Classic keeps its picture tiles.
+            if (String(spec.view ?? "").endsWith("IrisDisplayScale.qml")) spec = Object.assign({}, spec, { kind: "choice", comp: "display", key: "scale", view: undefined, bare: false, most: 6 })
             const path = String(spec.path ?? spec.modelKey)
             // What the compositor's file needs before anything here applies heads every page of its area.
             for (const chapter of spec.notice ? (root.chapters[String(spec.section)] ?? []) : []) {
@@ -262,7 +264,12 @@ Singleton {
     function virtual(row: var): bool { return Boolean(row?.virtual) || row?.spec?.path === "panelFamily" }
     function choicesOf(row: var): var {
         const _ = root.revision
-        return row.virtual ? row.choices : IrisOptions.choicesOf(row.spec)
+        if (row.virtual) return row.choices
+        const choices = IrisOptions.choicesOf(row.spec)
+        // Scale reads as factors (1×, 1.25, 2×), short enough for one segmented line.
+        if (row.spec.comp === "display" && row.spec.key === "scale")
+            return choices.map(choice => ({ label: Number.isInteger(Number(choice.value)) ? `${choice.value}×` : String(choice.value), value: choice.value }))
+        return choices
     }
     // Which Settings opens: Prism, a classic layout, or the v2.33 design, as one choice over its three keys.
     function settingsDesign(): string {

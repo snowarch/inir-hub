@@ -11,6 +11,8 @@ Item {
     property var current
     property real room: PrismTheme.dp(360)
     property bool open: false
+    // How many choices stand side by side before they fold to a key.
+    property int most: 4
     signal picked(var value)
     signal toggleOpen()
 
@@ -22,7 +24,7 @@ Item {
         for (const name of root.names) sum += metrics.advanceWidth(name) + root.slotPad * 2
         return sum + PrismTheme.dp(6)
     }
-    readonly property bool folded: root.choices.length > 4 || root.wanted > root.room
+    readonly property bool folded: root.choices.length > root.most || root.wanted > root.room
     readonly property int chosen: root.choices.findIndex(choice => JSON.stringify(choice.value) === JSON.stringify(root.current))
 
     implicitHeight: PrismTheme.dp(32)

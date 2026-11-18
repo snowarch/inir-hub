@@ -30,30 +30,7 @@ Item {
     // The body's corner radius: the column draws the body's left corners itself.
     property real corner: 0
 
-    Rectangle {
-        anchors.fill: parent
-        color: PrismTheme.rail
-        topLeftRadius: root.corner
-        bottomLeftRadius: root.corner
-    }
-    // The haze the reference spills from its corner, in the person's accent, filling only the column's own shape.
-    PrismGlow {
-        id: glow
-        x: -width * 0.45
-        y: -height * 0.42
-        width: root.width * 2.2
-        height: root.width * 2.2
-        colour: PrismTheme.accent
-        strength: PrismTheme.light ? 0.22 : 0.36
-        area: Qt.rect(-glow.x, -glow.y, glow.width + glow.x, Math.min(root.height, glow.height + glow.y))
-        corner: root.corner
-    }
-    Rectangle {
-        anchors.right: parent.right
-        width: 1
-        height: parent.height
-        color: PrismTheme.line
-    }
+    // No column of its own: the pages sit on the window's own ground, beside the cards (B · Carpeta).
 
     // Over the desktop or as a window: one key on the lights' line, the glyph says where it goes.
     PrismRound {
@@ -121,10 +98,11 @@ Item {
                     id: light
                     required property var modelData
                     required property int index
-                    width: PrismTheme.dp(12)
+                    width: PrismTheme.dp(11)
                     height: width
                     radius: width / 2
-                    color: light.modelData.c
+                    // Grey at rest, their colours under the pointer (B · Carpeta: no colour that says nothing).
+                    color: lightsHover.hovered ? light.modelData.c : PrismTheme.light ? "#c9c9ce" : "#3a3a3e" // iris-literal: the lights at rest, Prism's own grey
                     PrismGlyph {
                         anchors.centerIn: parent
                         visible: lightsHover.hovered
@@ -145,29 +123,20 @@ Item {
             HoverHandler { id: lightsHover }
         }
 
-        Row {
-            topPadding: PrismTheme.dp(26)
-            spacing: PrismTheme.dp(8)
-            PrismGlyph {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "tune"
-                filled: true
-                iconSize: PrismTheme.dp(22)
-            }
-            PrismText {
-                anchors.verticalCenter: parent.verticalCenter
-                text: Translation.tr("Settings")
-                font.pixelSize: PrismTheme.head
-                font.weight: Font.Bold
-                font.letterSpacing: -0.3
-            }
+        PrismText {
+            topPadding: PrismTheme.dp(20)
+            leftPadding: PrismTheme.dp(2)
+            text: Translation.tr("Settings")
+            font.pixelSize: PrismTheme.dp(21)
+            font.weight: Font.Bold
+            font.letterSpacing: -PrismTheme.dp(21) * 0.035
         }
 
-        Item { width: 1; height: PrismTheme.dp(22) }
+        Item { width: 1; height: PrismTheme.dp(14) }
         PrismField {
             id: searchField
-            width: head.width - PrismTheme.dp(20)
-            height: PrismTheme.dp(34)
+            width: head.width - PrismTheme.dp(12)
+            height: PrismTheme.dp(32)
             glyph: "search"
             placeholder: Translation.tr("Search")
             text: PrismState.query
@@ -209,15 +178,14 @@ Item {
                     width: column.width
                     PrismText {
                         visible: group.modelData.length > 0
-                        topPadding: PrismTheme.dp(18)
-                        bottomPadding: PrismTheme.dp(6)
+                        topPadding: PrismTheme.dp(14)
+                        bottomPadding: PrismTheme.dp(4)
+                        leftPadding: PrismTheme.dp(4)
+                        mono: true
                         text: Translation.tr(group.modelData).toUpperCase()
-                        color: group.here ? PrismTheme.accentInk : PrismTheme.ink3
-                        opacity: group.here ? 0.85 : 1
-                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
-                        font.pixelSize: PrismTheme.caption
-                        font.weight: Font.DemiBold
-                        font.letterSpacing: 0.6
+                        color: PrismTheme.ink3
+                        font.pixelSize: PrismTheme.dp(9)
+                        font.letterSpacing: PrismTheme.dp(9) * 0.08
                     }
                     Repeater {
                         model: group.pages
@@ -354,7 +322,7 @@ Item {
         anchors.fill: flick
         blurs: false
         reach: PrismTheme.dp(28)
-        veil: PrismTheme.rail
+        veil: PrismTheme.canvas
         bottomLeftRadius: root.corner
     }
 }

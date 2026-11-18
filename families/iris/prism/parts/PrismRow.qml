@@ -20,6 +20,13 @@ Item {
     required property var row
     property bool showPage: false   // search and Changes say where a row lives
     property bool stacked: false
+    // A narrow card (a folder on the shelf): a field's control goes under its name, a switch stays at the line's end,
+    // and the line's end only holds what it shows.
+    property bool compact: false
+    // Inside a folder: the study's tighter line.
+    property bool dense: false
+    readonly property bool tall: root.stacked || (root.compact && root.below === ""
+        && ["range", "hue", "text", "choice"].includes(root.kind))
     property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
     property bool flash: false
@@ -110,9 +117,9 @@ Item {
     Item {
         id: line
         width: parent.width
-        height: root.stacked
+        height: root.tall
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
-            : Math.max(PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
+            : Math.max(root.compact || root.dense ? PrismTheme.dp(48) : PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
         opacity: root.locked ? 0.45 : 1
 
         // A row that left its factory value: the sidebar's short accent bar, in the card's margin beside its name.
@@ -141,9 +148,9 @@ Item {
         Column {
             id: name
             anchors.left: parent.left
-            anchors.right: root.stacked ? tail.left : root.aboutShown ? about.left : control.left
-            anchors.rightMargin: root.stacked ? PrismTheme.dp(4) : PrismTheme.dp(16)
-            y: root.stacked ? PrismTheme.dp(12) : Math.round((parent.height - height) / 2)
+            anchors.right: root.tall || root.compact ? tail.left : root.aboutShown ? about.left : control.left
+            anchors.rightMargin: root.tall ? PrismTheme.dp(4) : PrismTheme.dp(16)
+            y: root.tall ? PrismTheme.dp(12) : Math.round((parent.height - height) / 2)
             spacing: PrismTheme.dp(2)
             PrismText {
                 width: parent.width
@@ -224,15 +231,16 @@ Item {
         Item {
             id: control
             // Stacked: under the name, as wide as the row.
-            x: root.stacked ? 0 : parent.width - tail.width - PrismTheme.dp(8) - width
-            y: root.stacked ? name.y + name.height + PrismTheme.dp(10) : 0
-            width: root.stacked ? parent.width : root.controlWidth
-            height: root.stacked ? (kind.item ? kind.item.height : 0) : parent.height
+            // In a folder the control stands flush at the line's end (the study) and the pin waits beside it.
+            x: root.tall ? 0 : parent.width - (root.compact ? 0 : tail.width + PrismTheme.dp(8)) - width
+            y: root.tall ? name.y + name.height + PrismTheme.dp(10) : 0
+            width: root.tall ? parent.width : root.compact ? Math.max(PrismTheme.dp(40), kind.item ? kind.item.implicitWidth : 0) : root.controlWidth
+            height: root.tall ? (kind.item ? kind.item.height : 0) : parent.height
             enabled: !root.locked
             Loader {
                 id: kind
-                anchors.right: root.stacked ? undefined : parent.right
-                anchors.left: root.stacked ? parent.left : undefined
+                anchors.right: root.tall ? undefined : parent.right
+                anchors.left: root.tall ? parent.left : undefined
                 anchors.verticalCenter: parent.verticalCenter
                 active: root.inline.length > 0
                 sourceComponent: ({ switch: switchKind, range: rangeKind, hue: hueKind, text: textKind, action: actionKind,
@@ -243,10 +251,11 @@ Item {
         // Pin, and the way back to the factory value when the row has left it.
         Row {
             id: tail
-            anchors.right: parent.right
-            y: root.stacked ? PrismTheme.dp(8) : Math.round((parent.height - height) / 2)
+            anchors.right: root.compact && !root.tall ? control.left : parent.right
+            anchors.rightMargin: root.compact && !root.tall ? PrismTheme.dp(6) : 0
+            y: root.tall ? PrismTheme.dp(8) : Math.round((parent.height - height) / 2)
             spacing: 0
-            width: PrismTheme.dp(56)
+            width: root.compact ? Math.max(PrismTheme.dp(28), implicitWidth) : PrismTheme.dp(56)
             layoutDirection: Qt.RightToLeft
             PrismGlyph {
                 width: PrismTheme.dp(28); height: PrismTheme.dp(28)
@@ -290,7 +299,7 @@ Item {
             // everything else sits under the row's name.
             readonly property bool full: root.below === "faces" || root.below === "themes"
             anchors.leftMargin: slot.full ? 0 : name.x
-            width: slot.full ? parent.width : parent.width - name.x - PrismTheme.dp(56)
+            width: slot.full ? parent.width : parent.width - name.x - (root.compact ? 0 : PrismTheme.dp(56))
             height: item ? item.implicitHeight : 0
             sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow,
                 view: viewBelow, icon: iconBelow, curve: curveBelow, niriMotion: niriBelow, widgets: widgetsBelow, themes: themesBelow })[root.below] ?? null
@@ -318,7 +327,7 @@ Item {
         id: rangeKind
         PrismSlider {
             id: slider
-            width: root.stacked ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
+            width: root.tall ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
             from: Number(root.spec.min ?? 0)
             to: Number(root.spec.max ?? 100)
             stepSize: Number(root.spec.step ?? 1)
@@ -333,7 +342,7 @@ Item {
     Component {
         id: hueKind
         PrismHue {
-            width: root.stacked ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
+            width: root.tall ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
             value: Number(root.value ?? 0)
             onMoved: value => PrismModel.preview(root.row, value)
             onCommitted: value => PrismModel.write(root.row, value)
@@ -342,9 +351,10 @@ Item {
     Component {
         id: choiceKind
         PrismChoice {
-            width: root.stacked ? root.controlWidth : implicitWidth
+            width: root.tall ? root.controlWidth : implicitWidth
             choices: root.choices
             current: root.value
+            most: root.spec.most ?? 4
             room: root.controlWidth
             open: root.open
             onPicked: value => PrismModel.write(root.row, value)
@@ -363,7 +373,7 @@ Item {
     Component {
         id: textKind
         PrismField {
-            width: root.stacked ? root.controlWidth : Math.min(PrismTheme.dp(220), root.controlWidth)
+            width: root.tall ? root.controlWidth : Math.min(PrismTheme.dp(220), root.controlWidth)
             text: String(root.value ?? "")
             placeholder: Translation.tr(String(root.spec.placeholder ?? ""))
             onCommitted: text => PrismModel.write(root.row, text.trim())
