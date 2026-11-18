@@ -80,14 +80,14 @@ Item {
                 }
             }
         }
-        NIcon {
+        Rectangle {
             visible: root.video
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.margins: NihilStyle.s(8)
-            text: "play_circle"
-            size: NihilStyle.s(20)
-            color: "white"
+            width: NihilStyle.s(26); height: width; radius: width / 2
+            color: NihilStyle.piece
+            NIcon { anchors.centerIn: parent; text: "play_arrow"; size: NihilStyle.s(16); color: NihilStyle.ink }
         }
     }
 

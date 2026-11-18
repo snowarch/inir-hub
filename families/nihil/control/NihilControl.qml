@@ -98,7 +98,7 @@ NPopup {
                         width: NihilStyle.s(32); height: width
                         x: parent.width - width - NihilStyle.s(8)
                         y: NihilStyle.s(8)
-                        tone: net.toggled ? Qt.rgba(0, 0, 0, 0.14) : NihilStyle.pieceRaised
+                        tone: net.toggled ? Qt.alpha(NihilStyle.onAccent, 0.16) : NihilStyle.pieceRaised
                         ink: net.toggled ? NihilStyle.onAccent : NihilStyle.ink
                         icon: "chevron_right"
                         iconSize: NihilStyle.s(18)
