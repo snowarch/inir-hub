@@ -1,0 +1,9 @@
+module qs.modules.nihil.widgets
+NihilFace 1.0 NihilFace.qml
+NihilClockFace 1.0 NihilClockFace.qml
+NihilBatteryFace 1.0 NihilBatteryFace.qml
+NihilVitalsFace 1.0 NihilVitalsFace.qml
+NihilDateFace 1.0 NihilDateFace.qml
+NihilNowPlayingFace 1.0 NihilNowPlayingFace.qml
+NihilWeatherFace 1.0 NihilWeatherFace.qml
+NihilPhotoFace 1.0 NihilPhotoFace.qml

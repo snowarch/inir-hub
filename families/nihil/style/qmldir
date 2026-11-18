@@ -1,0 +1,13 @@
+module qs.modules.nihil.style
+singleton NihilStyle 1.0 NihilStyle.qml
+DotText 1.0 DotText.qml
+DotGrid 1.0 DotGrid.qml
+PieDial 1.0 PieDial.qml
+NButton 1.0 NButton.qml
+NIcon 1.0 NIcon.qml
+NText 1.0 NText.qml
+NPopup 1.0 NPopup.qml
+NCard 1.0 NCard.qml
+NLevel 1.0 NLevel.qml
+NKey 1.0 NKey.qml
+NAppIcon 1.0 NAppIcon.qml
