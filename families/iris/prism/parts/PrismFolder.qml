@@ -37,7 +37,7 @@ Item {
     readonly property real bodyTop: root.frontTop + root.frontRise
     // The front tab is as long as the group's name (and its switch), between two fifths and three fifths of the card.
     readonly property real frontTab: Math.round(Math.max(root.width * 0.4, Math.min(root.width * 0.62,
-        titleMetrics.advanceWidth + 2 * root.padX + (head.masterSwitch ? PrismTheme.dp(60) : 0) + root.slope * 0.4)))
+        titleMetrics.advanceWidth + 2 * root.padX + (head.masterSwitch ? PrismTheme.dp(64) : 0) + root.slope * 0.15)))
     TextMetrics { id: titleMetrics; font.family: PrismTheme.fontMain; font.pixelSize: PrismTheme.dp(15); font.weight: Font.DemiBold; text: Translation.tr(root.title) }
 
     readonly property real headY: root.frontTop + PrismTheme.dp(15)
@@ -105,7 +105,8 @@ Item {
         id: head
         x: root.tabLeft ? root.padX : root.width - root.frontTab + root.padX
         y: root.headY
-        width: root.frontTab - 2 * root.padX + root.slope * 0.25
+        // Short of where the tab slopes down: the master switch stands on its flat top.
+        width: root.frontTab - 2 * root.padX - root.slope * 0.15
         // The name sits in the tab; the line under it is already on the body, so it runs the folder's width.
         lineWidth: root.tabLeft ? root.width - 2 * root.padX : width
         size: PrismTheme.dp(15)

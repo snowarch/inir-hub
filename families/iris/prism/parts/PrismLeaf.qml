@@ -47,6 +47,10 @@ Item {
     property string artKind: "flow"
     signal restore()
     signal action(string id)
+    // The side column's key, at the end of the page's keys.
+    property bool railFits: false
+    property bool railOpen: false
+    signal toggleRail()
 
     readonly property string pageId: String(root.page?.pageId ?? "")
     readonly property real pad: PrismTheme.dp(26)
@@ -274,6 +278,16 @@ Item {
             glyph: "restart_alt"
             text: Translation.tr("Restore defaults")
             onClicked: root.restore()
+        }
+        PrismRound {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.railFits
+            overArt: true
+            smoked: true
+            glyph: root.railOpen ? "right_panel_close" : "right_panel_open"
+            Accessible.role: Accessible.Button
+            Accessible.name: root.railOpen ? Translation.tr("Hide the side column") : Translation.tr("Show the side column")
+            onClicked: root.toggleRail()
         }
     }
 

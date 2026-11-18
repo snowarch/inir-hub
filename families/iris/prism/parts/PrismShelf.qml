@@ -3,9 +3,9 @@ import Quickshell
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 
-// The page's other groups under the page card, as an archive's drawer (B · Carpeta): short groups stand in columns,
-// each going to the column that ends highest, so no card is stretched to a neighbour's height and no place stays
-// empty; a gallery (faces, palettes, pieces) runs across every column. Each group takes the shape of what it holds
+// The page's other groups under the page card, as an archive's drawer (B · Carpeta): short groups stand in even rows,
+// every row as wide as the page and its folders as tall as each other, so the drawer reads in order; a gallery
+// (faces, palettes, pieces) runs across the whole width. Each group takes the shape of what it holds
 // (PrismFolder), its art one of the desktop's colours.
 Item {
     id: root
@@ -45,9 +45,9 @@ Item {
         return null
     }
 
-    // Run by run: the short groups between two wide ones share the row, each to the column that ends highest; a run of
-    // fewer groups than columns splits the width among them, so no group stands narrow beside an empty place. A wide
-    // one goes under all of them.
+    // Run by run: the short groups between two wide ones are dealt into rows as even as they go (four in two rows of
+    // two, five in three and two), each row splitting the page's width and standing as tall as its tallest folder, so
+    // no folder stands narrow beside an empty place and no row is ragged. A wide one goes under all of them.
     function place(): void {
         const boxes = []
         for (let i = 0; i < folders.count; ++i) {
@@ -66,19 +66,27 @@ Item {
             }
             let j = i
             while (j < boxes.length && !boxes[j].wideBox) j += 1
-            const cols = Math.min(root.columns, j - i)
-            const cell = Math.floor((root.width - root.gap * (cols - 1)) / cols)
-            const ends = new Array(cols).fill(top)
-            for (let k = i; k < j; ++k) {
-                let c = 0
-                for (let m = 1; m < cols; ++m) if (ends[m] < ends[c] - 1) c = m
-                boxes[k].cellWidth = cell
-                boxes[k].x = c * (cell + root.gap)
-                boxes[k].y = ends[c]
-                boxes[k].column = c
-                ends[c] += boxes[k].implicitHeight + root.gap
+            const n = j - i
+            const lines = Math.ceil(n / root.columns)
+            const base = Math.floor(n / lines)
+            const extra = n % lines
+            let k = i
+            for (let line = 0; line < lines; ++line) {
+                const count = base + (line < extra ? 1 : 0)
+                const cell = Math.floor((root.width - root.gap * (count - 1)) / count)
+                let tall = 0
+                for (let m = 0; m < count; ++m) tall = Math.max(tall, boxes[k + m].implicitHeight)
+                for (let m = 0; m < count; ++m) {
+                    const box = boxes[k + m]
+                    box.cellWidth = m === count - 1 ? root.width - m * (cell + root.gap) : cell
+                    box.x = m * (cell + root.gap)
+                    box.y = top
+                    box.column = m
+                    box.rowHeight = tall
+                }
+                top += tall + root.gap
+                k += count
             }
-            top = Math.max(...ends)
             i = j
         }
         root.implicitHeight = Math.max(0, top - root.gap)
@@ -99,10 +107,12 @@ Item {
             readonly property bool wideBox: root.wide(folder.modelData)
             property int column: 0
             property real cellWidth: root.cell
+            // Its row's height: the folders of one row stand as tall as each other.
+            property real rowHeight: 0
             entry: modelData
             shape: root.shapeOf(folder.modelData)
             width: folder.wideBox ? root.width : folder.cellWidth
-            height: implicitHeight
+            height: folder.wideBox ? implicitHeight : Math.max(implicitHeight, folder.rowHeight)
             // Every front tab at the left, the back's at the right (the study).
             tabLeft: true
             tint: root.tint

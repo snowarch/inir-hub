@@ -18,6 +18,8 @@ PrismSheet 1.0 PrismSheet.qml
 PrismFolder 1.0 PrismFolder.qml
 PrismShelf 1.0 PrismShelf.qml
 PrismLeaf 1.0 PrismLeaf.qml
+PrismRail 1.0 PrismRail.qml
+PrismNowPlaying 1.0 PrismNowPlaying.qml
 PrismGraph 1.0 PrismGraph.qml
 PrismIndex 1.0 PrismIndex.qml
 PrismBand 1.0 PrismBand.qml
