@@ -4,7 +4,7 @@
   "name": "InirCam",
   "summary": "Live camera panel: RTSP feeds, grid, wall, enlarged views and pins",
   "icon": "videocam",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "provides": "modules/inircam",
   "parts": {
     "panel": "Panel.qml"

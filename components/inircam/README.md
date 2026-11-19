@@ -12,7 +12,7 @@ Inspired by [OmaCam](https://github.com/entroit/omacam) (MIT, Entroit).
 - **Pinned cameras**: pin a camera as its own window over the desktop, move and resize it, keep it above or below windows, and it comes back after a restart.
 - **Brands**: Tapo, Dahua/Imou, Reolink, Hikvision, Amcrest, UniFi Protect, ONVIF and a custom URL.
 - **Test connection** with `ffprobe` before saving a camera, so a wrong password or path is not a mystery later.
-- **Add helpers**: enter one camera by hand, scan an NVR/DVR for its channels, or look for cameras on the network. A helper that is not there hides its own button.
+- **Two ways in**: enter one camera by hand, or give the panel an NVR's address and let it scan the channels and keep the ones that answer.
 
 ## How the streams work
 
