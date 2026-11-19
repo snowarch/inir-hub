@@ -63,12 +63,13 @@ Column {
     // The head as the drawing's captions: the name, and Edit at its end.
     Item {
         width: root.width
-        height: PrismTheme.dp(26)
+        height: PrismTheme.dp(28)
         PrismText {
             anchors.verticalCenter: parent.verticalCenter
             text: Translation.tr("Every day")
-            font.pixelSize: PrismTheme.row
+            font.pixelSize: PrismTheme.head
             font.weight: Font.DemiBold
+            font.letterSpacing: -PrismTheme.head * 0.012
         }
         PrismText {
             anchors.right: parent.right
@@ -110,7 +111,7 @@ Column {
                 readonly property bool offer: Boolean(tile.modelData.offer)
                 readonly property bool on: !tile.offer && root.isOn(tile.modelData)
                 width: grid.tileWidth
-                height: PrismTheme.dp(52)
+                height: PrismTheme.dp(56)
                 opacity: tile.offer ? (press.containsMouse ? 0.9 : 0.55) : 1
                 Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
 
@@ -150,8 +151,8 @@ Column {
                         width: parent.width
                         text: Translation.tr(tile.modelData.label)
                         elide: Text.ElideRight
-                        font.pixelSize: PrismTheme.small
-                        font.weight: Font.DemiBold
+                        font.pixelSize: PrismTheme.body
+                        font.weight: Font.Medium
                     }
                     // What it holds now; a tile on offer says where it lives instead.
                     PrismText {

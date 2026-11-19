@@ -162,14 +162,16 @@ Singleton {
     readonly property string fontMono: IrisStyle.fontMono
     readonly property string fontNumbers: IrisStyle.fontNumbers.length > 0 ? IrisStyle.fontNumbers : IrisStyle.fontMain
 
-    // The type ladder, in px at density 1: caption, small, body, row, head, title, display.
+    // The type ladder, in px at density 1: caption, small, body, row, head, title, display. Each step reads apart from
+    // the next in size or weight: a page's name (display) over its groups' names (head) over a row's name (row, Medium)
+    // over what the row does (small, ink2). Long languages wrap a row or shrink a page's name to its width; nothing is cut.
     readonly property real caption: 11 * IrisStyle.typeScale
-    readonly property real small: 12 * IrisStyle.typeScale
-    readonly property real body: 13 * IrisStyle.typeScale
-    readonly property real row: 14 * IrisStyle.typeScale
+    readonly property real small: 12.5 * IrisStyle.typeScale
+    readonly property real body: 13.5 * IrisStyle.typeScale
+    readonly property real row: 14.5 * IrisStyle.typeScale
     readonly property real head: 18 * IrisStyle.typeScale
-    readonly property real title: 28 * IrisStyle.typeScale
-    readonly property real display: 30 * IrisStyle.typeScale
+    readonly property real title: 30 * IrisStyle.typeScale
+    readonly property real display: 40 * IrisStyle.typeScale
     // A page's name on its poster (the posters' titles: one big word over the art's calm floor).
     readonly property real poster: 52 * IrisStyle.typeScale
 

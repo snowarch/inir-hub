@@ -7,6 +7,7 @@ import qs.modules.common
 import qs.modules.iris.style
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
+import qs.modules.iris.prism.fx
 import qs.modules.iris.prism.controls
 
 // Home is the person's: their desktop as it stands (picture, Island, the three colours iRiS takes from it; a press
@@ -36,6 +37,14 @@ Item {
         height: root.stacked ? Math.round(root.width * 0.5) : root.topHeight
         radius: PrismTheme.cardRadius
         color: PrismTheme.night
+        // Under the picture, and in its place while there is none: the desktop's own colours as art, never a black hole.
+        PrismFlow {
+            anchors.fill: parent
+            tint: "blue"
+            seed: 0.41
+            centre: Qt.point(0.5, 0.45)
+            thickness: 0.6
+        }
         Image {
             anchors.fill: parent
             source: Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? ""))

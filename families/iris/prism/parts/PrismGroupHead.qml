@@ -13,7 +13,7 @@ Item {
     // { title, rows }
     property var entry: ({ title: "", rows: [] })
     // The page's own head is bigger than a group's.
-    property real size: PrismTheme.dp(16)
+    property real size: PrismTheme.head
     // The line under the name may run past the name's own width (a folder's tab holds the name; the line sits on the body).
     property real lineWidth: root.width
 

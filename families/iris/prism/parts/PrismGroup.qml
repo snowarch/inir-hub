@@ -1,38 +1,123 @@
 import QtQuick
+import QtQuick.Shapes
 import qs.services
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
+import qs.modules.iris.prism.fx
 import qs.modules.iris.prism.controls
 
-// A group of a page: one smoked card, no outline, its name said once at its top (what it is for under it, its master
-// switch at the end), its rows inside. Off, the group still shows what it holds, dimmed and still, so turning it on
-// moves nothing. A card made of several one-row groups (PrismShelf.merge) lists them as rows under its band's name.
+// A group of a page as a folder (B · Carpeta, his 11-17 pick, the factory look): the front sheet carries the group's
+// name on its tab, what the group is for under it and its master switch at the tab's end; behind it a back sheet cut
+// from the page's art in the desktop's colours shows where the front steps down. A short group (two rows or fewer) is
+// the front sheet alone. Off, the group still shows what it holds, dimmed and still, so turning it on moves nothing.
+// A card made of several one-row groups (PrismShelf.cards) lists them as rows under its band's name, or under none.
 Item {
     id: root
     // { title, rows, titles }
     property var entry: ({ title: "", rows: [] })
     property string flashPath: ""
+    // The page's art colours, turned per folder so neighbours never lead with one colour.
+    property string tint: "grey"
+    property int turn: 0
     readonly property string title: String(root.entry?.title ?? "")
     // Every group this card holds: a search for one of them lands here.
     readonly property var titles: Array.from(root.entry?.titles ?? [root.title])
 
-    readonly property real pad: PrismTheme.dp(20)
     readonly property bool headed: root.title.length > 0
-    readonly property real rowsY: root.headed ? root.pad + head.implicitHeight + PrismTheme.dp(8) : PrismTheme.dp(6)
+    readonly property bool backed: root.headed && Array.from(root.entry?.rows ?? []).length > 2
     readonly property var bodyRows: root.headed ? head.bodyRows : Array.from(root.entry?.rows ?? [])
-    implicitHeight: root.rowsY + (root.bodyRows.length > 0 ? rows.implicitHeight + PrismTheme.dp(8) : PrismTheme.dp(12))
 
+    readonly property real r: PrismTheme.cardRadius
+    readonly property real pad: PrismTheme.dp(20)
+    // The back sheet's tab stands this far over the rest of its edge; the front starts a little under the back's low
+    // edge and steps down by its own rise.
+    readonly property real backRise: root.backed ? PrismTheme.dp(22) : 0
+    readonly property real frontTop: root.backed ? root.backRise + PrismTheme.dp(6) : 0
+    readonly property real frontRise: PrismTheme.dp(24)
+    readonly property real slope: PrismTheme.dp(44)
+    readonly property real bodyTop: root.frontTop + root.frontRise
+    // The front tab is as long as the group's name (and its switch), between two fifths and two thirds of the card.
+    readonly property real frontTab: Math.round(Math.max(root.width * 0.42, Math.min(root.width * 0.66,
+        titleMetrics.advanceWidth + 2 * root.pad + (head.masterSwitch ? PrismTheme.dp(64) : 0) + root.slope * 0.2)))
+    TextMetrics { id: titleMetrics; font.family: PrismTheme.fontMain; font.pixelSize: PrismTheme.head; font.weight: Font.DemiBold; text: Translation.tr(root.title) }
+
+    readonly property real headY: root.frontTop + PrismTheme.dp(16)
+    readonly property real rowsY: root.headed ? Math.max(root.bodyTop + PrismTheme.dp(8), root.headY + head.implicitHeight + PrismTheme.dp(10))
+        : PrismTheme.dp(6)
+    implicitHeight: root.rowsY + (root.bodyRows.length > 0 ? rows.implicitHeight + PrismTheme.dp(10) : PrismTheme.dp(12))
+
+    // The back sheet's art, drawn once offscreen, never shown by itself.
+    PrismFlow {
+        id: art
+        visible: false
+        layer.enabled: root.backed
+        width: root.width
+        height: root.bodyTop + root.r
+        tint: root.tint
+        turn: root.turn
+        seed: 0.23 + root.turn * 0.29
+        // The light gathers at the back's tab and dies toward the front's.
+        centre: Qt.point(0.8, 0.15)
+        thickness: 0.85
+        strength: PrismTheme.light ? 0.75 : 1
+        mute: 0.05
+    }
+    // The back sheet, only where it shows: its own top edge (its tab at the right) down to the front's edge.
+    Shape {
+        visible: root.backed
+        width: root.width
+        height: art.height
+        preferredRendererType: Shape.CurveRenderer
+        ShapePath {
+            fillItem: root.backed ? art : null
+            strokeColor: "transparent"
+            strokeWidth: -1
+            PathSvg {
+                readonly property real w: root.width
+                readonly property real r: root.r
+                readonly property real s: root.slope
+                readonly property real k: root.backRise
+                readonly property real t: w - Math.round(w * 0.52)
+                readonly property real f: root.frontTop
+                readonly property real b: root.bodyTop
+                readonly property real tf: root.frontTab
+                readonly property real rf: Math.min(r, root.frontRise + 2)
+                path: `M 0 ${k + r} Q 0 ${k} ${r} ${k} L ${t - s} ${k} C ${t - s * 0.45} ${k} ${t - s * 0.35} 0 ${t + s * 0.15} 0 `
+                    + `L ${w - r} 0 Q ${w} 0 ${w} ${r} L ${w} ${b + r} Q ${w} ${b} ${w - r} ${b} `
+                    + `L ${tf + s} ${b} C ${tf + s * 0.45} ${b} ${tf + s * 0.35} ${f} ${tf - s * 0.15} ${f} `
+                    + `L ${rf} ${f} Q 0 ${f} 0 ${f + rf} Z`
+            }
+        }
+    }
+    // The front sheet: a tab for a named group, a plain card for rows gathered under no name.
+    PrismSheet {
+        visible: root.headed
+        y: root.frontTop
+        width: root.width
+        height: root.height - root.frontTop
+        tab: root.frontTab
+        rise: root.frontRise
+        slope: root.slope
+        radius: root.r
+        fill: PrismTheme.card
+    }
     Rectangle {
+        visible: !root.headed
         anchors.fill: parent
-        radius: PrismTheme.cardRadius
+        radius: root.r
         color: PrismTheme.card
     }
+
     PrismGroupHead {
         id: head
         visible: root.headed
         x: root.pad
-        y: root.pad
-        width: root.width - 2 * root.pad
+        y: root.headY
+        // Short of where the tab slopes down: the master switch stands on its flat top.
+        width: root.frontTab - 2 * root.pad - root.slope * 0.2
+        // The name sits in the tab; the line under it is already on the body, so it runs the folder's width.
+        lineWidth: root.width - 2 * root.pad
+        size: PrismTheme.head
         entry: root.entry
     }
     PrismSection {

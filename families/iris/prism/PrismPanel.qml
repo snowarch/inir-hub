@@ -67,13 +67,11 @@ Item {
         : (({ general: homeHero, wallpaper: wallpaperHero, colour: colourHero, typeIcons: typeHero, lock: lockHero })[root.pageId]
             ?? (root.keyboardShown ? keyboardHero : null))
     readonly property var pageActions: root.pageId === "controlCenter" ? [{ id: "arrange", glyph: "dashboard_customize", text: "Arrange it" }] : []
-    readonly property string greeting: {
-        const hour = DateTime.clock.date.getHours()
-        const said = hour >= 5 && hour < 12 ? Translation.tr("Good morning") : hour >= 12 && hour < 19 ? Translation.tr("Good afternoon")
-            : hour >= 19 ? Translation.tr("Good evening") : Translation.tr("Good night")
-        const name = String(SystemInfo.displayName || SystemInfo.username || "")
-        return name.length > 0 ? said + ", " + name : said
-    }
+    // Home is the person's: their name, and the machine they sit at (never a greeting).
+    readonly property string person: String(SystemInfo.displayName || SystemInfo.username || "")
+    readonly property string machine: [String(SystemInfo.username ?? ""), String(SystemInfo.hostname ?? "")].filter(part => part.length > 0).join("@")
+        + (String(SystemInfo.distroName ?? "Unknown") !== "Unknown" ? "  ·  " + SystemInfo.distroName : "")
+    readonly property var fact: { const facts = PrismModel.leadOf(root.page); return facts.length > 0 ? facts[0] : null }
     function act(id: string): void {
         if (id === "lockEdit") { root.closeRequested(); IrisState.lockEdit = true; return }
         if (id === "lockNow") { root.closeRequested(); Session.lock(); return }
@@ -228,8 +226,14 @@ Item {
 
                 PrismPageHead {
                     width: content.width
+                    plain: PrismState.searching
+                    person: root.home
+                    eyebrow: root.home ? root.machine : Translation.tr(String(root.page.group ?? ""))
+                    tint: String(root.page.tint ?? "grey")
+                    turn: PrismModel.index(root.pageId)
+                    fact: root.home ? null : root.fact
                     title: PrismState.searching ? "“" + PrismState.asked.trim() + "”"
-                        : root.home ? root.greeting : Translation.tr(root.page.name)
+                        : root.home && root.person.length > 0 ? root.person : Translation.tr(root.page.name)
                     line: PrismState.searching ? Translation.tr("Pages and settings that match")
                         : Translation.tr(String(root.page.subtitle ?? ""))
                     actions: PrismState.searching ? [] : root.pageActions
@@ -237,7 +241,7 @@ Item {
                     onAction: id => root.act(id)
                     onRestore: PrismModel.restore(root.pageId)
                 }
-                Item { width: 1; height: PrismTheme.dp(24) }
+                Item { width: 1; height: PrismTheme.dp(20) }
                 Loader {
                     id: heroBox
                     active: root.hero !== null
@@ -327,6 +331,9 @@ Item {
                 x: Math.round((hostedBox.width - root.measure) / 2)
                 y: PrismTheme.dp(24)
                 width: root.measure
+                eyebrow: Translation.tr(String(root.page.group ?? ""))
+                tint: String(root.page.tint ?? "grey")
+                turn: PrismModel.index(root.pageId)
                 title: Translation.tr(root.page.name)
                 line: Translation.tr(String(root.page.subtitle ?? ""))
             }
@@ -369,14 +376,18 @@ Item {
         }
 
         // The window's own keys, where every window keeps them: as a window or over the desktop, the whole room, close.
+        // Over a page they stand inside its art's top corner, smoked, so they never hang half off its edge.
         Row {
             anchors.right: parent.right
-            anchors.rightMargin: PrismTheme.dp(16)
-            y: PrismTheme.dp(16)
+            anchors.rightMargin: PrismState.searching ? PrismTheme.dp(16)
+                : Math.round((parent.width - sidebar.width - root.measure) / 2) + PrismTheme.dp(14)
+            y: PrismState.searching ? PrismTheme.dp(16) : PrismTheme.dp(24) + PrismTheme.dp(14)
             z: 5
             spacing: PrismTheme.dp(2)
             PrismRound {
-                ghost: true
+                ghost: PrismState.searching
+                overArt: !PrismState.searching
+                smoked: !PrismState.searching
                 glyph: root.windowed ? "picture_in_picture_center" : "open_in_new"
                 glyphSize: PrismTheme.dp(17)
                 Accessible.role: Accessible.Button
@@ -385,7 +396,9 @@ Item {
             }
             PrismRound {
                 visible: root.windowed
-                ghost: true
+                ghost: PrismState.searching
+                overArt: !PrismState.searching
+                smoked: !PrismState.searching
                 glyph: "remove"
                 glyphSize: PrismTheme.dp(17)
                 Accessible.role: Accessible.Button
@@ -393,7 +406,9 @@ Item {
                 onClicked: root.minimizeRequested()
             }
             PrismRound {
-                ghost: true
+                ghost: PrismState.searching
+                overArt: !PrismState.searching
+                smoked: !PrismState.searching
                 glyph: root.windowed || !PrismState.wide ? "open_in_full" : "close_fullscreen"
                 glyphSize: PrismTheme.dp(16)
                 Accessible.role: Accessible.Button
@@ -401,7 +416,9 @@ Item {
                 onClicked: root.windowed ? root.growRequested() : (PrismState.wide = !PrismState.wide)
             }
             PrismRound {
-                ghost: true
+                ghost: PrismState.searching
+                overArt: !PrismState.searching
+                smoked: !PrismState.searching
                 glyph: "close"
                 glyphSize: PrismTheme.dp(18)
                 Accessible.role: Accessible.Button

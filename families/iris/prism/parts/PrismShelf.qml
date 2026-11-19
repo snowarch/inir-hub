@@ -118,6 +118,7 @@ Item {
         delegate: PrismGroup {
             id: card
             required property var modelData
+            required property int index
             // A card on its way out (its group gone) keeps where it stood and leaves the placing.
             readonly property bool placed: root.cards.some(entry => (entry.titles ?? [entry.title]).join("+") === card.modelData.key)
             readonly property bool wideBox: root.wide(card.modelData)
@@ -125,6 +126,8 @@ Item {
             // Its line's height: two cards of one line stand as tall as each other.
             property real lineHeight: 0
             entry: modelData
+            tint: String(PrismModel.page(root.page)?.tint ?? "grey")
+            turn: card.index + 1
             width: card.cellWidth
             height: Math.max(implicitHeight, card.lineHeight)
             flashPath: root.flashPath

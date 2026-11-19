@@ -24,8 +24,9 @@ Item {
     readonly property real gap: PrismTheme.dp(28)
     readonly property bool twoUp: !root.showPage && root.inner >= PrismTheme.dp(640)
     readonly property real half: Math.floor((root.inner - root.gap) / 2)
-    // The chart's grey column only where the room holds it; otherwise what a row does sits under its name.
-    readonly property real aboutWidth: root.inner < PrismTheme.dp(900) ? 0 : Math.min(PrismTheme.dp(260), root.inner * 0.28)
+    // What a row does sits under its name, read with it in one glance; a grey column between name and control read as
+    // a third thing to scan.
+    readonly property real aboutWidth: 0
     readonly property real controlWidth: root.compact ? root.inner : Math.min(PrismTheme.dp(300), root.inner * 0.4)
     // A folder on the shelf: too narrow for a control beside its name.
     property bool compact: false
@@ -81,10 +82,10 @@ Item {
                     && (entry.modelData.first === 0 || String(root.rows[entry.modelData.first - 1]?.spec?.part ?? "") !== entry.part)
                 PrismText {
                     visible: entry.partStarts
-                    topPadding: PrismTheme.dp(14)
+                    topPadding: PrismTheme.dp(18)
                     bottomPadding: PrismTheme.dp(2)
                     text: Translation.tr(entry.part)
-                    color: PrismTheme.ink3
+                    color: PrismTheme.ink2
                     font.pixelSize: PrismTheme.small
                     font.weight: Font.DemiBold
                 }

@@ -122,13 +122,14 @@ Item {
                     readonly property var pages: PrismModel.inGroup(group.modelData)
                     width: column.width
                     PrismText {
-                        topPadding: PrismTheme.dp(16)
-                        bottomPadding: PrismTheme.dp(4)
+                        topPadding: PrismTheme.dp(18)
+                        bottomPadding: PrismTheme.dp(6)
                         leftPadding: PrismTheme.dp(10)
                         text: Translation.tr(group.modelData)
-                        color: PrismTheme.ink
-                        font.pixelSize: PrismTheme.small
+                        color: PrismTheme.ink3
+                        font.pixelSize: PrismTheme.caption
                         font.weight: Font.DemiBold
+                        font.letterSpacing: PrismTheme.caption * 0.05
                     }
                     Repeater {
                         model: group.pages

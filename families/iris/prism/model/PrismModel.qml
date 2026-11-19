@@ -111,7 +111,8 @@ Singleton {
                 tint: String(dress.tint ?? "grey"),
                 // A view of Prism's own sits beside its parts; the rest are iRiS Settings' pages, shared with Classic.
                 view: !dress.view ? "" : dress.view.startsWith("Prism") ? Qt.resolvedUrl("../parts/" + dress.view) : Qt.resolvedUrl("../../settings/" + dress.view),
-                subtitle: String(dress.subtitle ?? base?.subtitle ?? ""),
+                // A chapter of an area (Colour, Surfaces… of Style) never wears its area's line: it would say another page.
+                subtitle: String(dress.subtitle ?? (id === base?.id ? base?.subtitle : "") ?? ""),
                 order: Number(dress.order ?? 0),
                 cluster: cluster,
                 show: null

@@ -105,7 +105,7 @@ Item {
         if (root.below === "typefaces") return root.spec.installedFonts ? "choice" : "now"
         if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
         if (root.kind === "choice" && root.headless && root.below === "chips") return ""
-        if (root.kind === "choice" && root.choices.length > 0) return "choice"
+        if (root.kind === "choice" && root.choices.length > 1) return "choice"
         if (root.kind === "choice" || root.kind === "list" || root.listed) return "now"
         return ""
     }
@@ -126,7 +126,8 @@ Item {
         color: root.flash ? Qt.alpha(PrismTheme.accent, 0.16) : PrismTheme.fill // iris-literal: the found row's flash
         // A view drawn under its name (the keyboard) is the thing itself: a plate over the name alone read as a stray bar.
         // A group's own control under its head is the thing itself too: no plate over it.
-        opacity: root.flash || (root.hovered && root.below !== "view" && !root.headless) ? 1 : 0
+        // Only the line lights it: a pointer resting on the gallery under the name is on the gallery, not the row.
+        opacity: root.flash || (lineHover.hovered && root.below !== "view" && !root.headless) ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(root.flash ? 120 : root.hovered ? 140 : 420); easing.type: Easing.OutCubic } }
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(420); easing.type: Easing.OutCubic } }
@@ -143,6 +144,7 @@ Item {
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
             : line.flat
         opacity: root.locked ? 0.45 : 1
+        HoverHandler { id: lineHover }
 
         MouseArea {
             id: placeArea
@@ -171,7 +173,7 @@ Item {
                 width: parent.width - tail.room
                 text: Translation.tr(root.row.label)
                 font.pixelSize: PrismTheme.row
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 // A long language takes a second line, never a cut name ("Apps em tela cheia desenham direto…", 11-14).
                 wrapMode: Text.WordWrap
                 maximumLineCount: 2
@@ -183,6 +185,7 @@ Item {
                 text: Translation.tr(root.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
+                lineHeight: 1.1
                 wrapMode: Text.WordWrap
                 maximumLineCount: 3
                 elide: Text.ElideRight
@@ -254,8 +257,9 @@ Item {
             enabled: !root.locked
             Loader {
                 id: kind
-                anchors.right: root.tall ? undefined : parent.right
-                anchors.left: root.tall ? parent.left : undefined
+                // Placed by x, never by anchors that flip with `tall`: a card first laid out narrow (tall) and then wide
+                // held both anchors for a moment, the Loader kept that width and stretched a folded pill over the words.
+                x: root.tall ? 0 : parent.width - (kind.item ? kind.item.width : 0)
                 anchors.verticalCenter: parent.verticalCenter
                 active: root.inline.length > 0
                 sourceComponent: ({ switch: switchKind, range: rangeKind, hue: hueKind, text: textKind, action: actionKind,
