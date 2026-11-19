@@ -13,13 +13,12 @@ Column {
     signal open(var place)
     spacing: 0
 
-    PrismHeading {
-        width: root.width
-        eyebrow: Translation.tr("Go to")
-        title: Translation.tr("Places")
-        titleSize: PrismTheme.title * 0.86
+    PrismText {
+        bottomPadding: PrismTheme.dp(10)
+        text: Translation.tr("Places")
+        font.pixelSize: PrismTheme.dp(16)
+        font.weight: Font.DemiBold
     }
-    Item { width: 1; height: PrismTheme.dp(14) }
 
     Flow {
         id: grid
@@ -41,17 +40,25 @@ Column {
                 Rectangle {
                     anchors.fill: parent
                     radius: height / 2
-                    color: press.pressed ? PrismTheme.fillPress : press.containsMouse ? PrismTheme.fillHover : PrismTheme.fill
+                    color: press.pressed ? PrismTheme.fillPress : press.containsMouse ? PrismTheme.fillHover : PrismTheme.card
                     scale: press.pressed ? 0.97 : 1
                     Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
                     Behavior on scale { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
                 }
-                PrismThumb {
+                Rectangle {
                     id: thumb
                     x: PrismTheme.dp(10)
                     anchors.verticalCenter: parent.verticalCenter
-                    glyph: tile.modelData.glyph
-                    tint: tile.modelData.tint
+                    width: PrismTheme.dp(36)
+                    height: width
+                    radius: width / 2
+                    color: PrismTheme.keyQuiet
+                    PrismGlyph {
+                        anchors.centerIn: parent
+                        text: tile.modelData.glyph
+                        iconSize: PrismTheme.dp(18)
+                        color: PrismTheme.ink
+                    }
                 }
                 Column {
                     anchors.left: thumb.right

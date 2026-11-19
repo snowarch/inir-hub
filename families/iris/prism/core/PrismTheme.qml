@@ -51,6 +51,8 @@ Singleton {
     // A group's card (Raell Tech's page, his 11-14): a step above the middle column, under the fields' own fill.
     readonly property color card: root.glass ? (root.light ? Qt.rgba(1, 1, 1, 0.62) : Qt.rgba(0.15, 0.15, 0.165, 0.6)) // iris-literal: the page's sheet, smoke a step over the panel's glass
         : root.light ? "#ffffff" : "#1b1b1e" // iris-literal: the page's sheet (B · Carpeta)
+    // A group's card and every picture on the page share one radius.
+    readonly property real cardRadius: root.dp(22)
     // A folder on the shelf: under the page's sheet, over the ground (B · Carpeta: the drawer sits lower than the page).
     readonly property color folder: root.glass ? (root.light ? Qt.rgba(1, 1, 1, 0.42) : Qt.rgba(0.09, 0.09, 0.1, 0.62)) // iris-literal: a folder, smoke over the panel's glass
         : root.light ? "#fafafc" : "#131316" // iris-literal: a folder (B · Carpeta)

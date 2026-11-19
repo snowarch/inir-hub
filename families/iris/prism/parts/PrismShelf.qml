@@ -1,22 +1,22 @@
 import QtQuick
 import Quickshell
+import qs.modules.iris.settings
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 
-// The page's other groups under the page card, as an archive's drawer (B · Carpeta): short groups stand in even rows,
-// every row as wide as the page and its folders as tall as each other, so the drawer reads in order; a gallery
-// (faces, palettes, pieces) runs across the whole width. Each group takes the shape of what it holds
-// (PrismFolder), its art one of the desktop's colours.
+// A page's groups, in their order, as cards on one scroll. A gallery (faces, palettes, pieces) or a long group reads
+// across the page; the short ones between two wide ones stand two to a line, each line as tall as its taller card, so
+// the eye reads down the page and never zigzags through a ragged wall. Runs of groups that hold one self-named row each
+// (a bubble, a sound) read as one card of rows, under their band's name.
 Item {
     id: root
-    // Every group but the page card's: { title, rows }.
+    // { title, rows }, in the page's order.
     property var groups: []
-    property string tint: "grey"
+    property string page: ""
     property string flashPath: ""
 
     readonly property real gap: PrismTheme.dp(14)
-    readonly property int columns: root.width >= PrismTheme.dp(900) ? 3 : root.width >= PrismTheme.dp(520) ? 2 : 1
-    readonly property real cell: Math.floor((root.width - root.gap * (root.columns - 1)) / root.columns)
+    readonly property int columns: root.width >= PrismTheme.dp(780) ? 2 : 1
 
     function laysOut(row: var): bool {
         const kind = String(row?.kind ?? ""), spec = row?.spec ?? {}
@@ -25,69 +25,86 @@ Item {
             || (kind === "choice" && Boolean(spec.previewFont))
             || (kind === "choice" && spec.tiles === true && PrismModel.choicesOf(row).every(choice => choice.palette))
     }
-    // A gallery, or a long group, reads across the page.
-    function wide(group: var): bool {
+    function same(a: string, b: string): bool { return String(a ?? "").trim().toLowerCase() === String(b ?? "").trim().toLowerCase() }
+    // A group that is only its own row: its name is the row's, nothing laid out under it.
+    function single(group: var): bool {
         const rows = Array.from(group?.rows ?? [])
-        return root.columns > 1 && (rows.length >= 10 || rows.some(row => root.laysOut(row)))
+        return rows.length === 1 && root.same(rows[0].label, group.title) && !root.laysOut(rows[0])
     }
-    // A group of a row or two that lays nothing out is a slip, not a folder.
-    function shapeOf(group: var): string {
-        const rows = Array.from(group?.rows ?? [])
-        if (root.wide(group)) return "band"
-        return rows.length <= 2 && !rows.some(row => root.laysOut(row)) ? "slip" : "folder"
+    readonly property var bands: IrisOptions.groupBands[root.page] ?? []
+    function bandOf(title: string): var {
+        return root.bands.find(band => band.groups.includes(title)) ?? null
+    }
+    // Two or more one-row groups in a row (within one band) become one card; the band names it unless it is "More".
+    readonly property var cards: {
+        const out = []
+        let run = []
+        const flush = () => {
+            if (run.length >= 2) {
+                const band = root.bandOf(run[0].title)
+                const named = band && String(band.title) !== "More" && run.every(group => root.bandOf(group.title) === band)
+                out.push({ title: named ? String(band.title) : "", titles: run.map(group => String(group.title)),
+                    rows: run.map(group => group.rows[0]), merged: true })
+            } else out.push(...run)
+            run = []
+        }
+        for (const group of root.groups) {
+            if (root.single(group) && (run.length === 0 || root.bandOf(group.title) === root.bandOf(run[0].title))) { run.push(group); continue }
+            flush()
+            if (root.single(group)) { run.push(group); continue }
+            out.push(group)
+        }
+        flush()
+        return out
+    }
+    // A gallery, or a long group, reads across the page.
+    function wide(card: var): bool {
+        const rows = Array.from(card?.rows ?? [])
+        return root.columns === 1 || rows.length >= 7 || rows.some(row => root.laysOut(row))
     }
 
     function boxOf(title: string): var {
-        for (let i = 0; i < folders.count; ++i) {
-            const box = folders.itemAt(i)
-            if (box && box.title === title) return box
+        for (let i = 0; i < cardsRepeater.count; ++i) {
+            const box = cardsRepeater.itemAt(i)
+            if (box && box.titles.includes(title)) return box
         }
         return null
     }
 
-    // Run by run: the short groups between two wide ones are dealt into rows as even as they go (four in two rows of
-    // two, five in three and two), each row splitting the page's width and standing as tall as its tallest folder, so
-    // no folder stands narrow beside an empty place and no row is ragged. A wide one goes under all of them.
+    // Run by run: the short cards between two wide ones go two to a line, a lone one takes the line; each line as tall
+    // as its taller card. A wide card goes under all of them.
     function place(): void {
         const boxes = []
-        for (let i = 0; i < folders.count; ++i) {
-            const box = folders.itemAt(i)
+        for (let i = 0; i < cardsRepeater.count; ++i) {
+            const box = cardsRepeater.itemAt(i)
             if (box && box.placed) boxes.push(box)
         }
         let top = 0
         let i = 0
         while (i < boxes.length) {
-            if (boxes[i].wideBox) {
-                boxes[i].x = 0
-                boxes[i].y = top
-                top += boxes[i].implicitHeight + root.gap
+            const box = boxes[i]
+            const next = boxes[i + 1]
+            if (box.wideBox || !next || next.wideBox) {
+                box.cellWidth = root.width
+                box.x = 0
+                box.y = top
+                box.lineHeight = 0
+                top += box.implicitHeight + root.gap
                 i += 1
                 continue
             }
-            let j = i
-            while (j < boxes.length && !boxes[j].wideBox) j += 1
-            const n = j - i
-            const lines = Math.ceil(n / root.columns)
-            const base = Math.floor(n / lines)
-            const extra = n % lines
-            let k = i
-            for (let line = 0; line < lines; ++line) {
-                const count = base + (line < extra ? 1 : 0)
-                const cell = Math.floor((root.width - root.gap * (count - 1)) / count)
-                let tall = 0
-                for (let m = 0; m < count; ++m) tall = Math.max(tall, boxes[k + m].implicitHeight)
-                for (let m = 0; m < count; ++m) {
-                    const box = boxes[k + m]
-                    box.cellWidth = m === count - 1 ? root.width - m * (cell + root.gap) : cell
-                    box.x = m * (cell + root.gap)
-                    box.y = top
-                    box.column = m
-                    box.rowHeight = tall
-                }
-                top += tall + root.gap
-                k += count
-            }
-            i = j
+            const cell = Math.floor((root.width - root.gap) / 2)
+            const tall = Math.max(box.implicitHeight, next.implicitHeight)
+            box.cellWidth = cell
+            next.cellWidth = root.width - cell - root.gap
+            box.x = 0
+            next.x = cell + root.gap
+            box.y = top
+            next.y = top
+            box.lineHeight = tall
+            next.lineHeight = tall
+            top += tall + root.gap
+            i += 2
         }
         root.implicitHeight = Math.max(0, top - root.gap)
     }
@@ -95,28 +112,21 @@ Item {
     onWidthChanged: Qt.callLater(root.place)
 
     Repeater {
-        id: folders
-        model: ScriptModel { objectProp: "title"; values: root.groups }
+        id: cardsRepeater
+        model: ScriptModel { objectProp: "key"; values: root.cards.map(card => Object.assign({ key: (card.titles ?? [card.title]).join("+") }, card)) }
         onCountChanged: Qt.callLater(root.place)
-        delegate: PrismFolder {
-            id: folder
+        delegate: PrismGroup {
+            id: card
             required property var modelData
-            required property int index
-            // A folder on its way out (its group gone) keeps where it stood and leaves the placing.
-            readonly property bool placed: root.groups.some(group => String(group?.title ?? "") === folder.title)
-            readonly property bool wideBox: root.wide(folder.modelData)
-            property int column: 0
-            property real cellWidth: root.cell
-            // Its row's height: the folders of one row stand as tall as each other.
-            property real rowHeight: 0
+            // A card on its way out (its group gone) keeps where it stood and leaves the placing.
+            readonly property bool placed: root.cards.some(entry => (entry.titles ?? [entry.title]).join("+") === card.modelData.key)
+            readonly property bool wideBox: root.wide(card.modelData)
+            property real cellWidth: root.width
+            // Its line's height: two cards of one line stand as tall as each other.
+            property real lineHeight: 0
             entry: modelData
-            shape: root.shapeOf(folder.modelData)
-            width: folder.wideBox ? root.width : folder.cellWidth
-            height: folder.wideBox ? implicitHeight : Math.max(implicitHeight, folder.rowHeight)
-            // Every front tab at the left, the back's at the right (the study).
-            tabLeft: true
-            tint: root.tint
-            turn: index + 1
+            width: card.cellWidth
+            height: Math.max(implicitHeight, card.lineHeight)
             flashPath: root.flashPath
             onImplicitHeightChanged: Qt.callLater(root.place)
             Component.onCompleted: Qt.callLater(root.place)

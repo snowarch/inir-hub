@@ -2,111 +2,39 @@ import QtQuick
 import Quickshell
 import qs
 import qs.services
+import qs.modules.common
 import qs.modules.iris.components
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
-// The left column: the window's lights, the name, the search and the pages by group, then what the person changed and
-// pinned (B · Carpeta, his 11-18 "tal cual"): one line per page, no index under it; the page's groups are its folders.
+// The left column, nothing in it but the way to a place: the search, the person (Home is theirs), every page under its
+// category, then the rows they pinned. The open page alone wears the accent.
 Item {
     id: root
-    signal closeRequested()
-    signal minimizeRequested()
-    signal growRequested()
-    signal switchHost()
     // A pinned row opens its page with the row lit.
     signal reach(var row)
     // Enter in the search: the page takes its first hit.
     signal searchEntered()
     property alias search: searchField
-    // In a window the green light grows the window's column instead of the panel, and the host key reads "over the desktop".
-    property bool windowed: false
-    // The body's corner radius: the column draws the body's left corners itself.
+    // The body's corner radius: the list's fade meets the body's lower left corner.
     property real corner: 0
+    readonly property real side: PrismTheme.dp(14)
 
-    // No column of its own: the pages sit on the window's own ground, beside the cards (B · Carpeta).
-
-    // Over the desktop or as a window: one key on the lights' line, the glyph says where it goes.
-    PrismRound {
-        id: hostKey
-        z: 2
-        x: root.width - width - PrismTheme.dp(14)
-        y: PrismTheme.dp(18) + PrismTheme.dp(6) - height / 2
-        implicitWidth: PrismTheme.dp(26)
-        glyphSize: PrismTheme.dp(15)
-        glyph: root.windowed ? "picture_in_picture_center" : "open_in_new"
-        onClicked: root.switchHost()
-        Accessible.name: root.windowed ? Translation.tr("Over the desktop") : Translation.tr("As a window")
-        PrismText {
-            visible: hostKey.hovered
-            anchors.right: parent.left
-            anchors.rightMargin: PrismTheme.dp(6)
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.windowed ? Translation.tr("Over the desktop") : Translation.tr("As a window")
-            color: PrismTheme.ink2
-            font.pixelSize: PrismTheme.caption
-        }
-    }
-
-    // The lights, the name and the search stay put; only the pages scroll under them.
+    // The search and the person stay put; only the pages scroll under them.
     Column {
         id: head
         z: 1
-        x: PrismTheme.dp(20)
-        width: root.width - x
+        x: root.side
+        width: root.width - 2 * root.side
         spacing: 0
-        // The lights: red and yellow put Settings away, green gives it the whole room (a window: its column the screen).
-        Row {
-            topPadding: PrismTheme.dp(18)
-            spacing: PrismTheme.dp(8)
-            Repeater {
-                model: [{ c: "#ff5f57", g: "close" }, { c: "#febc2e", g: "remove" }, { c: "#28c840", g: root.windowed || !PrismState.wide ? "open_in_full" : "close_fullscreen" }] // iris-literal: macOS window lights
-                delegate: Rectangle {
-                    id: light
-                    required property var modelData
-                    required property int index
-                    width: PrismTheme.dp(11)
-                    height: width
-                    radius: width / 2
-                    // Grey at rest, their colours under the pointer (B · Carpeta: no colour that says nothing).
-                    color: lightsHover.hovered ? light.modelData.c : PrismTheme.light ? "#c9c9ce" : "#3a3a3e" // iris-literal: the lights at rest, Prism's own grey
-                    PrismGlyph {
-                        anchors.centerIn: parent
-                        visible: lightsHover.hovered
-                        text: light.modelData.g
-                        iconSize: PrismTheme.dp(9)
-                        color: Qt.rgba(0, 0, 0, 0.6) // iris-literal: Prism's own fills and scrims, scheme-aware above
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        anchors.margins: -PrismTheme.dp(3)
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: light.index === 0 ? root.closeRequested()
-                            : light.index === 1 ? (root.windowed ? root.minimizeRequested() : root.closeRequested())
-                            : root.windowed ? root.growRequested() : (PrismState.wide = !PrismState.wide)
-                    }
-                }
-            }
-            HoverHandler { id: lightsHover }
-        }
-
-        PrismText {
-            topPadding: PrismTheme.dp(20)
-            leftPadding: PrismTheme.dp(2)
-            text: Translation.tr("Settings")
-            font.pixelSize: PrismTheme.dp(21)
-            font.weight: Font.Bold
-            font.letterSpacing: -PrismTheme.dp(21) * 0.035
-        }
-
-        Item { width: 1; height: PrismTheme.dp(14) }
+        Item { width: 1; height: PrismTheme.dp(20) }
         PrismField {
             id: searchField
-            width: head.width - PrismTheme.dp(12)
-            height: PrismTheme.dp(32)
+            width: head.width
+            height: PrismTheme.dp(36)
             glyph: "search"
-            placeholder: Translation.tr("Search")
+            placeholder: Translation.tr("Search settings")
             text: PrismState.query
             onEdited: text => PrismState.query = text
             onCommitted: text => PrismState.query = text
@@ -117,6 +45,56 @@ Item {
                 function onActiveFocusChanged() { if (searchField.input.activeFocus) PrismModel.searchIndex() }
             }
         }
+        Item { width: 1; height: PrismTheme.dp(12) }
+        // Home is the person's: their picture and name open it.
+        Item {
+            id: you
+            readonly property bool current: !PrismState.searching && PrismState.page === "general"
+            width: head.width
+            height: PrismTheme.dp(52)
+            Rectangle {
+                anchors.fill: parent
+                radius: PrismTheme.dp(12)
+                color: you.current ? PrismTheme.accentPlate : youArea.pressed ? PrismTheme.fillPress : youArea.containsMouse ? PrismTheme.fill : "transparent"
+                Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+            }
+            PrismAvatar {
+                id: face
+                x: PrismTheme.dp(8)
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: PrismTheme.dp(34)
+            }
+            Column {
+                anchors.left: face.right
+                anchors.leftMargin: PrismTheme.dp(10)
+                anchors.right: parent.right
+                anchors.rightMargin: PrismTheme.dp(8)
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 0
+                PrismText {
+                    width: parent.width
+                    text: face.name.length > 0 ? face.name : Translation.tr("Home")
+                    font.pixelSize: PrismTheme.row
+                    font.weight: Font.DemiBold
+                }
+                PrismText {
+                    width: parent.width
+                    visible: face.name.length > 0
+                    text: Translation.tr("Home")
+                    color: you.current ? PrismTheme.accentInk : PrismTheme.ink2
+                    font.pixelSize: PrismTheme.small
+                }
+            }
+            MouseArea {
+                id: youArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                Accessible.role: Accessible.PageTab
+                Accessible.name: Translation.tr("Home")
+                onClicked: PrismState.go("general")
+            }
+        }
         Item { width: 1; height: PrismTheme.dp(4) }
     }
 
@@ -125,30 +103,28 @@ Item {
         anchors.top: head.bottom
         anchors.bottom: parent.bottom
         width: parent.width
-        contentHeight: column.implicitHeight + PrismTheme.dp(24)
+        contentHeight: column.implicitHeight + PrismTheme.dp(28)
         boundsBehavior: Flickable.StopAtBounds
         clip: true
 
         Column {
             id: column
-            x: PrismTheme.dp(20)
-            width: root.width - x
+            x: root.side
+            width: root.width - 2 * root.side
             spacing: 0
 
             Repeater {
-                model: PrismModel.groups
+                // Home has its own place above; every other caption with its pages.
+                model: PrismModel.groups.filter(group => group.length > 0)
                 delegate: Column {
                     id: group
                     required property string modelData
                     readonly property var pages: PrismModel.inGroup(group.modelData)
-                    // The caption over the open page warms with it: where you are reads at the group's level too.
-                    readonly property bool here: !PrismState.searching && group.pages.some(page => page.pageId === PrismState.page)
                     width: column.width
                     PrismText {
-                        visible: group.modelData.length > 0
-                        topPadding: PrismTheme.dp(14)
+                        topPadding: PrismTheme.dp(16)
                         bottomPadding: PrismTheme.dp(4)
-                        leftPadding: PrismTheme.dp(4)
+                        leftPadding: PrismTheme.dp(10)
                         text: Translation.tr(group.modelData)
                         color: PrismTheme.ink
                         font.pixelSize: PrismTheme.small
@@ -160,7 +136,6 @@ Item {
                             id: entry
                             required property var modelData
                             width: group.width
-                            edge: group.width
                             glyph: entry.modelData.glyph
                             text: Translation.tr(entry.modelData.name)
                             current: !PrismState.searching && PrismState.page === entry.modelData.pageId
@@ -170,40 +145,16 @@ Item {
                 }
             }
 
-            // What the person changed from the factory, a page of its own, while there is something to show.
-            Column {
-                id: yours
-                width: column.width
-                readonly property int count: PrismModel.changes.length
-                visible: yours.count > 0
-                PrismText {
-                    topPadding: PrismTheme.dp(14)
-                    bottomPadding: PrismTheme.dp(4)
-                    leftPadding: PrismTheme.dp(4)
-                    text: Translation.tr("Yours")
-                    color: PrismTheme.ink
-                    font.pixelSize: PrismTheme.small
-                    font.weight: Font.DemiBold
-                }
-                PrismNavItem {
-                    width: yours.width
-                    edge: yours.width
-                    glyph: "history"
-                    text: Translation.tr("Changes")
-                    current: !PrismState.searching && PrismState.page === "changes"
-                    onClicked: PrismState.go("changes")
-                }
-            }
-
-            // Pinned rows: the reference's playlists, each one a row the person keeps at hand.
+            // Rows the person keeps at hand, while there are any.
             Column {
                 id: pinned
                 width: column.width
                 readonly property var rows: PrismModel.pinnedRows()
                 visible: pinned.rows.length > 0
                 PrismText {
-                    topPadding: PrismTheme.dp(18)
-                    bottomPadding: PrismTheme.dp(6)
+                    topPadding: PrismTheme.dp(16)
+                    bottomPadding: PrismTheme.dp(4)
+                    leftPadding: PrismTheme.dp(10)
                     text: Translation.tr("Pinned")
                     color: PrismTheme.ink
                     font.pixelSize: PrismTheme.small
@@ -214,7 +165,6 @@ Item {
                     delegate: PrismNavItem {
                         required property var modelData
                         width: pinned.width
-                        edge: pinned.width
                         glyph: modelData.glyph
                         text: Translation.tr(modelData.label)
                         trailing: "close"
@@ -223,17 +173,15 @@ Item {
                     }
                 }
             }
-
         }
     }
 
-    // The page list fades into the column where it meets the panel's edge.
+    // The list fades where it meets the column's ends.
     IrisScrollEdge {
-        id: sideEdge
         flick: flick
         anchors.fill: flick
         blurs: false
-        reach: PrismTheme.dp(28)
+        reach: PrismTheme.dp(24)
         veil: PrismTheme.canvas
         bottomLeftRadius: root.corner
     }

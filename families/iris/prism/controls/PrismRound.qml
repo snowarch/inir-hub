@@ -12,6 +12,8 @@ Item {
     property bool overArt: false
     // Over art, a smoked disc at rest (the dark pill's twin) instead of a bare glyph.
     property bool smoked: false
+    // On the page: no face at rest, a quiet plate under the pointer (the window's own keys).
+    property bool ghost: false
     property real glyphSize: PrismTheme.dp(18)
     signal clicked()
 
@@ -21,8 +23,15 @@ Item {
     opacity: root.enabled_ ? 1 : 0.32
     readonly property bool glass: root.overArt && !root.solid && !root.lit
 
+    Rectangle {
+        visible: root.ghost
+        anchors.fill: parent
+        radius: width / 2
+        color: area.pressed ? PrismTheme.fillPress : root.hovered ? PrismTheme.fillHover : "transparent"
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+    }
     PrismKey {
-        visible: !root.glass
+        visible: !root.glass && !root.ghost
         anchors.fill: parent
         face: root.solid ? (root.overArt ? PrismTheme.paper : PrismTheme.solid) : root.lit ? PrismTheme.accent : PrismTheme.keyQuiet
         hovered: root.hovered && root.enabled_
@@ -41,7 +50,7 @@ Item {
         filled: true
         iconSize: root.glyphSize
         color: root.solid ? (root.overArt ? "#000000" : PrismTheme.inkSolid) // iris-literal: ink on the white disc over art
-            : root.lit ? PrismTheme.inkAccent : root.overArt ? PrismTheme.paper : PrismTheme.ink
+            : root.lit ? PrismTheme.inkAccent : root.overArt ? PrismTheme.paper : root.ghost && !root.hovered ? PrismTheme.ink2 : PrismTheme.ink
     }
     MouseArea {
         id: area

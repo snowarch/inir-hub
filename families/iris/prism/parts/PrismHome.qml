@@ -88,7 +88,6 @@ Column {
                 onClicked: root.editing = !root.editing
             }
         }
-        Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: PrismTheme.line }
     }
     Item { width: 1; height: PrismTheme.dp(12) }
 
