@@ -374,7 +374,7 @@ Scope {
         color: "transparent"
         WlrLayershell.namespace: "quickshell:wAltSwitcher"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+        WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
         anchors { top: true; bottom: true; left: true; right: true }
 
         FocusScope {

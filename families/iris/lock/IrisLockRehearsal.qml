@@ -8,6 +8,7 @@ import qs.modules.common
 import qs.modules.iris.field
 import qs.modules.iris.style
 import qs.modules.iris.state
+import qs.services
 
 Scope {
     id: root
@@ -44,7 +45,7 @@ Scope {
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:iris-lock-rehearsal"
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+            WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
             anchors { left: true; right: true; top: true; bottom: true }
 
             Shortcut {

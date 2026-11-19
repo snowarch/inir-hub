@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.modules.common
 import qs.modules.common.pill
+import qs.services
 
 /**
  * The tray's native context menu, in a layer-shell window of its own so it can
@@ -202,7 +203,7 @@ Scope {
 
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+        WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
         WlrLayershell.namespace: "inir-pill-tray"
 
         anchors { top: true; left: true; right: true; bottom: true }

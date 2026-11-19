@@ -54,7 +54,7 @@ Scope {
         exclusiveZone: 0
         WlrLayershell.namespace: "quickshell:wNotificationCenter"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: visible
+        WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : visible
             ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
         color: "transparent"
 

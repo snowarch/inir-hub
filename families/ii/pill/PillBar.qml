@@ -385,7 +385,7 @@ Scope {
             readonly property bool overlayPresentation: modal
                 || pill.mode === "osd" || pill.mode === "toast"
             WlrLayershell.layer: overlayPresentation ? WlrLayer.Overlay : WlrLayer.Top
-            WlrLayershell.keyboardFocus: surfaceOpen || pill.held
+            WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : surfaceOpen || pill.held
                 ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
             WlrLayershell.namespace: "inir-pill"
 

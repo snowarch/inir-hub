@@ -41,7 +41,7 @@ Scope {
             WlrLayershell.namespace: "quickshell:settingsOverlay"
             // a native file dialog has to come above it
             WlrLayershell.layer: GlobalStates.settingsNativeDialogOpen ? WlrLayer.Bottom : WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: root.settingsOpen && !GlobalStates.regionSelectorOpen && !GlobalStates.settingsNativeDialogOpen
+            WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : root.settingsOpen && !GlobalStates.regionSelectorOpen && !GlobalStates.settingsNativeDialogOpen
                 ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
             color: "transparent"
             anchors {

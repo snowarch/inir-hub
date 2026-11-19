@@ -111,7 +111,7 @@ Loader {
             windowWidth: popup.width
             windowHeight: popup.height
         }
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+        WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
         anchors { top: true; bottom: true; left: true; right: true }
 
         readonly property real edge: Math.round(8 * root.d)

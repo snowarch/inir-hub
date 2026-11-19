@@ -35,7 +35,7 @@ Scope {
             WlrLayershell.namespace: "quickshell:ii-edit-desk"
             // The keyboard is held for a beat when the mode opens (Escape works at once), then left on demand so the
             // widgets under the card take the pointer.
-            WlrLayershell.keyboardFocus: !desk.present ? WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : !desk.present ? WlrKeyboardFocus.None
                 : desk.seeding ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand
             anchors { top: true; bottom: true; left: true; right: true }
             property Region glassBlurRegion: Region {

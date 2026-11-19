@@ -38,12 +38,15 @@ Scope {
 
             color: "transparent"
             WlrLayershell.namespace: "quickshell:polkit"
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+            // An auth prompt takes the keys at once; every shell surface that holds them gives them up meanwhile.
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             WlrLayershell.layer: WlrLayer.Overlay
             exclusionMode: ExclusionMode.Ignore
 
             Loader {
                 anchors.fill: parent
+                // A Loader is a focus scope: without focus its content's field never holds the keys.
+                focus: true
                 sourceComponent: root.contentComponent
             }
         }

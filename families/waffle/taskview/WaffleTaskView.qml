@@ -32,7 +32,7 @@ Scope {
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:wTaskView"
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+            WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
             color: "transparent"
 
             anchors {

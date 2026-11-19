@@ -568,7 +568,7 @@ Scope {
         WlrLayershell.namespace: root.isLeftEdge
             ? "quickshell:sidebarLeft" : "quickshell:sidebarRight"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: ShellEditSession.active
+        WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : ShellEditSession.active
             || !root.roleOpen || root.roleHoldOpen
             ? WlrKeyboardFocus.None
             : root.otherRoleOpen ? WlrKeyboardFocus.OnDemand

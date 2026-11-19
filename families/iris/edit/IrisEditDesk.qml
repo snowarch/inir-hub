@@ -21,7 +21,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:iris-edit"
-    WlrLayershell.keyboardFocus: bar.holdsKeyboard || sheet.typing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : bar.holdsKeyboard || sheet.typing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors { left: true; right: true; top: true; bottom: true }
 
     readonly property string outputName: root.screen?.name ?? ""

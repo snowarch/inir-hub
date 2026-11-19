@@ -9,6 +9,7 @@ import qs.modules.iris.components
 import qs.modules.iris.style
 import qs.modules.iris.field as Field
 import qs.modules.iris.prism.core
+import qs.services
 
 // Prism's host: an overlay on the focused output, a light scrim over the desktop and the panel centred at its
 // resting size (or the whole room with the green light). Click outside or Esc puts it away. Its material is iRiS's
@@ -28,7 +29,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.namespace: "quickshell:iris-prism"
     WlrLayershell.layer: GlobalStates.settingsNativeDialogOpen ? WlrLayer.Bottom : WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: GlobalStates.settingsNativeDialogOpen || !GlobalStates.settingsOverlayOpen ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : GlobalStates.settingsNativeDialogOpen || !GlobalStates.settingsOverlayOpen ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
 
     function close(): void { GlobalStates.settingsOverlayOpen = false }
 

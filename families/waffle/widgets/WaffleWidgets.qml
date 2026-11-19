@@ -41,7 +41,7 @@ Scope {
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:wWidgets"
             WlrLayershell.layer: WlrLayer.Top
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+            WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
             color: "transparent"
 
             anchors {

@@ -64,7 +64,7 @@ Scope {
         color: "transparent"
         WlrLayershell.namespace: "quickshell:equalizer"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: GlobalStates.equalizerOpen
+        WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : GlobalStates.equalizerOpen
             ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
         anchors {
