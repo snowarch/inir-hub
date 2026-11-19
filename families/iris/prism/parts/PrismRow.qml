@@ -31,7 +31,6 @@ Item {
     // over what the row says.
     readonly property bool tall: root.headless || root.stacked || (root.compact && (root.below === "" || root.below === "chips")
         && ["range", "hue", "text", "choice"].includes(root.kind))
-    property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
     property bool flash: false
     // Search and Changes: a press on the row's name or its place opens it where it lives; the control still answers here.
@@ -49,7 +48,6 @@ Item {
     readonly property string about: String(root.spec.description ?? root.row.detail ?? "")
     readonly property bool hovered: hover.hovered
     property bool open: false
-    readonly property bool aboutShown: root.aboutWidth > 0 && root.about.length > 0
 
     // A colour pick: every choice (but at most one, a "custom") carries the colour it gives.
     readonly property bool swatched: root.kind === "choice" && root.choices.length > 1
@@ -138,7 +136,7 @@ Item {
         width: parent.width
         // The control fills a flat line's height and sets a tall one's, so the flat height stands on its own: read through
         // the line, a row turning tall as its width shrinks (a colour pick's discs no longer fitting) re-entered it.
-        readonly property real flat: Math.max(root.compact || root.dense ? PrismTheme.dp(48) : PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
+        readonly property real flat: Math.max(root.compact || root.dense ? PrismTheme.dp(48) : PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20))
         height: root.headless ? (control.height > 0 ? PrismTheme.dp(6) + control.height + PrismTheme.dp(10) : PrismTheme.dp(4))
             : root.tall
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
@@ -163,7 +161,7 @@ Item {
             id: name
             visible: !root.headless
             anchors.left: parent.left
-            anchors.right: root.tall ? parent.right : root.aboutShown ? about.left : control.left
+            anchors.right: root.tall ? parent.right : control.left
             anchors.rightMargin: root.tall ? 0 : PrismTheme.dp(16)
             y: root.tall ? PrismTheme.dp(12) : Math.round((parent.height - height) / 2)
             spacing: PrismTheme.dp(2)
@@ -181,7 +179,7 @@ Item {
             }
             PrismText {
                 width: parent.width
-                visible: text.length > 0 && !root.showPage && !root.aboutShown
+                visible: text.length > 0 && !root.showPage
                 text: Translation.tr(root.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
@@ -227,25 +225,6 @@ Item {
                 elide: Text.ElideRight
             }
         }
-        // One grid for every row of a page (his 11-11): what it does starts at the head's own column whatever stands
-        // at the line's end, and the line grows rather than cut a sentence.
-        PrismText {
-            id: about
-            visible: root.aboutShown
-            width: root.aboutWidth
-            anchors.right: control.left
-            anchors.rightMargin: PrismTheme.dp(20)
-            anchors.verticalCenter: parent.verticalCenter
-            text: Translation.tr(root.about)
-            color: PrismTheme.ink2
-            font.pixelSize: PrismTheme.small
-            wrapMode: Text.WordWrap
-            // No elide: with it the text's own height answers to the line it sizes (a loop), and four lines hold every description.
-            maximumLineCount: 4
-            elide: Text.ElideNone
-            lineHeight: 1.1
-        }
-
         Item {
             id: control
             // Stacked: under the name, as wide as the row.

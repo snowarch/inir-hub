@@ -24,9 +24,6 @@ Item {
     readonly property real gap: PrismTheme.dp(28)
     readonly property bool twoUp: !root.showPage && root.inner >= PrismTheme.dp(640)
     readonly property real half: Math.floor((root.inner - root.gap) / 2)
-    // What a row does sits under its name, read with it in one glance; a grey column between name and control read as
-    // a third thing to scan.
-    readonly property real aboutWidth: 0
     readonly property real controlWidth: root.compact ? root.inner : Math.min(PrismTheme.dp(300), root.inner * 0.4)
     // A folder on the shelf: too narrow for a control beside its name.
     property bool compact: false
@@ -103,7 +100,6 @@ Item {
                         compact: root.compact
                         dense: true
                         showPage: root.showPage
-                        aboutWidth: parent.paired ? 0 : root.aboutWidth
                         controlWidth: parent.stackedPair ? root.half : parent.paired ? PrismTheme.dp(64) : root.controlWidth
                         flash: root.flashPath === row.path
                         onOpenRequested: root.reach(row)
@@ -117,7 +113,6 @@ Item {
                             width: root.half
                             row: entry.modelData.rows[1]
                             stacked: second.stackedPair
-                            aboutWidth: 0
                             controlWidth: second.stackedPair ? root.half : PrismTheme.dp(64)
                             flash: root.flashPath === row.path
                         }

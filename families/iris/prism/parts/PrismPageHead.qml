@@ -114,7 +114,7 @@ Item {
         anchors.rightMargin: root.pad
         anchors.bottom: art.bottom
         anchors.bottomMargin: PrismTheme.dp(20)
-        width: visible ? Math.max(keys.width, root.told ? Math.min(root.width * 0.36, Math.max(factSay.implicitWidth, factLabel.implicitWidth)) : 0) : 0
+        width: visible ? Math.min(root.width * 0.4, Math.max(keys.width, root.told ? Math.max(factSay.implicitWidth, factLabel.implicitWidth) : 0)) : 0
         spacing: PrismTheme.dp(12)
         Column {
             visible: root.told

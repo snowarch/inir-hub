@@ -70,7 +70,7 @@ Item {
     // Home is the person's: their name, and the machine they sit at (never a greeting).
     readonly property string person: String(SystemInfo.displayName || SystemInfo.username || "")
     readonly property string machine: [String(SystemInfo.username ?? ""), String(SystemInfo.hostname ?? "")].filter(part => part.length > 0).join("@")
-        + (String(SystemInfo.distroName ?? "Unknown") !== "Unknown" ? "  ·  " + SystemInfo.distroName : "")
+        + (["", "Unknown"].includes(String(SystemInfo.distroName ?? "")) ? "" : "  ·  " + SystemInfo.distroName)
     readonly property var fact: { const facts = PrismModel.leadOf(root.page); return facts.length > 0 ? facts[0] : null }
     function act(id: string): void {
         if (id === "lockEdit") { root.closeRequested(); IrisState.lockEdit = true; return }
