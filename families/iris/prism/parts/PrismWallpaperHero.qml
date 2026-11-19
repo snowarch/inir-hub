@@ -6,6 +6,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
+import qs.modules.iris.prism.fx
 import qs.modules.iris.prism.controls
 
 // Wallpaper opens on the person's own desktop: their picture large, the Island where it sits, and on it the two things
@@ -29,7 +30,16 @@ Item {
         height: Math.round(Math.min(root.width * 0.45, PrismTheme.dp(380)))
         radius: PrismTheme.cardRadius
         color: PrismTheme.night
+        // Under the picture, and in its place while there is none: the desktop's own colours, never a black hole.
+        PrismFlow {
+            anchors.fill: parent
+            tint: "blue"
+            seed: 0.57
+            centre: Qt.point(0.62, 0.4)
+            thickness: 0.6
+        }
         Image {
+            id: picture
             anchors.fill: parent
             source: Wallpapers.stillUrlFor(root.worn)
             sourceSize.width: Math.round(desk.width * 1.5)
@@ -37,15 +47,6 @@ Item {
             asynchronous: true
             scale: deskArea.containsMouse ? 1.015 : 1
             Behavior on scale { NumberAnimation { duration: PrismTheme.ms(520); easing.type: Easing.OutCubic } }
-        }
-        // The Island, where it sits on the screen: this is the desktop, not a file.
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: Math.round(parent.height * 0.04)
-            width: Math.round(parent.width * 0.14)
-            height: Math.round(parent.height * 0.055)
-            radius: height / 2
-            color: PrismTheme.night
         }
         // A step of smoke at the foot so the keys hold over a bright picture.
         Rectangle {
@@ -66,6 +67,29 @@ Item {
             Accessible.role: Accessible.Button
             Accessible.name: Translation.tr("Change wallpaper")
             onClicked: PrismModel.openWallpaperGallery()
+        }
+        // What it is: the picture's name, or the way to a first one.
+        Column {
+            x: PrismTheme.dp(22)
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: PrismTheme.dp(22)
+            width: parent.width * 0.5
+            spacing: PrismTheme.dp(2)
+            PrismText {
+                width: parent.width
+                text: root.worn.length > 0 ? PrismModel.wallpaperName(root.worn) : Translation.tr("No wallpaper yet")
+                color: PrismTheme.paper
+                font.pixelSize: PrismTheme.head
+                font.weight: Font.DemiBold
+            }
+            PrismText {
+                width: parent.width
+                visible: root.worn.length === 0
+                text: Translation.tr("Pick one and iRiS takes its colours.")
+                color: PrismTheme.paper
+                opacity: 0.72 // iris-literal: secondary words on the art, the same in every scheme
+                font.pixelSize: PrismTheme.small
+            }
         }
         Row {
             anchors.right: parent.right

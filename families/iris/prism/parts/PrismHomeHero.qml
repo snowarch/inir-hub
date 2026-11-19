@@ -55,14 +55,6 @@ Item {
             Behavior on scale { NumberAnimation { duration: PrismTheme.ms(520); easing.type: Easing.OutCubic } }
         }
         Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: Math.round(parent.height * 0.05)
-            width: Math.round(parent.width * 0.22)
-            height: Math.round(parent.height * 0.07)
-            radius: height / 2
-            color: PrismTheme.night
-        }
-        Rectangle {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -81,8 +73,20 @@ Item {
             Accessible.name: Translation.tr("Wallpaper")
             onClicked: PrismState.go("wallpaper")
         }
-        // The three colours iRiS wears, taken from the picture.
+        // The picture's name (a file's own name only when a person would say it), over the three colours iRiS wears.
+        PrismText {
+            x: PrismTheme.dp(18)
+            anchors.bottom: swatches.top
+            anchors.bottomMargin: PrismTheme.dp(10)
+            width: parent.width - x - PrismTheme.dp(60)
+            readonly property string path: String(Wallpapers.effectiveWallpaperPath ?? "")
+            text: path.length > 0 ? PrismModel.wallpaperName(path) : Translation.tr("Choose a wallpaper")
+            color: PrismTheme.paper
+            font.pixelSize: PrismTheme.body
+            font.weight: Font.DemiBold
+        }
         Row {
+            id: swatches
             x: PrismTheme.dp(18)
             anchors.bottom: parent.bottom
             anchors.bottomMargin: PrismTheme.dp(18)

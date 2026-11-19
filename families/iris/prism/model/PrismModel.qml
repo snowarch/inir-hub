@@ -87,6 +87,27 @@ Singleton {
             { id: "pointer", groups: ["Mouse", "Trackpad", "Pointer", "Hot corners"] }
         ]
     })
+    // Each page's lead (PrismLead, his 11-19: every page treated as what it is): `live`, the thing itself (the mixer,
+    // the charge) and the groups it stands for; `tiles`, the page's own switches people flip most, each [path, glyph], said
+    // there once (their rows leave the groups; a group whose master went still dims by it). "live:<id>" is one of
+    // IrisOptions.dailySwitches.
+    readonly property var leads: ({
+        sound: { live: "sound", groups: ["Output", "Input", "Apps playing"] },
+        battery: { live: "battery", tiles: [["battery.chargeLimit.enable", "battery_saver"], ["battery.automaticSuspend", "bedtime"]] },
+        notifications: { tiles: [["iris.modules.notificationPopup", "notifications"], ["notifications.silent", "notifications_off"], ["sounds.notifications", "music_note"]] },
+        gaming: { tiles: [["live:gameMode", "sports_esports"], ["gameMode.autoDetect", "auto_awesome"], ["gameMode.suppressNotifications", "do_not_disturb_on"]] },
+        dock: { tiles: [["iris.dock.enable", "dock_to_bottom"], ["iris.dock.autoHide", "visibility_off"], ["iris.dock.badges", "circle_notifications"]] },
+        bubbles: { tiles: [["iris.bubbles.autoHide", "visibility_off"], ["iris.bubbles.snap", "grid_view"]] },
+        bar: { tiles: [["iris.bar.autoHide", "visibility_off"], ["iris.bar.hoverExpand", "unfold_more"]] },
+        orbit: { tiles: [["iris.orbit.enable", "blur_circular"], ["iris.orbit.hotCorner", "north_west"], ["iris.orbit.previews", "preview"]] },
+        spotlight: { tiles: [["iris.modules.palette", "search"], ["search.sloppy", "spellcheck"], ["iris.palette.showHints", "lightbulb"]] },
+        desktop: { tiles: [["iris.modules.desktopWidgets", "widgets"], ["background.autoWallpaper.enable", "shuffle"], ["background.parallax.enable", "layers"], ["background.effects.enableBlur", "blur_on"]] },
+        capture: { tiles: [["regionSelector.targetRegions.windows", "web_asset"], ["regionSelector.annotation.useSatty", "draw"], ["search.imageSearch.useCircleSelection", "gesture"]] },
+        display: { tiles: [["light.night.enabled", "nightlight"], ["light.night.automatic", "schedule"], ["light.antiFlashbang.enable", "flash_off"]] },
+        sources: { tiles: [["weather.enable", "partly_cloudy_day"], ["calendar.externalSync.enable", "calendar_month"], ["shellUpdates.enabled", "system_update"]] },
+        player: { tiles: [["background.edgeWidgets.organic.enable", "graphic_eq"], ["background.edgeWidgets.organic.audioReactive", "equalizer"]] },
+        controlCenter: { tiles: [["iris.modules.controlCenter", "toggle_on"], ["vpn.quickToggle", "vpn_key"]] }
+    })
     // The page a row of IrisOptions' `section`, group `group` lives on.
     function pageOf(section: string, group: string): string {
         const list = root.chapters[section]

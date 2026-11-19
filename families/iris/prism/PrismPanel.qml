@@ -59,20 +59,52 @@ Item {
     readonly property bool home: !PrismState.searching && root.pageId === "general"
     // A page iRiS draws as a view of its own (Community Hub, Keyboard shortcuts, About) fills the room under its head.
     readonly property bool hosted: !PrismState.searching && String(root.page.view ?? "").length > 0
-    readonly property var sections: PrismState.searching || root.hosted ? [] : PrismModel.sectionsOf(root.pageId)
+    // The page's lead (PrismLead) says some rows itself: they leave the groups, and a group it stands for whole goes.
+    readonly property var lead: PrismModel.leads[root.pageId] ?? null
+    readonly property var sections: {
+        if (PrismState.searching || root.hosted) return []
+        const all = PrismModel.sectionsOf(root.pageId)
+        if (!root.lead) return all
+        const owned = Array.from(root.lead.tiles ?? []).map(tile => tile[0])
+        const gone = Array.from(root.lead.groups ?? [])
+        return all.filter(group => !gone.includes(group.title)).map(group => {
+            const kept = group.rows.filter(row => !owned.includes(row.path))
+            if (kept.length === group.rows.length) return group
+            const first = group.rows[0]
+            // The group's own master (named as it) went to the lead: the group still dims by it.
+            const named = String(first.label ?? "").trim().toLowerCase() === String(group.title ?? "").trim().toLowerCase()
+            const master = named && owned.includes(first.path) && String(first.kind) === "switch" ? first : null
+            return { title: group.title, glyph: group.glyph, rows: kept, lead: master }
+        }).filter(group => group.rows.length > 0)
+    }
     // The keyboard page draws the keyboard itself, live, where the compositor says which one it is.
     readonly property bool keyboardShown: root.pageId === "keyboard" && CompositorConfig.has("input", "keyboard.layout")
     // What a page shows before its groups: the person's own thing, as it is now.
     readonly property Component hero: PrismState.searching ? null
         : (({ general: homeHero, wallpaper: wallpaperHero, colour: colourHero, typeIcons: typeHero, lock: lockHero })[root.pageId]
-            ?? (root.keyboardShown ? keyboardHero : null))
-    readonly property var pageActions: root.pageId === "controlCenter" ? [{ id: "arrange", glyph: "dashboard_customize", text: "Arrange it" }] : []
+            ?? (root.keyboardShown ? keyboardHero : root.lead ? leadHero : null))
+    // What acts on the page's own thing, at the head: arrange the Control Center, send a notice, take the screen.
+    readonly property var pageActions: ({
+        controlCenter: [{ id: "arrange", glyph: "dashboard_customize", text: "Arrange it" }],
+        notifications: [{ id: "test", glyph: "notifications_active", text: "Send a test" }],
+        capture: [{ id: "shot", glyph: "screenshot_region", text: "Screenshot" }, { id: "ocr", glyph: "document_scanner", text: "Read text" },
+            { id: "record", glyph: "screen_record", text: "Record" }]
+    })[root.pageId] ?? []
     // Home is the person's: their name, and the machine they sit at (never a greeting).
     readonly property string person: String(SystemInfo.displayName || SystemInfo.username || "")
     readonly property string machine: [String(SystemInfo.username ?? ""), String(SystemInfo.hostname ?? "")].filter(part => part.length > 0).join("@")
         + (["", "Unknown"].includes(String(SystemInfo.distroName ?? "")) ? "" : "  ·  " + SystemInfo.distroName)
     readonly property var fact: { const facts = PrismModel.leadOf(root.page); return facts.length > 0 ? facts[0] : null }
+    // The screen tools start once Settings has left the screen, so it is never in the picture.
+    Timer { id: afterClose; property var run: null; interval: 320; onTriggered: if (afterClose.run) afterClose.run() }
     function act(id: string): void {
+        if (id === "test") { Notifications.sendTestNotifications(); return }
+        if (id === "shot" || id === "ocr" || id === "record") {
+            root.closeRequested()
+            afterClose.run = id === "shot" ? () => GlobalStates.openRegionScreenshot() : () => ShellExec.execDetachedArgs(["inir", "region", id])
+            afterClose.restart()
+            return
+        }
         if (id === "lockEdit") { root.closeRequested(); IrisState.lockEdit = true; return }
         if (id === "lockNow") { root.closeRequested(); Session.lock(); return }
         if (id === "arrange") {
@@ -190,6 +222,42 @@ Item {
     // The page's measure: its cards run between two even margins, never wider than a comfortable read.
     readonly property real measure: Math.min(centre.width - 2 * PrismTheme.dp(32), PrismTheme.dp(1040))
 
+    // The right column (PrismAside): open where the page keeps a comfortable measure beside it; the person may open or
+    // close it (iris.appearance.settingsRail: auto | open | closed). A page iRiS draws itself takes the whole room.
+    readonly property string asideMode: String(Config.options?.iris?.appearance?.settingsRail ?? "auto")
+    readonly property real asideBase: PrismTheme.dp(276)
+    readonly property real asideRoom: root.width - root.sideWidth - root.asideBase
+    readonly property bool asideFits: !root.hosted && root.asideRoom >= PrismTheme.dp(620)
+    readonly property bool asideAuto: root.asideRoom >= PrismTheme.dp(760)
+    readonly property bool asideOpen: root.asideFits && (root.asideMode === "open" || root.asideMode !== "closed" && root.asideAuto)
+    readonly property real asideWidth: root.asideOpen ? root.asideBase : 0
+    function toggleAside(): void {
+        const next = !root.asideOpen
+        Config.setNestedValue("iris.appearance.settingsRail", next === root.asideAuto ? "auto" : next ? "open" : "closed")
+    }
+
+    // The open page's parts for the sidebar, and those on screen now (a line of cards holds one or two).
+    readonly property var subsections: root.home || PrismState.searching || root.hosted ? [] : root.sections.map(section => String(section.title))
+    property var reading: []
+    function readNow(): void {
+        if (root.subsections.length < 2 || !shelf.visible) { if (root.reading.length > 0) root.reading = []; return }
+        const top = centre.contentY + centre.height * 0.32
+        const atEnd = centre.contentY >= centre.contentHeight - centre.height - 2
+        let best = null
+        let last = null
+        for (const title of root.subsections) {
+            const box = shelf.boxOf(title)
+            if (!box || box === last) continue
+            last = box
+            if (best === null || content.y + shelf.y + box.y <= top) best = box
+        }
+        if (atEnd && last) best = last
+        const next = best ? Array.from(best.titles ?? []).map(String) : []
+        if (next.join("|") !== root.reading.join("|")) root.reading = next
+    }
+    Timer { id: readLater; interval: 60; onTriggered: root.readNow() }
+    onSubsectionsChanged: readLater.restart()
+
     Rectangle {
         id: body
         anchors.fill: parent
@@ -202,8 +270,25 @@ Item {
             width: root.sideWidth
             height: parent.height
             corner: body.radius
+            subsections: root.subsections
+            reading: root.reading
             onReach: row => root.reach(row)
             onSearchEntered: root.takeFirstHit()
+            onPickGroup: title => root.showGroup(title)
+        }
+
+        PrismAside {
+            id: aside
+            x: body.width - root.asideBase
+            width: root.asideBase
+            height: parent.height
+            visible: opacity > 0
+            opacity: root.asideOpen ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
+            active: root.active && root.asideOpen
+            pageId: root.pageId
+            everywhere: root.home || PrismState.searching
+            onReach: row => root.reach(row)
         }
 
         Flickable {
@@ -211,11 +296,13 @@ Item {
             visible: !root.hosted
             anchors.left: sidebar.right
             anchors.right: parent.right
+            anchors.rightMargin: root.asideWidth
             height: parent.height
             contentHeight: content.y + content.implicitHeight + PrismTheme.dp(96)
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            onContentHeightChanged: if (Date.now() < root.aimUntil) aimLater.restart()
+            onContentHeightChanged: { if (Date.now() < root.aimUntil) aimLater.restart(); readLater.restart() }
+            onContentYChanged: readLater.restart()
 
             Column {
                 id: content
@@ -231,13 +318,15 @@ Item {
                     eyebrow: root.home ? root.machine : Translation.tr(String(root.page.group ?? ""))
                     tint: String(root.page.tint ?? "grey")
                     turn: PrismModel.index(root.pageId)
-                    fact: root.home ? null : root.fact
+                    // Battery's lead says the charge itself: the head does not say it again.
+                    fact: root.home || root.pageId === "battery" ? null : root.fact
                     title: PrismState.searching ? "“" + PrismState.asked.trim() + "”"
                         : root.home && root.person.length > 0 ? root.person : Translation.tr(root.page.name)
                     line: PrismState.searching ? Translation.tr("Pages and settings that match")
                         : Translation.tr(String(root.page.subtitle ?? ""))
                     actions: PrismState.searching ? [] : root.pageActions
-                    restorable: !PrismState.searching && PrismModel.restorableOf(root.pageId) > 0
+                    // With the side column open, the way back is there, beside what changed.
+                    restorable: !PrismState.searching && !root.asideOpen && PrismModel.restorableOf(root.pageId) > 0
                     onAction: id => root.act(id)
                     onRestore: PrismModel.restore(root.pageId)
                 }
@@ -371,8 +460,8 @@ Item {
             veil: PrismTheme.canvas
             // The veil alone: a blurred band read the page into a texture on every scrolled frame (11-11).
             blurs: false
-            topRightRadius: body.radius
-            bottomRightRadius: body.radius
+            topRightRadius: root.asideOpen ? 0 : body.radius
+            bottomRightRadius: root.asideOpen ? 0 : body.radius
         }
 
         // The window's own keys, where every window keeps them: as a window or over the desktop, the whole room, close.
@@ -380,10 +469,21 @@ Item {
         Row {
             anchors.right: parent.right
             anchors.rightMargin: PrismState.searching ? PrismTheme.dp(16)
-                : Math.round((parent.width - sidebar.width - root.measure) / 2) + PrismTheme.dp(14)
+                : root.asideWidth + Math.round((centre.width - root.measure) / 2) + PrismTheme.dp(14)
             y: PrismState.searching ? PrismTheme.dp(16) : PrismTheme.dp(24) + PrismTheme.dp(14)
             z: 5
             spacing: PrismTheme.dp(2)
+            PrismRound {
+                visible: root.asideFits
+                ghost: PrismState.searching
+                overArt: !PrismState.searching
+                smoked: !PrismState.searching
+                glyph: root.asideOpen ? "right_panel_close" : "right_panel_open"
+                glyphSize: PrismTheme.dp(17)
+                Accessible.role: Accessible.Button
+                Accessible.name: root.asideOpen ? Translation.tr("Hide the side column") : Translation.tr("Show the side column")
+                onClicked: root.toggleAside()
+            }
             PrismRound {
                 ghost: PrismState.searching
                 overArt: !PrismState.searching
@@ -441,6 +541,7 @@ Item {
     Component { id: wallpaperHero; PrismWallpaperHero {} }
     Component { id: colourHero; PrismColourHero { onPickGroup: title => root.showGroup(title) } }
     Component { id: typeHero; PrismTypeHero { onPickGroup: title => root.showGroup(title) } }
+    Component { id: leadHero; PrismLead { page: root.pageId } }
     Component { id: lockHero; PrismLockHero { onAction: id => root.act(id); onPickGroup: title => root.showGroup(title) } }
     // Keyboard: the keyboard itself, live; Super, Ctrl, Alt or Shift held shows what each key does.
     Component {

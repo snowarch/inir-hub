@@ -1,7 +1,13 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.112",
+    "version": "2.33.113",
     "changes": {
+      "2.33.113": [
+          "Prism Settings: each page leads with its own thing: the sound mixer, the battery charge, and the switches people flip most as tiles",
+          "The sidebar threads the open page's sections under it and marks the ones on screen; a press goes there",
+          "A side column lists what you changed, each with its own way back, the page's keyboard shortcuts and what is playing",
+          "Screenshots, notifications and the Control Center pages have their own actions at the top"
+      ],
       "2.33.112": ["Prism Settings: every page opens on its own art with its name large, groups are folders again, a row reads its name over what it does, Home shows you instead of a greeting, and long languages fit"],
       "2.33.111": ["The desktop menu, the startup file and the themes folder open apps as fast as the launcher, outside the shell"],
       "2.33.110": [

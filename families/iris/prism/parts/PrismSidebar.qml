@@ -19,6 +19,37 @@ Item {
     property alias search: searchField
     // The body's corner radius: the list's fade meets the body's lower left corner.
     property real corner: 0
+    // The open page's parts (its groups' names) under its line, and those the page shows now; a press goes to one.
+    property var subsections: []
+    property var reading: []
+    signal pickGroup(string title)
+    // The open page's line comes into sight once its parts have opened under it.
+    property Item opened: null
+    function reveal(): void {
+        if (!root.opened) return
+        const top = root.opened.mapToItem(column, 0, 0).y
+        const end = top + root.opened.height
+        const room = flick.height - PrismTheme.dp(28)
+        let to = flick.contentY
+        if (top < flick.contentY + PrismTheme.dp(12)) to = top - PrismTheme.dp(12)
+        else if (end > flick.contentY + room) to = Math.min(top - PrismTheme.dp(12), end - room)
+        to = Math.max(0, Math.min(flick.contentHeight - flick.height, to))
+        if (Math.abs(to - flick.contentY) < 1) return
+        slide.to = to
+        slide.restart()
+    }
+    NumberAnimation { id: slide; target: flick; property: "contentY"; duration: PrismTheme.ms(300); easing.type: Easing.OutCubic }
+    Timer { id: revealLater; interval: 240; onTriggered: root.reveal() }
+    // Home has no line in the list: the list goes back to its top.
+    Connections {
+        target: PrismState
+        function onPageChanged() {
+            if (PrismState.page !== "general") return
+            root.opened = null
+            slide.to = 0
+            slide.restart()
+        }
+    }
     readonly property real side: PrismTheme.dp(14)
 
     // The search and the person stay put; only the pages scroll under them.
@@ -133,14 +164,92 @@ Item {
                     }
                     Repeater {
                         model: group.pages
-                        delegate: PrismNavItem {
-                            id: entry
+                        delegate: Column {
+                            id: place
                             required property var modelData
+                            readonly property bool current: !PrismState.searching && PrismState.page === place.modelData.pageId
+                            onCurrentChanged: if (place.current) { root.opened = place; revealLater.restart() }
+                            Component.onCompleted: if (place.current) { root.opened = place; revealLater.restart() }
                             width: group.width
-                            glyph: entry.modelData.glyph
-                            text: Translation.tr(entry.modelData.name)
-                            current: !PrismState.searching && PrismState.page === entry.modelData.pageId
-                            onClicked: PrismState.go(entry.modelData.pageId)
+                            PrismNavItem {
+                                width: place.width
+                                glyph: place.modelData.glyph
+                                text: Translation.tr(place.modelData.name)
+                                current: place.current
+                                onClicked: PrismState.go(place.modelData.pageId)
+                            }
+                            // The page's parts, threaded under its glyph: the ones on screen wear the accent's tick.
+                            Item {
+                                id: parts
+                                readonly property bool open: place.current && root.subsections.length > 1
+                                width: place.width
+                                height: parts.open ? partList.implicitHeight : 0
+                                clip: true
+                                Behavior on height { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutCubic } }
+                                Rectangle {
+                                    x: PrismTheme.dp(19)
+                                    y: PrismTheme.dp(4)
+                                    width: 1
+                                    height: Math.max(0, partList.implicitHeight - PrismTheme.dp(12))
+                                    color: PrismTheme.line
+                                }
+                                Column {
+                                    id: partList
+                                    width: parts.width
+                                    topPadding: PrismTheme.dp(2)
+                                    bottomPadding: PrismTheme.dp(6)
+                                    Repeater {
+                                        model: parts.open ? root.subsections : []
+                                        delegate: Item {
+                                            id: part
+                                            required property string modelData
+                                            readonly property bool here: root.reading.includes(part.modelData)
+                                            width: partList.width
+                                            height: Math.max(PrismTheme.dp(28), partName.implicitHeight + PrismTheme.dp(10))
+                                            Rectangle {
+                                                x: PrismTheme.dp(30)
+                                                width: parent.width - x
+                                                height: parent.height
+                                                radius: PrismTheme.dp(8)
+                                                color: partArea.pressed ? PrismTheme.fillPress : partArea.containsMouse ? PrismTheme.fill : "transparent"
+                                                Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+                                            }
+                                            Rectangle {
+                                                x: PrismTheme.dp(18)
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                width: PrismTheme.dp(3)
+                                                height: PrismTheme.dp(14)
+                                                radius: width / 2
+                                                color: PrismTheme.accent
+                                                opacity: part.here ? 1 : 0
+                                                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+                                            }
+                                            PrismText {
+                                                id: partName
+                                                x: PrismTheme.dp(40)
+                                                width: parent.width - x - PrismTheme.dp(8)
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                text: Translation.tr(part.modelData)
+                                                color: part.here || partArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+                                                font.pixelSize: PrismTheme.small
+                                                font.weight: part.here ? Font.Medium : Font.Normal
+                                                wrapMode: Text.WordWrap
+                                                maximumLineCount: 2
+                                                elide: Text.ElideRight
+                                            }
+                                            MouseArea {
+                                                id: partArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                Accessible.role: Accessible.Link
+                                                Accessible.name: Translation.tr(part.modelData)
+                                                onClicked: root.pickGroup(part.modelData)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

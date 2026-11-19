@@ -17,3 +17,7 @@ PrismColourHero 1.0 PrismColourHero.qml
 PrismTypeHero 1.0 PrismTypeHero.qml
 PrismLockHero 1.0 PrismLockHero.qml
 PrismSheet 1.0 PrismSheet.qml
+PrismTile 1.0 PrismTile.qml
+PrismLead 1.0 PrismLead.qml
+PrismAside 1.0 PrismAside.qml
+PrismNowPlaying 1.0 PrismNowPlaying.qml

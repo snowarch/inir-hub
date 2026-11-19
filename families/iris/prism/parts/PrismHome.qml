@@ -105,88 +105,22 @@ Column {
                 objectProp: "key"
                 values: root.tiles.map(tile => Object.assign({ key: tile.id }, tile)).concat(root.editing ? root.offered.map(tile => Object.assign({ offer: true, key: "+" + tile.id }, tile)) : [])
             }
-            delegate: Item {
+            delegate: PrismTile {
                 id: tile
                 required property var modelData
-                readonly property bool offer: Boolean(tile.modelData.offer)
-                readonly property bool on: !tile.offer && root.isOn(tile.modelData)
                 width: grid.tileWidth
-                height: PrismTheme.dp(56)
-                opacity: tile.offer ? (press.containsMouse ? 0.9 : 0.55) : 1
-                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: PrismTheme.dp(16)
-                    // On, the tile lifts a little under its accent disc; no outline, its fill alone sets it off.
-                    color: press.pressed ? PrismTheme.fillPress : press.containsMouse || tile.on ? PrismTheme.fillHover : PrismTheme.fill
-                    scale: press.pressed ? 0.97 : 1
-                    Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
-                    Behavior on scale { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+                offer: Boolean(tile.modelData.offer)
+                on: !tile.offer && root.isOn(tile.modelData)
+                glyph: tile.modelData.glyph
+                label: Translation.tr(tile.modelData.label)
+                says: String(tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData))
+                isSwitch: tile.modelData.kind === "switch"
+                removable: root.editing && !tile.offer
+                onClicked: {
+                    if (tile.offer) root.setIds(root.ids.concat([tile.modelData.id]))
+                    else if (!root.editing) root.act(tile.modelData)
                 }
-                // The state as a circle: white when on, the page's dark when off; a swatch wears its colour.
-                Rectangle {
-                    id: mark
-                    x: PrismTheme.dp(8)
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: PrismTheme.dp(34); height: width; radius: PrismTheme.dp(11)
-                    color: tile.on ? PrismTheme.accent : PrismTheme.sunk
-                    Behavior on color { ColorAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
-                    PrismGlyph {
-                        anchors.centerIn: parent
-                        text: tile.offer ? "add" : tile.modelData.glyph
-                        filled: tile.on
-                        iconSize: PrismTheme.dp(18)
-                        color: tile.on ? PrismTheme.inkAccent : PrismTheme.ink
-                    }
-                }
-                Column {
-                    anchors.left: mark.right
-                    anchors.leftMargin: PrismTheme.dp(10)
-                    anchors.right: parent.right
-                    anchors.rightMargin: root.editing && !tile.offer ? PrismTheme.dp(40) : PrismTheme.dp(16)
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 0
-                    PrismText {
-                        width: parent.width
-                        text: Translation.tr(tile.modelData.label)
-                        elide: Text.ElideRight
-                        font.pixelSize: PrismTheme.body
-                        font.weight: Font.Medium
-                    }
-                    // What it holds now; a tile on offer says where it lives instead.
-                    PrismText {
-                        width: parent.width
-                        text: String(tile.offer ? root.whereOf(tile.modelData) : root.says(tile.modelData))
-                        elide: Text.ElideRight
-                        color: PrismTheme.ink2
-                        font.pixelSize: PrismTheme.small
-                    }
-                }
-                MouseArea {
-                    id: press
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    Accessible.role: tile.modelData.kind === "switch" ? Accessible.CheckBox : Accessible.Button
-                    Accessible.name: Translation.tr(tile.modelData.label)
-                    Accessible.checked: tile.on
-                    onClicked: {
-                        if (tile.offer) root.setIds(root.ids.concat([tile.modelData.id]))
-                        else if (!root.editing) root.act(tile.modelData)
-                    }
-                }
-                // Editing: a tile on Home comes off from its corner.
-                PrismRound {
-                    visible: root.editing && !tile.offer
-                    anchors.right: parent.right
-                    anchors.rightMargin: PrismTheme.dp(10)
-                    anchors.verticalCenter: parent.verticalCenter
-                    implicitWidth: PrismTheme.dp(24)
-                    glyphSize: PrismTheme.dp(15)
-                    glyph: "remove"
-                    onClicked: root.setIds(root.ids.filter(id => id !== tile.modelData.id))
-                }
+                onRemoveClicked: root.setIds(root.ids.filter(id => id !== tile.modelData.id))
             }
         }
     }

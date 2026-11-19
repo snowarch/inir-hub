@@ -33,6 +33,8 @@ Item {
     readonly property real pad: PrismTheme.dp(24)
     readonly property real artHeight: root.plain ? 0 : Math.max(PrismTheme.dp(196), words.implicitHeight + PrismTheme.dp(76))
     readonly property bool told: root.fact !== null && String(root.fact?.say ?? "").length > 0
+    // The page's keys stand at the right while they leave the name room; more of them go under what the page is for.
+    readonly property bool keysUnder: keysProbe.implicitWidth > root.width * 0.4
     implicitHeight: root.plain ? plainWords.implicitHeight : root.artHeight
 
     PrismFlow {
@@ -105,16 +107,22 @@ Item {
             maximumLineCount: 2
             lineHeight: 1.1
         }
+        Item { visible: root.keysUnder; width: 1; height: PrismTheme.dp(8) }
+        Loader {
+            active: root.keysUnder
+            visible: active
+            sourceComponent: keysRow
+        }
     }
     // At the right of the floor: the machine's own fact, then what acts on the whole page.
     Column {
         id: side
-        visible: !root.plain && (root.told || keys.width > 0)
+        visible: !root.plain && (root.told || !root.keysUnder && keysProbe.implicitWidth > 0)
         anchors.right: art.right
         anchors.rightMargin: root.pad
         anchors.bottom: art.bottom
         anchors.bottomMargin: PrismTheme.dp(20)
-        width: visible ? Math.min(root.width * 0.4, Math.max(keys.width, root.told ? Math.max(factSay.implicitWidth, factLabel.implicitWidth) : 0)) : 0
+        width: visible ? Math.min(root.width * 0.4, Math.max(root.keysUnder ? 0 : keysProbe.implicitWidth, root.told ? Math.max(factSay.implicitWidth, factLabel.implicitWidth) : 0)) : 0
         spacing: PrismTheme.dp(12)
         Column {
             visible: root.told
@@ -138,9 +146,27 @@ Item {
                 font.weight: Font.Bold
             }
         }
-        Row {
-            id: keys
+        Loader {
+            id: sideKeys
+            active: !root.keysUnder
             anchors.right: parent.right
+            sourceComponent: keysRow
+        }
+    }
+    // The keys, measured once off screen so where they stand never loops on their own width.
+    Row {
+        id: keysProbe
+        visible: false
+        spacing: PrismTheme.dp(8)
+        PrismPill { visible: root.restorable; tone: "quiet"; glyph: "restart_alt"; text: Translation.tr("Restore defaults") }
+        Repeater {
+            model: root.actions
+            delegate: PrismPill { required property var modelData; tone: "art"; glyph: String(modelData.glyph ?? ""); text: Translation.tr(String(modelData.text ?? "")) }
+        }
+    }
+    Component {
+        id: keysRow
+        Row {
             spacing: PrismTheme.dp(8)
             PrismPill {
                 visible: root.restorable

@@ -33,7 +33,12 @@ Item {
         return root.same(root.master.label, root.title) || about.length === 0 ? Translation.tr(about)
             : Translation.tr(String(root.master.label)) + " · " + Translation.tr(about)
     }
-    readonly property bool on: { const _ = PrismModel.revision; return root.masterSwitch ? Boolean(PrismModel.read(root.master)) : true }
+    // A master switch the page's lead took (PrismLead) still dims the group it heads.
+    readonly property var leadMaster: root.entry?.lead ?? null
+    readonly property bool on: {
+        const _ = PrismModel.revision
+        return root.masterSwitch ? Boolean(PrismModel.read(root.master)) : root.leadMaster ? Boolean(PrismModel.read(root.leadMaster)) : true
+    }
 
     implicitHeight: Math.max(words.implicitHeight, root.masterSwitch ? toggle.height : 0)
 
