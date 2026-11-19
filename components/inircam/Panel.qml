@@ -8,20 +8,29 @@ import qs.modules.common.widgets
 import qs.services
 import "Brands.js" as Brands
 
-// The camera panel: the grid of cameras, the enlarged view, the wall, the
-// camera list and the form to add one. It is a component of its own: it sits
-// beside the family and never edits it.
+// The camera panel: the list of cameras down the side, the one you picked large
+// beside it, the whole grid, the form to add one. It is a component of its own:
+// it sits beside the family and never edits it.
 Scope {
     id: root
 
     property bool open: false
-    // grid · enlarged · wall · manage · form
-    property string view: "grid"
+    // single · grid · manage · form · nvr
+    property string view: "single"
     property string focusId: ""
     property var editing: null
     property string notice: ""
 
     readonly property var cameras: store.enabledCameras()
+    readonly property var pinnedIds: pins.pins.map(p => p.cameraId)
+    // The camera in front of you: the one that was picked, or the first one if nothing was
+    // picked yet (and the old pick is gone, because it was deleted).
+    readonly property string shownId: {
+        const list = root.cameras
+        if (list.length === 0) return ""
+        for (let i = 0; i < list.length; i++) if (list[i].id === root.focusId) return root.focusId
+        return list[0].id
+    }
 
     function toggle() { root.open = !root.open }
     function close() {
@@ -30,17 +39,17 @@ Scope {
             root.editing = null
             return
         }
-        if (root.view === "grid") {
+        if (root.view === "single" || root.view === "grid") {
             root.open = false
             return
         }
-        root.view = "grid"
+        root.view = "single"
     }
 
     function openCamera(id) {
         if (!id) return
         root.focusId = id
-        root.view = "enlarged"
+        root.view = "single"
     }
 
     function stepCamera(delta) {
@@ -48,7 +57,7 @@ Scope {
         if (list.length === 0) return
         let index = 0
         for (let i = 0; i < list.length; i++) {
-            if (list[i].id === root.focusId) {
+            if (list[i].id === root.shownId) {
                 index = i
                 break
             }
@@ -116,10 +125,21 @@ Scope {
             event.accepted = true
             return
         }
-        if (root.view === "grid" && key >= "1" && key <= "9") {
+        if ((root.view === "grid" || root.view === "single") && key >= "1" && key <= "9") {
             const index = parseInt(key) - 1
             if (index < root.cameras.length) {
                 root.openCamera(root.cameras[index].id)
+                event.accepted = true
+            }
+            return
+        }
+        // Left/right walks the side list without going back to it.
+        if (root.view === "single") {
+            if (event.key === Qt.Key_Right || event.key === Qt.Key_Down) {
+                root.stepCamera(1)
+                event.accepted = true
+            } else if (event.key === Qt.Key_Left || event.key === Qt.Key_Up) {
+                root.stepCamera(-1)
                 event.accepted = true
             }
         }
@@ -138,6 +158,18 @@ Scope {
     // asked through `feeds`. Nothing runs while nobody holds one.
     property var feedHolders: ({})
     readonly property bool feedsNeeded: root.open || pins.pins.length > 0 || Object.keys(root.feedHolders).length > 0
+    // Who needs the main stream: the camera shown large, and any pinned to the desktop. Everything
+    // else — grid, side list, another item's card — is drawn from the substream, so a wall of ten
+    // cameras does not open twenty streams at an NVR that only has a handful.
+    readonly property var mainIds: {
+        const ids = []
+        if (root.open && root.view === "single" && root.shownId) ids.push(root.shownId)
+        for (let i = 0; i < pins.pins.length; i++) {
+            const id = pins.pins[i].cameraId
+            if (id && ids.indexOf(id) === -1) ids.push(id)
+        }
+        return ids
+    }
 
     Process {
         id: feedSync
@@ -147,14 +179,15 @@ Scope {
     function runFeedHelper(verb) {
         if (!root.feedHelper || root.feedHelper.indexOf("inircam-feeds") === -1) return
         const script = verb === "sync"
-            ? 'test -x "$1" && exec "$1" sync "$2"'
+            ? 'test -x "$1" && exec "$1" sync "$2" "$3"'
             : 'test -x "$1" && exec "$1" stop'
-        feedSync.command = ["sh", "-c", script, "sh", root.feedHelper, String(Quickshell.processId)]
+        feedSync.command = ["sh", "-c", script, "sh", root.feedHelper, String(Quickshell.processId), root.mainIds.join(",")]
         feedSync.running = false
         feedSync.running = true
     }
 
     function syncFeeds() { root.runFeedHelper("sync") }
+    onMainIdsChanged: if (root.feedsNeeded) root.syncFeeds()
     function stopFeeds() { root.runFeedHelper("stop") }
 
     onFeedsNeededChanged: {
@@ -271,142 +304,159 @@ Scope {
         }
     }
 
-    // The panel itself: built only while it is open, so nothing runs while it is closed.
-    LazyLoader {
-        active: root.open
-        PanelWindow {
-            id: window
-            visible: root.open
-            color: "transparent"
-            exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.namespace: "quickshell:inircam"
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+    // The panel itself. It stays built and hidden while closed: destroying the layer surface on
+    // every close leaks one surface per open (Quickshell 0.3.x), and the leftovers come back later
+    // with whatever they were showing. Nothing runs anyway — feeds and timers follow `visible`.
+    PanelWindow {
+        id: window
+        visible: root.open
+        color: "transparent"
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.namespace: "quickshell:inircam"
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-            anchors { top: true; bottom: true; left: true; right: true }
+        anchors { top: true; bottom: true; left: true; right: true }
 
-            MouseArea {
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: root.close()
+        }
+
+        Rectangle {
+            id: card
+            anchors.centerIn: parent
+            width: Math.min(parent.width - 80, 1100)
+            height: Math.min(parent.height - 80, 760)
+            radius: Appearance.rounding.large
+            color: Appearance.colors.colLayer1
+            border.color: Appearance.colors.colOutlineVariant
+            border.width: 1
+            clip: true
+            focus: true
+            Keys.onPressed: event => root.handleKey(event)
+
+            MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
+
+            ColumnLayout {
                 anchors.fill: parent
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onClicked: root.close()
-            }
+                anchors.margins: 16
+                spacing: 12
 
-            Rectangle {
-                id: card
-                anchors.centerIn: parent
-                width: Math.min(parent.width - 80, 1100)
-                height: Math.min(parent.height - 80, 760)
-                radius: Appearance.rounding.large
-                color: Appearance.colors.colLayer1
-                border.color: Appearance.colors.colOutlineVariant
-                border.width: 1
-                clip: true
-                focus: true
-                Keys.onPressed: event => root.handleKey(event)
+                // The header: where you are and what you can do from here.
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
 
-                MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
+                    StyledText {
+                        text: Translation.tr("Cameras")
+                        font.pixelSize: Appearance.font.pixelSize.title
+                        font.weight: Font.DemiBold
+                        color: Appearance.colors.colOnLayer1
+                    }
+                    StyledText {
+                        text: ({
+                            single: Translation.tr("One camera"),
+                            grid: Translation.tr("All cameras"),
+                            manage: Translation.tr("Cameras"),
+                            nvr: Translation.tr("Add from an NVR"),
+                            form: root.editing && root.editing.id ? Translation.tr("Edit camera") : Translation.tr("Add camera")
+                        })[root.view] ?? ""
+                        color: Appearance.colors.colOnSurfaceVariant
+                        font.pixelSize: Appearance.font.pixelSize.small
+                    }
+                    Item { Layout.fillWidth: true }
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 16
+                    // The two ways to watch the list.
+                    RippleButton {
+                        visible: root.view === "single" || root.view === "grid"
+                        buttonText: Translation.tr("Single")
+                        toggled: root.view === "single"
+                        onClicked: root.view = "single"
+                    }
+                    RippleButton {
+                        visible: root.view === "single" || root.view === "grid"
+                        buttonText: Translation.tr("Grid")
+                        toggled: root.view === "grid"
+                        onClicked: root.view = "grid"
+                    }
+                    RippleButton {
+                        visible: root.view === "manage" || root.view === "nvr"
+                        buttonText: Translation.tr("Back")
+                        onClicked: root.view = root.cameras.length > 0 ? "single" : "grid"
+                    }
+                    RippleButton {
+                        visible: root.view === "manage"
+                        buttonText: Translation.tr("Add camera")
+                        onClicked: root.openForm(null)
+                    }
+                    RippleButton {
+                        buttonText: Translation.tr("Close")
+                        onClicked: root.close()
+                    }
+                }
+
+                // The notice line: what just happened.
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: root.notice !== ""
+                    implicitHeight: 32
+                    radius: Appearance.rounding.small
+                    color: Appearance.colors.colLayer2
+
+                    StyledText {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.notice
+                        color: Appearance.colors.colOnLayer2
+                        font.pixelSize: Appearance.font.pixelSize.small
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
                     spacing: 12
 
-                    // The header: where you are and what you can do from here.
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-
-                        StyledText {
-                            text: Translation.tr("Cameras")
-                            font.pixelSize: Appearance.font.pixelSize.title
-                            font.weight: Font.DemiBold
-                            color: Appearance.colors.colOnLayer1
-                        }
-                        StyledText {
-                            visible: root.view !== "grid"
-                            text: ({
-                                enlarged: Translation.tr("Enlarged"),
-                                wall: Translation.tr("All cameras"),
-                                manage: Translation.tr("Cameras"),
-                                form: root.editing && root.editing.id ? Translation.tr("Edit camera") : Translation.tr("Add camera"),
-                                nvr: Translation.tr("Add from an NVR")
-                            })[root.view] ?? ""
-                            color: Appearance.colors.colOnSurfaceVariant
-                            font.pixelSize: Appearance.font.pixelSize.small
-                        }
-                        Item { Layout.fillWidth: true }
-
-                        RippleButton {
-                            visible: root.view === "grid"
-                            buttonText: Translation.tr("All cameras")
-                            onClicked: root.view = "wall"
-                        }
-                        RippleButton {
-                            visible: root.view === "grid" || root.view === "wall"
-                            buttonText: Translation.tr("Cameras")
-                            onClicked: root.view = "manage"
-                        }
-                        RippleButton {
-                            visible: root.view === "manage"
-                            buttonText: Translation.tr("Add camera")
-                            onClicked: root.openForm(null)
-                        }
-                        RippleButton {
-                            visible: root.view === "grid" || root.view === "enlarged" || root.view === "wall"
-                            buttonText: Translation.tr("Grid")
-                            onClicked: root.view = "grid"
-                        }
-                        RippleButton {
-                            buttonText: Translation.tr("Close")
-                            onClicked: root.close()
-                        }
-                    }
-
-                    // The notice line: what just happened.
-                    Rectangle {
-                        Layout.fillWidth: true
-                        visible: root.notice !== ""
-                        implicitHeight: 32
-                        radius: Appearance.rounding.small
-                        color: Appearance.colors.colLayer2
-
-                        StyledText {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: root.notice
-                            color: Appearance.colors.colOnLayer2
-                            font.pixelSize: Appearance.font.pixelSize.small
-                        }
+                    // The list down the side: pick one, and it takes the room.
+                    CameraSidebar {
+                        Layout.fillHeight: true
+                        visible: root.view === "single" || root.view === "grid"
+                        cameras: root.cameras
+                        selectedId: root.shownId
+                        pinnedIds: root.pinnedIds
+                        onCameraSelected: id => root.openCamera(id)
+                        onManageRequested: root.view = "manage"
+                        onAddRequested: root.openForm(null)
                     }
 
                     Item {
+                        id: gridArea
+
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
                         CameraGrid {
                             anchors.fill: parent
                             visible: root.view === "grid"
+                            // As many across as the room allows: ten cameras in two columns are
+                            // five rows tall, and five rows do not fit.
+                            columns: Math.max(2, Math.min(4, Math.floor(gridArea.width / 260)))
                             cameras: root.cameras
-                            pinnedIds: pins.pins.map(p => p.cameraId)
-                            onCameraClicked: id => root.openCamera(id)
-                        }
-
-                        CameraWall {
-                            anchors.fill: parent
-                            visible: root.view === "wall"
-                            cameras: root.cameras
+                            pinnedIds: root.pinnedIds
                             onCameraClicked: id => root.openCamera(id)
                         }
 
                         CameraEnlarged {
                             anchors.fill: parent
-                            visible: root.view === "enlarged"
-                            camera: store.cameraById(root.focusId)
-                            pinned: pins.pinFor(root.focusId) !== null
+                            visible: root.view === "single"
+                            camera: store.cameraById(root.shownId)
+                            pinned: pins.pinFor(root.shownId) !== null
                             onPrevious: root.stepCamera(-1)
                             onNext: root.stepCamera(1)
-                            onPinToggled: root.focusId ? pins.toggle(root.focusId) : false
+                            onPinToggled: root.shownId ? pins.toggle(root.shownId) : false
                             onEdited: camera => root.openForm(camera)
                         }
 

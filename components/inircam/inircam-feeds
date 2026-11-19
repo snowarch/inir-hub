@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Pulls RTSP cameras into fresh JPEG frames for the camera panel.
 #
-#   inircam-feeds sync <shell-pid>   start the pullers, given the shell's pid
-#   inircam-feeds stop               stop them
+#   inircam-feeds sync <shell-pid> [main-ids]   start the pullers, given the shell's pid
+#   inircam-feeds stop                          stop them
+#
+# Every camera gets its substream. The main stream is pulled only for the cameras named in
+# `main-ids` (comma separated) — the one shown large, and any pinned to the desktop — because an
+# NVR runs out of sessions long before a grid of ten cameras does.
 #
 # Frames and pid files live in $XDG_RUNTIME_DIR/inircam, which only its owner
 # can read. A camera's URL carries its password, so it is written to a 0600
@@ -21,12 +25,16 @@ chmod 700 "$FRAMEDIR" "$PIDDIR"
 
 log() { printf '%s %s\n' "$(date -Is)" "$*" >&2; }
 
+# A pid file holds "<ffmpeg pid> <shell pid>".
+read_pid() { awk '{print $1}' "$1" 2>/dev/null || true; }
+read_owner() { awk '{print $2}' "$1" 2>/dev/null || true; }
+
 kill_feed() {
   local pidfile="$1" base
   base=$(basename "$pidfile" .pid)
   if [[ -f "$pidfile" ]]; then
     local pid
-    pid=$(cat "$pidfile" 2>/dev/null || true)
+    pid=$(read_pid "$pidfile")
     if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
       kill "$pid" 2>/dev/null || true
       sleep 0.2
@@ -47,7 +55,7 @@ start_feed() {
   # if already running and healthy, skip
   if [[ -f "$pidfile" ]]; then
     local pid
-    pid=$(cat "$pidfile" 2>/dev/null || true)
+    pid=$(read_pid "$pidfile")
     if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
       return 0
     fi
@@ -64,7 +72,9 @@ start_feed() {
     -vf "fps=8,scale='min(1280,iw)':-2" \
     -q:v 4 -f image2 -update 1 -atomic_writing 1 -y "$frame" \
     </dev/null >>"$logfile" 2>&1 &
-  echo $! > "$pidfile"
+  # The owner comes second: a puller started by an earlier shell writes frames under that shell's
+  # pid, which the current one would never look at.
+  echo "$! $QS_PID" > "$pidfile"
 }
 
 build_rtsp_url() {
@@ -107,8 +117,8 @@ sync_feeds() {
       want_ids+=("$id"); want_quals+=("sub")
       start_feed "$id" "sub" "$u"
     fi
-    # main stream for enlarged and wall views
-    if [[ -n "$urlMain" && "$urlMain" == rtsp* ]]; then
+    # main stream only for a camera shown large or pinned: the rest would be wasted sessions
+    if [[ -n "$urlMain" && "$urlMain" == rtsp* && ",$MAIN_IDS," == *",$id,"* ]]; then
       local u
       u=$(build_rtsp_url "$urlMain" "$user" "$pass")
       want_ids+=("$id"); want_quals+=("main")
@@ -132,6 +142,11 @@ PY
   local pf base i keep
   for pf in "$PIDDIR"/*.pid; do
     base=$(basename "$pf" .pid)
+    # A puller left by another shell writes frames the current one cannot see: restart it.
+    if [[ "$(read_owner "$pf")" != "$QS_PID" ]]; then
+      kill_feed "$pf"
+      continue
+    fi
     keep=0
     for i in "${!want_ids[@]}"; do
       if [[ "$base" == "${want_ids[$i]}-${want_quals[$i]}" ]]; then keep=1; break; fi
@@ -156,8 +171,9 @@ stop_all() {
 case "${1:-sync}" in
   sync)
     QS_PID="${2:-}"
+    MAIN_IDS="${3:-}"
     if [[ -z "$QS_PID" ]]; then
-      echo "usage: $0 sync <shell-pid>" >&2
+      echo "usage: $0 sync <shell-pid> [main-camera-ids]" >&2
       exit 2
     fi
     sync_feeds
@@ -166,7 +182,7 @@ case "${1:-sync}" in
     stop_all
     ;;
   *)
-    echo "usage: $0 {sync <shell-pid>|stop}" >&2
+    echo "usage: $0 {sync <shell-pid> [main-camera-ids]|stop}" >&2
     exit 1
     ;;
 esac
