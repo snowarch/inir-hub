@@ -1,5 +1,0 @@
-module qs.modules.nihil
-ShellNihilPanelsImpl 1.0 ShellNihilPanelsImpl.qml
-NihilConfigSchema 1.0 NihilConfigSchema.qml
-NihilFamilyStyle 1.0 NihilFamilyStyle.qml
-NihilLayout 1.0 NihilLayout.qml

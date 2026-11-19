@@ -1,4 +1,0 @@
-module qs.modules.nihil.clipboard
-NihilClipboard 1.0 NihilClipboard.qml
-ClipRow 1.0 ClipRow.qml
-ClipPreview 1.0 ClipPreview.qml

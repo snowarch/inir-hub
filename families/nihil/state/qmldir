@@ -1,2 +1,0 @@
-module qs.modules.nihil.state
-singleton NihilState 1.0 NihilState.qml

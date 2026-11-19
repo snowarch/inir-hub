@@ -528,7 +528,7 @@ QtObject {
     }
     // The state of what this row depends on, said where the person is looking, so a row never reads as broken.
     // A Design with its own palette offers its colour first (AIRISU's vermilion seal, its kerria amber).
-    // The three built-in families first, then every other installed family by its manifest name (NiHiL, a
+    // The three built-in families first, then every other installed family by its manifest name (a
     // person's own), so a family added from the Hub can be picked here without editing this list.
     function familyChoices(): var {
         const known = [{label:"iRiS",value:"iris",glyph:"visibility"},{label:"Material",value:"ii",glyph:"dashboard"},{label:"Windows 11",value:"waffle",glyph:"window"}]

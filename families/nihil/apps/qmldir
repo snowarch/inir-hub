@@ -1,7 +1,0 @@
-module qs.modules.nihil.apps
-NihilApps 1.0 NihilApps.qml
-NihilLauncher 1.0 NihilLauncher.qml
-NihilSearchResults 1.0 NihilSearchResults.qml
-NihilAppModel 1.0 NihilAppModel.qml
-AppTile 1.0 AppTile.qml
-FolderView 1.0 FolderView.qml

@@ -283,7 +283,7 @@ ContentPage {
                     onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", "iris"])
                 }
 
-                // Every other installed family (NiHiL, one from the Hub) by its manifest name and icon.
+                // Every other installed family (one from the Hub) by its manifest name and icon.
                 Repeater {
                     model: Plugins.families.filter(id => !["ii", "waffle", "iris"].includes(id))
                     RippleButton {

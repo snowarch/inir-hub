@@ -2,7 +2,7 @@
     "$schema": "../../schema/hub.schema.json",
     "version": "2.36.6",
     "changes": {
-      "2.36.6": ["Settings lists every installed family (NiHiL, one from the Hub) next to the three built in"],
+      "2.36.6": ["Settings lists every installed family from the Hub next to the three built in"],
         "2.36.5": ["Booru previews, booru downloads, pasted images and saved code blocks no longer pass their text through a shell.", "Booru file names and the saved code-block extension keep only safe characters.", "Changing the palette type from the wallpaper section no longer passes it through a shell."],
         "2.36.4": ["Umbriel: a screen keeping its own new-window width says so and can follow the rest; it reads as height when stacked (thanks Raell Tech)"],
         "2.36.3": ["Synced lyrics under the lock screen's player, the sung line in the accent: Settings › System › Lock screen (thanks Turxx)", "Panels, bar popups and sidebar tabs are built the first time you open them, so the shell starts lighter", "Day and month names follow the shell's language, not the system's", "Widget edit mode opens without flicker: the bars slide away and the card zooms once the desktop is ready", "The bar's Resources stop sampling while a fullscreen game covers it"],

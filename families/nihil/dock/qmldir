@@ -1,4 +1,0 @@
-module qs.modules.nihil.dock
-NihilDock 1.0 NihilDock.qml
-DockStrip 1.0 DockStrip.qml
-DockPreview 1.0 DockPreview.qml
