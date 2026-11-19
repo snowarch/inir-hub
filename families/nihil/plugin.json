@@ -18,6 +18,7 @@
     "control.segmented": "style/NSegmented.qml",
     "lockSurface": "lock/NihilLockSurface.qml",
     "settingsApp": "settings/NihilSettingsApp.qml",
+    "settingsHost": "settings/NihilSettingsHost.qml",
     "widgetFace.battery": "widgets/NihilBatteryFace.qml",
     "widgetFace.calendar": "widgets/NihilCalendarFace.qml",
     "widgetFace.clock": "widgets/NihilClockFace.qml",
@@ -28,6 +29,12 @@
     "widgetFace.weather": "widgets/NihilWeatherFace.qml"
   },
   "configKey": "nihil",
+  "settings": {
+    "settingsOverlay": {
+      "key": "nihil.settings.overlay",
+      "fallback": false
+    }
+  },
   "enabledPanels": [
     "nBar",
     "nBackground",

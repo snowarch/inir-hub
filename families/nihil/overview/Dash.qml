@@ -17,6 +17,8 @@ NGlass {
     signal menuAsked(var app, point at)
 
     readonly property var options: Config.options?.nihil?.dash
+    // Size and glass; the desktop dock passes its own block.
+    property var look: root.options
     // The overview follows `dash.position`; the desktop dock sets its own edge.
     property string position: root.options?.position ?? "left"
     readonly property bool vertical: root.position === "left" || root.position === "right"
@@ -29,19 +31,21 @@ NGlass {
     })
     readonly property int keys: root.apps.length + (root.showApps === "hidden" ? 0 : 1)
     readonly property real iconSize: {
-        const asked = root.options?.iconSize ?? 48
+        const asked = root.look?.iconSize ?? 48
         if (asked > 0) return NihilStyle.s(asked)
         return NihilStyle.clamp((root.room - NihilStyle.s(12)) / Math.max(1, root.keys) - NihilStyle.s(12), NihilStyle.s(24), NihilStyle.s(64))
     }
-    readonly property real cell: root.iconSize + NihilStyle.s(12)
-    readonly property real along: root.keys * root.cell + NihilStyle.s(12)
-    readonly property real across: root.cell + NihilStyle.s(12)
-    readonly property string tone: root.options?.tone ?? "default"
+    // The room around each icon grows with it, so a small dash stays small.
+    readonly property real inset: NihilStyle.clamp(root.iconSize * 0.2, NihilStyle.s(5), NihilStyle.s(12))
+    readonly property real cell: root.iconSize + root.inset
+    readonly property real along: root.keys * root.cell + root.inset
+    readonly property real across: root.cell + root.inset
+    readonly property string tone: root.look?.tone ?? "default"
 
     implicitWidth: root.vertical ? root.across : root.along
     implicitHeight: root.vertical ? root.along : root.across
-    radius: root.options?.radius ?? 20
-    tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.void_, root.options?.opacity ?? 0.2)
+    radius: Math.min(root.look?.radius ?? 20, root.across / 2)
+    tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.void_, root.look?.opacity ?? 0.2)
     tracks: true
 
     function windowsOf(app: var): var { return (NiriService.windows ?? []).filter(win => win.app_id === app.appId) }

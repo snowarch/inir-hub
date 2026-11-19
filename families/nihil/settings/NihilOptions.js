@@ -108,6 +108,10 @@ var pages = [
                 choice("dock.visibility", "Shown", [["always", "Always"], ["desktop", "On an empty desktop"],
                                                     ["hover", "Only at the pointer"]],
                        "Away, it comes back when the pointer reaches the edge"),
+                level("dock.iconSize", "Icon size", 16, 96, 1, "px"),
+                choice("dock.tone", "Tone", [["default", "Palette"], ["light", "Light"], ["dark", "Dark"]]),
+                level("dock.opacity", "Glass opacity", 0, 1, 0.05, "percent"),
+                level("dock.radius", "Corner radius", 0, 48, 1, "px"),
                 level("dock.margin", "Space from the edge", 0, 48, 1, "px"),
                 screens("dock.screenList", "Screens", "With none marked it shows on all of them")
             ] },
@@ -537,7 +541,8 @@ var pages = [
             ] },
             { title: "Desktop", rows: [
                 system("panelFamily", "Family", "choice", "nihil", { source: "families", note: "The whole desktop changes to it" }),
-                system("familyTransitionAnimation", "Animate the switch", "switch", true)
+                system("familyTransitionAnimation", "Animate the switch", "switch", true),
+                toggle("settings.overlay", "Settings over the desktop", "Opens inside the shell, with the desktop in sight, instead of in a window")
             ] },
             { title: "Weather", rows: [
                 system("weather.enable", "Weather", "switch", true),

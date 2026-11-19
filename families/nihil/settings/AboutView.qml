@@ -47,16 +47,9 @@ Item {
             width: parent.width - NihilStyle.s(64)
             spacing: NihilStyle.s(6)
 
-            Rectangle {
+            NMark {
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: NihilStyle.s(56)
-                height: width
-                radius: NihilStyle.r(16)
-                gradient: Gradient {
-                    orientation: Gradient.Vertical
-                    GradientStop { position: 0; color: NihilStyle.specB }
-                    GradientStop { position: 1; color: NihilStyle.specA }
-                }
+                size: NihilStyle.s(56)
             }
             Item { width: 1; height: NihilStyle.s(10) }
             NDisplay {

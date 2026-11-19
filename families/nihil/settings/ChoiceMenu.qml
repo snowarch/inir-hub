@@ -40,6 +40,7 @@ Item {
         x: NihilStyle.clamp(root.at.x - width, NihilStyle.s(12), root.width - width - NihilStyle.s(12))
         y: NihilStyle.clamp(root.at.y, NihilStyle.s(12), root.height - height - NihilStyle.s(12))
         radius: NihilStyle.rCard
+        tint: NihilStyle.menuTint
 
         Flickable {
             anchors.fill: parent

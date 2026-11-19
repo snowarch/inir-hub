@@ -57,6 +57,7 @@ Item {
         width: NihilStyle.s(236)
         height: column.implicitHeight + NihilStyle.s(12)
         radius: NihilStyle.rCard
+        tint: NihilStyle.menuTint
         tracks: true
         Column {
             id: column

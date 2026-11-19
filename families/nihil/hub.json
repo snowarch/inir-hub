@@ -7,8 +7,8 @@
             "The overview is the compositor's own on Niri and Umbriel, with NiHiL's search, dash and workspace strip over the blurred wallpaper",
             "New Settings: every NiHiL option and the computer's own, from screens, windows, keyboard and mouse to sound, power and wallpaper",
             "Bar, Control, Today, Power, lock, OSD, notifications, the app grid and the desktop widgets redrawn on the same glass",
-            "Four desktop layouts to start from",
-            "A dock on the desktop, and tray menus on right click with their checks, radios and submenus"
+            "A dock on the desktop with its own size and glass, tray menus with checks, radios and submenus, four layouts to start from",
+            "Settings opens over the desktop or as a window with move, maximize and close keys; menus stay readable over anything"
         ],
         "1.3.0": [
             "NiHiL is rebuilt as a rack: packed black, paper and signal tiles, heavy figures and its own glyphs in every panel",

@@ -5,3 +5,6 @@ SettingRow 1.0 SettingRow.qml
 ChoiceMenu 1.0 ChoiceMenu.qml
 ProfilesView 1.0 ProfilesView.qml
 AboutView 1.0 AboutView.qml
+NihilSettingsView 1.0 NihilSettingsView.qml
+NihilSettingsHost 1.0 NihilSettingsHost.qml
+WindowGrip 1.0 WindowGrip.qml

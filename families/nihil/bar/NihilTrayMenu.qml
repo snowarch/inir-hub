@@ -113,6 +113,7 @@ Item {
                 width: NihilStyle.s(260)
                 height: column.implicitHeight + NihilStyle.s(12)
                 radius: NihilStyle.rCard
+                tint: NihilStyle.menuTint
                 tracks: true
                 x: NihilStyle.clamp(root.at.x - width / 2, edge, popup.width - width - edge)
                 y: root.fromBottom ? popup.height - NihilStyle.barHeight - height - NihilStyle.s(6)

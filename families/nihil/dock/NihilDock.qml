@@ -86,6 +86,9 @@ Variants {
 
             Dash {
                 id: dash
+                // The window ends a few pixels past the glass: a drop shadow would be cut there in a hard dark band.
+                shadow: 0
+                look: dock.options
                 output: dock.output
                 position: dock.edge
                 room: dock.vertical ? frame.height - dock.margin * 2 : frame.width - dock.margin * 2

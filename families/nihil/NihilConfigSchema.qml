@@ -143,6 +143,11 @@ JsonObject {
         property string visibility: "desktop"
         // Pixels from the screen's edge.
         property int margin: 8
+        // Its own size and glass, apart from the overview's dash.
+        property int iconSize: 36
+        property string tone: "default"
+        property real opacity: 0.45
+        property int radius: 18
         property list<string> screenList: []
     }
     property JsonObject thumbnails: JsonObject {
@@ -317,5 +322,9 @@ JsonObject {
         // "topLeft", "top", "topRight", "bottomLeft", "bottom" or "bottomRight".
         property string position: "top"
         property int maxVisible: 4
+    }
+    property JsonObject settings: JsonObject {
+        // Settings opens over the desktop, inside the shell, instead of in its own window.
+        property bool overlay: false
     }
 }

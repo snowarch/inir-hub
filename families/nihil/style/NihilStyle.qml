@@ -65,6 +65,8 @@ Singleton {
     readonly property int form: ({ smoke: 0, frost: 1, fluted: 2, prism: 3 })[root.material] ?? 0
     readonly property real glassOpacity: root.clamp(Number(root.opt("glass", 0.62)), 0.05, 1)
     readonly property color glassTint: Qt.alpha("#17181D", root.glassOpacity)
+    // Menus and lists that open over other controls: dense enough to read over anything, whatever the glass is set to.
+    readonly property color menuTint: Qt.alpha("#141519", Math.max(0.95, root.glassOpacity))
     readonly property bool blur: Boolean(root.opt("blur", true))
     readonly property real glassGrain: root.clamp(Number(root.opt("grain", 0.25)), 0, 1.5)
     readonly property real glassRim: root.clamp(Number(root.opt("rim", 0.7)), 0, 1.5)
