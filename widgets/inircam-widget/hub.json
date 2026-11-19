@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "changes": {
         "1.0.0": [
             "Your cameras on the desktop, in the colours of the wallpaper behind them",
@@ -9,6 +9,10 @@
         "1.0.1": [
             "A refresh button in the header, and Try again when the panel is not answering",
             "The gear opens the panel's manage view, and a button that cannot be delivered says so"
+        ],
+        "1.0.2": [
+            "Cameras that don't fit are counted in the header instead of being drawn past the card's edge",
+            "Recovers on its own after a shell reload, instead of staying on 'not answering'"
         ]
     },
     "summary": "The camera panel's cameras, as a grid on the desktop",
