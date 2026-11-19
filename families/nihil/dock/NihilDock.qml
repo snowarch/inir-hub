@@ -17,14 +17,10 @@ import qs.modules.nihil.overview
 Item {
     id: root
 
-    readonly property bool enabled: Config.options?.nihil?.modules?.dock ?? true
-
-    // The running apps come from the compositor's sorted toplevels, which stay empty until a consumer claims them. One
-    // claim serves every screen.
-    function claim(): void { CompositorService.setSortingConsumer("nihilDock", root.enabled) }
-    onEnabledChanged: root.claim()
-    Component.onCompleted: root.claim()
-    Component.onDestruction: CompositorService.setSortingConsumer("nihilDock", false)
+    // The running apps come from the compositor's sorted toplevels, which stay empty until a holder claims them. One
+    // claim serves every screen; it is kept by holder, so a reload's old release cannot drop the new claim.
+    Component.onCompleted: CompositorService.acquireSortingConsumer(root)
+    Component.onDestruction: CompositorService.releaseSortingConsumer(root)
 
     Variants {
         model: Quickshell.screens
@@ -55,8 +51,7 @@ Item {
                 : dock.previewOpen ? preview.across + NihilStyle.s(16) : strip.reach + NihilStyle.s(4)
 
             screen: dock.modelData
-            visible: root.enabled
-                && (dock.outputs.length === 0 || dock.outputs.includes(dock.output))
+            visible: dock.outputs.length === 0 || dock.outputs.includes(dock.output)
             color: "transparent"
             WlrLayershell.namespace: "quickshell:nihil-dock"
             WlrLayershell.layer: WlrLayer.Top

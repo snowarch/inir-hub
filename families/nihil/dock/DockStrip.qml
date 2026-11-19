@@ -62,7 +62,17 @@ NGlass {
 
     // Running apps are keyed by their lowercase resolved identity (TaskbarApps), so a window matches on the same key.
     function keyOf(win: var): string { return AppSearch.resolveWindowIdentity(win).toLowerCase() }
-    function windowsOf(app: var): var { return (NiriService.windows ?? []).filter(win => root.keyOf(win) === app.appId) }
+    // Windows by key, built once per change of the window list, so no icon or timer resolves identities itself.
+    readonly property var windowsByKey: {
+        const map = {}
+        for (const win of NiriService.windows ?? []) {
+            const key = root.keyOf(win)
+            if (map[key]) map[key].push(win)
+            else map[key] = [win]
+        }
+        return map
+    }
+    function windowsOf(app: var): var { return root.windowsByKey[app.appId] ?? [] }
     function launch(app: var): void {
         const entry = AppSearch.lookupDesktopEntry(app.appId)
         if (!entry) return
@@ -105,7 +115,7 @@ NGlass {
             const now = Date.now()
             const next = {}
             for (const id in root.starting)
-                if (now - root.starting[id] < 8000 && !(NiriService.windows ?? []).some(win => root.keyOf(win) === id)) next[id] = root.starting[id]
+                if (now - root.starting[id] < 8000 && !root.windowsByKey[id]) next[id] = root.starting[id]
             root.starting = next
         }
     }
