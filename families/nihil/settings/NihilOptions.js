@@ -75,6 +75,9 @@ var superActions = [["none", "Nothing"], ["follow", "Open or close the overview"
 var windowActions = [["none", "Nothing"], ["activate", "Focus it"], ["close", "Close it"], ["minimize", "Minimize it"],
                      ["next", "Send to next workspace"], ["search", "Search its title"], ["thumbnail", "Pin as thumbnail"]]
 
+// Where a part of the bar stands.
+var places = [["start", "Start"], ["center", "Centre"], ["end", "End"], ["off", "Hidden"]]
+
 var pages = [
     {
         id: "profiles", summary: "Start from a whole desktop layout", title: "Profiles", glyph: "dashboard_customize", view: "profiles"
@@ -90,10 +93,21 @@ var pages = [
                 choice("panel.visibility", "Shown", [["always", "Always"], ["desktop", "On an empty desktop"],
                                                      ["overview", "In the overview"], ["hidden", "Never"]]),
                 choice("panel.overviewStyle", "In the overview", [["same", "Keep the glass"], ["transparent", "Transparent"]]),
-                toggle("panel.windows", "Open windows", "The workspace's windows as icons; middle click closes one"),
-                level("panel.windowsMax", "Windows shown", 1, 16, 1, ""),
-                toggle("panel.tray", "Tray"),
                 screens("panel.screenList", "Screens", "With none marked it shows on all of them")
+            ] },
+            { title: "On the bar", rows: [
+                choice("panel.parts.logo", "Dashboard key", places),
+                choice("panel.parts.workspaces", "Workspaces", places),
+                choice("panel.parts.windows", "Open windows", places, "Middle click closes one, right click minimizes"),
+                choice("panel.parts.media", "What plays", places, "Middle click plays or pauses, right click skips"),
+                choice("panel.parts.tray", "Tray", places),
+                choice("panel.parts.status", "Status", places, "Network, Bluetooth, sound and battery"),
+                choice("panel.parts.clock", "Clock", places),
+                choice("panel.parts.power", "Power", places),
+                choice("panel.workspaceStyle", "Workspaces as", [["dots", "Dots"], ["numbers", "Numbers"]]),
+                level("panel.windowsMax", "Windows shown", 1, 16, 1, "", "Fewer when the bar has no room"),
+                level("panel.trayMax", "Tray icons shown", 1, 16, 1, "", "The rest wait behind one key"),
+                toggle("panel.date", "Date beside the time", "On a horizontal bar")
             ] },
             { title: "Dashboard", rows: [
                 choice("dashboard.sidebar", "Sidebar", [["full", "Icons and names"], ["icons", "Icons only"]]),
@@ -121,6 +135,10 @@ var pages = [
                                                     ["hover", "Only at the pointer"]],
                        "Away, it comes back when the pointer reaches the edge"),
                 level("dock.iconSize", "Icon size", 16, 96, 1, "px"),
+                level("dock.magnify", "Swell under the pointer", 0, 1, 0.05, "percent"),
+                toggle("dock.previews", "Window previews", "Resting on an icon shows its windows"),
+                toggle("dock.clickMinimizes", "Click the app in front to hide it"),
+                toggle("dock.appGrid", "App grid key"),
                 choice("dock.tone", "Tone", [["default", "Glass"], ["light", "Light"], ["dark", "Dark"]]),
                 level("dock.opacity", "Glass opacity", 0, 1, 0.05, "percent"),
                 level("dock.radius", "Corner radius", 0, 48, 1, "px"),

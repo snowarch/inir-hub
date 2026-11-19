@@ -15,7 +15,7 @@ search apps, windows and files.
 Settings holds every option, and its search reaches all of them.
 
 - **Profiles**: four whole desktop layouts to wear, overwrite with your own and restore.
-- **Layout**: the bar (edge, floating or attached, thickness, windows, tray), the dashboard (size, sidebar, dim), dash, workspace strip, workspace
+- **Layout**: the bar (edge, floating or attached, thickness, which part goes in which zone, how many windows and tray icons), the dock (edge, size, swell, previews), the dashboard (size, sidebar, dim), dash, workspace strip, workspace
   preview, search and workspace switcher.
 - **Appearance**: the accent, the glass, shape, type and the overview's background.
 - **Behavior**: the overview, Super key, hot corner, windows, dash actions, motion and windows asking for attention.

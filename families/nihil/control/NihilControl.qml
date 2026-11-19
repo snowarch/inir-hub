@@ -12,8 +12,9 @@ import qs.modules.common.models.quickToggles
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// Quick settings: the sound, microphone and screen dials, Wi-Fi and Bluetooth, six round keys and what plays. What is
-// on is solid in the accent. A radio's arrow, or a right click on a dial, opens its list in the same page.
+// Quick settings: the sound, microphone and screen dials across the top; under them Wi-Fi and Bluetooth beside six
+// round keys; then what plays. What is on is solid in the accent. A radio's arrow, or a right click on a dial, opens its
+// list in the same page.
 Item {
     id: root
 
@@ -71,8 +72,8 @@ Item {
         signal tapped()
         signal opened()
 
-        width: (root.inner - NihilStyle.spacing) / 2
-        height: NihilStyle.s(68)
+        width: parent.width
+        height: NihilStyle.s(80)
         enabled: radio.usable
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
@@ -144,7 +145,7 @@ Item {
 
         signal tapped()
 
-        width: root.inner / 6
+        width: parent.width / 3
         height: NihilStyle.s(86)
         enabled: key.usable
         hoverEnabled: true
@@ -198,11 +199,11 @@ Item {
         y: Math.max(root.side, (root.height - controls.implicitHeight) / 2)
         width: root.inner
         visible: root.page.length === 0
-        spacing: NihilStyle.s(14)
+        spacing: NihilStyle.s(20)
 
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: NihilStyle.s(24)
+            spacing: NihilStyle.s(40)
             NDial {
                 word: Translation.tr("Sound")
                 glyph: root.muted ? "volume_off" : "volume_up"
@@ -236,10 +237,12 @@ Item {
             }
         }
 
-        Column {
+        Row {
             width: parent.width
             spacing: NihilStyle.spacing
-            Row {
+            Column {
+                width: (parent.width - NihilStyle.spacing) / 2
+                anchors.verticalCenter: parent.verticalCenter
                 spacing: NihilStyle.spacing
                 Radio {
                     glyph: Network.ethernet ? "lan" : Network.wifiEnabled ? "wifi" : "wifi_off"
@@ -262,7 +265,11 @@ Item {
                     onOpened: root.page = "bluetooth"
                 }
             }
-            Row {
+            Grid {
+                width: (parent.width - NihilStyle.spacing) / 2
+                anchors.verticalCenter: parent.verticalCenter
+                columns: 3
+                rowSpacing: NihilStyle.spacing
                 Key {
                     glyph: "bedtime"
                     word: Translation.tr("Night")

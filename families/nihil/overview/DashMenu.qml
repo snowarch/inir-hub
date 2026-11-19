@@ -7,12 +7,15 @@ import qs.services
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// What a right click on a dash icon offers. `app` is the dash's entry; empty closes the menu.
+// What a right click on an icon of the dash or the dock offers: the app's name, a new window and its own actions, pinning,
+// and what can be done to its windows. `app` is the entry; empty closes the menu.
 Item {
     id: root
 
     property var app: null
     property point at: Qt.point(0, 0)
+    // The card grows up from `at` instead of down, for a menu opened above a bottom edge.
+    property bool above: false
     required property string output
 
     readonly property var options: Config.options?.nihil?.dash
@@ -25,7 +28,9 @@ Item {
         const list = []
         const add = (icon, label, run) => list.push({ icon, label, run })
         if (root.entry) add("add", Translation.tr("New window"), () => { AppSearch.launchEntry(root.entry); NihilState.closeOverview() })
-        add("push_pin", root.app.pinned ? Translation.tr("Unpin from dash") : Translation.tr("Pin to dash"), () => TaskbarApps.togglePin(root.app.appId))
+        for (const action of (root.entry?.actions ?? []))
+            add("arrow_forward", action.name, () => { action.execute(); NihilState.closeOverview() })
+        add("push_pin", root.app.pinned ? Translation.tr("Unpin") : Translation.tr("Pin"), () => TaskbarApps.togglePin(root.app.appId))
         if ((root.options?.menuMoveApp ?? true) && root.windows.length > root.here.length)
             add("arrow_forward", Translation.tr("Move all here"), () => root.windows.forEach(win =>
                 NiriService.moveWindowToWorkspaceById(win.id, root.workspace.id, false)))
@@ -52,10 +57,13 @@ Item {
     }
 
     NGlass {
+        id: card
         x: NihilStyle.clamp(root.at.x, NihilStyle.screenMargin, root.width - width - NihilStyle.screenMargin)
-        y: NihilStyle.clamp(root.at.y, NihilStyle.screenMargin, root.height - height - NihilStyle.screenMargin)
+        y: NihilStyle.clamp(root.above ? root.at.y - height : root.at.y, NihilStyle.screenMargin, root.height - height - NihilStyle.screenMargin)
         width: NihilStyle.s(236)
         height: column.implicitHeight + NihilStyle.s(12)
+        // Takes the press, so a click on the card's glass does not close it.
+        MouseArea { anchors.fill: parent }
         radius: NihilStyle.radiusCard
         tint: NihilStyle.menuBackground
         followPointer: true
@@ -64,6 +72,14 @@ Item {
             x: NihilStyle.s(6)
             y: NihilStyle.s(6)
             width: parent.width - NihilStyle.s(12)
+            NText {
+                x: NihilStyle.s(10)
+                width: parent.width - NihilStyle.s(20)
+                height: NihilStyle.s(34)
+                verticalAlignment: Text.AlignVCenter
+                text: root.entry?.name ?? root.app?.appId ?? ""
+                font.weight: Font.DemiBold
+            }
             Repeater {
                 model: root.rows
                 NButton {

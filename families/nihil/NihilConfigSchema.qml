@@ -50,10 +50,25 @@ JsonObject {
         // In the overview: "same" keeps the glass, "transparent" drops it.
         property string overviewStyle: "same"
         property list<string> screenList: []
-        // The open windows of the workspace, as icons on the bar.
-        property bool windows: true
+        // Where each part stands: "start", "center", "end" or "off".
+        property JsonObject parts: JsonObject {
+            property string logo: "start"
+            property string workspaces: "start"
+            property string windows: "start"
+            property string media: "center"
+            property string tray: "end"
+            property string status: "end"
+            property string clock: "end"
+            property string power: "end"
+        }
+        // "dots" or "numbers".
+        property string workspaceStyle: "dots"
+        // The open windows of the workspace, at most this many; fewer when the bar has no room.
         property int windowsMax: 8
-        property bool tray: true
+        // Tray icons on the bar; the rest wait behind one key.
+        property int trayMax: 6
+        // The date beside the time on a horizontal bar.
+        property bool date: true
     }
     // The dashboard: the one pane beside the bar that holds every page.
     property JsonObject dashboard: JsonObject {
@@ -163,10 +178,18 @@ JsonObject {
         // Pixels from the screen's edge.
         property int margin: 8
         // Its own size and glass, apart from the overview's dash.
-        property int iconSize: 36
+        property int iconSize: 44
         property string tone: "default"
-        property real opacity: 0.45
-        property int radius: 18
+        property real opacity: 0.6
+        property int radius: 22
+        // How much icons swell under the pointer, 0 for not at all.
+        property real magnify: 0.35
+        // Pictures of an app's windows when the pointer rests on its icon.
+        property bool previews: true
+        // A click on the app already in front sends its window away.
+        property bool clickMinimizes: true
+        // The key to the app grid at its end.
+        property bool appGrid: true
         property list<string> screenList: []
     }
     property JsonObject thumbnails: JsonObject {

@@ -44,7 +44,7 @@ NGlass {
 
     implicitWidth: root.vertical ? root.across : root.along
     implicitHeight: root.vertical ? root.along : root.across
-    radius: root.across / 2
+    radius: Math.min(NihilStyle.s(root.look?.radius ?? 999), root.across / 2)
     tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.background, root.look?.opacity ?? 0.74)
     followPointer: true
 

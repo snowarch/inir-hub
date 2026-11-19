@@ -1,7 +1,14 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "changes": {
+    "4.2.0": [
+      "The bar has start, centre and end zones; Settings puts each part in one of them or hides it, and nothing overlaps",
+      "What plays can sit on the bar: cover and title, click for Media, middle click pauses, right click skips",
+      "Workspaces as dots or numbers; the tray keeps a set number of icons and the rest behind one key",
+      "A new dock: icons swell under the pointer, pinned apps drag to reorder, running apps follow a parting",
+      "Resting on a dock icon shows its windows to pick or close; the right click menu carries the app's own actions"
+    ],
     "4.1.0": [
       "Plain names everywhere: Settings speaks of the bar, the dashboard, the accent, edge light and edge glow",
       "The dashboard keeps one size for every page, set in Settings, so moving between pages never moves the frame",
