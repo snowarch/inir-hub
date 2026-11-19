@@ -45,7 +45,7 @@ Singleton {
         { id: "terminal", group: 1, label: Translation.tr("Terminal"), glyph: "terminal", tint: "gray",
             run: screen => root.inir(["terminal"]) },
         { id: "files", group: 1, label: Translation.tr("Files"), glyph: "folder", tint: "sky",
-            run: screen => Quickshell.execDetached(["xdg-open", Quickshell.env("HOME") ?? "/"]) },
+            run: screen => ShellExec.execDetachedArgs(["xdg-open", Quickshell.env("HOME") ?? "/"], "Open home folder") },
         { id: "settings", group: 2, label: Translation.tr("Settings"), glyph: "settings", tint: "gray",
             run: screen => root.inir(["iris", "settings", ""]) },
         { id: "restart", group: 2, label: Translation.tr("Restart shell"), glyph: "restart_alt", tint: "gray",

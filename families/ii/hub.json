@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.36.6",
+    "version": "2.36.7",
     "changes": {
+      "2.36.7": ["Links and the Anki pages open from Settings as fast as apps from the launcher, outside the shell"],
       "2.36.6": ["Settings lists every installed family from the Hub next to the three built in"],
         "2.36.5": ["Booru previews, booru downloads, pasted images and saved code blocks no longer pass their text through a shell.", "Booru file names and the saved code-block extension keep only safe characters.", "Changing the palette type from the wallpaper section no longer passes it through a shell."],
         "2.36.4": ["Umbriel: a screen keeping its own new-window width says so and can follow the rest; it reads as height when stacked (thanks Raell Tech)"],

@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.modules.common
+import qs.modules.common.functions
 import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.pieces
@@ -1551,7 +1552,7 @@ QtObject {
             choices: [{ label: "System", value: "auto" }].concat(Translation.allAvailableLanguages.map(code => ({ label: Translation.languageDisplayName(code), value: code }))),
             keywords: ["language", "idioma", "translation", "locale", "español", "spanish"] },
         { section: "general", group: "Apps & login", label: "Starts with you", description: "Apps and commands your compositor opens when you sign in.", kind: "list", view: Qt.resolvedUrl("IrisAutostartList.qml"), summary: false, keywords: ["autostart", "startup", "login", "boot", "launch", "spawn", "discord", "steam", "telegram", "inicio", "arranque"] },
-        { section: "general", group: "Apps & login", label: "Startup file", description: "Where these lines live, to edit by hand.", kind: "action", button: "Open", run: () => Quickshell.execDetached(["xdg-open", Autostart.startupFilePath]), showIf: () => Autostart.isNiri && Autostart.startupFilePath.length > 0, tune: true, keywords: ["startup", "niri", "config", "kdl", "file"] },
+        { section: "general", group: "Apps & login", label: "Startup file", description: "Where these lines live, to edit by hand.", kind: "action", button: "Open", run: () => ShellExec.execDetachedArgs(["xdg-open", Autostart.startupFilePath], "Open startup file"), showIf: () => Autostart.isNiri && Autostart.startupFilePath.length > 0, tune: true, keywords: ["startup", "niri", "config", "kdl", "file"] },
         { section: "general", group: "Apps & login", label: "Terminal", description: "Where commands and installs open.", path: "apps.terminal", kind: "text", placeholder: "kitty", fallback: "kitty", keywords: ["terminal", "kitty", "foot", "alacritty", "ghostty", "wezterm", "default apps"] },
         { section: "general", group: "Settings window", label: "Prism", description: "Every page in one panel.", kind: "action", button: "Open Prism", run: () => { Config.setNestedValues({ "iris.appearance.settingsPanel": "prism", "iris.appearance.settingsOriginal": false }) }, keywords: ["prism", "settings", "new", "design", "layout", "back", "nuevo", "diseño", "volver"] },
         { section: "general", group: "Settings window", label: "Side column", description: "Your profile, changes and music beside the page.", path: "iris.appearance.settingsRail", kind: "choice", tune: true, fallback: "auto", visibleWhen: "iris.appearance.settingsPanel=prism", choices: [{ label: "Automatic", value: "auto", glyph: "auto_awesome" }, { label: "Always", value: "open", glyph: "right_panel_open" }, { label: "Never", value: "closed", glyph: "right_panel_close" }], keywords: ["rail", "sidebar", "right", "column", "changes", "now playing", "hide", "fold", "columna", "derecha", "ocultar"] },

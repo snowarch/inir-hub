@@ -1170,14 +1170,14 @@ ContentPage {
                         visible: JapaneseDictionary.ankiState === "not_installed"
                         materialIcon: "download"
                         mainText: Translation.tr("Get Anki Desktop")
-                        onClicked: Quickshell.execDetached(["xdg-open", "https://apps.ankiweb.net/"])
+                        onClicked: ShellExec.execDetachedArgs(["xdg-open", "https://apps.ankiweb.net/"], "Open link")
                     }
                     RippleButtonWithIcon {
                         Layout.fillWidth: true
                         visible: JapaneseDictionary.ankiState === "connect_unavailable"
                         materialIcon: "extension"
                         mainText: Translation.tr("Install / check AnkiConnect")
-                        onClicked: Quickshell.execDetached(["xdg-open", "https://ankiweb.net/shared/info/2055492159"])
+                        onClicked: ShellExec.execDetachedArgs(["xdg-open", "https://ankiweb.net/shared/info/2055492159"], "Open link")
                     }
                     RippleButtonWithIcon {
                         Layout.fillWidth: true
@@ -1271,7 +1271,7 @@ ContentPage {
                     Layout.fillWidth: true
                     materialIcon: "travel_explore"
                     mainText: Translation.tr("Browse more shared decks")
-                    onClicked: Quickshell.execDetached(["xdg-open", "https://ankiweb.net/shared/decks?search=japanese"])
+                    onClicked: ShellExec.execDetachedArgs(["xdg-open", "https://ankiweb.net/shared/decks?search=japanese"], "Open link")
                 }
             }
 

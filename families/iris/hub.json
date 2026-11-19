@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.110",
+    "version": "2.33.111",
     "changes": {
+      "2.33.111": ["The desktop menu, the startup file and the themes folder open apps as fast as the launcher, outside the shell"],
       "2.33.110": [
         "Hovering a notification in the quick panel no longer moves its row"
       ],

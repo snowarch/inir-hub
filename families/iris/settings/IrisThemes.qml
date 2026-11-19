@@ -159,7 +159,7 @@ Singleton {
         writer.exec(["rm", "-f", `${root.folder}/${id}.json`])
     }
     function reveal(): void {
-        Quickshell.execDetached(["bash", "-c", 'mkdir -p "$1" && xdg-open "$1"', "reveal", root.folder])
+        ShellExec.execDetachedArgs(["bash", "-c", 'mkdir -p "$1" && exec xdg-open "$1"', "reveal", root.folder], "Open themes folder")
     }
     function write(theme: var): void { root.writeAll([theme]) }
     function writeAll(themes: var): void {
