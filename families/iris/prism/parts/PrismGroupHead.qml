@@ -20,18 +20,20 @@ Item {
     readonly property string title: String(root.entry?.title ?? "")
     readonly property var rows: Array.from(root.entry?.rows ?? [])
     function same(a: string, b: string): bool { return String(a ?? "").trim().toLowerCase() === String(b ?? "").trim().toLowerCase() }
-    readonly property var master: root.rows.length === 0 ? null
+    // A group whose master went to the page's lead (PrismLead) promotes no other row to its head.
+    readonly property var master: root.leadMaster !== null || root.rows.length === 0 ? null
         : root.same(root.rows[0].label, root.title) || root.rows.length === 1 ? root.rows[0] : null
     readonly property bool masterSwitch: root.master !== null && String(root.master.kind) === "switch"
     // The rows under the head: a master switch lives in the head; another master stays, without its name.
     readonly property var bodyRows: root.masterSwitch ? root.rows.slice(1) : root.rows
     readonly property string headlessKey: root.master !== null && !root.masterSwitch ? String(root.master.key ?? "") : ""
     readonly property string line: {
-        if (!root.master) return ""
-        const about = String(root.master.spec?.description ?? root.master.detail ?? "")
+        const said = root.master ?? root.leadMaster
+        if (!said) return ""
+        const about = String(said.spec?.description ?? said.detail ?? "")
         // A master named otherwise than its group says its own name first: Badges › "Unread counts: the colour of…".
-        return root.same(root.master.label, root.title) || about.length === 0 ? Translation.tr(about)
-            : Translation.tr(String(root.master.label)) + " · " + Translation.tr(about)
+        return root.same(said.label, root.title) || about.length === 0 ? Translation.tr(about)
+            : Translation.tr(String(said.label)) + " · " + Translation.tr(about)
     }
     // A master switch the page's lead took (PrismLead) still dims the group it heads.
     readonly property var leadMaster: root.entry?.lead ?? null

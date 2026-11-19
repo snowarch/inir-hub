@@ -61,6 +61,8 @@ Column {
             }
             Repeater {
                 model: ScriptModel { objectProp: "key"; values: root.tiles }
+                // A tile gone (its row hidden) may have been the tallest.
+                onItemRemoved: Qt.callLater(grid.measure)
                 delegate: PrismTile {
                     id: tile
                     required property var modelData
