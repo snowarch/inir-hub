@@ -1,19 +1,22 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell.Widgets
 import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// One notification: the app's mark, who sent it and when, the summary and the body, then its actions. A click opens it,
-// resting on it keeps it, the cross on the body's line lets it go.
+// One notification on its plate: the app's mark, the summary, the body, a picture if it brought one, then its actions.
+// A click opens it, resting on it keeps it, the round key lets it go.
 MouseArea {
     id: root
 
     required property var notice
-    property bool alone: true
 
-    implicitHeight: Math.max(NihilStyle.s(64), words.implicitHeight + (root.alone ? 0 : NihilStyle.s(20)))
+    readonly property bool pictured: String(root.notice.image ?? "").length > 0
+    readonly property bool hot: root.containsMouse || drop.containsMouse
+
+    implicitHeight: Math.max(NihilStyle.s(84), words.implicitHeight + NihilStyle.s(32))
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     Accessible.role: Accessible.Button
@@ -21,80 +24,90 @@ MouseArea {
     onEntered: Notifications.cancelTimeout(root.notice.id)
     onClicked: Notifications.attemptInvokeAction(root.notice.id, "default")
 
-    NWell {
+    Rectangle {
         anchors.fill: parent
-        visible: !root.alone
-        radius: NihilStyle.rCard
-        hovered: root.containsMouse
+        radius: NihilStyle.r(24)
+        color: root.hot ? NihilStyle.pieceRaised : NihilStyle.piece
+        border.width: root.notice.critical ? NihilStyle.s(2) : 0
+        border.color: NihilStyle.danger
+        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
     }
     NAppIcon {
         id: mark
-        x: root.alone ? 0 : NihilStyle.s(12)
-        y: NihilStyle.s(12)
+        x: NihilStyle.s(16)
+        y: NihilStyle.s(16)
         appId: root.notice.icon
-        size: NihilStyle.s(40)
+        size: NihilStyle.s(48)
     }
     Column {
         id: words
-        x: mark.x + mark.width + NihilStyle.s(12)
-        y: root.alone ? NihilStyle.s(10) : NihilStyle.s(10)
-        width: parent.width - x - (root.alone ? 0 : NihilStyle.s(12))
-        spacing: NihilStyle.s(2)
+        x: mark.x + mark.width + NihilStyle.s(14)
+        y: NihilStyle.s(16)
+        width: parent.width - x - NihilStyle.s(16) - (root.pictured ? picture.width + NihilStyle.s(12) : 0)
+        spacing: NihilStyle.s(3)
 
-        Item {
-            width: parent.width
-            height: title.implicitHeight
-            NText {
-                id: title
-                width: parent.width - now.implicitWidth - NihilStyle.gap
-                text: root.notice.summary || root.notice.app
-                font.weight: Font.Medium
-                color: root.notice.critical ? NihilStyle.danger : NihilStyle.ink
-            }
-            NText {
-                id: now
-                anchors.right: parent.right
-                text: Translation.tr("Now")
-                font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkFaint
-            }
-        }
         NText {
             width: parent.width - NihilStyle.s(30)
+            text: root.notice.summary || root.notice.app
+            font.pixelSize: NihilStyle.s(15)
+            font.weight: Font.Medium
+            color: root.notice.critical ? NihilStyle.danger : NihilStyle.ink
+        }
+        NText {
+            width: parent.width
             visible: text.length > 0
             text: root.notice.body
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
-            maximumLineCount: 2
+            maximumLineCount: 3
             font.pixelSize: NihilStyle.textSmall
             color: NihilStyle.inkSoft
         }
         Row {
             visible: root.notice.actions.length > 0
-            topPadding: NihilStyle.gap
-            bottomPadding: NihilStyle.s(4)
+            topPadding: NihilStyle.s(8)
             spacing: NihilStyle.s(6)
             Repeater {
                 model: root.notice.actions
                 NButton {
                     required property var modelData
                     required property int index
-                    height: NihilStyle.s(32)
+                    height: NihilStyle.s(34)
                     label: modelData.text
                     lit: index === 0
+                    tone: NihilStyle.pieceRaised
                     onClicked: Notifications.attemptInvokeAction(root.notice.id, modelData.id)
                 }
             }
         }
     }
-    NButton {
+    ClippingRectangle {
+        id: picture
+        visible: root.pictured
         anchors.right: parent.right
-        anchors.rightMargin: root.alone ? -NihilStyle.s(6) : NihilStyle.s(6)
-        y: NihilStyle.s(30)
-        width: NihilStyle.s(28)
+        anchors.rightMargin: NihilStyle.s(16)
+        y: NihilStyle.s(16)
+        width: NihilStyle.s(64)
         height: width
-        radius: width / 2
-        opacity: root.containsMouse || containsMouse ? 1 : 0
+        radius: NihilStyle.r(14)
+        color: NihilStyle.piece
+        Image {
+            anchors.fill: parent
+            source: root.pictured ? root.notice.image : ""
+            sourceSize: Qt.size(parent.width * 2, parent.height * 2)
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+        }
+    }
+    NButton {
+        id: drop
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: NihilStyle.s(8)
+        width: NihilStyle.s(30)
+        height: width
+        tone: NihilStyle.pieceRaised
+        opacity: root.hot ? 1 : 0
         icon: "close"
         iconSize: NihilStyle.s(14)
         Accessible.name: Translation.tr("Dismiss")

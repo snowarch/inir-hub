@@ -449,5 +449,15 @@
   "Microphone": "마이크",
   "Dark": "어둡게",
   "Light": "밝게",
-  "The one light the whole desktop is drawn in": "데스크톱 전체를 그리는 하나의 빛"
+  "The one light the whole desktop is drawn in": "데스크톱 전체를 그리는 하나의 빛",
+  "All": "전체",
+  "Text": "텍스트",
+  "Images": "이미지",
+  "Pinned": "고정됨",
+  "Copy": "복사",
+  "Pin": "고정",
+  "Unpin": "고정 해제",
+  "Delete": "삭제",
+  "Random": "무작위",
+  "Use this wallpaper": "이 배경화면 사용"
 }

@@ -449,5 +449,15 @@
   "Microphone": "מיקרופון",
   "Dark": "כהה",
   "Light": "בהיר",
-  "The one light the whole desktop is drawn in": "האור היחיד שבו מצויר כל שולחן העבודה"
+  "The one light the whole desktop is drawn in": "האור היחיד שבו מצויר כל שולחן העבודה",
+  "All": "הכול",
+  "Text": "טקסט",
+  "Images": "תמונות",
+  "Pinned": "מוצמדים",
+  "Copy": "העתקה",
+  "Pin": "הצמדה",
+  "Unpin": "ביטול הצמדה",
+  "Delete": "מחיקה",
+  "Random": "אקראי",
+  "Use this wallpaper": "שימוש ברקע הזה"
 }

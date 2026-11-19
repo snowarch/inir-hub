@@ -449,5 +449,15 @@
   "Microphone": "Микрофон",
   "Dark": "Тёмная",
   "Light": "Светлая",
-  "The one light the whole desktop is drawn in": "Единственный свет, которым нарисован весь рабочий стол"
+  "The one light the whole desktop is drawn in": "Единственный свет, которым нарисован весь рабочий стол",
+  "All": "Все",
+  "Text": "Текст",
+  "Images": "Изображения",
+  "Pinned": "Закреплённые",
+  "Copy": "Копировать",
+  "Pin": "Закрепить",
+  "Unpin": "Открепить",
+  "Delete": "Удалить",
+  "Random": "Случайно",
+  "Use this wallpaper": "Использовать эти обои"
 }

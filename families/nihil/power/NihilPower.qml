@@ -7,13 +7,11 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.nihil.style
 
-// The way out. The band has bent into the horizon of a dark planet and the five ways stand along it; the light runs to the
-// chosen one. The pointer or the arrows choose, Enter or a click goes.
+// The way out: a selector you turn. Five ways stand round a ring and the light follows the chosen one; its name is at the
+// heart. The pointer, the wheel or the arrows turn it, Enter or a click goes.
 FocusScope {
     id: root
 
-    property real limbAt: 0
-    property real limbRadius: 2600
     property bool flipped: false
     property bool open: false
 
@@ -24,29 +22,31 @@ FocusScope {
         { id: "reboot", glyph: "restart", word: Translation.tr("Restart") },
         { id: "poweroff", glyph: "power_settings_new", word: Translation.tr("Shut down") }
     ]
-    property int current: 2
+    readonly property real stride: Math.PI * 2 / root.ways.length
+    property int current: 0
+    // Keeps turning the short way round, past the top as well.
+    property real pointer: 0
+    Behavior on pointer { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
 
-    readonly property real stride: Math.min(NihilStyle.s(190), root.width / 5.4)
-    function keyX(index: int): real { return root.width / 2 + (index - 2) * root.stride }
-    // The height of the horizon at x, measured from the edge the sheet hangs from.
-    function limbY(x: real): real {
-        const off = x - root.width / 2
-        return root.limbAt + root.limbRadius - Math.sqrt(root.limbRadius * root.limbRadius - off * off)
-    }
-    // From the edge the sheet hangs from to this window.
-    function onScreen(y: real, height: real): real { return root.flipped ? root.height - y - height : y }
-
-    readonly property real lightX: root.keyX(root.current)
-    readonly property real lightY: root.limbY(root.lightX)
+    readonly property real ringRadius: Math.min(root.height * 0.29, root.width * 0.24, NihilStyle.s(300))
+    readonly property real keySide: Math.round(root.ringRadius * 0.28)
+    readonly property real orbit: root.ringRadius + root.keySide / 2 + NihilStyle.s(46)
 
     onOpenChanged: {
         if (!root.open) return
-        root.current = 2
+        root.current = 0
+        root.pointer = 0
         root.forceActiveFocus()
     }
     Component.onCompleted: if (root.open) root.forceActiveFocus()
 
-    function step(by: int): void { root.current = (root.current + by + root.ways.length) % root.ways.length }
+    function choose(index: int): void {
+        const whole = Math.PI * 2
+        const off = ((index * root.stride - root.pointer) % whole + whole * 1.5) % whole - whole / 2
+        root.pointer += off
+        root.current = index
+    }
+    function step(by: int): void { root.choose((root.current + by + root.ways.length) % root.ways.length) }
     function take(id: string): void {
         GlobalStates.sessionOpen = false
         if (id === "lock") Session.lock()
@@ -57,27 +57,49 @@ FocusScope {
     }
 
     Keys.onLeftPressed: root.step(-1)
+    Keys.onUpPressed: root.step(-1)
     Keys.onRightPressed: root.step(1)
+    Keys.onDownPressed: root.step(1)
     Keys.onTabPressed: root.step(1)
     Keys.onBacktabPressed: root.step(-1)
     Keys.onReturnPressed: root.take(root.ways[root.current].id)
     Keys.onEnterPressed: root.take(root.ways[root.current].id)
 
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.NoButton
+        onWheel: event => root.step(event.angleDelta.y > 0 ? -1 : 1)
+    }
+
+    NRing {
+        id: ring
+        anchors.centerIn: parent
+        width: root.ringRadius * 2
+        height: width
+        ticks: 120
+        pointer: root.pointer
+        spread: root.stride * 0.42
+    }
+
     Column {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: root.onScreen(root.limbAt * 0.38, height)
+        anchors.centerIn: ring
+        width: root.ringRadius * 1.4
         spacing: NihilStyle.s(10)
         NDisplay {
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+            height: root.ringRadius * 0.3
+            horizontalAlignment: Text.AlignHCenter
+            fontSizeMode: Text.HorizontalFit
+            minimumPixelSize: NihilStyle.s(24)
+            size: root.ringRadius * 0.26
             text: root.ways[root.current].word
-            size: NihilStyle.s(96)
-            font.letterSpacing: -NihilStyle.s(3)
         }
         NText {
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
             visible: text.length > 0
             text: DateTime.uptime ? Translation.tr("Up for %1").arg(DateTime.uptime) : ""
-            font.pixelSize: NihilStyle.s(16)
+            font.pixelSize: NihilStyle.s(15)
             color: NihilStyle.inkSoft
         }
     }
@@ -90,53 +112,42 @@ FocusScope {
             required property var modelData
             required property int index
             readonly property bool chosen: root.current === way.index
-            readonly property real side: NihilStyle.s(72)
+            readonly property real angle: way.index * root.stride
 
-            x: root.keyX(way.index) - width / 2
-            y: root.flipped ? root.height - root.limbY(root.keyX(way.index)) - way.side / 2
-                : root.limbY(root.keyX(way.index)) - way.side / 2
-            width: Math.min(root.stride, NihilStyle.s(150))
-            height: way.side + NihilStyle.s(44)
+            width: Math.max(root.keySide, words.implicitWidth)
+            height: root.keySide + NihilStyle.s(34)
+            x: ring.x + ring.width / 2 + Math.sin(way.angle) * root.orbit - width / 2
+            y: ring.y + ring.height / 2 - Math.cos(way.angle) * root.orbit - root.keySide / 2
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             Accessible.role: Accessible.Button
             Accessible.name: way.modelData.word
-            onEntered: root.current = way.index
+            onEntered: root.choose(way.index)
             onClicked: root.take(way.modelData.id)
 
-            NBloom {
-                anchors.centerIn: disc
-                width: disc.width * 2.6
-                height: width
-                opacity: way.chosen ? 1 : 0
-                visible: opacity > 0
-                Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
-            }
             Rectangle {
                 id: disc
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: way.side
+                width: root.keySide
                 height: width
                 radius: width / 2
-                color: way.chosen ? NihilStyle.ink : NihilStyle.void_
-                border.width: way.chosen ? 0 : 1
-                border.color: NihilStyle.hair
+                color: way.chosen ? NihilStyle.accent : NihilStyle.pieceRaised
                 scale: way.pressed ? 0.95 : 1
                 Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
                 Behavior on scale { NumberAnimation { duration: NihilStyle.quick } }
                 NIcon {
                     anchors.centerIn: parent
                     text: way.modelData.glyph
-                    size: NihilStyle.s(28)
-                    color: way.chosen ? NihilStyle.void_ : NihilStyle.ink
+                    size: root.keySide * 0.36
+                    color: way.chosen ? NihilStyle.accentInk : NihilStyle.ink
                 }
             }
             NText {
+                id: words
                 anchors.horizontalCenter: parent.horizontalCenter
-                y: disc.height + NihilStyle.s(14)
-                width: Math.min(implicitWidth, parent.width)
+                y: disc.height + NihilStyle.s(10)
                 text: way.modelData.word
-                font.pixelSize: NihilStyle.s(15)
+                font.pixelSize: NihilStyle.textSmall
                 font.weight: way.chosen ? Font.Medium : Font.Normal
                 color: way.chosen ? NihilStyle.ink : NihilStyle.inkSoft
             }

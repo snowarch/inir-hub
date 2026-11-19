@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -8,8 +9,8 @@ import qs.modules.common.functions
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The wallpapers on the wide slab: a search, light or dark for the colours taken from the picture, one at random, and the
-// folder as pictures. The arrows walk them and Enter wears the marked one.
+// The wallpapers: the marked one large, with light or dark for the colours taken from it, beside the folder as pictures.
+// The arrows or a click mark one; Enter, a double click or the key wears it.
 Item {
     id: root
 
@@ -18,8 +19,8 @@ Item {
     property real room: 0
     property bool open: false
 
-    implicitWidth: NihilStyle.s(1040)
-    implicitHeight: Math.min(NihilStyle.s(660), root.room)
+    implicitWidth: NihilStyle.s(1240)
+    implicitHeight: Math.min(NihilStyle.s(720), root.room)
 
     property string query: ""
     property bool dark: NihilStyle.dark
@@ -65,97 +66,165 @@ Item {
         width: root.width - sheet.inset * 2
         height: root.height - NihilStyle.s(56)
 
-        NField {
-            id: search
-            width: sheet.width - keys.width - NihilStyle.gap
-            height: NihilStyle.s(48)
-            radius: NihilStyle.rCard
-            glyph: "search"
-            placeholder: Translation.tr("Search wallpapers")
-            clearable: true
-            onEdited: text => root.query = text
-            onStepped: by => by > 0 ? grid.moveCurrentIndexDown() : grid.moveCurrentIndexUp()
-            onEntered: root.pick(root.shown[grid.currentIndex] ?? "")
-            Keys.onLeftPressed: grid.moveCurrentIndexLeft()
-            Keys.onRightPressed: grid.moveCurrentIndexRight()
-        }
+        // The marked wallpaper, large, with what wearing it will do.
+        Item {
+            id: hero
 
-        Row {
-            id: keys
-            anchors.right: parent.right
-            anchors.verticalCenter: search.verticalCenter
-            spacing: NihilStyle.s(4)
+            readonly property string path: root.shown[grid.currentIndex] ?? ""
+            readonly property bool video: Wallpapers.isVideoFile(hero.path)
 
-            NButton {
-                icon: "light_mode"
-                lit: !root.dark
-                onClicked: root.dark = false
+            width: Math.round(sheet.width * 0.56)
+            height: sheet.height
+
+            ClippingRectangle {
+                id: picture
+                width: hero.width
+                height: hero.height - foot.height - NihilStyle.s(16)
+                radius: NihilStyle.r(26)
+                color: NihilStyle.piece
+
+                Image {
+                    anchors.fill: parent
+                    asynchronous: true
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: 1280
+                    source: !root.open || hero.path.length === 0 ? ""
+                        : "file://" + (hero.video ? String(Wallpapers.getVideoFirstFramePath(hero.path) ?? "") : hero.path)
+                    opacity: status === Image.Ready ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
+                }
             }
-            NButton {
-                icon: "moon"
-                lit: root.dark
-                onClicked: root.dark = true
-            }
-            NButton {
-                icon: "shuffle"
-                onClicked: {
-                    Wallpapers.randomFromCurrentFolder(root.dark)
-                    root.close()
+
+            Column {
+                id: foot
+                anchors.bottom: parent.bottom
+                width: hero.width
+                spacing: NihilStyle.s(14)
+
+                NDisplay {
+                    width: parent.width
+                    size: NihilStyle.s(30)
+                    text: FileUtils.fileNameForPath(hero.path).replace(/\.[^.]+$/, "")
+                }
+                Item {
+                    width: parent.width
+                    height: NihilStyle.s(44)
+
+                    NSegmented {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: NihilStyle.s(220)
+                        height: NihilStyle.s(40)
+                        options: [
+                            { value: true, label: Translation.tr("Dark") },
+                            { value: false, label: Translation.tr("Light") }
+                        ]
+                        current: root.dark
+                        onPicked: value => root.dark = value
+                    }
+                    Row {
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: NihilStyle.s(6)
+
+                        NButton {
+                            width: NihilStyle.s(44)
+                            height: NihilStyle.s(44)
+                            icon: "shuffle"
+                            Accessible.name: Translation.tr("Random")
+                            onClicked: {
+                                Wallpapers.randomFromCurrentFolder(root.dark)
+                                root.close()
+                            }
+                        }
+                        NButton {
+                            height: NihilStyle.s(44)
+                            icon: "check"
+                            label: Translation.tr("Use this wallpaper")
+                            lit: true
+                            enabled: hero.path.length > 0
+                            onClicked: root.pick(hero.path)
+                        }
+                    }
                 }
             }
         }
 
-        GridView {
-            id: grid
+        Item {
+            id: shelf
+            x: hero.width + NihilStyle.s(16)
+            width: sheet.width - x
+            height: sheet.height
 
-            readonly property int columns: Math.max(2, Math.round(width / NihilStyle.s(250)))
-
-            y: search.y + search.height + NihilStyle.s(12)
-            width: sheet.width
-            height: sheet.height - y
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
-            cellWidth: Math.floor(width / columns)
-            cellHeight: Math.round(cellWidth * 10 / 16)
-            model: root.shown
-            keyNavigationEnabled: true
-            highlightFollowsCurrentItem: false
-
-            delegate: WallpaperThumb {
-                id: thumb
-                required property string modelData
-                required property int index
-                width: grid.cellWidth
-                height: grid.cellHeight
-                path: thumb.modelData
-                current: thumb.modelData === Wallpapers.effectiveWallpaperPath
-                focused: grid.currentIndex === thumb.index
-                live: root.open
-                onPicked: root.pick(thumb.modelData)
-                onHoveredChanged: if (thumb.hovered) grid.currentIndex = thumb.index
+            NField {
+                id: search
+                width: shelf.width
+                height: NihilStyle.s(50)
+                glyph: "search"
+                placeholder: Translation.tr("Search wallpapers")
+                clearable: true
+                onEdited: text => {
+                    root.query = text
+                    grid.currentIndex = 0
+                }
+                onStepped: by => by > 0 ? grid.moveCurrentIndexDown() : grid.moveCurrentIndexUp()
+                onWalked: by => by > 0 ? grid.moveCurrentIndexRight() : grid.moveCurrentIndexLeft()
+                onEntered: root.pick(root.shown[grid.currentIndex] ?? "")
             }
-        }
 
-        Column {
-            anchors.centerIn: grid
-            visible: grid.count === 0
-            spacing: NihilStyle.s(6)
+            GridView {
+                id: grid
 
-            NIcon {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: root.query.length > 0 ? "search_off" : "image"
-                size: NihilStyle.s(32)
-                color: NihilStyle.inkSoft
+                y: search.height + NihilStyle.s(10)
+                width: shelf.width
+                height: shelf.height - y
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                cellWidth: Math.floor(width / 2)
+                cellHeight: Math.round(cellWidth * 10 / 16)
+                model: root.shown
+                keyNavigationEnabled: true
+                highlightFollowsCurrentItem: false
+                onCurrentIndexChanged: grid.positionViewAtIndex(grid.currentIndex, GridView.Contain)
+
+                delegate: WallpaperThumb {
+                    id: thumb
+                    required property string modelData
+                    required property int index
+                    width: grid.cellWidth
+                    height: grid.cellHeight
+                    path: thumb.modelData
+                    current: thumb.modelData === Wallpapers.effectiveWallpaperPath
+                    focused: grid.currentIndex === thumb.index
+                    live: root.open
+                    onMarked: grid.currentIndex = thumb.index
+                    onPicked: root.pick(thumb.modelData)
+                }
             }
-            NText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: root.query.length > 0 ? Translation.tr("Nothing by that name") : Translation.tr("No wallpapers in this folder")
-                font.pixelSize: NihilStyle.textLarge
-            }
-            NText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: root.query.length > 0 ? Translation.tr("Try another word") : Wallpapers.effectiveDirectory
-                color: NihilStyle.inkSoft
+
+            Column {
+                anchors.centerIn: grid
+                width: grid.width
+                visible: grid.count === 0
+                spacing: NihilStyle.s(6)
+
+                NIcon {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: root.query.length > 0 ? "search_off" : "image"
+                    size: NihilStyle.s(32)
+                    color: NihilStyle.inkSoft
+                }
+                NText {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.query.length > 0 ? Translation.tr("Nothing by that name") : Translation.tr("No wallpapers in this folder")
+                    font.pixelSize: NihilStyle.textLarge
+                }
+                NText {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    text: root.query.length > 0 ? Translation.tr("Try another word") : Wallpapers.effectiveDirectory
+                    color: NihilStyle.inkSoft
+                }
             }
         }
     }

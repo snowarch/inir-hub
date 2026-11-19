@@ -449,5 +449,15 @@
   "Microphone": "Microphone",
   "Dark": "Dark",
   "Light": "Light",
-  "The one light the whole desktop is drawn in": "The one light the whole desktop is drawn in"
+  "The one light the whole desktop is drawn in": "The one light the whole desktop is drawn in",
+  "All": "All",
+  "Text": "Text",
+  "Images": "Images",
+  "Pinned": "Pinned",
+  "Copy": "Copy",
+  "Pin": "Pin",
+  "Unpin": "Unpin",
+  "Delete": "Delete",
+  "Random": "Random",
+  "Use this wallpaper": "Use this wallpaper"
 }

@@ -449,5 +449,15 @@
   "Microphone": "Mikrofon",
   "Dark": "Dunkel",
   "Light": "Hell",
-  "The one light the whole desktop is drawn in": "Das eine Licht, in dem der ganze Desktop gezeichnet wird"
+  "The one light the whole desktop is drawn in": "Das eine Licht, in dem der ganze Desktop gezeichnet wird",
+  "All": "Alle",
+  "Text": "Text",
+  "Images": "Bilder",
+  "Pinned": "Angeheftet",
+  "Copy": "Kopieren",
+  "Pin": "Anheften",
+  "Unpin": "Lösen",
+  "Delete": "Löschen",
+  "Random": "Zufällig",
+  "Use this wallpaper": "Dieses Hintergrundbild verwenden"
 }

@@ -45,8 +45,7 @@ Item {
     NGlass {
         anchors.fill: parent
         radius: NihilStyle.rCard
-        flare: root.hot ? NihilStyle.glassFlare : 0
-        ignite: root.hot ? 0.8 : 0
+        flare: 0
         tracks: true
     }
 
@@ -58,6 +57,17 @@ Item {
         appId: root.win.app_id ?? ""
         live: root.live
         iconWhileEmpty: false
+    }
+
+    // The light marks the window the hand or the keys are on.
+    Rectangle {
+        anchors.fill: parent
+        radius: NihilStyle.rCard
+        color: "transparent"
+        border.width: NihilStyle.s(2)
+        border.color: NihilStyle.accent
+        opacity: root.hot ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
     }
 
     MouseArea {
@@ -87,8 +97,6 @@ Item {
         size: root.iconSize
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.bottom
-        scale: root.hot ? 1.08 : 1
-        Behavior on scale { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutBack } }
         MouseArea {
             id: iconHand
             anchors.fill: parent
@@ -103,16 +111,16 @@ Item {
         }
     }
 
-    NGlass {
+    Rectangle {
         visible: root.titleShown && (root.win.title ?? "").length > 0
         x: (root.width - width) / 2
         y: root.titleOnTop ? NihilStyle.s(8)
             : root.titleInside ? root.height - height - root.iconSize / 2 - NihilStyle.s(8)
             : root.height + root.iconSize / 2 + NihilStyle.s(4)
         width: Math.min(title.implicitWidth + NihilStyle.s(22), root.width - NihilStyle.s(12))
-        height: NihilStyle.s(28)
+        height: NihilStyle.s(30)
         radius: height / 2
-        shadow: 0.5
+        color: root.hot ? NihilStyle.accent : Qt.alpha(NihilStyle.void_, 0.86)
         NText {
             id: title
             anchors.fill: parent
@@ -123,6 +131,7 @@ Item {
             elide: Text.ElideRight
             text: root.win.title ?? ""
             font.pixelSize: NihilStyle.textSmall
+            color: root.hot ? NihilStyle.accentInk : NihilStyle.ink
         }
     }
 

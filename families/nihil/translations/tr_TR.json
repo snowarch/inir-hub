@@ -449,5 +449,15 @@
   "Microphone": "Mikrofon",
   "Dark": "Koyu",
   "Light": "Açık",
-  "The one light the whole desktop is drawn in": "Tüm masaüstünü çizen tek ışık"
+  "The one light the whole desktop is drawn in": "Tüm masaüstünü çizen tek ışık",
+  "All": "Tümü",
+  "Text": "Metin",
+  "Images": "Görseller",
+  "Pinned": "Sabitlenenler",
+  "Copy": "Kopyala",
+  "Pin": "Sabitle",
+  "Unpin": "Sabitlemeyi kaldır",
+  "Delete": "Sil",
+  "Random": "Rastgele",
+  "Use this wallpaper": "Bu duvar kağıdını kullan"
 }

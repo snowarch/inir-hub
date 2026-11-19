@@ -8,7 +8,7 @@ import qs.modules.common.functions
 import qs.modules.nihil.style
 
 // One wallpaper: the cached thumbnail filling its place, the picture itself while there is none, a video's first frame.
-// The one in use carries a check; the one under the hand or the keys shows its name.
+// The marked one wears the light, the one in use carries a check. A click marks it, a double click wears it.
 Item {
     id: root
 
@@ -18,9 +18,9 @@ Item {
     property bool live: true
     property bool fallback: false
 
-    readonly property bool hovered: hand.containsMouse
     readonly property bool video: Wallpapers.isVideoFile(root.path)
 
+    signal marked()
     signal picked()
 
     onPathChanged: root.fallback = false
@@ -28,8 +28,8 @@ Item {
     ClippingRectangle {
         id: frame
         anchors.fill: parent
-        anchors.margins: NihilStyle.s(4)
-        radius: NihilStyle.rCard
+        anchors.margins: NihilStyle.s(5)
+        radius: NihilStyle.r(16)
         color: NihilStyle.piece
 
         Image {
@@ -55,60 +55,33 @@ Item {
         }
 
         Rectangle {
-            visible: root.current
-            x: NihilStyle.s(8)
-            y: NihilStyle.s(8)
-            width: NihilStyle.s(26)
-            height: NihilStyle.s(26)
-            radius: width / 2
-            color: NihilStyle.accent
-
-            NIcon {
-                anchors.centerIn: parent
-                text: "check"
-                size: NihilStyle.s(16)
-                color: NihilStyle.accentInk
-            }
-        }
-
-        Rectangle {
-            visible: root.video
+            visible: root.current || root.video
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: NihilStyle.s(8)
+            anchors.margins: NihilStyle.s(7)
             width: NihilStyle.s(26)
-            height: NihilStyle.s(26)
+            height: width
             radius: width / 2
-            color: NihilStyle.scrim
+            color: root.current ? NihilStyle.accent : NihilStyle.scrim
 
             NIcon {
                 anchors.centerIn: parent
-                text: "play"
-                size: NihilStyle.s(14)
+                text: root.current ? "check" : "play"
+                size: NihilStyle.s(15)
+                color: root.current ? NihilStyle.accentInk : "#FFFFFF"
             }
         }
+    }
 
-        Rectangle {
-            x: NihilStyle.s(8)
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: NihilStyle.s(8)
-            width: Math.min(name.implicitWidth + NihilStyle.s(18), frame.width - NihilStyle.s(16))
-            height: NihilStyle.s(26)
-            radius: height / 2
-            color: NihilStyle.scrim
-            opacity: root.focused ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
-
-            NText {
-                id: name
-                x: NihilStyle.s(9)
-                width: parent.width - NihilStyle.s(18)
-                anchors.verticalCenter: parent.verticalCenter
-                text: FileUtils.fileNameForPath(root.path).replace(/\.[^.]+$/, "")
-                elide: Text.ElideRight
-                font.pixelSize: NihilStyle.textSmall
-            }
-        }
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: NihilStyle.s(2)
+        radius: NihilStyle.r(19)
+        color: "transparent"
+        border.width: NihilStyle.s(2)
+        border.color: NihilStyle.accent
+        opacity: root.focused ? 1 : hand.containsMouse ? 0.4 : 0
+        Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
     }
 
     MouseArea {
@@ -116,6 +89,7 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.picked()
+        onClicked: root.marked()
+        onDoubleClicked: root.picked()
     }
 }

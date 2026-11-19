@@ -132,15 +132,15 @@ Scope {
         NSpring { id: tagBEnd; to: chassis.bandTo + (banners.wanted ? banners.implicitHeight : 0); pace: 18 }
         NSpring { id: tagBSlide; to: chassis.tagBX; snap: tagBEnd.value - chassis.band < 1; pace: 15 }
 
-        // The horizon.
+        // The way out: the band falls past the far edge and the whole screen is glass.
         NSpring { id: limbSpring; to: stage.powerHere ? 1 : 0; pace: 11 }
-        readonly property real limbAt: Math.round(chassis.height * 0.73)
-        readonly property real limbRadius: chassis.width * 1.36
+        readonly property real limbAt: chassis.height + NihilStyle.s(90)
+        readonly property real limbRadius: chassis.width * 5
 
         // The light: where it is going, how far it reaches and how strong it is.
         readonly property var aim: {
             if (stage.powerHere)
-                return { x: powerLoader.item?.lightX ?? chassis.width / 2, y: powerLoader.item?.lightY ?? chassis.limbAt, reach: NihilStyle.s(330), power: 1.25 }
+                return { x: chassis.width / 2, y: chassis.limbAt, reach: NihilStyle.s(330), power: 0 }
             if (stage.page.length > 0)
                 return { x: slabX.to + slabWidth.to / 2, y: slabEnd.to, reach: NihilStyle.clamp(slabWidth.to * 0.56, NihilStyle.s(220), NihilStyle.s(340)), power: 1 }
             if (osd.wanted)
@@ -309,8 +309,6 @@ Scope {
                 source: "../power/NihilPower.qml"
                 opacity: NihilStyle.clamp((limbSpring.value - 0.5) * 2, 0, 1)
                 onLoaded: {
-                    powerLoader.item.limbAt = Qt.binding(() => chassis.limbAt)
-                    powerLoader.item.limbRadius = Qt.binding(() => chassis.limbRadius)
                     powerLoader.item.flipped = Qt.binding(() => stage.flipped)
                     powerLoader.item.open = Qt.binding(() => stage.powerHere)
                 }

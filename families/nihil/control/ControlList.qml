@@ -165,13 +165,13 @@ Item {
         signal tapped()
 
         width: parent?.width ?? 0
-        height: NihilStyle.s(58)
+        height: NihilStyle.s(60)
 
-        NWell {
+        Rectangle {
             anchors.fill: parent
-            radius: NihilStyle.rCard
-            lit: line.current ? 1 : 0
-            hovered: press.containsMouse
+            radius: height / 2
+            color: line.current ? NihilStyle.accent : press.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
         }
 
         MouseArea {
@@ -183,16 +183,17 @@ Item {
         }
         NIcon {
             id: lineGlyph
-            x: NihilStyle.s(16)
+            x: NihilStyle.s(20)
             anchors.verticalCenter: parent.verticalCenter
             text: line.glyph
             size: NihilStyle.s(20)
+            color: line.current ? NihilStyle.accentInk : NihilStyle.ink
         }
         Column {
             anchors.left: lineGlyph.right
-            anchors.leftMargin: NihilStyle.s(12)
+            anchors.leftMargin: NihilStyle.s(14)
             anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(12)
+            anchors.rightMargin: NihilStyle.s(22)
             anchors.verticalCenter: parent.verticalCenter
 
             NText {
@@ -200,6 +201,7 @@ Item {
                 text: line.name
                 elide: Text.ElideRight
                 font.weight: Font.Medium
+                color: line.current ? NihilStyle.accentInk : NihilStyle.ink
             }
             NText {
                 width: parent.width
@@ -207,7 +209,7 @@ Item {
                 text: line.note
                 elide: Text.ElideRight
                 font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
+                color: line.current ? Qt.alpha(NihilStyle.accentInk, 0.72) : NihilStyle.inkSoft
             }
         }
     }

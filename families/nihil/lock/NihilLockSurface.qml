@@ -9,9 +9,8 @@ import qs.modules.common.functions
 import qs.modules.shared.lock
 import qs.modules.nihil.style
 
-// The lock: the sheet has bent into the horizon of a dark planet and the password sits on it, where the light gathers.
-// Each key typed feeds that light. The day and the time stand above; what the computer is doing and the ways out wait
-// in the corners below the horizon.
+// The lock: the time at the heart of a ring of sixty ticks. At rest the ring tells the minute; each key typed lights more
+// of it, and a wrong password turns it red. What the computer is doing and the ways out wait in the corners.
 MouseArea {
     id: root
 
@@ -23,8 +22,9 @@ MouseArea {
     readonly property bool busy: root.context.unlockInProgress
     readonly property bool failed: root.context.showFailure && root.context.currentText.length === 0
 
-    readonly property real unit: root.height / 1080
-    readonly property real limbAt: Math.round(root.height * 0.7685)
+    readonly property int typed: root.context.currentText.length
+    readonly property real ringRadius: Math.round(Math.min(root.height * 0.3, root.width * 0.22))
+    readonly property real ringCentre: Math.round(root.height * 0.42)
     readonly property string layoutCode: NiriService.hasMultipleKeyboardLayouts
         ? String(NiriService.keyboardLayoutNames[NiriService.currentKeyboardLayoutIndex] ?? "").slice(0, 2).toUpperCase() : ""
 
@@ -105,66 +105,70 @@ MouseArea {
         anchors.fill: wallpaper
         source: wallpaper
         visible: root.blur
+        autoPaddingEnabled: false
         blurEnabled: true
         blur: 1
         blurMax: 64
         saturation: -0.1
-        brightness: NihilStyle.dark ? -0.42 : 0.08
+        brightness: NihilStyle.dark ? -0.2 : 0.08
     }
 
-    NSheet {
+    Rectangle {
         anchors.fill: parent
-        band: 0
-        limb: 1
-        limbAt: root.limbAt
-        limbRadius: root.width * 1.354
-        limbGlass: 0.42
-        light: Qt.point(root.width / 2, root.limbAt)
-        lightReach: NihilStyle.s(380)
-        lightPower: 1.05 + Math.min(root.context.currentText.length, 8) * 0.05
-        Behavior on lightPower { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+        color: Qt.alpha(NihilStyle.void_, NihilStyle.dark ? 0.26 : 0.24)
     }
 
-    NText {
+    // The ring tells the minute at rest and counts the password while it is typed.
+    NRing {
+        id: ring
         anchors.horizontalCenter: parent.horizontalCenter
-        y: Math.round(170 * root.unit)
-        text: Translation.locale.toString(DateTime.clock.date, "dddd d MMMM")
-        font.pixelSize: NihilStyle.s(20)
-        font.weight: Font.Light
-        color: NihilStyle.inkSoft
-    }
-    NDisplay {
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: Math.round(166 * root.unit)
-        text: DateTime.time
-        size: Math.round(Math.min(184 * root.unit, root.width * 0.096))
-        font.weight: Font.ExtraLight
-        font.letterSpacing: -size * 0.043
+        y: root.ringCentre - root.ringRadius
+        width: root.ringRadius * 2
+        height: width
+        ticks: 60
+        level: root.typed > 0 ? Math.min(root.typed * 4, 60) / 60 : DateTime.clock.date.getMinutes() / 60
+        light: root.failed ? NihilStyle.danger : root.typed > 0 ? NihilStyle.accent : NihilStyle.ink
+        Behavior on level { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+        Behavior on light { ColorAnimation { duration: NihilStyle.quick } }
     }
 
-    NBloom {
-        anchors.centerIn: capsule
-        width: capsule.width * 1.7
-        height: capsule.height * 3.4
-        tone: NihilStyle.specA
-        strength: 0.3 + Math.min(root.context.currentText.length, 8) * 0.04
-        Behavior on strength { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+    Column {
+        anchors.centerIn: ring
+        width: root.ringRadius * 1.46
+        spacing: NihilStyle.s(4)
+        NDisplay {
+            width: parent.width
+            height: root.ringRadius * 0.5
+            horizontalAlignment: Text.AlignHCenter
+            fontSizeMode: Text.HorizontalFit
+            minimumPixelSize: NihilStyle.s(40)
+            size: root.ringRadius * 0.46
+            text: DateTime.time
+        }
+        NText {
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            text: Translation.locale.toString(DateTime.clock.date, "dddd d MMMM")
+            font.pixelSize: NihilStyle.s(18)
+            font.weight: Font.Light
+            color: NihilStyle.inkSoft
+        }
     }
 
-    // The password, on the horizon.
+    // The password, under the ring.
     Rectangle {
         id: capsule
 
         property real nudge: 0
 
         anchors.horizontalCenter: parent.horizontalCenter
-        y: root.limbAt - height / 2
+        y: ring.y + ring.height + NihilStyle.s(30)
         width: NihilStyle.s(360)
         height: NihilStyle.s(60)
         radius: height / 2
-        color: NihilStyle.void_
-        border.width: 1
-        border.color: root.failed ? NihilStyle.danger : NihilStyle.hair
+        color: Qt.alpha(NihilStyle.void_, 0.72)
+        border.width: field.activeFocus || root.failed ? 2 : 1
+        border.color: root.failed ? NihilStyle.danger : field.activeFocus ? NihilStyle.accent : NihilStyle.hair
         transform: Translate { x: capsule.nudge }
         Behavior on border.color { ColorAnimation { duration: NihilStyle.quick } }
 
@@ -192,9 +196,9 @@ MouseArea {
         NText {
             x: NihilStyle.s(26)
             anchors.verticalCenter: parent.verticalCenter
-            visible: root.context.currentText.length === 0
+            visible: root.typed === 0
             text: Translation.tr("Password")
-            color: NihilStyle.inkFaint
+            color: NihilStyle.inkSoft
         }
 
         Row {
@@ -203,7 +207,7 @@ MouseArea {
             spacing: NihilStyle.s(11)
 
             Repeater {
-                model: Math.min(root.context.currentText.length, 16)
+                model: Math.min(root.typed, 16)
                 delegate: Rectangle {
                     width: NihilStyle.s(7)
                     height: width
@@ -231,9 +235,9 @@ MouseArea {
 
     NText {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: root.limbAt + NihilStyle.s(48)
+        y: capsule.y + capsule.height + NihilStyle.s(14)
         text: root.failed ? Translation.tr("Try again") : SystemInfo.username
-        font.pixelSize: NihilStyle.s(16)
+        font.pixelSize: NihilStyle.s(15)
         font.weight: Font.Medium
         color: root.failed ? NihilStyle.danger : NihilStyle.ink
     }

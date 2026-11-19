@@ -449,5 +449,15 @@
   "Microphone": "Мікрофон",
   "Dark": "Темна",
   "Light": "Світла",
-  "The one light the whole desktop is drawn in": "Єдине світло, яким намальовано весь робочий стіл"
+  "The one light the whole desktop is drawn in": "Єдине світло, яким намальовано весь робочий стіл",
+  "All": "Усе",
+  "Text": "Текст",
+  "Images": "Зображення",
+  "Pinned": "Закріплені",
+  "Copy": "Копіювати",
+  "Pin": "Закріпити",
+  "Unpin": "Відкріпити",
+  "Delete": "Видалити",
+  "Random": "Випадково",
+  "Use this wallpaper": "Використати ці шпалери"
 }

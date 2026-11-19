@@ -1,7 +1,14 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "changes": {
+    "3.1.0": [
+      "Power is a selector you turn: five keys around a ring, by pointer, wheel or arrows",
+      "The lock shows the time inside a ring that tells the minute and counts the password as you type",
+      "The clipboard reads the marked entry in full, text or picture, and filters by kind",
+      "Wallpapers show the marked picture large before you wear it",
+      "Notifications, the tray menu, network and sound lists and the overview cards use the new controls"
+    ],
     "3.0.0": [
       "Instrument: warm black glass and one light replace the violet; what is on is solid in that light",
       "NiHiL drops the Material colours: its own dark and light scheme, its own lights or the wallpaper's most vivid colour",

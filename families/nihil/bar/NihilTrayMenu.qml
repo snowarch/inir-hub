@@ -110,9 +110,9 @@ Item {
             NGlass {
                 id: card
                 readonly property real edge: NihilStyle.s(8)
-                width: NihilStyle.s(260)
-                height: column.implicitHeight + NihilStyle.s(12)
-                radius: NihilStyle.rCard
+                width: NihilStyle.s(290)
+                height: column.implicitHeight + NihilStyle.s(16)
+                radius: NihilStyle.r(24)
                 tint: NihilStyle.menuTint
                 tracks: true
                 x: NihilStyle.clamp(root.at.x - width / 2, edge, popup.width - width - edge)
@@ -132,41 +132,34 @@ Item {
 
                 Column {
                     id: column
-                    x: NihilStyle.s(6)
-                    y: NihilStyle.s(6)
-                    width: parent.width - NihilStyle.s(12)
+                    x: NihilStyle.s(8)
+                    y: NihilStyle.s(8)
+                    width: parent.width - NihilStyle.s(16)
 
                     // The app's name over its entries.
                     Item {
                         width: parent.width
-                        height: NihilStyle.s(34)
+                        height: NihilStyle.s(44)
                         visible: root.trail.length === 0 && root.title.length > 0
                         Image {
                             id: appIcon
                             x: NihilStyle.s(10)
                             anchors.verticalCenter: parent.verticalCenter
-                            width: NihilStyle.s(16)
+                            width: NihilStyle.s(20)
                             height: width
                             sourceSize: Qt.size(width * 2, height * 2)
                             source: root.item ? TrayService.getSafeIcon(root.item) : ""
                         }
                         NText {
-                            x: NihilStyle.s(36)
+                            x: NihilStyle.s(40)
                             anchors.verticalCenter: parent.verticalCenter
                             width: parent.width - x - NihilStyle.s(10)
                             text: root.title
-                            font.weight: Font.DemiBold
+                            font.pixelSize: NihilStyle.textLarge
+                            font.weight: Font.Medium
                             elide: Text.ElideRight
                         }
                     }
-                    Rectangle {
-                        visible: root.trail.length === 0 && root.title.length > 0 && root.rows.length > 0
-                        x: NihilStyle.s(10)
-                        width: parent.width - NihilStyle.s(20)
-                        height: 1
-                        color: NihilStyle.line
-                    }
-                    Item { width: 1; height: NihilStyle.s(4); visible: root.trail.length === 0 && root.title.length > 0 }
 
                     Repeater {
                         model: root.rows
@@ -177,16 +170,8 @@ Item {
                             readonly property bool line: row.modelData.type === "separator"
                             readonly property bool usable: !row.line && row.modelData.enabled !== false
                             width: column.width
-                            height: row.line ? NihilStyle.s(9) : NihilStyle.s(32)
-
-                            Rectangle {
-                                visible: row.line
-                                anchors.verticalCenter: parent.verticalCenter
-                                x: NihilStyle.s(10)
-                                width: parent.width - NihilStyle.s(20)
-                                height: 1
-                                color: NihilStyle.line
-                            }
+                            readonly property bool hot: root.lit === row.index && row.usable
+                            height: row.line ? NihilStyle.s(10) : NihilStyle.s(38)
 
                             MouseArea {
                                 id: hit
@@ -200,15 +185,15 @@ Item {
 
                                 Rectangle {
                                     anchors.fill: parent
-                                    radius: NihilStyle.r(9)
-                                    color: NihilStyle.chosen
-                                    visible: root.lit === row.index
+                                    radius: height / 2
+                                    color: NihilStyle.accent
+                                    visible: row.hot
                                 }
 
                                 // The entry's own mark: a check, a radio dot, its icon, or the way back.
                                 Item {
                                     id: mark
-                                    x: NihilStyle.s(10)
+                                    x: NihilStyle.s(12)
                                     anchors.verticalCenter: parent.verticalCenter
                                     width: NihilStyle.s(16)
                                     height: width
@@ -218,7 +203,7 @@ Item {
                                         visible: row.modelData.back || (row.modelData.mark === "check" && row.modelData.checked)
                                         text: row.modelData.back ? "chevron_left" : "check"
                                         size: NihilStyle.s(15)
-                                        color: row.modelData.back ? NihilStyle.inkSoft : NihilStyle.accent
+                                        color: row.hot ? NihilStyle.accentInk : row.modelData.back ? NihilStyle.inkSoft : NihilStyle.accent
                                     }
                                     Rectangle {
                                         anchors.centerIn: parent
@@ -228,20 +213,20 @@ Item {
                                         radius: width / 2
                                         color: "transparent"
                                         border.width: row.modelData.checked ? 0 : 1
-                                        border.color: NihilStyle.inkFaint
+                                        border.color: row.hot ? NihilStyle.accentInk : NihilStyle.inkFaint
                                         Rectangle {
                                             anchors.centerIn: parent
                                             visible: row.modelData.checked === true
                                             width: parent.width
                                             height: width
                                             radius: width / 2
-                                            color: NihilStyle.accent
+                                            color: row.hot ? NihilStyle.accentInk : NihilStyle.accent
                                             Rectangle {
                                                 anchors.centerIn: parent
                                                 width: NihilStyle.s(4)
                                                 height: width
                                                 radius: width / 2
-                                                color: NihilStyle.accentInk
+                                                color: row.hot ? NihilStyle.accent : NihilStyle.accentInk
                                             }
                                         }
                                     }
@@ -255,22 +240,22 @@ Item {
                                 }
 
                                 NText {
-                                    x: root.marked ? NihilStyle.s(36) : NihilStyle.s(12)
+                                    x: root.marked ? NihilStyle.s(38) : NihilStyle.s(16)
                                     anchors.verticalCenter: parent.verticalCenter
-                                    width: parent.width - x - NihilStyle.s(row.modelData.submenu ? 30 : 12)
+                                    width: parent.width - x - NihilStyle.s(row.modelData.submenu ? 32 : 16)
                                     text: row.modelData.text ?? ""
-                                    color: row.modelData.back ? NihilStyle.inkSoft : NihilStyle.ink
+                                    color: row.hot ? NihilStyle.accentInk : row.modelData.back ? NihilStyle.inkSoft : NihilStyle.ink
                                     opacity: row.usable ? 1 : 0.4
                                     elide: Text.ElideRight
                                 }
                                 NIcon {
                                     anchors.right: parent.right
-                                    anchors.rightMargin: NihilStyle.s(8)
+                                    anchors.rightMargin: NihilStyle.s(12)
                                     anchors.verticalCenter: parent.verticalCenter
                                     visible: row.modelData.submenu === true
                                     text: "chevron_right"
                                     size: NihilStyle.s(14)
-                                    color: NihilStyle.inkSoft
+                                    color: row.hot ? NihilStyle.accentInk : NihilStyle.inkSoft
                                 }
                             }
                         }

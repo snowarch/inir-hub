@@ -9,16 +9,15 @@ NButton 1.0 NButton.qml
 NSwitch 1.0 NSwitch.qml
 NSlider 1.0 NSlider.qml
 NDial 1.0 NDial.qml
+NRing 1.0 NRing.qml
 NSegmented 1.0 NSegmented.qml
 NField 1.0 NField.qml
 NScroller 1.0 NScroller.qml
 NPopup 1.0 NPopup.qml
 NLabel 1.0 NLabel.qml
 NDisplay 1.0 NDisplay.qml
-NSpectrum 1.0 NSpectrum.qml
 NMark 1.0 NMark.qml
 NWell 1.0 NWell.qml
 NSpring 1.0 NSpring.qml
 NSheet 1.0 NSheet.qml
-NBloom 1.0 NBloom.qml
 NihilShared 1.0 NihilShared.qml

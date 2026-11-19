@@ -449,5 +449,15 @@
   "Microphone": "Micrô",
   "Dark": "Tối",
   "Light": "Sáng",
-  "The one light the whole desktop is drawn in": "Thứ ánh sáng duy nhất vẽ nên toàn bộ màn hình"
+  "The one light the whole desktop is drawn in": "Thứ ánh sáng duy nhất vẽ nên toàn bộ màn hình",
+  "All": "Tất cả",
+  "Text": "Văn bản",
+  "Images": "Hình ảnh",
+  "Pinned": "Đã ghim",
+  "Copy": "Sao chép",
+  "Pin": "Ghim",
+  "Unpin": "Bỏ ghim",
+  "Delete": "Xóa",
+  "Random": "Ngẫu nhiên",
+  "Use this wallpaper": "Dùng hình nền này"
 }

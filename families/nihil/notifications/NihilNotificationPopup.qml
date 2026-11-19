@@ -6,7 +6,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// What just arrived, on a tag pulled from the band. One notification lies on the glass itself; several each get a well.
+// What just arrived, on a tag pulled from the band: a plate for each.
 Item {
     id: root
 
@@ -24,6 +24,7 @@ Item {
         icon: item.appIcon || item.appName || "",
         summary: item.summary ?? "",
         body: String(item.body ?? "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(),
+        image: String(item.image ?? ""),
         critical: item.urgency === "critical",
         actions: Array.from(item.actions ?? []).slice(0, 3).map(action => ({ id: action.identifier, text: action.text }))
     })) : []
@@ -32,7 +33,7 @@ Item {
     property var carried: []
     onArrivedChanged: if (root.arrived.length > 0) root.carried = root.arrived
 
-    implicitWidth: NihilStyle.s(404)
+    implicitWidth: NihilStyle.s(432)
     implicitHeight: stack.implicitHeight + NihilStyle.s(20)
     width: implicitWidth
     height: implicitHeight
@@ -52,7 +53,6 @@ Item {
                 required property var modelData
                 width: stack.width
                 notice: modelData
-                alone: root.carried.length === 1
             }
         }
     }

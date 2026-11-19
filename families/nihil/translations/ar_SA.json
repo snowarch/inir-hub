@@ -449,5 +449,15 @@
   "Microphone": "الميكروفون",
   "Dark": "داكن",
   "Light": "فاتح",
-  "The one light the whole desktop is drawn in": "الضوء الواحد الذي يُرسم به سطح المكتب كله"
+  "The one light the whole desktop is drawn in": "الضوء الواحد الذي يُرسم به سطح المكتب كله",
+  "All": "الكل",
+  "Text": "نص",
+  "Images": "صور",
+  "Pinned": "مثبّت",
+  "Copy": "نسخ",
+  "Pin": "تثبيت",
+  "Unpin": "إلغاء التثبيت",
+  "Delete": "حذف",
+  "Random": "عشوائي",
+  "Use this wallpaper": "استخدام هذه الخلفية"
 }

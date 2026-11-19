@@ -74,16 +74,14 @@ Item {
         }
     }
 
-    NGlass {
+    // The workspace in use wears the light; a window held over one calls it.
+    Rectangle {
         anchors.fill: parent
         radius: NihilStyle.rCard
-        tint: "transparent"
-        grain: 0
-        shadow: root.active ? 1 : 0.4
-        flare: root.active ? NihilStyle.glassFlare * 0.5 : 0
-        rim: root.active ? 1.4 : root.hot ? 0.9 : 0.35
-        ignite: drop.containsDrag ? 1 : root.active ? 0.4 : 0
-        light: Qt.point(root.width / 2, 0)
+        color: "transparent"
+        border.width: root.active || drop.containsDrag ? NihilStyle.s(2) : 1
+        border.color: root.active || drop.containsDrag ? NihilStyle.accent : root.hot ? NihilStyle.inkSoft : NihilStyle.hair
+        Behavior on border.color { ColorAnimation { duration: NihilStyle.quick } }
     }
 
     MouseArea {
@@ -106,15 +104,15 @@ Item {
         }
     }
 
-    NGlass {
+    Rectangle {
         visible: root.label.length > 0 && (!(root.options?.labelsOnHover ?? true) || root.hot || root.active)
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.margins: NihilStyle.s(5)
         width: Math.min(tag.implicitWidth + NihilStyle.s(14), root.width - NihilStyle.s(10))
-        height: NihilStyle.s(20)
+        height: NihilStyle.s(22)
         radius: height / 2
-        shadow: 0
+        color: root.active ? NihilStyle.accent : Qt.alpha(NihilStyle.void_, 0.86)
         NText {
             id: tag
             anchors.fill: parent
@@ -124,8 +122,9 @@ Item {
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
             text: root.label
-            font.pixelSize: NihilStyle.s(11)
-            font.weight: Font.DemiBold
+            font.pixelSize: NihilStyle.s(12)
+            font.weight: Font.Medium
+            color: root.active ? NihilStyle.accentInk : NihilStyle.ink
         }
     }
 

@@ -449,5 +449,15 @@
   "Microphone": "Micro",
   "Dark": "Sombre",
   "Light": "Clair",
-  "The one light the whole desktop is drawn in": "La seule lumière qui dessine tout le bureau"
+  "The one light the whole desktop is drawn in": "La seule lumière qui dessine tout le bureau",
+  "All": "Tout",
+  "Text": "Texte",
+  "Images": "Images",
+  "Pinned": "Épinglés",
+  "Copy": "Copier",
+  "Pin": "Épingler",
+  "Unpin": "Détacher",
+  "Delete": "Supprimer",
+  "Random": "Au hasard",
+  "Use this wallpaper": "Utiliser ce fond d'écran"
 }

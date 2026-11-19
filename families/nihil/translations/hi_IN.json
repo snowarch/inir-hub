@@ -449,5 +449,15 @@
   "Microphone": "माइक्रोफ़ोन",
   "Dark": "गहरा",
   "Light": "हल्का",
-  "The one light the whole desktop is drawn in": "वह एक रोशनी जिससे पूरा डेस्कटॉप बनता है"
+  "The one light the whole desktop is drawn in": "वह एक रोशनी जिससे पूरा डेस्कटॉप बनता है",
+  "All": "सभी",
+  "Text": "पाठ",
+  "Images": "चित्र",
+  "Pinned": "पिन किए गए",
+  "Copy": "कॉपी करें",
+  "Pin": "पिन करें",
+  "Unpin": "अनपिन करें",
+  "Delete": "हटाएं",
+  "Random": "यादृच्छिक",
+  "Use this wallpaper": "यह वॉलपेपर लगाएं"
 }

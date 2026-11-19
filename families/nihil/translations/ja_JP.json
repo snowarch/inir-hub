@@ -449,5 +449,15 @@
   "Microphone": "マイク",
   "Dark": "ダーク",
   "Light": "ライト",
-  "The one light the whole desktop is drawn in": "デスクトップ全体を描く唯一の光"
+  "The one light the whole desktop is drawn in": "デスクトップ全体を描く唯一の光",
+  "All": "すべて",
+  "Text": "テキスト",
+  "Images": "画像",
+  "Pinned": "固定済み",
+  "Copy": "コピー",
+  "Pin": "固定",
+  "Unpin": "固定を解除",
+  "Delete": "削除",
+  "Random": "ランダム",
+  "Use this wallpaper": "この壁紙を使う"
 }
