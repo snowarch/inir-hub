@@ -60,7 +60,9 @@ NGlass {
         return d >= 1 ? 1 : 1 + root.magnify * (Math.cos(d * Math.PI) + 1) / 2
     }
 
-    function windowsOf(app: var): var { return (NiriService.windows ?? []).filter(win => win.app_id === app.appId) }
+    // Running apps are keyed by their lowercase resolved identity (TaskbarApps), so a window matches on the same key.
+    function keyOf(win: var): string { return AppSearch.resolveWindowIdentity(win).toLowerCase() }
+    function windowsOf(app: var): var { return (NiriService.windows ?? []).filter(win => root.keyOf(win) === app.appId) }
     function launch(app: var): void {
         const entry = AppSearch.lookupDesktopEntry(app.appId)
         if (!entry) return
@@ -103,7 +105,7 @@ NGlass {
             const now = Date.now()
             const next = {}
             for (const id in root.starting)
-                if (now - root.starting[id] < 8000 && !(NiriService.windows ?? []).some(win => win.app_id === id)) next[id] = root.starting[id]
+                if (now - root.starting[id] < 8000 && !(NiriService.windows ?? []).some(win => root.keyOf(win) === id)) next[id] = root.starting[id]
             root.starting = next
         }
     }

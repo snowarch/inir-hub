@@ -37,14 +37,15 @@ Item {
     Component.onCompleted: root.look()
     Connections {
         target: Wallpapers
-        enabled: !root.thumbReady && root.thumb.length > 0
         function onThumbnailsChecked(found: var): void {
+            if (root.thumbReady || root.thumb.length === 0) return
             if (!(root.thumb in found)) return
             root.thumbReady = found[root.thumb]
             root.thumbMissing = !found[root.thumb]
             if (root.thumbMissing) Wallpapers.ensureThumbnailForPath(root.path, "large")
         }
         function onThumbnailGeneratedFile(filePath: string): void {
+            if (root.thumbReady || root.thumb.length === 0) return
             if (FileUtils.trimFileProtocol(filePath) !== FileUtils.trimFileProtocol(root.path)) return
             Wallpapers.rememberThumbnail(root.thumb)
             root.thumbReady = true
