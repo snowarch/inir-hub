@@ -8,6 +8,7 @@ NAppIcon 1.0 NAppIcon.qml
 NButton 1.0 NButton.qml
 NSwitch 1.0 NSwitch.qml
 NSlider 1.0 NSlider.qml
+NDial 1.0 NDial.qml
 NSegmented 1.0 NSegmented.qml
 NField 1.0 NField.qml
 NScroller 1.0 NScroller.qml

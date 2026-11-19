@@ -8,7 +8,7 @@ NihilWidgetFace {
 
     readonly property int charge: Math.round(Battery.percentage * 100)
     readonly property bool warned: Battery.isLowAndNotCharging
-    readonly property color tint: root.warned ? NihilStyle.m3.m3error : root.accent
+    readonly property color tint: root.warned ? NihilStyle.danger : root.accent
     readonly property string saying: String(root.widget.timeLabel ?? "").length > 0 ? root.widget.timeLabel
         : Battery.isCharging ? Translation.tr("Charging")
         : Battery.isFull ? Translation.tr("Fully charged") : Translation.tr("On battery")

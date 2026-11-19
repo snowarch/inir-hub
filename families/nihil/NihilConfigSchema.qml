@@ -7,8 +7,10 @@ JsonObject {
     property string profile: "vertical"
 
     property JsonObject look: JsonObject {
-        // The accent and the light at the glass's edge: "aurora", "ice", "ember", "moss", "mono" or "wallpaper".
-        property string palette: "wallpaper"
+        // NiHiL's own scheme: "dark" or "light".
+        property string scheme: "dark"
+        // The one light: "filament", "copper", "signal", "glacier", "sage" or "wallpaper".
+        property string palette: "filament"
         // "smoke", "frost", "fluted" or "prism".
         property string material: "smoke"
         // Reeds across fluted glass.

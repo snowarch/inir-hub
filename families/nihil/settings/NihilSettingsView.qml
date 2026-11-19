@@ -166,7 +166,7 @@ Item {
     // The side: the family's name, the search, and every page. The page on show is lit from below.
     Item {
         id: side
-        width: NihilStyle.s(284)
+        width: NihilStyle.s(268)
         height: parent.height
 
         Row {
@@ -192,7 +192,7 @@ Item {
             y: NihilStyle.s(82)
             width: parent.width - NihilStyle.s(32)
             height: NihilStyle.s(40)
-            radius: NihilStyle.r(13)
+            radius: height / 2
             glyph: "search"
             glyphSize: NihilStyle.s(16)
             textSize: NihilStyle.textSmall
@@ -221,7 +221,7 @@ Item {
                     readonly property real lead: entry.modelData.heading ? NihilStyle.s(36) : 0
 
                     width: index.innerWidth
-                    height: NihilStyle.s(42) + entry.lead
+                    height: NihilStyle.s(44) + entry.lead
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
@@ -242,16 +242,9 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         anchors.topMargin: entry.lead
-                        radius: NihilStyle.r(13)
-                        color: NihilStyle.piece
-                        visible: entry.containsMouse && !entry.here
-                    }
-                    NWell {
-                        anchors.fill: parent
-                        anchors.topMargin: entry.lead
-                        radius: NihilStyle.r(13)
-                        lit: entry.here ? 0.7 : 0
-                        visible: entry.here
+                        radius: height / 2
+                        color: entry.here ? NihilStyle.accent : NihilStyle.piece
+                        visible: entry.here || entry.containsMouse
                     }
                     NIcon {
                         id: glyph
@@ -260,7 +253,7 @@ Item {
                         anchors.verticalCenterOffset: entry.lead / 2
                         text: entry.modelData.glyph ?? "tune"
                         size: NihilStyle.s(18)
-                        color: entry.here ? NihilStyle.ink : NihilStyle.inkSoft
+                        color: entry.here ? NihilStyle.accentInk : NihilStyle.inkSoft
                     }
                     NText {
                         anchors.left: glyph.right
@@ -272,7 +265,8 @@ Item {
                         text: Translation.tr(entry.modelData.title)
                         elide: Text.ElideRight
                         font.pixelSize: NihilStyle.textBody
-                        color: entry.here || entry.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                        color: entry.here ? NihilStyle.accentInk : entry.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                        font.weight: entry.here ? Font.DemiBold : Font.Normal
                     }
                 }
             }
@@ -294,8 +288,18 @@ Item {
             y: NihilStyle.s(26)
             width: Math.min(implicitWidth, parent.width - controls.width - count.implicitWidth - NihilStyle.s(32))
             text: root.query.length > 0 ? Translation.tr("Results") : Translation.tr(root.page.title)
-            size: NihilStyle.s(30)
-            font.weight: Font.Light
+            size: NihilStyle.s(46)
+            font.weight: Font.ExtraLight
+        }
+        NText {
+            id: summary
+            anchors.top: title.bottom
+            anchors.topMargin: NihilStyle.s(2)
+            width: parent.width
+            visible: root.query.length === 0
+            text: Translation.tr(root.page.summary ?? "")
+            font.pixelSize: NihilStyle.textBody
+            color: NihilStyle.inkSoft
         }
         NText {
             id: count
@@ -340,7 +344,7 @@ Item {
         Loader {
             id: body
             anchors.fill: parent
-            anchors.topMargin: NihilStyle.s(83)
+            anchors.topMargin: NihilStyle.s(118)
             active: root.query.length === 0 || root.found.length > 0
             sourceComponent: root.query.length > 0 ? foundPage
                 : root.page.view === "profiles" ? profilesPage

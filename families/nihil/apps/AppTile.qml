@@ -72,10 +72,10 @@ MouseArea {
         scale: root.drag.active ? 1.08 : 1
         Behavior on scale { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
 
-        NWell {
+        Rectangle {
             anchors.fill: parent
-            radius: NihilStyle.rCard
-            lit: root.lit ? 0.8 : 0
+            radius: NihilStyle.r(22)
+            color: NihilStyle.pieceRaised
             opacity: root.lit ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }

@@ -103,7 +103,7 @@ Item {
         }
     }
 
-    implicitHeight: Math.max(NihilStyle.s(62), words.implicitHeight + NihilStyle.s(22))
+    implicitHeight: Math.max(NihilStyle.s(68), words.implicitHeight + NihilStyle.s(24))
 
     // Changed from how NiHiL came: a small dot of the accent at the row's edge.
     Rectangle {
@@ -215,7 +215,8 @@ Item {
             }
             NSlider {
                 anchors.verticalCenter: parent.verticalCenter
-                width: NihilStyle.s(230)
+                width: NihilStyle.s(250)
+                height: NihilStyle.s(32)
                 enabled: !root.isFit
                 opacity: root.isFit ? 0.4 : 1
                 from: root.from

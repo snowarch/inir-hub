@@ -9,8 +9,8 @@ MouseArea {
     property real iconSize: NihilStyle.s(18)
     property bool lit: false
     property color tone: NihilStyle.piece
-    property real radius: NihilStyle.rKey
-    readonly property color ink: root.lit ? NihilStyle.void_ : NihilStyle.ink
+    property real radius: height / 2
+    readonly property color ink: root.lit ? NihilStyle.accentInk : NihilStyle.ink
     default property alias content: holder.data
 
     implicitWidth: root.label.length > 0 ? row.implicitWidth + NihilStyle.s(24) : NihilStyle.s(36)
@@ -27,7 +27,7 @@ MouseArea {
     Rectangle {
         anchors.fill: parent
         radius: root.radius
-        color: root.lit ? NihilStyle.ink : root.pressed ? NihilStyle.pieceRaised
+        color: root.lit ? NihilStyle.accent : root.pressed ? NihilStyle.pieceRaised
             : root.containsMouse || root.activeFocus ? NihilStyle.pieceRaised : root.tone
         border.width: 1
         border.color: root.lit ? "transparent" : root.containsMouse || root.activeFocus ? NihilStyle.hair : "transparent"

@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "Vous avez modifié ce bureau à la main. Gardez-le sur un profil pour le retrouver plus tard.",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "Ton mot de passe ouvre aussi le trousseau",
-  "Your password is needed": "Votre mot de passe est requis"
+  "Your password is needed": "Votre mot de passe est requis",
+  "Filament": "Filament",
+  "Copper": "Cuivre",
+  "Signal": "Signal",
+  "Glacier": "Glacier",
+  "Sage": "Sauge",
+  "Scheme": "Thème",
+  "Microphone": "Micro",
+  "Dark": "Sombre",
+  "Light": "Clair",
+  "The one light the whole desktop is drawn in": "La seule lumière qui dessine tout le bureau"
 }

@@ -44,7 +44,7 @@ NGlass {
 
     implicitWidth: root.vertical ? root.across : root.along
     implicitHeight: root.vertical ? root.along : root.across
-    radius: Math.min(root.look?.radius ?? 20, root.across / 2)
+    radius: root.across / 2
     tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.void_, root.look?.opacity ?? 0.74)
     tracks: true
 
@@ -86,7 +86,6 @@ NGlass {
         NButton {
             width: root.cell
             height: root.cell
-            radius: NihilStyle.rCard
             tone: "transparent"
             icon: "apps"
             iconSize: root.iconSize * 0.6
@@ -120,7 +119,6 @@ NGlass {
                 readonly property bool urgent: root.windowsOf(key.modelData).some(win => win.is_urgent)
                 width: root.cell
                 height: root.cell
-                radius: NihilStyle.rCard
                 tone: key.urgent ? NihilStyle.pieceRaised : "transparent"
                 Accessible.name: AppSearch.lookupDesktopEntry(key.modelData.appId)?.name ?? key.modelData.appId
                 onClicked: mouse => {
@@ -152,7 +150,7 @@ NGlass {
                             width: (root.options?.runningStyle ?? "dot") === "line" ? root.iconSize * 0.5 : NihilStyle.s(4)
                             height: NihilStyle.s((root.options?.runningStyle ?? "dot") === "line" ? 3 : 4)
                             radius: height / 2
-                            color: NihilStyle.ink
+                            color: NihilStyle.accent
                         }
                     }
                 }

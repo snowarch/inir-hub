@@ -22,27 +22,28 @@ MouseArea {
         const then = new Date(time)
         if (then.toDateString() === new Date().toDateString())
             return Qt.formatTime(then, Config.options?.time?.format ?? "hh:mm")
-        return then.toLocaleDateString(Qt.locale(), "d MMM")
+        return then.toLocaleDateString(Translation.locale, "d MMM")
     }
 
-    height: Math.max(NihilStyle.s(66), words.implicitHeight + NihilStyle.s(24))
+    height: Math.max(NihilStyle.s(76), words.implicitHeight + NihilStyle.s(30))
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
     Accessible.role: Accessible.Button
     Accessible.name: root.entry?.summary ?? ""
     onClicked: Notifications.attemptInvokeAction(root.entry.notificationId, root.entry?.actions?.[0]?.identifier ?? "default")
 
-    NWell {
+    Rectangle {
         anchors.fill: parent
-        radius: NihilStyle.rCard
-        hovered: root.containsMouse || drop.containsMouse
+        radius: NihilStyle.r(22)
+        color: root.containsMouse || drop.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
     }
     NAppIcon {
         id: mark
         x: NihilStyle.s(16)
         anchors.verticalCenter: parent.verticalCenter
         appId: root.entry?.appIcon || root.entry?.appName || ""
-        size: NihilStyle.s(36)
+        size: NihilStyle.s(42)
     }
     Column {
         id: words

@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "Вы изменили рабочий стол вручную. Сохраните его в профиль, чтобы вернуть позже.",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "Ваш пароль также открывает связку ключей",
-  "Your password is needed": "Нужен ваш пароль"
+  "Your password is needed": "Нужен ваш пароль",
+  "Filament": "Нить накала",
+  "Copper": "Медь",
+  "Signal": "Сигнал",
+  "Glacier": "Ледник",
+  "Sage": "Шалфей",
+  "Scheme": "Схема",
+  "Microphone": "Микрофон",
+  "Dark": "Тёмная",
+  "Light": "Светлая",
+  "The one light the whole desktop is drawn in": "Единственный свет, которым нарисован весь рабочий стол"
 }

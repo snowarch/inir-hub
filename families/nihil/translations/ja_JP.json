@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "このデスクトップは手動で変更されています。プロファイルに保存すれば後で戻せます。",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "パスワードでキーリングも開きます",
-  "Your password is needed": "パスワードが必要です"
+  "Your password is needed": "パスワードが必要です",
+  "Filament": "フィラメント",
+  "Copper": "カッパー",
+  "Signal": "シグナル",
+  "Glacier": "グレイシャー",
+  "Sage": "セージ",
+  "Scheme": "スキーム",
+  "Microphone": "マイク",
+  "Dark": "ダーク",
+  "Light": "ライト",
+  "The one light the whole desktop is drawn in": "デスクトップ全体を描く唯一の光"
 }

@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "Hai cambiato questo desktop a mano. Salvalo su un profilo per riaverlo più tardi.",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "La tua password apre anche il portachiavi",
-  "Your password is needed": "Serve la tua password"
+  "Your password is needed": "Serve la tua password",
+  "Filament": "Filamento",
+  "Copper": "Rame",
+  "Signal": "Segnale",
+  "Glacier": "Ghiacciaio",
+  "Sage": "Salvia",
+  "Scheme": "Schema",
+  "Microphone": "Microfono",
+  "Dark": "Scuro",
+  "Light": "Chiaro",
+  "The one light the whole desktop is drawn in": "L'unica luce con cui è disegnato tutto il desktop"
 }

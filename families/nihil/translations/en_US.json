@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "You changed this desktop by hand. Keep it over a profile to have it back later.",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "Your password also opens the keyring",
-  "Your password is needed": "Your password is needed"
+  "Your password is needed": "Your password is needed",
+  "Filament": "Filament",
+  "Copper": "Copper",
+  "Signal": "Signal",
+  "Glacier": "Glacier",
+  "Sage": "Sage",
+  "Scheme": "Scheme",
+  "Microphone": "Microphone",
+  "Dark": "Dark",
+  "Light": "Light",
+  "The one light the whole desktop is drawn in": "The one light the whole desktop is drawn in"
 }

@@ -12,8 +12,8 @@ import qs.modules.common.models.quickToggles
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The machine, on the slab pulled from the band's right end: the two levels, the two radios, six keys, what plays and the
-// way out. What is on is lit from below. A radio's arrow and the sound's open their lists on the same slab.
+// The machine as an instrument panel: two dials, two radios, six round keys, what plays and the way out. What is on is
+// solid in the light. A radio's arrow, or a right click on a dial, opens its list on the same slab.
 Item {
     id: root
 
@@ -26,7 +26,7 @@ Item {
     property string page: ""
     onOpenChanged: if (!root.open) root.page = ""
 
-    readonly property real side: NihilStyle.s(20)
+    readonly property real side: NihilStyle.s(24)
     readonly property real inner: root.width - root.side * 2
     readonly property real headPad: NihilStyle.s(16)
     // Where the light gathers, under the last row.
@@ -37,7 +37,7 @@ Item {
     readonly property bool airplane: !Network.wifiEnabled && !BluetoothStatus.enabled
     readonly property var player: MprisController.activePlayer
 
-    implicitWidth: NihilStyle.s(448)
+    implicitWidth: NihilStyle.s(520)
     implicitHeight: root.page.length > 0 ? Math.min(NihilStyle.s(600), root.room)
         : controls.implicitHeight + root.headPad + root.footPad
 
@@ -64,87 +64,7 @@ Item {
         return (Battery.isCharging ? Translation.tr("%1, full in %2") : Translation.tr("%1, %2 left")).arg(share).arg(root.span(left))
     }
 
-    // A level: its glyph (which mutes), the word, the ruler and the figure. A list hides behind the figure.
-    component Level: NWell {
-        id: level
-
-        property string word: ""
-        property string glyph: ""
-        property real value: 0
-        property bool opens: false
-        property bool keyed: false
-
-        signal tapped()
-        signal moved(real value)
-        signal opened()
-
-        width: root.inner
-        height: NihilStyle.s(58)
-        radius: NihilStyle.rCard
-        hovered: under.hovered
-
-        HoverHandler { id: under }
-
-        MouseArea {
-            id: keyArea
-            x: NihilStyle.s(8)
-            anchors.verticalCenter: parent.verticalCenter
-            width: NihilStyle.s(32)
-            height: width
-            enabled: level.keyed
-            hoverEnabled: true
-            cursorShape: level.keyed ? Qt.PointingHandCursor : Qt.ArrowCursor
-            Accessible.role: Accessible.Button
-            Accessible.name: level.word
-            onClicked: level.tapped()
-            NIcon {
-                anchors.centerIn: parent
-                text: level.glyph
-                size: NihilStyle.s(20)
-                color: keyArea.containsMouse ? NihilStyle.accent : NihilStyle.ink
-            }
-        }
-        NText {
-            x: NihilStyle.s(46)
-            anchors.verticalCenter: parent.verticalCenter
-            width: NihilStyle.s(66)
-            text: level.word
-        }
-        NSlider {
-            x: NihilStyle.s(118)
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - x - NihilStyle.s(50)
-            height: NihilStyle.s(30)
-            name: level.word
-            value: level.value
-            onMoved: value => level.moved(value)
-        }
-        NText {
-            anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(16)
-            anchors.verticalCenter: parent.verticalCenter
-            visible: !more.visible
-            text: Math.round(level.value * 100)
-            figures: true
-            font.pixelSize: NihilStyle.s(15)
-        }
-        NButton {
-            id: more
-            anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(8)
-            anchors.verticalCenter: parent.verticalCenter
-            visible: level.opens && under.hovered
-            width: NihilStyle.s(32)
-            height: width
-            tone: "transparent"
-            icon: "chevron_right"
-            iconSize: NihilStyle.s(16)
-            Accessible.name: Translation.tr("More")
-            onClicked: level.opened()
-        }
-    }
-
-    // A radio: its glyph and name, what it is on under them. Lit while on.
+    // A radio: a wide pill, solid in the light while on. The end of the pill opens its list.
     component Radio: MouseArea {
         id: radio
 
@@ -153,12 +73,13 @@ Item {
         property string note: ""
         property bool on: false
         property bool usable: true
+        readonly property color inkOn: radio.on ? NihilStyle.accentInk : NihilStyle.ink
 
         signal tapped()
         signal opened()
 
         width: (root.inner - NihilStyle.gap) / 2
-        height: NihilStyle.s(84)
+        height: NihilStyle.s(68)
         enabled: radio.usable
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
@@ -169,46 +90,49 @@ Item {
         Accessible.checked: radio.on
         onClicked: radio.tapped()
 
-        NWell {
+        Rectangle {
             anchors.fill: parent
-            radius: NihilStyle.rCard
-            lit: radio.on ? 1 : 0
-            hovered: radio.containsMouse
+            radius: height / 2
+            color: radio.on ? NihilStyle.accent : radio.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
         }
         NIcon {
             id: radioGlyph
-            x: NihilStyle.s(16)
-            y: NihilStyle.s(14)
+            x: NihilStyle.s(22)
+            anchors.verticalCenter: parent.verticalCenter
             text: radio.glyph
             size: NihilStyle.s(22)
+            color: radio.inkOn
         }
-        NText {
+        Column {
             anchors.left: radioGlyph.right
-            anchors.leftMargin: NihilStyle.s(10)
+            anchors.leftMargin: NihilStyle.s(14)
             anchors.right: arrow.left
-            anchors.verticalCenter: radioGlyph.verticalCenter
-            text: radio.name
-            font.pixelSize: NihilStyle.s(15)
-            font.weight: Font.Medium
-        }
-        NText {
-            x: NihilStyle.s(16)
-            y: NihilStyle.s(44)
-            width: parent.width - x * 2
-            text: radio.note
-            font.pixelSize: NihilStyle.textSmall
-            color: NihilStyle.inkSoft
+            anchors.rightMargin: NihilStyle.s(4)
+            anchors.verticalCenter: parent.verticalCenter
+            NText {
+                width: parent.width
+                text: radio.name
+                font.pixelSize: NihilStyle.textBody
+                font.weight: Font.DemiBold
+                color: radio.inkOn
+            }
+            NText {
+                width: parent.width
+                text: radio.note
+                font.pixelSize: NihilStyle.textSmall
+                color: Qt.alpha(radio.inkOn, 0.66)
+            }
         }
         NButton {
             id: arrow
             anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(8)
-            y: NihilStyle.s(9)
-            width: NihilStyle.s(32)
+            anchors.rightMargin: NihilStyle.s(14)
+            anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(36)
             height: width
             visible: radio.usable
-            opacity: radio.containsMouse || arrow.containsMouse ? 1 : 0
-            tone: "transparent"
+            tone: radio.on ? Qt.alpha(NihilStyle.accentInk, 0.1) : NihilStyle.piece
             icon: "chevron_right"
             iconSize: NihilStyle.s(16)
             Accessible.name: Translation.tr("More")
@@ -216,7 +140,7 @@ Item {
         }
     }
 
-    // One of the six keys: the glyph over its word.
+    // A round key, solid in the light while on, its word under it.
     component Key: MouseArea {
         id: key
 
@@ -227,8 +151,8 @@ Item {
 
         signal tapped()
 
-        width: (root.inner - NihilStyle.gap * 2) / 3
-        height: NihilStyle.s(76)
+        width: root.inner / 6
+        height: NihilStyle.s(86)
         enabled: key.usable
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
@@ -239,25 +163,29 @@ Item {
         Accessible.checked: key.on
         onClicked: key.tapped()
 
-        NWell {
-            anchors.fill: parent
-            radius: NihilStyle.rCard
-            lit: key.on ? 0.9 : 0
-            hovered: key.containsMouse
-        }
-        NIcon {
+        Rectangle {
+            id: disc
             anchors.horizontalCenter: parent.horizontalCenter
-            y: NihilStyle.s(14)
-            text: key.glyph
-            size: NihilStyle.s(20)
-            color: key.on ? NihilStyle.ink : NihilStyle.inkSoft
+            width: NihilStyle.s(56)
+            height: width
+            radius: width / 2
+            color: key.on ? NihilStyle.accent : key.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+            scale: key.pressed ? 0.94 : 1
+            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+            Behavior on scale { NumberAnimation { duration: NihilStyle.quick } }
+            NIcon {
+                anchors.centerIn: parent
+                text: key.glyph
+                size: NihilStyle.s(22)
+                color: key.on ? NihilStyle.accentInk : NihilStyle.ink
+            }
         }
         NText {
             anchors.horizontalCenter: parent.horizontalCenter
-            y: NihilStyle.s(44)
-            width: Math.min(implicitWidth, parent.width - NihilStyle.s(12))
+            anchors.bottom: parent.bottom
+            width: Math.min(implicitWidth, parent.width - NihilStyle.s(4))
             text: key.word
-            font.pixelSize: NihilStyle.textSmall
+            font.pixelSize: NihilStyle.textLabel
             color: key.on ? NihilStyle.ink : NihilStyle.inkSoft
         }
     }
@@ -281,25 +209,36 @@ Item {
         visible: root.page.length === 0
         spacing: NihilStyle.s(14)
 
-        Column {
-            width: parent.width
-            spacing: NihilStyle.gap
-            Level {
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: NihilStyle.s(24)
+            NDial {
                 word: Translation.tr("Sound")
                 glyph: root.muted ? "volume_off" : "volume_up"
                 value: root.muted ? 0 : Audio.value
                 keyed: true
-                opens: true
                 onTapped: if (Audio.sink?.audio) Audio.sink.audio.muted = !root.muted
                 onMoved: value => Audio.setSinkVolume(value)
-                onOpened: root.page = "output"
+                TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    onTapped: root.page = "output"
+                }
             }
-            Level {
-                visible: root.hasBrightness
-                word: Translation.tr("Light")
-                glyph: "light_mode"
-                value: root.hasBrightness ? root.monitor.brightness : 0
-                onMoved: value => root.monitor?.setBrightness(Math.max(0.01, value))
+            NDial {
+                word: root.hasBrightness ? Translation.tr("Light") : Translation.tr("Microphone")
+                glyph: root.hasBrightness ? "light_mode" : (Audio.source?.audio?.muted ? "mic_off" : "mic")
+                value: root.hasBrightness ? root.monitor.brightness : (Audio.source?.audio?.volume ?? 0)
+                keyed: !root.hasBrightness
+                onTapped: if (Audio.source?.audio) Audio.source.audio.muted = !Audio.source.audio.muted
+                onMoved: value => {
+                    if (root.hasBrightness) root.monitor?.setBrightness(Math.max(0.01, value))
+                    else if (Audio.source?.audio) Audio.source.audio.volume = value
+                }
+                TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    enabled: !root.hasBrightness
+                    onTapped: root.page = "input"
+                }
             }
         }
 
@@ -329,9 +268,7 @@ Item {
                     onOpened: root.page = "bluetooth"
                 }
             }
-            Grid {
-                columns: 3
-                spacing: NihilStyle.gap
+            Row {
                 Key {
                     glyph: "bedtime"
                     word: Translation.tr("Night")
@@ -347,8 +284,12 @@ Item {
                 Key {
                     glyph: "contrast"
                     word: Translation.tr("Dark")
-                    on: darkMode.toggled
-                    onTapped: darkMode.mainAction()
+                    on: NihilStyle.dark
+                    onTapped: {
+                        const dark = !NihilStyle.dark
+                        Config.setNestedValue("nihil.look.scheme", dark ? "dark" : "light")
+                        if (darkMode.toggled !== dark) darkMode.mainAction()
+                    }
                 }
                 Key {
                     glyph: "flight"
@@ -382,90 +323,86 @@ Item {
             }
         }
 
-        NWell {
+        // What plays: its cover is the tile, darkened until the words read, with the round white key.
+        ClippingRectangle {
             visible: !!root.player
             width: parent.width
-            height: NihilStyle.s(92)
-            radius: NihilStyle.r(20)
+            height: NihilStyle.s(112)
+            radius: NihilStyle.r(26)
+            color: NihilStyle.carbon
 
-            ClippingRectangle {
-                id: art
-                x: NihilStyle.s(14)
-                anchors.verticalCenter: parent.verticalCenter
-                width: NihilStyle.s(64)
-                height: width
-                radius: NihilStyle.r(14)
-                color: NihilStyle.pieceRaised
-                NIcon {
-                    anchors.centerIn: parent
-                    visible: cover.status !== Image.Ready
-                    text: "music_note"
-                    size: NihilStyle.s(24)
-                    color: NihilStyle.inkFaint
-                }
-                Image {
-                    id: cover
-                    anchors.fill: parent
-                    asynchronous: true
-                    sourceSize: Qt.size(art.width * 2, art.height * 2)
-                    fillMode: Image.PreserveAspectCrop
-                    source: root.player?.trackArtUrl ?? ""
+            Image {
+                id: cover
+                anchors.fill: parent
+                asynchronous: true
+                sourceSize.width: parent.width
+                fillMode: Image.PreserveAspectCrop
+                source: root.player?.trackArtUrl ?? ""
+            }
+            Rectangle {
+                anchors.fill: parent
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: Qt.alpha("#0C0A08", 0.86) }
+                    GradientStop { position: 1; color: Qt.alpha("#0C0A08", cover.status === Image.Ready ? 0.42 : 0.86) }
                 }
             }
             Column {
-                anchors.left: art.right
-                anchors.leftMargin: NihilStyle.s(14)
+                x: NihilStyle.s(22)
                 anchors.right: transport.left
-                anchors.rightMargin: NihilStyle.gap
+                anchors.rightMargin: NihilStyle.s(12)
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: NihilStyle.s(3)
                 NText {
                     width: parent.width
                     text: root.player?.trackTitle ?? ""
-                    font.pixelSize: NihilStyle.s(15)
+                    font.pixelSize: NihilStyle.textLarge
                     font.weight: Font.Medium
+                    color: "#F5F0E8"
                 }
                 NText {
                     width: parent.width
                     text: root.player?.trackArtist ?? ""
                     font.pixelSize: NihilStyle.textSmall
-                    color: NihilStyle.inkSoft
+                    color: Qt.alpha("#F5F0E8", 0.7)
                 }
             }
             Row {
                 id: transport
                 anchors.right: parent.right
-                anchors.rightMargin: NihilStyle.s(8)
+                anchors.rightMargin: NihilStyle.s(16)
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: NihilStyle.s(2)
-                NButton {
+                spacing: NihilStyle.s(6)
+                MouseArea {
                     anchors.verticalCenter: parent.verticalCenter
-                    tone: "transparent"
-                    radius: width / 2
-                    icon: "previous"
-                    iconSize: NihilStyle.s(20)
+                    width: NihilStyle.s(36)
+                    height: width
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
                     Accessible.name: Translation.tr("Previous")
                     onClicked: root.player?.previous()
+                    NIcon { anchors.centerIn: parent; text: "previous"; size: NihilStyle.s(20); color: "#F5F0E8" }
                 }
-                NButton {
+                MouseArea {
                     anchors.verticalCenter: parent.verticalCenter
-                    width: NihilStyle.s(44)
+                    width: NihilStyle.s(56)
                     height: width
-                    radius: width / 2
-                    lit: true
-                    icon: root.player?.isPlaying ? "pause" : "play"
-                    iconSize: NihilStyle.s(20)
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
                     Accessible.name: root.player?.isPlaying ? Translation.tr("Pause") : Translation.tr("Play")
                     onClicked: root.player?.togglePlaying()
+                    Rectangle { anchors.fill: parent; radius: width / 2; color: "#F5F0E8" }
+                    NIcon { anchors.centerIn: parent; text: root.player?.isPlaying ? "pause" : "play"; size: NihilStyle.s(24); color: "#0C0A08" }
                 }
-                NButton {
+                MouseArea {
                     anchors.verticalCenter: parent.verticalCenter
-                    tone: "transparent"
-                    radius: width / 2
-                    icon: "next"
-                    iconSize: NihilStyle.s(20)
+                    width: NihilStyle.s(36)
+                    height: width
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
                     Accessible.name: Translation.tr("Next")
                     onClicked: root.player?.next()
+                    NIcon { anchors.centerIn: parent; text: "next"; size: NihilStyle.s(20); color: "#F5F0E8" }
                 }
             }
         }

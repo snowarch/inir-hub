@@ -37,14 +37,10 @@ Rectangle {
 
     implicitWidth: NihilStyle.s(230)
     implicitHeight: NihilStyle.s(40)
-    radius: NihilStyle.rKey
-    color: "transparent"
-
-    NWell {
-        anchors.fill: parent
-        radius: root.radius
-        lit: input.activeFocus ? 0.55 : 0
-    }
+    radius: height / 2
+    color: NihilStyle.pieceRaised
+    border.width: input.activeFocus ? Math.max(1, NihilStyle.s(1.5)) : 0
+    border.color: NihilStyle.accent
 
     NIcon {
         id: mark

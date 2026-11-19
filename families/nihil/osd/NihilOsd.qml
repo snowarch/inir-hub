@@ -36,8 +36,8 @@ Item {
     // Where the needle stands on the tag: the sheet's light gathers under it.
     readonly property real needle: ruler.x + ruler.width * NihilStyle.clamp(root.level, 0, 1)
 
-    implicitWidth: NihilStyle.s(320)
-    implicitHeight: NihilStyle.s(62)
+    implicitWidth: NihilStyle.s(420)
+    implicitHeight: NihilStyle.s(72)
     width: implicitWidth
     height: implicitHeight
 
@@ -96,8 +96,8 @@ Item {
         id: ruler
         x: mark.x + mark.width + NihilStyle.s(12)
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width - x - NihilStyle.s(60)
-        height: NihilStyle.s(26)
+        width: parent.width - x - NihilStyle.s(76)
+        height: NihilStyle.s(36)
         name: root.kind === "volume" ? Translation.tr("Sound") : Translation.tr("Light")
         value: root.level
         onMoved: value => {
@@ -111,6 +111,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: Math.round(root.level * 100)
         figures: true
-        font.pixelSize: NihilStyle.s(15)
+        font.pixelSize: NihilStyle.s(26)
+        font.weight: Font.ExtraLight
     }
 }

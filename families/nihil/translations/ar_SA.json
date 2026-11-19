@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "غيّرت سطح المكتب هذا يدويًا. احفظه فوق ملف تعريف لتستعيده لاحقًا.",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "كلمة مرورك تفتح سلسلة المفاتيح أيضًا",
-  "Your password is needed": "كلمة المرور مطلوبة"
+  "Your password is needed": "كلمة المرور مطلوبة",
+  "Filament": "فتيل",
+  "Copper": "نحاسي",
+  "Signal": "إشارة",
+  "Glacier": "جليدي",
+  "Sage": "مريمية",
+  "Scheme": "النمط",
+  "Microphone": "الميكروفون",
+  "Dark": "داكن",
+  "Light": "فاتح",
+  "The one light the whole desktop is drawn in": "الضوء الواحد الذي يُرسم به سطح المكتب كله"
 }

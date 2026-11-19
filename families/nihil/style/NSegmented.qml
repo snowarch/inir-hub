@@ -19,8 +19,8 @@ Rectangle {
 
     implicitWidth: NihilStyle.s(92) * root.options.length + root.inset * 2
     implicitHeight: NihilStyle.s(34)
-    radius: NihilStyle.rKey
-    color: NihilStyle.well
+    radius: height / 2
+    color: NihilStyle.pieceRaised
 
     activeFocusOnTab: true
     Accessible.role: Accessible.List
@@ -39,7 +39,7 @@ Rectangle {
         width: root.slot
         height: root.height - root.inset * 2
         radius: Math.max(0, root.radius - root.inset)
-        color: NihilStyle.chosen
+        color: NihilStyle.accent
         Behavior on x { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
     }
 
@@ -78,7 +78,7 @@ Rectangle {
                         width: Math.min(implicitWidth, segment.width - NihilStyle.s(segment.glyph.length > 0 ? 28 : 8))
                         text: Translation.tr(String(segment.modelData?.label ?? ""))
                         font.pixelSize: NihilStyle.textSmall
-                        color: segment.chosen || segment.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                        color: segment.chosen ? NihilStyle.accentInk : segment.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
                         font.weight: segment.chosen ? Font.DemiBold : Font.Medium
                     }
                 }

@@ -3,10 +3,10 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import qs.modules.common
+import qs.services
 
 // Every measure, ink and material of NiHiL, all of it driven by `nihil.look`.
-// One sheet of black glass and one light. Colour exists only as light: the contour of the sheet, the aurora rising from
-// what is on. The light's two colours come from the wallpaper through the shell's colour pipeline.
+// An instrument panel: warm black glass, one filament of light, and what is on drawn solid in that light.
 Singleton {
     id: root
 
@@ -17,42 +17,57 @@ Singleton {
     }
     function clamp(value: real, low: real, high: real): real { return Math.max(low, Math.min(high, value)) }
 
-    readonly property var m3: Appearance.m3colors
-    readonly property bool dark: root.m3.darkmode ?? true
+    // NiHiL keeps its own scheme: nothing here is read from the shell's Material colours.
+    readonly property string scheme: String(root.opt("scheme", "dark")) === "light" ? "light" : "dark"
+    readonly property bool dark: root.scheme === "dark"
 
-    // Each palette is the accent and the two lights its glow mixes.
+    // One light per palette. "wallpaper" takes the most vivid colour the picture itself holds.
     readonly property var palettes: ({
-        aurora: { accent: "#A3B1FF", a: "#6F7CFF", b: "#C08BFF" },
-        mono: { accent: "#ECECEE", a: "#B9BDC6", b: "#ECECEE" },
-        ember: { accent: "#FF9A6B", a: "#FF5A36", b: "#FFB45C" },
-        ice: { accent: "#8AD4FF", a: "#3FA9FF", b: "#7C8CFF" },
-        moss: { accent: "#A9DDB1", a: "#4FBF8A", b: "#C6E38A" },
-        wallpaper: { accent: "", a: "", b: "" }
+        filament: { light: "#F2E6D4" },
+        copper: { light: "#E9A26A" },
+        signal: { light: "#FF6A3D" },
+        glacier: { light: "#BBD6E4" },
+        sage: { light: "#B7CFA3" },
+        wallpaper: { light: "" }
     })
-    // Names from earlier NiHiL land on the closest light.
-    readonly property var _renamed: ({ spectral: "aurora", obsidian: "mono", amber: "ember", azure: "ice", ultramarine: "aurora" })
+    // Names from earlier NiHiL land on the closest light; anything unknown on the filament.
+    readonly property var _renamed: ({ ember: "copper", amber: "copper", ice: "glacier", azure: "glacier", moss: "sage" })
     readonly property string paletteName: {
-        const name = String(root.opt("palette", "wallpaper"))
+        const name = String(root.opt("palette", "filament"))
         const known = root._renamed[name] ?? name
-        return root.palettes[known] ? known : "wallpaper"
+        return root.palettes[known] ? known : "filament"
     }
-    readonly property var palette: root.palettes[root.paletteName]
     readonly property bool fromWallpaper: root.paletteName === "wallpaper"
-    // A colour as light: its hue, carried to the lightness that reads on this sheet. Grey stays grey.
-    function tone(c: color, lightness: real): color {
-        const saturation = c.hslSaturation < 0.08 ? c.hslSaturation : Math.max(c.hslSaturation, 0.62)
-        return Qt.hsla(Math.max(0, c.hslHue), saturation, lightness, 1)
-    }
-    readonly property real lightLevel: root.dark ? 0.76 : 0.46
-    readonly property color specA: root.tone(root.fromWallpaper ? root.m3.m3primary : root.palette.a, root.lightLevel)
-    readonly property color specB: root.tone(root.fromWallpaper ? root.m3.m3tertiary : root.palette.b, root.lightLevel)
-    readonly property color accent: root.tone(root.fromWallpaper ? root.m3.m3primary : root.palette.accent, root.dark ? 0.82 : 0.4)
-    readonly property color accentInk: root.dark ? "#07080B" : "#FFFFFF"
 
-    // The sheet and what is written on it.
-    readonly property color void_: root.dark ? "#07080B" : "#EEEFF3"
-    readonly property color carbon: root.dark ? "#101116" : "#E2E4EA"
-    readonly property color ink: root.dark ? "#F3F4F6" : "#101217"
+    ColorQuantizer {
+        id: pictureColours
+        source: root.fromWallpaper ? Wallpapers.effectiveWallpaperUrl : ""
+        depth: 4
+        rescaleSize: 64
+    }
+    readonly property color pictureLight: {
+        let best = root.palettes.filament.light
+        let score = 0.12
+        for (const colour of pictureColours.colors ?? []) {
+            const vivid = colour.hslSaturation * (1 - Math.abs(colour.hslLightness - 0.55))
+            if (vivid > score) { score = vivid; best = colour }
+        }
+        return best
+    }
+    readonly property color seed: root.fromWallpaper ? root.pictureLight : root.palettes[root.paletteName].light
+    // The light at the lightness that reads on this sheet: pale on black, deep on paper.
+    function tone(c: color, lightness: real): color {
+        return Qt.hsla(Math.max(0, c.hslHue), Math.min(c.hslSaturation, root.dark ? 0.9 : 0.62), lightness, 1)
+    }
+    readonly property color accent: root.dark ? root.tone(root.seed, Math.max(0.68, root.seed.hslLightness)) : root.tone(root.seed, 0.3)
+    readonly property color accentInk: root.dark ? "#0C0A08" : "#FBF8F3"
+    readonly property color specA: root.accent
+    readonly property color specB: root.accent
+
+    // The sheet and what is written on it: warm black and warm paper, never a blue-grey.
+    readonly property color void_: root.dark ? "#0C0A08" : "#EFEAE2"
+    readonly property color carbon: root.dark ? "#171411" : "#E5DFD5"
+    readonly property color ink: root.dark ? "#F5F0E8" : "#17130E"
     readonly property color inkSoft: Qt.alpha(root.ink, root.dark ? 0.62 : 0.68)
     readonly property color inkFaint: Qt.alpha(root.ink, root.dark ? 0.38 : 0.46)
     readonly property color hair: Qt.alpha(root.ink, 0.1)

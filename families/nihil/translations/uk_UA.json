@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "Ви змінили робочий стіл вручну. Збережіть його в профіль, щоб повернути пізніше.",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "Ваш пароль також відкриває в'язку ключів",
-  "Your password is needed": "Потрібен ваш пароль"
+  "Your password is needed": "Потрібен ваш пароль",
+  "Filament": "Нитка розжарення",
+  "Copper": "Мідь",
+  "Signal": "Сигнал",
+  "Glacier": "Льодовик",
+  "Sage": "Шавлія",
+  "Scheme": "Схема",
+  "Microphone": "Мікрофон",
+  "Dark": "Темна",
+  "Light": "Світла",
+  "The one light the whole desktop is drawn in": "Єдине світло, яким намальовано весь робочий стіл"
 }

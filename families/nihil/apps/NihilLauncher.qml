@@ -6,7 +6,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The launcher, a page of the sheet: the search on top, the kinds of app under it and the grid. Typing turns the grid into
+// The launcher, a page of the sheet: the search on top, the kinds of app down a rail and the grid beside them. Typing turns the grid into
 // what was found. The field keeps the keys the whole time and steers whatever is on show.
 FocusScope {
     id: root
@@ -67,11 +67,11 @@ FocusScope {
         x: root.pad
         y: NihilStyle.s(24)
         width: root.width - root.pad * 2
-        height: NihilStyle.s(68)
-        radius: NihilStyle.r(22)
+        height: NihilStyle.s(64)
+        radius: height / 2
         glyph: "search"
-        glyphSize: NihilStyle.s(26)
-        textSize: NihilStyle.s(22)
+        glyphSize: NihilStyle.s(24)
+        textSize: NihilStyle.s(21)
         textWeight: Font.Light
         clearable: true
         placeholder: Translation.tr("Search apps, windows and files")
@@ -83,11 +83,11 @@ FocusScope {
     }
 
     // The kinds of app, or what a search looks through.
-    Row {
+    Column {
         id: chips
         x: root.pad
-        y: field.y + field.height + NihilStyle.s(14)
-        height: NihilStyle.s(32)
+        y: field.y + field.height + NihilStyle.s(22)
+        width: NihilStyle.s(176)
         spacing: NihilStyle.s(4)
 
         Repeater {
@@ -99,8 +99,8 @@ FocusScope {
                 readonly property bool chosen: root.searching ? NihilState.searchScope === chip.modelData.id
                     : root.kind === chip.modelData.id
 
-                width: word.implicitWidth + NihilStyle.s(28)
-                height: chips.height
+                width: chips.width
+                height: NihilStyle.s(44)
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 Accessible.role: Accessible.RadioButton
@@ -113,17 +113,19 @@ FocusScope {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: NihilStyle.rKey
-                    color: chip.chosen ? NihilStyle.chosen : chip.containsMouse ? NihilStyle.piece : "transparent"
+                    radius: height / 2
+                    color: chip.chosen ? NihilStyle.accent : chip.containsMouse ? NihilStyle.piece : "transparent"
                     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
                 }
                 NText {
                     id: word
-                    anchors.centerIn: parent
+                    x: NihilStyle.s(20)
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width - x * 2
                     text: chip.modelData.word
-                    font.pixelSize: NihilStyle.textSmall
-                    font.weight: chip.chosen ? Font.Medium : Font.Normal
-                    color: chip.chosen || chip.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                    font.pixelSize: NihilStyle.textBody
+                    font.weight: chip.chosen ? Font.DemiBold : Font.Normal
+                    color: chip.chosen ? NihilStyle.accentInk : chip.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
                 }
             }
         }
@@ -131,9 +133,9 @@ FocusScope {
 
     Item {
         id: area
-        x: root.pad
-        y: chips.y + chips.height + NihilStyle.s(14)
-        width: root.width - root.pad * 2
+        x: chips.x + chips.width + NihilStyle.s(24)
+        y: chips.y
+        width: root.width - x - root.pad
         height: root.height - y - NihilStyle.s(24)
 
         Loader {

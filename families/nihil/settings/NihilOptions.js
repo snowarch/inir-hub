@@ -165,8 +165,8 @@ var pages = [
         id: "appearance", summary: "Colour, glass, shape and type", title: "Appearance", glyph: "palette",
         sections: [
             { title: "Colour", rows: [
-                choice("look.palette", "Accent", [["aurora", "Aurora"], ["ice", "Ice"], ["ember", "Ember"], ["moss", "Moss"],
-                                                  ["mono", "Mono"], ["wallpaper", "From the wallpaper"]], "The accent and the light at the glass's edge")
+                choice("look.scheme", "Scheme", [["dark", "Dark"], ["light", "Light"]]),
+                choice("look.palette", "Light", [["filament", "Filament"], ["copper", "Copper"], ["signal", "Signal"], ["glacier", "Glacier"], ["sage", "Sage"], ["wallpaper", "From the wallpaper"]], "The one light the whole desktop is drawn in")
             ] },
             { title: "Glass", rows: [
                 choice("look.material", "Material", [["smoke", "Smoked"], ["frost", "Frosted"], ["fluted", "Fluted"], ["prism", "Prism"]]),

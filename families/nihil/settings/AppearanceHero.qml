@@ -13,16 +13,16 @@ ClippingRectangle {
 
     readonly property string chosen: NihilStyle.paletteName
     readonly property var lights: [
-        { id: "wallpaper", word: Translation.tr("From the wallpaper") },
-        { id: "aurora", word: Translation.tr("Aurora") },
-        { id: "ice", word: Translation.tr("Ice") },
-        { id: "ember", word: Translation.tr("Ember") },
-        { id: "moss", word: Translation.tr("Moss") },
-        { id: "mono", word: Translation.tr("Mono") }
+        { id: "filament", word: Translation.tr("Filament") },
+        { id: "copper", word: Translation.tr("Copper") },
+        { id: "signal", word: Translation.tr("Signal") },
+        { id: "glacier", word: Translation.tr("Glacier") },
+        { id: "sage", word: Translation.tr("Sage") },
+        { id: "wallpaper", word: Translation.tr("From the wallpaper") }
     ]
 
-    height: NihilStyle.s(190)
-    radius: NihilStyle.r(22)
+    height: NihilStyle.s(220)
+    radius: NihilStyle.r(26)
     color: NihilStyle.well
 
     Image {
@@ -37,8 +37,8 @@ ClippingRectangle {
         anchors.fill: parent
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: Qt.alpha("#05060A", 0.72) }
-            GradientStop { position: 0.62; color: Qt.alpha("#05060A", 0) }
+            GradientStop { position: 0; color: Qt.alpha("#0C0A08", 0.78) }
+            GradientStop { position: 0.62; color: Qt.alpha("#0C0A08", 0) }
         }
     }
 
@@ -49,7 +49,7 @@ ClippingRectangle {
         spacing: NihilStyle.s(12)
 
         NText {
-            text: Translation.tr("Wallpaper light")
+            text: Translation.tr("Light")
             font.pixelSize: NihilStyle.textBody
             font.weight: Font.Medium
             color: "#FFFFFF"
@@ -86,11 +86,7 @@ ClippingRectangle {
                         anchors.fill: parent
                         anchors.margins: swatch.here ? NihilStyle.s(4) : swatch.containsMouse ? NihilStyle.s(1) : NihilStyle.s(2)
                         radius: width / 2
-                        gradient: Gradient {
-                            orientation: Gradient.Vertical
-                            GradientStop { position: 0; color: swatch.modelData.id === "wallpaper" ? NihilStyle.specA : swatch.light.a }
-                            GradientStop { position: 1; color: swatch.modelData.id === "wallpaper" ? NihilStyle.specB : swatch.light.b }
-                        }
+                        color: swatch.modelData.id === "wallpaper" ? NihilStyle.pictureLight : swatch.light.light
                         Behavior on anchors.margins { NumberAnimation { duration: NihilStyle.quick } }
                     }
                 }

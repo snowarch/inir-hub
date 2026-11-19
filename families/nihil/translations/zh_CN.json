@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "你手动修改了此桌面。把它保存到一个配置上，以后即可恢复。",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "你的密码也会解锁密钥环",
-  "Your password is needed": "需要你的密码"
+  "Your password is needed": "需要你的密码",
+  "Filament": "灯丝",
+  "Copper": "铜色",
+  "Signal": "信号",
+  "Glacier": "冰川",
+  "Sage": "鼠尾草",
+  "Scheme": "方案",
+  "Microphone": "麦克风",
+  "Dark": "深色",
+  "Light": "浅色",
+  "The one light the whole desktop is drawn in": "绘制整个桌面的唯一光线"
 }

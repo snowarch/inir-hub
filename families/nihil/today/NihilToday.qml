@@ -21,8 +21,8 @@ Item {
     readonly property real headPad: NihilStyle.s(20)
     readonly property real footPad: NihilStyle.s(26)
 
-    implicitWidth: NihilStyle.s(808)
-    implicitHeight: Math.min(NihilStyle.s(616), root.room)
+    implicitWidth: NihilStyle.s(900)
+    implicitHeight: Math.min(NihilStyle.s(660), root.room)
 
     Component.onCompleted: Notifications.ensureInitialized()
 
@@ -30,14 +30,14 @@ Item {
         id: calendar
         x: root.side
         y: root.flipped ? root.footPad : root.headPad
-        width: NihilStyle.s(296)
+        width: NihilStyle.s(350)
         height: root.height - root.headPad - root.footPad
         live: root.open
     }
 
     Item {
         id: arrived
-        x: calendar.x + calendar.width + NihilStyle.s(28)
+        x: calendar.x + calendar.width + NihilStyle.s(40)
         y: calendar.y
         width: root.width - x - root.side
         height: calendar.height
@@ -45,10 +45,10 @@ Item {
         NDisplay {
             id: heading
             width: parent.width - keys.width - NihilStyle.gap
-            height: NihilStyle.s(36)
+            height: NihilStyle.s(52)
             text: Translation.tr("Notifications")
-            size: NihilStyle.textTitle
-            font.weight: Font.Light
+            size: NihilStyle.s(34)
+            font.weight: Font.ExtraLight
         }
         Row {
             id: keys
@@ -75,7 +75,7 @@ Item {
 
         ListView {
             id: list
-            y: heading.height + NihilStyle.s(10)
+            y: heading.height + NihilStyle.s(16)
             width: parent.width
             height: parent.height - y
             clip: true

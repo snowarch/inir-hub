@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "आपने यह डेस्कटॉप हाथ से बदला है। बाद में वापस पाने के लिए इसे किसी प्रोफ़ाइल पर रखें।",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "आपका पासवर्ड कीरिंग भी खोलता है",
-  "Your password is needed": "आपका पासवर्ड चाहिए"
+  "Your password is needed": "आपका पासवर्ड चाहिए",
+  "Filament": "फिलामेंट",
+  "Copper": "तांबा",
+  "Signal": "सिग्नल",
+  "Glacier": "हिमनद",
+  "Sage": "सेज",
+  "Scheme": "योजना",
+  "Microphone": "माइक्रोफ़ोन",
+  "Dark": "गहरा",
+  "Light": "हल्का",
+  "The one light the whole desktop is drawn in": "वह एक रोशनी जिससे पूरा डेस्कटॉप बनता है"
 }

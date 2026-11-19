@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "Bu masaüstünü elle değiştirdin. Sonra geri almak için bir profilin üzerine kaydet.",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "Parolan anahtar zincirini de açar",
-  "Your password is needed": "Parolan gerekiyor"
+  "Your password is needed": "Parolan gerekiyor",
+  "Filament": "Filaman",
+  "Copper": "Bakır",
+  "Signal": "Sinyal",
+  "Glacier": "Buzul",
+  "Sage": "Adaçayı",
+  "Scheme": "Şema",
+  "Microphone": "Mikrofon",
+  "Dark": "Koyu",
+  "Light": "Açık",
+  "The one light the whole desktop is drawn in": "Tüm masaüstünü çizen tek ışık"
 }

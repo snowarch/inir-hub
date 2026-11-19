@@ -20,7 +20,7 @@ Item {
     readonly property int days: new Date(root.first.getFullYear(), root.first.getMonth() + 1, 0).getDate()
     readonly property int rows: Math.ceil((root.lead + root.days) / 7)
     readonly property real cellWidth: root.width / 7
-    readonly property real cellHeight: NihilStyle.s(38)
+    readonly property real cellHeight: NihilStyle.s(42)
 
     // The next thing on the calendar, from what was written here and what is synced.
     readonly property var next: {
@@ -37,7 +37,7 @@ Item {
         const away = Math.floor((at - start) / 86400000)
         if (away === 0) return Translation.tr("Today at %1").arg(time)
         if (away === 1) return Translation.tr("Tomorrow at %1").arg(time)
-        return then.toLocaleDateString(Qt.locale(), "ddd d MMM") + ", " + time
+        return then.toLocaleDateString(Translation.locale, "ddd d MMM") + ", " + time
     }
 
     onLiveChanged: if (!root.live) root.shift = 0
@@ -51,7 +51,7 @@ Item {
         id: weekday
         width: parent.width
         height: NihilStyle.s(22)
-        text: root.shift === 0 ? Qt.locale().dayName(root.now.getDay(), Locale.LongFormat) : Translation.tr("Back to today")
+        text: root.shift === 0 ? Translation.locale.dayName(root.now.getDay(), Locale.LongFormat) : Translation.tr("Back to today")
         font.pixelSize: NihilStyle.s(15)
         color: NihilStyle.inkSoft
     }
@@ -60,7 +60,7 @@ Item {
         id: hero
         y: weekday.height
         width: parent.width
-        height: NihilStyle.s(112)
+        height: NihilStyle.s(140)
         enabled: root.shift !== 0
         cursorShape: root.shift !== 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: root.shift = 0
@@ -68,11 +68,11 @@ Item {
         Text {
             id: figure
             anchors.verticalCenter: parent.verticalCenter
-            text: root.shift === 0 ? root.now.getDate() : Qt.locale().standaloneMonthName(root.first.getMonth(), Locale.ShortFormat)
+            text: root.shift === 0 ? root.now.getDate() : Translation.locale.standaloneMonthName(root.first.getMonth(), Locale.ShortFormat)
             color: NihilStyle.ink
             renderType: Text.NativeRendering
             font.family: NihilStyle.display
-            font.pixelSize: root.shift === 0 ? NihilStyle.s(104) : NihilStyle.s(72)
+            font.pixelSize: root.shift === 0 ? NihilStyle.s(136) : NihilStyle.s(80)
             font.weight: Font.ExtraLight
             font.letterSpacing: root.shift === 0 ? -NihilStyle.s(5) : -NihilStyle.s(2)
             font.features: { "tnum": 1 }
@@ -82,7 +82,7 @@ Item {
             anchors.leftMargin: NihilStyle.s(14)
             anchors.right: parent.right
             anchors.baseline: figure.baseline
-            text: root.shift === 0 ? Qt.locale().standaloneMonthName(root.now.getMonth(), Locale.LongFormat) : root.first.getFullYear()
+            text: root.shift === 0 ? Translation.locale.standaloneMonthName(root.now.getMonth(), Locale.LongFormat) : root.first.getFullYear()
             font.pixelSize: NihilStyle.s(18)
             color: NihilStyle.inkSoft
         }
@@ -98,7 +98,7 @@ Item {
                 required property int index
                 width: root.cellWidth
                 horizontalAlignment: Text.AlignHCenter
-                text: Qt.locale().dayName((root.startDay + initial.index) % 7, Locale.ShortFormat).slice(0, 2)
+                text: Translation.locale.dayName((root.startDay + initial.index) % 7, Locale.ShortFormat).slice(0, 2)
                 font.pixelSize: NihilStyle.textLabel
                 color: NihilStyle.inkFaint
             }
@@ -122,38 +122,33 @@ Item {
                 width: root.cellWidth
                 height: root.cellHeight
 
+                Rectangle {
+                    anchors.centerIn: parent
+                    visible: step.today
+                    width: NihilStyle.s(36)
+                    height: width
+                    radius: width / 2
+                    color: NihilStyle.accent
+                }
                 NText {
                     anchors.centerIn: parent
                     visible: step.inMonth
                     figures: true
                     text: step.number
                     font.weight: step.today ? Font.DemiBold : Font.Normal
-                    color: step.today ? NihilStyle.ink : step.rest ? NihilStyle.inkFaint : NihilStyle.inkSoft
-                }
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: NihilStyle.s(3)
-                    visible: step.today
-                    width: NihilStyle.s(22)
-                    height: NihilStyle.s(2)
-                    radius: height / 2
-                    gradient: Gradient {
-                        orientation: Gradient.Horizontal
-                        GradientStop { position: 0; color: NihilStyle.specA }
-                        GradientStop { position: 1; color: NihilStyle.specB }
-                    }
+                    color: step.today ? NihilStyle.accentInk : step.rest ? NihilStyle.inkFaint : NihilStyle.ink
                 }
             }
         }
     }
 
-    NWell {
+    Rectangle {
         anchors.bottom: parent.bottom
         visible: root.next !== null
         width: parent.width
-        height: NihilStyle.s(58)
-        radius: NihilStyle.rCard
+        height: NihilStyle.s(62)
+        radius: NihilStyle.r(22)
+        color: NihilStyle.piece
 
         Rectangle {
             x: NihilStyle.s(16)
@@ -161,10 +156,7 @@ Item {
             width: NihilStyle.s(3)
             height: NihilStyle.s(30)
             radius: width / 2
-            gradient: Gradient {
-                GradientStop { position: 0; color: NihilStyle.specA }
-                GradientStop { position: 1; color: NihilStyle.specB }
-            }
+            color: NihilStyle.accent
         }
         Column {
             x: NihilStyle.s(30)

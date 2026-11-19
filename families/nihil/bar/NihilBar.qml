@@ -9,8 +9,8 @@ import qs.services
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The band's writing. Left: NiHiL's mark, the workspaces as dashes as long as what they hold, the window that has the keys.
-// Centre: the day and the time. Right: the tray, then the machine. The light of the sheet rests on the active dash.
+// The band's writing. Left: NiHiL's mark, the workspaces as a ruler whose active tick is a solid key, the window that has
+// the keys. Centre: the day and the time. Right: the tray, then the machine in one capsule.
 Item {
     id: bar
 
@@ -25,8 +25,9 @@ Item {
         && win.workspace_id === bar.workspaces[bar.at]?.id) ?? null
     readonly property real pad: NihilStyle.s(20)
 
+    // The workspaces are the ticks of a ruler; the one on show is a solid key that carries its number.
     function dashLength(workspace: var): real {
-        return NihilStyle.s(16) + Math.min(6, NihilState.windowsOn(workspace?.id).length) * NihilStyle.s(8)
+        return workspace?.is_active ? NihilStyle.s(34) : NihilStyle.s(14)
     }
     // Where the sheet's light rests: the middle of the active dash.
     readonly property real lightX: {
@@ -38,7 +39,7 @@ Item {
     component Key: MouseArea {
         id: key
         property bool lit: false
-        readonly property color ink: key.lit || key.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+        readonly property color ink: key.lit ? NihilStyle.accentInk : NihilStyle.ink
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -79,22 +80,25 @@ Item {
                 Accessible.name: Translation.tr("Workspace %1").arg(dash.index + 1)
                 onClicked: NiriService.switchToWorkspaceById(dash.modelData.id)
                 Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+                readonly property bool holds: NihilState.windowsOn(dash.modelData.id).length > 0
                 Rectangle {
                     anchors.centerIn: parent
-                    width: parent.width
-                    height: NihilStyle.s(9)
-                    radius: height / 2
-                    color: NihilStyle.accent
-                    opacity: dash.active ? 0.22 : 0
-                    Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
-                }
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: parent.width
-                    height: NihilStyle.s(3)
-                    radius: height / 2
-                    color: dash.active ? NihilStyle.ink : Qt.alpha(NihilStyle.ink, dash.containsMouse ? 0.55 : 0.3)
+                    width: dash.active ? parent.width : NihilStyle.s(2)
+                    height: dash.active ? NihilStyle.s(22) : dash.holds ? NihilStyle.s(16) : NihilStyle.s(8)
+                    radius: dash.active ? height / 2 : 1
+                    color: dash.active ? NihilStyle.accent : Qt.alpha(NihilStyle.ink, dash.containsMouse ? 0.9 : dash.holds ? 0.62 : 0.3)
+                    Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+                    Behavior on height { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
                     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                }
+                NText {
+                    anchors.centerIn: parent
+                    visible: dash.active
+                    text: dash.index + 1
+                    figures: true
+                    font.pixelSize: NihilStyle.textLabel
+                    font.weight: Font.DemiBold
+                    color: NihilStyle.accentInk
                 }
             }
         }
@@ -147,8 +151,8 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 text: DateTime.time
                 figures: true
-                font.pixelSize: NihilStyle.s(15)
-                font.weight: Font.Medium
+                font.pixelSize: NihilStyle.s(20)
+                font.weight: Font.Light
             }
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
@@ -223,7 +227,7 @@ Item {
 
         Key {
             id: status
-            width: statusRow.implicitWidth + NihilStyle.s(16)
+            width: statusRow.implicitWidth + NihilStyle.s(28)
             lit: NihilState.controlOpen
             Accessible.role: Accessible.Button
             Accessible.name: Translation.tr("Quick settings")
@@ -231,6 +235,14 @@ Item {
             onWheel: wheel => {
                 const sink = Audio.sink?.audio
                 if (sink) sink.volume = NihilStyle.clamp(sink.volume + (wheel.angleDelta.y > 0 ? 0.05 : -0.05), 0, 1)
+            }
+            Rectangle {
+                anchors.centerIn: parent
+                width: parent.width
+                height: NihilStyle.s(30)
+                radius: height / 2
+                color: status.lit ? NihilStyle.accent : status.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+                Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
             }
             Row {
                 id: statusRow

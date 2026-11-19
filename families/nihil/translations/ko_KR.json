@@ -439,5 +439,15 @@
   "You changed this desktop by hand. Keep it over a profile to have it back later.": "이 데스크톱을 직접 바꾸었습니다. 프로필에 저장하면 나중에 되돌릴 수 있습니다.",
   "YouTube Music (Pear Desktop)": "YouTube Music (Pear Desktop)",
   "Your password also opens the keyring": "비밀번호로 키링도 엽니다",
-  "Your password is needed": "비밀번호가 필요합니다"
+  "Your password is needed": "비밀번호가 필요합니다",
+  "Filament": "필라멘트",
+  "Copper": "구리",
+  "Signal": "시그널",
+  "Glacier": "빙하",
+  "Sage": "세이지",
+  "Scheme": "구성표",
+  "Microphone": "마이크",
+  "Dark": "어둡게",
+  "Light": "밝게",
+  "The one light the whole desktop is drawn in": "데스크톱 전체를 그리는 하나의 빛"
 }

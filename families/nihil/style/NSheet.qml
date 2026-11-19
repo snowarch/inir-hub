@@ -35,16 +35,16 @@ ShaderEffect {
     readonly property real reach: root.lightReach
     readonly property real power: root.lightPower
     readonly property vector4d aurora: Qt.vector4d(root.auroraRect.x, root.auroraRect.y, root.auroraRect.width, root.auroraRect.height)
-    readonly property real auroraP: root.auroraPower
+    readonly property real auroraP: 0
     readonly property real limbP: root.limb
     readonly property real limbY: root.limbAt
     readonly property real limbR: root.limbRadius
     readonly property real rim: NihilStyle.glassRim
-    readonly property real flare: NihilStyle.glassFlare
+    readonly property real flare: NihilStyle.glassFlare * 0.45
     readonly property real grain: NihilStyle.glassGrain
     readonly property real veil: root.veiled
-    readonly property color tint: Qt.alpha(NihilStyle.void_, NihilStyle.glassOpacity + (root.limbGlass - NihilStyle.glassOpacity) * root.limb)
-    readonly property color voidInk: NihilStyle.dark ? "#020305" : "#DDE0E7"
+    readonly property color tint: Qt.alpha(NihilStyle.void_, Math.max(0.86, NihilStyle.glassOpacity))
+    readonly property color voidInk: NihilStyle.dark ? "#050403" : "#DDD7CC"
     readonly property color rimInk: NihilStyle.rimInk
     readonly property color specA: NihilStyle.specA
     readonly property color specB: NihilStyle.specB

@@ -162,7 +162,7 @@ MouseArea {
         width: NihilStyle.s(360)
         height: NihilStyle.s(60)
         radius: height / 2
-        color: NihilStyle.dark ? "#05060A" : "#F4F5F8"
+        color: NihilStyle.void_
         border.width: 1
         border.color: root.failed ? NihilStyle.danger : NihilStyle.hair
         transform: Translate { x: capsule.nudge }

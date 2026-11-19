@@ -1,7 +1,7 @@
 import QtQuick
 
 // On or off. Also the shell's own switch (part control.switch): `toggled` asks, `on` follows the value given.
-// A well with a bead; on, the bead is lit and the light rises from the well's lower edge.
+// On, the whole pill is the light.
 Item {
     id: root
 
@@ -24,11 +24,11 @@ Item {
     Accessible.checked: root.on
     Accessible.onPressAction: root.toggled()
 
-    NWell {
+    Rectangle {
         anchors.fill: parent
         radius: height / 2
-        lit: root.on ? 1 : 0
-        hovered: tap.containsMouse
+        color: root.on ? NihilStyle.accent : tap.containsMouse ? NihilStyle.chosen : NihilStyle.pieceRaised
+        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
     }
     Rectangle {
         readonly property real side: root.height - root.inset * 2
@@ -37,7 +37,7 @@ Item {
         width: side * (tap.pressed ? 1.25 : 1)
         height: side
         radius: height / 2
-        color: root.on ? NihilStyle.ink : NihilStyle.inkFaint
+        color: root.on ? NihilStyle.accentInk : NihilStyle.inkSoft
         Behavior on x { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutQuint } }
         Behavior on width { NumberAnimation { duration: NihilStyle.quick } }
         Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
