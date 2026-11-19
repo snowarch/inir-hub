@@ -65,12 +65,28 @@ AbstractBackgroundWidget {
     readonly property int pad: Math.round(12 * root.scaleFactor)
     readonly property int gap: Math.round(8 * root.scaleFactor)
     readonly property int headerHeight: Math.round(20 * root.scaleFactor)
-    readonly property int maxTiles: Math.max(root.columns, Math.min(root.columns * 3, 12))
-    readonly property real tileWidth: Math.max(60, (root.width - root.pad * 2 - root.gap * (root.columns - 1)) / root.columns)
-    readonly property real tileHeight: Math.max(38, Math.min(root.tileWidth * 0.66, (root.height - root.pad * 2 - root.headerHeight - root.gap) / Math.max(1, root.rows)))
-    readonly property int rows: Math.max(1, Math.ceil(Math.min(root.cameras.length, root.maxTiles) / root.columns))
     readonly property string frameDir: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/inircam"
     readonly property string frameVersion: String(root.frameTick)
+
+    // ── How many fit ─────────────────────────────────────────
+    // The card shows what the space holds and says how many are left over, instead of drawing
+    // rows past its own edge: a camera you cannot see is worse than a count that tells you.
+    readonly property int maxRows: 4
+    readonly property real tileWidth: Math.max(56, (root.width - root.pad * 2 - root.gap * (root.columns - 1)) / root.columns)
+    readonly property real bodyHeight: Math.max(
+        Math.round(40 * root.scaleFactor),
+        root.height - root.pad * 2 - root.headerHeight - root.gap)
+    // A tile shorter than this says nothing about what it shows, so the card shows fewer rows.
+    readonly property real minTileHeight: Math.round(46 * root.scaleFactor)
+    readonly property int fitRows: Math.max(1, Math.floor((root.bodyHeight + root.gap) / (root.minTileHeight + root.gap)))
+    readonly property int wantedRows: Math.max(1, Math.ceil(Math.max(1, root.cameras.length) / root.columns))
+    readonly property int rows: Math.max(1, Math.min(Math.min(root.wantedRows, root.maxRows), root.fitRows))
+    readonly property int capacity: root.rows * root.columns
+    readonly property var shown: root.cameras.slice(0, root.capacity)
+    readonly property int hiddenCount: Math.max(0, root.cameras.length - root.shown.length)
+    readonly property real tileHeight: Math.max(
+        Math.round(24 * root.scaleFactor),
+        Math.min(root.tileWidth * 0.66, (root.bodyHeight - root.gap * (root.rows - 1)) / root.rows))
 
     // ── Talking to the panel ─────────────────────────────────
     // `inir inircam <fn>` reaches the panel on iNiR 3.1.0 and later.
@@ -169,11 +185,13 @@ AbstractBackgroundWidget {
     }
 
     // While the panel has not answered — it may still be starting, or was restarted — ask again
-    // sooner than the regular refresh.
+    // sooner than the regular refresh. This one runs even when the card is hidden: a shell reload
+    // takes the panel's IPC down for a moment, and a card that gives up there stays wrong until
+    // someone looks at it.
     Timer {
         interval: 5000
         repeat: true
-        running: root.visible && root.ready && !root.answered
+        running: root.ready && !root.answered
         onTriggered: root.refresh()
     }
 
@@ -252,6 +270,30 @@ AbstractBackgroundWidget {
                     font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
                 }
 
+                // Cameras the card has no room for: one click opens the panel where they all are.
+                Rectangle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.hiddenCount > 0
+                    width: hiddenLabel.implicitWidth + Math.round(10 * root.scaleFactor)
+                    height: hiddenLabel.implicitHeight + Math.round(2 * root.scaleFactor)
+                    radius: height / 2
+                    color: ColorUtils.applyAlpha(root.widgetInk, 0.14)
+
+                    StyledText {
+                        id: hiddenLabel
+                        anchors.centerIn: parent
+                        text: `+${root.hiddenCount}`
+                        color: root.widgetInkMuted
+                        font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.tell("toggle", [], true)
+                    }
+                }
+
                 // Ask the panel again right now, instead of waiting for the next refresh.
                 MaterialSymbol {
                     anchors.verticalCenter: parent.verticalCenter
@@ -292,7 +334,7 @@ AbstractBackgroundWidget {
             visible: root.cameras.length > 0
 
             Repeater {
-                model: root.cameras.slice(0, root.maxTiles)
+                model: root.shown
 
                 Rectangle {
                     id: tile
