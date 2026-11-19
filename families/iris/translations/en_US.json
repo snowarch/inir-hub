@@ -2677,5 +2677,16 @@
   "Plugged in": "Plugged in",
   "Choose a wallpaper": "Choose a wallpaper",
   "No wallpaper yet": "No wallpaper yet",
-  "Pick one and iRiS takes its colours.": "Pick one and iRiS takes its colours."
+  "Pick one and iRiS takes its colours.": "Pick one and iRiS takes its colours.",
+  "Scheme, accent and how colours follow the wallpaper": "Scheme, accent and how colours follow the wallpaper",
+  "Material, glass, light and the shape of every surface": "Material, glass, light and the shape of every surface",
+  "Text sizes, typefaces, icons and badges": "Text sizes, typefaces, icons and badges",
+  "Your colours in GTK, Qt, terminals and apps": "Your colours in GTK, Qt, terminals and apps",
+  "Gaps, columns and the room iRiS keeps": "Gaps, columns and the room iRiS keeps",
+  "Blur behind windows and the compositor's effects": "Blur behind windows and the compositor's effects",
+  "How windows open, close and slide": "How windows open, close and slide",
+  "Layouts, repeat and how keys type": "Layouts, repeat and how keys type",
+  "Speed, scrolling, the cursor and hot corners": "Speed, scrolling, the cursor and hot corners",
+  "Every key and what it does": "Every key and what it does",
+  "App rules, borders and corners": "App rules, borders and corners"
 }

@@ -2677,5 +2677,16 @@
   "Plugged in": "電源接続中",
   "Choose a wallpaper": "壁紙を選択",
   "No wallpaper yet": "壁紙がありません",
-  "Pick one and iRiS takes its colours.": "1枚選ぶと iRiS がその色を使います。"
+  "Pick one and iRiS takes its colours.": "1枚選ぶと iRiS がその色を使います。",
+  "Scheme, accent and how colours follow the wallpaper": "配色、アクセント、壁紙に色が追従する方法",
+  "Material, glass, light and the shape of every surface": "マテリアル、ガラス、光、各面の形",
+  "Text sizes, typefaces, icons and badges": "文字サイズ、書体、アイコン、バッジ",
+  "Your colours in GTK, Qt, terminals and apps": "GTK、Qt、ターミナル、アプリでの色",
+  "Gaps, columns and the room iRiS keeps": "隙間、列、iRiS が確保する余白",
+  "Blur behind windows and the compositor's effects": "ウィンドウ背面のぼかしとコンポジタ効果",
+  "How windows open, close and slide": "ウィンドウの開閉とスライドの動き",
+  "Layouts, repeat and how keys type": "レイアウト、リピート、キー入力の方法",
+  "Speed, scrolling, the cursor and hot corners": "速度、スクロール、カーソル、ホットコーナー",
+  "Every key and what it does": "すべてのキーとその動作",
+  "App rules, borders and corners": "アプリのルール、境界線、角"
 }

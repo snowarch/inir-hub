@@ -2677,5 +2677,16 @@
   "Plugged in": "Підключено до мережі",
   "Choose a wallpaper": "Виберіть шпалери",
   "No wallpaper yet": "Шпалер ще немає",
-  "Pick one and iRiS takes its colours.": "Виберіть їх, і iRiS візьме їхні кольори."
+  "Pick one and iRiS takes its colours.": "Виберіть їх, і iRiS візьме їхні кольори.",
+  "Scheme, accent and how colours follow the wallpaper": "Схема, акцент і як кольори слідують за шпалерами",
+  "Material, glass, light and the shape of every surface": "Матеріал, скло, світло і форма кожної поверхні",
+  "Text sizes, typefaces, icons and badges": "Розміри тексту, шрифти, значки та позначки",
+  "Your colours in GTK, Qt, terminals and apps": "Ваші кольори в GTK, Qt, терміналах і застосунках",
+  "Gaps, columns and the room iRiS keeps": "Відступи, колонки та простір, який залишає iRiS",
+  "Blur behind windows and the compositor's effects": "Розмиття за вікнами та ефекти композитора",
+  "How windows open, close and slide": "Як вікна відкриваються, закриваються і з'їжджають",
+  "Layouts, repeat and how keys type": "Розкладки, повтор і введення клавіш",
+  "Speed, scrolling, the cursor and hot corners": "Швидкість, прокручування, курсор і гарячі кути",
+  "Every key and what it does": "Кожна клавіша і що вона робить",
+  "App rules, borders and corners": "Правила застосунків, рамки і кути"
 }

@@ -2677,5 +2677,16 @@
   "Plugged in": "Angeschlossen",
   "Choose a wallpaper": "Hintergrundbild wählen",
   "No wallpaper yet": "Noch kein Hintergrundbild",
-  "Pick one and iRiS takes its colours.": "Wähle eins und iRiS übernimmt seine Farben."
+  "Pick one and iRiS takes its colours.": "Wähle eins und iRiS übernimmt seine Farben.",
+  "Scheme, accent and how colours follow the wallpaper": "Schema, Akzent und wie Farben dem Hintergrundbild folgen",
+  "Material, glass, light and the shape of every surface": "Material, Glas, Licht und die Form jeder Fläche",
+  "Text sizes, typefaces, icons and badges": "Textgrößen, Schriftarten, Symbole und Abzeichen",
+  "Your colours in GTK, Qt, terminals and apps": "Deine Farben in GTK, Qt, Terminals und Apps",
+  "Gaps, columns and the room iRiS keeps": "Abstände, Spalten und der Platz, den iRiS freihält",
+  "Blur behind windows and the compositor's effects": "Unschärfe hinter Fenstern und Effekte des Compositors",
+  "How windows open, close and slide": "Wie Fenster sich öffnen, schließen und gleiten",
+  "Layouts, repeat and how keys type": "Layouts, Wiederholung und wie Tasten eingeben",
+  "Speed, scrolling, the cursor and hot corners": "Tempo, Scrollen, Zeiger und Ecken mit Aktion",
+  "Every key and what it does": "Jede Taste und was sie tut",
+  "App rules, borders and corners": "App-Regeln, Rahmen und Ecken"
 }

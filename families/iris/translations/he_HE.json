@@ -2677,5 +2677,16 @@
   "Plugged in": "מחובר לחשמל",
   "Choose a wallpaper": "בחירת רקע",
   "No wallpaper yet": "אין רקע עדיין",
-  "Pick one and iRiS takes its colours.": "בחר אחד ו-iRiS ייקח ממנו את הצבעים."
+  "Pick one and iRiS takes its colours.": "בחר אחד ו-iRiS ייקח ממנו את הצבעים.",
+  "Scheme, accent and how colours follow the wallpaper": "סכמה, הדגשה ואופן מעקב הצבעים אחר טפט השולחן",
+  "Material, glass, light and the shape of every surface": "חומר, זכוכית, אור וצורת כל משטח",
+  "Text sizes, typefaces, icons and badges": "גודל טקסט, גופנים, סמלים ותגים",
+  "Your colours in GTK, Qt, terminals and apps": "הצבעים שלך ב-GTK, Qt, מסופים ואפליקציות",
+  "Gaps, columns and the room iRiS keeps": "רווחים, עמודות והמרווח ש-iRiS שומר",
+  "Blur behind windows and the compositor's effects": "טשטוש מאחורי חלונות ואפקטים של המרכיב",
+  "How windows open, close and slide": "איך חלונות נפתחים, נסגרים ומחליקים",
+  "Layouts, repeat and how keys type": "פריסות, חזרה ואופן הקלדת מקשים",
+  "Speed, scrolling, the cursor and hot corners": "מהירות, גלילה, סמן ופינות חמות",
+  "Every key and what it does": "כל מקש ומה הוא עושה",
+  "App rules, borders and corners": "כללי אפליקציות, מסגרות ופינות"
 }

@@ -24,7 +24,9 @@ Item {
     readonly property var titles: Array.from(root.entry?.titles ?? [root.title])
 
     readonly property bool headed: root.title.length > 0
-    readonly property bool backed: root.headed && Array.from(root.entry?.rows ?? []).length > 2
+    // A card standing beside another on its line wears its back like its neighbour, so both fronts step down together.
+    property bool lined: false
+    readonly property bool backed: root.headed && (Array.from(root.entry?.rows ?? []).length > 2 || root.lined)
     readonly property var bodyRows: root.headed ? head.bodyRows : Array.from(root.entry?.rows ?? [])
 
     readonly property real r: PrismTheme.cardRadius
@@ -36,8 +38,9 @@ Item {
     readonly property real frontRise: PrismTheme.dp(24)
     readonly property real slope: PrismTheme.dp(44)
     readonly property real bodyTop: root.frontTop + root.frontRise
-    // The front tab is as long as the group's name (and its switch), between two fifths and two thirds of the card.
-    readonly property real frontTab: Math.round(Math.max(root.width * 0.42, Math.min(root.width * 0.66,
+    // The front tab is as long as the group's name (and its switch), between two fifths and two thirds of the card; a
+    // card half a line wide lets it run to four fifths, so a name and its switch keep one line.
+    readonly property real frontTab: Math.round(Math.max(root.width * 0.42, Math.min(root.width * (root.width < PrismTheme.dp(420) ? 0.82 : 0.66),
         titleMetrics.advanceWidth + 2 * root.pad + (head.masterSwitch ? PrismTheme.dp(64) : 0) + root.slope * 0.2)))
     TextMetrics { id: titleMetrics; font.family: PrismTheme.fontMain; font.pixelSize: PrismTheme.head; font.weight: Font.DemiBold; text: Translation.tr(root.title) }
 
@@ -46,11 +49,13 @@ Item {
         : PrismTheme.dp(6)
     implicitHeight: root.rowsY + (root.bodyRows.length > 0 ? rows.implicitHeight + PrismTheme.dp(10) : PrismTheme.dp(12))
 
-    // The back sheet's art, drawn once offscreen, never shown by itself.
+    // The back sheet's art, drawn once offscreen, never shown by itself. Layered for every named card, not only a backed
+    // one: a card that comes to stand beside another (`lined`) takes its back after it was made, and a fill item that
+    // turns into a texture only then is refused by the Shape ("Fill item is not texture provider").
     PrismFlow {
         id: art
         visible: false
-        layer.enabled: root.backed
+        layer.enabled: root.headed
         width: root.width
         height: root.bodyTop + root.r
         tint: root.tint
@@ -69,7 +74,7 @@ Item {
         height: art.height
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
-            fillItem: root.backed ? art : null
+            fillItem: root.headed ? art : null
             strokeColor: "transparent"
             strokeWidth: -1
             PathSvg {

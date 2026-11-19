@@ -79,6 +79,25 @@ Item {
         }))
     }
 
+    // What changed, gathered: by page on Home and in a search, by group on a page. One line each: the name, and what it
+    // holds now at the line's end, which gives way to its own restore while pointed.
+    readonly property var sections: {
+        const out = []
+        for (const row of root.changes) {
+            const page = PrismModel.page(row.page) ?? {}
+            const title = root.everywhere ? String(page.name ?? "") : String(row.section ?? "")
+            let at = out.find(section => section.key === title)
+            if (!at) {
+                at = { key: title, title: title, glyph: root.everywhere ? String(page.glyph ?? "") : "", rows: [] }
+                out.push(at)
+            }
+            at.rows.push(row)
+        }
+        return out
+    }
+    // One group on a page needs no caption: the page already says where it is.
+    readonly property bool captioned: root.everywhere || root.sections.length > 1
+
     Item {
         id: head
         x: root.pad
@@ -94,6 +113,7 @@ Item {
             font.pixelSize: PrismTheme.row
             font.weight: Font.DemiBold
             font.letterSpacing: -PrismTheme.row * 0.01
+            elide: Text.ElideRight
         }
         // The page back to iNiR's, in one change Ctrl+Z takes back.
         PrismText {
@@ -120,7 +140,7 @@ Item {
 
     Flickable {
         id: scroll
-        y: head.y + head.height + PrismTheme.dp(6)
+        y: head.y + head.height + PrismTheme.dp(4)
         width: root.width
         height: (player.visible ? player.y - PrismTheme.dp(14) : root.height - PrismTheme.dp(22)) - y
         contentHeight: stack.implicitHeight
@@ -133,112 +153,156 @@ Item {
             spacing: 0
 
             // Nothing changed: said once, quietly, with where changes will show.
-            Column {
+            Row {
                 visible: root.changes.length === 0
                 width: parent.width
-                topPadding: PrismTheme.dp(4)
-                spacing: PrismTheme.dp(4)
-                PrismText {
-                    width: parent.width
-                    text: root.everywhere ? Translation.tr("Everything is as iNiR ships it.") : Translation.tr("As iNiR ships it")
-                    font.pixelSize: PrismTheme.body
-                    font.weight: Font.Medium
-                    wrapMode: Text.WordWrap
-                    maximumLineCount: 2
+                topPadding: PrismTheme.dp(6)
+                spacing: PrismTheme.dp(10)
+                PrismGlyph {
+                    id: calm
+                    text: "task_alt"
+                    iconSize: PrismTheme.dp(18)
+                    color: PrismTheme.ink3
                 }
-                PrismText {
-                    width: parent.width
-                    text: root.everywhere ? Translation.tr("What you change shows up here.") : Translation.tr("What you change on this page shows up here.")
-                    color: PrismTheme.ink2
-                    font.pixelSize: PrismTheme.small
-                    wrapMode: Text.WordWrap
-                    maximumLineCount: 3
+                Column {
+                    width: parent.width - calm.width - parent.spacing
+                    spacing: PrismTheme.dp(3)
+                    PrismText {
+                        width: parent.width
+                        text: root.everywhere ? Translation.tr("Everything is as iNiR ships it.") : Translation.tr("As iNiR ships it")
+                        color: PrismTheme.ink2
+                        font.pixelSize: PrismTheme.body
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 2
+                    }
+                    PrismText {
+                        width: parent.width
+                        text: root.everywhere ? Translation.tr("What you change shows up here.") : Translation.tr("What you change on this page shows up here.")
+                        color: PrismTheme.ink3
+                        font.pixelSize: PrismTheme.small
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 3
+                    }
                 }
             }
             Repeater {
-                // Keyed: a write elsewhere keeps the lines that stayed instead of rebuilding the list.
-                model: ScriptModel { objectProp: "key"; values: root.changes }
-                delegate: Item {
-                    id: change
+                // Keyed: a write elsewhere keeps the groups and lines that stayed instead of rebuilding the list.
+                model: ScriptModel { objectProp: "key"; values: root.sections }
+                delegate: Column {
+                    id: section
                     required property var modelData
-                    readonly property bool pointed: changeArea.containsMouse || undo.hovered
-                    readonly property string where: root.everywhere ? Translation.tr(String(PrismModel.page(change.modelData.page).name ?? "")) : ""
-                    readonly property string now: { const _ = PrismModel.revision; return String(PrismModel.sayNow(change.modelData) ?? "") }
+                    required property int index
                     width: stack.width
-                    height: Math.max(PrismTheme.dp(50), words.implicitHeight + PrismTheme.dp(16))
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.leftMargin: -PrismTheme.dp(8)
-                        anchors.rightMargin: -PrismTheme.dp(8)
-                        radius: PrismTheme.dp(12)
-                        color: changeArea.pressed ? PrismTheme.fillPress : change.pointed ? PrismTheme.fill : "transparent"
-                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
-                    }
-                    // The changed row's own bar, as it wears it on its page.
-                    Rectangle {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: PrismTheme.dp(3)
-                        height: PrismTheme.dp(16)
-                        radius: width / 2
-                        color: PrismTheme.mark
-                    }
-                    Column {
-                        id: words
-                        x: PrismTheme.dp(14)
-                        width: parent.width - x - (change.pointed ? undo.width + PrismTheme.dp(6) : 0)
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: PrismTheme.dp(2)
+                    topPadding: section.index === 0 ? PrismTheme.dp(4) : PrismTheme.dp(14)
+                    Row {
+                        visible: root.captioned
+                        height: PrismTheme.dp(24)
+                        spacing: PrismTheme.dp(6)
+                        PrismGlyph {
+                            visible: section.modelData.glyph.length > 0
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: section.modelData.glyph
+                            iconSize: PrismTheme.dp(14)
+                            color: PrismTheme.ink3
+                        }
                         PrismText {
-                            width: parent.width
-                            text: Translation.tr(String(change.modelData.label ?? ""))
-                            font.pixelSize: PrismTheme.body
-                            font.weight: Font.Medium
-                            wrapMode: Text.WordWrap
-                            maximumLineCount: 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: Math.min(implicitWidth, stack.width - PrismTheme.dp(20))
+                            text: Translation.tr(section.modelData.title)
+                            color: PrismTheme.ink3
+                            font.pixelSize: PrismTheme.small
+                            font.weight: Font.DemiBold
+                            font.letterSpacing: PrismTheme.small * 0.02
                             elide: Text.ElideRight
                         }
-                        PrismText {
-                            visible: text.length > 0
-                            width: parent.width
-                            text: [change.where, change.now].filter(part => part.length > 0).join("  ·  ")
-                            color: PrismTheme.ink2
-                            font.pixelSize: PrismTheme.small
+                    }
+                    Repeater {
+                        model: ScriptModel { objectProp: "key"; values: section.modelData.rows }
+                        delegate: Item {
+                            id: change
+                            required property var modelData
+                            readonly property bool pointed: changeArea.containsMouse || undo.hovered
+                            readonly property bool undoable: PrismModel.restorable(change.modelData)
+                            readonly property string now: { const _ = PrismModel.revision; return String(PrismModel.sayNow(change.modelData) ?? "") }
+                            width: stack.width
+                            height: PrismTheme.dp(34)
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.leftMargin: -PrismTheme.dp(8)
+                                anchors.rightMargin: -PrismTheme.dp(8)
+                                radius: PrismTheme.dp(10)
+                                color: changeArea.pressed ? PrismTheme.fillPress : change.pointed ? PrismTheme.fill : "transparent"
+                                Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+                            }
+                            // The changed row's own bar, as it wears it on its page.
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: PrismTheme.dp(3)
+                                height: PrismTheme.dp(14)
+                                radius: width / 2
+                                color: PrismTheme.mark
+                            }
+                            PrismText {
+                                id: name
+                                x: PrismTheme.dp(12)
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Math.min(implicitWidth, parent.width - x - (said.visible ? Math.min(said.implicitWidth, parent.width * 0.42) + PrismTheme.dp(10) : 0)
+                                    - (undo.visible ? undo.width + PrismTheme.dp(6) : 0))
+                                text: Translation.tr(String(change.modelData.label ?? ""))
+                                font.pixelSize: PrismTheme.body
+                                font.weight: Font.Medium
+                                elide: Text.ElideRight
+                            }
+                            // What it holds now, at the line's end; pointed, its way back stands there instead.
+                            PrismText {
+                                id: said
+                                visible: change.now.length > 0 && !(change.pointed && change.undoable)
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Math.min(implicitWidth, parent.width * 0.42)
+                                horizontalAlignment: Text.AlignRight
+                                text: change.now
+                                color: PrismTheme.ink2
+                                font.pixelSize: PrismTheme.small
+                                figures: true
+                                elide: Text.ElideRight
+                            }
+                            MouseArea {
+                                id: changeArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                Accessible.role: Accessible.Link
+                                Accessible.name: Translation.tr(String(change.modelData.label ?? ""))
+                                onClicked: root.reach(change.modelData)
+                            }
+                            PrismRound {
+                                id: undo
+                                visible: change.pointed && change.undoable
+                                anchors.right: parent.right
+                                anchors.rightMargin: -PrismTheme.dp(4)
+                                anchors.verticalCenter: parent.verticalCenter
+                                implicitWidth: PrismTheme.dp(26)
+                                ghost: true
+                                glyph: "undo"
+                                glyphSize: PrismTheme.dp(15)
+                                Accessible.name: Translation.tr("Restore")
+                                onClicked: PrismModel.restoreRow(change.modelData)
+                            }
                         }
-                    }
-                    MouseArea {
-                        id: changeArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        Accessible.role: Accessible.Link
-                        Accessible.name: Translation.tr(String(change.modelData.label ?? ""))
-                        onClicked: root.reach(change.modelData)
-                    }
-                    // Its own way back to iNiR's value.
-                    PrismRound {
-                        id: undo
-                        visible: change.pointed && PrismModel.restorable(change.modelData)
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        implicitWidth: PrismTheme.dp(28)
-                        ghost: true
-                        glyph: "undo"
-                        glyphSize: PrismTheme.dp(16)
-                        Accessible.name: Translation.tr("Restore")
-                        onClicked: PrismModel.restoreRow(change.modelData)
                     }
                 }
             }
 
-            // The keys: what each does, its combo as caps.
+            // The keys: what each does at the left, its combo as caps at the right.
             Column {
                 visible: root.keys.length > 0
                 width: parent.width
-                topPadding: PrismTheme.dp(26)
-                spacing: PrismTheme.dp(2)
+                topPadding: PrismTheme.dp(28)
+                spacing: 0
                 PrismText {
                     width: parent.width
-                    bottomPadding: PrismTheme.dp(6)
+                    bottomPadding: PrismTheme.dp(4)
                     text: Translation.tr("Keys")
                     font.pixelSize: PrismTheme.row
                     font.weight: Font.DemiBold
@@ -246,15 +310,17 @@ Item {
                 }
                 Repeater {
                     model: root.keys
-                    delegate: Column {
+                    delegate: Item {
                         id: key
                         required property var modelData
                         width: stack.width
-                        topPadding: PrismTheme.dp(6)
-                        bottomPadding: PrismTheme.dp(8)
-                        spacing: PrismTheme.dp(6)
+                        height: Math.max(PrismTheme.dp(34), say.implicitHeight + PrismTheme.dp(12))
                         PrismText {
-                            width: parent.width
+                            id: say
+                            anchors.left: parent.left
+                            anchors.right: caps.left
+                            anchors.rightMargin: PrismTheme.dp(10)
+                            anchors.verticalCenter: parent.verticalCenter
                             text: Translation.tr(key.modelData.say)
                             color: PrismTheme.ink2
                             font.pixelSize: PrismTheme.small
@@ -262,19 +328,22 @@ Item {
                             maximumLineCount: 2
                             elide: Text.ElideRight
                         }
-                        Flow {
-                            width: parent.width
-                            spacing: PrismTheme.dp(4)
+                        Row {
+                            id: caps
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: PrismTheme.dp(3)
                             Repeater {
                                 model: root.capsOf(key.modelData.combo)
                                 delegate: Rectangle {
                                     id: cap
                                     required property var modelData
                                     readonly property bool drawn: cap.modelData.glyph.length > 0
-                                    width: Math.max(height, (cap.drawn ? capGlyph.width : capText.implicitWidth) + PrismTheme.dp(14))
-                                    height: PrismTheme.dp(24)
-                                    radius: PrismTheme.dp(7)
-                                    color: PrismTheme.keyQuiet
+                                    width: Math.max(height, (cap.drawn ? capGlyph.width : capText.implicitWidth) + PrismTheme.dp(12))
+                                    height: PrismTheme.dp(22)
+                                    radius: PrismTheme.dp(6)
+                                    // Light, the panel is already frost: a key stands in the card's white.
+                                    color: PrismTheme.light ? PrismTheme.card : PrismTheme.keyQuiet
                                     // Its lower lip: a key, not a chip.
                                     Rectangle {
                                         anchors.bottom: parent.bottom
@@ -288,7 +357,7 @@ Item {
                                         visible: !cap.drawn
                                         anchors.centerIn: parent
                                         text: cap.modelData.text
-                                        font.pixelSize: PrismTheme.small
+                                        font.pixelSize: PrismTheme.small - 1
                                         font.weight: Font.DemiBold
                                     }
                                     PrismGlyph {
@@ -296,7 +365,7 @@ Item {
                                         visible: cap.drawn
                                         anchors.centerIn: parent
                                         text: cap.modelData.glyph
-                                        iconSize: PrismTheme.dp(15)
+                                        iconSize: PrismTheme.dp(14)
                                         color: PrismTheme.ink
                                     }
                                 }

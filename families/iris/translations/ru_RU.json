@@ -2677,5 +2677,16 @@
   "Plugged in": "Подключено к сети",
   "Choose a wallpaper": "Выберите обои",
   "No wallpaper yet": "Обоев пока нет",
-  "Pick one and iRiS takes its colours.": "Выберите их, и iRiS возьмёт их цвета."
+  "Pick one and iRiS takes its colours.": "Выберите их, и iRiS возьмёт их цвета.",
+  "Scheme, accent and how colours follow the wallpaper": "Схема, акцент и как цвета следуют за обоями",
+  "Material, glass, light and the shape of every surface": "Материал, стекло, свет и форма каждой поверхности",
+  "Text sizes, typefaces, icons and badges": "Размеры текста, шрифты, значки и метки",
+  "Your colours in GTK, Qt, terminals and apps": "Ваши цвета в GTK, Qt, терминалах и приложениях",
+  "Gaps, columns and the room iRiS keeps": "Отступы, колонки и место, которое оставляет iRiS",
+  "Blur behind windows and the compositor's effects": "Размытие за окнами и эффекты композитора",
+  "How windows open, close and slide": "Как окна открываются, закрываются и выезжают",
+  "Layouts, repeat and how keys type": "Раскладки, повтор и ввод клавиш",
+  "Speed, scrolling, the cursor and hot corners": "Скорость, прокрутка, курсор и горячие углы",
+  "Every key and what it does": "Каждая клавиша и её действие",
+  "App rules, borders and corners": "Правила приложений, рамки и углы"
 }

@@ -28,10 +28,10 @@ Singleton {
     readonly property var dress: ({
         general: { name: "Home", glyph: "home", tint: "blue" },
         appearance: { name: "Style", glyph: "style", tint: "violet" },
-        colour: { name: "Colour", glyph: "palette", tint: "pink" },
-        surfaces: { name: "Surfaces", glyph: "layers", tint: "teal" },
-        typeIcons: { name: "Type & icons", glyph: "text_fields", tint: "orange" },
-        appColours: { name: "App colours", glyph: "format_paint", tint: "blue" },
+        colour: { subtitle: "Scheme, accent and how colours follow the wallpaper", name: "Colour", glyph: "palette", tint: "pink" },
+        surfaces: { subtitle: "Material, glass, light and the shape of every surface", name: "Surfaces", glyph: "layers", tint: "teal" },
+        typeIcons: { subtitle: "Text sizes, typefaces, icons and badges", name: "Type & icons", glyph: "text_fields", tint: "orange" },
+        appColours: { subtitle: "Your colours in GTK, Qt, terminals and apps", name: "App colours", glyph: "format_paint", tint: "blue" },
         wallpaper: { glyph: "wallpaper", tint: "teal" },
         motion: { glyph: "animation", tint: "pink" },
         bar: { name: "Island", glyph: "smart_button", tint: "indigo" },
@@ -41,12 +41,12 @@ Singleton {
         widgets: { glyph: "widgets", tint: "amber" },
         // The compositor's pages (cluster 5), in the order of `order`. A lead with a colon names a compositor row.
         display: { name: "Displays", glyph: "desktop_windows", tint: "amber", cluster: 5, order: 0 },
-        layout: { name: "Layout", glyph: "view_column_2", tint: "teal", cluster: 5, order: 1 },
-        windows: { glyph: "select_window", tint: "blue", cluster: 5, order: 2 },
-        glass: { name: "Glass & effects", glyph: "blur_on", tint: "violet", cluster: 5, order: 3 },
-        movement: { name: "Movement", glyph: "animation", tint: "pink", cluster: 5, order: 4 },
-        keyboard: { name: "Keyboard", glyph: "keyboard", tint: "indigo", cluster: 5, order: 5 },
-        pointer: { name: "Mouse & pointer", glyph: "mouse", tint: "orange", cluster: 5, order: 7 },
+        layout: { subtitle: "Gaps, columns and the room iRiS keeps", name: "Layout", glyph: "view_column_2", tint: "teal", cluster: 5, order: 1 },
+        windows: { subtitle: "App rules, borders and corners", glyph: "select_window", tint: "blue", cluster: 5, order: 2 },
+        glass: { subtitle: "Blur behind windows and the compositor's effects", name: "Glass & effects", glyph: "blur_on", tint: "violet", cluster: 5, order: 3 },
+        movement: { subtitle: "How windows open, close and slide", name: "Movement", glyph: "animation", tint: "pink", cluster: 5, order: 4 },
+        keyboard: { subtitle: "Layouts, repeat and how keys type", name: "Keyboard", glyph: "keyboard", tint: "indigo", cluster: 5, order: 5 },
+        pointer: { subtitle: "Speed, scrolling, the cursor and hot corners", name: "Mouse & pointer", glyph: "mouse", tint: "orange", cluster: 5, order: 7 },
         sidebars: { name: "Side Panels", glyph: "dock_to_right", tint: "green" },
         controlCenter: { glyph: "toggle_on", tint: "green" },
         spotlight: { glyph: "search", tint: "orange" },
@@ -56,7 +56,7 @@ Singleton {
         anime: { glyph: "live_tv", tint: "pink" },
         notifications: { glyph: "notifications", tint: "red" },
         sound: { name: "Sound", glyph: "volume_up", tint: "orange" },
-        shortcuts: { name: "Keyboard shortcuts", glyph: "keyboard_command_key", tint: "indigo", view: "IrisShortcutsPage.qml", cluster: 5, order: 6, after: "keyboard" },
+        shortcuts: { subtitle: "Every key and what it does", name: "Keyboard shortcuts", glyph: "keyboard_command_key", tint: "indigo", view: "IrisShortcutsPage.qml", cluster: 5, order: 6, after: "keyboard" },
         battery: { glyph: "battery_full", tint: "green", needs: "battery" },
         gaming: { name: "Gaming", glyph: "sports_esports", tint: "teal" },
         lock: { name: "Lock", glyph: "lock", tint: "indigo" },
@@ -90,7 +90,8 @@ Singleton {
     // Each page's lead (PrismLead, his 11-19: every page treated as what it is): `live`, the thing itself (the mixer,
     // the charge) and the groups it stands for; `tiles`, the page's own switches people flip most, each [path, glyph], said
     // there once (their rows leave the groups; a group whose master went still dims by it). "live:<id>" is one of
-    // IrisOptions.dailySwitches.
+    // IrisOptions.dailySwitches. A surface's own on switch stays on its folder's tab when the folder is named as the page
+    // (Orbit › Orbit): a tile there would say the page's name a third time.
     readonly property var leads: ({
         sound: { live: "sound", groups: ["Output", "Input", "Apps playing"] },
         battery: { live: "battery", tiles: [["battery.chargeLimit.enable", "battery_saver"], ["battery.automaticSuspend", "bedtime"]] },
@@ -99,15 +100,13 @@ Singleton {
         dock: { tiles: [["iris.dock.enable", "dock_to_bottom"], ["iris.dock.autoHide", "visibility_off"], ["iris.dock.badges", "circle_notifications"]] },
         bubbles: { tiles: [["iris.bubbles.autoHide", "visibility_off"], ["iris.bubbles.snap", "grid_view"]] },
         bar: { tiles: [["iris.bar.autoHide", "visibility_off"], ["iris.bar.hoverExpand", "unfold_more"]] },
-        orbit: { tiles: [["iris.orbit.enable", "blur_circular"], ["iris.orbit.hotCorner", "north_west"], ["iris.orbit.previews", "preview"]] },
-        spotlight: { tiles: [["iris.modules.palette", "search"], ["search.sloppy", "spellcheck"], ["iris.palette.showHints", "lightbulb"]] },
+        orbit: { tiles: [["iris.orbit.hotCorner", "north_west"], ["iris.orbit.previews", "preview"]] },
+        spotlight: { tiles: [["search.sloppy", "spellcheck"], ["iris.palette.showHints", "lightbulb"]] },
         desktop: { tiles: [["iris.modules.desktopWidgets", "widgets"], ["background.autoWallpaper.enable", "shuffle"], ["background.parallax.enable", "layers"], ["background.effects.enableBlur", "blur_on"]] },
         capture: { tiles: [["regionSelector.targetRegions.windows", "web_asset"], ["regionSelector.annotation.useSatty", "draw"], ["search.imageSearch.useCircleSelection", "gesture"]] },
         display: { tiles: [["light.night.enabled", "nightlight"], ["light.night.automatic", "schedule"], ["light.antiFlashbang.enable", "flash_off"]] },
         sources: { tiles: [["weather.enable", "partly_cloudy_day"], ["calendar.externalSync.enable", "calendar_month"], ["shellUpdates.enabled", "system_update"]] },
-        player: { tiles: [["background.edgeWidgets.organic.enable", "graphic_eq"], ["background.edgeWidgets.organic.audioReactive", "equalizer"]] },
-        controlCenter: { tiles: [["iris.modules.controlCenter", "toggle_on"], ["vpn.quickToggle", "vpn_key"]] }
-    })
+        player: { tiles: [["background.edgeWidgets.organic.enable", "graphic_eq"], ["background.edgeWidgets.organic.audioReactive", "equalizer"]] }    })
     // The page a row of IrisOptions' `section`, group `group` lives on.
     function pageOf(section: string, group: string): string {
         const list = root.chapters[section]

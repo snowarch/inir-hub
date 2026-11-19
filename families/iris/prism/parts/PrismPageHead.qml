@@ -46,9 +46,11 @@ Item {
         tint: root.tint
         turn: root.turn
         seed: 0.11 + root.turn * 0.37
-        // The light gathers high at the right and dies before the words at the foot.
-        centre: Qt.point(0.74, 0.2)
-        thickness: 0.5
+        // The light gathers high at the right and dies before the words at the foot; where it gathers and how wide it
+        // runs walk a little from page to page (golden steps), so each page opens on its own composition.
+        readonly property real walk: (root.turn * 0.618034) % 1
+        centre: Qt.point(0.64 + 0.24 * art.walk, 0.08 + 0.3 * ((root.turn * 0.381966 + 0.4) % 1))
+        thickness: 0.4 + 0.2 * ((root.turn * 0.7548) % 1)
         fade: 0.5
         // The left third stays calm: where the page lives and its name read on the plain ground.
         side: 0.38

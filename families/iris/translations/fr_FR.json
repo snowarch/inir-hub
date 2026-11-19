@@ -2677,5 +2677,16 @@
   "Plugged in": "Branché",
   "Choose a wallpaper": "Choisir un fond d'écran",
   "No wallpaper yet": "Pas encore de fond d'écran",
-  "Pick one and iRiS takes its colours.": "Choisissez-en un et iRiS en prend les couleurs."
+  "Pick one and iRiS takes its colours.": "Choisissez-en un et iRiS en prend les couleurs.",
+  "Scheme, accent and how colours follow the wallpaper": "Thème, accent et façon dont les couleurs suivent le fond d'écran",
+  "Material, glass, light and the shape of every surface": "Matériau, verre, lumière et forme de chaque surface",
+  "Text sizes, typefaces, icons and badges": "Tailles de texte, polices, icônes et badges",
+  "Your colours in GTK, Qt, terminals and apps": "Vos couleurs dans GTK, Qt, les terminaux et les applis",
+  "Gaps, columns and the room iRiS keeps": "Espaces, colonnes et la marge que garde iRiS",
+  "Blur behind windows and the compositor's effects": "Flou derrière les fenêtres et effets du compositeur",
+  "How windows open, close and slide": "Comment les fenêtres s'ouvrent, se ferment et glissent",
+  "Layouts, repeat and how keys type": "Dispositions, répétition et saisie des touches",
+  "Speed, scrolling, the cursor and hot corners": "Vitesse, défilement, curseur et coins actifs",
+  "Every key and what it does": "Chaque touche et ce qu'elle fait",
+  "App rules, borders and corners": "Règles des applis, bordures et coins"
 }

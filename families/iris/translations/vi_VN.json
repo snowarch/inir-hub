@@ -2677,5 +2677,16 @@
   "Plugged in": "Đã cắm sạc",
   "Choose a wallpaper": "Chọn hình nền",
   "No wallpaper yet": "Chưa có hình nền",
-  "Pick one and iRiS takes its colours.": "Chọn một hình và iRiS sẽ lấy màu của nó."
+  "Pick one and iRiS takes its colours.": "Chọn một hình và iRiS sẽ lấy màu của nó.",
+  "Scheme, accent and how colours follow the wallpaper": "Bảng màu, màu nhấn và cách màu theo hình nền",
+  "Material, glass, light and the shape of every surface": "Vật liệu, kính, ánh sáng và hình dạng mọi bề mặt",
+  "Text sizes, typefaces, icons and badges": "Cỡ chữ, phông chữ, biểu tượng và huy hiệu",
+  "Your colours in GTK, Qt, terminals and apps": "Màu của bạn trong GTK, Qt, terminal và ứng dụng",
+  "Gaps, columns and the room iRiS keeps": "Khoảng cách, cột và khoảng trống iRiS giữ lại",
+  "Blur behind windows and the compositor's effects": "Làm mờ phía sau cửa sổ và hiệu ứng compositor",
+  "How windows open, close and slide": "Cửa sổ mở, đóng và trượt như thế nào",
+  "Layouts, repeat and how keys type": "Bố cục, lặp lại và cách gõ phím",
+  "Speed, scrolling, the cursor and hot corners": "Tốc độ, cuộn, con trỏ và góc nóng",
+  "Every key and what it does": "Mọi phím và chức năng của nó",
+  "App rules, borders and corners": "Quy tắc ứng dụng, viền và góc"
 }

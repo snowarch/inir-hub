@@ -2677,5 +2677,16 @@
   "Plugged in": "Terhubung ke listrik",
   "Choose a wallpaper": "Pilih wallpaper",
   "No wallpaper yet": "Belum ada wallpaper",
-  "Pick one and iRiS takes its colours.": "Pilih satu dan iRiS mengambil warnanya."
+  "Pick one and iRiS takes its colours.": "Pilih satu dan iRiS mengambil warnanya.",
+  "Scheme, accent and how colours follow the wallpaper": "Skema, aksen, dan cara warna mengikuti wallpaper",
+  "Material, glass, light and the shape of every surface": "Material, kaca, cahaya, dan bentuk setiap permukaan",
+  "Text sizes, typefaces, icons and badges": "Ukuran teks, font, ikon, dan lencana",
+  "Your colours in GTK, Qt, terminals and apps": "Warna Anda di GTK, Qt, terminal, dan aplikasi",
+  "Gaps, columns and the room iRiS keeps": "Jarak, kolom, dan ruang yang disisakan iRiS",
+  "Blur behind windows and the compositor's effects": "Blur di belakang jendela dan efek compositor",
+  "How windows open, close and slide": "Cara jendela dibuka, ditutup, dan digeser",
+  "Layouts, repeat and how keys type": "Tata letak, pengulangan, dan cara tombol diketik",
+  "Speed, scrolling, the cursor and hot corners": "Kecepatan, gulir, kursor, dan sudut panas",
+  "Every key and what it does": "Setiap tombol dan fungsinya",
+  "App rules, borders and corners": "Aturan aplikasi, batas, dan sudut"
 }

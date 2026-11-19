@@ -325,24 +325,54 @@ Item {
     }
     Component {
         id: rangeKind
-        PrismSlider {
-            id: slider
-            width: root.tall ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
-            from: Number(root.spec.min ?? 0)
-            to: Number(root.spec.max ?? 100)
-            stepSize: Number(root.spec.step ?? 1)
-            value: Number(root.value ?? 0)
-            home: PrismModel.home(root.row)
-            glyph: root.row.glyph ?? ""
-            label: PrismModel.figure(root.row, slider.live)
-            onMoved: value => PrismModel.preview(root.row, value)
-            onCommitted: value => PrismModel.write(root.row, value)
+        // A group that is this level alone (Night Light's warmth, the Dock's icon size): its figure stands large over a
+        // fader as wide as the card, the B · Carpeta study's "5600 K". Anywhere else, the fader with its figure at the end.
+        Column {
+            id: level
+            readonly property bool figured: root.headless
+            readonly property string said: PrismModel.figure(root.row, slider.live)
+            // "6000 K" reads as the number, large, and its unit beside it, small.
+            readonly property var parts: /^([−+-]?[\d.,\s]*\d)\s*(.*)$/.exec(said) ?? [said, said, ""]
+            width: figured ? control.width : slider.width
+            spacing: PrismTheme.dp(4)
+            Row {
+                visible: parent.figured
+                spacing: PrismTheme.dp(6)
+                PrismText {
+                    id: big
+                    text: level.parts[1]
+                    figures: true
+                    font.pixelSize: PrismTheme.dp(34)
+                    font.weight: Font.Bold
+                    font.letterSpacing: -PrismTheme.dp(34) * 0.02
+                }
+                PrismText {
+                    anchors.baseline: big.baseline
+                    text: level.parts[2]
+                    color: PrismTheme.ink2
+                    font.pixelSize: PrismTheme.body
+                    font.weight: Font.DemiBold
+                }
+            }
+            PrismSlider {
+                id: slider
+                width: parent.figured ? parent.width : root.tall ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
+                from: Number(root.spec.min ?? 0)
+                to: Number(root.spec.max ?? 100)
+                stepSize: Number(root.spec.step ?? 1)
+                value: Number(root.value ?? 0)
+                home: PrismModel.home(root.row)
+                glyph: parent.figured ? "" : root.row.glyph ?? ""
+                label: parent.figured ? "" : PrismModel.figure(root.row, slider.live)
+                onMoved: value => PrismModel.preview(root.row, value)
+                onCommitted: value => PrismModel.write(root.row, value)
+            }
         }
     }
     Component {
         id: hueKind
         PrismHue {
-            width: root.tall ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
+            width: root.headless ? control.width : root.tall ? root.controlWidth : Math.min(PrismTheme.dp(240), root.controlWidth)
             value: Number(root.value ?? 0)
             onMoved: value => PrismModel.preview(root.row, value)
             onCommitted: value => PrismModel.write(root.row, value)

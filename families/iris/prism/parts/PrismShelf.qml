@@ -16,7 +16,9 @@ Item {
     property string flashPath: ""
 
     readonly property real gap: PrismTheme.dp(14)
-    readonly property int columns: root.width >= PrismTheme.dp(780) ? 2 : 1
+    // Two to a line wherever a card keeps room for a name over its control: the side column open beside a page leaves
+    // about 700 dp, where one column made every page one long list.
+    readonly property int columns: root.width >= PrismTheme.dp(640) ? 2 : 1
 
     function laysOut(row: var): bool {
         const kind = String(row?.kind ?? ""), spec = row?.spec ?? {}
@@ -89,6 +91,7 @@ Item {
                 box.x = 0
                 box.y = top
                 box.lineHeight = 0
+                box.lined = false
                 top += box.implicitHeight + root.gap
                 i += 1
                 continue
@@ -103,6 +106,8 @@ Item {
             next.y = top
             box.lineHeight = tall
             next.lineHeight = tall
+            box.lined = true
+            next.lined = true
             top += tall + root.gap
             i += 2
         }

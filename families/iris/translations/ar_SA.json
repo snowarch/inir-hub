@@ -2677,5 +2677,16 @@
   "Plugged in": "موصول بالكهرباء",
   "Choose a wallpaper": "اختر خلفية",
   "No wallpaper yet": "لا توجد خلفية بعد",
-  "Pick one and iRiS takes its colours.": "اختر واحدة وسيأخذ iRiS ألوانها."
+  "Pick one and iRiS takes its colours.": "اختر واحدة وسيأخذ iRiS ألوانها.",
+  "Scheme, accent and how colours follow the wallpaper": "النظام والتمييز وكيف تتبع الألوان الخلفية",
+  "Material, glass, light and the shape of every surface": "المادة والزجاج والضوء وشكل كل سطح",
+  "Text sizes, typefaces, icons and badges": "أحجام النص والخطوط والأيقونات والشارات",
+  "Your colours in GTK, Qt, terminals and apps": "ألوانك في GTK وQt والطرفيات والتطبيقات",
+  "Gaps, columns and the room iRiS keeps": "المسافات والأعمدة والمساحة التي يحتفظ بها iRiS",
+  "Blur behind windows and the compositor's effects": "الضبابية خلف النوافذ وتأثيرات المركب",
+  "How windows open, close and slide": "كيف تُفتح النوافذ وتُغلق وتنزلق",
+  "Layouts, repeat and how keys type": "التخطيطات والتكرار وكيفية كتابة المفاتيح",
+  "Speed, scrolling, the cursor and hot corners": "السرعة والتمرير والمؤشر والزوايا النشطة",
+  "Every key and what it does": "كل مفتاح وما يفعله",
+  "App rules, borders and corners": "قواعد التطبيقات والحدود والزوايا"
 }

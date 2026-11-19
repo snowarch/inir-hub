@@ -2677,5 +2677,16 @@
   "Plugged in": "Aqqusaarsimavoq",
   "Choose a wallpaper": "Wallpaper toqqaruk",
   "No wallpaper yet": "Wallpaper suli pigineqanngilaq",
-  "Pick one and iRiS takes its colours.": "Ataasiannik toqqaruk iRiS-illu qalipaataat tigussavai."
+  "Pick one and iRiS takes its colours.": "Ataasiannik toqqaruk iRiS-illu qalipaataat tigussavai.",
+  "Scheme, accent and how colours follow the wallpaper": "Sinnerlugu, ilusilersuineq aamma qanoq qalipaatit qaavimut attuumassuteqarpat",
+  "Material, glass, light and the shape of every surface": "Material, sanaaq, sila aamma uuttuutit tamarmi",
+  "Text sizes, typefaces, icons and badges": "Qillerit ilanngullugit, qalipaatit, ikuallagit aamma mærkit",
+  "Your colours in GTK, Qt, terminals and apps": "GTK, Qt, terminalit aamma apit ilusiliaruit",
+  "Gaps, columns and the room iRiS keeps": "Akilerut, kolonnit aamma iRiS-ip ataatsimut ilaqqinnginnera",
+  "Blur behind windows and the compositor's effects": "Qaavi ilaanni sisuseqqusineq aamma compositor-ip pissuserisai",
+  "How windows open, close and slide": "Qanoq qaavit ammasarnerat, akiliutigineqarnerat aamma sukkallaarnerat",
+  "Layouts, repeat and how keys type": "Qalipaatit, ataqatigiinneq aamma qanoq tassatigut allaffigineqarnerat",
+  "Speed, scrolling, the cursor and hot corners": "Siunnersuutit, sunnernerit, sammiviit aamma kulsa",
+  "Every key and what it does": "Immikkut tassaniit tamarmi aamma suliaat",
+  "App rules, borders and corners": "Apit inuiaqatigiit, kantit aamma qaaqqat"
 }

@@ -2677,5 +2677,16 @@
   "Plugged in": "전원 연결됨",
   "Choose a wallpaper": "배경화면 선택",
   "No wallpaper yet": "아직 배경화면이 없습니다",
-  "Pick one and iRiS takes its colours.": "하나를 고르면 iRiS가 그 색상을 가져옵니다."
+  "Pick one and iRiS takes its colours.": "하나를 고르면 iRiS가 그 색상을 가져옵니다.",
+  "Scheme, accent and how colours follow the wallpaper": "구성표, 강조색, 배경화면에 따라 색이 바뀌는 방식",
+  "Material, glass, light and the shape of every surface": "머티리얼, 유리, 빛과 모든 표면의 모양",
+  "Text sizes, typefaces, icons and badges": "글자 크기, 글꼴, 아이콘과 배지",
+  "Your colours in GTK, Qt, terminals and apps": "GTK, Qt, 터미널, 앱에 적용되는 내 색상",
+  "Gaps, columns and the room iRiS keeps": "간격, 열, iRiS가 남겨 두는 여백",
+  "Blur behind windows and the compositor's effects": "창 뒤 흐림과 컴포지터 효과",
+  "How windows open, close and slide": "창이 열리고, 닫히고, 미끄러지는 방식",
+  "Layouts, repeat and how keys type": "레이아웃, 반복, 키 입력 방식",
+  "Speed, scrolling, the cursor and hot corners": "속도, 스크롤, 커서와 핫 코너",
+  "Every key and what it does": "모든 키와 그 기능",
+  "App rules, borders and corners": "앱 규칙, 테두리와 모서리"
 }

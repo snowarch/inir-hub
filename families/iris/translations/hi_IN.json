@@ -2677,5 +2677,16 @@
   "Plugged in": "चार्जर लगा है",
   "Choose a wallpaper": "वॉलपेपर चुनें",
   "No wallpaper yet": "अभी कोई वॉलपेपर नहीं",
-  "Pick one and iRiS takes its colours.": "एक चुनें और iRiS उसके रंग ले लेगा।"
+  "Pick one and iRiS takes its colours.": "एक चुनें और iRiS उसके रंग ले लेगा।",
+  "Scheme, accent and how colours follow the wallpaper": "योजना, एक्सेंट और रंग वॉलपेपर के साथ कैसे बदलें",
+  "Material, glass, light and the shape of every surface": "मटीरियल, काँच, रोशनी और हर सतह का आकार",
+  "Text sizes, typefaces, icons and badges": "टेक्स्ट का आकार, फ़ॉन्ट, आइकन और बैज",
+  "Your colours in GTK, Qt, terminals and apps": "GTK, Qt, टर्मिनल और ऐप्स में आपके रंग",
+  "Gaps, columns and the room iRiS keeps": "गैप, कॉलम और वह जगह जो iRiS रखता है",
+  "Blur behind windows and the compositor's effects": "विंडो के पीछे धुंधलापन और कंपोज़िटर के प्रभाव",
+  "How windows open, close and slide": "विंडो कैसे खुलती, बंद होती और सरकती हैं",
+  "Layouts, repeat and how keys type": "लेआउट, दोहराव और कुंजियाँ कैसे टाइप होती हैं",
+  "Speed, scrolling, the cursor and hot corners": "गति, स्क्रॉलिंग, कर्सर और हॉट कॉर्नर",
+  "Every key and what it does": "हर कुंजी और उसका काम",
+  "App rules, borders and corners": "ऐप नियम, बॉर्डर और कोने"
 }

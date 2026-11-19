@@ -34,7 +34,8 @@ Item {
     ClippingRectangle {
         id: desk
         width: root.deskWidth
-        height: root.stacked ? Math.round(root.width * 0.5) : root.topHeight
+        // Stacked (the side column open), a band, not a poster: the day's tiles stay in view under it.
+        height: root.stacked ? Math.round(root.width * 0.38) : root.topHeight
         radius: PrismTheme.cardRadius
         color: PrismTheme.night
         // Under the picture, and in its place while there is none: the desktop's own colours as art, never a black hole.

@@ -2677,5 +2677,16 @@
   "Plugged in": "Prize takılı",
   "Choose a wallpaper": "Bir duvar kâğıdı seçin",
   "No wallpaper yet": "Henüz duvar kâğıdı yok",
-  "Pick one and iRiS takes its colours.": "Birini seçin, iRiS renklerini ondan alsın."
+  "Pick one and iRiS takes its colours.": "Birini seçin, iRiS renklerini ondan alsın.",
+  "Scheme, accent and how colours follow the wallpaper": "Şema, vurgu ve renklerin duvar kağıdını nasıl izlediği",
+  "Material, glass, light and the shape of every surface": "Malzeme, cam, ışık ve her yüzeyin şekli",
+  "Text sizes, typefaces, icons and badges": "Metin boyutları, yazı tipleri, simgeler ve rozetler",
+  "Your colours in GTK, Qt, terminals and apps": "GTK, Qt, terminaller ve uygulamalardaki renkleriniz",
+  "Gaps, columns and the room iRiS keeps": "Boşluklar, sütunlar ve iRiS'in ayırdığı alan",
+  "Blur behind windows and the compositor's effects": "Pencerelerin arkasındaki bulanıklık ve bileşen efektleri",
+  "How windows open, close and slide": "Pencerelerin açılması, kapanması ve kayması",
+  "Layouts, repeat and how keys type": "Düzenler, tekrar ve tuşların yazılma biçimi",
+  "Speed, scrolling, the cursor and hot corners": "Hız, kaydırma, imleç ve sıcak köşeler",
+  "Every key and what it does": "Her tuş ve ne yaptığı",
+  "App rules, borders and corners": "Uygulama kuralları, kenarlıklar ve köşeler"
 }

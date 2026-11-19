@@ -2677,5 +2677,16 @@
   "Plugged in": "已接通电源",
   "Choose a wallpaper": "选择壁纸",
   "No wallpaper yet": "还没有壁纸",
-  "Pick one and iRiS takes its colours.": "选一张，iRiS 会取用它的颜色。"
+  "Pick one and iRiS takes its colours.": "选一张，iRiS 会取用它的颜色。",
+  "Scheme, accent and how colours follow the wallpaper": "配色方案、强调色，以及颜色如何跟随壁纸",
+  "Material, glass, light and the shape of every surface": "材质、玻璃、光线与每个表面的形状",
+  "Text sizes, typefaces, icons and badges": "文字大小、字体、图标和徽章",
+  "Your colours in GTK, Qt, terminals and apps": "你的颜色在 GTK、Qt、终端和应用中的表现",
+  "Gaps, columns and the room iRiS keeps": "间距、列，以及 iRiS 保留的空间",
+  "Blur behind windows and the compositor's effects": "窗口背后的模糊与合成器效果",
+  "How windows open, close and slide": "窗口如何打开、关闭和滑动",
+  "Layouts, repeat and how keys type": "布局、重复以及按键输入方式",
+  "Speed, scrolling, the cursor and hot corners": "速度、滚动、光标和热角",
+  "Every key and what it does": "每个按键及其作用",
+  "App rules, borders and corners": "应用规则、边框与圆角"
 }

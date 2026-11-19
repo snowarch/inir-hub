@@ -2677,5 +2677,16 @@
   "Plugged in": "Na tomada",
   "Choose a wallpaper": "Escolha um papel de parede",
   "No wallpaper yet": "Ainda sem papel de parede",
-  "Pick one and iRiS takes its colours.": "Escolha um e o iRiS pega as cores dele."
+  "Pick one and iRiS takes its colours.": "Escolha um e o iRiS pega as cores dele.",
+  "Scheme, accent and how colours follow the wallpaper": "Esquema, destaque e como as cores seguem o papel de parede",
+  "Material, glass, light and the shape of every surface": "Material, vidro, luz e a forma de cada superfície",
+  "Text sizes, typefaces, icons and badges": "Tamanhos de texto, fontes, ícones e selos",
+  "Your colours in GTK, Qt, terminals and apps": "Suas cores no GTK, Qt, terminais e apps",
+  "Gaps, columns and the room iRiS keeps": "Espaçamentos, colunas e o espaço que o iRiS reserva",
+  "Blur behind windows and the compositor's effects": "Desfoque atrás das janelas e efeitos do compositor",
+  "How windows open, close and slide": "Como as janelas abrem, fecham e deslizam",
+  "Layouts, repeat and how keys type": "Layouts, repetição e como as teclas digitam",
+  "Speed, scrolling, the cursor and hot corners": "Velocidade, rolagem, cursor e cantos ativos",
+  "Every key and what it does": "Cada tecla e o que ela faz",
+  "App rules, borders and corners": "Regras de apps, bordas e cantos"
 }
