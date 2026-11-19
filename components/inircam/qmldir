@@ -1,7 +1,7 @@
 module qs.modules.inircam
 Panel 1.0 Panel.qml
 CameraGrid 1.0 CameraGrid.qml
-CameraWall 1.0 CameraWall.qml
+CameraSidebar 1.0 CameraSidebar.qml
 CameraEnlarged 1.0 CameraEnlarged.qml
 CameraManage 1.0 CameraManage.qml
 CameraForm 1.0 CameraForm.qml

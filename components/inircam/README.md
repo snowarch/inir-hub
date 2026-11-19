@@ -1,6 +1,6 @@
 # iNiR Cam
 
-Live IP camera panel for iNiR: a grid of cameras, one enlarged, a wall of all of them, a form to add and edit them, and cameras you can pin to the desktop.
+Live IP camera panel for iNiR: your cameras in a list down the side, the one you pick large beside it, all of them in a grid, a form to add and edit them, and cameras you can pin to the desktop.
 
 It comes with **Cameras**, a desktop card that shows the same cameras as a grid on your desktop. Installing this panel installs the card with it.
 
@@ -8,7 +8,7 @@ Inspired by [OmaCam](https://github.com/entroit/omacam) (MIT, Entroit).
 
 ## Features
 
-- **Views**: a grid, one enlarged camera, a wall of every camera, and the form to add or edit one.
+- **Views**: a list of cameras down the side; pick one to see it large, or switch to the grid and see them all. Arrow keys walk the list.
 - **Pinned cameras**: pin a camera as its own window over the desktop, move and resize it, keep it above or below windows, and it comes back after a restart.
 - **Brands**: Tapo, Dahua/Imou, Reolink, Hikvision, Amcrest, UniFi Protect, ONVIF and a custom URL.
 - **Test connection** with `ffprobe` before saving a camera, so a wrong password or path is not a mystery later.
@@ -22,7 +22,7 @@ The frames live in `$XDG_RUNTIME_DIR/inircam`, a folder only you can read (mode 
 
 Everything else (HTTP, MJPEG) plays through Qt Multimedia.
 
-Grid tiles use the substream when a camera has one, and enlarged and wall views use the main stream.
+Grid tiles and the side list use the substream when a camera has one; the one you pick large uses the main stream.
 
 ## Opening it
 

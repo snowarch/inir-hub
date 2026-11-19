@@ -21,7 +21,9 @@ Item {
     property bool lowLatency: true
 
     readonly property string streamUrlStr: root.camera ? Brands.streamUrl(root.camera, root.quality).toString() : ""
-    readonly property bool useFfmpeg: /^rtsps?:/i.test(root.streamUrlStr)
+    // Set from the URL when the feed starts (see start()): a binding here can still hold the
+    // empty string at the moment `streamUrlStr` changes, which would send RTSP to Qt Multimedia.
+    property bool useFfmpeg: false
     // Same private folder inircam-feeds writes to: only this user can read it.
     readonly property string frameDir: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/inircam"
     readonly property string framePath: root.frameDir + "/feed-" + Quickshell.processId + "-" + (root.camera ? root.camera.id : "none") + "-" + root.quality + ".jpg"
@@ -36,6 +38,7 @@ Item {
 
     function start() {
         retry.stop()
+        root.useFfmpeg = /^rtsps?:/i.test(root.streamUrlStr)
         if (!root.camera || root.streamUrlStr === "") {
             root.status = "idle"
             root.note = ""
