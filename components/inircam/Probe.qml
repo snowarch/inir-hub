@@ -26,19 +26,15 @@ Item {
         }
         if (proc.running) proc.running = false
         root.result = null
-        // The address holds the camera login, so it goes in through stdin rather
-        // than the command line, where other users could read it.
-        root._input = url + "\n"
+        // The address holds the camera login, so it travels in the child's environment
+        // rather than on the command line: `ps` and `/proc/PID/cmdline` show the command
+        // only, and `/proc/PID/environ` is readable by this user alone.
+        proc.environment = ({ INIRCAM_PROBE_URL: url })
         proc.command = [
             "bash", "-c",
-            "IFS= read -r url; exec timeout -k 2 9 ffprobe \"$@\" -i /dev/stdin < <(printf %s \"$url\")",
-            "inircam-probe",
-            "-v", "error",
-            "-rtsp_transport", "tcp",
-            "-timeout", "5000000",
-            "-select_streams", "v:0",
-            "-show_entries", "stream=codec_name,width,height,avg_frame_rate",
-            "-of", "json"
+            "exec timeout -k 2 9 ffprobe -v error -rtsp_transport tcp -timeout 5000000 "
+                + "-select_streams v:0 -show_entries stream=codec_name,width,height,avg_frame_rate "
+                + "-of json -i \"$INIRCAM_PROBE_URL\""
         ]
         proc.running = true
     }
@@ -89,16 +85,13 @@ Item {
 
     property string _stdout: ""
     property string _stderr: ""
-    property string _input: ""
 
     Process {
         id: proc
-        stdinEnabled: true
+        stdinEnabled: false
         onStarted: {
             root._stdout = ""
             root._stderr = ""
-            write(root._input)
-            root._input = ""
         }
         stdout: StdioCollector { id: out; waitForEnd: true; onStreamFinished: root._stdout = text }
         stderr: StdioCollector { id: err; waitForEnd: true; onStreamFinished: root._stderr = text }
