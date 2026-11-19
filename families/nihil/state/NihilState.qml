@@ -183,14 +183,31 @@ Singleton {
 
     // The compositor's overview stands under NiHiL only while the windows are on show. The apps and a search are a page of
     // the sheet over the desktop, and the compositor would keep Escape for itself.
+    // The compositor only offers a toggle and answers later: one request at a time, or a second one undoes the first.
     function followStage(): void {
-        if (!root.nativeStage) return
+        if (!root.nativeStage || root._stageAsked) return
         const wantsStage = root.overviewOpen && root.view === "windows"
-        if (wantsStage !== NiriService.inOverview) NiriService.toggleOverview()
+        if (wantsStage === NiriService.inOverview) return
+        root._stageAsked = true
+        stageAnswer.restart()
+        NiriService.toggleOverview()
     }
+    property bool _stageAsked: false
+    Timer {
+        id: stageAnswer
+        interval: 700
+        onTriggered: {
+            root._stageAsked = false
+            root.followStage()
+        }
+    }
+    // The overview has just opened or closed: what the pointer does at a hot corner now is not a new request.
+    property real _stageMovedAt: 0
+    function settling(): bool { return Date.now() - root._stageMovedAt < 700 }
 
     // Keeps the shell's shared flags and NiHiL's overview saying the same thing.
     onOverviewOpenChanged: {
+        root._stageMovedAt = Date.now()
         root.followStage()
         CompositorService.setSortingConsumer("nihil-overview", root.overviewOpen)
         if (root.overviewOpen) WindowPreviewService.captureForTaskView()
@@ -216,6 +233,14 @@ Singleton {
         target: NiriService
         enabled: root.nativeStage
         function onInOverviewChanged(): void {
+            root._stageMovedAt = Date.now()
+            // The answer to NiHiL's own request: only what was asked for since then is left to do.
+            if (root._stageAsked) {
+                root._stageAsked = false
+                stageAnswer.stop()
+                root.followStage()
+                return
+            }
             if (NiriService.inOverview && !root.overviewOpen) root.openOverview("windows")
             else if (!NiriService.inOverview && root.overviewOpen && root.view === "windows") root.closeOverview()
             else if (NiriService.inOverview && root.launcherOpen) root.showWindows()

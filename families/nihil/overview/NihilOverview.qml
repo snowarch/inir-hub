@@ -67,15 +67,34 @@ Scope {
                 left: hot.edge || hot.at.endsWith("Left")
                 right: hot.edge || hot.at.endsWith("Right")
             }
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered: {
+            // Niri's own corner may answer the same arrival: two toggles cancel out, so NiHiL lets it speak first.
+            readonly property bool shared: hot.action === "windows" && NihilState.nativeStage
+                && Array.from(NiriService.overviewHotCornersByOutput?.[hot.modelData.name] ?? NiriService.overviewHotCornersGlobal ?? []).includes(hot.at)
+            // One arrival, one action: the pointer trembling on the zone's border, or a surface mapping over it, is not
+            // a second arrival. It counts again once the pointer has been away for a moment.
+            property bool armed: true
+            Timer { id: rearm; interval: 450; onTriggered: hot.armed = true }
+            Timer {
+                id: dwell
+                interval: hot.shared ? 180 : 1
+                onTriggered: {
+                    if (NihilState.settling()) return
                     if (hot.options?.hotCornerRipples ?? true) ripple.restart()
                     if (hot.action === "apps") NihilState.toggleOverview("apps")
                     else if (hot.action === "searchWindows") NihilState.trigger("searchWindows")
                     else NihilState.toggleOverview("windows")
                 }
+            }
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {
+                    rearm.stop()
+                    if (!hot.armed || NihilState.settling()) return
+                    hot.armed = false
+                    dwell.restart()
+                }
+                onExited: rearm.restart()
             }
             Rectangle {
                 id: ring
