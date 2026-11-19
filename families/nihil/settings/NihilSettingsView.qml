@@ -10,7 +10,8 @@ import qs.modules.nihil.style
 import "NihilOptions.js" as Options
 import "../state/NihilProfiles.js" as Profiles
 
-// NiHiL's Settings: one sheet, the search and the pages down its side and the page itself beside them.
+// NiHiL's Settings, built like the deck: a plate down the side with the search and the pages, the page beside it in
+// grouped plates of rows.
 // Every row comes from NihilOptions.js. The same view is its own window (NihilSettingsApp) and the overlay over the
 // desktop (NihilSettingsHost); `windowed` tells which, and the head's buttons ask the holder to switch or close.
 Item {
@@ -163,14 +164,22 @@ Item {
         onMaximize: root.toggleMaximized()
     }
 
-    // The side: the family's name, the search, and every page. The page on show is lit from below.
+    // The side: the family's name, the search, and every page, on a plate of its own. The page on show wears the accent.
     Item {
         id: side
         width: NihilStyle.s(268)
         height: parent.height
 
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: NihilStyle.s(10)
+            anchors.rightMargin: 0
+            radius: NihilStyle.rSheet - NihilStyle.s(10)
+            color: NihilStyle.piece
+        }
+
         Row {
-            x: NihilStyle.s(32)
+            x: NihilStyle.s(30)
             y: NihilStyle.s(28)
             height: NihilStyle.s(32)
             spacing: NihilStyle.s(12)
@@ -182,15 +191,15 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 text: "NiHiL"
                 font.pixelSize: NihilStyle.textLarge
-                font.weight: Font.Medium
+                font.weight: Font.DemiBold
             }
         }
 
         NField {
             id: search
-            x: NihilStyle.s(16)
+            x: NihilStyle.s(20)
             y: NihilStyle.s(82)
-            width: parent.width - NihilStyle.s(32)
+            width: parent.width - NihilStyle.s(30)
             height: NihilStyle.s(40)
             radius: height / 2
             glyph: "search"
@@ -204,10 +213,10 @@ Item {
 
         NScroller {
             id: index
-            x: NihilStyle.s(16)
+            x: NihilStyle.s(20)
             y: NihilStyle.s(134)
-            width: parent.width - NihilStyle.s(32)
-            height: parent.height - y - NihilStyle.s(12)
+            width: parent.width - NihilStyle.s(30)
+            height: parent.height - y - NihilStyle.s(20)
             spacing: NihilStyle.s(2)
 
             Repeater {
@@ -243,8 +252,9 @@ Item {
                         anchors.fill: parent
                         anchors.topMargin: entry.lead
                         radius: height / 2
-                        color: entry.here ? NihilStyle.accent : NihilStyle.piece
+                        color: entry.here ? NihilStyle.accent : NihilStyle.pieceRaised
                         visible: entry.here || entry.containsMouse
+                        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
                     }
                     NIcon {
                         id: glyph
@@ -266,7 +276,7 @@ Item {
                         elide: Text.ElideRight
                         font.pixelSize: NihilStyle.textBody
                         color: entry.here ? NihilStyle.accentInk : entry.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
-                        font.weight: entry.here ? Font.DemiBold : Font.Normal
+                        font.weight: entry.here ? Font.DemiBold : Font.Medium
                     }
                 }
             }
@@ -276,9 +286,9 @@ Item {
     Item {
         id: stage
         anchors.left: side.right
-        anchors.leftMargin: NihilStyle.s(20)
+        anchors.leftMargin: NihilStyle.s(28)
         anchors.right: parent.right
-        anchors.rightMargin: NihilStyle.s(36)
+        anchors.rightMargin: NihilStyle.s(28)
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
@@ -288,8 +298,8 @@ Item {
             y: NihilStyle.s(26)
             width: Math.min(implicitWidth, parent.width - controls.width - count.implicitWidth - NihilStyle.s(32))
             text: root.query.length > 0 ? Translation.tr("Results") : Translation.tr(root.page.title)
-            size: NihilStyle.s(46)
-            font.weight: Font.ExtraLight
+            size: NihilStyle.s(34)
+            font.weight: Font.Bold
         }
         NText {
             id: summary

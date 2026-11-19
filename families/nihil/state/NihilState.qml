@@ -27,6 +27,8 @@ Singleton {
     property bool holdStatic: false
     property bool controlOpen: false
     property bool todayOpen: false
+    property bool mediaOpen: false
+    property bool focusOpen: false
     // Windows pinned as floating thumbnails.
     property var pips: []
 
@@ -41,13 +43,18 @@ Singleton {
     property string launcherHome: "windows"
     property bool overWindows: false
 
-    // The one page the sheet carries: "apps", "control", "today", "clipboard", "wallpapers" or nothing.
-    readonly property string page: root.launcherOpen ? "apps" : root.controlOpen ? "control" : root.todayOpen ? "today" : root.clipboardOpen ? "clipboard"
+    // The one page the deck carries, or nothing: the deck is open while there is one.
+    readonly property var pages: ["apps", "control", "today", "media", "focus", "clipboard", "wallpapers"]
+    readonly property string page: root.launcherOpen ? "apps" : root.controlOpen ? "control" : root.todayOpen ? "today"
+        : root.mediaOpen ? "media" : root.focusOpen ? "focus" : root.clipboardOpen ? "clipboard"
         : root.wallpapersOpen ? "wallpapers" : ""
+    readonly property bool deckOpen: root.page.length > 0
     function closePages(except: string): void {
         if (except !== "apps" && root.launcherOpen) root.leaveLauncher()
         if (except !== "control") root.controlOpen = false
         if (except !== "today") root.todayOpen = false
+        if (except !== "media") root.mediaOpen = false
+        if (except !== "focus") root.focusOpen = false
         if (except !== "clipboard") GlobalStates.clipboardOpen = false
         if (except !== "wallpapers") {
             GlobalStates.wallpaperSelectorOpen = false
@@ -61,7 +68,10 @@ Singleton {
         root.askedOn = output
         root.toggle(which)
     }
-    onPageChanged: if (root.page.length === 0 && !root.powerOpen) root.askedOn = ""
+    onPageChanged: {
+        if (root.page.length > 0) root.lastPage = root.page
+        else if (!root.powerOpen) root.askedOn = ""
+    }
     // A click beside the sheet, or Escape.
     function dismiss(): void {
         root.closePages("")
@@ -70,6 +80,8 @@ Singleton {
     onLauncherOpenChanged: if (root.launcherOpen) root.closePages("apps")
     onControlOpenChanged: if (root.controlOpen) root.closePages("control")
     onTodayOpenChanged: if (root.todayOpen) root.closePages("today")
+    onMediaOpenChanged: if (root.mediaOpen) root.closePages("media")
+    onFocusOpenChanged: if (root.focusOpen) root.closePages("focus")
     onClipboardOpenChanged: if (root.clipboardOpen) root.closePages("clipboard")
     onWallpapersOpenChanged: if (root.wallpapersOpen) root.closePages("wallpapers")
     onPowerOpenChanged: if (root.powerOpen) root.closePages("")
@@ -128,8 +140,33 @@ Singleton {
         case "search": root.toggleOverview("search"); break
         case "control": root.controlOpen = !root.controlOpen; break
         case "today": root.todayOpen = !root.todayOpen; break
+        case "media": root.mediaOpen = !root.mediaOpen; break
+        case "focus": root.focusOpen = !root.focusOpen; break
+        case "clipboard": GlobalStates.clipboardOpen = !GlobalStates.clipboardOpen; break
+        case "wallpapers": GlobalStates.wallpaperSelectorOpen = !root.wallpapersOpen; break
+        case "deck": if (root.deckOpen) root.dismiss(); else root.show(root.lastPage); break
         case "power": GlobalStates.sessionOpen = !GlobalStates.sessionOpen; break
         }
+    }
+    // Opens a page of the deck, or moves the open deck to it: the deck's own navigation.
+    function show(which: string): void {
+        if (root.page === which) return
+        switch (which) {
+        case "apps": root.openOverview("apps"); break
+        case "control": root.controlOpen = true; break
+        case "today": root.todayOpen = true; break
+        case "media": root.mediaOpen = true; break
+        case "focus": root.focusOpen = true; break
+        case "clipboard": GlobalStates.clipboardOpen = true; break
+        case "wallpapers": GlobalStates.wallpaperSelectorOpen = true; break
+        }
+    }
+    // The page the deck comes back to.
+    property string lastPage: "apps"
+    // A step through the deck's pages, for its keys.
+    function stepPage(by: int): void {
+        const at = Math.max(0, root.pages.indexOf(root.page))
+        root.show(root.pages[(at + by + root.pages.length) % root.pages.length])
     }
 
     // One action by name: the Super key, the hot corner.

@@ -5,7 +5,7 @@ import Quickshell.Widgets
 import qs.services
 import qs.modules.nihil.style
 
-// The head of Appearance: the wallpaper the glass is lit by, and the lights to choose from over it.
+// The head of Appearance: the wallpaper the glass stands on, and the accents to choose from over it.
 ClippingRectangle {
     id: root
 
@@ -13,11 +13,11 @@ ClippingRectangle {
 
     readonly property string chosen: NihilStyle.paletteName
     readonly property var lights: [
-        { id: "filament", word: Translation.tr("Filament") },
-        { id: "copper", word: Translation.tr("Copper") },
-        { id: "signal", word: Translation.tr("Signal") },
+        { id: "pearl", word: Translation.tr("Pearl") },
         { id: "glacier", word: Translation.tr("Glacier") },
         { id: "sage", word: Translation.tr("Sage") },
+        { id: "coral", word: Translation.tr("Coral") },
+        { id: "gold", word: Translation.tr("Gold") },
         { id: "wallpaper", word: Translation.tr("From the wallpaper") }
     ]
 
@@ -37,8 +37,8 @@ ClippingRectangle {
         anchors.fill: parent
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: Qt.alpha("#0C0A08", 0.78) }
-            GradientStop { position: 0.62; color: Qt.alpha("#0C0A08", 0) }
+            GradientStop { position: 0; color: Qt.alpha("#0B0C0F", 0.8) }
+            GradientStop { position: 0.62; color: Qt.alpha("#0B0C0F", 0) }
         }
     }
 
@@ -49,7 +49,7 @@ ClippingRectangle {
         spacing: NihilStyle.s(12)
 
         NText {
-            text: Translation.tr("Light")
+            text: Translation.tr("Accent")
             font.pixelSize: NihilStyle.textBody
             font.weight: Font.Medium
             color: "#FFFFFF"
@@ -82,12 +82,21 @@ ClippingRectangle {
                         border.width: swatch.here ? 2 : 0
                         border.color: "#FFFFFF"
                     }
-                    Rectangle {
+                    // Pearl is the glass's own white; the wallpaper's accent shows the picture it comes from.
+                    ClippingRectangle {
                         anchors.fill: parent
                         anchors.margins: swatch.here ? NihilStyle.s(4) : swatch.containsMouse ? NihilStyle.s(1) : NihilStyle.s(2)
                         radius: width / 2
-                        color: swatch.modelData.id === "wallpaper" ? NihilStyle.pictureLight : swatch.light.light
+                        color: swatch.modelData.id === "pearl" ? "#F5F6F8" : swatch.light.light || "#F5F6F8"
                         Behavior on anchors.margins { NumberAnimation { duration: NihilStyle.quick } }
+                        Image {
+                            anchors.fill: parent
+                            visible: swatch.modelData.id === "wallpaper"
+                            source: visible ? Wallpapers.effectiveWallpaperUrl : ""
+                            sourceSize: Qt.size(64, 64)
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                        }
                     }
                 }
             }

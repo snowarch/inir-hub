@@ -2,7 +2,7 @@
 
 // Everything a profile holds: the desktop's structure, never its look.
 var keys = [
-    "panel.position", "panel.visibility", "panel.overviewStyle",
+    "panel.position", "panel.style", "panel.visibility", "panel.overviewStyle",
     "overview.mode", "overview.background", "overview.hotCorner", "overview.hotCornerAction", "overview.superKey",
     "overview.superKeyDouble", "overview.backgroundBrightness",
     "dash.position", "dash.adjust", "dash.iconSize", "dash.showApps", "dash.isolateWorkspace", "dash.click", "dash.scroll",
@@ -19,7 +19,7 @@ var list = [
         name: "Vertical",
         description: "Dash on the left, workspaces stacked on the right",
         values: {
-            "dash.position": "left", "thumbnails.position": "right", "panel.position": "top",
+            "dash.position": "left", "thumbnails.position": "right", "panel.position": "left",
             "panel.visibility": "always", "overview.hotCorner": "topLeft", "overview.mode": "default",
             "search.showEntry": true, "switcher.vertical": 0.95, "switcher.horizontal": 0.5
         }
@@ -39,7 +39,7 @@ var list = [
         name: "Hot corner",
         description: "No panel: the top-left corner opens everything",
         values: {
-            "dash.position": "left", "thumbnails.position": "right", "panel.position": "top",
+            "dash.position": "left", "thumbnails.position": "right", "panel.position": "left",
             "panel.visibility": "overview", "overview.hotCorner": "topLeft", "overview.mode": "default",
             "search.showEntry": false, "switcher.vertical": 0.95, "switcher.horizontal": 0.5
         }
@@ -49,7 +49,7 @@ var list = [
         name: "Dock",
         description: "Windows stay in place, the dash stays at the bottom",
         values: {
-            "dash.position": "bottom", "thumbnails.position": "right", "panel.position": "top",
+            "dash.position": "bottom", "thumbnails.position": "right", "panel.position": "left",
             "panel.visibility": "always", "overview.hotCorner": "none", "overview.mode": "static",
             "search.showEntry": true, "switcher.vertical": 0.95, "switcher.horizontal": 0.5
         }

@@ -4,7 +4,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.services
 
-// NiHiL's persistent surface for ShellLayoutController: the panel, top or bottom.
+// NiHiL's persistent surface for ShellLayoutController: the rail, on any edge.
 QtObject {
     readonly property var surfaces: [
         {
@@ -14,7 +14,7 @@ QtObject {
             labelKey: "Taskbar",
             icon: "toolbar",
             layoutScope: "enabledOutputs",
-            slots: ["top", "bottom"],
+            slots: ["left", "right", "top", "bottom"],
             editableProperties: [],
             collisionPolicy: "validated",
             resetScopes: ["surface", "family"]
@@ -27,7 +27,7 @@ QtObject {
         return {
             ok: true,
             id: surfaceId,
-            slot: Config.options?.nihil?.panel?.position ?? "top",
+            slot: NihilStyle.railEdge,
             scope: desc.layoutScope,
             outputName: outputName,
             enabledOutputs: Config.options?.nihil?.panel?.screenList ?? [],
@@ -39,13 +39,13 @@ QtObject {
         Config.setNestedValue("nihil.panel.position", slot)
         return true
     }
-    function resetSlot(surfaceId: string): string { return surfaceId === "nihilBar" ? "top" : "" }
+    function resetSlot(surfaceId: string): string { return surfaceId === "nihilBar" ? "left" : "" }
     function desktopInsets(outputName: string, result: var): var {
         if (!ShellLayoutController.panelEnabled("nBar") || (Config.options?.nihil?.panel?.visibility ?? "always") !== "always"
                 || !ShellLayoutController.outputEnabled(Config.options?.nihil?.panel?.screenList ?? [], outputName))
             return result
-        result.barEdge = Config.options?.nihil?.panel?.position ?? "top"
-        result.barThickness = NihilStyle.barHeight
+        result.barEdge = NihilStyle.railEdge
+        result.barThickness = NihilStyle.railRoom
         ShellLayoutController.applyInset(result, result.barEdge, result.barThickness)
         return result
     }

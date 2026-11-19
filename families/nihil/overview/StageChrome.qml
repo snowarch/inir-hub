@@ -27,7 +27,13 @@ PanelWindow {
     readonly property var nihil: Config.options?.nihil
     readonly property var modules: root.nihil?.modules
     readonly property bool panelShown: (root.modules?.panel ?? true) && (root.nihil?.panel?.visibility ?? "always") !== "hidden"
-    readonly property real top: (root.panelShown && (root.nihil?.panel?.position ?? "top") === "top" ? NihilStyle.barHeight : 0)
+    // The rail stays beside the overview, which keeps clear of its edge.
+    readonly property real rail: root.panelShown ? NihilStyle.railRoom : 0
+    readonly property real top: NihilStyle.railEdge === "top" ? root.rail : 0
+    readonly property real bottom: NihilStyle.railEdge === "bottom" ? root.rail : 0
+    readonly property real lead: NihilStyle.railEdge === "left" ? root.rail : 0
+    readonly property real trail: NihilStyle.railEdge === "right" ? root.rail : 0
+    readonly property real roomHeight: root.height - root.top - root.bottom
     readonly property real margin: NihilStyle.s(18)
     readonly property string dashAt: (root.modules?.dash ?? true) ? (root.nihil?.dash?.position ?? "left") : "hidden"
     readonly property bool indexShown: (root.modules?.thumbnails ?? true)
@@ -107,7 +113,7 @@ PanelWindow {
         NGlass {
             id: entryGlass
             visible: root.entryShown
-            x: (root.width - width) / 2
+            x: root.lead + (root.width - root.lead - root.trail - width) / 2
             y: root.top + root.margin + (1 - root.shown) * -NihilStyle.s(16)
             width: NihilStyle.s(440) * (root.nihil?.search?.width ?? 1)
             height: NihilStyle.s(42)
@@ -127,12 +133,12 @@ PanelWindow {
             id: dash
             output: root.output
             visible: root.dashAt !== "hidden"
-            room: dash.vertical ? root.height - root.top - root.margin * 2 : root.width - root.margin * 2
+            room: dash.vertical ? root.roomHeight - root.margin * 2 : root.width - root.lead - root.trail - root.margin * 2
             readonly property real slide: (1 - root.shown) * NihilStyle.s(28)
-            x: dash.vertical ? (root.dashAt === "left" ? root.margin - dash.slide : root.width - width - root.margin + dash.slide)
-                : (root.width - width) / 2
-            y: dash.vertical ? root.top + (root.height - root.top - height) / 2
-                : root.dashAt === "top" ? root.top + root.margin : root.height - height - root.margin + dash.slide
+            x: dash.vertical ? (root.dashAt === "left" ? root.lead + root.margin - dash.slide : root.width - root.trail - width - root.margin + dash.slide)
+                : root.lead + (root.width - root.lead - root.trail - width) / 2
+            y: dash.vertical ? root.top + (root.roomHeight - height) / 2
+                : root.dashAt === "top" ? root.top + root.margin : root.height - root.bottom - height - root.margin + dash.slide
             onMenuAsked: (app, at) => { menu.at = at; menu.app = app }
         }
 
@@ -141,8 +147,8 @@ PanelWindow {
             visible: root.indexShown
             output: root.output
             readonly property real slide: (1 - root.shown) * NihilStyle.s(28)
-            x: root.indexAt === "right" ? root.width - width - root.margin + index.slide : root.margin - index.slide
-            y: root.top + (root.height - root.top - height) / 2
+            x: root.indexAt === "right" ? root.width - root.trail - width - root.margin + index.slide : root.lead + root.margin - index.slide
+            y: root.top + (root.roomHeight - height) / 2
         }
 
         DashMenu {

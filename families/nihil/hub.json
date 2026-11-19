@@ -1,7 +1,16 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "3.1.1",
+  "version": "4.0.0",
   "changes": {
+    "4.0.0": [
+      "Vitrine: a floating glass rail on any edge replaces the bar; left by default, or right, top or bottom, floating or flush",
+      "One deck beside the rail holds every page, with its own side to move between them (Alt and a figure, Ctrl and Tab)",
+      "New Media page: the cover on its own colours, the timeline, the keys and every player",
+      "New Focus page: tasks, focus rounds or a countdown, and a note, shared with every family",
+      "The rail shows the workspace's windows, the tray, the status, the clock and power; each key names itself on hover",
+      "Neutral smoked glass with a rim of light; pearl, glacier, sage, coral, gold or the wallpaper's colour as the accent",
+      "Settings wears the deck's layout: a side plate and the options in grouped plates"
+    ],
     "3.1.1": [
       "The hot corner opens the overview once per arrival: it no longer jumps back to the workspace"
     ],
@@ -51,7 +60,7 @@
       "NiHiL: a floating bar, dot-matrix clock and widgets, Start, quick controls, a power card and its own menu, in one signal colour"
     ]
   },
-  "summary": "Vertical workspaces, a full overview and glass you shape completely.",
+  "summary": "A floating glass rail on any edge and one deck that holds every page.",
   "authors": [
     "snowarch"
   ],

@@ -55,8 +55,9 @@ Item {
         return hours > 0 ? Translation.tr("%1 h %2 min").arg(hours).arg(minutes % 60) : Translation.tr("%1 min").arg(minutes)
     }
     readonly property string machine: {
+        // Without a battery there is nothing to tell here: the deck's side already says how long the machine is up.
         if (!Battery.available)
-            return DateTime.uptime ? Translation.tr("Up for %1").arg(DateTime.uptime) : ""
+            return ""
         const share = Math.round(Battery.percentage * 100) + " %"
         const left = Battery.isCharging ? Battery.timeToFull : Battery.timeToEmpty
         if (!(left > 0))
@@ -343,8 +344,8 @@ Item {
                 anchors.fill: parent
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: Qt.alpha("#0C0A08", 0.86) }
-                    GradientStop { position: 1; color: Qt.alpha("#0C0A08", cover.status === Image.Ready ? 0.42 : 0.86) }
+                    GradientStop { position: 0; color: Qt.alpha("#0B0C0F", 0.86) }
+                    GradientStop { position: 1; color: Qt.alpha("#0B0C0F", cover.status === Image.Ready ? 0.42 : 0.86) }
                 }
             }
             Column {
@@ -358,13 +359,13 @@ Item {
                     text: root.player?.trackTitle ?? ""
                     font.pixelSize: NihilStyle.textLarge
                     font.weight: Font.Medium
-                    color: "#F5F0E8"
+                    color: "#F5F6F8"
                 }
                 NText {
                     width: parent.width
                     text: root.player?.trackArtist ?? ""
                     font.pixelSize: NihilStyle.textSmall
-                    color: Qt.alpha("#F5F0E8", 0.7)
+                    color: Qt.alpha("#F5F6F8", 0.7)
                 }
             }
             Row {
@@ -381,7 +382,7 @@ Item {
                     Accessible.role: Accessible.Button
                     Accessible.name: Translation.tr("Previous")
                     onClicked: root.player?.previous()
-                    NIcon { anchors.centerIn: parent; text: "previous"; size: NihilStyle.s(20); color: "#F5F0E8" }
+                    NIcon { anchors.centerIn: parent; text: "previous"; size: NihilStyle.s(20); color: "#F5F6F8" }
                 }
                 MouseArea {
                     anchors.verticalCenter: parent.verticalCenter
@@ -391,8 +392,8 @@ Item {
                     Accessible.role: Accessible.Button
                     Accessible.name: root.player?.isPlaying ? Translation.tr("Pause") : Translation.tr("Play")
                     onClicked: root.player?.togglePlaying()
-                    Rectangle { anchors.fill: parent; radius: width / 2; color: "#F5F0E8" }
-                    NIcon { anchors.centerIn: parent; text: root.player?.isPlaying ? "pause" : "play"; size: NihilStyle.s(24); color: "#0C0A08" }
+                    Rectangle { anchors.fill: parent; radius: width / 2; color: "#F5F6F8" }
+                    NIcon { anchors.centerIn: parent; text: root.player?.isPlaying ? "pause" : "play"; size: NihilStyle.s(24); color: "#0B0C0F" }
                 }
                 MouseArea {
                     anchors.verticalCenter: parent.verticalCenter
@@ -402,7 +403,7 @@ Item {
                     Accessible.role: Accessible.Button
                     Accessible.name: Translation.tr("Next")
                     onClicked: root.player?.next()
-                    NIcon { anchors.centerIn: parent; text: "next"; size: NihilStyle.s(20); color: "#F5F0E8" }
+                    NIcon { anchors.centerIn: parent; text: "next"; size: NihilStyle.s(20); color: "#F5F6F8" }
                 }
             }
         }
@@ -410,51 +411,15 @@ Item {
         Item {
             width: parent.width
             height: NihilStyle.s(36)
+            visible: root.machine.length > 0
             NText {
                 anchors.left: parent.left
-                anchors.right: ways.left
+                anchors.right: parent.right
                 anchors.leftMargin: NihilStyle.s(4)
-                anchors.rightMargin: NihilStyle.gap
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.machine
                 font.pixelSize: NihilStyle.textSmall
                 color: NihilStyle.inkSoft
-            }
-            Row {
-                id: ways
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                spacing: NihilStyle.s(2)
-                NButton {
-                    radius: width / 2
-                    tone: "transparent"
-                    icon: "settings"
-                    Accessible.name: Translation.tr("Settings")
-                    onClicked: {
-                        NihilState.controlOpen = false
-                        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
-                    }
-                }
-                NButton {
-                    radius: width / 2
-                    tone: "transparent"
-                    icon: "lock"
-                    Accessible.name: Translation.tr("Lock")
-                    onClicked: {
-                        NihilState.controlOpen = false
-                        Session.lock()
-                    }
-                }
-                NButton {
-                    radius: width / 2
-                    tone: "transparent"
-                    icon: "power_settings_new"
-                    Accessible.name: Translation.tr("Power")
-                    onClicked: {
-                        NihilState.controlOpen = false
-                        NihilState.toggle("power")
-                    }
-                }
             }
         }
     }

@@ -1,7 +1,8 @@
 #version 440
-// NiHiL's glass. A graphite sheet over the blur with a faint grain, a specular line along its top edge, a hairline rim
-// and, on what is active, a soft light rising from its bottom edge in the palette's two colours. `form` shapes the
-// body: 0 smoke, 1 frost, 2 fluted (vertical reeds), 3 prism (a beam crossing the sheet from the light).
+// NiHiL's glass, Vitrine. A smoked pane over the compositor's blur: brighter at its top, a thickness of light just inside
+// its edge, a specular rim that catches a light from the upper left (and its faint echo at the lower right), a broad
+// sheen across the pane, the pointer's light when the piece tracks it, and a soft shadow. `form` shapes the body:
+// 0 smoke, 1 frost (paler, coarser grain), 2 fluted (vertical reeds), 3 prism (the rim splits into the spectrum).
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 layout(std140, binding = 0) uniform buf {
@@ -38,68 +39,81 @@ void main() {
     vec2 c = box * 0.5;
     float r = min(radius, min(c.x, c.y));
     float d = rounded(p - c, c, r);
-    float inside = smoothstep(0.6, -0.6, d);
+    float inside = smoothstep(0.75, -0.75, d);
     vec2 uv = clamp(p / max(box, vec2(1.0)), 0.0, 1.0);
+    // Is the tint light (paper) or dark (smoke)?
+    float paper = step(0.5, dot(tint.rgb, vec3(0.2126, 0.7152, 0.0722)));
+    vec3 white = vec3(1.0);
 
     vec3 body = tint.rgb;
     float bodyAlpha = tint.a;
-    // A sheet under a lamp: a touch brighter at the top.
-    body += vec3(0.03) * pow(1.0 - uv.y, 2.0);
+    // A pane under a lamp: a little brighter along its top.
+    body += white * 0.045 * pow(1.0 - uv.y, 1.6) * (1.0 - paper * 0.6);
+    body -= white * 0.025 * pow(uv.y, 2.0) * (1.0 - paper);
+
+    // The glass's thickness: light gathered just inside the edge, strongest along the top.
+    float depth = -d;
+    float thick = exp(-max(depth, 0.0) / 7.0) * (0.55 + 0.45 * (1.0 - uv.y));
+    body += white * thick * 0.07 * rim;
+
+    // A broad sheen across the pane, falling from the upper left.
+    vec2 diag = normalize(vec2(1.0, 0.62));
+    float across = dot(p / max(box.x, 1.0), diag);
+    float sheen = exp(-pow((across - 0.18) / 0.22, 2.0)) * (1.0 - uv.y * 0.7);
+    body += white * sheen * 0.035 * flare * (1.0 - paper * 0.5);
 
     // The pointer's light, when the piece tracks it.
     vec2 toLight = p - lightAt;
-    float reach = max(box.x, box.y) * 0.55 + 1.0;
+    float reach = max(min(box.x, box.y) * 0.9, 60.0);
     float near = exp(-dot(toLight, toLight) / (reach * reach));
-    body += vec3(0.035) * near * flare;
+    body += mix(white, specA.rgb, 0.25) * near * 0.06 * flare;
 
-    // The glow from the bottom edge: wide and low, warmer at one side, cooler at the other.
-    float power = flare * 0.22 + ignite;
+    // What is active glows up from its bottom edge in the light's colour.
     float fromBottom = (box.y - p.y) / max(box.y, 1.0);
-    float across = (uv.x - 0.5) * 2.0;
-    float glow = exp(-fromBottom * fromBottom * 9.0) * exp(-across * across * 0.9);
+    float mid = (uv.x - 0.5) * 2.0;
+    float glow = exp(-fromBottom * fromBottom * 10.0) * exp(-mid * mid * 0.8) * ignite;
     vec3 glowInk = mix(specA.rgb, specB.rgb, uv.x);
-    body += glowInk * glow * 0.42 * power;
-    bodyAlpha = min(1.0, bodyAlpha + glow * 0.18 * power);
+    body += glowInk * glow * 0.35;
+    bodyAlpha = min(1.0, bodyAlpha + glow * 0.15);
 
     if (form > 0.5 && form < 1.5) {
-        // Frost: paler, the grain a little coarser.
-        body = mix(body, vec3(0.55), 0.06);
-        bodyAlpha = min(1.0, bodyAlpha + 0.06);
+        body = mix(body, white * (0.5 + paper * 0.45), 0.08);
+        bodyAlpha = min(1.0, bodyAlpha + 0.08);
     } else if (form > 1.5 && form < 2.5) {
-        // Fluted: each reed a lens, lit on its upper half.
         float w = max(ribs, 3.0);
         float ph = fract(p.x / w);
-        body += vec3(0.035) * sin(ph * 3.14159) * (0.5 + 0.5 * (1.0 - uv.y));
-        body -= vec3(0.03) * smoothstep(0.92, 1.0, ph);
-    } else if (form > 2.5) {
-        // Prism: a soft beam from the light, opening into the palette's two colours.
-        vec2 dir = normalize(vec2(0.82, 0.57));
-        vec2 nrm = vec2(-dir.y, dir.x);
-        float along = dot(toLight, dir);
-        float side = dot(toLight, nrm);
-        float widen = 8.0 + max(along, 0.0) * 0.3;
-        float t = side / widen * 0.5 + 0.5;
-        float beam = smoothstep(0.0, 0.3, t) * smoothstep(1.0, 0.7, t) * step(0.0, along);
-        beam *= exp(-max(along, 0.0) / (reach * 1.4));
-        body += mix(specA.rgb, specB.rgb, t) * beam * 0.22 * (flare + ignite);
+        body += white * 0.04 * sin(ph * 3.14159) * (0.5 + 0.5 * (1.0 - uv.y));
+        body -= white * 0.03 * smoothstep(0.9, 1.0, ph);
     }
 
-    body += (hash(floor(gl_FragCoord.xy) + 0.5) - 0.5) * grain * (form > 0.5 && form < 1.5 ? 0.06 : 0.035);
+    body += (hash(floor(gl_FragCoord.xy) + 0.5) - 0.5) * grain * (form > 0.5 && form < 1.5 ? 0.07 : 0.035);
 
-    // Rim: a hairline, brightest where the edge faces up, plus a faint coloured lift where the glow touches it.
+    // The specular rim: where the edge faces the light it is bright, opposite it a faint echo, between them a hairline.
     vec2 outward = normalize(p - c + 0.0001);
-    float up = max(0.0, -outward.y);
-    float band = smoothstep(1.0, 0.0, abs(d + 0.5));
-    float rimLight = rim * (0.07 + 0.3 * pow(up, 2.0));
-    vec2 toHot = p - vec2(c.x, box.y);
-    float hotReach = box.x * 0.42 + 1.0;
-    float heat = exp(-dot(toHot, toHot) / (hotReach * hotReach)) * clamp(ignite * 1.6, 0.0, 1.0);
-    vec3 rimInk = vec3(rimLight) + glowInk * glow * power * 0.5 * rim + (glowInk * 0.7 + 0.3) * heat * 1.1 * rim;
-    float rimAlpha = band * clamp(rimLight + glow * power * 0.4 + heat, 0.0, 1.0);
+    vec2 sun = normalize(vec2(-0.55, -0.83));
+    float facing = max(0.0, dot(outward, sun));
+    float echo = max(0.0, dot(outward, -sun));
+    float edgeBand = smoothstep(1.25, 0.0, abs(d + 0.6));
+    float catchLight = rim * (0.09 + 0.62 * pow(facing, 3.0) + 0.2 * pow(echo, 4.0) + 0.25 * near * flare);
+    vec3 rimInk = mix(white, specA.rgb, 0.18) * catchLight;
+    if (form > 2.5) {
+        // Prism: the rim splits as a lens edge would, warm on one side, cool on the other.
+        float t = atan(outward.y, outward.x) / 6.28318 + 0.5;
+        vec3 spectrum = 0.5 + 0.5 * cos(6.28318 * (t * 1.6 + vec3(0.0, 0.33, 0.67)));
+        rimInk = mix(rimInk, spectrum * (catchLight + 0.18 * rim), 0.7);
+    }
+    rimInk += glowInk * glow * 0.6 * rim;
+    float rimAlpha = edgeBand * clamp(catchLight * (paper > 0.5 ? 0.8 : 1.0) + glow * 0.4, 0.0, 1.0);
+    if (paper > 0.5) rimInk = mix(rimInk, white, 0.6);
 
-    float drop = (1.0 - inside) * exp(-max(d, 0.0) / (pad * 0.34 + 1.0)) * 0.14 * shadow;
-    vec3 rgb = body * inside * bodyAlpha + rimInk * band;
-    float alpha = max(bodyAlpha * inside, rimAlpha);
+    // A soft shadow, a little below the pane.
+    float sd = rounded(p - c - vec2(0.0, pad * 0.18), c, r);
+    float drop = (1.0 - inside) * exp(-max(sd, 0.0) / (pad * 0.38 + 1.0)) * 0.22 * shadow;
+
+    vec3 rgb = body * inside * bodyAlpha;
+    float alpha = bodyAlpha * inside;
+    rgb = rgb * (1.0 - rimAlpha) + rimInk * rimAlpha;
+    alpha = max(alpha, rimAlpha);
     alpha = alpha + drop * (1.0 - alpha);
     fragColor = vec4(rgb, alpha) * qt_Opacity;
 }

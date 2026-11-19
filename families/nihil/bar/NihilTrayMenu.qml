@@ -12,9 +12,9 @@ Item {
 
     property var item: null
     property var screen: null
-    // The icon's centre on its screen, and the panel edge the menu hangs from.
+    // The icon's centre on its screen, and the edge the rail stands on: the menu opens beside the rail.
     property point at: Qt.point(0, 0)
-    property bool fromBottom: false
+    property string edge: "left"
     property var trail: []
     property int lit: -1
 
@@ -22,12 +22,12 @@ Item {
     readonly property var current: root.trail.length > 0 ? root.trail[root.trail.length - 1] : root.handle
     readonly property bool open: root.item !== null
 
-    function show(item: var, screen: var, at: point, fromBottom: bool): void {
+    function show(item: var, screen: var, at: point, edge: string): void {
         root.trail = []
         root.lit = -1
         root.screen = screen
         root.at = at
-        root.fromBottom = fromBottom
+        root.edge = edge
         root.item = item
     }
     function close(): void { root.item = null; root.trail = [] }
@@ -115,9 +115,11 @@ Item {
                 radius: NihilStyle.r(24)
                 tint: NihilStyle.menuTint
                 tracks: true
-                x: NihilStyle.clamp(root.at.x - width / 2, edge, popup.width - width - edge)
-                y: root.fromBottom ? popup.height - NihilStyle.barHeight - height - NihilStyle.s(6)
-                    : NihilStyle.barHeight + NihilStyle.s(6)
+                readonly property real away: NihilStyle.railRoom + NihilStyle.s(8)
+                x: root.edge === "left" ? card.away : root.edge === "right" ? popup.width - card.away - width
+                    : NihilStyle.clamp(root.at.x - width / 2, edge, popup.width - width - edge)
+                y: root.edge === "top" ? card.away : root.edge === "bottom" ? popup.height - card.away - height
+                    : NihilStyle.clamp(root.at.y - NihilStyle.s(28), edge, popup.height - height - edge)
 
                 // Clicks on the card stay on the card.
                 MouseArea { anchors.fill: parent }

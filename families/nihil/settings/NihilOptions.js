@@ -80,16 +80,26 @@ var pages = [
         id: "profiles", summary: "Start from a whole desktop layout", title: "Profiles", glyph: "dashboard_customize", view: "profiles"
     },
     {
-        id: "layout", summary: "Where the panel, the dash and the workspaces sit", title: "Layout", glyph: "desktop",
+        id: "layout", summary: "Where the rail, the dash and the workspaces sit", title: "Layout", glyph: "desktop",
         sections: [
-            { title: "Panel", rows: [
-                choice("panel.position", "Position", [["top", "Top"], ["bottom", "Bottom"]]),
+            { title: "Rail", rows: [
+                choice("panel.position", "Edge", [["left", "Left"], ["right", "Right"], ["top", "Top"], ["bottom", "Bottom"]]),
+                choice("panel.style", "Style", [["float", "Floating"], ["edge", "Against the edge"]]),
+                level("panel.thickness", "Thickness", 40, 72, 1, "px"),
+                level("panel.margin", "Space from the edge", 0, 32, 1, "px", "Only while it floats"),
                 choice("panel.visibility", "Shown", [["always", "Always"], ["desktop", "On an empty desktop"],
                                                      ["overview", "In the overview"], ["hidden", "Never"]]),
                 choice("panel.overviewStyle", "In the overview", [["same", "Keep the glass"], ["transparent", "Transparent"]]),
-                toggle("panel.windowTitle", "Focused app's name"),
-                toggle("panel.statusWords", "Network in words", "Wired, or the network's name, beside its mark"),
+                toggle("panel.windows", "Open windows", "The workspace's windows as icons; middle click closes one"),
+                level("panel.windowsMax", "Windows shown", 1, 16, 1, ""),
+                toggle("panel.tray", "Tray"),
                 screens("panel.screenList", "Screens", "With none marked it shows on all of them")
+            ] },
+            { title: "Deck", rows: [
+                choice("deck.sidebar", "Side", [["full", "Names and marks"], ["icons", "Marks only"]]),
+                level("deck.dim", "Dim the desktop behind", 0, 0.6, 0.01, "percent"),
+                toggle("modules.media", "Media page"),
+                toggle("modules.focus", "Focus page", "Tasks, a timer and a note")
             ] },
             { title: "Dash", rows: [
                 choice("dash.position", "Position", edges),
@@ -166,7 +176,7 @@ var pages = [
         sections: [
             { title: "Colour", rows: [
                 choice("look.scheme", "Scheme", [["dark", "Dark"], ["light", "Light"]]),
-                choice("look.palette", "Light", [["filament", "Filament"], ["copper", "Copper"], ["signal", "Signal"], ["glacier", "Glacier"], ["sage", "Sage"], ["wallpaper", "From the wallpaper"]], "The one light the whole desktop is drawn in")
+                choice("look.palette", "Accent", [["pearl", "Pearl"], ["glacier", "Glacier"], ["sage", "Sage"], ["coral", "Coral"], ["gold", "Gold"], ["wallpaper", "From the wallpaper"]], "What is chosen wears it: the page, the workspace, the key that is on")
             ] },
             { title: "Glass", rows: [
                 choice("look.material", "Material", [["smoke", "Smoked"], ["frost", "Frosted"], ["fluted", "Fluted"], ["prism", "Prism"]]),
@@ -175,7 +185,7 @@ var pages = [
                 toggle("look.blur", "Blur what is behind"),
                 level("look.grain", "Grain", 0, 1, 0.01, "percent"),
                 level("look.rim", "Rim light", 0, 1, 0.01, "percent"),
-                level("look.flare", "Edge glow", 0, 1, 0.01, "percent", "The light rising from the bottom of the glass")
+                level("look.flare", "Rim flare", 0, 1, 0.01, "percent", "The light caught along the glass's edge")
             ] },
             { title: "Shape and type", rows: [
                 level("look.corners", "Roundness", 0, 2, 0.05, "times"),

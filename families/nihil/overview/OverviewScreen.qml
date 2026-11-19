@@ -48,10 +48,8 @@ PanelWindow {
     readonly property real thumbH: Math.round(root.thumbW / root.screenAspect)
     readonly property real margin: NihilStyle.s(14)
     readonly property bool panelShown: (root.modules?.panel ?? true) && (root.nihil?.panel?.visibility ?? "always") !== "hidden"
-    readonly property bool panelBottom: (root.nihil?.panel?.position ?? "top") === "bottom"
-    // The panel stays above the overview, which starts where it ends.
-    readonly property real barTop: root.panelShown && !root.panelBottom ? NihilStyle.barHeight : 0
-    readonly property real barEnd: root.panelShown && root.panelBottom ? NihilStyle.barHeight : 0
+    // The rail stays beside the overview, which starts where it ends.
+    readonly property real rail: root.panelShown ? NihilStyle.railRoom : 0
     readonly property bool entryShown: (root.modules?.search ?? true) && (root.nihil?.search?.showEntry ?? true)
 
     readonly property var workspaces: NihilState.workspacesOn(root.output)
@@ -68,7 +66,12 @@ PanelWindow {
     WlrLayershell.namespace: "quickshell:nihil-overview"
     WlrLayershell.keyboardFocus: root.open && root.focusedHere ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors { top: true; bottom: true; left: true; right: true }
-    margins { top: root.barTop; bottom: root.barEnd }
+    margins {
+        top: NihilStyle.railEdge === "top" ? root.rail : 0
+        bottom: NihilStyle.railEdge === "bottom" ? root.rail : 0
+        left: NihilStyle.railEdge === "left" ? root.rail : 0
+        right: NihilStyle.railEdge === "right" ? root.rail : 0
+    }
 
     onOpenChanged: {
         if (!root.open) return

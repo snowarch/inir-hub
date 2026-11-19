@@ -18,7 +18,7 @@ NScroller {
     // The screen's scale is the compositor's, though no group lists it.
     readonly property var scaleSpec: ({ comp: "display", key: "scale", kind: "choice", label: Translation.tr("Scale"), fallback: 1 })
 
-    spacing: NihilStyle.s(30)
+    spacing: NihilStyle.s(26)
     bottomPad: NihilStyle.s(32)
 
     Loader {
@@ -51,10 +51,11 @@ NScroller {
             spacing: NihilStyle.s(10)
 
             NText {
-                x: NihilStyle.s(4)
+                x: NihilStyle.s(18)
                 text: Translation.tr(section.modelData.title)
-                font.pixelSize: NihilStyle.textLarge
-                font.weight: Font.Light
+                font.pixelSize: NihilStyle.textSmall
+                font.weight: Font.DemiBold
+                color: NihilStyle.inkSoft
             }
 
             // Which screen the rows below set, with more than one.
@@ -109,13 +110,15 @@ NScroller {
             Rectangle {
                 width: section.width
                 height: rows.implicitHeight
-                radius: NihilStyle.r(26)
+                radius: NihilStyle.r(22)
                 color: NihilStyle.piece
+                border.width: 1
+                border.color: NihilStyle.hair
 
                 Column {
                     id: rows
-                    x: NihilStyle.s(24)
-                    width: parent.width - NihilStyle.s(48)
+                    x: NihilStyle.s(20)
+                    width: parent.width - NihilStyle.s(40)
 
                     Repeater {
                         model: section.rows

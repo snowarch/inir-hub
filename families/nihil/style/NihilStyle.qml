@@ -6,7 +6,8 @@ import qs.modules.common
 import qs.services
 
 // Every measure, ink and material of NiHiL, all of it driven by `nihil.look`.
-// An instrument panel: warm black glass, one filament of light, and what is on drawn solid in that light.
+// Vitrine: neutral smoked glass over the blurred desktop, a specular rim where the light catches it, white type, and what
+// is on drawn as a solid pill in one light (pearl by default, or the wallpaper's own colour).
 Singleton {
     id: root
 
@@ -21,23 +22,26 @@ Singleton {
     readonly property string scheme: String(root.opt("scheme", "dark")) === "light" ? "light" : "dark"
     readonly property bool dark: root.scheme === "dark"
 
-    // One light per palette. "wallpaper" takes the most vivid colour the picture itself holds.
+    // One light per palette. "pearl" is the glass's own white (ink on dark, ink on light); "wallpaper" takes the most
+    // vivid colour the picture itself holds.
     readonly property var palettes: ({
-        filament: { light: "#F2E6D4" },
-        copper: { light: "#E9A26A" },
-        signal: { light: "#FF6A3D" },
-        glacier: { light: "#BBD6E4" },
-        sage: { light: "#B7CFA3" },
-        wallpaper: { light: "" }
+        pearl: { light: "" },
+        wallpaper: { light: "" },
+        glacier: { light: "#9CCBF2" },
+        sage: { light: "#A8D5A2" },
+        coral: { light: "#FF8D72" },
+        gold: { light: "#F1C76B" }
     })
-    // Names from earlier NiHiL land on the closest light; anything unknown on the filament.
-    readonly property var _renamed: ({ ember: "copper", amber: "copper", ice: "glacier", azure: "glacier", moss: "sage" })
+    // Names from earlier NiHiL land on the closest light; anything unknown on pearl.
+    readonly property var _renamed: ({ filament: "pearl", copper: "gold", amber: "gold", signal: "coral", ember: "coral",
+        ice: "glacier", azure: "glacier", moss: "sage" })
     readonly property string paletteName: {
-        const name = String(root.opt("palette", "filament"))
+        const name = String(root.opt("palette", "pearl"))
         const known = root._renamed[name] ?? name
-        return root.palettes[known] ? known : "filament"
+        return root.palettes[known] ? known : "pearl"
     }
     readonly property bool fromWallpaper: root.paletteName === "wallpaper"
+    readonly property bool pearl: root.paletteName === "pearl"
 
     ColorQuantizer {
         id: pictureColours
@@ -46,7 +50,7 @@ Singleton {
         rescaleSize: 64
     }
     readonly property color pictureLight: {
-        let best = root.palettes.filament.light
+        let best = "#9CCBF2"
         let score = 0.12
         for (const colour of pictureColours.colors ?? []) {
             const vivid = colour.hslSaturation * (1 - Math.abs(colour.hslLightness - 0.55))
@@ -54,33 +58,36 @@ Singleton {
         }
         return best
     }
-    readonly property color seed: root.fromWallpaper ? root.pictureLight : root.palettes[root.paletteName].light
-    // The light at the lightness that reads on this sheet: pale on black, deep on paper.
+    readonly property color seed: root.fromWallpaper ? root.pictureLight : root.pearl ? root.ink : root.palettes[root.paletteName].light
+    // The light at the lightness that reads on this glass: pale on dark, deep on light.
     function tone(c: color, lightness: real): color {
-        return Qt.hsla(Math.max(0, c.hslHue), Math.min(c.hslSaturation, root.dark ? 0.9 : 0.62), lightness, 1)
+        return Qt.hsla(Math.max(0, c.hslHue), Math.min(c.hslSaturation, root.dark ? 0.85 : 0.6), lightness, 1)
     }
-    readonly property color accent: root.dark ? root.tone(root.seed, Math.max(0.68, root.seed.hslLightness)) : root.tone(root.seed, 0.3)
-    readonly property color accentInk: root.dark ? "#0C0A08" : "#FBF8F3"
-    readonly property color specA: root.accent
-    readonly property color specB: root.accent
+    function luma(c: color): real { return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b }
+    readonly property color accent: root.pearl ? root.ink
+        : root.dark ? root.tone(root.seed, Math.max(0.7, root.seed.hslLightness)) : root.tone(root.seed, 0.36)
+    readonly property color accentInk: root.luma(root.accent) > 0.5 ? "#0D0E11" : "#F7F8FA"
+    // The light the rim and the glow are drawn in: white for pearl, the light itself otherwise.
+    readonly property color specA: root.pearl ? "#FFFFFF" : root.accent
+    readonly property color specB: root.pearl ? "#DCE6FF" : Qt.lighter(root.accent, 1.25)
 
-    // The sheet and what is written on it: warm black and warm paper, never a blue-grey.
-    readonly property color void_: root.dark ? "#0C0A08" : "#EFEAE2"
-    readonly property color carbon: root.dark ? "#171411" : "#E5DFD5"
-    readonly property color ink: root.dark ? "#F5F0E8" : "#17130E"
-    readonly property color inkSoft: Qt.alpha(root.ink, root.dark ? 0.62 : 0.68)
-    readonly property color inkFaint: Qt.alpha(root.ink, root.dark ? 0.38 : 0.46)
+    // The glass and what is written on it: neutral graphite and neutral paper.
+    readonly property color void_: root.dark ? "#0F1013" : "#F1F2F5"
+    readonly property color carbon: root.dark ? "#1A1B20" : "#E4E6EB"
+    readonly property color ink: root.dark ? "#F5F6F8" : "#121317"
+    readonly property color inkSoft: Qt.alpha(root.ink, root.dark ? 0.66 : 0.68)
+    readonly property color inkFaint: Qt.alpha(root.ink, root.dark ? 0.4 : 0.46)
     readonly property color hair: Qt.alpha(root.ink, 0.1)
     readonly property color line: Qt.alpha(root.ink, 0.07)
-    readonly property color piece: Qt.alpha(root.ink, 0.045)
-    readonly property color pieceRaised: Qt.alpha(root.ink, 0.09)
-    readonly property color chosen: Qt.alpha(root.ink, 0.12)
+    readonly property color piece: Qt.alpha(root.ink, root.dark ? 0.06 : 0.05)
+    readonly property color pieceRaised: Qt.alpha(root.ink, root.dark ? 0.11 : 0.09)
+    readonly property color chosen: Qt.alpha(root.ink, 0.14)
     // A well: a place pressed into the glass, darker at its top edge, caught by the light along its bottom one.
-    readonly property color well: Qt.alpha(root.ink, root.dark ? 0.035 : 0.05)
-    readonly property color wellShade: Qt.alpha("#000000", root.dark ? 0.45 : 0.1)
-    readonly property color wellEdge: Qt.alpha(root.dark ? "#FFFFFF" : "#000000", root.dark ? 0.06 : 0.07)
-    readonly property color rimInk: root.dark ? Qt.alpha("#FFFFFF", 0.16) : Qt.alpha("#000000", 0.14)
-    readonly property color scrim: Qt.alpha("#000000", 0.45)
+    readonly property color well: Qt.alpha(root.dark ? "#000000" : "#FFFFFF", root.dark ? 0.18 : 0.45)
+    readonly property color wellShade: Qt.alpha("#000000", root.dark ? 0.4 : 0.08)
+    readonly property color wellEdge: Qt.alpha("#FFFFFF", root.dark ? 0.07 : 0.6)
+    readonly property color rimInk: root.dark ? Qt.alpha("#FFFFFF", 0.18) : Qt.alpha("#000000", 0.12)
+    readonly property color scrim: Qt.alpha("#000000", 0.42)
     readonly property color live: root.accent
     readonly property color danger: root.dark ? "#FF7B72" : "#C62F2F"
 
@@ -88,7 +95,7 @@ Singleton {
     // "smoke", "frost", "fluted" or "prism".
     readonly property string material: String(root.opt("material", "smoke"))
     readonly property int form: ({ smoke: 0, frost: 1, fluted: 2, prism: 3 })[root.material] ?? 0
-    readonly property real glassOpacity: root.clamp(Number(root.opt("glass", 0.74)), 0.05, 1)
+    readonly property real glassOpacity: root.clamp(Number(root.opt("glass", 0.62)), 0.05, 1)
     readonly property color glassTint: Qt.alpha(root.void_, root.glassOpacity)
     // Menus and lists that open over other controls: dense enough to read over anything, whatever the glass is set to.
     readonly property color menuTint: Qt.alpha(root.void_, Math.max(0.95, root.glassOpacity))
@@ -104,15 +111,27 @@ Singleton {
     readonly property real corners: root.clamp(Number(root.opt("corners", 1)), 0, 2)
     function r(px: real): real { return Math.round(px * root.corners * root.scale) }
     readonly property real rSheet: root.r(30)
-    readonly property real rPanel: root.r(28)
+    readonly property real rPanel: root.r(26)
     readonly property real rCard: root.r(18)
     readonly property real rKey: root.r(12)
     readonly property real tileRadius: root.rKey
     readonly property real gap: root.s(8)
     readonly property real edge: root.s(16)
-    readonly property real barHeight: root.s(44)
-    // How wide the coves are where a body is pulled out of the sheet.
-    readonly property real fuse: root.s(30)
+
+    // The rail: NiHiL's panel, a column (or a row) of glass along one edge of the screen.
+    readonly property var panel: Config.options?.nihil?.panel
+    // "left", "right", "top" or "bottom". Earlier NiHiL kept only top and bottom, which still mean what they said.
+    readonly property string railEdge: {
+        const at = String(root.panel?.position ?? "left")
+        return ["left", "right", "top", "bottom"].includes(at) ? at : "left"
+    }
+    readonly property bool railVertical: root.railEdge === "left" || root.railEdge === "right"
+    // "float" stands off every edge as an island; "edge" runs the whole side.
+    readonly property bool railFloats: String(root.panel?.style ?? "float") !== "edge"
+    readonly property real railThickness: root.s(Number(root.panel?.thickness ?? 52))
+    readonly property real railMargin: root.railFloats ? root.s(Number(root.panel?.margin ?? 10)) : 0
+    // What the rail takes from its edge, margins included.
+    readonly property real railRoom: root.railThickness + root.railMargin
 
     // Type: Geist for everything, set by weight and size alone.
     readonly property FontLoader sans: FontLoader { source: Qt.resolvedUrl("../assets/fonts/Geist.ttf") }
