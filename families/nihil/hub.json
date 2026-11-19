@@ -4,10 +4,9 @@
   "changes": {
     "4.0.0": [
       "Vitrine: a floating glass rail on any edge replaces the bar; left by default, or right, top or bottom, floating or flush",
-      "One deck beside the rail holds every page, with its own side to move between them (Alt and a figure, Ctrl and Tab)",
-      "New Media page: the cover on its own colours, the timeline, the keys and every player",
-      "New Focus page: tasks, focus rounds or a countdown, and a note, shared with every family",
       "The rail shows the workspace's windows, the tray, the status, the clock and power; each key names itself on hover",
+      "One deck beside the rail holds every page, with its own side to move between them (Alt and a figure, Ctrl and Tab)",
+      "New pages: Media (cover, timeline, keys, every player) and Focus (tasks, focus rounds or a countdown, a note)",
       "Neutral smoked glass with a rim of light; pearl, glacier, sage, coral, gold or the wallpaper's colour as the accent",
       "Settings wears the deck's layout: a side plate and the options in grouped plates"
     ],
