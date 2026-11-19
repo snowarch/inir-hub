@@ -40,10 +40,12 @@ Item {
             sourceSize.width: Math.round(frame.width * 1.5)
             opacity: status === Image.Ready ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
-            source: !root.live || root.path.length === 0 ? ""
-                : root.video ? "file://" + Wallpapers.getVideoFirstFramePath(root.path)
-                : root.fallback ? "file://" + root.path
-                : "file://" + Wallpapers.getExpectedThumbnailPath(root.path, "large")
+            // A video whose first frame is not made yet has no file to show: nothing, not the root folder.
+            readonly property string file: !root.live || root.path.length === 0 ? ""
+                : root.video ? String(Wallpapers.getVideoFirstFramePath(root.path) ?? "")
+                : root.fallback ? root.path
+                : String(Wallpapers.getExpectedThumbnailPath(root.path, "large") ?? "")
+            source: file.length > 0 ? "file://" + file : ""
             onStatusChanged: {
                 if (status !== Image.Error || root.fallback || root.video)
                     return
