@@ -9,20 +9,22 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// What was copied, on one pane of glass by the bar: the pins first, then the history newest first. The search keeps the
-// keys: the arrows walk the rows, Enter copies the marked one and closes.
-NPopup {
+// What was copied, on the slab: the pins first, then the history newest first. The search keeps the keys: the arrows walk
+// the rows, Enter copies the marked one and closes.
+Item {
     id: root
 
-    open: NihilState.clipboardOpen
-    namespace: "nihil:clipboard"
-    blurPieces: [sheet.region]
-    onDismissed: GlobalStates.clipboardOpen = false
+    property var screen: null
+    property bool flipped: false
+    property real room: 0
+    property bool open: false
+
+    implicitWidth: NihilStyle.s(560)
+    implicitHeight: Math.min(NihilStyle.s(620), root.room)
 
     property string query: ""
     property bool armed: false
 
-    readonly property bool barBottom: (Config.options?.nihil?.panel?.position ?? "top") === "bottom"
     readonly property var pins: {
         const words = root.query.trim().toLowerCase()
         return (Cliphist.pinned ?? [])
@@ -64,25 +66,21 @@ NPopup {
         onTriggered: root.armed = false
     }
 
-    NGlass {
+    Item {
         id: sheet
 
-        readonly property real inset: NihilStyle.s(14)
+        readonly property real inset: NihilStyle.s(20)
 
-        width: Math.min(NihilStyle.s(520), parent.width - NihilStyle.edge * 2)
-        height: Math.min(NihilStyle.s(620), parent.height - NihilStyle.barHeight - NihilStyle.edge * 3)
-        x: Math.round((parent.width - width) / 2)
-        y: root.barBottom ? parent.height - height - NihilStyle.barHeight - NihilStyle.edge * 2
-            : NihilStyle.barHeight + NihilStyle.edge * 2
-        ignite: root.open ? 0.5 : 0
-
-        MouseArea { anchors.fill: parent }
+        x: sheet.inset
+        y: root.flipped ? NihilStyle.s(40) : NihilStyle.s(16)
+        width: root.width - sheet.inset * 2
+        height: root.height - NihilStyle.s(56)
 
         NField {
             id: search
-            x: sheet.inset
-            y: sheet.inset
-            width: sheet.width - sheet.inset * 2 - wipe.width - NihilStyle.gap
+            width: sheet.width - wipe.width - NihilStyle.gap
+            height: NihilStyle.s(48)
+            radius: NihilStyle.rCard
             glyph: "search"
             placeholder: Translation.tr("Search what you copied")
             clearable: true
@@ -97,7 +95,6 @@ NPopup {
         NButton {
             id: wipe
             anchors.right: parent.right
-            anchors.rightMargin: sheet.inset
             anchors.verticalCenter: search.verticalCenter
             visible: Cliphist.entries.length > 0
             icon: "delete_sweep"
@@ -115,12 +112,11 @@ NPopup {
 
         ListView {
             id: list
-            x: sheet.inset
-            y: search.y + search.height + NihilStyle.gap
-            width: sheet.width - sheet.inset * 2
-            height: sheet.height - y - sheet.inset
+            y: search.y + search.height + NihilStyle.s(12)
+            width: sheet.width
+            height: sheet.height - y
             clip: true
-            spacing: NihilStyle.s(2)
+            spacing: NihilStyle.s(4)
             boundsBehavior: Flickable.StopAtBounds
             model: root.rows
             highlightFollowsCurrentItem: false

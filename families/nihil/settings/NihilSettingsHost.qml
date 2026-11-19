@@ -59,9 +59,10 @@ Scope {
             NGlass {
                 id: card
                 anchors.centerIn: parent
-                width: Math.min(NihilStyle.s(1180), parent.width - NihilStyle.s(96))
-                height: Math.min(NihilStyle.s(800), parent.height - NihilStyle.s(96))
-                radius: NihilStyle.rPanel * 1.4
+                width: Math.min(NihilStyle.s(1260), parent.width - NihilStyle.s(96))
+                height: Math.min(NihilStyle.s(830), parent.height - NihilStyle.s(96))
+                radius: NihilStyle.rSheet
+                tint: Qt.alpha(NihilStyle.void_, Math.max(0.86, NihilStyle.glassOpacity))
 
                 // A click on the card's own glass stays in it.
                 MouseArea { anchors.fill: parent }
@@ -70,7 +71,6 @@ Scope {
                     id: view
                     anchors.fill: parent
                     windowed: false
-                    backdrop: false
                     focus: true
                     onCloseRequested: GlobalStates.settingsOverlayOpen = false
                     onWindowRequested: key => {

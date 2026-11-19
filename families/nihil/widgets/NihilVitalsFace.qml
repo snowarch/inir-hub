@@ -47,7 +47,7 @@ NihilWidgetFace {
                         anchors.verticalCenter: parent.verticalCenter
                         text: part.modelData.note.length > 0 ? `${part.modelData.name}  ·  ${part.modelData.note}` : part.modelData.name
                         font.pixelSize: root.dp(13)
-                        color: NihilStyle.inkSoft
+                        color: root.inkSoft
                     }
                     NText {
                         id: percent
@@ -56,13 +56,14 @@ NihilWidgetFace {
                         figures: true
                         font.pixelSize: root.dp(root.small ? 14 : 16)
                         font.weight: Font.DemiBold
-                        color: part.high ? NihilStyle.danger : NihilStyle.ink
+                        color: part.high ? NihilStyle.danger : root.ink
                     }
                 }
                 FaceBar {
+                    ink: root.ink
                     width: parent.width
                     level: part.modelData.level
-                    tint: part.high ? NihilStyle.danger : NihilStyle.accent
+                    tint: part.high ? NihilStyle.danger : root.accent
                 }
             }
         }

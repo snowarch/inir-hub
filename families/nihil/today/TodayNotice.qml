@@ -5,9 +5,9 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// One notification kept in Today, on its own card: the app's mark, its name and when, the summary and two lines of body. A tap does its
-// first action, the cross lets it go.
-Rectangle {
+// One notification kept: the app's mark, the summary and when, the body under them. A tap does its first action; the
+// cross on the body's line lets it go.
+MouseArea {
     id: root
 
     required property var entry
@@ -16,83 +16,82 @@ Rectangle {
     readonly property bool critical: root.entry?.urgency === "critical"
 
     function when(time: real): string {
-        const minutes = Math.floor((Date.now() - time) / 60000)
-        if (minutes < 1)
-            return Translation.tr("Now")
-        if (minutes < 60)
-            return Translation.tr("%1 min").arg(minutes)
+        const minutes = Math.floor((DateTime.clock.date.getTime() - time) / 60000)
+        if (minutes < 1) return Translation.tr("Now")
+        if (minutes < 60) return Translation.tr("%1 min").arg(minutes)
         const then = new Date(time)
         if (then.toDateString() === new Date().toDateString())
             return Qt.formatTime(then, Config.options?.time?.format ?? "hh:mm")
         return then.toLocaleDateString(Qt.locale(), "d MMM")
     }
 
-    height: Math.max(words.implicitHeight + NihilStyle.s(22), NihilStyle.s(60))
-    radius: NihilStyle.rCard
-    color: tap.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
-    border.width: 1
-    border.color: root.critical ? Qt.alpha(NihilStyle.danger, 0.5) : NihilStyle.line
-    Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+    height: Math.max(NihilStyle.s(66), words.implicitHeight + NihilStyle.s(24))
+    hoverEnabled: true
+    cursorShape: Qt.PointingHandCursor
+    Accessible.role: Accessible.Button
+    Accessible.name: root.entry?.summary ?? ""
+    onClicked: Notifications.attemptInvokeAction(root.entry.notificationId, root.entry?.actions?.[0]?.identifier ?? "default")
 
-    MouseArea {
-        id: tap
+    NWell {
         anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: Notifications.attemptInvokeAction(root.entry.notificationId, root.entry?.actions?.[0]?.identifier ?? "default")
+        radius: NihilStyle.rCard
+        hovered: root.containsMouse || drop.containsMouse
     }
-
     NAppIcon {
         id: mark
-        x: NihilStyle.s(12)
-        y: NihilStyle.s(12)
+        x: NihilStyle.s(16)
+        anchors.verticalCenter: parent.verticalCenter
         appId: root.entry?.appIcon || root.entry?.appName || ""
-        size: NihilStyle.s(32)
+        size: NihilStyle.s(36)
     }
-
     Column {
         id: words
         x: mark.x + mark.width + NihilStyle.s(12)
-        y: NihilStyle.s(11)
-        width: parent.width - x - NihilStyle.s(36)
-
-        spacing: NihilStyle.s(2)
-
-        NText {
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width - x - NihilStyle.s(14)
+        spacing: NihilStyle.s(3)
+        Item {
             width: parent.width
-            text: (root.entry?.appName ?? "") + "  ·  " + root.when(root.entry?.time ?? Date.now())
-            font.pixelSize: NihilStyle.textLabel
-            font.weight: Font.Medium
-            color: root.critical ? NihilStyle.danger : NihilStyle.inkSoft
+            height: title.implicitHeight
+            NText {
+                id: title
+                width: parent.width - time.implicitWidth - NihilStyle.gap
+                text: root.entry?.summary || root.entry?.appName || ""
+                font.weight: Font.Medium
+                color: root.critical ? NihilStyle.danger : NihilStyle.ink
+            }
+            NText {
+                id: time
+                anchors.right: parent.right
+                text: root.when(root.entry?.time ?? Date.now())
+                font.pixelSize: NihilStyle.textSmall
+                color: NihilStyle.inkFaint
+            }
         }
         NText {
-            width: parent.width
-            text: root.entry?.summary ?? ""
-            elide: Text.ElideRight
-            font.weight: Font.DemiBold
-        }
-        NText {
-            width: parent.width
-            visible: root.body.length > 0
+            width: parent.width - NihilStyle.s(30)
+            visible: text.length > 0
             text: root.body
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
             maximumLineCount: 2
-            elide: Text.ElideRight
             font.pixelSize: NihilStyle.textSmall
             color: NihilStyle.inkSoft
         }
     }
-
     NButton {
+        id: drop
         anchors.right: parent.right
-        anchors.rightMargin: NihilStyle.s(4)
-        y: NihilStyle.s(4)
+        anchors.rightMargin: NihilStyle.s(8)
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: NihilStyle.s(6)
         width: NihilStyle.s(28)
-        height: NihilStyle.s(28)
+        height: width
+        radius: width / 2
+        opacity: root.containsMouse || drop.containsMouse ? 1 : 0
         icon: "close"
         iconSize: NihilStyle.s(14)
-        opacity: tap.containsMouse || containsMouse ? 1 : 0
+        Accessible.name: Translation.tr("Dismiss")
         onClicked: Notifications.discardNotification(root.entry.notificationId)
     }
 }

@@ -119,8 +119,6 @@ var pages = [
                 choice("thumbnails.position", "Position", edges),
                 level("thumbnails.adjust", "Shift along the edge", -1, 1, 0.05),
                 level("thumbnails.scale", "Size", 0.05, 0.3, 0.01, "percent"),
-                level("thumbnails.scaleInApps", "Size in the app grid", 0, 0.3, 0.01, "percent", "", hiddenAtZero),
-                level("thumbnails.scaleInSearch", "Size in search", 0, 0.3, 0.01, "percent", "", hiddenAtZero),
                 toggle("thumbnails.fullLength", "Glass along the whole edge"),
                 toggle("thumbnails.background", "Glass behind the strip"),
                 choice("thumbnails.labels", "Labels", [["none", "None"], ["index", "Number"], ["indexApp", "Number and app"],
@@ -203,8 +201,6 @@ var pages = [
                                                                       ["blurFast", "Fast blur"], ["blurSmooth", "Smooth blur"]]),
                 level("overview.backgroundBlur", "Blur", 0, 1, 0.01, "percent"),
                 level("overview.backgroundBrightness", "Brightness with windows", 0, 1, 0.01, "percent"),
-                level("overview.appsBrightness", "Brightness in the app grid", 0, 1, 0.01, "percent"),
-                level("overview.searchBrightness", "Brightness in search", 0, 1, 0.01, "percent"),
                 toggle("overview.smoothAnimation", "Blur grows with the opening")
             ] },
             { title: "Desktop widgets", rows: [
@@ -319,9 +315,7 @@ var pages = [
                 toggle("results.includeWindows", "Include open windows"),
                 choice("results.windowsOrder", "Open windows rank", [["first", "First"], ["last", "Last"]]),
                 choice("results.activateSettings", "Choosing a window", [["default", "Focus it"], ["switch", "Go to its workspace"], ["bring", "Bring it here"]]),
-                level("results.iconSize", "Larger rows", 0, 48, 1, "px"),
-                choice("results.background", "Background", [["transparent", "Glass"], ["dark", "Dark"]]),
-                choice("results.animation", "Results arrive", arrivals)
+                level("results.iconSize", "Larger rows", 0, 48, 1, "px")
             ] }
         ]
     },

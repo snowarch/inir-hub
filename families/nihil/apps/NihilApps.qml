@@ -6,13 +6,18 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The app grid inside the overview: pages of launchers and folders. The arrows walk the tiles, the wheel and the page
-// keys turn the pages. A tile let go on the middle of another makes a folder, on its edge it takes that place.
+// The app grid: pages of launchers and folders, filling the room it is given. The arrows walk the tiles, the wheel and the
+// page keys turn the pages. A tile let go on the middle of another makes a folder, on its edge it takes that place.
 FocusScope {
     id: root
 
     // False while the search field keeps the keys and this grid only shows what the words narrow it to.
     property bool takesKeys: true
+    // The kind of app on show.
+    property string kind: "all"
+    readonly property int columns: catalog.columns
+    readonly property var kindsHeld: catalog.kindsHeld
+    signal folderClosed()
 
     readonly property var options: Config.options?.nihil?.apps ?? ({})
     readonly property string orientation: root.options.orientation ?? "workspaces"
@@ -22,13 +27,18 @@ FocusScope {
     readonly property string animation: root.options.animation ?? "default"
     readonly property bool still: root.animation === "none" || (root.options.performance ?? false)
 
-    readonly property real pageWidth: root.width * (root.options.pageWidth ?? 0.85)
-    readonly property real pageHeight: root.height * (root.options.pageHeight ?? 0.9)
+    readonly property real pagerRoom: NihilStyle.s(36)
+    readonly property real pageWidth: root.width
+    readonly property real pageHeight: root.height - root.pagerRoom
     readonly property real gap: NihilStyle.s(root.options.spacing ?? 30)
+    readonly property real rowGap: Math.round(root.gap * 0.53)
     readonly property real iconSize: (root.options.iconSize ?? -1) > 0 ? root.options.iconSize
-        : NihilStyle.clamp(Math.min(root.pageWidth / 11, root.pageHeight / 7), NihilStyle.s(48), NihilStyle.s(96))
-    readonly property real cellWidth: root.iconSize + NihilStyle.s(52)
+        : NihilStyle.clamp(root.pageWidth / 19, NihilStyle.s(48), NihilStyle.s(96))
+    readonly property real cellWidth: root.iconSize + NihilStyle.s(64)
     readonly property real cellHeight: root.iconSize + NihilStyle.s(56)
+    // The columns spread over the whole width, so the grid ends where the search field does.
+    readonly property real columnGap: catalog.columns > 1
+        ? Math.max(root.gap, (root.pageWidth - catalog.columns * root.cellWidth) / (catalog.columns - 1)) : 0
 
     property int selected: 0
     // The tile under the pointer; while one is, the keys' choice steps back.
@@ -51,6 +61,10 @@ FocusScope {
         } else {
             root.selected = NihilStyle.clamp(next, 0, Math.max(0, catalog.pageItems.length - 1))
         }
+    }
+
+    function turn(by: int): void {
+        catalog.goToPage(catalog.shownPage + by)
     }
 
     function activateFirst(): void {
@@ -98,7 +112,7 @@ FocusScope {
         const fixed = root.animation === "left" || root.animation === "up" ? -1
             : root.animation === "right" || root.animation === "down" ? 1 : 0
         tiles.slide = NihilStyle.s(48) * (fixed !== 0 ? fixed : page > before ? 1 : -1)
-        turn.restart()
+        slideBack.restart()
     }
 
     focus: root.takesKeys
@@ -118,9 +132,9 @@ FocusScope {
     Keys.onEnterPressed: root.activateFirst()
     Keys.onPressed: event => {
         if (event.key === Qt.Key_PageDown)
-            catalog.goToPage(catalog.shownPage + 1)
+            root.turn(1)
         else if (event.key === Qt.Key_PageUp)
-            catalog.goToPage(catalog.shownPage - 1)
+            root.turn(-1)
         else
             return
         event.accepted = true
@@ -129,8 +143,9 @@ FocusScope {
     NihilAppModel {
         id: catalog
         query: NihilState.query
+        kind: root.kind
         fitColumns: Math.max(1, Math.floor((root.pageWidth + root.gap) / (root.cellWidth + root.gap)))
-        fitRows: Math.max(1, Math.floor((root.pageHeight + root.gap) / (root.cellHeight + root.gap)))
+        fitRows: Math.max(1, Math.floor((root.pageHeight + root.rowGap) / (root.cellHeight + root.rowGap)))
         onShownPageChanged: root._turned(catalog.shownPage)
     }
 
@@ -142,17 +157,15 @@ FocusScope {
             root._wheelRest += wheel.angleDelta.y !== 0 ? wheel.angleDelta.y : wheel.angleDelta.x
             if (Math.abs(root._wheelRest) < 120)
                 return
-            catalog.goToPage(catalog.shownPage + (root._wheelRest < 0 ? 1 : -1))
+            root.turn(root._wheelRest < 0 ? 1 : -1)
             root._wheelRest = 0
         }
     }
 
     Item {
         id: pages
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: -NihilStyle.s(24)
         width: root.pageWidth
-        height: root.pageHeight - NihilStyle.s(48)
+        height: root.pageHeight
 
         Grid {
             id: tiles
@@ -160,10 +173,9 @@ FocusScope {
             property real slide: 0
 
             x: (root.options.center ?? false) ? Math.round((pages.width - implicitWidth) / 2) : 0
-            y: Math.round((pages.height - implicitHeight) / 2)
             columns: catalog.columns
-            columnSpacing: root.gap
-            rowSpacing: root.gap
+            columnSpacing: root.columnGap
+            rowSpacing: root.rowGap
             opacity: 1 - Math.abs(tiles.slide) / NihilStyle.s(96)
             transform: Translate {
                 x: root.vertical ? 0 : tiles.slide
@@ -194,7 +206,7 @@ FocusScope {
         }
 
         NumberAnimation {
-            id: turn
+            id: slideBack
             target: tiles
             property: "slide"
             to: 0
@@ -216,63 +228,79 @@ FocusScope {
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: catalog.filtering ? Translation.tr("No apps match") : Translation.tr("No apps to show")
-                font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 color: NihilStyle.inkSoft
             }
         }
     }
 
-    NButton {
-        visible: (root.options.pageArrows ?? true) && catalog.shownPage > 0
-        anchors.left: parent.left
-        anchors.leftMargin: NihilStyle.s(12)
-        anchors.verticalCenter: parent.verticalCenter
-        icon: root.vertical ? "keyboard_arrow_up" : "chevron_left"
-        onClicked: catalog.goToPage(catalog.shownPage - 1)
-    }
-    NButton {
-        visible: (root.options.pageArrows ?? true) && catalog.shownPage < catalog.pageCount - 1
-        anchors.right: parent.right
-        anchors.rightMargin: NihilStyle.s(12)
-        anchors.verticalCenter: parent.verticalCenter
-        icon: root.vertical ? "expand_more" : "chevron_right"
-        onClicked: catalog.goToPage(catalog.shownPage + 1)
-    }
-
-    // The pages as dots under the grid, the one on show drawn long in the accent.
+    // The pages, under the grid: a key each way and a mark for each page.
     Row {
-        id: pager
-        visible: (root.options.pageIndicators ?? true) && catalog.pageCount > 1
+        visible: catalog.pageCount > 1
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: NihilStyle.s(22)
-        spacing: NihilStyle.s(2)
+        height: root.pagerRoom
+        spacing: NihilStyle.s(8)
 
-        Repeater {
-            model: catalog.pageCount
-            delegate: MouseArea {
-                id: dot
-                required property int index
-                readonly property bool here: catalog.shownPage === dot.index
+        NButton {
+            visible: root.options.pageArrows ?? true
+            anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(28)
+            height: NihilStyle.s(28)
+            tone: "transparent"
+            enabled: catalog.shownPage > 0
+            opacity: enabled ? 1 : 0.3
+            icon: root.vertical ? "expand_less" : "chevron_left"
+            iconSize: NihilStyle.s(16)
+            Accessible.name: Translation.tr("Previous")
+            onClicked: root.turn(-1)
+        }
 
-                width: mark.width + NihilStyle.s(10)
-                height: NihilStyle.s(20)
-                cursorShape: Qt.PointingHandCursor
-                hoverEnabled: true
-                Accessible.role: Accessible.Button
-                Accessible.name: Translation.tr("Page %1").arg(dot.index + 1)
-                onClicked: catalog.goToPage(dot.index)
+        Row {
+            visible: root.options.pageIndicators ?? true
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: NihilStyle.s(2)
 
-                Rectangle {
-                    id: mark
-                    anchors.centerIn: parent
-                    width: dot.here ? NihilStyle.s(22) : NihilStyle.s(7)
-                    height: NihilStyle.s(7)
-                    radius: height / 2
-                    color: dot.here ? NihilStyle.accent : Qt.alpha(NihilStyle.ink, dot.containsMouse ? 0.5 : 0.25)
-                    Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutQuint } }
+            Repeater {
+                model: catalog.pageCount
+                delegate: MouseArea {
+                    id: dot
+                    required property int index
+                    readonly property bool here: catalog.shownPage === dot.index
+
+                    width: mark.width + NihilStyle.s(10)
+                    height: NihilStyle.s(20)
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    Accessible.role: Accessible.Button
+                    Accessible.name: Translation.tr("Page %1").arg(dot.index + 1)
+                    onClicked: catalog.goToPage(dot.index)
+
+                    Rectangle {
+                        id: mark
+                        anchors.centerIn: parent
+                        width: dot.here ? NihilStyle.s(22) : NihilStyle.s(6)
+                        height: NihilStyle.s(6)
+                        radius: height / 2
+                        color: dot.here ? NihilStyle.ink : Qt.alpha(NihilStyle.ink, dot.containsMouse ? 0.5 : 0.22)
+                        Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+                    }
                 }
             }
+        }
+
+        NButton {
+            visible: root.options.pageArrows ?? true
+            anchors.verticalCenter: parent.verticalCenter
+            width: NihilStyle.s(28)
+            height: NihilStyle.s(28)
+            tone: "transparent"
+            enabled: catalog.shownPage < catalog.pageCount - 1
+            opacity: enabled ? 1 : 0.3
+            icon: root.vertical ? "expand_more" : "chevron_right"
+            iconSize: NihilStyle.s(16)
+            Accessible.name: Translation.tr("Next")
+            onClicked: root.turn(1)
         }
     }
 
@@ -287,6 +315,7 @@ FocusScope {
                 root.openFolderId = ""
                 if (root.takesKeys)
                     root.forceActiveFocus()
+                root.folderClosed()
             }
         }
     }

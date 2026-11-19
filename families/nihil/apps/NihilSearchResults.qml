@@ -8,7 +8,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// What the overview's search finds. As a list: launchers and open windows on one pane of glass, or only the windows, or
+// What the launcher's search finds. As a list: launchers and open windows on the page itself, or only the windows, or
 // only the recent files, when that is what was asked for. As a filter: the app grid itself, narrowed in place. The search
 // field keeps the keys and sends its arrows and Enter here.
 Item {
@@ -17,12 +17,11 @@ Item {
     readonly property var options: Config.options?.nihil?.results ?? ({})
     readonly property string scope: NihilState.searchScope
     readonly property bool asGrid: root.scope === "all" && (root.options.appsMode ?? "view") === "filter"
-    readonly property real rowHeight: NihilStyle.s(52) + (root.options.iconSize ?? 0)
+    readonly property real rowHeight: NihilStyle.s(60) + (root.options.iconSize ?? 0)
     readonly property int most: Config.options?.nihil?.search?.maxRows ?? 5
     readonly property string words: NihilState.query.trim().toLowerCase()
     readonly property bool dotted: root.words.startsWith("..")
     readonly property string sought: root.dotted ? root.words.slice(2).trim() : root.words
-    readonly property string arrival: root.options.animation ?? "default"
     readonly property string highlight: Config.options?.nihil?.overview?.highlight ?? "bold"
 
     readonly property var windows: {
@@ -145,104 +144,80 @@ Item {
         sourceComponent: NihilApps { takesKeys: false }
     }
 
-    NGlass {
-        id: pane
+    NText {
+        anchors.centerIn: parent
+        visible: !root.asGrid && root.rows.length === 0
+        text: root.words.length > 0 ? Translation.tr("Nothing found")
+            : root.scope === "recent" ? Translation.tr("No recent files")
+            : root.scope === "windows" ? Translation.tr("No open windows") : Translation.tr("Nothing found")
+        font.pixelSize: NihilStyle.textLarge
+        font.weight: Font.Light
+        color: NihilStyle.inkSoft
+    }
 
-        property real arriving: root.arrival === "none" ? 0 : 1
+    ListView {
+        id: list
+        anchors.fill: parent
+        clip: true
+        interactive: contentHeight > height
+        boundsBehavior: Flickable.StopAtBounds
+        model: root.rows
 
-        visible: !root.asGrid
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: NihilStyle.s(24)
-        width: Math.min(parent.width - NihilStyle.s(48), NihilStyle.s(640) * (Config.options?.nihil?.search?.width ?? 1))
-        height: Math.min(parent.height - NihilStyle.s(48),
-            root.rows.length > 0 ? list.contentHeight + NihilStyle.s(16) : NihilStyle.s(72))
-        radius: NihilStyle.rPanel
-        tint: root.options.background === "dark" ? NihilStyle.scrim : NihilStyle.glassTint
-        opacity: 1 - pane.arriving
-        transform: Translate {
-            x: pane.arriving * NihilStyle.s(root.arrival === "left" ? -32 : root.arrival === "right" ? 32 : 0)
-            y: pane.arriving * NihilStyle.s(root.arrival === "up" ? -32 : root.arrival === "down" ? 32
-                : root.arrival === "default" ? 12 : 0)
-        }
+        delegate: MouseArea {
+            id: row
+            required property var modelData
+            required property int index
+            readonly property bool marked: root.current === row.index
+            readonly property bool isFile: row.modelData.kind === "file"
 
-        Component.onCompleted: pane.arriving = 0
-        Behavior on arriving { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
-        Behavior on height { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+            width: ListView.view.width
+            height: root.rowHeight
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onEntered: root.current = row.index
+            onClicked: root.take(row.modelData)
 
-        NText {
-            anchors.centerIn: parent
-            visible: root.rows.length === 0
-            text: root.words.length > 0 ? Translation.tr("Nothing found")
-                : root.scope === "recent" ? Translation.tr("No recent files")
-                : root.scope === "windows" ? Translation.tr("No open windows") : Translation.tr("Nothing found")
-            color: NihilStyle.inkSoft
-        }
-
-        ListView {
-            id: list
-            anchors.fill: parent
-            anchors.margins: NihilStyle.s(8)
-            clip: true
-            interactive: contentHeight > height
-            boundsBehavior: Flickable.StopAtBounds
-            model: root.rows
-
-            delegate: MouseArea {
-                id: row
-                required property var modelData
-                required property int index
-                readonly property bool marked: root.current === row.index
-                readonly property bool isFile: row.modelData.kind === "file"
-
-                width: ListView.view.width
-                height: root.rowHeight
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onEntered: root.current = row.index
-                onClicked: root.take(row.modelData)
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: NihilStyle.rKey
-                    color: row.marked ? NihilStyle.pieceRaised : "transparent"
-                    Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-                }
-                NAppIcon {
-                    id: mark
-                    x: NihilStyle.s(10)
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: !row.isFile
-                    appId: row.isFile ? "" : (row.modelData.icon || row.modelData.id)
-                    size: root.rowHeight - NihilStyle.s(20)
-                }
-                NIcon {
-                    anchors.centerIn: mark
-                    visible: row.isFile
-                    text: "page"
-                    size: NihilStyle.s(22)
-                    color: NihilStyle.inkSoft
-                }
-                NText {
-                    anchors.left: mark.right
-                    anchors.leftMargin: NihilStyle.s(12)
-                    anchors.right: kind.left
-                    anchors.rightMargin: NihilStyle.s(12)
-                    anchors.verticalCenter: parent.verticalCenter
-                    textFormat: Text.StyledText
-                    text: root.marked(row.modelData.name)
-                    elide: Text.ElideRight
-                    font.pixelSize: NihilStyle.textBody
-                }
-                NText {
-                    id: kind
-                    anchors.right: parent.right
-                    anchors.rightMargin: NihilStyle.s(12)
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: row.modelData.kind === "window" || row.isFile
-                    text: row.isFile ? Translation.tr("Recent file") : Translation.tr("Open window")
-                    font.pixelSize: NihilStyle.textSmall
-                    color: NihilStyle.inkSoft
-                }
+            NWell {
+                anchors.fill: parent
+                radius: NihilStyle.rCard
+                lit: row.marked ? 0.8 : 0
+                visible: row.marked
+            }
+            NAppIcon {
+                id: mark
+                x: NihilStyle.s(14)
+                anchors.verticalCenter: parent.verticalCenter
+                visible: !row.isFile
+                appId: row.isFile ? "" : (row.modelData.icon || row.modelData.id)
+                size: root.rowHeight - NihilStyle.s(24)
+            }
+            NIcon {
+                anchors.centerIn: mark
+                visible: row.isFile
+                text: "page"
+                size: NihilStyle.s(22)
+                color: NihilStyle.inkSoft
+            }
+            NText {
+                anchors.left: mark.right
+                anchors.leftMargin: NihilStyle.s(12)
+                anchors.right: kind.left
+                anchors.rightMargin: NihilStyle.s(12)
+                anchors.verticalCenter: parent.verticalCenter
+                textFormat: Text.StyledText
+                text: root.marked(row.modelData.name)
+                elide: Text.ElideRight
+                font.pixelSize: NihilStyle.s(16)
+            }
+            NText {
+                id: kind
+                anchors.right: parent.right
+                anchors.rightMargin: NihilStyle.s(16)
+                anchors.verticalCenter: parent.verticalCenter
+                visible: row.modelData.kind === "window" || row.isFile
+                text: row.isFile ? Translation.tr("Recent file") : Translation.tr("Open window")
+                font.pixelSize: NihilStyle.textSmall
+                color: NihilStyle.inkSoft
             }
         }
     }

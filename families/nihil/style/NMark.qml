@@ -1,34 +1,36 @@
 import QtQuick
 
-// NiHiL's mark: a disc of the palette's light eclipsed by the void, a crescent of it left along the lower edge.
-Item {
+// NiHiL's mark: a dark disc and the light caught along its lower limb, the sheet's horizon in small.
+Canvas {
     id: root
 
-    property real size: NihilStyle.s(24)
-    // What the eclipsing body is painted with: the surface the mark sits on reads as the void.
-    property color body: NihilStyle.void_
+    property real size: NihilStyle.s(20)
+    // Kept for callers that paint the mark over a surface of their own.
+    property color body: "transparent"
 
     implicitWidth: root.size
     implicitHeight: root.size
     width: root.size
     height: root.size
-
-    Rectangle {
-        anchors.fill: parent
-        radius: width / 2
-        gradient: Gradient {
-            GradientStop { position: 0; color: NihilStyle.specB }
-            GradientStop { position: 1; color: NihilStyle.specA }
-        }
-    }
-    Rectangle {
-        width: root.size * 0.8
-        height: width
-        radius: width / 2
-        x: root.size * 0.14
-        y: root.size * 0.02
-        color: root.body
-        border.width: Math.max(1, root.size / 48)
-        border.color: Qt.alpha(NihilStyle.specB, 0.35)
+    readonly property var inks: [NihilStyle.specA, NihilStyle.specB, NihilStyle.rimInk]
+    onInksChanged: root.requestPaint()
+    onPaint: {
+        const ctx = root.getContext("2d")
+        const c = root.width / 2, r = root.width * 0.36
+        ctx.reset()
+        ctx.lineCap = "round"
+        ctx.lineWidth = Math.max(1, root.width * 0.075)
+        ctx.strokeStyle = String(NihilStyle.rimInk)
+        ctx.beginPath()
+        ctx.arc(c, c, r, 0, Math.PI * 2)
+        ctx.stroke()
+        const lit = ctx.createLinearGradient(c - r, 0, c + r, 0)
+        lit.addColorStop(0, String(NihilStyle.specA))
+        lit.addColorStop(1, String(NihilStyle.specB))
+        ctx.lineWidth = Math.max(1.4, root.width * 0.11)
+        ctx.strokeStyle = lit
+        ctx.beginPath()
+        ctx.arc(c, c, r, Math.PI * 0.14, Math.PI * 0.86)
+        ctx.stroke()
     }
 }

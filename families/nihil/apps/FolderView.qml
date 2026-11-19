@@ -37,6 +37,11 @@ Item {
         anchors.fill: parent
         onClicked: root.closed()
     }
+    Rectangle {
+        anchors.fill: parent
+        radius: NihilStyle.rCard
+        color: Qt.alpha(NihilStyle.void_, 0.7)
+    }
 
     // A second press only counts while the key is still armed.
     Timer {
@@ -53,6 +58,8 @@ Item {
             root.columns * root.cell + Math.max(0, root.columns - 1) * root.spacing + NihilStyle.s(40))
         height: Math.min(root.height - NihilStyle.s(48), head.height + root.shownHeight + NihilStyle.s(56))
         radius: NihilStyle.rPanel
+        tint: NihilStyle.menuTint
+        shadow: 0
 
         // Keeps a press on the pane from reaching the close area behind it.
         MouseArea { anchors.fill: parent }

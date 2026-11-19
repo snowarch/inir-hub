@@ -7,7 +7,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 
 // One copied thing: two lines of the text, or what picture it is, with a pin and a cross while the hand is on it.
-Rectangle {
+Item {
     id: root
 
     required property var row
@@ -26,10 +26,13 @@ Rectangle {
 
     signal used()
 
-    height: Math.max(NihilStyle.s(48), words.implicitHeight + NihilStyle.s(20))
-    radius: NihilStyle.rKey
-    color: root.marked ? NihilStyle.pieceRaised : "transparent"
-    Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+    height: Math.max(NihilStyle.s(52), words.implicitHeight + NihilStyle.s(22))
+
+    NWell {
+        anchors.fill: parent
+        radius: NihilStyle.rCard
+        lit: root.marked ? 0.6 : 0
+    }
 
     MouseArea {
         id: hand
@@ -41,7 +44,7 @@ Rectangle {
 
     NIcon {
         id: mark
-        x: NihilStyle.s(12)
+        x: NihilStyle.s(16)
         anchors.verticalCenter: parent.verticalCenter
         text: root.image ? "image" : root.row.pinned ? "pin" : "page"
         size: NihilStyle.s(18)

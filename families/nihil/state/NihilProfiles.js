@@ -4,7 +4,7 @@
 var keys = [
     "panel.position", "panel.visibility", "panel.overviewStyle",
     "overview.mode", "overview.background", "overview.hotCorner", "overview.hotCornerAction", "overview.superKey",
-    "overview.superKeyDouble", "overview.backgroundBrightness", "overview.appsBrightness", "overview.searchBrightness",
+    "overview.superKeyDouble", "overview.backgroundBrightness",
     "dash.position", "dash.adjust", "dash.iconSize", "dash.showApps", "dash.isolateWorkspace", "dash.click", "dash.scroll",
     "thumbnails.position", "thumbnails.adjust", "thumbnails.scale", "thumbnails.labels", "thumbnails.closeButton",
     "stage.scale", "stage.radius", "stage.spacing", "stage.adjacent",

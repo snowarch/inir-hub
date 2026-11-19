@@ -12,6 +12,10 @@ Rectangle {
     property bool mono: false
     property bool clearable: false
     property var accepts: null
+    // A search field that leads a surface sets its own size.
+    property real textSize: 0
+    property real glyphSize: NihilStyle.s(18)
+    property int textWeight: Font.Medium
     readonly property alias text: input.text
     readonly property bool typing: input.activeFocus
     property alias echoMode: input.echoMode
@@ -20,6 +24,8 @@ Rectangle {
     // Enter, and the arrows for a list the field steers (the clipboard's, a search's).
     signal entered()
     signal stepped(int by)
+    // Left and right, while nothing is written: the grid under the field walks sideways.
+    signal walked(int by)
 
     function take(): void { input.forceActiveFocus(); input.selectAll() }
     // Takes the keys with what is written kept, the cursor after it: typing goes on from there.
@@ -31,11 +37,14 @@ Rectangle {
 
     implicitWidth: NihilStyle.s(230)
     implicitHeight: NihilStyle.s(40)
-    radius: NihilStyle.tileRadius
-    color: input.activeFocus ? NihilStyle.pieceRaised : NihilStyle.piece
-    border.width: 1
-    border.color: input.activeFocus ? Qt.alpha(NihilStyle.accent, 0.55) : NihilStyle.line
-    Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+    radius: NihilStyle.rKey
+    color: "transparent"
+
+    NWell {
+        anchors.fill: parent
+        radius: root.radius
+        lit: input.activeFocus ? 0.55 : 0
+    }
 
     NIcon {
         id: mark
@@ -44,7 +53,7 @@ Rectangle {
         anchors.leftMargin: NihilStyle.s(13)
         anchors.verticalCenter: parent.verticalCenter
         text: root.glyph
-        size: NihilStyle.s(18)
+        size: root.glyphSize
         color: NihilStyle.inkSoft
     }
 
@@ -62,8 +71,8 @@ Rectangle {
         selectedTextColor: NihilStyle.accentInk
         font.family: NihilStyle.grotesk
         font.features: root.mono ? { "tnum": 1 } : ({})
-        font.pixelSize: Math.max(NihilStyle.textBody, Math.round(root.height * 0.3))
-        font.weight: Font.Medium
+        font.pixelSize: root.textSize > 0 ? root.textSize : Math.max(NihilStyle.textBody, Math.round(root.height * 0.3))
+        font.weight: root.textWeight
         Accessible.role: Accessible.EditableText
         Accessible.name: root.placeholder
         onTextEdited: root.edited(input.text)
@@ -71,6 +80,8 @@ Rectangle {
         passwordCharacter: "\u25CF"
         Keys.onUpPressed: root.stepped(-1)
         Keys.onDownPressed: root.stepped(1)
+        Keys.onLeftPressed: event => { event.accepted = input.length === 0; if (event.accepted) root.walked(-1) }
+        Keys.onRightPressed: event => { event.accepted = input.length === 0; if (event.accepted) root.walked(1) }
         function keep(): void {
             if (input.text === root.value) return
             if (root.accepts && !root.accepts(input.text)) { input.text = root.value; return }
@@ -90,7 +101,7 @@ Rectangle {
         color: NihilStyle.inkSoft
         font.family: input.font.family
         font.pixelSize: input.font.pixelSize
-        font.weight: Font.Medium
+        font.weight: root.textWeight
     }
 
     NButton {

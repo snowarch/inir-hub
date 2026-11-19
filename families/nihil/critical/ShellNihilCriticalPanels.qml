@@ -6,11 +6,11 @@ import Quickshell.Io
 import qs
 import qs.modules.common
 import qs.modules.shared.background
-import qs.modules.nihil.bar as NihilBarModule
+import qs.modules.nihil.stage as NihilStageModule
 import qs.modules.nihil.overview as NihilOverviewModule
 import qs.modules.nihil.state
 
-// NiHiL's first frame: the panel, the desktop, the overview and its commands.
+// NiHiL's first frame: the sheet, the desktop, the overview and its commands.
 Item {
     id: root
 
@@ -38,9 +38,10 @@ Item {
         active: Config.ready && (Config.options?.enabledPanels ?? []).includes(identifier)
     }
 
-    CriticalPanelLoader {
-        identifier: "nBar"
-        component: NihilBarModule.NihilBar {}
+    // The sheet carries the bar and every page, so it stands whichever of them are switched on.
+    LazyLoader {
+        active: Config.ready
+        component: NihilStageModule.NihilStage {}
     }
     CriticalPanelLoader {
         identifier: "nBackground"

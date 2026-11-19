@@ -52,9 +52,7 @@ NScroller {
         }
     }
 
-    topPad: NihilStyle.s(8)
     bottomPad: NihilStyle.s(32)
-    sidePad: NihilStyle.s(14)
 
     // A profile drawn as a small screen: the panel, where the dash stands, how the workspaces line up.
     component Plan: Rectangle {
@@ -137,7 +135,7 @@ NScroller {
         Repeater {
             model: Profiles.list
 
-            delegate: NGlass {
+            delegate: NWell {
                 id: card
 
                 required property var modelData
@@ -146,15 +144,15 @@ NScroller {
 
                 width: root.cardWidth
                 height: NihilStyle.s(14) * 2 + plan.height + about.height + NihilStyle.s(70)
-                radius: NihilStyle.rCard
-                ignite: card.isWorn ? 0.7 : 0
+                radius: NihilStyle.r(22)
+                lit: card.isWorn ? 0.8 : 0
 
                 Plan {
                     id: plan
                     x: NihilStyle.s(14)
                     y: NihilStyle.s(14)
                     width: card.width - NihilStyle.s(28)
-                    height: Math.round(width * 0.5)
+                    height: Math.round(width * 0.4)
                     profile: card.modelData.id
                     worn: card.isWorn
                 }

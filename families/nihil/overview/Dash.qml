@@ -45,7 +45,7 @@ NGlass {
     implicitWidth: root.vertical ? root.across : root.along
     implicitHeight: root.vertical ? root.along : root.across
     radius: Math.min(root.look?.radius ?? 20, root.across / 2)
-    tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.void_, root.look?.opacity ?? 0.2)
+    tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.void_, root.look?.opacity ?? 0.74)
     tracks: true
 
     function windowsOf(app: var): var { return (NiriService.windows ?? []).filter(win => win.app_id === app.appId) }
@@ -90,9 +90,11 @@ NGlass {
             tone: "transparent"
             icon: "apps"
             iconSize: root.iconSize * 0.6
-            lit: NihilState.view === "apps"
             Accessible.name: Translation.tr("Show apps")
-            onClicked: NihilState.toggleOverview("apps")
+            onClicked: {
+                NihilState.askedOn = root.output
+                NihilState.toggleOverview("apps")
+            }
         }
     }
 
@@ -136,7 +138,7 @@ NGlass {
                     appId: key.modelData.appId
                     size: root.iconSize
                     scale: key.containsMouse ? 1.1 : 1
-                    Behavior on scale { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutBack } }
+                    Behavior on scale { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
                 }
                 Row {
                     visible: (root.options?.runningDots ?? true) && key.running > 0
@@ -150,7 +152,7 @@ NGlass {
                             width: (root.options?.runningStyle ?? "dot") === "line" ? root.iconSize * 0.5 : NihilStyle.s(4)
                             height: NihilStyle.s((root.options?.runningStyle ?? "dot") === "line" ? 3 : 4)
                             radius: height / 2
-                            color: NihilStyle.accent
+                            color: NihilStyle.ink
                         }
                     }
                 }

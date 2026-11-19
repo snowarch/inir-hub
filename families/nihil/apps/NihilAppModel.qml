@@ -15,6 +15,8 @@ QtObject {
     property int fitColumns: 7
     property int fitRows: 4
     property int page: 0
+    // The kind of app on show: "all", "internet", "creation", "games", "work" or "system".
+    property string kind: "all"
 
     readonly property var options: Config.options?.nihil?.apps ?? ({})
     readonly property var folderOptions: Config.options?.nihil?.folders ?? ({})
@@ -67,6 +69,8 @@ QtObject {
         const filed = new Set()
         for (const folder of root.folders)
             folder.apps.forEach(app => filed.add(app.id))
+        if (root.kind !== "all")
+            return root._apps.filter(app => app.kinds.includes(root.kind)).sort(root._byName)
         const loose = root._apps.filter(app => !filed.has(app.id) && root._admitted(app))
         return root._arranged(root.folders, loose)
     }
@@ -79,7 +83,16 @@ QtObject {
     readonly property int shownPage: Math.min(root.page, root.pageCount - 1)
     readonly property var pageItems: root.items.slice(root.shownPage * root.pageSize, (root.shownPage + 1) * root.pageSize)
 
+    // The kinds this computer has at least one app of.
+    readonly property var kindsHeld: {
+        const held = new Set()
+        for (const app of root._apps)
+            app.kinds.forEach(kind => held.add(kind))
+        return Array.from(held)
+    }
+
     onQueryChanged: root.page = 0
+    onKindChanged: root.page = 0
     onPageCountChanged: root.page = root.shownPage
 
     function goToPage(target: int): void {
@@ -148,12 +161,24 @@ QtObject {
             icon: entry.icon ?? "",
             entry: entry,
             system: categories.includes("System") || categories.includes("Settings"),
+            kinds: root._kindsOf(categories),
             package: line.includes("flatpak") ? "flatpak" : line.includes("snap") ? "snap"
                 : line.includes(".appimage") ? "appimage" : "",
             nameKey: (entry.name ?? "").toLowerCase(),
             otherKey: [entry.genericName ?? "", entry.comment ?? "", ...Array.from(entry.keywords ?? []),
                        ...categories, launcher].join(" ").toLowerCase()
         }
+    }
+
+    function _kindsOf(categories: var): var {
+        const has = names => names.some(name => categories.includes(name))
+        const kinds = []
+        if (has(["Network", "WebBrowser", "Email", "Chat"])) kinds.push("internet")
+        if (has(["Graphics", "AudioVideo", "Audio", "Video"])) kinds.push("creation")
+        if (has(["Game"])) kinds.push("games")
+        if (has(["Office", "Development", "Education", "Science"])) kinds.push("work")
+        if (has(["System", "Settings", "Utility"])) kinds.push("system")
+        return kinds
     }
 
     function _plainId(id: var): string {

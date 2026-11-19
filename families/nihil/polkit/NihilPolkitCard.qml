@@ -53,7 +53,8 @@ Item {
         anchors.centerIn: parent
         width: Math.min(NihilStyle.s(420), parent.width - NihilStyle.s(40))
         height: body.implicitHeight + NihilStyle.s(56)
-        radius: NihilStyle.rPanel
+        radius: NihilStyle.rSheet
+        tint: NihilStyle.menuTint
         opacity: root.shown
         scale: 0.96 + 0.04 * root.shown
 

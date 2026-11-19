@@ -8,7 +8,7 @@ NihilWidgetFace {
 
     readonly property int charge: Math.round(Battery.percentage * 100)
     readonly property bool warned: Battery.isLowAndNotCharging
-    readonly property color tint: root.warned ? NihilStyle.m3.m3error : NihilStyle.accent
+    readonly property color tint: root.warned ? NihilStyle.m3.m3error : root.accent
     readonly property string saying: String(root.widget.timeLabel ?? "").length > 0 ? root.widget.timeLabel
         : Battery.isCharging ? Translation.tr("Charging")
         : Battery.isFull ? Translation.tr("Fully charged") : Translation.tr("On battery")
@@ -30,7 +30,7 @@ NihilWidgetFace {
             anchors.top: parent.top
             text: Battery.isCharging ? "bolt" : "battery"
             size: root.dp(22)
-            color: Battery.isCharging ? NihilStyle.accent : NihilStyle.inkSoft
+            color: Battery.isCharging ? root.accent : root.inkSoft
         }
 
         Column {
@@ -48,13 +48,13 @@ NihilWidgetFace {
                     text: root.charge
                     font.weight: Font.Light
                     font.pixelSize: Math.min(root.contentHeight * 0.56, root.contentWidth * 0.42)
-                    color: root.warned ? root.tint : NihilStyle.ink
+                    color: root.warned ? root.tint : root.ink
                 }
                 NText {
                     anchors.baseline: figure.baseline
                     text: "%"
                     font.pixelSize: figure.font.pixelSize * 0.36
-                    color: NihilStyle.inkSoft
+                    color: root.inkSoft
                 }
             }
             NText {
@@ -62,9 +62,10 @@ NihilWidgetFace {
                 text: root.saying
                 elide: Text.ElideRight
                 font.pixelSize: root.dp(13)
-                color: NihilStyle.inkSoft
+                color: root.inkSoft
             }
             FaceBar {
+                ink: root.ink
                 width: parent.width
                 level: Battery.percentage
                 tint: root.tint

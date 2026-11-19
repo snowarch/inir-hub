@@ -12,18 +12,13 @@ import qs
 import qs.modules.common
 import qs.services
 import qs.services.deferred
-import qs.modules.nihil.state
 import qs.modules.nihil.polkit
 import qs.modules.nihil.dock
 
-// NiHiL's panels after the first frame, each loaded while it is open, and the shared tools it wears as they are.
+// What NiHiL loads after the first frame: the dock, Polkit, the lock and the shared tools it wears as they are. The bar and
+// its pages live on the sheet (stage/).
 Item {
     id: root
-
-    component PanelLoader: LazyLoader {
-        required property string identifier
-        active: Config.ready && (Config.options?.enabledPanels ?? []).includes(identifier)
-    }
 
     component DeferredPanelLoader: LazyLoader {
         required property string identifier
@@ -52,14 +47,6 @@ Item {
         activeAsync: enabledPanel && GlobalStates.deferredPanelsReady && resident
     }
 
-    PanelLoader { identifier: "nNotificationPopup"; source: "./notifications/NihilNotificationPopup.qml" }
-    PanelLoader { identifier: "nOsd"; source: "./osd/NihilOsd.qml" }
-
-    OnDemandPanelLoader { identifier: "nControl"; open: NihilState.controlOpen; source: "./control/NihilControl.qml" }
-    OnDemandPanelLoader { identifier: "nToday"; open: NihilState.todayOpen; source: "./today/NihilToday.qml" }
-    OnDemandPanelLoader { identifier: "nPower"; open: GlobalStates.sessionOpen; source: "./power/NihilPower.qml" }
-    OnDemandPanelLoader { identifier: "nClipboard"; open: NihilState.clipboardOpen; closeGraceMs: 250; source: "./clipboard/NihilClipboard.qml" }
-    OnDemandPanelLoader { identifier: "nWallpapers"; open: NihilState.wallpapersOpen; closeGraceMs: 250; source: "./wallpapers/NihilWallpapers.qml" }
     // The dock answers to its own switch in Settings, so a NiHiL set up before it existed gets it too.
     LazyLoader {
         readonly property bool wanted: Config.ready && (Config.options?.nihil?.modules?.dock ?? true)

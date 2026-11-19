@@ -20,7 +20,7 @@ Rectangle {
     implicitWidth: NihilStyle.s(92) * root.options.length + root.inset * 2
     implicitHeight: NihilStyle.s(34)
     radius: NihilStyle.rKey
-    color: NihilStyle.piece
+    color: NihilStyle.well
 
     activeFocusOnTab: true
     Accessible.role: Accessible.List
@@ -40,8 +40,6 @@ Rectangle {
         height: root.height - root.inset * 2
         radius: Math.max(0, root.radius - root.inset)
         color: NihilStyle.chosen
-        border.width: 1
-        border.color: NihilStyle.hair
         Behavior on x { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
     }
 

@@ -31,7 +31,7 @@ NihilWidgetFace {
             text: Translation.locale.toString(root.viewing, "MMMM")
             font.pixelSize: root.dp(root.small ? 14 : 16)
             font.weight: Font.DemiBold
-            color: NihilStyle.accent
+            color: root.accent
 
             MouseArea {
                 anchors.fill: parent
@@ -52,7 +52,7 @@ NihilWidgetFace {
                 visible: root.browsing
                 text: Translation.locale.toString(root.viewing, "yyyy")
                 font.pixelSize: root.dp(12)
-                color: NihilStyle.inkSoft
+                color: root.inkSoft
             }
             Repeater {
                 model: [{ glyph: "chevron_left", shift: -1 }, { glyph: "chevron_right", shift: 1 }]
@@ -68,7 +68,7 @@ NihilWidgetFace {
                         anchors.centerIn: parent
                         text: arrow.modelData.glyph
                         size: root.dp(16)
-                        color: arrow.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                        color: arrow.containsMouse ? root.ink : root.inkSoft
                     }
                 }
             }
@@ -96,7 +96,7 @@ NihilWidgetFace {
                 height: table.dayRowH
                 horizontalAlignment: Text.AlignHCenter
                 text: Translation.locale.dayName((root.widget.weekStart + index) % 7, Locale.NarrowFormat)
-                color: NihilStyle.inkFaint
+                color: root.inkFaint
             }
         }
 
@@ -117,7 +117,7 @@ NihilWidgetFace {
                     width: Math.min(parent.width, parent.height) - root.dp(2)
                     height: width
                     radius: width / 2
-                    color: NihilStyle.accent
+                    color: root.accent
                     visible: cell.modelData.isToday
                 }
                 NText {
@@ -126,8 +126,8 @@ NihilWidgetFace {
                     text: cell.modelData.day
                     font.pixelSize: root.dp(root.small ? 11 : 13)
                     font.weight: cell.modelData.isToday ? Font.DemiBold : Font.Normal
-                    color: cell.modelData.isToday ? NihilStyle.accentInk
-                        : cell.modelData.currentMonth ? NihilStyle.ink : NihilStyle.inkFaint
+                    color: cell.modelData.isToday ? root.accentInk
+                        : cell.modelData.currentMonth ? root.ink : root.inkFaint
                 }
             }
         }

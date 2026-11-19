@@ -1,7 +1,15 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "changes": {
+      "2.1.0": [
+        "Horizon: every surface is now one sheet of black glass whose edge is a line of light that travels to what is active",
+        "Apps and search open as a page of the bar, with the kinds of app, a larger search field and results in place",
+        "Control, Today, Clipboard, Wallpapers, notifications and the OSD are redrawn as parts of the same sheet",
+        "Power and the lock screen bend the bar into the horizon of a dark planet, with the password resting on it",
+        "Settings is one sheet with lit pages and quiet groups, and Appearance opens with the wallpaper and its lights",
+        "Shared surfaces and widgets without their own face now wear NiHiL"
+      ],
         "2.0.0": [
             "NiHiL is rebuilt as quiet premium glass: graphite smoked glass, Geist in sentence case and one accent for what is on",
             "The overview is the compositor's own on Niri and Umbriel, with NiHiL's search, dash and workspace strip over the blurred wallpaper",

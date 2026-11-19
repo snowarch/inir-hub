@@ -10,7 +10,8 @@ import qs.services
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The overview on one screen: dash, workspace strip, the workspaces in the centre, and the search above them.
+// NiHiL's own overview on one screen, where the compositor's is not used: dash, workspace strip, the workspaces in the
+// centre and the search above them. What is typed opens the launcher, a page of the sheet.
 PanelWindow {
     id: root
 
@@ -18,15 +19,13 @@ PanelWindow {
     readonly property string output: root.modelData.name
     readonly property bool primary: Quickshell.screens[0]?.name === root.output
     readonly property bool focusedHere: (GlobalStates.focusedScreen?.name ?? root.output) === root.output
-    // With the compositor's overview, this page only carries the apps and the search, over it or alone.
-    readonly property bool open: NihilState.overviewOpen && (!NihilState.nativeStage || NihilState.view !== "windows")
+    readonly property bool open: NihilState.overviewOpen && !NihilState.nativeStage && NihilState.view === "windows"
     property real shown: root.open ? 1 : 0
     Behavior on shown { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
 
     readonly property var nihil: Config.options?.nihil
     readonly property var modules: root.nihil?.modules
     readonly property var thumbs: root.nihil?.thumbnails
-    readonly property string view: NihilState.view
 
     readonly property string dashAt: (root.modules?.dash ?? true) ? (root.nihil?.dash?.position ?? "left") : "hidden"
     readonly property string thumbsAt: {
@@ -39,11 +38,7 @@ PanelWindow {
         return other === "start" ? (sideways ? "left" : "top") : (sideways ? "right" : "bottom")
     }
     readonly property bool thumbsVertical: root.thumbsAt === "left" || root.thumbsAt === "right"
-    readonly property real thumbScale: {
-        if (root.view === "apps") return root.thumbs?.scaleInApps ?? 0
-        if (root.view === "search") return root.thumbs?.scaleInSearch ?? 0
-        return root.primary ? (root.thumbs?.scale ?? 0.13) : (root.thumbs?.secondaryScale ?? 0.1)
-    }
+    readonly property real thumbScale: root.primary ? (root.thumbs?.scale ?? 0.13) : (root.thumbs?.secondaryScale ?? 0.1)
     readonly property bool stripShown: root.thumbsAt !== "hidden" && root.thumbScale > 0
     readonly property real stripAdjust: root.primary ? (root.thumbs?.adjust ?? 0) : (root.thumbs?.secondaryAdjust ?? 0)
     readonly property real screenW: root.modelData.width
@@ -79,12 +74,6 @@ PanelWindow {
         if (!root.open) return
         root.selected = root.firstSelection()
         keys.forceActiveFocus()
-        if (root.view === "search") Qt.callLater(() => entry.resume())
-    }
-    // Back on the windows, the keys come home from the search field or the app grid.
-    onViewChanged: {
-        if (root.open && root.view === "windows") keys.forceActiveFocus()
-        else if (root.open && root.view === "search") Qt.callLater(() => entry.resume())
     }
     function firstSelection(): int {
         const list = root.activeWindows
@@ -114,10 +103,7 @@ PanelWindow {
         else NihilState.closeOverview()
     }
     function stepBack(): void {
-        if ((root.nihil?.overview?.escapeKey ?? "default") === "close") root.leave()
-        else if (NihilState.query.length > 0 || NihilState.searchScope !== "all") { NihilState.searchScope = "all"; NihilState.setQuery("") }
-        else if (root.view === "apps") NihilState.view = "windows"
-        else root.leave()
+        root.leave()
     }
 
     // The room the side strips leave for the centre.
@@ -135,11 +121,7 @@ PanelWindow {
     // The desktop behind everything: the wallpaper, as blurred and dimmed as the view asks.
     readonly property string backdropMode: root.nihil?.overview?.background ?? "blurSmooth"
     readonly property bool backdropBlurred: root.backdropMode === "blurFast" || root.backdropMode === "blurSmooth"
-    readonly property real brightness: {
-        const o = root.nihil?.overview
-        return root.view === "apps" ? (o?.appsBrightness ?? 0.5) : root.view === "search" ? (o?.searchBrightness ?? 0.4)
-            : (o?.backgroundBrightness ?? 0.5)
-    }
+    readonly property real brightness: root.nihil?.overview?.backgroundBrightness ?? 0.5
     Image {
         id: backdrop
         anchors.fill: parent
@@ -181,19 +163,6 @@ PanelWindow {
 
         Keys.onPressed: event => {
             const pages = root.nihil?.overview?.pageShortcuts ?? true
-            // A search opened without the field, or with the field hidden, still answers to the keys.
-            if (root.view === "search") {
-                const by = event.key === Qt.Key_Down || event.key === Qt.Key_Tab ? 1
-                    : event.key === Qt.Key_Up || event.key === Qt.Key_Backtab ? -1 : 0
-                const enter = event.key === Qt.Key_Return || event.key === Qt.Key_Enter
-                if (by !== 0) results.item?.step?.(by)
-                else if (enter) results.item?.activateFirst?.()
-                else if (event.key === Qt.Key_Backspace) NihilState.setQuery(NihilState.query.slice(0, -1))
-                if (by !== 0 || enter || event.key === Qt.Key_Backspace) {
-                    event.accepted = true
-                    return
-                }
-            }
             switch (event.key) {
             case Qt.Key_Escape: root.stepBack(); break
             case Qt.Key_Tab:
@@ -215,7 +184,6 @@ PanelWindow {
                 if ((root.modules?.search ?? true) && event.text.length === 1 && event.text.trim().length === 1
                         && !(event.modifiers & Qt.ControlModifier)) {
                     NihilState.setQuery(NihilState.query + event.text)
-                    entry.resume()
                     break
                 }
                 return
@@ -239,7 +207,6 @@ PanelWindow {
             y: root.topRoom + (boxH - height) / 2
             width: root.screenW * pageScale
             height: root.screenH * pageScale
-            visible: root.view === "windows"
 
             Repeater {
                 model: root.workspaces
@@ -356,29 +323,7 @@ PanelWindow {
                 placeholder: Translation.tr("Type to search")
                 value: NihilState.query
                 onEdited: text => NihilState.setQuery(text)
-                onEntered: results.item?.activateFirst?.()
-                onStepped: by => results.item?.step?.(by)
             }
-        }
-
-        Item {
-            id: stageArea
-            x: root.leftRoom
-            y: root.topRoom
-            width: root.width - root.leftRoom - root.rightRoom
-            height: root.height - root.topRoom - root.bottomRoom
-        }
-        Loader {
-            id: grid
-            active: root.view === "apps" && (root.modules?.appGrid ?? true)
-            anchors.fill: stageArea
-            source: Qt.resolvedUrl("../apps/NihilApps.qml")
-        }
-        Loader {
-            id: results
-            active: root.view === "search"
-            anchors.fill: stageArea
-            source: Qt.resolvedUrl("../apps/NihilSearchResults.qml")
         }
 
         DashMenu {

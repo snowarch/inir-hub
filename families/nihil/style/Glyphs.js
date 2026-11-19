@@ -3,6 +3,17 @@
 // NiHiL's own glyphs, drawn on a 24 grid out of lines, circles and dots. Segments are split by "|": "M..." a stroked
 // path, "*M..." a filled one, "o x y r" a ring, "O x y r" a disc. A name with "_off" or "_disabled" is its glyph struck.
 var set = {
+    music_note: "M9.5 18V6l10-2v12|o 7 18 2.5|o 17 16 2.5",
+    notifications: "M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z|M10 21h4",
+    battery_full: "M9.5 3.5h5|*M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z",
+    battery_charging_full: "M9.5 3.5h5|M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z|*M12.8 8 9.6 13.2h2.2L11.2 18l3.2-5.2h-2.2z",
+    battery_0_bar: "M9.5 3.5h5|M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z|*M9 17.65h6V18.5H9z",
+    battery_1_bar: "M9.5 3.5h5|M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z|*M9 15.80h6V18.5H9z",
+    battery_2_bar: "M9.5 3.5h5|M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z|*M9 13.95h6V18.5H9z",
+    battery_3_bar: "M9.5 3.5h5|M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z|*M9 12.10h6V18.5H9z",
+    battery_4_bar: "M9.5 3.5h5|M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z|*M9 10.25h6V18.5H9z",
+    battery_5_bar: "M9.5 3.5h5|M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z|*M9 8.40h6V18.5H9z",
+    battery_6_bar: "M9.5 3.5h5|M8 5.5h8a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z|*M9 6.55h6V18.5H9z",
     search: "o 10.5 10.5 6.5|M15.5 15.5 20.5 20.5",
     close: "M6 6 18 18|M18 6 6 18",
     check: "M4.5 12.5 10 18 19.5 7",
@@ -18,6 +29,7 @@ var set = {
     apps: "O 5.5 5.5 2|O 12 5.5 2|O 18.5 5.5 2|O 5.5 12 2|O 12 12 2|O 18.5 12 2|O 5.5 18.5 2|O 12 18.5 2|O 18.5 18.5 2",
     widgets: "o 7.5 7.5 3.6|o 16.5 7.5 3.6|o 7.5 16.5 3.6|O 16.5 16.5 3.6",
     home: "M4 11.5 12 4.5l8 7|M6.5 10v9.5h11V10",
+    gear: "o 12 12 2.8|o 12 12 6.6|M12 2.6v2.8|M12 18.6v2.8|M2.6 12h2.8|M18.6 12h2.8|M5.35 5.35l2 2|M16.65 16.65l2 2|M5.35 18.65l2-2|M16.65 7.35l2-2",
     tune: "M4 8h9|M19 8h1|o 16 8 2.6|M4 16h1|M11 16h9|o 8 16 2.6",
     power: "M12 3.5v8|M7 6.2a8 8 0 1 0 10 0",
     restart: "M5 12a7 7 0 1 0 2.4-5.3L4.5 9.5|M4.5 4.5v5h5",
@@ -91,7 +103,7 @@ var set = {
 
 // The shell's service glyph names, said in NiHiL's words.
 var alias = {
-    settings: "tune", settings_applications: "tune", page_info: "tune",
+    settings: "gear", settings_applications: "gear", page_info: "tune",
     power_settings_new: "power", restart_alt: "restart", refresh: "restart", autorenew: "restart", sync: "restart",
     bedtime: "moon", dark_mode: "moon", nightlight: "moon", nightlight_round: "moon", mode_night: "moon",
     light_mode: "sun", brightness_empty: "sun", brightness_high: "sun", brightness_medium: "sun", brightness_low: "sun",

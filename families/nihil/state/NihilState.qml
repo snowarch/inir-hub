@@ -35,7 +35,60 @@ Singleton {
     readonly property bool wallpapersOpen: GlobalStates.wallpaperSelectorOpen || GlobalStates.wallpaperLauncherOpen
         || GlobalStates.coverflowSelectorOpen
 
+    // The apps and the search are a page of the sheet; the windows are the overview's.
+    readonly property bool launcherOpen: root.overviewOpen && root.view !== "windows"
+    // Where the search falls back to once its words are gone, and whether the windows wait under the launcher.
+    property string launcherHome: "windows"
+    property bool overWindows: false
+
+    // The one page the sheet carries: "apps", "control", "today", "clipboard", "wallpapers" or nothing.
+    readonly property string page: root.launcherOpen ? "apps" : root.controlOpen ? "control" : root.todayOpen ? "today" : root.clipboardOpen ? "clipboard"
+        : root.wallpapersOpen ? "wallpapers" : ""
+    function closePages(except: string): void {
+        if (except !== "apps" && root.launcherOpen) root.leaveLauncher()
+        if (except !== "control") root.controlOpen = false
+        if (except !== "today") root.todayOpen = false
+        if (except !== "clipboard") GlobalStates.clipboardOpen = false
+        if (except !== "wallpapers") {
+            GlobalStates.wallpaperSelectorOpen = false
+            GlobalStates.wallpaperLauncherOpen = false
+            GlobalStates.coverflowSelectorOpen = false
+        }
+    }
+    // The screen whose bar asked for what is open; empty is the screen with the keys.
+    property string askedOn: ""
+    function toggleOn(which: string, output: string): void {
+        root.askedOn = output
+        root.toggle(which)
+    }
+    onPageChanged: if (root.page.length === 0 && !root.powerOpen) root.askedOn = ""
+    // A click beside the sheet, or Escape.
+    function dismiss(): void {
+        root.closePages("")
+        GlobalStates.sessionOpen = false
+    }
+    onLauncherOpenChanged: if (root.launcherOpen) root.closePages("apps")
+    onControlOpenChanged: if (root.controlOpen) root.closePages("control")
+    onTodayOpenChanged: if (root.todayOpen) root.closePages("today")
+    onClipboardOpenChanged: if (root.clipboardOpen) root.closePages("clipboard")
+    onWallpapersOpenChanged: if (root.wallpapersOpen) root.closePages("wallpapers")
+    onPowerOpenChanged: if (root.powerOpen) root.closePages("")
+
+    function leaveLauncher(): void {
+        if (!root.overWindows) {
+            root.closeOverview()
+            return
+        }
+        root.showWindows()
+    }
+    function showWindows(): void {
+        root.query = ""
+        root.searchScope = "all"
+        root.view = "windows"
+    }
     function openOverview(which: string): void {
+        root.overWindows = root.overviewOpen && root.view === "windows" && which !== "windows"
+        root.launcherHome = which === "windows" ? "windows" : "apps"
         root.view = which
         root.query = ""
         root.searchScope = "all"
@@ -57,7 +110,7 @@ Singleton {
     }
     function setQuery(text: string): void {
         root.query = text
-        root.view = text.length > 0 || root.searchScope !== "all" ? "search" : "windows"
+        root.view = text.length > 0 || root.searchScope !== "all" ? "search" : root.launcherHome
     }
     function searchFor(text: string, scope: string): void {
         root.openOverview("search")
@@ -66,9 +119,7 @@ Singleton {
     }
     function closeAll(): void {
         root.closeOverview()
-        root.controlOpen = false
-        root.todayOpen = false
-        GlobalStates.sessionOpen = false
+        root.dismiss()
     }
     function toggle(which: string): void {
         switch (which) {
@@ -130,13 +181,17 @@ Singleton {
     }
     function unpin(id: var): void { root.pips = root.pips.filter(item => item.id !== id) }
 
+    // The compositor's overview stands under NiHiL only while the windows are on show. The apps and a search are a page of
+    // the sheet over the desktop, and the compositor would keep Escape for itself.
+    function followStage(): void {
+        if (!root.nativeStage) return
+        const wantsStage = root.overviewOpen && root.view === "windows"
+        if (wantsStage !== NiriService.inOverview) NiriService.toggleOverview()
+    }
+
     // Keeps the shell's shared flags and NiHiL's overview saying the same thing.
     onOverviewOpenChanged: {
-        if (root.nativeStage) {
-            const wantsStage = root.overviewOpen && root.view === "windows"
-            if (wantsStage && !NiriService.inOverview) NiriService.toggleOverview()
-            else if (!root.overviewOpen && NiriService.inOverview) NiriService.toggleOverview()
-        }
+        root.followStage()
         CompositorService.setSortingConsumer("nihil-overview", root.overviewOpen)
         if (root.overviewOpen) WindowPreviewService.captureForTaskView()
         if (GlobalStates.overviewOpen !== root.overviewOpen) GlobalStates.overviewOpen = root.overviewOpen
@@ -163,11 +218,10 @@ Singleton {
         function onInOverviewChanged(): void {
             if (NiriService.inOverview && !root.overviewOpen) root.openOverview("windows")
             else if (!NiriService.inOverview && root.overviewOpen && root.view === "windows") root.closeOverview()
+            else if (NiriService.inOverview && root.launcherOpen) root.showWindows()
         }
     }
-    // Back from the apps or a search to the windows: the compositor's overview comes back under NiHiL's parts.
-    onViewChanged: if (root.nativeStage && root.overviewOpen && root.view === "windows" && !NiriService.inOverview)
-        NiriService.toggleOverview()
+    onViewChanged: if (root.overviewOpen) root.followStage()
 
     // The session starts where the person asked.
     Connections {

@@ -7,6 +7,7 @@ Item {
 
     property real level: 0
     property color tint: NihilStyle.accent
+    property color ink: NihilStyle.ink
     readonly property bool lightFill: Qt.colorEqual(root.tint, NihilStyle.accent)
     readonly property real shown: NihilStyle.clamp(root.level, 0, 1)
 
@@ -18,7 +19,7 @@ Item {
         width: parent.width
         height: root.height
         radius: height / 2
-        color: Qt.alpha(NihilStyle.ink, 0.12)
+        color: Qt.alpha(root.ink, 0.14)
     }
     Item {
         anchors.verticalCenter: parent.verticalCenter

@@ -1,66 +1,58 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Quickshell
-import Quickshell.Wayland
 import qs
 import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// New notifications stacked in the chosen corner; only the stack itself takes the pointer.
-Scope {
+// What just arrived, on a tag pulled from the band. One notification lies on the glass itself; several each get a well.
+Item {
     id: root
 
+    // This screen's sheet is the one that shows them.
+    property bool here: false
+
     readonly property string position: Config.options?.nihil?.notifications?.position ?? "top"
+    readonly property bool atStart: root.position.endsWith("Left")
     readonly property int most: Config.options?.nihil?.notifications?.maxVisible ?? 4
-    readonly property bool atTop: root.position.startsWith("top")
-    readonly property bool atLeft: root.position.endsWith("Left")
-    readonly property bool atRight: root.position.endsWith("Right")
+    readonly property bool quiet: GlobalStates.screenLocked || (GameMode.active && GameMode.suppressNotifications)
+
+    readonly property var arrived: root.here && !root.quiet ? Notifications.popupList.slice(0, root.most).map(item => ({
+        id: item.notificationId,
+        app: item.appName ?? "",
+        icon: item.appIcon || item.appName || "",
+        summary: item.summary ?? "",
+        body: String(item.body ?? "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim(),
+        critical: item.urgency === "critical",
+        actions: Array.from(item.actions ?? []).slice(0, 3).map(action => ({ id: action.identifier, text: action.text }))
+    })) : []
+    readonly property bool wanted: root.arrived.length > 0
+    // What the tag still carries while it folds away.
+    property var carried: []
+    onArrivedChanged: if (root.arrived.length > 0) root.carried = root.arrived
+
+    implicitWidth: NihilStyle.s(404)
+    implicitHeight: stack.implicitHeight + NihilStyle.s(20)
+    width: implicitWidth
+    height: implicitHeight
 
     Component.onCompleted: Notifications.ensureInitialized()
 
-    LazyLoader {
-        active: Notifications.popupList.length > 0
-        component: PanelWindow {
-            id: window
+    Column {
+        id: stack
+        x: NihilStyle.s(16)
+        y: NihilStyle.s(10)
+        width: parent.width - x * 2
+        spacing: NihilStyle.gap
 
-            screen: GlobalStates.focusedScreen ?? Quickshell.screens[0]
-            visible: !GlobalStates.screenLocked && !(GameMode.active && GameMode.suppressNotifications)
-            color: "transparent"
-            exclusiveZone: 0
-            WlrLayershell.namespace: "quickshell:nihilNotifications"
-            WlrLayershell.layer: WlrLayer.Overlay
-            anchors { top: root.atTop; bottom: !root.atTop; right: root.atRight; left: root.atLeft }
-            margins {
-                top: root.atTop ? NihilStyle.edge : 0
-                bottom: root.atTop ? 0 : NihilStyle.edge
-                right: root.atRight ? NihilStyle.edge : 0
-                left: root.atLeft ? NihilStyle.edge : 0
-            }
-            implicitWidth: NihilStyle.s(380)
-            implicitHeight: Math.min(stack.implicitHeight, (screen?.height ?? 800) * 0.7)
-            mask: Region { item: stack }
-            BackgroundEffect.blurRegion: CompositorService.blurRegions && NihilStyle.blur ? glassZone : null
-
-            Region {
-                id: glassZone
-                regions: stack.children.filter(card => card.region !== undefined).map(card => card.region)
-            }
-
-            Column {
-                id: stack
-                width: parent.width
-                spacing: NihilStyle.gap
-
-                Repeater {
-                    model: Notifications.popupList.slice(0, root.most)
-                    delegate: NotificationCard {
-                        required property var modelData
-                        width: stack.width
-                        notification: modelData
-                    }
-                }
+        Repeater {
+            model: root.carried
+            NotificationCard {
+                required property var modelData
+                width: stack.width
+                notice: modelData
+                alone: root.carried.length === 1
             }
         }
     }

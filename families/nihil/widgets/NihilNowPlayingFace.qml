@@ -61,7 +61,7 @@ NihilWidgetFace {
             anchors.centerIn: parent
             text: "music"
             size: parent.width * 0.4
-            color: NihilStyle.inkFaint
+            color: root.inkFaint
         }
         Image {
             anchors.fill: parent
@@ -81,6 +81,7 @@ NihilWidgetFace {
         spacing: root.dp(4)
 
         NText {
+            color: root.ink
             width: parent.width
             text: root.player?.trackTitle || Translation.tr("Unknown track")
             elide: Text.ElideRight
@@ -93,9 +94,10 @@ NihilWidgetFace {
             text: root.player?.trackArtist ?? ""
             elide: Text.ElideRight
             font.pixelSize: root.dp(13)
-            color: NihilStyle.inkSoft
+            color: root.inkSoft
         }
         FaceBar {
+            ink: root.ink
             width: parent.width
             visible: root.length > 0
             level: root.position / Math.max(1, root.length)

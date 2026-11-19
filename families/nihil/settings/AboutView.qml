@@ -33,13 +33,12 @@ Item {
         onTriggered: root.armed = false
     }
 
-    NGlass {
+    NWell {
         anchors.horizontalCenter: parent.horizontalCenter
         y: Math.max(0, (parent.height - height) / 2 - NihilStyle.s(40))
         width: Math.min(parent.width, NihilStyle.s(460))
         height: card.implicitHeight + NihilStyle.s(64)
-        radius: NihilStyle.rPanel
-        ignite: 0.8
+        radius: NihilStyle.r(22)
 
         Column {
             id: card

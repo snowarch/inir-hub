@@ -5,7 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// One place in the grid: an app, or a folder showing what it holds. A raised plate comes up under the pointer or the keys.
+// One place in the grid: an app, or a folder showing what it holds. The place lights from below under the pointer or the keys.
 // A press and a drag carries the tile; `dropped` says where it landed.
 MouseArea {
     id: root
@@ -72,15 +72,12 @@ MouseArea {
         scale: root.drag.active ? 1.08 : 1
         Behavior on scale { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
 
-        // Lit: the tile sits on a raised plate of light glass.
-        Rectangle {
+        NWell {
             anchors.fill: parent
-            anchors.margins: NihilStyle.s(2)
             radius: NihilStyle.rCard
-            color: NihilStyle.chosen
-            border.width: 1
-            border.color: NihilStyle.hair
+            lit: root.lit ? 0.8 : 0
             opacity: root.lit ? 1 : 0
+            visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
         }
 
@@ -170,9 +167,9 @@ MouseArea {
                     elide: root.wholeName ? Text.ElideNone : Text.ElideRight
                     wrapMode: root.wholeName ? Text.Wrap : Text.NoWrap
                     maximumLineCount: root.wholeName ? 3 : 1
-                    font.pixelSize: NihilStyle.textSmall
-                    font.weight: root.lit ? Font.DemiBold : Font.Medium
-                    color: root.lit ? NihilStyle.ink : NihilStyle.inkSoft
+                    font.pixelSize: NihilStyle.textBody
+                    font.weight: Font.Normal
+                    color: root.lit ? NihilStyle.ink : Qt.alpha(NihilStyle.ink, 0.78)
                 }
             }
         }

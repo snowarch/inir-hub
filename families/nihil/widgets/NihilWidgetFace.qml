@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import qs.services
+import qs.modules.common.functions
 import qs.modules.nihil.style
 
 // A desktop widget on NiHiL's glass: the plate the widget's material asks for, the content inside it, and the page turn
@@ -30,6 +31,17 @@ Item {
     readonly property string material: typeof root.widget.look?.material === "function"
         ? root.widget.look.material(root.widget) : (root.widget.showBackground === false ? "clear" : "glass")
     readonly property bool clear: root.material === "clear"
+
+    // On the glass the ink follows the scheme. Bare on the wallpaper it reads the picture under it instead.
+    readonly property bool darkInk: root.clear ? root.widget.inkOnLight : !NihilStyle.dark
+    readonly property color ink: root.clear ? (root.darkInk ? "#101217" : "#F3F4F6") : NihilStyle.ink
+    readonly property color inkSoft: root.clear ? Qt.alpha(root.ink, 0.76) : NihilStyle.inkSoft
+    readonly property color inkFaint: root.clear ? Qt.alpha(root.ink, 0.52) : NihilStyle.inkFaint
+    readonly property color accent: root.clear
+        ? Lume.mark(NihilStyle.accent, Math.max(0, root.widget.regionBrightness), root.widget.regionBrightnessSpread, root.darkInk, 4.5)
+        : NihilStyle.accent
+    readonly property color accentInk: !root.clear ? NihilStyle.accentInk
+        : ColorUtils.contrastRatio("#FFFFFF", root.accent) >= ColorUtils.contrastRatio("#101217", root.accent) ? "#FFFFFF" : "#101217"
 
     readonly property bool stacked: root.widget.stacked
     readonly property real slide: root.widget.stackPos
@@ -60,7 +72,8 @@ Item {
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowBlur: 0.7
-            shadowOpacity: 0.75
+            shadowColor: root.darkInk ? "#FFFFFF" : "#000000"
+            shadowOpacity: root.darkInk ? 0.4 : 0.75
             shadowVerticalOffset: 1
             shadowHorizontalOffset: 0
             autoPaddingEnabled: true

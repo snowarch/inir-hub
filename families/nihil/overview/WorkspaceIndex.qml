@@ -55,12 +55,16 @@ NGlass {
                 Accessible.name: Translation.tr("Workspace %1").arg(row.index + 1)
                 onClicked: NiriService.switchToWorkspaceById(row.modelData.id)
 
+                NWell {
+                    anchors.fill: parent
+                    radius: NihilStyle.rKey
+                    lit: 0.7
+                    visible: row.active
+                }
                 Rectangle {
                     anchors.fill: parent
                     radius: NihilStyle.rKey
-                    color: row.active ? NihilStyle.chosen : row.containsMouse ? NihilStyle.piece : "transparent"
-                    border.width: row.active ? 1 : 0
-                    border.color: NihilStyle.hair
+                    color: !row.active && row.containsMouse ? NihilStyle.piece : "transparent"
                     Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
                 }
                 // What lives there: up to three icons, overlapping a little; an empty workspace shows a quiet ring.

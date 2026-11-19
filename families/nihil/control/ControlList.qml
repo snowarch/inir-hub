@@ -58,6 +58,8 @@ Item {
             id: backKey
             anchors.verticalCenter: parent.verticalCenter
             icon: "chevron_left"
+            radius: width / 2
+            Accessible.name: Translation.tr("Back")
             onClicked: root.back()
         }
         NText {
@@ -104,7 +106,7 @@ Item {
         width: parent.width
         height: parent.height - y
         clip: true
-        spacing: NihilStyle.s(2)
+        spacing: NihilStyle.gap
         boundsBehavior: Flickable.StopAtBounds
         model: root.rows
 
@@ -152,7 +154,7 @@ Item {
     }
 
     // The row every list shares: a glyph, a name over one line, marked while in use.
-    component Line: Rectangle {
+    component Line: Item {
         id: line
 
         property string glyph: ""
@@ -163,10 +165,14 @@ Item {
         signal tapped()
 
         width: parent?.width ?? 0
-        height: NihilStyle.s(50)
-        radius: NihilStyle.rKey
-        color: line.current ? NihilStyle.pieceRaised : press.containsMouse ? NihilStyle.piece : "transparent"
-        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+        height: NihilStyle.s(58)
+
+        NWell {
+            anchors.fill: parent
+            radius: NihilStyle.rCard
+            lit: line.current ? 1 : 0
+            hovered: press.containsMouse
+        }
 
         MouseArea {
             id: press
@@ -177,11 +183,10 @@ Item {
         }
         NIcon {
             id: lineGlyph
-            x: NihilStyle.s(12)
+            x: NihilStyle.s(16)
             anchors.verticalCenter: parent.verticalCenter
             text: line.glyph
             size: NihilStyle.s(20)
-            color: line.current ? NihilStyle.accent : NihilStyle.ink
         }
         Column {
             anchors.left: lineGlyph.right

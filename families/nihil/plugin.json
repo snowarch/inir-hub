@@ -5,7 +5,7 @@
   "summary": "Vertical workspaces, a full overview and glass you shape completely.",
   "tagline": "Dash, workspace strip and live windows on procedural glass.",
   "icon": "blur_circular",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "provides": "modules/nihil",
   "parts": {
     "critical": "critical/ShellNihilCriticalPanels.qml",

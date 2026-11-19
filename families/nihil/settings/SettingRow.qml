@@ -13,7 +13,6 @@ Item {
 
     required property var option
     required property var host
-    property bool first: false
 
     // A compositor row reads and writes the compositor's own setting, for Niri and Umbriel alike: its spec comes with the
     // row (a whole group) or is found by the row's `comp` and `key`.
@@ -104,15 +103,8 @@ Item {
         }
     }
 
-    implicitHeight: Math.max(NihilStyle.s(56), words.implicitHeight + NihilStyle.s(20))
+    implicitHeight: Math.max(NihilStyle.s(62), words.implicitHeight + NihilStyle.s(22))
 
-    Rectangle {
-        visible: !root.first
-        width: parent.width
-        height: 1
-        color: NihilStyle.line
-    }
-    HoverHandler { id: hover }
     // Changed from how NiHiL came: a small dot of the accent at the row's edge.
     Rectangle {
         visible: root.changed
@@ -223,7 +215,7 @@ Item {
             }
             NSlider {
                 anchors.verticalCenter: parent.verticalCenter
-                width: NihilStyle.s(190)
+                width: NihilStyle.s(230)
                 enabled: !root.isFit
                 opacity: root.isFit ? 0.4 : 1
                 from: root.from
@@ -237,7 +229,7 @@ Item {
             }
             NText {
                 anchors.verticalCenter: parent.verticalCenter
-                width: NihilStyle.s(56)
+                width: NihilStyle.s(46)
                 horizontalAlignment: Text.AlignRight
                 text: root.figure(Number(root.value))
                 figures: true

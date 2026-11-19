@@ -9,8 +9,9 @@ import qs.modules.common.functions
 import qs.modules.shared.lock
 import qs.modules.nihil.style
 
-// The lock: the wallpaper melted behind the day and the time, and one pill of glass for the password, a dot for each
-// key typed. Power and restart wait in one corner, the charge in the other.
+// The lock: the sheet has bent into the horizon of a dark planet and the password sits on it, where the light gathers.
+// Each key typed feeds that light. The day and the time stand above; what the computer is doing and the ways out wait
+// in the corners below the horizon.
 MouseArea {
     id: root
 
@@ -20,6 +21,12 @@ MouseArea {
     readonly property bool showBattery: Config.options?.nihil?.lock?.showBattery ?? true
     readonly property bool requirePasswordToPower: Config.options?.lock?.security?.requirePasswordToPower ?? true
     readonly property bool busy: root.context.unlockInProgress
+    readonly property bool failed: root.context.showFailure && root.context.currentText.length === 0
+
+    readonly property real unit: root.height / 1080
+    readonly property real limbAt: Math.round(root.height * 0.7685)
+    readonly property string layoutCode: NiriService.hasMultipleKeyboardLayouts
+        ? String(NiriService.keyboardLayoutNames[NiriService.currentKeyboardLayoutIndex] ?? "").slice(0, 2).toUpperCase() : ""
 
     function focusField(): void {
         Qt.callLater(() => field.forceActiveFocus())
@@ -51,17 +58,46 @@ MouseArea {
         function onFailed(): void { shake.restart() }
     }
 
+    component Fact: Row {
+        id: fact
+        property string glyph: ""
+        property string word: ""
+        property color tone: NihilStyle.inkSoft
+        spacing: NihilStyle.s(8)
+        NIcon {
+            anchors.verticalCenter: parent.verticalCenter
+            text: fact.glyph
+            size: NihilStyle.s(18)
+            color: fact.tone
+        }
+        NText {
+            anchors.verticalCenter: parent.verticalCenter
+            text: fact.word
+            font.pixelSize: NihilStyle.textSmall
+            color: fact.tone
+        }
+    }
+
+    component Way: NButton {
+        width: NihilStyle.s(40)
+        height: NihilStyle.s(40)
+        radius: height / 2
+        tone: "transparent"
+        iconSize: NihilStyle.s(20)
+    }
+
     Rectangle {
         anchors.fill: parent
-        color: NihilStyle.scrim
+        color: NihilStyle.void_
     }
 
     Image {
         id: wallpaper
         anchors.fill: parent
-        source: Config.options?.background?.wallpaperPath ?? ""
+        source: Wallpapers.effectiveWallpaperUrl
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
+        cache: false
         sourceSize.width: root.width
         visible: !root.blur
     }
@@ -72,40 +108,65 @@ MouseArea {
         blurEnabled: true
         blur: 1
         blurMax: 64
-        brightness: NihilStyle.dark ? -0.22 : 0.06
+        saturation: -0.1
+        brightness: NihilStyle.dark ? -0.42 : 0.08
     }
 
-    // The day over the time, both centred high on the page; the time in Geist's medium weight, tight and large.
-    Column {
+    NSheet {
+        anchors.fill: parent
+        band: 0
+        limb: 1
+        limbAt: root.limbAt
+        limbRadius: root.width * 1.354
+        limbGlass: 0.42
+        light: Qt.point(root.width / 2, root.limbAt)
+        lightReach: NihilStyle.s(380)
+        lightPower: 1.05 + Math.min(root.context.currentText.length, 8) * 0.05
+        Behavior on lightPower { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+    }
+
+    NText {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: Math.round(parent.height * 0.12)
-        spacing: NihilStyle.s(4)
-        NText {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Translation.locale.toString(DateTime.clock.date, "dddd, d MMMM")
-            font.pixelSize: NihilStyle.s(20)
-            font.weight: Font.Medium
-            color: Qt.alpha(NihilStyle.ink, 0.82)
-        }
-        NDisplay {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: DateTime.time
-            size: Math.round(Math.min(root.height * 0.17, root.width * 0.11))
-        }
+        y: Math.round(170 * root.unit)
+        text: Translation.locale.toString(DateTime.clock.date, "dddd d MMMM")
+        font.pixelSize: NihilStyle.s(20)
+        font.weight: Font.Light
+        color: NihilStyle.inkSoft
+    }
+    NDisplay {
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: Math.round(166 * root.unit)
+        text: DateTime.time
+        size: Math.round(Math.min(184 * root.unit, root.width * 0.096))
+        font.weight: Font.ExtraLight
+        font.letterSpacing: -size * 0.043
     }
 
-    NGlass {
+    NBloom {
+        anchors.centerIn: capsule
+        width: capsule.width * 1.7
+        height: capsule.height * 3.4
+        tone: NihilStyle.specA
+        strength: 0.3 + Math.min(root.context.currentText.length, 8) * 0.04
+        Behavior on strength { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+    }
+
+    // The password, on the horizon.
+    Rectangle {
         id: capsule
 
         property real nudge: 0
 
         anchors.horizontalCenter: parent.horizontalCenter
-        y: Math.round(parent.height * 0.7)
-        width: NihilStyle.s(320)
-        height: NihilStyle.s(50)
+        y: root.limbAt - height / 2
+        width: NihilStyle.s(360)
+        height: NihilStyle.s(60)
         radius: height / 2
-        ignite: field.activeFocus ? 0.6 : 0.2
+        color: NihilStyle.dark ? "#05060A" : "#F4F5F8"
+        border.width: 1
+        border.color: root.failed ? NihilStyle.danger : NihilStyle.hair
         transform: Translate { x: capsule.nudge }
+        Behavior on border.color { ColorAnimation { duration: NihilStyle.quick } }
 
         SequentialAnimation {
             id: shake
@@ -129,20 +190,20 @@ MouseArea {
         }
 
         NText {
-            x: NihilStyle.s(22)
+            x: NihilStyle.s(26)
             anchors.verticalCenter: parent.verticalCenter
             visible: root.context.currentText.length === 0
-            text: root.context.showFailure ? Translation.tr("Try again") : Translation.tr("Password")
-            color: root.context.showFailure ? NihilStyle.danger : NihilStyle.inkSoft
+            text: Translation.tr("Password")
+            color: NihilStyle.inkFaint
         }
 
         Row {
-            x: NihilStyle.s(22)
+            x: NihilStyle.s(26)
             anchors.verticalCenter: parent.verticalCenter
-            spacing: NihilStyle.s(6)
+            spacing: NihilStyle.s(11)
 
             Repeater {
-                model: Math.min(root.context.currentText.length, 22)
+                model: Math.min(root.context.currentText.length, 16)
                 delegate: Rectangle {
                     width: NihilStyle.s(7)
                     height: width
@@ -154,50 +215,78 @@ MouseArea {
 
         NButton {
             anchors.right: parent.right
-            anchors.rightMargin: NihilStyle.s(7)
+            anchors.rightMargin: NihilStyle.s(9)
             anchors.verticalCenter: parent.verticalCenter
-            width: NihilStyle.s(36)
-            height: NihilStyle.s(36)
+            width: NihilStyle.s(42)
+            height: NihilStyle.s(42)
+            radius: height / 2
             lit: true
             icon: root.busy ? "more_horiz"
                 : root.context.targetAction === LockContext.ActionEnum.Poweroff ? "power_settings_new"
                 : root.context.targetAction === LockContext.ActionEnum.Reboot ? "restart" : "arrow_forward"
+            Accessible.name: Translation.tr("Unlock")
             onClicked: root.submit()
         }
     }
 
+    NText {
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: root.limbAt + NihilStyle.s(48)
+        text: root.failed ? Translation.tr("Try again") : SystemInfo.username
+        font.pixelSize: NihilStyle.s(16)
+        font.weight: Font.Medium
+        color: root.failed ? NihilStyle.danger : NihilStyle.ink
+    }
+
     Row {
         anchors.left: parent.left
+        anchors.leftMargin: NihilStyle.s(44)
         anchors.bottom: parent.bottom
-        anchors.margins: NihilStyle.s(30)
-        visible: root.showBattery && Battery.available
-        spacing: NihilStyle.s(6)
-        NIcon {
+        anchors.bottomMargin: NihilStyle.s(32)
+        height: NihilStyle.s(20)
+        spacing: NihilStyle.s(20)
+
+        Fact {
             anchors.verticalCenter: parent.verticalCenter
-            text: Battery.isCharging ? "battery_charging_full" : "battery_full"
-            size: NihilStyle.s(16)
-            color: Battery.isLow && !Battery.isCharging ? NihilStyle.danger : NihilStyle.inkSoft
+            visible: root.showBattery && Battery.available
+            glyph: Battery.isCharging ? "battery_charging_full" : "battery_full"
+            word: Math.round(Battery.percentage * 100) + " %"
+            tone: Battery.isLow && !Battery.isCharging ? NihilStyle.danger : NihilStyle.inkSoft
         }
-        NText {
+        Fact {
             anchors.verticalCenter: parent.verticalCenter
-            text: Math.round(Battery.percentage * 100) + "%"
-            figures: true
-            color: NihilStyle.inkSoft
+            visible: Network.ethernet || Network.networkName.length > 0
+            glyph: Network.ethernet ? "lan" : "wifi"
+            word: Network.ethernet ? Translation.tr("Wired") : Network.networkName
+        }
+        Fact {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.layoutCode.length > 0
+            glyph: "keyboard"
+            word: root.layoutCode
         }
     }
 
     Row {
         anchors.right: parent.right
+        anchors.rightMargin: NihilStyle.s(34)
         anchors.bottom: parent.bottom
-        anchors.margins: NihilStyle.s(24)
-        spacing: NihilStyle.gap
+        anchors.bottomMargin: NihilStyle.s(22)
+        spacing: NihilStyle.s(2)
 
-        NButton {
+        Way {
+            icon: "bedtime"
+            Accessible.name: Translation.tr("Sleep")
+            onClicked: Session.suspend()
+        }
+        Way {
             icon: "restart"
+            Accessible.name: Translation.tr("Restart")
             onClicked: root.power(LockContext.ActionEnum.Reboot)
         }
-        NButton {
+        Way {
             icon: "power_settings_new"
+            Accessible.name: Translation.tr("Shut down")
             onClicked: root.power(LockContext.ActionEnum.Poweroff)
         }
     }

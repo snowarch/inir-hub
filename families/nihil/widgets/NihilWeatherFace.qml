@@ -37,10 +37,11 @@ NihilWidgetFace {
             anchors.top: parent.top
             text: root.night ? "moon" : "sun"
             size: root.dp(root.small ? 20 : 26)
-            color: NihilStyle.accent
+            color: root.accent
         }
 
         NDisplay {
+            color: root.ink
             id: temperature
             text: root.widget.temperatureText ?? root.sky.temp
             size: root.dp(root.small ? 44 : 58)
@@ -53,6 +54,7 @@ NihilWidgetFace {
             y: root.small ? parent.height - height : temperature.height + root.dp(2)
 
             NText {
+                color: root.ink
                 width: parent.width
                 text: Weather.describeWeather(root.sky.wCode, root.night)
                 font.pixelSize: root.dp(15)
@@ -62,7 +64,7 @@ NihilWidgetFace {
             NText {
                 width: parent.width
                 font.pixelSize: root.dp(12)
-                color: NihilStyle.inkSoft
+                color: root.inkSoft
                 elide: Text.ElideRight
                 visible: Weather.showVisibleCity || Weather.stale
                 text: Weather.stale ? Weather.updatedLabel : Weather.visibleCity
@@ -90,9 +92,10 @@ NihilWidgetFace {
                         width: parent.width
                         text: fact.modelData.name
                         font.pixelSize: root.dp(11)
-                        color: NihilStyle.inkSoft
+                        color: root.inkSoft
                     }
                     NText {
+                        color: root.ink
                         width: parent.width
                         figures: true
                         text: fact.modelData.value

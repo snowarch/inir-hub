@@ -11,8 +11,8 @@ Window {
 
     visible: true
     title: Translation.tr("NiHiL Settings")
-    width: 1120
-    height: 760
+    width: 1260
+    height: 830
     minimumWidth: 860
     minimumHeight: 520
     color: NihilStyle.void_

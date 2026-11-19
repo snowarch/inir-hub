@@ -8,20 +8,22 @@ import qs.modules.common.functions
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The wallpapers on one wide pane of glass: a search, light or dark for the colours taken from the picture, one at
-// random, and the folder as pictures. The arrows walk them and Enter wears the marked one.
-NPopup {
+// The wallpapers on the wide slab: a search, light or dark for the colours taken from the picture, one at random, and the
+// folder as pictures. The arrows walk them and Enter wears the marked one.
+Item {
     id: root
 
-    open: NihilState.wallpapersOpen
-    namespace: "nihil:wallpapers"
-    blurPieces: [sheet.region]
-    onDismissed: root.close()
+    property var screen: null
+    property bool flipped: false
+    property real room: 0
+    property bool open: false
+
+    implicitWidth: NihilStyle.s(1040)
+    implicitHeight: Math.min(NihilStyle.s(660), root.room)
 
     property string query: ""
     property bool dark: NihilStyle.dark
 
-    readonly property bool barBottom: (Config.options?.nihil?.panel?.position ?? "top") === "bottom"
     readonly property var shown: {
         const words = root.query.trim().toLowerCase()
         const all = Wallpapers.wallpapers ?? []
@@ -53,25 +55,21 @@ NPopup {
         root.close()
     }
 
-    NGlass {
+    Item {
         id: sheet
 
-        readonly property real inset: NihilStyle.s(14)
+        readonly property real inset: NihilStyle.s(20)
 
-        width: Math.min(NihilStyle.s(1040), parent.width - NihilStyle.edge * 2)
-        height: Math.min(NihilStyle.s(660), parent.height - NihilStyle.barHeight - NihilStyle.edge * 3)
-        x: Math.round((parent.width - width) / 2)
-        y: root.barBottom ? parent.height - height - NihilStyle.barHeight - NihilStyle.edge * 2
-            : NihilStyle.barHeight + NihilStyle.edge * 2
-        ignite: root.open ? 0.5 : 0
-
-        MouseArea { anchors.fill: parent }
+        x: sheet.inset
+        y: root.flipped ? NihilStyle.s(40) : NihilStyle.s(16)
+        width: root.width - sheet.inset * 2
+        height: root.height - NihilStyle.s(56)
 
         NField {
             id: search
-            x: sheet.inset
-            y: sheet.inset
-            width: sheet.width - sheet.inset * 2 - keys.width - NihilStyle.gap
+            width: sheet.width - keys.width - NihilStyle.gap
+            height: NihilStyle.s(48)
+            radius: NihilStyle.rCard
             glyph: "search"
             placeholder: Translation.tr("Search wallpapers")
             clearable: true
@@ -85,7 +83,6 @@ NPopup {
         Row {
             id: keys
             anchors.right: parent.right
-            anchors.rightMargin: sheet.inset
             anchors.verticalCenter: search.verticalCenter
             spacing: NihilStyle.s(4)
 
@@ -106,10 +103,6 @@ NPopup {
                     root.close()
                 }
             }
-            NButton {
-                icon: "close"
-                onClicked: root.close()
-            }
         }
 
         GridView {
@@ -117,10 +110,9 @@ NPopup {
 
             readonly property int columns: Math.max(2, Math.round(width / NihilStyle.s(250)))
 
-            x: sheet.inset
-            y: search.y + search.height + NihilStyle.gap
-            width: sheet.width - sheet.inset * 2
-            height: sheet.height - y - sheet.inset
+            y: search.y + search.height + NihilStyle.s(12)
+            width: sheet.width
+            height: sheet.height - y
             clip: true
             boundsBehavior: Flickable.StopAtBounds
             cellWidth: Math.floor(width / columns)

@@ -8,17 +8,17 @@ JsonObject {
 
     property JsonObject look: JsonObject {
         // The accent and the light at the glass's edge: "aurora", "ice", "ember", "moss", "mono" or "wallpaper".
-        property string palette: "aurora"
+        property string palette: "wallpaper"
         // "smoke", "frost", "fluted" or "prism".
         property string material: "smoke"
         // Reeds across fluted glass.
         property int ribs: 14
-        property real glass: 0.62
+        property real glass: 0.74
         property bool blur: true
         property real grain: 0.25
-        property real rim: 0.7
+        property real rim: 1
         // The light rising from the bottom edge of the glass.
-        property real flare: 0.5
+        property real flare: 1
         property real corners: 1
         property real scale: 1
         // Multiplies every animation; 0 turns movement off.
@@ -43,7 +43,7 @@ JsonObject {
         property string overviewStyle: "same"
         property list<string> screenList: []
         property bool windowTitle: true
-        property bool statusWords: true
+        property bool statusWords: false
     }
     property JsonObject modules: JsonObject {
         // Turn a whole surface off.
@@ -74,8 +74,6 @@ JsonObject {
         property real backgroundBlur: 1
         // How bright the wallpaper stays in each view, 0 to 1.
         property real backgroundBrightness: 0.5
-        property real appsBrightness: 0.5
-        property real searchBrightness: 0.4
         property bool closeOnEmptyClick: true
         // "default" steps back one view at a time, "close" leaves the overview at once.
         property string escapeKey: "default"
@@ -157,8 +155,6 @@ JsonObject {
         // Share of the screen's width, 0.05 to 0.3.
         property real scale: 0.13
         // The same in the app grid and in search; 0 hides the strip there.
-        property real scaleInApps: 0
-        property real scaleInSearch: 0
         // The strip's glass runs the whole edge.
         property bool fullLength: false
         // Glass behind the strip.
@@ -204,7 +200,7 @@ JsonObject {
         property bool showEntry: true
         property bool center: true
         property real width: 1
-        property int maxRows: 5
+        property int maxRows: 8
     }
     property JsonObject switcher: JsonObject {
         // "off", "all" (every screen) or "current" (the focused one).
@@ -249,8 +245,8 @@ JsonObject {
         property int columns: 0
         property int rows: 0
         property int spacing: 30
-        property real pageWidth: 0.85
-        property real pageHeight: 0.9
+        property real pageWidth: 0.667
+        property real pageHeight: 0.78
         property bool center: false
         // "custom", "name", "foldersFirst", "foldersLast" or "usage" (usage shows no folders).
         property string order: "custom"

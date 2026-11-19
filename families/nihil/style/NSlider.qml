@@ -20,7 +20,7 @@ Item {
     readonly property real share: NihilStyle.clamp((root.value - root.from) / root.span, 0, 1)
     property real _held: 0
     readonly property real shown: hand.pressed ? root._held : root.share
-    readonly property real side: NihilStyle.s(16)
+    readonly property real side: 0
 
     implicitWidth: NihilStyle.s(190)
     implicitHeight: NihilStyle.s(24)
@@ -49,42 +49,18 @@ Item {
     Keys.onRightPressed: root.nudge(1)
     Keys.onUpPressed: root.nudge(1)
 
-    // A rounded track, the level in the accent's light, and a white bead where it stands.
-    Rectangle {
-        id: track
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.width
-        height: NihilStyle.s(4)
-        radius: height / 2
-        color: Qt.alpha(NihilStyle.ink, 0.12)
-    }
-    NSpectrum {
-        anchors.verticalCenter: parent.verticalCenter
-        width: root.side / 2 + root.shown * (root.width - root.side)
-        height: NihilStyle.s(4)
-        radius: height / 2
-        visible: root.lightFill
-    }
-    Rectangle {
-        anchors.verticalCenter: parent.verticalCenter
-        width: root.side / 2 + root.shown * (root.width - root.side)
-        height: NihilStyle.s(4)
-        radius: height / 2
-        visible: !root.lightFill
-        color: root.fillColor
-    }
-
-    Rectangle {
-        visible: root.knob
-        anchors.verticalCenter: parent.verticalCenter
-        x: root.shown * (root.width - root.side) + root.side / 2 - width / 2
-        width: hand.pressed ? NihilStyle.s(18) : NihilStyle.s(14)
-        height: width
-        radius: width / 2
-        color: "#FFFFFF"
-        border.width: 1
-        border.color: Qt.alpha("#000000", 0.2)
-        Behavior on width { NumberAnimation { duration: NihilStyle.quick } }
+    // The level on a ruler, a needle of light where it stands.
+    ShaderEffect {
+        anchors.fill: parent
+        readonly property size box: Qt.size(width, height)
+        readonly property real level: root.shown
+        readonly property real cell: NihilStyle.s(5.5) + 0.5
+        readonly property real needle: root.knob ? 1 : 0
+        readonly property color mark: Qt.alpha(NihilStyle.ink, 0.22)
+        readonly property color specA: root.lightFill ? NihilStyle.specA : root.fillColor
+        readonly property color specB: root.lightFill ? NihilStyle.specB : root.fillColor
+        readonly property color needleInk: NihilStyle.ink
+        fragmentShader: Qt.resolvedUrl("ruler.frag.qsb")
     }
 
     MouseArea {

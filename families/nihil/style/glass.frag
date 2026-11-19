@@ -91,10 +91,13 @@ void main() {
     float up = max(0.0, -outward.y);
     float band = smoothstep(1.0, 0.0, abs(d + 0.5));
     float rimLight = rim * (0.07 + 0.3 * pow(up, 2.0));
-    vec3 rimInk = vec3(rimLight) + glowInk * glow * power * 0.5 * rim;
-    float rimAlpha = band * clamp(rimLight + glow * power * 0.4, 0.0, 1.0);
+    vec2 toHot = p - vec2(c.x, box.y);
+    float hotReach = box.x * 0.42 + 1.0;
+    float heat = exp(-dot(toHot, toHot) / (hotReach * hotReach)) * clamp(ignite * 1.6, 0.0, 1.0);
+    vec3 rimInk = vec3(rimLight) + glowInk * glow * power * 0.5 * rim + (glowInk * 0.7 + 0.3) * heat * 1.1 * rim;
+    float rimAlpha = band * clamp(rimLight + glow * power * 0.4 + heat, 0.0, 1.0);
 
-    float drop = (1.0 - inside) * exp(-max(d, 0.0) / (pad * 0.34 + 1.0)) * 0.42 * shadow;
+    float drop = (1.0 - inside) * exp(-max(d, 0.0) / (pad * 0.34 + 1.0)) * 0.14 * shadow;
     vec3 rgb = body * inside * bodyAlpha + rimInk * band;
     float alpha = max(bodyAlpha * inside, rimAlpha);
     alpha = alpha + drop * (1.0 - alpha);

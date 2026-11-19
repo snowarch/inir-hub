@@ -10,15 +10,13 @@ import qs.modules.nihil.style
 import "NihilOptions.js" as Options
 import "../state/NihilProfiles.js" as Profiles
 
-// NiHiL's Settings: a pane of glass with the search and the pages, and the page itself beside it under a quiet head.
+// NiHiL's Settings: one sheet, the search and the pages down its side and the page itself beside them.
 // Every row comes from NihilOptions.js. The same view is its own window (NihilSettingsApp) and the overlay over the
 // desktop (NihilSettingsHost); `windowed` tells which, and the head's buttons ask the holder to switch or close.
 Item {
     id: root
 
     property bool windowed: true
-    // The field behind the panes; the overlay's card is glass of its own and leaves it out.
-    property bool backdrop: true
     readonly property int pageIndex: Options.pages.findIndex(item => item.id === root.pageId)
     readonly property bool maximized: root.Window.window?.visibility === Window.Maximized
     signal closeRequested()
@@ -147,14 +145,6 @@ Item {
 
     Component.onCompleted: CompositorConfig.ensure()
 
-    NFieldPaint {
-        anchors.fill: parent
-        visible: root.backdrop
-        form: Config.options?.nihil?.field?.form ?? 0
-        seed: Config.options?.nihil?.field?.seed ?? 0.37
-        glow: (Config.options?.nihil?.field?.glow ?? 1) * 0.45
-    }
-
     // Escape first closes what is open in here; then it goes on to whoever holds this view (the overlay closes).
     Keys.onEscapePressed: event => {
         if (menu.shown)
@@ -165,57 +155,60 @@ Item {
             event.accepted = false
     }
 
-    // The side: the family's name, the search, and every page with its glyph. The page on show sits on a raised
-    // plate of glass.
-    NGlass {
-        id: side
-        x: NihilStyle.s(12)
-        y: NihilStyle.s(12)
-        width: NihilStyle.s(244)
-        height: parent.height - NihilStyle.s(24)
-        radius: NihilStyle.rPanel
+    // The top of the sheet moves the window, and a double click fills the screen with it.
+    WindowGrip {
+        width: parent.width
+        height: NihilStyle.s(76)
+        enabled: root.windowed
+        onMaximize: root.toggleMaximized()
+    }
 
-        // In a window the pane's empty glass moves it.
-        WindowGrip {
-            anchors.fill: parent
-            enabled: root.windowed
-            onMaximize: root.toggleMaximized()
+    // The side: the family's name, the search, and every page. The page on show is lit from below.
+    Item {
+        id: side
+        width: NihilStyle.s(284)
+        height: parent.height
+
+        Row {
+            x: NihilStyle.s(32)
+            y: NihilStyle.s(28)
+            height: NihilStyle.s(32)
+            spacing: NihilStyle.s(12)
+            NMark {
+                anchors.verticalCenter: parent.verticalCenter
+                size: NihilStyle.s(20)
+            }
+            NText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: "NiHiL"
+                font.pixelSize: NihilStyle.textLarge
+                font.weight: Font.Medium
+            }
         }
 
-        Column {
+        NField {
+            id: search
+            x: NihilStyle.s(16)
+            y: NihilStyle.s(82)
+            width: parent.width - NihilStyle.s(32)
+            height: NihilStyle.s(40)
+            radius: NihilStyle.r(13)
+            glyph: "search"
+            glyphSize: NihilStyle.s(16)
+            textSize: NihilStyle.textSmall
+            textWeight: Font.Normal
+            placeholder: Translation.tr("Search options")
+            clearable: true
+            onEdited: text => root.query = text
+        }
+
+        NScroller {
             id: index
-            x: NihilStyle.s(14)
-            y: NihilStyle.s(18)
-            width: parent.width - NihilStyle.s(28)
+            x: NihilStyle.s(16)
+            y: NihilStyle.s(134)
+            width: parent.width - NihilStyle.s(32)
+            height: parent.height - y - NihilStyle.s(12)
             spacing: NihilStyle.s(2)
-
-            Row {
-                x: NihilStyle.s(8)
-                height: NihilStyle.s(34)
-                spacing: NihilStyle.s(8)
-                NMark {
-                    anchors.verticalCenter: parent.verticalCenter
-                    size: NihilStyle.s(22)
-                }
-                NText {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "NiHiL"
-                    font.pixelSize: NihilStyle.textLarge
-                    font.weight: Font.DemiBold
-                }
-            }
-            Item { width: 1; height: NihilStyle.s(10) }
-
-            NField {
-                id: search
-                width: parent.width
-                glyph: "search"
-                placeholder: Translation.tr("Search options")
-                clearable: true
-                onEdited: text => root.query = text
-            }
-
-            Item { width: 1; height: NihilStyle.s(12) }
 
             Repeater {
                 model: Options.pages
@@ -225,10 +218,10 @@ Item {
 
                     required property var modelData
                     readonly property bool here: root.query.length === 0 && root.pageId === entry.modelData.id
-                    readonly property real lead: entry.modelData.heading ? NihilStyle.s(34) : 0
+                    readonly property real lead: entry.modelData.heading ? NihilStyle.s(36) : 0
 
-                    width: index.width
-                    height: NihilStyle.s(36) + entry.lead
+                    width: index.innerWidth
+                    height: NihilStyle.s(42) + entry.lead
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
@@ -238,77 +231,89 @@ Item {
                     }
 
                     // The pages of the computer itself start under their own quiet heading.
-                    NLabel {
+                    NText {
                         visible: entry.lead > 0
-                        x: NihilStyle.s(10)
-                        y: NihilStyle.s(14)
+                        x: NihilStyle.s(14)
+                        y: NihilStyle.s(12)
                         text: Translation.tr(entry.modelData.heading ?? "")
+                        font.pixelSize: NihilStyle.textLabel
                         color: NihilStyle.inkFaint
                     }
                     Rectangle {
                         anchors.fill: parent
                         anchors.topMargin: entry.lead
-                        radius: NihilStyle.rKey
-                        color: entry.here ? NihilStyle.chosen : entry.containsMouse ? NihilStyle.piece : "transparent"
-                        border.width: entry.here ? 1 : 0
-                        border.color: NihilStyle.hair
-                        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                        radius: NihilStyle.r(13)
+                        color: NihilStyle.piece
+                        visible: entry.containsMouse && !entry.here
+                    }
+                    NWell {
+                        anchors.fill: parent
+                        anchors.topMargin: entry.lead
+                        radius: NihilStyle.r(13)
+                        lit: entry.here ? 0.7 : 0
+                        visible: entry.here
                     }
                     NIcon {
                         id: glyph
-                        x: NihilStyle.s(10)
+                        x: NihilStyle.s(14)
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.verticalCenterOffset: entry.lead / 2
                         text: entry.modelData.glyph ?? "tune"
                         size: NihilStyle.s(18)
-                        color: entry.here ? NihilStyle.accent : NihilStyle.inkSoft
+                        color: entry.here ? NihilStyle.ink : NihilStyle.inkSoft
                     }
                     NText {
                         anchors.left: glyph.right
-                        anchors.leftMargin: NihilStyle.s(10)
+                        anchors.leftMargin: NihilStyle.s(16)
                         anchors.right: parent.right
+                        anchors.rightMargin: NihilStyle.s(10)
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.verticalCenterOffset: entry.lead / 2
                         text: Translation.tr(entry.modelData.title)
+                        elide: Text.ElideRight
+                        font.pixelSize: NihilStyle.textBody
                         color: entry.here || entry.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
-                        font.weight: entry.here ? Font.DemiBold : Font.Medium
                     }
                 }
             }
-        }
-
-        NLabel {
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.margins: NihilStyle.s(22)
-            text: Translation.tr("Saved as you go")
-            color: NihilStyle.inkFaint
         }
     }
 
     Item {
         id: stage
         anchors.left: side.right
-        anchors.leftMargin: NihilStyle.s(36)
+        anchors.leftMargin: NihilStyle.s(20)
         anchors.right: parent.right
         anchors.rightMargin: NihilStyle.s(36)
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        // The top of the page moves the window, and a double click fills the screen with it.
-        WindowGrip {
-            width: parent.width
-            height: hero.y + hero.height
-            enabled: root.windowed
-            onMaximize: root.toggleMaximized()
+        // The page's name; a search says how much it found beside it.
+        NDisplay {
+            id: title
+            y: NihilStyle.s(26)
+            width: Math.min(implicitWidth, parent.width - controls.width - count.implicitWidth - NihilStyle.s(32))
+            text: root.query.length > 0 ? Translation.tr("Results") : Translation.tr(root.page.title)
+            size: NihilStyle.s(30)
+            font.weight: Font.Light
+        }
+        NText {
+            id: count
+            anchors.left: title.right
+            anchors.leftMargin: NihilStyle.s(12)
+            anchors.baseline: title.baseline
+            visible: root.query.length > 0
+            text: root.found.length === 1 ? Translation.tr("1 option matches") : Translation.tr("%1 options match").arg(root.found.length)
+            font.pixelSize: NihilStyle.textSmall
+            color: NihilStyle.inkSoft
         }
 
         // How Settings is held: over the desktop or in its own window, and closed from here in either.
         Row {
             id: controls
             anchors.right: parent.right
-            anchors.rightMargin: -NihilStyle.s(22)
-            y: NihilStyle.s(14)
+            anchors.rightMargin: -NihilStyle.s(10)
+            y: NihilStyle.s(26)
             spacing: NihilStyle.s(2)
 
             NButton {
@@ -332,32 +337,10 @@ Item {
             }
         }
 
-        // The page's head: its name and one line on what it holds.
-        Column {
-            id: hero
-            y: NihilStyle.s(34)
-            width: parent.width - controls.width - NihilStyle.s(16)
-            spacing: NihilStyle.s(6)
-
-            NDisplay {
-                width: parent.width
-                text: root.query.length > 0 ? Translation.tr("Results") : Translation.tr(root.page.title)
-                size: NihilStyle.s(30)
-            }
-            NText {
-                width: parent.width
-                text: root.query.length > 0
-                    ? (root.found.length === 1 ? Translation.tr("1 option matches") : Translation.tr("%1 options match").arg(root.found.length))
-                    : Translation.tr(root.page.summary ?? "")
-                color: NihilStyle.inkSoft
-                font.pixelSize: NihilStyle.textBody
-            }
-        }
-
         Loader {
             id: body
             anchors.fill: parent
-            anchors.topMargin: hero.y + hero.height + NihilStyle.s(22)
+            anchors.topMargin: NihilStyle.s(83)
             active: root.query.length === 0 || root.found.length > 0
             sourceComponent: root.query.length > 0 ? foundPage
                 : root.page.view === "profiles" ? profilesPage
@@ -393,6 +376,7 @@ Item {
         OptionsPage {
             sections: root.page.sections
             host: root
+            leadsWithLight: root.page.id === "appearance"
         }
     }
     Component {
