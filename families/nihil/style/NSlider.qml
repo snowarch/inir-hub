@@ -56,7 +56,7 @@ Item {
         width: parent.width
         height: root.pill ? root.height : NihilStyle.s(4)
         radius: height / 2
-        color: root.pill ? NihilStyle.pieceRaised : Qt.alpha(NihilStyle.ink, 0.16)
+        color: root.pill ? NihilStyle.fillHover : Qt.alpha(NihilStyle.text, 0.16)
     }
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter
@@ -75,7 +75,7 @@ Item {
             width: Math.max(1, NihilStyle.s(1.5))
             height: root.height * 0.3
             radius: width / 2
-            color: along < root.fillWidth - root.height * 0.4 ? Qt.alpha(NihilStyle.accentInk, 0.26) : Qt.alpha(NihilStyle.ink, 0.2)
+            color: along < root.fillWidth - root.height * 0.4 ? Qt.alpha(NihilStyle.accentText, 0.26) : Qt.alpha(NihilStyle.text, 0.2)
         }
     }
     Rectangle {
@@ -85,7 +85,7 @@ Item {
         width: Math.max(2, NihilStyle.s(3))
         height: root.height * 0.5
         radius: width / 2
-        color: NihilStyle.accentInk
+        color: NihilStyle.accentText
     }
     Rectangle {
         visible: !root.pill && root.knob

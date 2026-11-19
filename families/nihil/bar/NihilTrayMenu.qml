@@ -12,11 +12,11 @@ Item {
 
     property var item: null
     property var screen: null
-    // The icon's centre on its screen, and the edge the rail stands on: the menu opens beside the rail.
+    // The icon's centre on its screen, and the edge the bar stands on: the menu opens beside the bar.
     property point at: Qt.point(0, 0)
     property string edge: "left"
     property var trail: []
-    property int lit: -1
+    property int highlighted: -1
 
     readonly property var handle: root.item?.menu ?? null
     readonly property var current: root.trail.length > 0 ? root.trail[root.trail.length - 1] : root.handle
@@ -24,7 +24,7 @@ Item {
 
     function show(item: var, screen: var, at: point, edge: string): void {
         root.trail = []
-        root.lit = -1
+        root.highlighted = -1
         root.screen = screen
         root.at = at
         root.edge = edge
@@ -38,16 +38,16 @@ Item {
     }
     function take(row: var): void {
         if (!row || row.type || row.enabled === false) return
-        if (row.back) { root.trail = root.trail.slice(0, -1); root.lit = -1; return }
-        if (row.submenu) { root.trail = root.trail.concat([row.entry]); root.lit = -1; return }
+        if (row.back) { root.trail = root.trail.slice(0, -1); root.highlighted = -1; return }
+        if (row.submenu) { root.trail = root.trail.concat([row.entry]); root.highlighted = -1; return }
         if (root.alive(row.entry)) row.entry.triggered()
         root.close()
     }
     function step(by: int): void {
         const rows = root.rows
         for (let i = 1; i <= rows.length; i++) {
-            const at = (Math.max(root.lit, by > 0 ? -1 : 0) + by * i + rows.length * 4) % rows.length
-            if (!rows[at].type && rows[at].enabled !== false) { root.lit = at; return }
+            const at = (Math.max(root.highlighted, by > 0 ? -1 : 0) + by * i + rows.length * 4) % rows.length
+            if (!rows[at].type && rows[at].enabled !== false) { root.highlighted = at; return }
         }
     }
 
@@ -94,7 +94,7 @@ Item {
 
     property bool lingering: false
     onOpenChanged: if (!root.open) { root.lingering = true; linger.restart() }
-    Timer { id: linger; interval: NihilStyle.calm + 60; onTriggered: root.lingering = false }
+    Timer { id: linger; interval: NihilStyle.durationMedium + 60; onTriggered: root.lingering = false }
 
     LazyLoader {
         active: root.open || root.lingering
@@ -113,9 +113,9 @@ Item {
                 width: NihilStyle.s(290)
                 height: column.implicitHeight + NihilStyle.s(16)
                 radius: NihilStyle.r(24)
-                tint: NihilStyle.menuTint
-                tracks: true
-                readonly property real away: NihilStyle.railRoom + NihilStyle.s(8)
+                tint: NihilStyle.menuBackground
+                followPointer: true
+                readonly property real away: NihilStyle.barSpace + NihilStyle.s(8)
                 x: root.edge === "left" ? card.away : root.edge === "right" ? popup.width - card.away - width
                     : NihilStyle.clamp(root.at.x - width / 2, edge, popup.width - width - edge)
                 y: root.edge === "top" ? card.away : root.edge === "bottom" ? popup.height - card.away - height
@@ -127,10 +127,10 @@ Item {
                 focus: true
                 Keys.onUpPressed: root.step(-1)
                 Keys.onDownPressed: root.step(1)
-                Keys.onReturnPressed: root.take(root.rows[root.lit])
-                Keys.onEnterPressed: root.take(root.rows[root.lit])
-                Keys.onRightPressed: if (root.rows[root.lit]?.submenu) root.take(root.rows[root.lit])
-                Keys.onLeftPressed: if (root.trail.length > 0) { root.trail = root.trail.slice(0, -1); root.lit = -1 }
+                Keys.onReturnPressed: root.take(root.rows[root.highlighted])
+                Keys.onEnterPressed: root.take(root.rows[root.highlighted])
+                Keys.onRightPressed: if (root.rows[root.highlighted]?.submenu) root.take(root.rows[root.highlighted])
+                Keys.onLeftPressed: if (root.trail.length > 0) { root.trail = root.trail.slice(0, -1); root.highlighted = -1 }
 
                 Column {
                     id: column
@@ -172,7 +172,7 @@ Item {
                             readonly property bool line: row.modelData.type === "separator"
                             readonly property bool usable: !row.line && row.modelData.enabled !== false
                             width: column.width
-                            readonly property bool hot: root.lit === row.index && row.usable
+                            readonly property bool hot: root.highlighted === row.index && row.usable
                             height: row.line ? NihilStyle.s(10) : NihilStyle.s(38)
 
                             MouseArea {
@@ -182,7 +182,7 @@ Item {
                                 enabled: row.usable
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onContainsMouseChanged: if (hit.containsMouse) root.lit = row.index
+                                onContainsMouseChanged: if (hit.containsMouse) root.highlighted = row.index
                                 onClicked: root.take(row.modelData)
 
                                 Rectangle {
@@ -205,7 +205,7 @@ Item {
                                         visible: row.modelData.back || (row.modelData.mark === "check" && row.modelData.checked)
                                         text: row.modelData.back ? "chevron_left" : "check"
                                         size: NihilStyle.s(15)
-                                        color: row.hot ? NihilStyle.accentInk : row.modelData.back ? NihilStyle.inkSoft : NihilStyle.accent
+                                        color: row.hot ? NihilStyle.accentText : row.modelData.back ? NihilStyle.textSecondary : NihilStyle.accent
                                     }
                                     Rectangle {
                                         anchors.centerIn: parent
@@ -215,20 +215,20 @@ Item {
                                         radius: width / 2
                                         color: "transparent"
                                         border.width: row.modelData.checked ? 0 : 1
-                                        border.color: row.hot ? NihilStyle.accentInk : NihilStyle.inkFaint
+                                        border.color: row.hot ? NihilStyle.accentText : NihilStyle.textTertiary
                                         Rectangle {
                                             anchors.centerIn: parent
                                             visible: row.modelData.checked === true
                                             width: parent.width
                                             height: width
                                             radius: width / 2
-                                            color: row.hot ? NihilStyle.accentInk : NihilStyle.accent
+                                            color: row.hot ? NihilStyle.accentText : NihilStyle.accent
                                             Rectangle {
                                                 anchors.centerIn: parent
                                                 width: NihilStyle.s(4)
                                                 height: width
                                                 radius: width / 2
-                                                color: row.hot ? NihilStyle.accent : NihilStyle.accentInk
+                                                color: row.hot ? NihilStyle.accent : NihilStyle.accentText
                                             }
                                         }
                                     }
@@ -246,7 +246,7 @@ Item {
                                     anchors.verticalCenter: parent.verticalCenter
                                     width: parent.width - x - NihilStyle.s(row.modelData.submenu ? 32 : 16)
                                     text: row.modelData.text ?? ""
-                                    color: row.hot ? NihilStyle.accentInk : row.modelData.back ? NihilStyle.inkSoft : NihilStyle.ink
+                                    color: row.hot ? NihilStyle.accentText : row.modelData.back ? NihilStyle.textSecondary : NihilStyle.text
                                     opacity: row.usable ? 1 : 0.4
                                     elide: Text.ElideRight
                                 }
@@ -257,7 +257,7 @@ Item {
                                     visible: row.modelData.submenu === true
                                     text: "chevron_right"
                                     size: NihilStyle.s(14)
-                                    color: row.hot ? NihilStyle.accentInk : NihilStyle.inkSoft
+                                    color: row.hot ? NihilStyle.accentText : NihilStyle.textSecondary
                                 }
                             }
                         }
@@ -270,7 +270,7 @@ Item {
                         height: NihilStyle.s(32)
                         verticalAlignment: Text.AlignVCenter
                         text: Translation.tr("No actions")
-                        color: NihilStyle.inkSoft
+                        color: NihilStyle.textSecondary
                     }
                 }
             }

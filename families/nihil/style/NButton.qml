@@ -1,16 +1,16 @@
 import QtQuick
 
-// A press target: glass-quiet at rest, lit under the pointer. `icon` and `label` fill it; other content may sit inside.
+// A press target: glass-quiet at rest, highlighted under the pointer. `icon` and `label` fill it; other content may sit inside.
 MouseArea {
     id: root
 
     property string icon: ""
     property string label: ""
     property real iconSize: NihilStyle.s(18)
-    property bool lit: false
-    property color tone: NihilStyle.piece
+    property bool highlighted: false
+    property color tone: NihilStyle.fill
     property real radius: height / 2
-    readonly property color ink: root.lit ? NihilStyle.accentInk : NihilStyle.ink
+    readonly property color foreground: root.highlighted ? NihilStyle.accentText : NihilStyle.text
     default property alias content: holder.data
 
     implicitWidth: root.label.length > 0 ? row.implicitWidth + NihilStyle.s(24) : NihilStyle.s(36)
@@ -27,13 +27,13 @@ MouseArea {
     Rectangle {
         anchors.fill: parent
         radius: root.radius
-        color: root.lit ? NihilStyle.accent : root.pressed ? NihilStyle.pieceRaised
-            : root.containsMouse || root.activeFocus ? NihilStyle.pieceRaised : root.tone
+        color: root.highlighted ? NihilStyle.accent : root.pressed ? NihilStyle.fillHover
+            : root.containsMouse || root.activeFocus ? NihilStyle.fillHover : root.tone
         border.width: 1
-        border.color: root.lit ? "transparent" : root.containsMouse || root.activeFocus ? NihilStyle.hair : "transparent"
+        border.color: root.highlighted ? "transparent" : root.containsMouse || root.activeFocus ? NihilStyle.border : "transparent"
         scale: root.pressed ? 0.97 : 1
-        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-        Behavior on scale { NumberAnimation { duration: NihilStyle.quick } }
+        Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
+        Behavior on scale { NumberAnimation { duration: NihilStyle.durationShort } }
     }
 
     Row {
@@ -45,13 +45,13 @@ MouseArea {
             visible: root.icon.length > 0
             text: root.icon
             size: root.iconSize
-            color: root.ink
+            color: root.foreground
         }
         NText {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.label.length > 0
             text: root.label
-            color: root.ink
+            color: root.foreground
         }
     }
 

@@ -7,7 +7,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// Volume and brightness, on a tag pulled from the band when a level moves: the glyph, the ruler and the figure. The hand
+// Volume and brightness, on a tag pulled from the band when a level moves: the icon, the level and the number. The hand
 // keeps it out and can set the level on it.
 Item {
     id: root
@@ -90,7 +90,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: root.glyph
         size: NihilStyle.s(20)
-        color: root.muted ? NihilStyle.danger : NihilStyle.ink
+        color: root.muted ? NihilStyle.danger : NihilStyle.text
     }
     NSlider {
         id: ruler
@@ -98,7 +98,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width - x - NihilStyle.s(76)
         height: NihilStyle.s(36)
-        name: root.kind === "volume" ? Translation.tr("Sound") : Translation.tr("Light")
+        name: root.kind === "volume" ? Translation.tr("Sound") : Translation.tr("Brightness")
         value: root.level
         onMoved: value => {
             if (root.kind === "volume") Audio.setSinkVolume(value)

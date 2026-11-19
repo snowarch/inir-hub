@@ -15,12 +15,8 @@ Item {
     id: root
 
     property var screen: null
-    property bool flipped: false
-    property real room: 0
     property bool open: false
 
-    implicitWidth: NihilStyle.s(980)
-    implicitHeight: Math.min(NihilStyle.s(620), root.room)
 
     property string query: ""
     property string kind: "all"
@@ -79,13 +75,14 @@ Item {
         readonly property real inset: NihilStyle.s(20)
 
         x: sheet.inset
-        y: root.flipped ? NihilStyle.s(40) : NihilStyle.s(16)
+        y: sheet.inset
         width: root.width - sheet.inset * 2
-        height: root.height - NihilStyle.s(56)
+        height: root.height - sheet.inset * 2
 
+        // With nothing to show, the list takes the whole page.
         Item {
             id: side
-            width: NihilStyle.s(400)
+            width: plate.visible ? NihilStyle.s(400) : sheet.width
             height: sheet.height
 
             NField {
@@ -144,30 +141,12 @@ Item {
                 }
             }
 
-            Column {
+            NEmpty {
                 anchors.centerIn: list
-                width: list.width
                 visible: list.count === 0
-                spacing: NihilStyle.s(6)
-
-                NIcon {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.query.length > 0 ? "search_off" : "clipboard"
-                    size: NihilStyle.s(32)
-                    color: NihilStyle.inkSoft
-                }
-                NText {
-                    width: parent.width
-                    horizontalAlignment: Text.AlignHCenter
-                    text: root.query.length > 0 ? Translation.tr("Nothing matches") : Translation.tr("Nothing copied yet")
-                    font.pixelSize: NihilStyle.textLarge
-                }
-                NText {
-                    width: parent.width
-                    horizontalAlignment: Text.AlignHCenter
-                    text: root.query.length > 0 ? Translation.tr("Try another word") : Translation.tr("What you copy lands here")
-                    color: NihilStyle.inkSoft
-                }
+                icon: root.query.length > 0 ? "search_off" : "clipboard"
+                title: root.query.length > 0 ? Translation.tr("Nothing matches") : Translation.tr("Nothing copied yet")
+                note: root.query.length > 0 ? Translation.tr("Try another word") : Translation.tr("What you copy lands here")
             }
         }
 
@@ -178,11 +157,12 @@ Item {
             readonly property var row: root.rows[list.currentIndex] ?? null
             readonly property real pad: NihilStyle.s(22)
 
-            x: side.width + NihilStyle.s(16)
+            visible: !!plate.row
+            x: NihilStyle.s(416)
             width: sheet.width - x
             height: sheet.height
             radius: NihilStyle.r(26)
-            color: NihilStyle.piece
+            color: NihilStyle.fill
 
             ClipPreview {
                 id: preview
@@ -208,7 +188,7 @@ Item {
                         height: actions.height
                         icon: "content_copy"
                         label: Translation.tr("Copy")
-                        lit: true
+                        highlighted: true
                         onClicked: root.use(plate.row)
                     }
                     NButton {

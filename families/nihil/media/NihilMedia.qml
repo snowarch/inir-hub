@@ -8,14 +8,12 @@ import qs.modules.common
 import qs.services
 import qs.modules.nihil.style
 
-// Media: what plays, as large as the deck allows. The cover stands on a glow of its own colours; beside it the title,
+// Media: what plays, as large as the dashboard allows. The cover stands on a glow of its own colours; beside it the title,
 // the timeline, the keys and the players there are to switch between.
 FocusScope {
     id: root
 
     property var screen: null
-    property bool flipped: false
-    property real room: 0
     property bool open: false
 
     readonly property var player: MprisController.activePlayer
@@ -25,8 +23,6 @@ FocusScope {
     readonly property string art: MprisController.artUrlOf(root.player) || (root.player?.trackArtUrl ?? "")
     readonly property real pad: NihilStyle.s(28)
 
-    implicitWidth: NihilStyle.s(860)
-    implicitHeight: NihilStyle.s(520)
 
     function clock(seconds: real): string {
         const s = Math.max(0, Math.floor(seconds))
@@ -71,22 +67,17 @@ FocusScope {
             blurMax: 64
             saturation: 0.2
             opacity: root.open ? (NihilStyle.dark ? 0.32 : 0.4) : 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.slow } }
+            Behavior on opacity { NumberAnimation { duration: NihilStyle.durationLong } }
         }
     }
 
     // Nothing plays.
-    Column {
+    NEmpty {
         anchors.centerIn: parent
         visible: !root.player
-        spacing: NihilStyle.s(12)
-        NIcon { anchors.horizontalCenter: parent.horizontalCenter; text: "music"; size: NihilStyle.s(44); color: NihilStyle.inkFaint }
-        NDisplay { anchors.horizontalCenter: parent.horizontalCenter; text: Translation.tr("Nothing playing") }
-        NText {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Translation.tr("Music and videos you play show up here")
-            color: NihilStyle.inkSoft
-        }
+        icon: "music"
+        title: Translation.tr("Nothing playing")
+        note: Translation.tr("Music and videos you play show up here")
     }
 
     Item {
@@ -100,15 +91,15 @@ FocusScope {
             width: Math.min(parent.height, parent.width * 0.44)
             height: width
             anchors.verticalCenter: parent.verticalCenter
-            radius: NihilStyle.rCard
-            color: NihilStyle.pieceRaised
+            radius: NihilStyle.radiusCard
+            color: NihilStyle.fillHover
             clip: true
             NIcon {
                 anchors.centerIn: parent
                 visible: artImage.status !== Image.Ready
                 text: "music"
                 size: NihilStyle.s(56)
-                color: NihilStyle.inkFaint
+                color: NihilStyle.textTertiary
             }
             Image {
                 id: artImage
@@ -130,7 +121,7 @@ FocusScope {
                 visible: false
                 layer.enabled: true
             }
-            // The rim of the glass the cover sits under.
+            // The edge of the glass the cover sits under.
             Rectangle {
                 anchors.fill: parent
                 radius: parent.radius
@@ -154,9 +145,9 @@ FocusScope {
                 NText {
                     width: parent.width
                     text: root.player?.identity ?? ""
-                    font.pixelSize: NihilStyle.textLabel
+                    font.pixelSize: NihilStyle.textCaption
                     font.weight: Font.Medium
-                    color: NihilStyle.inkFaint
+                    color: NihilStyle.textTertiary
                 }
                 NDisplay {
                     width: parent.width
@@ -168,7 +159,7 @@ FocusScope {
                     width: parent.width
                     text: [MprisController.artistOf(root.player), root.player?.trackAlbum ?? ""].filter(part => String(part).length > 0).join(" · ")
                     font.pixelSize: NihilStyle.textLarge
-                    color: NihilStyle.inkSoft
+                    color: NihilStyle.textSecondary
                 }
             }
 
@@ -194,13 +185,13 @@ FocusScope {
                 Item {
                     width: parent.width
                     height: NihilStyle.s(16)
-                    NText { text: root.clock(root.position); figures: true; font.pixelSize: NihilStyle.textLabel; color: NihilStyle.inkFaint }
+                    NText { text: root.clock(root.position); figures: true; font.pixelSize: NihilStyle.textCaption; color: NihilStyle.textTertiary }
                     NText {
                         anchors.right: parent.right
                         text: "-" + root.clock(root.length - root.position)
                         figures: true
-                        font.pixelSize: NihilStyle.textLabel
-                        color: NihilStyle.inkFaint
+                        font.pixelSize: NihilStyle.textCaption
+                        color: NihilStyle.textTertiary
                     }
                 }
             }
@@ -213,7 +204,7 @@ FocusScope {
                     anchors.verticalCenter: parent.verticalCenter
                     icon: "shuffle"
                     visible: root.player?.shuffleSupported ?? false
-                    lit: root.player?.shuffle ?? false
+                    highlighted: root.player?.shuffle ?? false
                     Accessible.name: Translation.tr("Shuffle")
                     onClicked: root.player.shuffle = !root.player.shuffle
                 }
@@ -231,7 +222,7 @@ FocusScope {
                     anchors.verticalCenter: parent.verticalCenter
                     width: NihilStyle.s(68)
                     height: width
-                    lit: true
+                    highlighted: true
                     icon: root.player?.isPlaying ? "pause" : "play"
                     iconSize: NihilStyle.s(28)
                     Accessible.name: root.player?.isPlaying ? Translation.tr("Pause") : Translation.tr("Play")
@@ -251,7 +242,7 @@ FocusScope {
                     anchors.verticalCenter: parent.verticalCenter
                     icon: "restart"
                     visible: root.player?.loopSupported ?? false
-                    lit: (root.player?.loopState ?? MprisLoopState.None) !== MprisLoopState.None
+                    highlighted: (root.player?.loopState ?? MprisLoopState.None) !== MprisLoopState.None
                     Accessible.name: Translation.tr("Repeat")
                     onClicked: root.player.loopState = root.player.loopState === MprisLoopState.None ? MprisLoopState.Playlist
                         : root.player.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None
@@ -266,7 +257,7 @@ FocusScope {
                     anchors.verticalCenter: parent.verticalCenter
                     text: (Audio.sink?.audio?.muted ?? false) ? "volume_mute" : "volume_down"
                     size: NihilStyle.s(18)
-                    color: NihilStyle.inkSoft
+                    color: NihilStyle.textSecondary
                 }
                 NSlider {
                     anchors.verticalCenter: parent.verticalCenter
@@ -280,7 +271,7 @@ FocusScope {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "volume_up"
                     size: NihilStyle.s(18)
-                    color: NihilStyle.inkSoft
+                    color: NihilStyle.textSecondary
                 }
             }
 
@@ -296,7 +287,7 @@ FocusScope {
                         label: modelData?.identity ?? ""
                         icon: modelData?.isPlaying ? "play" : "pause"
                         iconSize: NihilStyle.s(14)
-                        lit: modelData === root.player
+                        highlighted: modelData === root.player
                         onClicked: MprisController.setActivePlayer(modelData)
                     }
                 }

@@ -27,8 +27,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: height / 2
-        color: root.on ? NihilStyle.accent : tap.containsMouse ? NihilStyle.chosen : NihilStyle.pieceRaised
-        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+        color: root.on ? NihilStyle.accent : tap.containsMouse ? NihilStyle.fillPressed : NihilStyle.fillHover
+        Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
     }
     Rectangle {
         readonly property real side: root.height - root.inset * 2
@@ -37,10 +37,10 @@ Item {
         width: side * (tap.pressed ? 1.25 : 1)
         height: side
         radius: height / 2
-        color: root.on ? NihilStyle.accentInk : NihilStyle.inkSoft
-        Behavior on x { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutQuint } }
-        Behavior on width { NumberAnimation { duration: NihilStyle.quick } }
-        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+        color: root.on ? NihilStyle.accentText : NihilStyle.textSecondary
+        Behavior on x { NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutQuint } }
+        Behavior on width { NumberAnimation { duration: NihilStyle.durationShort } }
+        Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
     }
 
     MouseArea {

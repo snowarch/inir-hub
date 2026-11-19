@@ -30,11 +30,11 @@ FocusScope {
     readonly property real pagerRoom: NihilStyle.s(36)
     readonly property real pageWidth: root.width
     readonly property real pageHeight: root.height - root.pagerRoom
-    readonly property real gap: NihilStyle.s(root.options.spacing ?? 30)
+    readonly property real gap: NihilStyle.s(root.options.spacing ?? 20)
     readonly property real rowGap: Math.round(root.gap * 0.53)
     readonly property real iconSize: (root.options.iconSize ?? -1) > 0 ? root.options.iconSize
         : NihilStyle.clamp(root.pageWidth / 19, NihilStyle.s(48), NihilStyle.s(96))
-    readonly property real cellWidth: root.iconSize + NihilStyle.s(64)
+    readonly property real cellWidth: root.iconSize + NihilStyle.s(48)
     readonly property real cellHeight: root.iconSize + NihilStyle.s(56)
     // The columns spread over the whole width, so the grid ends where the search field does.
     readonly property real columnGap: catalog.columns > 1
@@ -210,7 +210,7 @@ FocusScope {
             target: tiles
             property: "slide"
             to: 0
-            duration: NihilStyle.calm
+            duration: NihilStyle.durationMedium
             easing.type: Easing.OutCubic
         }
 
@@ -223,13 +223,13 @@ FocusScope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: catalog.filtering ? "search_off" : "apps"
                 size: NihilStyle.s(30)
-                color: NihilStyle.inkFaint
+                color: NihilStyle.textTertiary
             }
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: catalog.filtering ? Translation.tr("No apps match") : Translation.tr("No apps to show")
                 font.weight: Font.Medium
-                color: NihilStyle.inkSoft
+                color: NihilStyle.textSecondary
             }
         }
     }
@@ -282,8 +282,8 @@ FocusScope {
                         width: dot.here ? NihilStyle.s(22) : NihilStyle.s(6)
                         height: NihilStyle.s(6)
                         radius: height / 2
-                        color: dot.here ? NihilStyle.ink : Qt.alpha(NihilStyle.ink, dot.containsMouse ? 0.5 : 0.22)
-                        Behavior on width { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+                        color: dot.here ? NihilStyle.text : Qt.alpha(NihilStyle.text, dot.containsMouse ? 0.5 : 0.22)
+                        Behavior on width { NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
                     }
                 }
             }

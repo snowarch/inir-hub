@@ -19,8 +19,8 @@ NGlass {
     implicitHeight: column.implicitHeight + NihilStyle.s(20)
     width: implicitWidth
     height: implicitHeight
-    radius: NihilStyle.rPanel
-        tracks: true
+    radius: NihilStyle.radiusPanel
+        followPointer: true
 
     function appName(win: var): string {
         return AppSearch.lookupDesktopEntry(win?.app_id ?? "")?.name ?? String(win?.app_id ?? "")
@@ -58,8 +58,8 @@ NGlass {
                 Rectangle {
                     anchors.fill: parent
                     radius: height / 2
-                    color: row.active ? NihilStyle.chosen : row.containsMouse ? NihilStyle.piece : "transparent"
-                    Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                    color: row.active ? NihilStyle.fillPressed : row.containsMouse ? NihilStyle.fill : "transparent"
+                    Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
                 }
                 // What lives there: up to three icons, overlapping a little; an empty workspace shows a quiet ring.
                 Item {
@@ -76,7 +76,7 @@ NGlass {
                         radius: width / 2
                         color: "transparent"
                         border.width: 1
-                        border.color: NihilStyle.inkFaint
+                        border.color: NihilStyle.textTertiary
                     }
                     Repeater {
                         model: row.windows.slice(0, 3)
@@ -98,7 +98,7 @@ NGlass {
                     anchors.verticalCenter: parent.verticalCenter
                     text: row.name.length > 0 ? row.name
                         : row.windows.length > 0 ? root.appName(row.windows.find(win => win.is_focused) ?? row.windows[0]) : Translation.tr("Empty")
-                    color: row.active ? NihilStyle.ink : NihilStyle.inkSoft
+                    color: row.active ? NihilStyle.text : NihilStyle.textSecondary
                     font.weight: row.active ? Font.DemiBold : Font.Medium
                 }
             }

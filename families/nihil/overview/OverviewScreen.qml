@@ -21,7 +21,7 @@ PanelWindow {
     readonly property bool focusedHere: (GlobalStates.focusedScreen?.name ?? root.output) === root.output
     readonly property bool open: NihilState.overviewOpen && !NihilState.nativeStage && NihilState.view === "windows"
     property real shown: root.open ? 1 : 0
-    Behavior on shown { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
+    Behavior on shown { NumberAnimation { duration: NihilStyle.durationLong; easing.type: Easing.OutQuint } }
 
     readonly property var nihil: Config.options?.nihil
     readonly property var modules: root.nihil?.modules
@@ -48,8 +48,8 @@ PanelWindow {
     readonly property real thumbH: Math.round(root.thumbW / root.screenAspect)
     readonly property real margin: NihilStyle.s(14)
     readonly property bool panelShown: (root.modules?.panel ?? true) && (root.nihil?.panel?.visibility ?? "always") !== "hidden"
-    // The rail stays beside the overview, which starts where it ends.
-    readonly property real rail: root.panelShown ? NihilStyle.railRoom : 0
+    // The bar stays beside the overview, which starts where it ends.
+    readonly property real bar: root.panelShown ? NihilStyle.barSpace : 0
     readonly property bool entryShown: (root.modules?.search ?? true) && (root.nihil?.search?.showEntry ?? true)
 
     readonly property var workspaces: NihilState.workspacesOn(root.output)
@@ -67,10 +67,10 @@ PanelWindow {
     WlrLayershell.keyboardFocus: root.open && root.focusedHere ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors { top: true; bottom: true; left: true; right: true }
     margins {
-        top: NihilStyle.railEdge === "top" ? root.rail : 0
-        bottom: NihilStyle.railEdge === "bottom" ? root.rail : 0
-        left: NihilStyle.railEdge === "left" ? root.rail : 0
-        right: NihilStyle.railEdge === "right" ? root.rail : 0
+        top: NihilStyle.barEdge === "top" ? root.bar : 0
+        bottom: NihilStyle.barEdge === "bottom" ? root.bar : 0
+        left: NihilStyle.barEdge === "left" ? root.bar : 0
+        right: NihilStyle.barEdge === "right" ? root.bar : 0
     }
 
     onOpenChanged: {
@@ -105,8 +105,10 @@ PanelWindow {
         if ((root.nihil?.overview?.alwaysActivateSelected ?? false) && win) root.focusWindow(win)
         else NihilState.closeOverview()
     }
+    // Escape clears a typed search first, unless it is set to close the overview at once.
     function stepBack(): void {
-        root.leave()
+        if (NihilState.query.length > 0 && (root.nihil?.overview?.escapeKey ?? "default") !== "close") NihilState.setQuery("")
+        else root.leave()
     }
 
     // The room the side strips leave for the centre.
@@ -149,7 +151,7 @@ PanelWindow {
         visible: root.backdropMode !== "transparent"
         color: "#000000"
         opacity: root.shown * (1 - root.brightness)
-        Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
+        Behavior on opacity { NumberAnimation { duration: NihilStyle.durationMedium } }
     }
 
     Item {
@@ -235,8 +237,8 @@ PanelWindow {
                         if (page.away !== 0) NiriService.switchToWorkspaceById(page.modelData.id)
                         else if (root.nihil?.overview?.closeOnEmptyClick ?? true) root.leave()
                     }
-                    Behavior on x { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
-                    Behavior on y { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
+                    Behavior on x { NumberAnimation { duration: NihilStyle.durationLong; easing.type: Easing.OutQuint } }
+                    Behavior on y { NumberAnimation { duration: NihilStyle.durationLong; easing.type: Easing.OutQuint } }
                 }
             }
         }
@@ -251,7 +253,7 @@ PanelWindow {
             width: root.thumbsVertical ? strip.width + pad * 2 : full ? root.width - root.margin * 2 : strip.width + pad * 2
             height: root.thumbsVertical ? (full ? root.height - root.margin * 2 : strip.height + pad * 2)
                 : strip.height + pad * 2
-            radius: NihilStyle.rPanel
+            radius: NihilStyle.radiusPanel
         }
 
         // The workspace strip.
@@ -314,8 +316,8 @@ PanelWindow {
             width: NihilStyle.s(420) * (root.nihil?.search?.width ?? 1)
             height: NihilStyle.s(42)
             radius: height / 2
-            tracks: true
-            ignite: entry.typing ? 0.6 : 0
+            followPointer: true
+            activeGlow: entry.typing ? 0.6 : 0
 
             NField {
                 id: entry

@@ -16,7 +16,7 @@ ClippingRectangle {
     property bool iconWhileEmpty: true
     property int decodeWidth: 960
 
-    color: NihilStyle.piece
+    color: NihilStyle.fill
 
     NAppIcon {
         anchors.centerIn: parent

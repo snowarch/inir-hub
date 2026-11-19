@@ -12,34 +12,26 @@ import qs.modules.common.models.quickToggles
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The machine as an instrument panel: two dials, two radios, six round keys, what plays and the way out. What is on is
-// solid in the light. A radio's arrow, or a right click on a dial, opens its list on the same slab.
+// Quick settings: the sound, microphone and screen dials, Wi-Fi and Bluetooth, six round keys and what plays. What is
+// on is solid in the accent. A radio's arrow, or a right click on a dial, opens its list in the same page.
 Item {
     id: root
 
     property var screen: null
-    property bool flipped: false
-    property real room: 0
     property bool open: false
 
     // The list on show: "wifi", "bluetooth", "output" or "input". Empty is the controls themselves.
     property string page: ""
     onOpenChanged: if (!root.open) root.page = ""
 
-    readonly property real side: NihilStyle.s(24)
+    readonly property real side: NihilStyle.s(28)
     readonly property real inner: root.width - root.side * 2
-    readonly property real headPad: NihilStyle.s(16)
-    // Where the light gathers, under the last row.
-    readonly property real footPad: NihilStyle.s(54)
     readonly property var monitor: Brightness.getMonitorForScreen(root.screen)
     readonly property bool hasBrightness: Number.isFinite(root.monitor?.brightness)
     readonly property bool muted: Audio.sink?.audio?.muted ?? false
     readonly property bool airplane: !Network.wifiEnabled && !BluetoothStatus.enabled
     readonly property var player: MprisController.activePlayer
 
-    implicitWidth: NihilStyle.s(520)
-    implicitHeight: root.page.length > 0 ? Math.min(NihilStyle.s(600), root.room)
-        : controls.implicitHeight + root.headPad + root.footPad
 
     BluetoothToggle { id: bt }
     NetworkToggle { id: net }
@@ -55,7 +47,7 @@ Item {
         return hours > 0 ? Translation.tr("%1 h %2 min").arg(hours).arg(minutes % 60) : Translation.tr("%1 min").arg(minutes)
     }
     readonly property string machine: {
-        // Without a battery there is nothing to tell here: the deck's side already says how long the machine is up.
+        // Without a battery there is nothing to tell here: the dashboard's side already says how long the machine is up.
         if (!Battery.available)
             return ""
         const share = Math.round(Battery.percentage * 100) + " %"
@@ -74,12 +66,12 @@ Item {
         property string note: ""
         property bool on: false
         property bool usable: true
-        readonly property color inkOn: radio.on ? NihilStyle.accentInk : NihilStyle.ink
+        readonly property color foreground: radio.on ? NihilStyle.accentText : NihilStyle.text
 
         signal tapped()
         signal opened()
 
-        width: (root.inner - NihilStyle.gap) / 2
+        width: (root.inner - NihilStyle.spacing) / 2
         height: NihilStyle.s(68)
         enabled: radio.usable
         hoverEnabled: true
@@ -94,8 +86,8 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: height / 2
-            color: radio.on ? NihilStyle.accent : radio.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
-            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+            color: radio.on ? NihilStyle.accent : radio.containsMouse ? NihilStyle.fillHover : NihilStyle.fill
+            Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
         }
         NIcon {
             id: radioGlyph
@@ -103,7 +95,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: radio.glyph
             size: NihilStyle.s(22)
-            color: radio.inkOn
+            color: radio.foreground
         }
         Column {
             anchors.left: radioGlyph.right
@@ -116,13 +108,13 @@ Item {
                 text: radio.name
                 font.pixelSize: NihilStyle.textBody
                 font.weight: Font.DemiBold
-                color: radio.inkOn
+                color: radio.foreground
             }
             NText {
                 width: parent.width
                 text: radio.note
                 font.pixelSize: NihilStyle.textSmall
-                color: Qt.alpha(radio.inkOn, 0.66)
+                color: Qt.alpha(radio.foreground, 0.66)
             }
         }
         NButton {
@@ -133,7 +125,7 @@ Item {
             width: NihilStyle.s(36)
             height: width
             visible: radio.usable
-            tone: radio.on ? Qt.alpha(NihilStyle.accentInk, 0.1) : NihilStyle.piece
+            tone: radio.on ? Qt.alpha(NihilStyle.accentText, 0.1) : NihilStyle.fill
             icon: "chevron_right"
             iconSize: NihilStyle.s(16)
             Accessible.name: Translation.tr("More")
@@ -170,15 +162,15 @@ Item {
             width: NihilStyle.s(56)
             height: width
             radius: width / 2
-            color: key.on ? NihilStyle.accent : key.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
+            color: key.on ? NihilStyle.accent : key.containsMouse ? NihilStyle.fillHover : NihilStyle.fill
             scale: key.pressed ? 0.94 : 1
-            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-            Behavior on scale { NumberAnimation { duration: NihilStyle.quick } }
+            Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
+            Behavior on scale { NumberAnimation { duration: NihilStyle.durationShort } }
             NIcon {
                 anchors.centerIn: parent
                 text: key.glyph
                 size: NihilStyle.s(22)
-                color: key.on ? NihilStyle.accentInk : NihilStyle.ink
+                color: key.on ? NihilStyle.accentText : NihilStyle.text
             }
         }
         NText {
@@ -186,16 +178,14 @@ Item {
             anchors.bottom: parent.bottom
             width: Math.min(implicitWidth, parent.width - NihilStyle.s(4))
             text: key.word
-            font.pixelSize: NihilStyle.textLabel
-            color: key.on ? NihilStyle.ink : NihilStyle.inkSoft
+            font.pixelSize: NihilStyle.textCaption
+            color: key.on ? NihilStyle.text : NihilStyle.textSecondary
         }
     }
 
     ControlList {
-        x: root.side
-        y: root.flipped ? root.footPad : root.headPad
-        width: root.inner
-        height: root.height - root.headPad - root.footPad
+        anchors.fill: parent
+        anchors.margins: root.side
         visible: root.page.length > 0
         page: root.page
         onPicked: page => root.page = page
@@ -205,7 +195,7 @@ Item {
     Column {
         id: controls
         x: root.side
-        y: root.flipped ? root.footPad : root.headPad
+        y: Math.max(root.side, (root.height - controls.implicitHeight) / 2)
         width: root.inner
         visible: root.page.length === 0
         spacing: NihilStyle.s(14)
@@ -226,28 +216,31 @@ Item {
                 }
             }
             NDial {
-                word: root.hasBrightness ? Translation.tr("Light") : Translation.tr("Microphone")
-                glyph: root.hasBrightness ? "light_mode" : (Audio.source?.audio?.muted ? "mic_off" : "mic")
-                value: root.hasBrightness ? root.monitor.brightness : (Audio.source?.audio?.volume ?? 0)
-                keyed: !root.hasBrightness
+                word: Translation.tr("Microphone")
+                glyph: Audio.source?.audio?.muted ? "mic_off" : "mic"
+                value: Audio.source?.audio?.muted ? 0 : (Audio.source?.audio?.volume ?? 0)
+                keyed: true
                 onTapped: if (Audio.source?.audio) Audio.source.audio.muted = !Audio.source.audio.muted
-                onMoved: value => {
-                    if (root.hasBrightness) root.monitor?.setBrightness(Math.max(0.01, value))
-                    else if (Audio.source?.audio) Audio.source.audio.volume = value
-                }
+                onMoved: value => { if (Audio.source?.audio) Audio.source.audio.volume = value }
                 TapHandler {
                     acceptedButtons: Qt.RightButton
-                    enabled: !root.hasBrightness
                     onTapped: root.page = "input"
                 }
+            }
+            NDial {
+                visible: root.hasBrightness
+                word: Translation.tr("Brightness")
+                glyph: "light_mode"
+                value: root.monitor?.brightness ?? 0
+                onMoved: value => root.monitor?.setBrightness(Math.max(0.01, value))
             }
         }
 
         Column {
             width: parent.width
-            spacing: NihilStyle.gap
+            spacing: NihilStyle.spacing
             Row {
-                spacing: NihilStyle.gap
+                spacing: NihilStyle.spacing
                 Radio {
                     glyph: Network.ethernet ? "lan" : Network.wifiEnabled ? "wifi" : "wifi_off"
                     name: Translation.tr("Wi-Fi")
@@ -330,7 +323,7 @@ Item {
             width: parent.width
             height: NihilStyle.s(112)
             radius: NihilStyle.r(26)
-            color: NihilStyle.carbon
+            color: NihilStyle.surface
 
             Image {
                 id: cover
@@ -419,7 +412,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.machine
                 font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
+                color: NihilStyle.textSecondary
             }
         }
     }

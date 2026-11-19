@@ -44,7 +44,7 @@ NScroller {
                 if (section.screens && CompositorConfig.has("display", "scale")) rows.push({ type: "compositor", spec: root.scaleSpec })
                 if (section.modelData.group) rows = rows.concat(CompositorRows.of(section.modelData.group).map(spec => ({ type: "compositor", spec: spec })))
                 return rows.concat(section.modelData.rows)
-                    .filter(row => root.host.shown(row) && !(root.leadsWithLight && row.key === "look.palette"))
+                    .filter(row => root.host.shown(row) && !(root.leadsWithLight && row.key === "look.accent"))
             }
             visible: section.rows.length > 0
             width: root.innerWidth
@@ -55,7 +55,7 @@ NScroller {
                 text: Translation.tr(section.modelData.title)
                 font.pixelSize: NihilStyle.textSmall
                 font.weight: Font.DemiBold
-                color: NihilStyle.inkSoft
+                color: NihilStyle.textSecondary
             }
 
             // Which screen the rows below set, with more than one.
@@ -67,19 +67,19 @@ NScroller {
                     delegate: NButton {
                         required property var modelData
                         label: CompositorConfig.screenName(modelData)
-                        lit: CompositorConfig.output?.name === modelData.name
+                        highlighted: CompositorConfig.output?.name === modelData.name
                         onClicked: CompositorConfig.applyDisplay("screen", modelData.name)
                     }
                 }
             }
 
             // A screen change that may have left nothing to see goes back by itself unless it is kept.
-            NWell {
+            NInset {
                 visible: section.screens && CompositorConfig.pending !== null
                 width: section.width
                 height: NihilStyle.s(62)
                 radius: NihilStyle.r(22)
-                lit: 0.7
+                highlighted: 0.7
                 NText {
                     x: NihilStyle.s(20)
                     anchors.verticalCenter: parent.verticalCenter
@@ -102,7 +102,7 @@ NScroller {
                     anchors.rightMargin: NihilStyle.s(12)
                     anchors.verticalCenter: parent.verticalCenter
                     label: Translation.tr("Keep")
-                    lit: true
+                    highlighted: true
                     onClicked: CompositorConfig.keepDisplay()
                 }
             }
@@ -111,9 +111,9 @@ NScroller {
                 width: section.width
                 height: rows.implicitHeight
                 radius: NihilStyle.r(22)
-                color: NihilStyle.piece
+                color: NihilStyle.fill
                 border.width: 1
-                border.color: NihilStyle.hair
+                border.color: NihilStyle.border
 
                 Column {
                     id: rows

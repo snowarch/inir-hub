@@ -33,10 +33,10 @@ Item {
     height: root.slot.h
     z: hand.drag.active ? 100 : root.hot ? 2 : 1
 
-    Behavior on x { enabled: !hand.drag.active; NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
-    Behavior on y { enabled: !hand.drag.active; NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
-    Behavior on width { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
-    Behavior on height { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
+    Behavior on x { enabled: !hand.drag.active; NumberAnimation { duration: NihilStyle.durationLong; easing.type: Easing.OutQuint } }
+    Behavior on y { enabled: !hand.drag.active; NumberAnimation { duration: NihilStyle.durationLong; easing.type: Easing.OutQuint } }
+    Behavior on width { NumberAnimation { duration: NihilStyle.durationLong; easing.type: Easing.OutQuint } }
+    Behavior on height { NumberAnimation { duration: NihilStyle.durationLong; easing.type: Easing.OutQuint } }
 
     Drag.active: hand.drag.active
     Drag.keys: ["nihil-window"]
@@ -44,15 +44,15 @@ Item {
 
     NGlass {
         anchors.fill: parent
-        radius: NihilStyle.rCard
-        flare: 0
-        tracks: true
+        radius: NihilStyle.radiusCard
+        edgeGlow: 0
+        followPointer: true
     }
 
     WindowShot {
         anchors.fill: parent
         anchors.margins: NihilStyle.s(2)
-        radius: NihilStyle.rCard - NihilStyle.s(2)
+        radius: NihilStyle.radiusCard - NihilStyle.s(2)
         windowId: root.win.id
         appId: root.win.app_id ?? ""
         live: root.live
@@ -62,12 +62,12 @@ Item {
     // The light marks the window the hand or the keys are on.
     Rectangle {
         anchors.fill: parent
-        radius: NihilStyle.rCard
+        radius: NihilStyle.radiusCard
         color: "transparent"
         border.width: NihilStyle.s(2)
         border.color: NihilStyle.accent
         opacity: root.hot ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+        Behavior on opacity { NumberAnimation { duration: NihilStyle.durationShort } }
     }
 
     MouseArea {
@@ -120,7 +120,7 @@ Item {
         width: Math.min(title.implicitWidth + NihilStyle.s(22), root.width - NihilStyle.s(12))
         height: NihilStyle.s(30)
         radius: height / 2
-        color: root.hot ? NihilStyle.accent : Qt.alpha(NihilStyle.void_, 0.86)
+        color: root.hot ? NihilStyle.accent : Qt.alpha(NihilStyle.background, 0.86)
         NText {
             id: title
             anchors.fill: parent
@@ -131,7 +131,7 @@ Item {
             elide: Text.ElideRight
             text: root.win.title ?? ""
             font.pixelSize: NihilStyle.textSmall
-            color: root.hot ? NihilStyle.accentInk : NihilStyle.ink
+            color: root.hot ? NihilStyle.accentText : NihilStyle.text
         }
     }
 

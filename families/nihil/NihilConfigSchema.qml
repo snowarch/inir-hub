@@ -9,18 +9,18 @@ JsonObject {
     property JsonObject look: JsonObject {
         // NiHiL's own scheme: "dark" or "light".
         property string scheme: "dark"
-        // The one light: "pearl", "glacier", "sage", "coral", "gold" or "wallpaper".
-        property string palette: "pearl"
+        // "white", "blue", "green", "orange", "yellow" or "wallpaper".
+        property string accent: "white"
         // "smoke", "frost", "fluted" or "prism".
         property string material: "smoke"
-        // Reeds across fluted glass.
-        property int ribs: 14
+        // Width of each rib of fluted glass.
+        property int ribWidth: 14
         property real glass: 0.62
         property bool blur: true
         property real grain: 0.25
-        property real rim: 1
-        // The light along the glass's rim, brightest where the light falls.
-        property real flare: 1
+        property real edgeLight: 1
+        // Glow along the glass edge, strongest where the light falls.
+        property real edgeGlow: 1
         property real corners: 1
         property real scale: 1
         // Multiplies every animation; 0 turns movement off.
@@ -28,39 +28,42 @@ JsonObject {
         // Body text: "geist" or "system".
         property string font: "geist"
         // Titles: "geist" or "system".
-        property string display: "geist"
+        property string titleFont: "geist"
     }
-    property JsonObject field: JsonObject {
-        // 0 beam, 1 fluted streaks, 2 haze, 3 void.
-        property int form: 0
-        property real seed: 0.37
+    // The pattern the overview can stand on: 0 beam, 1 streaks, 2 haze, 3 plain.
+    property JsonObject backdrop: JsonObject {
+        property int pattern: 0
+        property real variation: 0.37
         property real glow: 1
     }
-    // The rail: the column (or row) of glass along one edge that holds everything at hand.
+    // The bar: the column (or row) of glass along one edge that holds everything at hand.
     property JsonObject panel: JsonObject {
         // "left", "right", "top" or "bottom".
         property string position: "left"
         // "float" stands clear of the edge with round ends; "edge" lies flush against it.
         property string style: "float"
         property int thickness: 52
-        // Space between the floating rail and the screen's edge.
+        // Space between the floating bar and the screen's edge.
         property int margin: 10
         // "always", "desktop" (while no window is open on the workspace, and in the overview), "overview" or "hidden".
         property string visibility: "always"
         // In the overview: "same" keeps the glass, "transparent" drops it.
         property string overviewStyle: "same"
         property list<string> screenList: []
-        // The open windows of the workspace, as icons on the rail.
+        // The open windows of the workspace, as icons on the bar.
         property bool windows: true
         property int windowsMax: 8
         property bool tray: true
     }
-    // The deck: the one pane beside the rail that holds every page.
-    property JsonObject deck: JsonObject {
+    // The dashboard: the one pane beside the bar that holds every page.
+    property JsonObject dashboard: JsonObject {
         // "full" names each page; "icons" keeps only their marks.
         property string sidebar: "full"
         // How much the desktop dims behind it.
         property real dim: 0.22
+        // Its size in pixels at interface size 1, kept within the screen.
+        property int width: 1180
+        property int height: 680
     }
     property JsonObject modules: JsonObject {
         // Turn a whole surface off.
@@ -75,16 +78,16 @@ JsonObject {
         property bool hotCorner: true
         property bool osd: true
         property bool notifications: true
-        // Pages of the deck.
+        // Pages of the dashboard.
         property bool media: true
         property bool focus: true
     }
     property JsonObject overview: JsonObject {
         // "compositor" puts NiHiL's parts over Niri's or Umbriel's own overview; "shell" draws the whole overview.
         property string engine: "compositor"
-        // What the compositor's overview stands on: "wallpaper" (blurred), "field" or "off".
-        property string poster: "wallpaper"
-        property real posterWallpaper: 0.6
+        // Behind the compositor's overview: "wallpaper" (blurred), "pattern" or "off".
+        property string backdrop: "wallpaper"
+        property real backdropWallpaper: 0.6
         // "default" spreads the windows, "static" leaves them in place, "hover" spreads them under the pointer.
         property string mode: "default"
         // "desktop", "overview" or "apps": where the session starts.
@@ -150,8 +153,6 @@ JsonObject {
         property bool menuCloseOnWorkspace: true
         property bool menuMoveApp: true
         property bool menuThumbnail: true
-        // Scrolling over the search's window list moves through it.
-        property bool windowSearchScroll: true
     }
     // The desktop dock wears the dash's apps, icons, clicks and menu.
     property JsonObject dock: JsonObject {
@@ -253,9 +254,6 @@ JsonObject {
     }
     // Profiles saved over the four presets: { id: { "dash.position": value, ... } }.
     property var savedProfiles: ({})
-    property JsonObject widgets: JsonObject {
-        property string design: "nihil"
-    }
     property JsonObject apps: JsonObject {
         // "workspaces" follows the way workspaces stack, or "horizontal", "vertical".
         property string orientation: "workspaces"
@@ -264,9 +262,7 @@ JsonObject {
         // 0 fits the page.
         property int columns: 0
         property int rows: 0
-        property int spacing: 30
-        property real pageWidth: 0.667
-        property real pageHeight: 0.78
+        property int spacing: 20
         property bool center: false
         // "custom", "name", "foldersFirst", "foldersLast" or "usage" (usage shows no folders).
         property string order: "custom"

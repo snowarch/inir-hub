@@ -1,6 +1,6 @@
 #version 440
 // A full ring of ticks. `level` lights them clockwise from the top; `pointer` lights the ones round an angle and draws
-// the longest tick there. A recess sits at the heart.
+// the longest tick there. A trackColor sits at the heart.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 layout(std140, binding = 0) uniform buf {
@@ -11,9 +11,9 @@ layout(std140, binding = 0) uniform buf {
     float level;
     float pointer;
     float spread;
-    vec4 mark;
-    vec4 light;
-    vec4 recess;
+    vec4 tickColor;
+    vec4 fillColor;
+    vec4 trackColor;
 };
 
 const float TAU = 6.28318531;
@@ -28,7 +28,7 @@ void main() {
     float theta = mod(atan(p.x, -p.y), TAU);
 
     float heart = R * 0.82;
-    vec4 color = recess * smoothstep(heart + 0.7, heart - 0.7, r);
+    vec4 color = trackColor * smoothstep(heart + 0.7, heart - 0.7, r);
 
     float f = theta / TAU * ticks;
     float n = floor(f + 0.5);
@@ -45,6 +45,6 @@ void main() {
 
     float filled = step(at + 0.5, level * ticks);
     float near = spread > 0.0 ? smoothstep(spread, spread * 0.3, apart(angle, pointer)) : 0.0;
-    color += mix(mark, light, max(filled, near)) * cover * (1.0 - color.a);
+    color += mix(tickColor, fillColor, max(filled, near)) * cover * (1.0 - color.a);
     fragColor = color * qt_Opacity;
 }

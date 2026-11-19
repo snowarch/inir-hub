@@ -1,6 +1,6 @@
 import QtQuick
 
-// A level as an instrument: ticks round three quarters of a circle, its figure at the heart, its glyph in the open quarter.
+// A level as a dial: ticks round three quarters of a circle, its value in the middle, its glyph in the open quarter.
 // Drag round it or scroll on it; the glyph is a key of its own.
 Item {
     id: root
@@ -34,9 +34,9 @@ Item {
         readonly property size box: Qt.size(width, height)
         readonly property real level: root.level
         readonly property real ticks: 50
-        readonly property color mark: Qt.alpha(NihilStyle.ink, 0.2)
-        readonly property color light: NihilStyle.accent
-        readonly property color recess: NihilStyle.piece
+        readonly property color tickColor: Qt.alpha(NihilStyle.text, 0.2)
+        readonly property color fillColor: NihilStyle.accent
+        readonly property color trackColor: NihilStyle.fill
         fragmentShader: Qt.resolvedUrl("dial.frag.qsb")
     }
 
@@ -72,7 +72,7 @@ Item {
             width: Math.min(implicitWidth, root.width * 0.5)
             text: root.word
             font.pixelSize: NihilStyle.textSmall
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
     }
 

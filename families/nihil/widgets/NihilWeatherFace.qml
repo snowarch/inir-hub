@@ -41,20 +41,20 @@ NihilWidgetFace {
         }
 
         NDisplay {
-            color: root.ink
+            color: root.foreground
             id: temperature
             text: root.widget.temperatureText ?? root.sky.temp
             size: root.dp(root.small ? 44 : 58)
         }
 
-        // Small: the sky sits on the bottom edge, Apple's way; with room it follows the figure and the facts take the foot.
+        // Small: the sky sits on the bottom edge, with room it follows the temperature and the facts take the foot.
         Column {
             width: parent.width
             spacing: root.dp(2)
             y: root.small ? parent.height - height : temperature.height + root.dp(2)
 
             NText {
-                color: root.ink
+                color: root.foreground
                 width: parent.width
                 text: Weather.describeWeather(root.sky.wCode, root.night)
                 font.pixelSize: root.dp(15)
@@ -64,7 +64,7 @@ NihilWidgetFace {
             NText {
                 width: parent.width
                 font.pixelSize: root.dp(12)
-                color: root.inkSoft
+                color: root.foregroundSecondary
                 elide: Text.ElideRight
                 visible: Weather.showVisibleCity || Weather.stale
                 text: Weather.stale ? Weather.updatedLabel : Weather.visibleCity
@@ -92,10 +92,10 @@ NihilWidgetFace {
                         width: parent.width
                         text: fact.modelData.name
                         font.pixelSize: root.dp(11)
-                        color: root.inkSoft
+                        color: root.foregroundSecondary
                     }
                     NText {
-                        color: root.ink
+                        color: root.foreground
                         width: parent.width
                         figures: true
                         text: fact.modelData.value

@@ -45,7 +45,7 @@ Item {
         x: NihilStyle.s(16)
         y: NihilStyle.s(10)
         width: parent.width - x * 2
-        spacing: NihilStyle.gap
+        spacing: NihilStyle.spacing
 
         Repeater {
             model: root.carried

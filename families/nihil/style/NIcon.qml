@@ -2,13 +2,13 @@ import QtQuick
 import QtQuick.Window
 import "Glyphs.js" as Glyphs
 
-// One of NiHiL's own glyphs (Glyphs.js), drawn at the screen's real pixels in one ink.
+// One of NiHiL's own glyphs (Glyphs.js), drawn at the screen's real pixels in one foreground.
 Item {
     id: root
 
     property string text: ""
     property real size: NihilStyle.s(20)
-    property color color: NihilStyle.ink
+    property color color: NihilStyle.text
     property real weight: 2
 
     readonly property string _ink: "rgb(" + Math.round(root.color.r * 255) + "," + Math.round(root.color.g * 255) + ","

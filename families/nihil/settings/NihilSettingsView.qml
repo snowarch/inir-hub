@@ -10,7 +10,7 @@ import qs.modules.nihil.style
 import "NihilOptions.js" as Options
 import "../state/NihilProfiles.js" as Profiles
 
-// NiHiL's Settings, built like the deck: a plate down the side with the search and the pages, the page beside it in
+// NiHiL's Settings, built like the dashboard: a plate down the side with the search and the pages, the page beside it in
 // grouped plates of rows.
 // Every row comes from NihilOptions.js. The same view is its own window (NihilSettingsApp) and the overlay over the
 // desktop (NihilSettingsHost); `windowed` tells which, and the head's buttons ask the holder to switch or close.
@@ -174,8 +174,8 @@ Item {
             anchors.fill: parent
             anchors.margins: NihilStyle.s(10)
             anchors.rightMargin: 0
-            radius: NihilStyle.rSheet - NihilStyle.s(10)
-            color: NihilStyle.piece
+            radius: NihilStyle.radiusWindow - NihilStyle.s(10)
+            color: NihilStyle.fill
         }
 
         Row {
@@ -183,7 +183,7 @@ Item {
             y: NihilStyle.s(28)
             height: NihilStyle.s(32)
             spacing: NihilStyle.s(12)
-            NMark {
+            NLogo {
                 anchors.verticalCenter: parent.verticalCenter
                 size: NihilStyle.s(20)
             }
@@ -245,16 +245,16 @@ Item {
                         x: NihilStyle.s(14)
                         y: NihilStyle.s(12)
                         text: Translation.tr(entry.modelData.heading ?? "")
-                        font.pixelSize: NihilStyle.textLabel
-                        color: NihilStyle.inkFaint
+                        font.pixelSize: NihilStyle.textCaption
+                        color: NihilStyle.textTertiary
                     }
                     Rectangle {
                         anchors.fill: parent
                         anchors.topMargin: entry.lead
                         radius: height / 2
-                        color: entry.here ? NihilStyle.accent : NihilStyle.pieceRaised
+                        color: entry.here ? NihilStyle.accent : NihilStyle.fillHover
                         visible: entry.here || entry.containsMouse
-                        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                        Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
                     }
                     NIcon {
                         id: glyph
@@ -263,7 +263,7 @@ Item {
                         anchors.verticalCenterOffset: entry.lead / 2
                         text: entry.modelData.glyph ?? "tune"
                         size: NihilStyle.s(18)
-                        color: entry.here ? NihilStyle.accentInk : NihilStyle.inkSoft
+                        color: entry.here ? NihilStyle.accentText : NihilStyle.textSecondary
                     }
                     NText {
                         anchors.left: glyph.right
@@ -275,7 +275,7 @@ Item {
                         text: Translation.tr(entry.modelData.title)
                         elide: Text.ElideRight
                         font.pixelSize: NihilStyle.textBody
-                        color: entry.here ? NihilStyle.accentInk : entry.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                        color: entry.here ? NihilStyle.accentText : entry.containsMouse ? NihilStyle.text : NihilStyle.textSecondary
                         font.weight: entry.here ? Font.DemiBold : Font.Medium
                     }
                 }
@@ -309,7 +309,7 @@ Item {
             visible: root.query.length === 0
             text: Translation.tr(root.page.summary ?? "")
             font.pixelSize: NihilStyle.textBody
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
         NText {
             id: count
@@ -319,7 +319,7 @@ Item {
             visible: root.query.length > 0
             text: root.found.length === 1 ? Translation.tr("1 option matches") : Translation.tr("%1 options match").arg(root.found.length)
             font.pixelSize: NihilStyle.textSmall
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
 
         // How Settings is held: over the desktop or in its own window, and closed from here in either.
@@ -370,7 +370,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "search_off"
                 size: NihilStyle.s(32)
-                color: NihilStyle.inkFaint
+                color: NihilStyle.textTertiary
             }
             NText {
                 anchors.horizontalCenter: parent.horizontalCenter

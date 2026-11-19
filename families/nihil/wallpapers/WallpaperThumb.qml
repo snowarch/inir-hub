@@ -30,7 +30,7 @@ Item {
         anchors.fill: parent
         anchors.margins: NihilStyle.s(5)
         radius: NihilStyle.r(16)
-        color: NihilStyle.piece
+        color: NihilStyle.fill
 
         Image {
             anchors.fill: parent
@@ -39,7 +39,7 @@ Item {
             fillMode: Image.PreserveAspectCrop
             sourceSize.width: Math.round(frame.width * 1.5)
             opacity: status === Image.Ready ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+            Behavior on opacity { NumberAnimation { duration: NihilStyle.durationShort } }
             // A video whose first frame is not made yet has no file to show: nothing, not the root folder.
             readonly property string file: !root.live || root.path.length === 0 ? ""
                 : root.video ? String(Wallpapers.getVideoFirstFramePath(root.path) ?? "")
@@ -68,7 +68,7 @@ Item {
                 anchors.centerIn: parent
                 text: root.current ? "check" : "play"
                 size: NihilStyle.s(15)
-                color: root.current ? NihilStyle.accentInk : "#FFFFFF"
+                color: root.current ? NihilStyle.accentText : "#FFFFFF"
             }
         }
     }
@@ -81,7 +81,7 @@ Item {
         border.width: NihilStyle.s(2)
         border.color: NihilStyle.accent
         opacity: root.focused ? 1 : hand.containsMouse ? 0.4 : 0
-        Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+        Behavior on opacity { NumberAnimation { duration: NihilStyle.durationShort } }
     }
 
     MouseArea {

@@ -11,7 +11,7 @@ import qs.modules.nihil.state
 
 // NiHiL's parts over the compositor's own overview, on one screen. The compositor draws the workspaces and the live
 // windows (their motion, drags between workspaces, a window opening or closing), so nothing here can lag behind them.
-// This surface holds the search line, the dash and the workspace index; its input mask is only those pieces, so a
+// This surface holds the search line, the dash and the workspace index; its input mask is only those parts, so a
 // window can be dragged anywhere around them.
 PanelWindow {
     id: root
@@ -22,17 +22,17 @@ PanelWindow {
     readonly property bool open: NihilState.overviewOpen && NihilState.nativeStage && NiriService.inOverview
         && NihilState.view === "windows"
     property real shown: root.open ? 1 : 0
-    Behavior on shown { NumberAnimation { duration: NihilStyle.slow; easing.type: Easing.OutQuint } }
+    Behavior on shown { NumberAnimation { duration: NihilStyle.durationLong; easing.type: Easing.OutQuint } }
 
     readonly property var nihil: Config.options?.nihil
     readonly property var modules: root.nihil?.modules
     readonly property bool panelShown: (root.modules?.panel ?? true) && (root.nihil?.panel?.visibility ?? "always") !== "hidden"
-    // The rail stays beside the overview, which keeps clear of its edge.
-    readonly property real rail: root.panelShown ? NihilStyle.railRoom : 0
-    readonly property real top: NihilStyle.railEdge === "top" ? root.rail : 0
-    readonly property real bottom: NihilStyle.railEdge === "bottom" ? root.rail : 0
-    readonly property real lead: NihilStyle.railEdge === "left" ? root.rail : 0
-    readonly property real trail: NihilStyle.railEdge === "right" ? root.rail : 0
+    // The bar stays beside the overview, which keeps clear of its edge.
+    readonly property real bar: root.panelShown ? NihilStyle.barSpace : 0
+    readonly property real top: NihilStyle.barEdge === "top" ? root.bar : 0
+    readonly property real bottom: NihilStyle.barEdge === "bottom" ? root.bar : 0
+    readonly property real lead: NihilStyle.barEdge === "left" ? root.bar : 0
+    readonly property real trail: NihilStyle.barEdge === "right" ? root.bar : 0
     readonly property real roomHeight: root.height - root.top - root.bottom
     readonly property real margin: NihilStyle.s(18)
     readonly property string dashAt: (root.modules?.dash ?? true) ? (root.nihil?.dash?.position ?? "left") : "hidden"
@@ -118,7 +118,7 @@ PanelWindow {
             width: NihilStyle.s(440) * (root.nihil?.search?.width ?? 1)
             height: NihilStyle.s(42)
             radius: height / 2
-            tracks: true
+            followPointer: true
             NField {
                 anchors.fill: parent
                 color: "transparent"

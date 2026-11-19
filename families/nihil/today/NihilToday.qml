@@ -12,26 +12,20 @@ Item {
     id: root
 
     property var screen: null
-    property bool flipped: false
-    property real room: 0
     property bool open: false
 
     readonly property var notices: [...Notifications.list].sort((a, b) => b.time - a.time)
     readonly property real side: NihilStyle.s(28)
-    readonly property real headPad: NihilStyle.s(20)
-    readonly property real footPad: NihilStyle.s(26)
 
-    implicitWidth: NihilStyle.s(900)
-    implicitHeight: Math.min(NihilStyle.s(660), root.room)
 
     Component.onCompleted: Notifications.ensureInitialized()
 
     TodayCalendar {
         id: calendar
         x: root.side
-        y: root.flipped ? root.footPad : root.headPad
-        width: NihilStyle.s(350)
-        height: root.height - root.headPad - root.footPad
+        y: root.side
+        width: Math.min(NihilStyle.s(360), root.width * 0.42)
+        height: root.height - root.side * 2
         live: root.open
     }
 
@@ -44,7 +38,7 @@ Item {
 
         NDisplay {
             id: heading
-            width: parent.width - keys.width - NihilStyle.gap
+            width: parent.width - keys.width - NihilStyle.spacing
             height: NihilStyle.s(52)
             text: Translation.tr("Notifications")
             size: NihilStyle.s(34)
@@ -59,7 +53,7 @@ Item {
                 radius: width / 2
                 tone: "transparent"
                 icon: Notifications.silent ? "notifications_paused" : "bell"
-                lit: Notifications.silent
+                highlighted: Notifications.silent
                 Accessible.name: Translation.tr("Do not disturb")
                 onClicked: Notifications.toggleSilent()
             }
@@ -90,27 +84,12 @@ Item {
             }
         }
 
-        Column {
+        NEmpty {
             anchors.centerIn: list
             visible: root.notices.length === 0
-            spacing: NihilStyle.s(6)
-            NIcon {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: Notifications.silent ? "notifications_paused" : "notifications"
-                size: NihilStyle.s(28)
-                color: NihilStyle.inkFaint
-            }
-            NText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: Translation.tr("All caught up")
-                font.pixelSize: NihilStyle.s(15)
-            }
-            NText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: Notifications.silent ? Translation.tr("Do not disturb is on") : Translation.tr("New notifications land here")
-                font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
-            }
+            icon: Notifications.silent ? "notifications_paused" : "notifications"
+            title: Translation.tr("All caught up")
+            note: Notifications.silent ? Translation.tr("Do not disturb is on") : Translation.tr("New notifications land here")
         }
     }
 }

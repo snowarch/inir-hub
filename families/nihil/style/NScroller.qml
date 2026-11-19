@@ -28,7 +28,7 @@ Item {
         contentWidth: width
         contentHeight: holder.implicitHeight + root.topPad + root.bottomPad
         boundsBehavior: Flickable.StopAtBounds
-        NumberAnimation { id: jump; target: flick; property: "contentY"; duration: NihilStyle.calm; easing.type: Easing.OutCubic }
+        NumberAnimation { id: jump; target: flick; property: "contentY"; duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic }
         Column {
             id: holder
             x: root.sidePad
@@ -48,8 +48,8 @@ Item {
         width: NihilStyle.s(3)
         height: Math.max(NihilStyle.s(28), flick.visibleArea.heightRatio * flick.height)
         radius: width / 2
-        color: NihilStyle.inkSoft
+        color: NihilStyle.textSecondary
         opacity: flick.moving || pointer.hovered ? 0.7 : 0
-        Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
+        Behavior on opacity { NumberAnimation { duration: NihilStyle.durationMedium } }
     }
 }

@@ -39,8 +39,8 @@ Item {
     }
     Rectangle {
         anchors.fill: parent
-        radius: NihilStyle.rCard
-        color: Qt.alpha(NihilStyle.void_, 0.7)
+        radius: NihilStyle.radiusCard
+        color: Qt.alpha(NihilStyle.background, 0.7)
     }
 
     // A second press only counts while the key is still armed.
@@ -57,8 +57,8 @@ Item {
         width: Math.min(root.width - NihilStyle.s(48),
             root.columns * root.cell + Math.max(0, root.columns - 1) * root.spacing + NihilStyle.s(40))
         height: Math.min(root.height - NihilStyle.s(48), head.height + root.shownHeight + NihilStyle.s(56))
-        radius: NihilStyle.rPanel
-        tint: NihilStyle.menuTint
+        radius: NihilStyle.radiusPanel
+        tint: NihilStyle.menuBackground
         shadow: 0
 
         // Keeps a press on the pane from reaching the close area behind it.
@@ -74,7 +74,7 @@ Item {
             NField {
                 anchors.left: parent.left
                 anchors.right: keys.left
-                anchors.rightMargin: NihilStyle.gap
+                anchors.rightMargin: NihilStyle.spacing
                 anchors.verticalCenter: parent.verticalCenter
                 value: root.folder.name
                 placeholder: Translation.tr("Folder name")
@@ -88,12 +88,12 @@ Item {
                 id: keys
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: NihilStyle.gap
+                spacing: NihilStyle.spacing
 
                 NButton {
                     visible: root.removeMode !== "hidden"
                     icon: "trash"
-                    lit: root.armed
+                    highlighted: root.armed
                     onClicked: {
                         if (root.removeMode === "doubleClick" && !root.armed) {
                             root.armed = true

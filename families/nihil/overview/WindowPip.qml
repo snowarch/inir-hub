@@ -32,13 +32,13 @@ PanelWindow {
 
     NGlass {
         anchors.fill: parent
-        radius: NihilStyle.rCard
-        tracks: true
+        radius: NihilStyle.radiusCard
+        followPointer: true
     }
     WindowShot {
         anchors.fill: parent
         anchors.margins: NihilStyle.s(3)
-        radius: NihilStyle.rCard - NihilStyle.s(3)
+        radius: NihilStyle.radiusCard - NihilStyle.s(3)
         windowId: root.modelData.id
         appId: root.modelData.appId ?? ""
     }

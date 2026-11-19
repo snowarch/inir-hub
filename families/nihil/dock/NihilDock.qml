@@ -67,7 +67,7 @@ Variants {
         }
 
         property real reveal: dock.shown ? 1 : 0
-        Behavior on reveal { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+        Behavior on reveal { NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
 
         Item {
             id: frame

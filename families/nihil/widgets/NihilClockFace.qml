@@ -31,7 +31,7 @@ NihilWidgetFace {
         anchors.verticalCenterOffset: root.dp(2)
         spacing: root.dp(6)
         NDisplay {
-            color: root.ink
+            color: root.foreground
             id: figure
             text: root.hour
             size: Math.min(root.contentHeight * (root.small ? 0.5 : 0.56), root.contentWidth / Math.max(2.6, root.hour.length * 0.62))
@@ -42,7 +42,7 @@ NihilWidgetFace {
             text: root.period
             font.pixelSize: root.dp(14)
             font.weight: Font.DemiBold
-            color: root.inkSoft
+            color: root.foregroundSecondary
         }
     }
 
@@ -51,7 +51,7 @@ NihilWidgetFace {
         anchors.bottom: parent.bottom
         text: Translation.locale.toString(root.now, root.small ? "d MMM" : "d MMMM")
         font.pixelSize: root.dp(13)
-        color: root.inkSoft
+        color: root.foregroundSecondary
     }
     Row {
         anchors.right: parent.right
@@ -62,7 +62,7 @@ NihilWidgetFace {
             anchors.verticalCenter: parent.verticalCenter
             text: String(Weather.data?.temp ?? "")
             font.pixelSize: root.dp(13)
-            color: root.inkSoft
+            color: root.foregroundSecondary
         }
     }
 }

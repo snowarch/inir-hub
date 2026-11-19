@@ -11,27 +11,27 @@ QtObject {
     readonly property real density: 1
 
     readonly property color accent: NihilStyle.accent
-    readonly property color secondaryAccent: NihilStyle.specB
-    readonly property color wallpaperLight: NihilStyle.specA
-    readonly property color text: NihilStyle.ink
-    readonly property color textStrong: NihilStyle.ink
-    readonly property color textSecondary: NihilStyle.inkSoft
-    readonly property color textTertiary: NihilStyle.inkFaint
-    readonly property color subtext: NihilStyle.inkSoft
+    readonly property color secondaryAccent: NihilStyle.highlightTint
+    readonly property color wallpaperLight: NihilStyle.highlight
+    readonly property color text: NihilStyle.text
+    readonly property color textStrong: NihilStyle.text
+    readonly property color textSecondary: NihilStyle.textSecondary
+    readonly property color textTertiary: NihilStyle.textTertiary
+    readonly property color subtext: NihilStyle.textSecondary
     readonly property color surface: NihilStyle.glassTint
-    readonly property color bodySurface: NihilStyle.menuTint
-    readonly property color surfaceHigh: NihilStyle.carbon
-    readonly property color surfaceHighest: ColorUtils.mix(NihilStyle.carbon, NihilStyle.ink, 0.92)
-    readonly property color raised: NihilStyle.pieceRaised
-    readonly property color fill: NihilStyle.piece
-    readonly property color fillQuiet: NihilStyle.well
-    readonly property color fillHover: NihilStyle.pieceRaised
-    readonly property color fillActive: NihilStyle.chosen
-    readonly property color border: NihilStyle.hair
-    readonly property color hairlineStrong: Qt.alpha(NihilStyle.ink, 0.18)
+    readonly property color bodySurface: NihilStyle.menuBackground
+    readonly property color surfaceHigh: NihilStyle.surface
+    readonly property color surfaceHighest: ColorUtils.mix(NihilStyle.surface, NihilStyle.text, 0.92)
+    readonly property color raised: NihilStyle.fillHover
+    readonly property color fill: NihilStyle.fill
+    readonly property color fillQuiet: NihilStyle.inset
+    readonly property color fillHover: NihilStyle.fillHover
+    readonly property color fillActive: NihilStyle.fillPressed
+    readonly property color border: NihilStyle.border
+    readonly property color hairlineStrong: Qt.alpha(NihilStyle.text, 0.18)
     readonly property color danger: NihilStyle.danger
     readonly property color success: NihilStyle.dark ? "#7BD88F" : "#1F8A4C"
-    readonly property color inkOnAccent: NihilStyle.accentInk
+    readonly property color inkOnAccent: NihilStyle.accentText
     readonly property color onTint: "#FFFFFF"
     readonly property color inkOnLight: "#101217"
     readonly property color inkOnDark: "#F3F4F6"
@@ -40,7 +40,7 @@ QtObject {
     readonly property color onMediaFill: Qt.alpha("#FFFFFF", 0.18)
     readonly property color highlightOnMedia: NihilStyle.accent
     readonly property color dangerOnMedia: "#FF7B72"
-    readonly property color veilStrong: Qt.alpha(NihilStyle.void_, 0.62)
+    readonly property color veilStrong: Qt.alpha(NihilStyle.background, 0.62)
     readonly property color scrim: NihilStyle.scrim
     readonly property color shadow: Qt.alpha("#000000", 0.4)
     readonly property color plateShadow: Qt.alpha("#000000", 0.28)
@@ -48,31 +48,31 @@ QtObject {
     readonly property var widgetPaletteNames: ["wallpaper", "mono"]
     readonly property string toastSkin: ""
 
-    readonly property string fontMain: NihilStyle.grotesk
-    readonly property string fontNumbers: NihilStyle.grotesk
-    readonly property string fontTitle: NihilStyle.display
+    readonly property string fontMain: NihilStyle.fontFamily
+    readonly property string fontNumbers: NihilStyle.fontFamily
+    readonly property string fontTitle: NihilStyle.titleFontFamily
     readonly property real typeScale: NihilStyle.scale
-    readonly property int typeFootnote: NihilStyle.textLabel - 1
-    readonly property int typeMeta: NihilStyle.textLabel
+    readonly property int typeFootnote: NihilStyle.textCaption - 1
+    readonly property int typeMeta: NihilStyle.textCaption
     readonly property int typeLabel: NihilStyle.textBody
     readonly property int typeTitle: NihilStyle.textLarge
 
-    readonly property int radiusChip: Math.round(NihilStyle.rKey * 0.75)
-    readonly property int radiusRow: NihilStyle.rKey
-    readonly property int radiusTile: NihilStyle.rKey
-    readonly property int radiusCard: NihilStyle.rCard
+    readonly property int radiusChip: Math.round(NihilStyle.radiusSmall * 0.75)
+    readonly property int radiusRow: NihilStyle.radiusSmall
+    readonly property int radiusTile: NihilStyle.radiusSmall
+    readonly property int radiusCard: NihilStyle.radiusCard
     readonly property int radiusPlate: NihilStyle.r(22)
-    readonly property int radiusSheet: NihilStyle.rSheet
-    readonly property int radiusPanel: NihilStyle.rPanel
-    readonly property int spaceSmall: NihilStyle.gap
+    readonly property int radiusSheet: NihilStyle.radiusWindow
+    readonly property int radiusPanel: NihilStyle.radiusPanel
+    readonly property int spaceSmall: NihilStyle.spacing
     readonly property real shapeScale: NihilStyle.corners
 
-    readonly property int revealDuration: NihilStyle.quick
-    readonly property int feedbackDuration: NihilStyle.quick
-    readonly property int moveDuration: NihilStyle.calm
-    readonly property int morphDuration: NihilStyle.calm
-    readonly property int emergeDuration: NihilStyle.calm
-    readonly property int recedeDuration: NihilStyle.quick
+    readonly property int revealDuration: NihilStyle.durationShort
+    readonly property int feedbackDuration: NihilStyle.durationShort
+    readonly property int moveDuration: NihilStyle.durationMedium
+    readonly property int morphDuration: NihilStyle.durationMedium
+    readonly property int emergeDuration: NihilStyle.durationMedium
+    readonly property int recedeDuration: NihilStyle.durationShort
     readonly property var moveCurve: [0.16, 1, 0.3, 1, 1, 1]
     readonly property var morphCurve: [0.16, 1, 0.3, 1, 1, 1]
     readonly property var emergeCurve: [0.05, 0.7, 0.1, 1, 1, 1]
@@ -89,7 +89,7 @@ QtObject {
     function tintFill(tint: color): color { return ColorUtils.applyAlpha(tint, 0.13) }
     function tintFillHover(tint: color): color { return ColorUtils.applyAlpha(tint, 0.2) }
     function tintBorder(tint: color): color { return ColorUtils.applyAlpha(tint, 0.7) }
-    function containerOf(c: color): color { return ColorUtils.mix(NihilStyle.void_, c, NihilStyle.dark ? 0.72 : 0.8) }
+    function containerOf(c: color): color { return ColorUtils.mix(NihilStyle.background, c, NihilStyle.dark ? 0.72 : 0.8) }
     function onTintFor(tint: color): color {
         return ColorUtils.contrastRatio("#FFFFFF", tint) >= ColorUtils.contrastRatio("#101217", tint) ? "#FFFFFF" : "#101217"
     }
@@ -99,13 +99,13 @@ QtObject {
         const c = Qt.color(seed)
         return c.valid ? c : (fallback ?? "#101217")
     }
-    function markOn(seed: color, sample: var, darkInk: bool, contrast: real): color {
-        return sample ? Lume.mark(seed, sample.level, sample.spread, darkInk, contrast) : seed
+    function markOn(seed: color, sample: var, darkText: bool, contrast: real): color {
+        return sample ? Lume.mark(seed, sample.level, sample.spread, darkText, contrast) : seed
     }
     function legibleVeil(material: string, level: real, spread: real, strength: real): real {
-        return material === "clear" ? 0 : Lume.veil(level, spread, 1, NihilStyle.void_, NihilStyle.ink, 4.5, 0.3 * strength, 0.86)
+        return material === "clear" ? 0 : Lume.veil(level, spread, 1, NihilStyle.background, NihilStyle.text, 4.5, 0.3 * strength, 0.86)
     }
     function widgetPalette(name: string, vibrance: real): var {
-        return name === "mono" ? [NihilStyle.ink, NihilStyle.inkSoft, NihilStyle.inkFaint] : [NihilStyle.accent, NihilStyle.specA, NihilStyle.specB]
+        return name === "mono" ? [NihilStyle.text, NihilStyle.textSecondary, NihilStyle.textTertiary] : [NihilStyle.accent, NihilStyle.highlight, NihilStyle.highlightTint]
     }
 }

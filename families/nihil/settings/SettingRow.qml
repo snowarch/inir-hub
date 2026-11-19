@@ -131,7 +131,7 @@ Item {
             elide: Text.ElideRight
             font.pixelSize: NihilStyle.textBody
             font.weight: Font.Medium
-            color: NihilStyle.ink
+            color: NihilStyle.text
         }
         NText {
             width: parent.width
@@ -139,7 +139,7 @@ Item {
             text: root.note
             elide: Text.ElideRight
             font.pixelSize: NihilStyle.textSmall
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
     }
 
@@ -210,7 +210,7 @@ Item {
                 visible: root.option.fit !== undefined
                 anchors.verticalCenter: parent.verticalCenter
                 label: Translation.tr(root.option.fitLabel ?? "")
-                lit: root.isFit
+                highlighted: root.isFit
                 onClicked: root.write(root.isFit ? root.host.levelStart(root.option) : root.option.fit)
             }
             NSlider {
@@ -235,7 +235,7 @@ Item {
                 text: root.figure(Number(root.value))
                 figures: true
                 font.weight: Font.Medium
-                color: root.changed ? NihilStyle.ink : NihilStyle.inkSoft
+                color: root.changed ? NihilStyle.text : NihilStyle.textSecondary
             }
         }
     }
@@ -254,8 +254,8 @@ Item {
                     required property var modelData
                     readonly property var chosen: Array.from(root.value ?? [])
                     label: screenKey.modelData.name
-                    lit: screenKey.chosen.includes(screenKey.modelData.name)
-                    onClicked: root.write(screenKey.lit
+                    highlighted: screenKey.chosen.includes(screenKey.modelData.name)
+                    onClicked: root.write(screenKey.highlighted
                         ? screenKey.chosen.filter(name => name !== screenKey.modelData.name)
                         : [...screenKey.chosen, screenKey.modelData.name])
                 }

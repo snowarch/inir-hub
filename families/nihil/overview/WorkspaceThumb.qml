@@ -45,8 +45,8 @@ Item {
 
     ClippingRectangle {
         anchors.fill: parent
-        radius: NihilStyle.rCard
-        color: NihilStyle.void_
+        radius: NihilStyle.radiusCard
+        color: NihilStyle.background
         Image {
             anchors.fill: parent
             source: Wallpapers.effectiveWallpaperUrl
@@ -77,11 +77,11 @@ Item {
     // The workspace in use wears the light; a window held over one calls it.
     Rectangle {
         anchors.fill: parent
-        radius: NihilStyle.rCard
+        radius: NihilStyle.radiusCard
         color: "transparent"
         border.width: root.active || drop.containsDrag ? NihilStyle.s(2) : 1
-        border.color: root.active || drop.containsDrag ? NihilStyle.accent : root.hot ? NihilStyle.inkSoft : NihilStyle.hair
-        Behavior on border.color { ColorAnimation { duration: NihilStyle.quick } }
+        border.color: root.active || drop.containsDrag ? NihilStyle.accent : root.hot ? NihilStyle.textSecondary : NihilStyle.border
+        Behavior on border.color { ColorAnimation { duration: NihilStyle.durationShort } }
     }
 
     MouseArea {
@@ -112,7 +112,7 @@ Item {
         width: Math.min(tag.implicitWidth + NihilStyle.s(14), root.width - NihilStyle.s(10))
         height: NihilStyle.s(22)
         radius: height / 2
-        color: root.active ? NihilStyle.accent : Qt.alpha(NihilStyle.void_, 0.86)
+        color: root.active ? NihilStyle.accent : Qt.alpha(NihilStyle.background, 0.86)
         NText {
             id: tag
             anchors.fill: parent
@@ -124,7 +124,7 @@ Item {
             text: root.label
             font.pixelSize: NihilStyle.s(12)
             font.weight: Font.Medium
-            color: root.active ? NihilStyle.accentInk : NihilStyle.ink
+            color: root.active ? NihilStyle.accentText : NihilStyle.text
         }
     }
 

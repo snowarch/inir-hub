@@ -43,12 +43,12 @@ Singleton {
     property string launcherHome: "windows"
     property bool overWindows: false
 
-    // The one page the deck carries, or nothing: the deck is open while there is one.
+    // The one page the dashboard carries, or nothing: the dashboard is open while there is one.
     readonly property var pages: ["apps", "control", "today", "media", "focus", "clipboard", "wallpapers"]
     readonly property string page: root.launcherOpen ? "apps" : root.controlOpen ? "control" : root.todayOpen ? "today"
         : root.mediaOpen ? "media" : root.focusOpen ? "focus" : root.clipboardOpen ? "clipboard"
         : root.wallpapersOpen ? "wallpapers" : ""
-    readonly property bool deckOpen: root.page.length > 0
+    readonly property bool dashboardOpen: root.page.length > 0
     function closePages(except: string): void {
         if (except !== "apps" && root.launcherOpen) root.leaveLauncher()
         if (except !== "control") root.controlOpen = false
@@ -144,11 +144,11 @@ Singleton {
         case "focus": root.focusOpen = !root.focusOpen; break
         case "clipboard": GlobalStates.clipboardOpen = !GlobalStates.clipboardOpen; break
         case "wallpapers": GlobalStates.wallpaperSelectorOpen = !root.wallpapersOpen; break
-        case "deck": if (root.deckOpen) root.dismiss(); else root.show(root.lastPage); break
+        case "dashboard": if (root.dashboardOpen) root.dismiss(); else root.show(root.lastPage); break
         case "power": GlobalStates.sessionOpen = !GlobalStates.sessionOpen; break
         }
     }
-    // Opens a page of the deck, or moves the open deck to it: the deck's own navigation.
+    // Opens a page of the dashboard, or moves the open dashboard to it: the dashboard's own navigation.
     function show(which: string): void {
         if (root.page === which) return
         switch (which) {
@@ -161,9 +161,9 @@ Singleton {
         case "wallpapers": GlobalStates.wallpaperSelectorOpen = true; break
         }
     }
-    // The page the deck comes back to.
+    // The page the dashboard comes back to.
     property string lastPage: "apps"
-    // A step through the deck's pages, for its keys.
+    // A step through the dashboard's pages, for its keys.
     function stepPage(by: int): void {
         const at = Math.max(0, root.pages.indexOf(root.page))
         root.show(root.pages[(at + by + root.pages.length) % root.pages.length])

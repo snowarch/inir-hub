@@ -38,7 +38,7 @@ Rectangle {
     implicitWidth: NihilStyle.s(230)
     implicitHeight: NihilStyle.s(40)
     radius: height / 2
-    color: NihilStyle.pieceRaised
+    color: NihilStyle.fillHover
     border.width: input.activeFocus ? Math.max(1, NihilStyle.s(1.5)) : 0
     border.color: NihilStyle.accent
 
@@ -50,7 +50,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         text: root.glyph
         size: root.glyphSize
-        color: NihilStyle.inkSoft
+        color: NihilStyle.textSecondary
     }
 
     TextInput {
@@ -62,10 +62,10 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         clip: true
         selectByMouse: true
-        color: NihilStyle.ink
+        color: NihilStyle.text
         selectionColor: NihilStyle.accent
-        selectedTextColor: NihilStyle.accentInk
-        font.family: NihilStyle.grotesk
+        selectedTextColor: NihilStyle.accentText
+        font.family: NihilStyle.fontFamily
         font.features: root.mono ? { "tnum": 1 } : ({})
         font.pixelSize: root.textSize > 0 ? root.textSize : Math.max(NihilStyle.textBody, Math.round(root.height * 0.3))
         font.weight: root.textWeight
@@ -94,7 +94,7 @@ Rectangle {
         anchors.fill: input
         visible: input.text.length === 0
         text: root.placeholder
-        color: NihilStyle.inkSoft
+        color: NihilStyle.textSecondary
         font.family: input.font.family
         font.pixelSize: input.font.pixelSize
         font.weight: root.textWeight

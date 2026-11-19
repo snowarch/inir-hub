@@ -55,13 +55,13 @@ NihilWidgetFace {
         width: root.coverSize
         height: root.coverSize
         radius: Math.max(root.dp(6), root.radius - root.padding)
-        color: NihilStyle.piece
+        color: NihilStyle.fill
 
         NIcon {
             anchors.centerIn: parent
             text: "music"
             size: parent.width * 0.4
-            color: root.inkFaint
+            color: root.foregroundTertiary
         }
         Image {
             anchors.fill: parent
@@ -81,7 +81,7 @@ NihilWidgetFace {
         spacing: root.dp(4)
 
         NText {
-            color: root.ink
+            color: root.foreground
             width: parent.width
             text: root.player?.trackTitle || Translation.tr("Unknown track")
             elide: Text.ElideRight
@@ -94,10 +94,10 @@ NihilWidgetFace {
             text: root.player?.trackArtist ?? ""
             elide: Text.ElideRight
             font.pixelSize: root.dp(13)
-            color: root.inkSoft
+            color: root.foregroundSecondary
         }
         FaceBar {
-            ink: root.ink
+            foreground: root.foreground
             width: parent.width
             visible: root.length > 0
             level: root.position / Math.max(1, root.length)
@@ -118,7 +118,7 @@ NihilWidgetFace {
             NButton {
                 width: root.keySize
                 height: root.keySize
-                lit: true
+                highlighted: true
                 enabled: root.player?.canTogglePlaying ?? false
                 icon: root.playing ? "pause" : "play"
                 Accessible.name: root.playing ? Translation.tr("Pause") : Translation.tr("Play")

@@ -1,7 +1,7 @@
 module qs.modules.nihil.style
 singleton NihilStyle 1.0 NihilStyle.qml
 NGlass 1.0 NGlass.qml
-NFieldPaint 1.0 NFieldPaint.qml
+NPattern 1.0 NPattern.qml
 NText 1.0 NText.qml
 NIcon 1.0 NIcon.qml
 NAppIcon 1.0 NAppIcon.qml
@@ -16,7 +16,8 @@ NScroller 1.0 NScroller.qml
 NPopup 1.0 NPopup.qml
 NLabel 1.0 NLabel.qml
 NDisplay 1.0 NDisplay.qml
-NMark 1.0 NMark.qml
-NWell 1.0 NWell.qml
+NLogo 1.0 NLogo.qml
+NInset 1.0 NInset.qml
+NEmpty 1.0 NEmpty.qml
 NSpring 1.0 NSpring.qml
 NihilShared 1.0 NihilShared.qml

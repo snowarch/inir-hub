@@ -80,13 +80,13 @@ var pages = [
         id: "profiles", summary: "Start from a whole desktop layout", title: "Profiles", glyph: "dashboard_customize", view: "profiles"
     },
     {
-        id: "layout", summary: "Where the rail, the dash and the workspaces sit", title: "Layout", glyph: "desktop",
+        id: "layout", summary: "Where the bar, the dash and the workspaces sit", title: "Layout", glyph: "desktop",
         sections: [
-            { title: "Rail", rows: [
+            { title: "Bar", rows: [
                 choice("panel.position", "Edge", [["left", "Left"], ["right", "Right"], ["top", "Top"], ["bottom", "Bottom"]]),
-                choice("panel.style", "Style", [["float", "Floating"], ["edge", "Against the edge"]]),
+                choice("panel.style", "Style", [["float", "Floating"], ["edge", "Attached"]]),
                 level("panel.thickness", "Thickness", 40, 72, 1, "px"),
-                level("panel.margin", "Space from the edge", 0, 32, 1, "px", "Only while it floats"),
+                level("panel.margin", "Space from the edge", 0, 32, 1, "px", "Only when floating"),
                 choice("panel.visibility", "Shown", [["always", "Always"], ["desktop", "On an empty desktop"],
                                                      ["overview", "In the overview"], ["hidden", "Never"]]),
                 choice("panel.overviewStyle", "In the overview", [["same", "Keep the glass"], ["transparent", "Transparent"]]),
@@ -95,9 +95,11 @@ var pages = [
                 toggle("panel.tray", "Tray"),
                 screens("panel.screenList", "Screens", "With none marked it shows on all of them")
             ] },
-            { title: "Deck", rows: [
-                choice("deck.sidebar", "Side", [["full", "Names and marks"], ["icons", "Marks only"]]),
-                level("deck.dim", "Dim the desktop behind", 0, 0.6, 0.01, "percent"),
+            { title: "Dashboard", rows: [
+                choice("dashboard.sidebar", "Sidebar", [["full", "Icons and names"], ["icons", "Icons only"]]),
+                level("dashboard.width", "Width", 860, 1600, 10, "px"),
+                level("dashboard.height", "Height", 520, 960, 10, "px"),
+                level("dashboard.dim", "Dim the desktop behind", 0, 0.6, 0.01, "percent"),
                 toggle("modules.media", "Media page"),
                 toggle("modules.focus", "Focus page", "Tasks, a timer and a note")
             ] },
@@ -109,7 +111,7 @@ var pages = [
                 choice("dash.showApps", "App grid key", [["start", "First"], ["end", "Last"], ["hidden", "Hidden"]]),
                 toggle("dash.runningDots", "Mark running apps"),
                 choice("dash.runningStyle", "Running mark", [["dot", "Dot"], ["line", "Line"]]),
-                choice("dash.tone", "Tone", [["default", "Palette"], ["light", "Light"], ["dark", "Dark"]]),
+                choice("dash.tone", "Tone", [["default", "Glass"], ["light", "Light"], ["dark", "Dark"]]),
                 level("dash.opacity", "Glass opacity", 0, 1, 0.05, "percent"),
                 level("dash.radius", "Corner radius", 0, 48, 1, "px")
             ] },
@@ -119,7 +121,7 @@ var pages = [
                                                     ["hover", "Only at the pointer"]],
                        "Away, it comes back when the pointer reaches the edge"),
                 level("dock.iconSize", "Icon size", 16, 96, 1, "px"),
-                choice("dock.tone", "Tone", [["default", "Palette"], ["light", "Light"], ["dark", "Dark"]]),
+                choice("dock.tone", "Tone", [["default", "Glass"], ["light", "Light"], ["dark", "Dark"]]),
                 level("dock.opacity", "Glass opacity", 0, 1, 0.05, "percent"),
                 level("dock.radius", "Corner radius", 0, 48, 1, "px"),
                 level("dock.margin", "Space from the edge", 0, 48, 1, "px"),
@@ -176,33 +178,33 @@ var pages = [
         sections: [
             { title: "Colour", rows: [
                 choice("look.scheme", "Scheme", [["dark", "Dark"], ["light", "Light"]]),
-                choice("look.palette", "Accent", [["pearl", "Pearl"], ["glacier", "Glacier"], ["sage", "Sage"], ["coral", "Coral"], ["gold", "Gold"], ["wallpaper", "From the wallpaper"]], "What is chosen wears it: the page, the workspace, the key that is on")
+                choice("look.accent", "Accent", [["white", "White"], ["blue", "Blue"], ["green", "Green"], ["orange", "Orange"], ["yellow", "Yellow"], ["wallpaper", "From the wallpaper"]], "Colours the active page, workspace and button")
             ] },
             { title: "Glass", rows: [
                 choice("look.material", "Material", [["smoke", "Smoked"], ["frost", "Frosted"], ["fluted", "Fluted"], ["prism", "Prism"]]),
-                level("look.ribs", "Rib width", 6, 32, 1, "px", "How wide each reed of fluted glass is"),
+                level("look.ribWidth", "Rib width", 6, 32, 1, "px", "Only for fluted glass"),
                 level("look.glass", "Opacity", 0, 1, 0.01, "percent"),
                 toggle("look.blur", "Blur what is behind"),
                 level("look.grain", "Grain", 0, 1, 0.01, "percent"),
-                level("look.rim", "Rim light", 0, 1, 0.01, "percent"),
-                level("look.flare", "Rim flare", 0, 1, 0.01, "percent", "The light caught along the glass's edge")
+                level("look.edgeLight", "Edge light", 0, 1, 0.01, "percent"),
+                level("look.edgeGlow", "Edge glow", 0, 1, 0.01, "percent")
             ] },
             { title: "Shape and type", rows: [
                 level("look.corners", "Roundness", 0, 2, 0.05, "times"),
                 level("look.scale", "Interface size", 0.75, 1.5, 0.01, "times"),
-                choice("look.display", "Titles", [["geist", "Geist"], ["system", "System"]]),
+                choice("look.titleFont", "Titles", [["geist", "Geist"], ["system", "System"]]),
                 choice("look.font", "Text", [["geist", "Geist"], ["system", "System"]])
             ] },
-            { title: "Field", rows: [
-                choice("field.form", "Form", [[0, "Beam"], [1, "Fluted streaks"], [2, "Haze"], [3, "Void"]]),
-                level("field.seed", "Variation", 0, 1, 0.01),
-                level("field.glow", "Glow", 0, 2, 0.05, "times")
+            { title: "Pattern", rows: [
+                choice("backdrop.pattern", "Pattern", [[0, "Beam"], [1, "Streaks"], [2, "Haze"], [3, "Plain"]]),
+                level("backdrop.variation", "Variation", 0, 1, 0.01),
+                level("backdrop.glow", "Glow", 0, 2, 0.05, "times")
             ] },
             { title: "Overview stage", rows: [
                 choice("overview.engine", "Overview", [["compositor", "The compositor's own"], ["shell", "Drawn by NiHiL"]],
                        "The compositor's moves live windows with no lag; NiHiL's own works anywhere"),
-                choice("overview.poster", "Backdrop", [["wallpaper", "Blurred wallpaper"], ["field", "Field"], ["off", "Plain"]]),
-                level("overview.posterWallpaper", "Wallpaper strength", 0, 1, 0.01, "percent"),
+                choice("overview.backdrop", "Background", [["wallpaper", "Blurred wallpaper"], ["pattern", "Pattern"], ["off", "Plain"]]),
+                level("overview.backdropWallpaper", "Wallpaper strength", 0, 1, 0.01, "percent"),
                 compositor("layout", "overview.zoom", "Workspace size", "range", "How big the compositor draws each workspace", [0.2, 0.75, 0.05, "percent"]),
                 compositor("glass", "overview", "Blur behind the overview", "switch")
             ] },
@@ -212,9 +214,6 @@ var pages = [
                 level("overview.backgroundBlur", "Blur", 0, 1, 0.01, "percent"),
                 level("overview.backgroundBrightness", "Brightness with windows", 0, 1, 0.01, "percent"),
                 toggle("overview.smoothAnimation", "Blur grows with the opening")
-            ] },
-            { title: "Desktop widgets", rows: [
-                choice("widgets.design", "Design", [["nihil", "NiHiL"], ["material", "Material"], ["instrument", "iNstrument"], ["readout", "Readout"]])
             ] }
         ]
     },
@@ -260,7 +259,6 @@ var pages = [
                 choice("dash.scroll", "Scroll over an app", [["none", "Nothing"], ["workspace", "Switch workspace"], ["cycleWindows", "Its windows here"],
                                                              ["cycleWindowsAll", "Its windows everywhere"]]),
                 toggle("dash.isolateWorkspace", "Only apps on this workspace"),
-                toggle("dash.windowSearchScroll", "Scroll moves through window results"),
                 toggle("dash.menuForceQuit", "Menu offers force quit"),
                 toggle("dash.menuCloseOnWorkspace", "Menu offers closing on this workspace"),
                 toggle("dash.menuMoveApp", "Menu offers moving the app here"),
@@ -282,8 +280,6 @@ var pages = [
         sections: [
             { title: "Pages", rows: [
                 choice("apps.orientation", "Pages turn", [["workspaces", "Like the workspaces"], ["horizontal", "Sideways"], ["vertical", "Up and down"]]),
-                level("apps.pageWidth", "Page width", 0.3, 1, 0.01, "percent"),
-                level("apps.pageHeight", "Page height", 0.3, 1, 0.01, "percent"),
                 toggle("apps.center", "Centre the icons on the page"),
                 toggle("apps.pageArrows", "Page arrows"),
                 toggle("apps.pageIndicators", "Page indicators"),

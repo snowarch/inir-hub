@@ -1,14 +1,21 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "changes": {
+    "4.1.0": [
+      "Plain names everywhere: Settings speaks of the bar, the dashboard, the accent, edge light and edge glow",
+      "The dashboard keeps one size for every page, set in Settings, so moving between pages never moves the frame",
+      "Control shows the sound, microphone and brightness dials together; empty pages share one quiet empty state",
+      "Escape follows its setting in the overview and the app grid; options that did nothing are gone",
+      "The accents are White, Blue, Green, Orange, Yellow or the wallpaper's own colour"
+    ],
     "4.0.0": [
-      "Vitrine: a floating glass rail on any edge replaces the bar; left by default, or right, top or bottom, floating or flush",
-      "The rail shows the workspace's windows, the tray, the status, the clock and power; each key names itself on hover",
-      "One deck beside the rail holds every page, with its own side to move between them (Alt and a figure, Ctrl and Tab)",
-      "New pages: Media (cover, timeline, keys, every player) and Focus (tasks, focus rounds or a countdown, a note)",
-      "Neutral smoked glass with a rim of light; pearl, glacier, sage, coral, gold or the wallpaper's colour as the accent",
-      "Settings wears the deck's layout: a side plate and the options in grouped plates"
+      "A floating glass bar on any edge, left by default, or right, top or bottom, floating or attached",
+      "The bar shows the workspace's windows, the tray, the status, the clock and power; each key names itself on hover",
+      "One dashboard beside the bar holds every page, with a sidebar to move between them (Alt and a number, Ctrl and Tab)",
+      "New pages: Media (cover, timeline, controls, every player) and Focus (tasks, Pomodoro or a countdown, a note)",
+      "Neutral smoked glass with a bright edge, and one accent for what is active",
+      "Settings shares the dashboard's layout: a sidebar and the options in grouped plates"
     ],
     "3.1.1": [
       "The hot corner opens the overview once per arrival: it no longer jumps back to the workspace"
@@ -59,7 +66,7 @@
       "NiHiL: a floating bar, dot-matrix clock and widgets, Start, quick controls, a power card and its own menu, in one signal colour"
     ]
   },
-  "summary": "A floating glass rail on any edge and one deck that holds every page.",
+  "summary": "A floating glass bar on any edge and one dashboard that holds every page.",
   "authors": [
     "snowarch"
   ],

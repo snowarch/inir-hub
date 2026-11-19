@@ -18,13 +18,13 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         text: root.glyph
         size: root.face.dp(28)
-        color: root.face.inkSoft
+        color: root.face.foregroundSecondary
     }
     NText {
         width: parent.width
         horizontalAlignment: Text.AlignHCenter
         text: root.title
-        color: root.face.ink
+        color: root.face.foreground
         elide: Text.ElideRight
         font.pixelSize: root.face.dp(14)
     }
@@ -37,6 +37,6 @@ Column {
         maximumLineCount: 2
         elide: Text.ElideRight
         font.pixelSize: root.face.dp(12)
-        color: root.face.inkSoft
+        color: root.face.foregroundSecondary
     }
 }

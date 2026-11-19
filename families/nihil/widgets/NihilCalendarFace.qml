@@ -52,7 +52,7 @@ NihilWidgetFace {
                 visible: root.browsing
                 text: Translation.locale.toString(root.viewing, "yyyy")
                 font.pixelSize: root.dp(12)
-                color: root.inkSoft
+                color: root.foregroundSecondary
             }
             Repeater {
                 model: [{ glyph: "chevron_left", shift: -1 }, { glyph: "chevron_right", shift: 1 }]
@@ -68,7 +68,7 @@ NihilWidgetFace {
                         anchors.centerIn: parent
                         text: arrow.modelData.glyph
                         size: root.dp(16)
-                        color: arrow.containsMouse ? root.ink : root.inkSoft
+                        color: arrow.containsMouse ? root.foreground : root.foregroundSecondary
                     }
                 }
             }
@@ -96,7 +96,7 @@ NihilWidgetFace {
                 height: table.dayRowH
                 horizontalAlignment: Text.AlignHCenter
                 text: Translation.locale.dayName((root.widget.weekStart + index) % 7, Locale.NarrowFormat)
-                color: root.inkFaint
+                color: root.foregroundTertiary
             }
         }
 
@@ -126,8 +126,8 @@ NihilWidgetFace {
                     text: cell.modelData.day
                     font.pixelSize: root.dp(root.small ? 11 : 13)
                     font.weight: cell.modelData.isToday ? Font.DemiBold : Font.Normal
-                    color: cell.modelData.isToday ? root.accentInk
-                        : cell.modelData.currentMonth ? root.ink : root.inkFaint
+                    color: cell.modelData.isToday ? root.accentForeground
+                        : cell.modelData.currentMonth ? root.foreground : root.foregroundTertiary
                 }
             }
         }

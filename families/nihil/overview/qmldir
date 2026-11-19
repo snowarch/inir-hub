@@ -8,6 +8,6 @@ WorkspaceThumb 1.0 WorkspaceThumb.qml
 DashMenu 1.0 DashMenu.qml
 WindowPip 1.0 WindowPip.qml
 WindowShot 1.0 WindowShot.qml
-PosterBackdrop 1.0 PosterBackdrop.qml
+OverviewBackdrop 1.0 OverviewBackdrop.qml
 StageChrome 1.0 StageChrome.qml
 WorkspaceIndex 1.0 WorkspaceIndex.qml

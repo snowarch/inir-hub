@@ -53,7 +53,7 @@ Scope {
             // The desktop stays in sight behind a light veil, so a change shows on it as it is made.
             Rectangle {
                 anchors.fill: parent
-                color: Qt.alpha(NihilStyle.void_, 0.38)
+                color: Qt.alpha(NihilStyle.background, 0.38)
             }
 
             NGlass {
@@ -61,8 +61,8 @@ Scope {
                 anchors.centerIn: parent
                 width: Math.min(NihilStyle.s(1260), parent.width - NihilStyle.s(96))
                 height: Math.min(NihilStyle.s(830), parent.height - NihilStyle.s(96))
-                radius: NihilStyle.rSheet
-                tint: Qt.alpha(NihilStyle.void_, Math.max(0.86, NihilStyle.glassOpacity))
+                radius: NihilStyle.radiusWindow
+                tint: Qt.alpha(NihilStyle.background, Math.max(0.86, NihilStyle.glassOpacity))
 
                 // A click on the card's own glass stays in it.
                 MouseArea { anchors.fill: parent }

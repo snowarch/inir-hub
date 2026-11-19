@@ -26,7 +26,7 @@ FocusScope {
     property int current: 0
     // Keeps turning the short way round, past the top as well.
     property real pointer: 0
-    Behavior on pointer { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+    Behavior on pointer { NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
 
     readonly property real ringRadius: Math.min(root.height * 0.29, root.width * 0.24, NihilStyle.s(300))
     readonly property real keySide: Math.round(root.ringRadius * 0.28)
@@ -100,7 +100,7 @@ FocusScope {
             visible: text.length > 0
             text: DateTime.uptime ? Translation.tr("Up for %1").arg(DateTime.uptime) : ""
             font.pixelSize: NihilStyle.s(15)
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
     }
 
@@ -131,15 +131,15 @@ FocusScope {
                 width: root.keySide
                 height: width
                 radius: width / 2
-                color: way.chosen ? NihilStyle.accent : NihilStyle.pieceRaised
+                color: way.chosen ? NihilStyle.accent : NihilStyle.fillHover
                 scale: way.pressed ? 0.95 : 1
-                Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
-                Behavior on scale { NumberAnimation { duration: NihilStyle.quick } }
+                Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
+                Behavior on scale { NumberAnimation { duration: NihilStyle.durationShort } }
                 NIcon {
                     anchors.centerIn: parent
                     text: way.modelData.glyph
                     size: root.keySide * 0.36
-                    color: way.chosen ? NihilStyle.accentInk : NihilStyle.ink
+                    color: way.chosen ? NihilStyle.accentText : NihilStyle.text
                 }
             }
             NText {
@@ -149,7 +149,7 @@ FocusScope {
                 text: way.modelData.word
                 font.pixelSize: NihilStyle.textSmall
                 font.weight: way.chosen ? Font.Medium : Font.Normal
-                color: way.chosen ? NihilStyle.ink : NihilStyle.inkSoft
+                color: way.chosen ? NihilStyle.text : NihilStyle.textSecondary
             }
         }
     }

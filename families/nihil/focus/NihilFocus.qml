@@ -6,15 +6,13 @@ import qs.modules.common
 import qs.services
 import qs.modules.nihil.style
 
-// Focus: the work at hand. The tasks on one side; on the other a timer you start in one press (focus rounds or a
+// Focus: the work at hand. The tasks on one side; on the other a timer you start in one press (Pomodoro or a
 // countdown) and a note that saves as you write. Everything lives in the shell's own Todo, timers and notepad, so
 // it is the same list and the same note in every family.
 FocusScope {
     id: root
 
     property var screen: null
-    property bool flipped: false
-    property real room: 0
     property bool open: false
 
     readonly property real pad: NihilStyle.s(24)
@@ -28,8 +26,6 @@ FocusScope {
         .sort((a, b) => Number(a.done) - Number(b.done))
     readonly property int pending: Todo.list.filter(item => !item.done).length
 
-    implicitWidth: NihilStyle.s(920)
-    implicitHeight: NihilStyle.s(600)
 
     function clock(seconds: int): string {
         const s = Math.max(0, seconds)
@@ -46,7 +42,7 @@ FocusScope {
 
         NDisplay {
             id: tasksTitle
-            size: NihilStyle.textFigure
+            size: NihilStyle.textHeadline
             text: Translation.tr("Tasks")
         }
         NText {
@@ -54,7 +50,7 @@ FocusScope {
             anchors.leftMargin: NihilStyle.s(10)
             anchors.baseline: tasksTitle.baseline
             text: root.pending > 0 ? Translation.tr("%1 to do").arg(root.pending) : Translation.tr("All done")
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
         NButton {
             anchors.right: parent.right
@@ -91,8 +87,8 @@ FocusScope {
             spacing: NihilStyle.s(2)
             model: root.tasks
             boundsBehavior: Flickable.StopAtBounds
-            add: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: NihilStyle.calm } }
-            displaced: Transition { NumberAnimation { property: "y"; duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+            add: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: NihilStyle.durationMedium } }
+            displaced: Transition { NumberAnimation { property: "y"; duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
 
             delegate: MouseArea {
                 id: task
@@ -104,8 +100,8 @@ FocusScope {
                 onClicked: task.modelData.done ? Todo.markUnfinished(task.modelData.index) : Todo.markDone(task.modelData.index)
                 Rectangle {
                     anchors.fill: parent
-                    radius: NihilStyle.rKey
-                    color: task.containsMouse ? NihilStyle.piece : "transparent"
+                    radius: NihilStyle.radiusSmall
+                    color: task.containsMouse ? NihilStyle.fill : "transparent"
                 }
                 // The check: a ring, solid in the light once done.
                 Rectangle {
@@ -117,15 +113,15 @@ FocusScope {
                     radius: width / 2
                     color: task.modelData.done ? NihilStyle.accent : "transparent"
                     border.width: task.modelData.done ? 0 : NihilStyle.s(2)
-                    border.color: NihilStyle.inkFaint
-                    Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                    border.color: NihilStyle.textTertiary
+                    Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
                     NIcon {
                         anchors.centerIn: parent
                         visible: task.modelData.done
                         text: "check"
                         size: NihilStyle.s(14)
                         weight: 2.6
-                        color: NihilStyle.accentInk
+                        color: NihilStyle.accentText
                     }
                 }
                 NText {
@@ -135,7 +131,7 @@ FocusScope {
                     anchors.rightMargin: NihilStyle.s(8)
                     anchors.verticalCenter: parent.verticalCenter
                     text: task.modelData.content
-                    color: task.modelData.done ? NihilStyle.inkFaint : NihilStyle.ink
+                    color: task.modelData.done ? NihilStyle.textTertiary : NihilStyle.text
                     font.strikeout: task.modelData.done
                 }
                 NButton {
@@ -154,11 +150,12 @@ FocusScope {
                 }
             }
 
-            NText {
+            NEmpty {
                 anchors.centerIn: parent
                 visible: list.count === 0
-                text: Translation.tr("Nothing to do yet")
-                color: NihilStyle.inkFaint
+                icon: "check"
+                title: Translation.tr("Nothing to do yet")
+                note: Translation.tr("Type a task above and press Enter")
             }
         }
     }
@@ -170,8 +167,8 @@ FocusScope {
         y: root.pad
         width: root.width - x - root.pad
         height: (root.height - root.pad * 3) * 0.56
-        radius: NihilStyle.rCard
-        color: NihilStyle.piece
+        radius: NihilStyle.radiusCard
+        color: NihilStyle.fill
 
         NSegmented {
             x: NihilStyle.s(14)
@@ -179,7 +176,7 @@ FocusScope {
             width: parent.width - NihilStyle.s(28)
             height: NihilStyle.s(34)
             options: [
-                { value: "pomodoro", label: Translation.tr("Focus rounds") },
+                { value: "pomodoro", label: Translation.tr("Pomodoro") },
                 { value: "countdown", label: Translation.tr("Countdown") }
             ]
             current: root.mode
@@ -197,11 +194,11 @@ FocusScope {
                 id: ring
                 anchors.fill: parent
                 readonly property real share: root.lap > 0 ? 1 - root.remaining / root.lap : 0
-                readonly property color track: NihilStyle.hair
-                readonly property color lit: NihilStyle.accent
+                readonly property color track: NihilStyle.border
+                readonly property color highlighted: NihilStyle.accent
                 onShareChanged: requestPaint()
                 onTrackChanged: requestPaint()
-                onLitChanged: requestPaint()
+                onHighlightedChanged: requestPaint()
                 onWidthChanged: requestPaint()
                 onPaint: {
                     const ctx = getContext("2d")
@@ -212,7 +209,7 @@ FocusScope {
                     ctx.strokeStyle = String(ring.track)
                     ctx.beginPath(); ctx.arc(c, c, r, 0, Math.PI * 2); ctx.stroke()
                     if (ring.share <= 0) return
-                    ctx.strokeStyle = String(ring.lit)
+                    ctx.strokeStyle = String(ring.highlighted)
                     ctx.beginPath(); ctx.arc(c, c, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ring.share); ctx.stroke()
                 }
             }
@@ -229,7 +226,7 @@ FocusScope {
                         : TimerService.pomodoroLongBreak ? Translation.tr("Long break")
                         : TimerService.pomodoroBreak ? Translation.tr("Break") : Translation.tr("Focus")
                     font.pixelSize: NihilStyle.textSmall
-                    color: NihilStyle.inkSoft
+                    color: NihilStyle.textSecondary
                 }
             }
         }
@@ -246,7 +243,7 @@ FocusScope {
                 onClicked: TimerService.adjustCountdownDuration(-60)
             }
             NButton {
-                lit: true
+                highlighted: true
                 icon: root.running ? "pause" : "play"
                 label: root.running ? Translation.tr("Pause") : Translation.tr("Start")
                 onClicked: root.pomodoro ? TimerService.togglePomodoro() : TimerService.toggleCountdown()
@@ -272,8 +269,8 @@ FocusScope {
         y: timerCard.y + timerCard.height + root.pad
         width: timerCard.width
         height: root.height - y - root.pad
-        radius: NihilStyle.rCard
-        color: NihilStyle.piece
+        radius: NihilStyle.radiusCard
+        color: NihilStyle.fill
 
         NText {
             id: noteTitle
@@ -295,17 +292,17 @@ FocusScope {
                 width: noteFlick.width
                 text: Notepad.text
                 wrapMode: TextEdit.Wrap
-                color: NihilStyle.ink
+                color: NihilStyle.text
                 selectionColor: Qt.alpha(NihilStyle.accent, 0.4)
-                selectedTextColor: NihilStyle.ink
-                font.family: NihilStyle.grotesk
+                selectedTextColor: NihilStyle.text
+                font.family: NihilStyle.fontFamily
                 font.pixelSize: NihilStyle.textBody
                 onTextChanged: if (note.activeFocus && note.text !== Notepad.text) saveNote.restart()
                 Timer { id: saveNote; interval: 400; onTriggered: Notepad.setTextValue(note.text) }
                 NText {
                     visible: note.text.length === 0 && !note.activeFocus
                     text: Translation.tr("Write something down")
-                    color: NihilStyle.inkFaint
+                    color: NihilStyle.textTertiary
                 }
             }
         }

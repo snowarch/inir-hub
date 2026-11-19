@@ -144,15 +144,14 @@ Item {
         sourceComponent: NihilApps { takesKeys: false }
     }
 
-    NText {
+    NEmpty {
         anchors.centerIn: parent
         visible: !root.asGrid && root.rows.length === 0
-        text: root.words.length > 0 ? Translation.tr("Nothing found")
+        icon: root.words.length > 0 ? "search_off" : root.scope === "windows" ? "windows" : "schedule"
+        title: root.words.length > 0 ? Translation.tr("Nothing found")
             : root.scope === "recent" ? Translation.tr("No recent files")
             : root.scope === "windows" ? Translation.tr("No open windows") : Translation.tr("Nothing found")
-        font.pixelSize: NihilStyle.textLarge
-        font.weight: Font.Light
-        color: NihilStyle.inkSoft
+        note: root.words.length > 0 ? Translation.tr("Try another word") : ""
     }
 
     ListView {
@@ -177,10 +176,10 @@ Item {
             onEntered: root.current = row.index
             onClicked: root.take(row.modelData)
 
-            NWell {
+            NInset {
                 anchors.fill: parent
-                radius: NihilStyle.rCard
-                lit: row.marked ? 0.8 : 0
+                radius: NihilStyle.radiusCard
+                highlighted: row.marked ? 0.8 : 0
                 visible: row.marked
             }
             NAppIcon {
@@ -196,7 +195,7 @@ Item {
                 visible: row.isFile
                 text: "page"
                 size: NihilStyle.s(22)
-                color: NihilStyle.inkSoft
+                color: NihilStyle.textSecondary
             }
             NText {
                 anchors.left: mark.right
@@ -217,7 +216,7 @@ Item {
                 visible: row.modelData.kind === "window" || row.isFile
                 text: row.isFile ? Translation.tr("Recent file") : Translation.tr("Open window")
                 font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
+                color: NihilStyle.textSecondary
             }
         }
     }

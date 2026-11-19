@@ -4,7 +4,7 @@ import qs
 import qs.modules.common
 import qs.modules.nihil.style
 
-// What NiHiL hands the base as its part `style`: its tokens for shared surfaces, and the room its rail takes.
+// What NiHiL hands the base as its part `style`: its tokens for shared surfaces, and the room its bar takes.
 QtObject {
     readonly property QtObject style: NihilShared {}
 
@@ -15,7 +15,7 @@ QtObject {
         const listed = outputs.length === 0 || outputs.includes(screen?.name ?? "")
         if ((Config.options?.enabledPanels ?? []).includes("nBar") && (GlobalStates.barOpen ?? true) && listed
                 && (panel?.visibility ?? "always") === "always")
-            insets[NihilStyle.railEdge] = NihilStyle.railRoom
+            insets[NihilStyle.barEdge] = NihilStyle.barSpace
         return insets
     }
 }

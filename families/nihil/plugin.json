@@ -2,10 +2,10 @@
   "id": "nihil",
   "kind": "family",
   "name": "NiHiL",
-  "summary": "A floating glass rail on any edge and one deck that holds every page.",
-  "tagline": "Glass rail, one deck for every page, procedural glass.",
+  "summary": "A floating glass bar on any edge and one dashboard that holds every page.",
+  "tagline": "Glass bar, one dashboard for every page, procedural glass.",
   "icon": "blur_circular",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "provides": "modules/nihil",
   "parts": {
     "critical": "critical/ShellNihilCriticalPanels.qml",

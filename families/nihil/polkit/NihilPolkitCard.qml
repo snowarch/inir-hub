@@ -18,7 +18,7 @@ Item {
         ? PolkitService.actionLabel : Translation.tr("Your password is needed")
 
     property real shown: 0
-    Behavior on shown { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+    Behavior on shown { NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
 
     Component.onCompleted: {
         root.shown = 1
@@ -53,8 +53,8 @@ Item {
         anchors.centerIn: parent
         width: Math.min(NihilStyle.s(420), parent.width - NihilStyle.s(40))
         height: body.implicitHeight + NihilStyle.s(56)
-        radius: NihilStyle.rSheet
-        tint: NihilStyle.menuTint
+        radius: NihilStyle.radiusWindow
+        tint: NihilStyle.menuBackground
         opacity: root.shown
         scale: 0.96 + 0.04 * root.shown
 
@@ -76,7 +76,7 @@ Item {
                 wrapMode: Text.WordWrap
                 text: root.title
                 font.pixelSize: NihilStyle.textTitle
-                color: NihilStyle.ink
+                color: NihilStyle.text
             }
             NText {
                 width: parent.width
@@ -87,7 +87,7 @@ Item {
                 elide: Text.ElideRight
                 text: PolkitService.cleanMessage
                 font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
+                color: NihilStyle.textSecondary
             }
             NField {
                 id: field
@@ -100,7 +100,7 @@ Item {
             }
             Row {
                 anchors.right: parent.right
-                spacing: NihilStyle.gap
+                spacing: NihilStyle.spacing
 
                 NButton {
                     label: Translation.tr("Cancel")
@@ -108,7 +108,7 @@ Item {
                 }
                 NButton {
                     label: Translation.tr("Allow")
-                    lit: true
+                    highlighted: true
                     enabled: PolkitService.interactionAvailable
                     onClicked: root.submit()
                 }

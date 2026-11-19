@@ -4,7 +4,7 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.services
 
-// NiHiL's persistent surface for ShellLayoutController: the rail, on any edge.
+// NiHiL's persistent surface for ShellLayoutController: the bar, on any edge.
 QtObject {
     readonly property var surfaces: [
         {
@@ -27,7 +27,7 @@ QtObject {
         return {
             ok: true,
             id: surfaceId,
-            slot: NihilStyle.railEdge,
+            slot: NihilStyle.barEdge,
             scope: desc.layoutScope,
             outputName: outputName,
             enabledOutputs: Config.options?.nihil?.panel?.screenList ?? [],
@@ -44,8 +44,8 @@ QtObject {
         if (!ShellLayoutController.panelEnabled("nBar") || (Config.options?.nihil?.panel?.visibility ?? "always") !== "always"
                 || !ShellLayoutController.outputEnabled(Config.options?.nihil?.panel?.screenList ?? [], outputName))
             return result
-        result.barEdge = NihilStyle.railEdge
-        result.barThickness = NihilStyle.railRoom
+        result.barEdge = NihilStyle.barEdge
+        result.barThickness = NihilStyle.barSpace
         ShellLayoutController.applyInset(result, result.barEdge, result.barThickness)
         return result
     }

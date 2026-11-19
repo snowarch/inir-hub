@@ -102,11 +102,11 @@ Item {
 
     ListView {
         id: list
-        y: head.height + NihilStyle.gap
+        y: head.height + NihilStyle.spacing
         width: parent.width
         height: parent.height - y
         clip: true
-        spacing: NihilStyle.gap
+        spacing: NihilStyle.spacing
         boundsBehavior: Flickable.StopAtBounds
         model: root.rows
 
@@ -131,7 +131,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             text: root.searching ? "restart" : root.wifi ? "wifi_off" : root.bluetooth ? "bluetooth_disabled" : "speaker"
             size: NihilStyle.s(30)
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
 
             RotationAnimator on rotation {
                 running: root.searching && waiting.visible
@@ -145,7 +145,7 @@ Item {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
             text: root.wifi ? (Network.wifiEnabled ? Translation.tr("Looking for networks") : Translation.tr("Wi-Fi is off"))
                 : root.bluetooth ? (!root.adapter ? Translation.tr("No Bluetooth here")
                     : root.adapter.enabled ? Translation.tr("Looking for devices") : Translation.tr("Bluetooth is off"))
@@ -170,8 +170,8 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: height / 2
-            color: line.current ? NihilStyle.accent : press.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
-            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+            color: line.current ? NihilStyle.accent : press.containsMouse ? NihilStyle.fillHover : NihilStyle.fill
+            Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
         }
 
         MouseArea {
@@ -187,7 +187,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: line.glyph
             size: NihilStyle.s(20)
-            color: line.current ? NihilStyle.accentInk : NihilStyle.ink
+            color: line.current ? NihilStyle.accentText : NihilStyle.text
         }
         Column {
             anchors.left: lineGlyph.right
@@ -201,7 +201,7 @@ Item {
                 text: line.name
                 elide: Text.ElideRight
                 font.weight: Font.Medium
-                color: line.current ? NihilStyle.accentInk : NihilStyle.ink
+                color: line.current ? NihilStyle.accentText : NihilStyle.text
             }
             NText {
                 width: parent.width
@@ -209,7 +209,7 @@ Item {
                 text: line.note
                 elide: Text.ElideRight
                 font.pixelSize: NihilStyle.textSmall
-                color: line.current ? Qt.alpha(NihilStyle.accentInk, 0.72) : NihilStyle.inkSoft
+                color: line.current ? Qt.alpha(NihilStyle.accentText, 0.72) : NihilStyle.textSecondary
             }
         }
     }

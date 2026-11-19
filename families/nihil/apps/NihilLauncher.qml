@@ -6,14 +6,12 @@ import qs.modules.common
 import qs.modules.nihil.style
 import qs.modules.nihil.state
 
-// The launcher, a page of the sheet: the search on top, the kinds of app down a rail and the grid beside them. Typing turns the grid into
+// The launcher, a page of the sheet: the search on top, the kinds of app down a bar and the grid beside them. Typing turns the grid into
 // what was found. The field keeps the keys the whole time and steers whatever is on show.
 FocusScope {
     id: root
 
     property var screen: null
-    property bool flipped: false
-    property real room: 1000
     property bool open: false
 
     readonly property var options: Config.options?.nihil?.apps ?? ({})
@@ -36,8 +34,6 @@ FocusScope {
         { id: "recent", word: Translation.tr("Recent files") }
     ]
 
-    implicitWidth: Math.round((root.screen?.width ?? 1920) * (root.options.pageWidth ?? 0.667))
-    implicitHeight: Math.min(root.room, Math.round((root.screen?.height ?? 1080) * (root.options.pageHeight ?? 0.78)))
 
     onOpenChanged: if (root.open) field.resume()
     Component.onCompleted: if (root.open) field.resume()
@@ -48,7 +44,9 @@ FocusScope {
     }
 
     Keys.onEscapePressed: {
-        if (NihilState.query.length > 0 || NihilState.searchScope !== "all") {
+        if ((Config.options?.nihil?.overview?.escapeKey ?? "default") === "close") {
+            NihilState.closeOverview()
+        } else if (NihilState.query.length > 0 || NihilState.searchScope !== "all") {
             NihilState.searchScope = "all"
             field.clear()
         } else {
@@ -114,8 +112,8 @@ FocusScope {
                 Rectangle {
                     anchors.fill: parent
                     radius: height / 2
-                    color: chip.chosen ? NihilStyle.accent : chip.containsMouse ? NihilStyle.piece : "transparent"
-                    Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                    color: chip.chosen ? NihilStyle.accent : chip.containsMouse ? NihilStyle.fill : "transparent"
+                    Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
                 }
                 NText {
                     id: word
@@ -125,7 +123,7 @@ FocusScope {
                     text: chip.modelData.word
                     font.pixelSize: NihilStyle.textBody
                     font.weight: chip.chosen ? Font.DemiBold : Font.Normal
-                    color: chip.chosen ? NihilStyle.accentInk : chip.containsMouse ? NihilStyle.ink : NihilStyle.inkSoft
+                    color: chip.chosen ? NihilStyle.accentText : chip.containsMouse ? NihilStyle.text : NihilStyle.textSecondary
                 }
             }
         }

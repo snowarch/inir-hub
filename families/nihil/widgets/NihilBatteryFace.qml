@@ -2,7 +2,7 @@ import QtQuick
 import qs.services
 import qs.modules.nihil.style
 
-// The charge as a figure over its line. The line turns to the error colour only when the battery is low and not charging.
+// The charge as a number over its line. The line turns to the error colour only when the battery is low and not charging.
 NihilWidgetFace {
     id: root
 
@@ -30,7 +30,7 @@ NihilWidgetFace {
             anchors.top: parent.top
             text: Battery.isCharging ? "bolt" : "battery"
             size: root.dp(22)
-            color: Battery.isCharging ? root.accent : root.inkSoft
+            color: Battery.isCharging ? root.accent : root.foregroundSecondary
         }
 
         Column {
@@ -48,13 +48,13 @@ NihilWidgetFace {
                     text: root.charge
                     font.weight: Font.Light
                     font.pixelSize: Math.min(root.contentHeight * 0.56, root.contentWidth * 0.42)
-                    color: root.warned ? root.tint : root.ink
+                    color: root.warned ? root.tint : root.foreground
                 }
                 NText {
                     anchors.baseline: figure.baseline
                     text: "%"
                     font.pixelSize: figure.font.pixelSize * 0.36
-                    color: root.inkSoft
+                    color: root.foregroundSecondary
                 }
             }
             NText {
@@ -62,10 +62,10 @@ NihilWidgetFace {
                 text: root.saying
                 elide: Text.ElideRight
                 font.pixelSize: root.dp(13)
-                color: root.inkSoft
+                color: root.foregroundSecondary
             }
             FaceBar {
-                ink: root.ink
+                foreground: root.foreground
                 width: parent.width
                 level: Battery.percentage
                 tint: root.tint

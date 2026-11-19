@@ -24,7 +24,7 @@ Scope {
     // On the compositor's own overview: the backdrop behind its workspaces and NiHiL's parts over them.
     Loader {
         active: NihilState.nativeStage
-        sourceComponent: PosterBackdrop {}
+        sourceComponent: OverviewBackdrop {}
     }
     Variants {
         model: NihilState.nativeStage ? Quickshell.screens : []
@@ -105,13 +105,13 @@ Scope {
                 radius: width / 2
                 color: "transparent"
                 border.width: NihilStyle.s(2)
-                border.color: NihilStyle.specA
+                border.color: NihilStyle.highlight
                 opacity: 0
                 property real grow: 0
                 ParallelAnimation {
                     id: ripple
-                    NumberAnimation { target: ring; property: "grow"; from: 0; to: 1; duration: NihilStyle.slow; easing.type: Easing.OutCubic }
-                    NumberAnimation { target: ring; property: "opacity"; from: 0.9; to: 0; duration: NihilStyle.slow }
+                    NumberAnimation { target: ring; property: "grow"; from: 0; to: 1; duration: NihilStyle.durationLong; easing.type: Easing.OutCubic }
+                    NumberAnimation { target: ring; property: "opacity"; from: 0.9; to: 0; duration: NihilStyle.durationLong }
                 }
             }
         }
@@ -134,7 +134,7 @@ Scope {
             readonly property string arrival: popup.options?.animation ?? "default"
             property bool showing: false
             property real shown: popup.showing ? 1 : 0
-            Behavior on shown { NumberAnimation { duration: popup.arrival === "none" ? 0 : NihilStyle.calm; easing.type: Easing.OutCubic } }
+            Behavior on shown { NumberAnimation { duration: popup.arrival === "none" ? 0 : NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
 
             screen: popup.modelData
             visible: popup.shown > 0 && !NihilState.overviewOpen
@@ -166,7 +166,7 @@ Scope {
                 height: NihilStyle.s(44)
                 radius: height / 2
                 opacity: popup.shown
-                ignite: 0.4
+                activeGlow: 0.4
                 Row {
                     id: strip
                     anchors.centerIn: parent
@@ -186,10 +186,10 @@ Scope {
                             width: index === popup.reached ? NihilStyle.s(34) : NihilStyle.s(10)
                             height: NihilStyle.s(10)
                             radius: height / 2
-                            color: index === popup.reached ? NihilStyle.accent : NihilStyle.inkFaint
+                            color: index === popup.reached ? NihilStyle.accent : NihilStyle.textTertiary
                             Behavior on width {
                                 enabled: popup.springs
-                                NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic }
+                                NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic }
                             }
                         }
                     }

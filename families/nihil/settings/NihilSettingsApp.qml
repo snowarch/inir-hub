@@ -15,7 +15,7 @@ Window {
     height: 830
     minimumWidth: 860
     minimumHeight: 520
-    color: NihilStyle.void_
+    color: NihilStyle.background
     onClosing: Qt.quit()
 
     NihilSettingsView {

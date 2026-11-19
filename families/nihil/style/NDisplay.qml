@@ -2,13 +2,13 @@ import QtQuick
 
 // What leads a surface: Geist set large, thin and tight, in the sentence's own case.
 Text {
-    property real size: NihilStyle.textHero
+    property real size: NihilStyle.textDisplay
     property bool capitals: false
 
-    color: NihilStyle.ink
+    color: NihilStyle.text
     elide: Text.ElideRight
     verticalAlignment: Text.AlignVCenter
-    font.family: NihilStyle.display
+    font.family: NihilStyle.titleFontFamily
     font.pixelSize: size
     font.weight: size >= NihilStyle.s(72) ? Font.ExtraLight : size >= NihilStyle.s(26) ? Font.Light : Font.Normal
     font.capitalization: capitals ? Font.AllUppercase : Font.MixedCase

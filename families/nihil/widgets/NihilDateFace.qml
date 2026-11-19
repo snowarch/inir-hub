@@ -19,7 +19,7 @@ NihilWidgetFace {
     }
 
     NDisplay {
-        color: root.ink
+        color: root.foreground
         id: day
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
@@ -36,7 +36,7 @@ NihilWidgetFace {
         text: Translation.locale.toString(root.today, "dddd")
         font.pixelSize: root.dp(root.small ? 14 : 17)
         font.weight: Font.DemiBold
-        color: root.inkSoft
+        color: root.foregroundSecondary
     }
 
     Column {
@@ -53,10 +53,10 @@ NihilWidgetFace {
                 id: gone
                 text: Translation.tr("Day %1 of %2").arg(root.widget.dayOfYear).arg(root.widget.daysInYear)
                 font.pixelSize: root.dp(12)
-                color: root.inkSoft
+                color: root.foregroundSecondary
             }
             NText {
-                color: root.ink
+                color: root.foreground
                 anchors.right: parent.right
                 text: Math.round(root.yearGone * 100) + "%"
                 figures: true
@@ -65,7 +65,7 @@ NihilWidgetFace {
             }
         }
         FaceBar {
-            ink: root.ink
+            foreground: root.foreground
             width: parent.width
             level: root.yearGone
         }

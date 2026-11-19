@@ -32,15 +32,15 @@ Item {
         ? root.widget.look.material(root.widget) : (root.widget.showBackground === false ? "clear" : "glass")
     readonly property bool clear: root.material === "clear"
 
-    // On the glass the ink follows the scheme. Bare on the wallpaper it reads the picture under it instead.
-    readonly property bool darkInk: root.clear ? root.widget.inkOnLight : !NihilStyle.dark
-    readonly property color ink: root.clear ? (root.darkInk ? "#101217" : "#F3F4F6") : NihilStyle.ink
-    readonly property color inkSoft: root.clear ? Qt.alpha(root.ink, 0.76) : NihilStyle.inkSoft
-    readonly property color inkFaint: root.clear ? Qt.alpha(root.ink, 0.52) : NihilStyle.inkFaint
+    // On the glass the foreground follows the scheme. Bare on the wallpaper it reads the picture under it instead.
+    readonly property bool darkText: root.clear ? root.widget.inkOnLight : !NihilStyle.dark
+    readonly property color foreground: root.clear ? (root.darkText ? "#101217" : "#F3F4F6") : NihilStyle.text
+    readonly property color foregroundSecondary: root.clear ? Qt.alpha(root.foreground, 0.76) : NihilStyle.textSecondary
+    readonly property color foregroundTertiary: root.clear ? Qt.alpha(root.foreground, 0.52) : NihilStyle.textTertiary
     readonly property color accent: root.clear
-        ? Lume.mark(NihilStyle.accent, Math.max(0, root.widget.regionBrightness), root.widget.regionBrightnessSpread, root.darkInk, 4.5)
+        ? Lume.mark(NihilStyle.accent, Math.max(0, root.widget.regionBrightness), root.widget.regionBrightnessSpread, root.darkText, 4.5)
         : NihilStyle.accent
-    readonly property color accentInk: !root.clear ? NihilStyle.accentInk
+    readonly property color accentForeground: !root.clear ? NihilStyle.accentText
         : ColorUtils.contrastRatio("#FFFFFF", root.accent) >= ColorUtils.contrastRatio("#101217", root.accent) ? "#FFFFFF" : "#101217"
 
     readonly property bool stacked: root.widget.stacked
@@ -55,8 +55,8 @@ Item {
         anchors.fill: parent
         visible: root.plated && !root.clear
         radius: root.radius
-        tint: root.material === "glass" ? NihilStyle.glassTint : NihilStyle.void_
-        ignite: root.widget.stackDropHint ? 1 : 0
+        tint: root.material === "glass" ? NihilStyle.glassTint : NihilStyle.background
+        activeGlow: root.widget.stackDropHint ? 1 : 0
     }
 
     Item {
@@ -72,8 +72,8 @@ Item {
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowBlur: 0.7
-            shadowColor: root.darkInk ? "#FFFFFF" : "#000000"
-            shadowOpacity: root.darkInk ? 0.4 : 0.75
+            shadowColor: root.darkText ? "#FFFFFF" : "#000000"
+            shadowOpacity: root.darkText ? 0.4 : 0.75
             shadowVerticalOffset: 1
             shadowHorizontalOffset: 0
             autoPaddingEnabled: true

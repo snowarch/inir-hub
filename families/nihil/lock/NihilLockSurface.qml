@@ -62,7 +62,7 @@ MouseArea {
         id: fact
         property string glyph: ""
         property string word: ""
-        property color tone: NihilStyle.inkSoft
+        property color tone: NihilStyle.textSecondary
         spacing: NihilStyle.s(8)
         NIcon {
             anchors.verticalCenter: parent.verticalCenter
@@ -88,7 +88,7 @@ MouseArea {
 
     Rectangle {
         anchors.fill: parent
-        color: NihilStyle.void_
+        color: NihilStyle.background
     }
 
     Image {
@@ -115,7 +115,7 @@ MouseArea {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(NihilStyle.void_, NihilStyle.dark ? 0.26 : 0.24)
+        color: Qt.alpha(NihilStyle.background, NihilStyle.dark ? 0.26 : 0.24)
     }
 
     // The ring tells the minute at rest and counts the password while it is typed.
@@ -127,9 +127,9 @@ MouseArea {
         height: width
         ticks: 60
         level: root.typed > 0 ? Math.min(root.typed * 4, 60) / 60 : DateTime.clock.date.getMinutes() / 60
-        light: root.failed ? NihilStyle.danger : root.typed > 0 ? NihilStyle.accent : NihilStyle.ink
-        Behavior on level { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
-        Behavior on light { ColorAnimation { duration: NihilStyle.quick } }
+        fillColor: root.failed ? NihilStyle.danger : root.typed > 0 ? NihilStyle.accent : NihilStyle.text
+        Behavior on level { NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
+        Behavior on fillColor { ColorAnimation { duration: NihilStyle.durationShort } }
     }
 
     Column {
@@ -151,7 +151,7 @@ MouseArea {
             text: Translation.locale.toString(DateTime.clock.date, "dddd d MMMM")
             font.pixelSize: NihilStyle.s(18)
             font.weight: Font.Light
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
     }
 
@@ -166,11 +166,11 @@ MouseArea {
         width: NihilStyle.s(360)
         height: NihilStyle.s(60)
         radius: height / 2
-        color: Qt.alpha(NihilStyle.void_, 0.72)
+        color: Qt.alpha(NihilStyle.background, 0.72)
         border.width: field.activeFocus || root.failed ? 2 : 1
-        border.color: root.failed ? NihilStyle.danger : field.activeFocus ? NihilStyle.accent : NihilStyle.hair
+        border.color: root.failed ? NihilStyle.danger : field.activeFocus ? NihilStyle.accent : NihilStyle.border
         transform: Translate { x: capsule.nudge }
-        Behavior on border.color { ColorAnimation { duration: NihilStyle.quick } }
+        Behavior on border.color { ColorAnimation { duration: NihilStyle.durationShort } }
 
         SequentialAnimation {
             id: shake
@@ -198,7 +198,7 @@ MouseArea {
             anchors.verticalCenter: parent.verticalCenter
             visible: root.typed === 0
             text: Translation.tr("Password")
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
 
         Row {
@@ -212,7 +212,7 @@ MouseArea {
                     width: NihilStyle.s(7)
                     height: width
                     radius: width / 2
-                    color: NihilStyle.ink
+                    color: NihilStyle.text
                 }
             }
         }
@@ -224,7 +224,7 @@ MouseArea {
             width: NihilStyle.s(42)
             height: NihilStyle.s(42)
             radius: height / 2
-            lit: true
+            highlighted: true
             icon: root.busy ? "more_horiz"
                 : root.context.targetAction === LockContext.ActionEnum.Poweroff ? "power_settings_new"
                 : root.context.targetAction === LockContext.ActionEnum.Reboot ? "restart" : "arrow_forward"
@@ -239,7 +239,7 @@ MouseArea {
         text: root.failed ? Translation.tr("Try again") : SystemInfo.username
         font.pixelSize: NihilStyle.s(15)
         font.weight: Font.Medium
-        color: root.failed ? NihilStyle.danger : NihilStyle.ink
+        color: root.failed ? NihilStyle.danger : NihilStyle.text
     }
 
     Row {
@@ -255,7 +255,7 @@ MouseArea {
             visible: root.showBattery && Battery.available
             glyph: Battery.isCharging ? "battery_charging_full" : "battery_full"
             word: Math.round(Battery.percentage * 100) + " %"
-            tone: Battery.isLow && !Battery.isCharging ? NihilStyle.danger : NihilStyle.inkSoft
+            tone: Battery.isLow && !Battery.isCharging ? NihilStyle.danger : NihilStyle.textSecondary
         }
         Fact {
             anchors.verticalCenter: parent.verticalCenter

@@ -1,5 +1,5 @@
 #version 440
-// A well: a shallow recess in the glass. Shaded along its top edge, caught by light along its bottom one; `lit` raises
+// An inset: a shallow recess in the glass, shaded along its top edge and lit along its bottom one. `highlighted` raises
 // an aurora in the light's two colours from the lower edge and draws its hot line.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
@@ -8,14 +8,14 @@ layout(std140, binding = 0) uniform buf {
     float qt_Opacity;
     vec2 box;
     float radius;
-    float lit;
+    float highlighted;
     float hover;
     vec4 fill;
     vec4 shade;
     vec4 edge;
     vec4 glow;
-    vec4 specA;
-    vec4 specB;
+    vec4 highlight;
+    vec4 highlightTint;
 };
 
 vec3 straight(vec4 c) { return c.a > 0.0001 ? c.rgb / c.a : c.rgb; }
@@ -42,15 +42,15 @@ void main() {
     rgb += straight(edge) * lower;
     a += lower * (1.0 - a);
 
-    vec3 ink = mix(specA.rgb, specB.rgb, qt_TexCoord0.x);
+    vec3 tone = mix(highlight.rgb, highlightTint.rgb, qt_TexCoord0.x);
     float fromBottom = (box.y - p.y) / min(box.y * 0.42, 26.0);
     float across = (p.x - c.x) / (box.x * 0.46);
-    float rise = exp(-fromBottom * fromBottom) * exp(-across * across) * lit;
-    rgb += ink * rise * 0.2;
+    float rise = exp(-fromBottom * fromBottom) * exp(-across * across) * highlighted;
+    rgb += tone * rise * 0.2;
     a += rise * 0.14 * (1.0 - a);
 
-    float hot = exp(-pow((box.y - p.y - 0.75) / 0.8, 2.0)) * exp(-pow((p.x - c.x) / (box.x * 0.34), 2.0)) * lit;
-    rgb += (ink * 0.6 + 0.4) * hot;
+    float hot = exp(-pow((box.y - p.y - 0.75) / 0.8, 2.0)) * exp(-pow((p.x - c.x) / (box.x * 0.34), 2.0)) * highlighted;
+    rgb += (tone * 0.6 + 0.4) * hot;
     a += hot * (1.0 - a);
 
     fragColor = vec4(rgb, a) * inside * qt_Opacity;

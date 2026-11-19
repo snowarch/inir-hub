@@ -27,10 +27,10 @@ MouseArea {
     Rectangle {
         anchors.fill: parent
         radius: NihilStyle.r(24)
-        color: root.hot ? NihilStyle.pieceRaised : NihilStyle.piece
+        color: root.hot ? NihilStyle.fillHover : NihilStyle.fill
         border.width: root.notice.critical ? NihilStyle.s(2) : 0
         border.color: NihilStyle.danger
-        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+        Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
     }
     NAppIcon {
         id: mark
@@ -51,7 +51,7 @@ MouseArea {
             text: root.notice.summary || root.notice.app
             font.pixelSize: NihilStyle.s(15)
             font.weight: Font.Medium
-            color: root.notice.critical ? NihilStyle.danger : NihilStyle.ink
+            color: root.notice.critical ? NihilStyle.danger : NihilStyle.text
         }
         NText {
             width: parent.width
@@ -61,7 +61,7 @@ MouseArea {
             wrapMode: Text.Wrap
             maximumLineCount: 3
             font.pixelSize: NihilStyle.textSmall
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
         Row {
             visible: root.notice.actions.length > 0
@@ -74,8 +74,8 @@ MouseArea {
                     required property int index
                     height: NihilStyle.s(34)
                     label: modelData.text
-                    lit: index === 0
-                    tone: NihilStyle.pieceRaised
+                    highlighted: index === 0
+                    tone: NihilStyle.fillHover
                     onClicked: Notifications.attemptInvokeAction(root.notice.id, modelData.id)
                 }
             }
@@ -90,7 +90,7 @@ MouseArea {
         width: NihilStyle.s(64)
         height: width
         radius: NihilStyle.r(14)
-        color: NihilStyle.piece
+        color: NihilStyle.fill
         Image {
             anchors.fill: parent
             source: root.pictured ? root.notice.image : ""
@@ -106,7 +106,7 @@ MouseArea {
         anchors.margins: NihilStyle.s(8)
         width: NihilStyle.s(30)
         height: width
-        tone: NihilStyle.pieceRaised
+        tone: NihilStyle.fillHover
         opacity: root.hot ? 1 : 0
         icon: "close"
         iconSize: NihilStyle.s(14)

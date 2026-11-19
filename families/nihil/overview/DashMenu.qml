@@ -52,13 +52,13 @@ Item {
     }
 
     NGlass {
-        x: NihilStyle.clamp(root.at.x, NihilStyle.edge, root.width - width - NihilStyle.edge)
-        y: NihilStyle.clamp(root.at.y, NihilStyle.edge, root.height - height - NihilStyle.edge)
+        x: NihilStyle.clamp(root.at.x, NihilStyle.screenMargin, root.width - width - NihilStyle.screenMargin)
+        y: NihilStyle.clamp(root.at.y, NihilStyle.screenMargin, root.height - height - NihilStyle.screenMargin)
         width: NihilStyle.s(236)
         height: column.implicitHeight + NihilStyle.s(12)
-        radius: NihilStyle.rCard
-        tint: NihilStyle.menuTint
-        tracks: true
+        radius: NihilStyle.radiusCard
+        tint: NihilStyle.menuBackground
+        followPointer: true
         Column {
             id: column
             x: NihilStyle.s(6)

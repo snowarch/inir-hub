@@ -15,12 +15,8 @@ Item {
     id: root
 
     property var screen: null
-    property bool flipped: false
-    property real room: 0
     property bool open: false
 
-    implicitWidth: NihilStyle.s(1240)
-    implicitHeight: Math.min(NihilStyle.s(720), root.room)
 
     property string query: ""
     property bool dark: NihilStyle.dark
@@ -62,9 +58,9 @@ Item {
         readonly property real inset: NihilStyle.s(20)
 
         x: sheet.inset
-        y: root.flipped ? NihilStyle.s(40) : NihilStyle.s(16)
+        y: sheet.inset
         width: root.width - sheet.inset * 2
-        height: root.height - NihilStyle.s(56)
+        height: root.height - sheet.inset * 2
 
         // The marked wallpaper, large, with what wearing it will do.
         Item {
@@ -81,7 +77,7 @@ Item {
                 width: hero.width
                 height: hero.height - foot.height - NihilStyle.s(16)
                 radius: NihilStyle.r(26)
-                color: NihilStyle.piece
+                color: NihilStyle.fill
 
                 Image {
                     anchors.fill: parent
@@ -91,7 +87,7 @@ Item {
                     source: !root.open || hero.path.length === 0 ? ""
                         : "file://" + (hero.video ? String(Wallpapers.getVideoFirstFramePath(hero.path) ?? "") : hero.path)
                     opacity: status === Image.Ready ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: NihilStyle.calm } }
+                    Behavior on opacity { NumberAnimation { duration: NihilStyle.durationMedium } }
                 }
             }
 
@@ -140,7 +136,7 @@ Item {
                             height: NihilStyle.s(44)
                             icon: "check"
                             label: Translation.tr("Use this wallpaper")
-                            lit: true
+                            highlighted: true
                             enabled: hero.path.length > 0
                             onClicked: root.pick(hero.path)
                         }
@@ -201,30 +197,13 @@ Item {
                 }
             }
 
-            Column {
+            NEmpty {
                 anchors.centerIn: grid
-                width: grid.width
+                width: Math.min(grid.width, NihilStyle.s(340))
                 visible: grid.count === 0
-                spacing: NihilStyle.s(6)
-
-                NIcon {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.query.length > 0 ? "search_off" : "image"
-                    size: NihilStyle.s(32)
-                    color: NihilStyle.inkSoft
-                }
-                NText {
-                    width: parent.width
-                    horizontalAlignment: Text.AlignHCenter
-                    text: root.query.length > 0 ? Translation.tr("Nothing by that name") : Translation.tr("No wallpapers in this folder")
-                    font.pixelSize: NihilStyle.textLarge
-                }
-                NText {
-                    width: parent.width
-                    horizontalAlignment: Text.AlignHCenter
-                    text: root.query.length > 0 ? Translation.tr("Try another word") : Wallpapers.effectiveDirectory
-                    color: NihilStyle.inkSoft
-                }
+                icon: root.query.length > 0 ? "search_off" : "image"
+                title: root.query.length > 0 ? Translation.tr("Nothing by that name") : Translation.tr("No wallpapers in this folder")
+                note: root.query.length > 0 ? Translation.tr("Try another word") : Wallpapers.effectiveDirectory
             }
         }
     }

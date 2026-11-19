@@ -5,7 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.nihil.style
 
-// The date set large, the month under it and what comes next at the foot. The wheel walks the months; the large figure
+// The date set large, the month under it and what comes next at the foot. The wheel walks the months; the large number
 // then names the month shown, and a tap on it comes back to today.
 Item {
     id: root
@@ -53,7 +53,7 @@ Item {
         height: NihilStyle.s(22)
         text: root.shift === 0 ? Translation.locale.dayName(root.now.getDay(), Locale.LongFormat) : Translation.tr("Back to today")
         font.pixelSize: NihilStyle.s(15)
-        color: NihilStyle.inkSoft
+        color: NihilStyle.textSecondary
     }
 
     MouseArea {
@@ -69,9 +69,9 @@ Item {
             id: figure
             anchors.verticalCenter: parent.verticalCenter
             text: root.shift === 0 ? root.now.getDate() : Translation.locale.standaloneMonthName(root.first.getMonth(), Locale.ShortFormat)
-            color: NihilStyle.ink
+            color: NihilStyle.text
             renderType: Text.NativeRendering
-            font.family: NihilStyle.display
+            font.family: NihilStyle.titleFontFamily
             font.pixelSize: root.shift === 0 ? NihilStyle.s(136) : NihilStyle.s(80)
             font.weight: Font.ExtraLight
             font.letterSpacing: root.shift === 0 ? -NihilStyle.s(5) : -NihilStyle.s(2)
@@ -84,7 +84,7 @@ Item {
             anchors.baseline: figure.baseline
             text: root.shift === 0 ? Translation.locale.standaloneMonthName(root.now.getMonth(), Locale.LongFormat) : root.first.getFullYear()
             font.pixelSize: NihilStyle.s(18)
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
     }
 
@@ -99,8 +99,8 @@ Item {
                 width: root.cellWidth
                 horizontalAlignment: Text.AlignHCenter
                 text: Translation.locale.dayName((root.startDay + initial.index) % 7, Locale.ShortFormat).slice(0, 2)
-                font.pixelSize: NihilStyle.textLabel
-                color: NihilStyle.inkFaint
+                font.pixelSize: NihilStyle.textCaption
+                color: NihilStyle.textTertiary
             }
         }
     }
@@ -136,7 +136,7 @@ Item {
                     figures: true
                     text: step.number
                     font.weight: step.today ? Font.DemiBold : Font.Normal
-                    color: step.today ? NihilStyle.accentInk : step.rest ? NihilStyle.inkFaint : NihilStyle.ink
+                    color: step.today ? NihilStyle.accentText : step.rest ? NihilStyle.textTertiary : NihilStyle.text
                 }
             }
         }
@@ -148,7 +148,7 @@ Item {
         width: parent.width
         height: NihilStyle.s(62)
         radius: NihilStyle.r(22)
-        color: NihilStyle.piece
+        color: NihilStyle.fill
 
         Rectangle {
             x: NihilStyle.s(16)
@@ -172,7 +172,7 @@ Item {
                 width: parent.width
                 text: root.next ? root.whenNext(root.next.at) : ""
                 font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkSoft
+                color: NihilStyle.textSecondary
             }
         }
     }

@@ -66,14 +66,14 @@ NScroller {
         radius: NihilStyle.r(10)
         color: Qt.alpha("#000000", 0.28)
         border.width: 1
-        border.color: plan.worn ? Qt.alpha(NihilStyle.accent, 0.5) : NihilStyle.hair
+        border.color: plan.worn ? Qt.alpha(NihilStyle.accent, 0.5) : NihilStyle.border
         clip: true
 
         // The panel.
         Rectangle {
             visible: plan.profile !== "corner"
             x: plan.u * 3; y: plan.u * 3; width: plan.width - plan.u * 6; height: plan.u * 3.2
-            radius: height / 2; color: NihilStyle.pieceRaised
+            radius: height / 2; color: NihilStyle.fillHover
         }
         // The hot corner.
         Rectangle {
@@ -85,12 +85,12 @@ NScroller {
         Rectangle {
             visible: plan.dashLeft
             x: plan.u * 3; y: plan.height * 0.3; width: plan.u * 3.4; height: plan.height * 0.44
-            radius: width / 2; color: NihilStyle.pieceRaised
+            radius: width / 2; color: NihilStyle.fillHover
         }
         Rectangle {
             visible: plan.dashBottom
             x: plan.width * 0.32; y: plan.height - plan.u * 7; width: plan.width * 0.36; height: plan.u * 3.6
-            radius: height / 2; color: NihilStyle.pieceRaised
+            radius: height / 2; color: NihilStyle.fillHover
         }
         // The workspaces.
         Repeater {
@@ -102,7 +102,7 @@ NScroller {
                 width: plan.rowOfWorkspaces ? plan.width * 0.12 : plan.u * 9
                 height: plan.rowOfWorkspaces ? plan.u * 6 : plan.height * 0.13
                 radius: plan.u * 1.2
-                color: index === 0 ? Qt.alpha(NihilStyle.ink, 0.3) : NihilStyle.piece
+                color: index === 0 ? Qt.alpha(NihilStyle.text, 0.3) : NihilStyle.fill
             }
         }
         // The windows.
@@ -112,9 +112,9 @@ NScroller {
             width: plan.width * (plan.rowOfWorkspaces || plan.profile === "dock" ? 0.68 : 0.56)
             height: plan.height * (plan.dashBottom ? 0.42 : 0.5)
             radius: plan.u * 1.6
-            color: NihilStyle.piece
+            color: NihilStyle.fill
             border.width: 1
-            border.color: NihilStyle.hair
+            border.color: NihilStyle.border
         }
     }
 
@@ -125,7 +125,7 @@ NScroller {
         text: root.worn === "custom" ? Translation.tr("You changed this desktop by hand. Keep it over a profile to have it back later.")
             : Translation.tr("Each profile is a whole desktop layout, and your colours stay as they are.")
         wrapMode: Text.Wrap
-        color: NihilStyle.inkSoft
+        color: NihilStyle.textSecondary
     }
 
     Flow {
@@ -135,7 +135,7 @@ NScroller {
         Repeater {
             model: Profiles.list
 
-            delegate: NWell {
+            delegate: NInset {
                 id: card
 
                 required property var modelData
@@ -145,7 +145,7 @@ NScroller {
                 width: root.cardWidth
                 height: NihilStyle.s(14) * 2 + plan.height + about.height + NihilStyle.s(70)
                 radius: NihilStyle.r(22)
-                lit: card.isWorn ? 0.8 : 0
+                highlighted: card.isWorn ? 0.8 : 0
 
                 Plan {
                     id: plan
@@ -179,7 +179,7 @@ NScroller {
                         maximumLineCount: 2
                         elide: Text.ElideRight
                         verticalAlignment: Text.AlignTop
-                        color: NihilStyle.inkSoft
+                        color: NihilStyle.textSecondary
                     }
                 }
 
@@ -192,7 +192,7 @@ NScroller {
                     NButton {
                         icon: card.isWorn ? "check" : ""
                         label: card.isWorn ? Translation.tr("In use") : Translation.tr("Use")
-                        lit: card.isWorn
+                        highlighted: card.isWorn
                         onClicked: root.wear(card.modelData.id)
                     }
                     NButton {

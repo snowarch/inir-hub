@@ -45,8 +45,8 @@ NGlass {
     implicitWidth: root.vertical ? root.across : root.along
     implicitHeight: root.vertical ? root.along : root.across
     radius: root.across / 2
-    tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.void_, root.look?.opacity ?? 0.74)
-    tracks: true
+    tint: Qt.alpha(root.tone === "light" ? "#FFFFFF" : root.tone === "dark" ? "#000000" : NihilStyle.background, root.look?.opacity ?? 0.74)
+    followPointer: true
 
     function windowsOf(app: var): var { return (NiriService.windows ?? []).filter(win => win.app_id === app.appId) }
     function launch(app: var): void {
@@ -119,7 +119,7 @@ NGlass {
                 readonly property bool urgent: root.windowsOf(key.modelData).some(win => win.is_urgent)
                 width: root.cell
                 height: root.cell
-                tone: key.urgent ? NihilStyle.pieceRaised : "transparent"
+                tone: key.urgent ? NihilStyle.fillHover : "transparent"
                 Accessible.name: AppSearch.lookupDesktopEntry(key.modelData.appId)?.name ?? key.modelData.appId
                 onClicked: mouse => {
                     if (mouse?.button === Qt.MiddleButton) root.launch(key.modelData)
@@ -136,7 +136,7 @@ NGlass {
                     appId: key.modelData.appId
                     size: root.iconSize
                     scale: key.containsMouse ? 1.1 : 1
-                    Behavior on scale { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+                    Behavior on scale { NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
                 }
                 Row {
                     visible: (root.options?.runningDots ?? true) && key.running > 0

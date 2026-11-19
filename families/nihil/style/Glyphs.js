@@ -139,22 +139,22 @@ function resolve(name) {
     return { glyph: "dot", struck: false }
 }
 
-function _segment(part, ink) {
+function _segment(part, color) {
     var head = part.charAt(0)
     if (head === "o" || head === "O") {
         var c = part.slice(2).split(" ")
-        return '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + c[2] + '"' + (head === "O" ? ' fill="' + ink + '" stroke="none"' : "") + "/>"
+        return '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="' + c[2] + '"' + (head === "O" ? ' fill="' + color + '" stroke="none"' : "") + "/>"
     }
-    if (head === "*") return '<path d="' + part.slice(1) + '" fill="' + ink + '" stroke="none"/>'
+    if (head === "*") return '<path d="' + part.slice(1) + '" fill="' + color + '" stroke="none"/>'
     return '<path d="' + part + '"/>'
 }
 
-// The glyph as an SVG address an Image can load, in one ink.
-function url(name, ink, weight) {
+// The glyph as an SVG address an Image can load, in one color.
+function url(name, color, weight) {
     var found = resolve(name)
-    var body = set[found.glyph].split("|").map(function (part) { return _segment(part, ink) }).join("")
+    var body = set[found.glyph].split("|").map(function (part) { return _segment(part, color) }).join("")
     if (found.struck) body += '<path d="M4 4l16 16"/>'
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="' + ink + '" stroke-width="' + weight
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="' + weight
         + '" stroke-linecap="round" stroke-linejoin="round">' + body + "</svg>"
     return "data:image/svg+xml;utf8," + encodeURIComponent(svg)
 }

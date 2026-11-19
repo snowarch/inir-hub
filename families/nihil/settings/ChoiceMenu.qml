@@ -39,8 +39,8 @@ Item {
         height: Math.min(root.height - NihilStyle.s(24), rows.implicitHeight + NihilStyle.s(12))
         x: NihilStyle.clamp(root.at.x - width, NihilStyle.s(12), root.width - width - NihilStyle.s(12))
         y: NihilStyle.clamp(root.at.y, NihilStyle.s(12), root.height - height - NihilStyle.s(12))
-        radius: NihilStyle.rCard
-        tint: NihilStyle.menuTint
+        radius: NihilStyle.radiusCard
+        tint: NihilStyle.menuBackground
 
         Flickable {
             anchors.fill: parent
@@ -72,9 +72,9 @@ Item {
 
                         Rectangle {
                             anchors.fill: parent
-                            radius: NihilStyle.rKey
-                            color: row.chosen ? NihilStyle.chosen : (row.containsMouse ? NihilStyle.piece : "transparent")
-                            Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+                            radius: NihilStyle.radiusSmall
+                            color: row.chosen ? NihilStyle.fillPressed : (row.containsMouse ? NihilStyle.fill : "transparent")
+                            Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
                         }
                         NText {
                             x: NihilStyle.s(12)
@@ -83,7 +83,7 @@ Item {
                             text: row.modelData.label
                             elide: Text.ElideRight
                             font.weight: row.chosen ? Font.DemiBold : Font.Normal
-                            color: NihilStyle.ink
+                            color: NihilStyle.text
                         }
                         NIcon {
                             anchors.right: parent.right

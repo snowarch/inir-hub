@@ -33,7 +33,7 @@ Item {
         onTriggered: root.armed = false
     }
 
-    NWell {
+    NInset {
         anchors.horizontalCenter: parent.horizontalCenter
         y: Math.max(0, (parent.height - height) / 2 - NihilStyle.s(40))
         width: Math.min(parent.width, NihilStyle.s(460))
@@ -46,7 +46,7 @@ Item {
             width: parent.width - NihilStyle.s(64)
             spacing: NihilStyle.s(6)
 
-            NMark {
+            NLogo {
                 anchors.horizontalCenter: parent.horizontalCenter
                 size: NihilStyle.s(56)
             }
@@ -66,14 +66,14 @@ Item {
                 bottomPadding: NihilStyle.s(18)
                 horizontalAlignment: Text.AlignHCenter
                 text: Translation.tr("Vertical workspaces, a full overview and glass you shape completely.")
-                color: NihilStyle.inkSoft
+                color: NihilStyle.textSecondary
                 wrapMode: Text.Wrap
             }
             NButton {
                 anchors.horizontalCenter: parent.horizontalCenter
                 icon: "undo"
                 label: root.armed ? Translation.tr("Press again to restore everything") : Translation.tr("Restore every option")
-                lit: root.armed
+                highlighted: root.armed
                 onClicked: {
                     if (!root.armed) {
                         root.armed = true

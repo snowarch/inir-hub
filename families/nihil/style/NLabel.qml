@@ -4,11 +4,11 @@ import QtQuick
 Text {
     property bool strong: false
 
-    color: strong ? NihilStyle.ink : NihilStyle.inkSoft
+    color: strong ? NihilStyle.text : NihilStyle.textSecondary
     elide: Text.ElideRight
     verticalAlignment: Text.AlignVCenter
     renderType: Text.NativeRendering
-    font.family: NihilStyle.grotesk
+    font.family: NihilStyle.fontFamily
     font.pixelSize: NihilStyle.textSmall
     font.weight: strong ? Font.DemiBold : Font.Medium
     font.features: { "tnum": 1 }

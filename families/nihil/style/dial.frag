@@ -1,5 +1,5 @@
 #version 440
-// An instrument dial: ticks around three quarters of a circle, lit up to the level, a recess at its heart and a soft
+// A dial: ticks around three quarters of a circle, lit up to the level, a track in the middle and a soft
 // bloom where the level stands. The open quarter faces down.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
@@ -9,9 +9,9 @@ layout(std140, binding = 0) uniform buf {
     vec2 box;
     float level;
     float ticks;
-    vec4 mark;
-    vec4 light;
-    vec4 recess;
+    vec4 tickColor;
+    vec4 fillColor;
+    vec4 trackColor;
 };
 
 const float PI = 3.14159265;
@@ -27,9 +27,9 @@ void main() {
     float t = (theta - gap) / span;
 
     float heart = R * 0.7;
-    vec4 color = recess * smoothstep(heart + 0.7, heart - 0.7, r);
+    vec4 color = trackColor * smoothstep(heart + 0.7, heart - 0.7, r);
     float catchLine = exp(-pow((r - heart) / 0.8, 2.0)) * smoothstep(R * 0.2, -R * 0.7, p.y);
-    color += mark * catchLine * 0.8;
+    color += tickColor * catchLine * 0.8;
 
     if (t > -0.02 && t < 1.02) {
         float f = t * ticks;
@@ -43,10 +43,10 @@ void main() {
             * smoothstep(inner - 0.6, inner + 0.6, r) * smoothstep(outer + 0.6, outer - 0.6, r);
         cover *= step(0.0, n) * step(n, ticks);
         float on = step(n / ticks, level + 0.0001) * step(0.0001, level);
-        color += mix(mark, light, on) * cover * (1.0 - color.a);
+        color += mix(tickColor, fillColor, on) * cover * (1.0 - color.a);
 
         float tip = exp(-pow((t - level) * span * r / (R * 0.2), 2.0)) * exp(-pow((r - R * 0.9) / (R * 0.12), 2.0));
-        color += light * tip * 0.3 * step(0.0001, level) * (1.0 - color.a);
+        color += fillColor * tip * 0.3 * step(0.0001, level) * (1.0 - color.a);
     }
     fragColor = color * qt_Opacity;
 }

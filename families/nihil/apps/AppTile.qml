@@ -18,9 +18,9 @@ MouseArea {
     readonly property var folderOptions: Config.options?.nihil?.folders ?? ({})
     readonly property bool isFolder: root.item.kind === "folder"
     readonly property string names: root.options.names ?? "ellipsized"
-    readonly property bool lit: root.selected || root.containsMouse
-    readonly property bool showName: root.names !== "hidden" || root.lit
-    readonly property bool wholeName: root.names === "expanded" || (root.names === "ellipsized" && root.lit)
+    readonly property bool highlighted: root.selected || root.containsMouse
+    readonly property bool showName: root.names !== "hidden" || root.highlighted
+    readonly property bool wholeName: root.names === "expanded" || (root.names === "ellipsized" && root.highlighted)
 
     // 2x2 always; 3x3 once a folder holds at least five (3) or nine (4) apps.
     readonly property int previewSide: {
@@ -70,15 +70,15 @@ MouseArea {
         height: root.height
         z: root.drag.active ? 10 : 0
         scale: root.drag.active ? 1.08 : 1
-        Behavior on scale { NumberAnimation { duration: NihilStyle.quick; easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: NihilStyle.durationShort; easing.type: Easing.OutCubic } }
 
         Rectangle {
             anchors.fill: parent
             radius: NihilStyle.r(22)
-            color: NihilStyle.pieceRaised
-            opacity: root.lit ? 1 : 0
+            color: NihilStyle.fillHover
+            opacity: root.highlighted ? 1 : 0
             visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: NihilStyle.quick } }
+            Behavior on opacity { NumberAnimation { duration: NihilStyle.durationShort } }
         }
 
         Column {
@@ -101,10 +101,10 @@ MouseArea {
                 Rectangle {
                     anchors.fill: parent
                     visible: root.isFolder
-                    radius: NihilStyle.rCard
-                    color: NihilStyle.piece
+                    radius: NihilStyle.radiusCard
+                    color: NihilStyle.fill
                     border.width: 1
-                    border.color: NihilStyle.hair
+                    border.color: NihilStyle.border
 
                     Grid {
                         anchors.centerIn: parent
@@ -139,16 +139,16 @@ MouseArea {
                     width: NihilStyle.s(18)
                     height: width
                     radius: width / 2
-                    color: NihilStyle.carbon
+                    color: NihilStyle.surface
                     border.width: 1
-                    border.color: NihilStyle.hair
+                    border.color: NihilStyle.border
 
                     NText {
                         anchors.centerIn: parent
                         text: String(root.item.package ?? "").slice(0, 1).toUpperCase()
-                        font.pixelSize: NihilStyle.textLabel
+                        font.pixelSize: NihilStyle.textCaption
                         font.weight: Font.DemiBold
-                        color: NihilStyle.inkSoft
+                        color: NihilStyle.textSecondary
                     }
                 }
             }
@@ -169,7 +169,7 @@ MouseArea {
                     maximumLineCount: root.wholeName ? 3 : 1
                     font.pixelSize: NihilStyle.textBody
                     font.weight: Font.Normal
-                    color: root.lit ? NihilStyle.ink : Qt.alpha(NihilStyle.ink, 0.78)
+                    color: root.highlighted ? NihilStyle.text : Qt.alpha(NihilStyle.text, 0.78)
                 }
             }
         }

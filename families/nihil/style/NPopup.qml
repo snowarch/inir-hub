@@ -30,7 +30,7 @@ PanelWindow {
     BackgroundEffect.blurRegion: CompositorService.blurRegions && NihilStyle.blur && root.open ? zone : null
     Region { id: zone; regions: root.blurPieces }
 
-    Behavior on shown { NumberAnimation { duration: NihilStyle.calm; easing.type: Easing.OutCubic } }
+    Behavior on shown { NumberAnimation { duration: NihilStyle.durationMedium; easing.type: Easing.OutCubic } }
 
     MouseArea {
         anchors.fill: parent

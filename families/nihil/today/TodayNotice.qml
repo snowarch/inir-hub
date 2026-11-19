@@ -35,8 +35,8 @@ MouseArea {
     Rectangle {
         anchors.fill: parent
         radius: NihilStyle.r(22)
-        color: root.containsMouse || drop.containsMouse ? NihilStyle.pieceRaised : NihilStyle.piece
-        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+        color: root.containsMouse || drop.containsMouse ? NihilStyle.fillHover : NihilStyle.fill
+        Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
     }
     NAppIcon {
         id: mark
@@ -56,17 +56,17 @@ MouseArea {
             height: title.implicitHeight
             NText {
                 id: title
-                width: parent.width - time.implicitWidth - NihilStyle.gap
+                width: parent.width - time.implicitWidth - NihilStyle.spacing
                 text: root.entry?.summary || root.entry?.appName || ""
                 font.weight: Font.Medium
-                color: root.critical ? NihilStyle.danger : NihilStyle.ink
+                color: root.critical ? NihilStyle.danger : NihilStyle.text
             }
             NText {
                 id: time
                 anchors.right: parent.right
                 text: root.when(root.entry?.time ?? Date.now())
                 font.pixelSize: NihilStyle.textSmall
-                color: NihilStyle.inkFaint
+                color: NihilStyle.textTertiary
             }
         }
         NText {
@@ -77,7 +77,7 @@ MouseArea {
             wrapMode: Text.Wrap
             maximumLineCount: 2
             font.pixelSize: NihilStyle.textSmall
-            color: NihilStyle.inkSoft
+            color: NihilStyle.textSecondary
         }
     }
     NButton {

@@ -34,7 +34,7 @@ MouseArea {
         anchors.fill: parent
         radius: height / 2
         color: root.marked ? NihilStyle.accent : "transparent"
-        Behavior on color { ColorAnimation { duration: NihilStyle.quick } }
+        Behavior on color { ColorAnimation { duration: NihilStyle.durationShort } }
     }
     NIcon {
         id: mark
@@ -42,7 +42,7 @@ MouseArea {
         anchors.verticalCenter: parent.verticalCenter
         text: root.image ? "image" : root.row.pinned ? "pin" : "page"
         size: NihilStyle.s(18)
-        color: root.marked ? NihilStyle.accentInk : root.row.pinned ? NihilStyle.accent : NihilStyle.inkSoft
+        color: root.marked ? NihilStyle.accentText : root.row.pinned ? NihilStyle.accent : NihilStyle.textSecondary
     }
     NText {
         anchors.left: mark.right
@@ -52,6 +52,6 @@ MouseArea {
         anchors.verticalCenter: parent.verticalCenter
         text: root.image ? root.picture : root.raw.replace(/\s+/g, " ").trim()
         textFormat: Text.PlainText
-        color: root.marked ? NihilStyle.accentInk : NihilStyle.ink
+        color: root.marked ? NihilStyle.accentText : NihilStyle.text
     }
 }
