@@ -42,8 +42,8 @@ Scope {
     // intentionally wins as before).
     readonly property string surfaceDialect: Appearance.surfaceDialectFor(
         root.isIslandStyle ? "island" : "")
-    readonly property bool zzzEverywhere: !root.isM3Style && root.surfaceDialect === "zzz"
-    readonly property bool regaliaEverywhere: !root.isM3Style && root.surfaceDialect === "regalia"
+    readonly property bool zzzEverywhere: !root.isM3Style && !root.isNotchStyle && root.surfaceDialect === "zzz"
+    readonly property bool regaliaEverywhere: !root.isM3Style && !root.isNotchStyle && root.surfaceDialect === "regalia"
 
     // Track bar position to force dock recreation when bar changes
     readonly property bool barIsVertical: Config.options?.material?.bar?.bottom !== undefined
@@ -171,16 +171,17 @@ Scope {
 
                 exclusiveZone: root.pinned ? (dockHeight + Appearance.sizes.elevationMargin) : 0
 
-                implicitWidth: root.isVertical ? (dockHeight + Appearance.sizes.elevationMargin + Appearance.sizes.hyprlandGapsOut) : dockBackground.implicitWidth
-                implicitHeight: root.isVertical ? dockBackground.implicitHeight : (dockHeight + Appearance.sizes.elevationMargin + Appearance.sizes.hyprlandGapsOut)
+                implicitWidth: root.isVertical ? (dockHeight + Appearance.sizes.elevationMargin + (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut)) : (dockBackground.implicitWidth + (root.isNotchStyle ? 32 : 0))
+                implicitHeight: root.isVertical ? (dockBackground.implicitHeight + (root.isNotchStyle ? 32 : 0)) : (dockHeight + Appearance.sizes.elevationMargin + (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut))
 
                 WlrLayershell.namespace: "quickshell:dock"
                 color: "transparent"
 
                 // The dock publishes one concrete Region item. Standard, macOS and
-                // island capsules are exact rounded rectangles; the morphing pill and
-                // sharp/chamfered ZZZ silhouettes keep their wallpaper material.
+                // island capsules are exact rounded rectangles; the morphing pill,
+                // concave notch and sharp/chamfered ZZZ silhouettes keep their wallpaper material.
                 readonly property string nativeBlurTopology: !root.isPillStyle
+                    && !root.isNotchStyle
                     && !(root.zzzEverywhere && !Appearance.zzz.round)
                     ? Appearance.blurTopology.roundedRectangle
                     : Appearance.blurTopology.unsupported
@@ -244,9 +245,9 @@ Scope {
 
                     width: root.isVertical
                         ? parent.width
-                        : (dockBackground.implicitWidth + Appearance.sizes.elevationMargin * 2)
+                        : (dockBackground.implicitWidth + Math.max(Appearance.sizes.elevationMargin, root.isNotchStyle ? 16 : 0) * 2)
                     height: root.isVertical
-                        ? (dockBackground.implicitHeight + Appearance.sizes.elevationMargin * 2)
+                        ? (dockBackground.implicitHeight + Math.max(Appearance.sizes.elevationMargin, root.isNotchStyle ? 16 : 0) * 2)
                         : parent.height
 
                     anchors {
@@ -322,14 +323,14 @@ Scope {
                             }
 
                             // Use dockRoot dimensions to avoid binding loop
-                            implicitWidth: root.isVertical ? (dockRoot.width - Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut) : (dockRow.implicitWidth + 10)
-                            implicitHeight: root.isVertical ? (dockColumn.implicitHeight + 10) : (dockRoot.height - Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut)
+                            implicitWidth: root.isVertical ? (dockRoot.width - Appearance.sizes.elevationMargin - (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut)) : (dockRow.implicitWidth + 10)
+                            implicitHeight: root.isVertical ? (dockColumn.implicitHeight + 10) : (dockRoot.height - Appearance.sizes.elevationMargin - (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut))
                             width: implicitWidth
                             height: implicitHeight
 
                             StyledRectangularShadow {
                                 target: dockVisualBackground
-                                visible: (Config.options?.material?.dock?.showBackground ?? true) && !Appearance.gameModeMinimal && !root.zzzEverywhere && !root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle
+                                visible: (Config.options?.material?.dock?.showBackground ?? true) && !Appearance.gameModeMinimal && !root.zzzEverywhere && !root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle && !root.isNotchStyle
                             }
 
                             // Island style carries its own surface (gradient card,
@@ -354,10 +355,19 @@ Scope {
                                 Rectangle {
                                     id: dockVisualBackground
                                     property bool cardStyle: Config.options?.material?.dock?.cardStyle ?? false
+                                    readonly property int flareSize: root.isNotchStyle ? 16 : 0
+                                    readonly property int startFlareCorner: root.position === "bottom" ? RoundCorner.CornerEnum.BottomRight
+                                        : root.isTop ? RoundCorner.CornerEnum.TopRight
+                                        : root.isLeft ? RoundCorner.CornerEnum.BottomLeft
+                                        : RoundCorner.CornerEnum.BottomRight
+                                    readonly property int endFlareCorner: root.position === "bottom" ? RoundCorner.CornerEnum.BottomLeft
+                                        : root.isTop ? RoundCorner.CornerEnum.TopLeft
+                                        : root.isLeft ? RoundCorner.CornerEnum.TopLeft
+                                        : RoundCorner.CornerEnum.TopRight
                                     readonly property bool zzzGlassActive: root.zzzEverywhere
                                         && Appearance.effectsEnabled
                                         && (Config.options?.material?.style?.zzz?.glass ?? true)
-                                    readonly property bool regaliaEverywhere: !root.isM3Style && root.surfaceDialect === "regalia"
+                                    readonly property bool regaliaEverywhere: !root.isM3Style && !root.isNotchStyle && root.surfaceDialect === "regalia"
                                     readonly property bool angelEverywhere: !root.isM3Style && root.surfaceDialect === "angel"
                                     readonly property bool auroraEverywhere: !root.isM3Style && (root.surfaceDialect === "aurora" || angelEverywhere)
                                     readonly property bool inirEverywhere: !root.isM3Style && root.surfaceDialect === "inir"
@@ -387,10 +397,10 @@ Scope {
                                     }
 
                                      anchors.fill: parent
-                                     anchors.topMargin: root.isTop ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
-                                     anchors.bottomMargin: root.position === "bottom" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
-                                     anchors.leftMargin: root.isLeft ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
-                                     anchors.rightMargin: root.position === "right" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
+                                     anchors.topMargin: root.isTop ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
+                                     anchors.bottomMargin: root.position === "bottom" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
+                                     anchors.leftMargin: root.isLeft ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
+                                     anchors.rightMargin: root.position === "right" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
 
                                  // Hide shared background in pill mode — each pill is its own background
                                  // Hide in macOS mode — DockMacBackground is the unified shelf
@@ -399,18 +409,19 @@ Scope {
                                  // islands bar).
                                  visible: (Config.options?.material?.dock?.showBackground ?? true) && !gameModeMinimal && ((root.zzzEverywhere && !root.isIslandStyle) || (!root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle))
                                  // ZZZ: the visible shelf is the chamfered ZzzPlate below.
-                                 color: dockVisualBackground.editorialGlassActive
+                                 readonly property color surfaceColor: dockVisualBackground.editorialGlassActive
                                      ? (!dockVisualBackground.editorialBackdropReady ? Appearance.editorial.rail
                                          : dockRoot.nativeBlurActive && !Appearance.editorial.paperStack ? Appearance.editorial.glassRail
                                          : "transparent")
                                      : Appearance.editorialEverywhere ? Appearance.editorial.rail
-                                     : (root.isM3Style || root.isNotchStyle) ? Appearance.colors.colLayer0
+                                     : root.isM3Style ? Appearance.colors.colLayer0
                                      : root.zzzEverywhere || regaliaEverywhere ? "transparent"
                                      : auroraEverywhere ? ColorUtils.applyAlpha(
                                          (blendedColors?.colLayer0 ?? Appearance.colors.colLayer0),
                                          dockRoot.nativeBlurActive ? 0.46 : 1)
                                      : inirEverywhere ? Appearance.inir.colLayer1
                                      : (cardStyle ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
+                                 color: root.isNotchStyle ? "transparent" : surfaceColor
                                  border.width: root.isNotchStyle ? 0
                                      : root.isM3Style ? 1
                                      : root.zzzEverywhere || regaliaEverywhere ? 0
@@ -431,8 +442,45 @@ Scope {
                                  topRightRadius: root.isNotchStyle && (root.isTop || root.position === "right") ? 0 : radius
                                  bottomLeftRadius: root.isNotchStyle && (root.position === "bottom" || root.isLeft) ? 0 : radius
                                  bottomRightRadius: root.isNotchStyle && (root.position === "bottom" || root.position === "right") ? 0 : radius
+
+                                Rectangle {
+                                    id: notchBodyFill
+                                    visible: root.isNotchStyle
+                                    x: !root.isVertical ? dockVisualBackground.flareSize : 0
+                                    y: root.isVertical ? dockVisualBackground.flareSize : 0
+                                    width: parent.width - (!root.isVertical ? dockVisualBackground.flareSize * 2 : 0)
+                                    height: parent.height - (root.isVertical ? dockVisualBackground.flareSize * 2 : 0)
+                                    color: dockVisualBackground.surfaceColor
+                                    radius: dockVisualBackground.radius
+                                    topLeftRadius: dockVisualBackground.topLeftRadius
+                                    topRightRadius: dockVisualBackground.topRightRadius
+                                    bottomLeftRadius: dockVisualBackground.bottomLeftRadius
+                                    bottomRightRadius: dockVisualBackground.bottomRightRadius
+                                }
+                                RoundCorner {
+                                    visible: root.isNotchStyle
+                                    width: dockVisualBackground.flareSize
+                                    height: dockVisualBackground.flareSize
+                                    implicitSize: dockVisualBackground.flareSize
+                                    color: dockVisualBackground.surfaceColor
+                                    corner: dockVisualBackground.startFlareCorner
+                                    x: !root.isVertical ? 0 : (root.isLeft ? 0 : parent.width - width)
+                                    y: !root.isVertical ? (root.isTop ? 0 : parent.height - height) : 0
+                                }
+                                RoundCorner {
+                                    visible: root.isNotchStyle
+                                    width: dockVisualBackground.flareSize
+                                    height: dockVisualBackground.flareSize
+                                    implicitSize: dockVisualBackground.flareSize
+                                    color: dockVisualBackground.surfaceColor
+                                    corner: dockVisualBackground.endFlareCorner
+                                    x: !root.isVertical ? parent.width - width : (root.isLeft ? 0 : parent.width - width)
+                                    y: !root.isVertical ? (root.isTop ? 0 : parent.height - height) : parent.height - height
+                                }
+
                                 EditorialPaperStack {
                                     anchors.fill: parent
+                                    visible: !root.isM3Style && !root.isNotchStyle && Appearance.editorialEverywhere
                                     faceColor: Appearance.editorial.rail
                                     radius: dockVisualBackground.radius
                                     materialOpacity: dockVisualBackground.editorialBackdropReady ? Appearance.editorial.glassOpacity : 1
@@ -498,10 +546,41 @@ Scope {
                                     && !inirEverywhere && !root.zzzEverywhere
                                     && !gameModeMinimal && !dockRoot.nativeBlurActive
                                 layer.effect: GE.OpacityMask {
-                                    maskSource: Rectangle {
+                                    maskSource: Item {
                                         width: dockVisualBackground.width
                                         height: dockVisualBackground.height
-                                        radius: dockVisualBackground.radius
+                                        Rectangle {
+                                            x: !root.isVertical ? dockVisualBackground.flareSize : 0
+                                            y: root.isVertical ? dockVisualBackground.flareSize : 0
+                                            width: parent.width - (!root.isVertical ? dockVisualBackground.flareSize * 2 : 0)
+                                            height: parent.height - (root.isVertical ? dockVisualBackground.flareSize * 2 : 0)
+                                            radius: dockVisualBackground.radius
+                                            topLeftRadius: dockVisualBackground.topLeftRadius
+                                            topRightRadius: dockVisualBackground.topRightRadius
+                                            bottomLeftRadius: dockVisualBackground.bottomLeftRadius
+                                            bottomRightRadius: dockVisualBackground.bottomRightRadius
+                                            color: "white"
+                                        }
+                                        RoundCorner {
+                                            visible: root.isNotchStyle
+                                            width: dockVisualBackground.flareSize
+                                            height: dockVisualBackground.flareSize
+                                            implicitSize: dockVisualBackground.flareSize
+                                            color: "white"
+                                            corner: dockVisualBackground.startFlareCorner
+                                            x: !root.isVertical ? 0 : (root.isLeft ? 0 : parent.width - width)
+                                            y: !root.isVertical ? (root.isTop ? 0 : parent.height - height) : 0
+                                        }
+                                        RoundCorner {
+                                            visible: root.isNotchStyle
+                                            width: dockVisualBackground.flareSize
+                                            height: dockVisualBackground.flareSize
+                                            implicitSize: dockVisualBackground.flareSize
+                                            color: "white"
+                                            corner: dockVisualBackground.endFlareCorner
+                                            x: !root.isVertical ? parent.width - width : (root.isLeft ? 0 : parent.width - width)
+                                            y: !root.isVertical ? (root.isTop ? 0 : parent.height - height) : parent.height - height
+                                        }
                                     }
                                 }
 
@@ -513,11 +592,11 @@ Scope {
                                         && !dockVisualBackground.gameModeMinimal
                                         && !dockRoot.nativeBlurActive
                                     x: root.isVertical 
-                                        ? (root.isLeft ? 0 : (-(dockRoot.screen?.width ?? 1920) + dockVisualBackground.width + Appearance.sizes.hyprlandGapsOut))
+                                        ? (root.isLeft ? 0 : (-(dockRoot.screen?.width ?? 1920) + dockVisualBackground.width + (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut)))
                                         : (-(dockRoot.screen?.width ?? 1920) / 2 + dockVisualBackground.width / 2)
                                     y: root.isVertical 
                                         ? (-(dockRoot.screen?.height ?? 1080) / 2 + dockVisualBackground.height / 2)
-                                        : (root.isTop ? 0 : (-(dockRoot.screen?.height ?? 1080) + dockVisualBackground.height + Appearance.sizes.hyprlandGapsOut))
+                                        : (root.isTop ? 0 : (-(dockRoot.screen?.height ?? 1080) + dockVisualBackground.height + (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut)))
                                     width: dockRoot.screen?.width ?? 1920
                                     height: dockRoot.screen?.height ?? 1080
                                     visible: requested && status === Image.Ready
@@ -562,41 +641,11 @@ Scope {
                                 }
 
                                 AngelPartialBorder {
-                                    visible: dockVisualBackground.angelEverywhere
+                                    visible: dockVisualBackground.angelEverywhere && !root.isNotchStyle
                                     targetRadius: dockVisualBackground.radius
                                 }
 
                             }
-
-                             // Notch concave edge flares
-                             RoundCorner {
-                                 visible: root.isNotchStyle && dockVisualBackground.visible
-                                 implicitSize: 16
-                                 color: dockVisualBackground.color
-                                 corner: root.position === "bottom" ? RoundCorner.CornerEnum.BottomRight
-                                     : root.isTop ? RoundCorner.CornerEnum.TopRight
-                                     : root.isLeft ? RoundCorner.CornerEnum.BottomLeft
-                                     : RoundCorner.CornerEnum.BottomRight
-                                 x: !root.isVertical ? (dockVisualBackground.x - implicitSize)
-                                     : (root.isLeft ? dockVisualBackground.x : dockVisualBackground.x + dockVisualBackground.width - implicitSize)
-                                 y: !root.isVertical
-                                     ? (root.isTop ? dockVisualBackground.y : dockVisualBackground.y + dockVisualBackground.height - implicitSize)
-                                     : (dockVisualBackground.y - implicitSize)
-                             }
-                             RoundCorner {
-                                 visible: root.isNotchStyle && dockVisualBackground.visible
-                                 implicitSize: 16
-                                 color: dockVisualBackground.color
-                                 corner: root.position === "bottom" ? RoundCorner.CornerEnum.BottomLeft
-                                     : root.isTop ? RoundCorner.CornerEnum.TopLeft
-                                     : root.isLeft ? RoundCorner.CornerEnum.TopLeft
-                                     : RoundCorner.CornerEnum.TopRight
-                                 x: !root.isVertical ? (dockVisualBackground.x + dockVisualBackground.width)
-                                     : (root.isLeft ? dockVisualBackground.x : dockVisualBackground.x + dockVisualBackground.width - implicitSize)
-                                 y: !root.isVertical
-                                     ? (root.isTop ? dockVisualBackground.y : dockVisualBackground.y + dockVisualBackground.height - implicitSize)
-                                     : (dockVisualBackground.y + dockVisualBackground.height)
-                             }
 
                              // macOS unified shelf background — visible only in macOS style
                                DockMacBackground {
