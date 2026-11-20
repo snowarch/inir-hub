@@ -3214,5 +3214,7 @@
   "More options": "Інші параметри",
   "Remove from bar": "Прибрати з панелі",
   "Add to bar": "Додати на панель",
-  "Notch": "Виріз"
+  "Notch": "Виріз",
+  "Lifted %1 px": "Піднято на %1 px",
+  "At the edge": "Біля краю"
 }

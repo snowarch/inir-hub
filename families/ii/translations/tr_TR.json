@@ -3214,5 +3214,7 @@
   "More options": "Diğer seçenekler",
   "Remove from bar": "Çubuktan kaldır",
   "Add to bar": "Çubuğa ekle",
-  "Notch": "Çentik"
+  "Notch": "Çentik",
+  "Lifted %1 px": "%1 px yükseltildi",
+  "At the edge": "Kenarda"
 }

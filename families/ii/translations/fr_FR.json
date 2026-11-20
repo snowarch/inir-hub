@@ -3214,5 +3214,7 @@
   "More options": "Plus d’options",
   "Remove from bar": "Retirer de la barre",
   "Add to bar": "Ajouter à la barre",
-  "Notch": "Encoche"
+  "Notch": "Encoche",
+  "Lifted %1 px": "Surélevé de %1 px",
+  "At the edge": "Au bord"
 }

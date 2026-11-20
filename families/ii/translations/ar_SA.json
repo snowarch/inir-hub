@@ -3214,5 +3214,7 @@
   "More options": "خيارات أخرى",
   "Remove from bar": "إزالة من الشريط",
   "Add to bar": "إضافة إلى الشريط",
-  "Notch": "شق"
+  "Notch": "شق",
+  "Lifted %1 px": "مرفوع %1 بكسل",
+  "At the edge": "عند الحافة"
 }

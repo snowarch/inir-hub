@@ -3214,5 +3214,7 @@
   "More options": "Weitere Optionen",
   "Remove from bar": "Aus der Leiste entfernen",
   "Add to bar": "Zur Leiste hinzufügen",
-  "Notch": "Notch"
+  "Notch": "Notch",
+  "Lifted %1 px": "Angehoben um %1 px",
+  "At the edge": "Am Rand"
 }

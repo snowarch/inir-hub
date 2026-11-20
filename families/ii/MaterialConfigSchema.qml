@@ -598,6 +598,8 @@ JsonObject {
     }
     property JsonObject dock: JsonObject {
         property string style: "m3" // "panel" | "pill" | "macos" | "island" | "m3" | "notch"
+        property int lift: 0 // px between the dock and its edge beyond the usual gap (edit mode grip), 0..120
+        property string styleBeforeNotch: "m3" // style a notch dock goes back to when pulled out of the edge
         property bool cardStyle: false
         property bool enable: true
         property bool monochromeIcons: true

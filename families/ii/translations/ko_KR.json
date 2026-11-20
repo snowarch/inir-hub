@@ -3214,5 +3214,7 @@
   "More options": "추가 옵션",
   "Remove from bar": "바에서 제거",
   "Add to bar": "바에 추가",
-  "Notch": "노치"
+  "Notch": "노치",
+  "Lifted %1 px": "%1px 띄움",
+  "At the edge": "가장자리에 붙음"
 }

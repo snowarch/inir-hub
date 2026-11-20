@@ -110,6 +110,14 @@ Scope {
                     ? editThicknessPreview
                     : (Config.options?.material?.dock?.height ?? 70)
 
+                // Shell edit: the grip lifts the dock off its edge (material.dock.lift) or sinks it into a notch.
+                // Previews locally while held and writes once on release.
+                property real liftPreview: -1
+                property string edgeHint: "" // "notch" | "float" while the grip is held
+                readonly property real lift: root.isNotchStyle ? 0 : Math.max(0, Math.min(120,
+                    liftPreview >= 0 ? liftPreview : (Config.options?.material?.dock?.lift ?? 0)))
+                readonly property real edgeGap: Appearance.sizes.hyprlandGapsOut + lift
+
                 function beginDockResize(): void {
                     const baseline = Config.options?.material?.dock?.height ?? 70
                     if (!ShellEditSession.beginGesture("iiDock", "resize-thickness",
@@ -162,10 +170,10 @@ Scope {
                     right: !root.isLeft || !root.isVertical
                 }
 
-                exclusiveZone: root.pinned ? (dockHeight + Appearance.sizes.elevationMargin) : 0
+                exclusiveZone: root.pinned ? (dockHeight + Appearance.sizes.elevationMargin + dockRoot.lift) : 0
 
-                implicitWidth: root.isVertical ? (dockHeight + Appearance.sizes.elevationMargin + (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut)) : (dockBackground.implicitWidth + (root.isNotchStyle ? 32 : 0))
-                implicitHeight: root.isVertical ? (dockBackground.implicitHeight + (root.isNotchStyle ? 32 : 0)) : (dockHeight + Appearance.sizes.elevationMargin + (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut))
+                implicitWidth: root.isVertical ? (dockHeight + Appearance.sizes.elevationMargin + (root.isNotchStyle ? 0 : dockRoot.edgeGap)) : (dockBackground.implicitWidth + (root.isNotchStyle ? 32 : 0))
+                implicitHeight: root.isVertical ? (dockBackground.implicitHeight + (root.isNotchStyle ? 32 : 0)) : (dockHeight + Appearance.sizes.elevationMargin + (root.isNotchStyle ? 0 : dockRoot.edgeGap))
 
                 WlrLayershell.namespace: "quickshell:dock"
                 color: "transparent"
@@ -317,8 +325,8 @@ Scope {
                             }
 
                             // Use dockRoot dimensions to avoid binding loop
-                            implicitWidth: root.isVertical ? (dockRoot.width - Appearance.sizes.elevationMargin - (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut)) : (dockRow.implicitWidth + 10)
-                            implicitHeight: root.isVertical ? (dockColumn.implicitHeight + 10) : (dockRoot.height - Appearance.sizes.elevationMargin - (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut))
+                            implicitWidth: root.isVertical ? (dockRoot.width - Appearance.sizes.elevationMargin - (root.isNotchStyle ? 0 : dockRoot.edgeGap)) : (dockRow.implicitWidth + 10)
+                            implicitHeight: root.isVertical ? (dockColumn.implicitHeight + 10) : (dockRoot.height - Appearance.sizes.elevationMargin - (root.isNotchStyle ? 0 : dockRoot.edgeGap))
                             width: implicitWidth
                             height: implicitHeight
 
@@ -333,10 +341,10 @@ Scope {
                             IslandPanel {
                                 id: dockIslandBackground
                                 anchors.fill: parent
-                                anchors.topMargin: root.isTop ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
-                                anchors.bottomMargin: root.position === "bottom" ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
-                                anchors.leftMargin: root.isLeft ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
-                                anchors.rightMargin: root.position === "right" ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
+                                anchors.topMargin: root.isTop ? dockRoot.edgeGap : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
+                                anchors.bottomMargin: root.position === "bottom" ? dockRoot.edgeGap : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
+                                anchors.leftMargin: root.isLeft ? dockRoot.edgeGap : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
+                                anchors.rightMargin: root.position === "right" ? dockRoot.edgeGap : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
                                 visible: (Config.options?.material?.dock?.showBackground ?? true) && root.isIslandStyle
                                 glassEnabled: true
                                 nativeBlurActive: dockRoot.nativeBlurActive
@@ -391,10 +399,10 @@ Scope {
                                     }
 
                                     anchors.fill: parent
-                                    anchors.topMargin: root.isTop ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
-                                    anchors.bottomMargin: root.position === "bottom" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
-                                    anchors.leftMargin: root.isLeft ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
-                                    anchors.rightMargin: root.position === "right" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
+                                    anchors.topMargin: root.isTop ? (root.isNotchStyle ? 0 : dockRoot.edgeGap) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
+                                    anchors.bottomMargin: root.position === "bottom" ? (root.isNotchStyle ? 0 : dockRoot.edgeGap) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
+                                    anchors.leftMargin: root.isLeft ? (root.isNotchStyle ? 0 : dockRoot.edgeGap) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
+                                    anchors.rightMargin: root.position === "right" ? (root.isNotchStyle ? 0 : dockRoot.edgeGap) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
 
                                 // Hide shared background in pill mode — each pill is its own background
                                 // Hide in macOS mode — DockMacBackground is the unified shelf
@@ -586,11 +594,11 @@ Scope {
                                         && !dockVisualBackground.gameModeMinimal
                                         && !dockRoot.nativeBlurActive
                                     x: root.isVertical 
-                                        ? (root.isLeft ? 0 : (-(dockRoot.screen?.width ?? 1920) + dockVisualBackground.width + (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut)))
+                                        ? (root.isLeft ? 0 : (-(dockRoot.screen?.width ?? 1920) + dockVisualBackground.width + (root.isNotchStyle ? 0 : dockRoot.edgeGap)))
                                         : (-(dockRoot.screen?.width ?? 1920) / 2 + dockVisualBackground.width / 2)
                                     y: root.isVertical 
                                         ? (-(dockRoot.screen?.height ?? 1080) / 2 + dockVisualBackground.height / 2)
-                                        : (root.isTop ? 0 : (-(dockRoot.screen?.height ?? 1080) + dockVisualBackground.height + (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut)))
+                                        : (root.isTop ? 0 : (-(dockRoot.screen?.height ?? 1080) + dockVisualBackground.height + (root.isNotchStyle ? 0 : dockRoot.edgeGap)))
                                     width: dockRoot.screen?.width ?? 1920
                                     height: dockRoot.screen?.height ?? 1080
                                     visible: requested && status === Image.Ready
@@ -647,10 +655,10 @@ Scope {
                                    visible: (Config.options?.material?.dock?.showBackground ?? true)
                                             && root.isMacosStyle && !root.zzzEverywhere && !Appearance.gameModeMinimal
                                    anchors.fill: parent
-                                   anchors.topMargin:    root.isTop     ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
-                                   anchors.bottomMargin: root.position === "bottom" ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
-                                   anchors.leftMargin:   root.isLeft   ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
-                                   anchors.rightMargin:  root.position === "right" ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
+                                   anchors.topMargin:    root.isTop     ? dockRoot.edgeGap : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
+                                   anchors.bottomMargin: root.position === "bottom" ? dockRoot.edgeGap : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
+                                   anchors.leftMargin:   root.isLeft   ? dockRoot.edgeGap : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
+                                   anchors.rightMargin:  root.position === "right" ? dockRoot.edgeGap : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
                                    dockHeight:    dockRoot.dockHeight
                                    vertical:      root.isVertical
                                    wallpaperUrl:  dockVisualBackground.wallpaperUrl
@@ -772,6 +780,98 @@ Scope {
                         animationDuration: Appearance.animationsEnabled
                             ? Appearance.animation.elementMoveFast.duration : 0
                         onActivated: surface => ShellEditSession.selectSurface(surface)
+                    }
+
+                    // Grip on the edge side: drag away from the edge to lift the dock, into the edge to make it a notch,
+                    // out of the edge to float a notch again. Nothing is written until release.
+                    ShellEditResizeHandle {
+                        id: dockLiftGrip
+                        z: 11000
+                        width: root.isVertical ? 16 : 64
+                        height: root.isVertical ? 64 : 16
+                        x: root.isVertical
+                            ? (root.isLeft ? dockEditFrame.x + 2 : dockEditFrame.x + dockEditFrame.width - width - 2)
+                            : dockEditFrame.x + (dockEditFrame.width - width) / 2
+                        y: root.isVertical
+                            ? dockEditFrame.y + (dockEditFrame.height - height) / 2
+                            : (root.isTop ? dockEditFrame.y + 2 : dockEditFrame.y + dockEditFrame.height - height - 2)
+                        axis: root.isVertical ? "horizontal" : "vertical"
+                        active: ShellEditSession.active && ShellEditSession.liftedSurfaceId.length === 0
+                        accentColor: Appearance.colors.colPrimary
+                        surfaceColor: Appearance.colors.colLayer2
+                        animationsEnabled: Appearance.animationsEnabled
+                        radius: Appearance.rounding.full
+
+                        property point pressPoint: Qt.point(0, 0)
+                        property real startDist: 0
+                        property real startLift: 0
+                        property bool startNotch: false
+
+                        // Pointer distance from the screen edge. The window grows with the lift, so the press point
+                        // (window coordinates at the press) plus the translation is read against the current size.
+                        function edgeDist(dx: real, dy: real): real {
+                            const px = pressPoint.x + dx
+                            const py = pressPoint.y + dy
+                            return root.isTop ? py : root.isLeft ? px
+                                : root.position === "right" ? dockRoot.width - px : dockRoot.height - py
+                        }
+                        function reset(): void {
+                            dockRoot.liftPreview = -1
+                            dockRoot.edgeHint = ""
+                        }
+                        onDragStarted: {
+                            pressPoint = dockLiftGrip.mapToItem(null, width / 2, height / 2)
+                            startDist = edgeDist(0, 0)
+                            startLift = Config.options?.material?.dock?.lift ?? 0
+                            startNotch = root.isNotchStyle
+                        }
+                        onDragged: (axis, dx, dy) => {
+                            const dist = edgeDist(dx, dy)
+                            const moved = dist - startDist
+                            if (startNotch) {
+                                dockRoot.edgeHint = moved > 24 ? "float" : "notch"
+                                return
+                            }
+                            const pull = startLift + moved
+                            // Pressed against the screen edge, or pushed well past rest: sink into a notch.
+                            dockRoot.edgeHint = pull < -24 || (dist <= 4 && pull <= 0) ? "notch" : ""
+                            dockRoot.liftPreview = Math.round(Math.max(0, Math.min(120, pull)))
+                        }
+                        onDragFinished: {
+                            const hint = dockRoot.edgeHint
+                            const style = Config.options?.material?.dock?.style ?? "m3"
+                            if (startNotch && hint === "float") {
+                                const back = Config.options?.material?.dock?.styleBeforeNotch ?? "m3"
+                                Config.setNestedValues({ "material.dock.style": back === "notch" ? "m3" : back, "material.dock.lift": 0 })
+                            } else if (!startNotch && hint === "notch") {
+                                Config.setNestedValues({ "material.dock.styleBeforeNotch": style, "material.dock.style": "notch", "material.dock.lift": 0 })
+                            } else if (!startNotch && dockRoot.liftPreview >= 0 && dockRoot.liftPreview !== startLift) {
+                                Config.setNestedValue("material.dock.lift", dockRoot.liftPreview)
+                            }
+                            reset()
+                        }
+                        onDragCanceled: reset()
+                    }
+
+                    // Where the dock settles while the grip is held.
+                    Rectangle {
+                        z: 11001
+                        visible: dockLiftGrip.dragging
+                        anchors.centerIn: dockEditFrame
+                        radius: Appearance.rounding.full
+                        color: dockRoot.edgeHint.length > 0 ? Appearance.colors.colPrimary : Appearance.colors.colLayer2
+                        implicitWidth: liftChipText.implicitWidth + 20
+                        implicitHeight: liftChipText.implicitHeight + 8
+                        StyledText {
+                            id: liftChipText
+                            anchors.centerIn: parent
+                            text: dockRoot.edgeHint === "notch" ? Translation.tr("Notch")
+                                : dockRoot.edgeHint === "float" || dockRoot.lift <= 0 ? Translation.tr("At the edge")
+                                : Translation.tr("Lifted %1 px").arg(Math.round(dockRoot.lift))
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            font.weight: Font.Medium
+                            color: dockRoot.edgeHint.length > 0 ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
+                        }
                     }
 
                     ShellEditResizeHandle {

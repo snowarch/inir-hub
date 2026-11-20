@@ -3214,5 +3214,7 @@
   "More options": "その他のオプション",
   "Remove from bar": "バーから削除",
   "Add to bar": "バーに追加",
-  "Notch": "ノッチ"
+  "Notch": "ノッチ",
+  "Lifted %1 px": "%1 px 浮かせています",
+  "At the edge": "端に接しています"
 }

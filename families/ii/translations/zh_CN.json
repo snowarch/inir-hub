@@ -3214,5 +3214,7 @@
   "More options": "更多选项",
   "Remove from bar": "从栏中移除",
   "Add to bar": "添加到栏",
-  "Notch": "刘海"
+  "Notch": "刘海",
+  "Lifted %1 px": "已抬起 %1 像素",
+  "At the edge": "贴边"
 }

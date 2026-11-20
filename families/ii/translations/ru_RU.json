@@ -3214,5 +3214,7 @@
   "More options": "Другие параметры",
   "Remove from bar": "Убрать с панели",
   "Add to bar": "Добавить на панель",
-  "Notch": "Вырез"
+  "Notch": "Вырез",
+  "Lifted %1 px": "Поднята на %1 px",
+  "At the edge": "У края"
 }

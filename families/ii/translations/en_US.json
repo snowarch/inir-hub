@@ -3214,5 +3214,7 @@
   "More options": "More options",
   "Remove from bar": "Remove from bar",
   "Add to bar": "Add to bar",
-  "Notch": "Notch"
+  "Notch": "Notch",
+  "Lifted %1 px": "Lifted %1 px",
+  "At the edge": "At the edge"
 }
