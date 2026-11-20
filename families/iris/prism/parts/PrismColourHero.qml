@@ -40,7 +40,9 @@ Item {
                 readonly property var row: PrismModel.find(card.modelData.path)
                 readonly property string said: { const _ = PrismModel.revision; return card.row ? PrismModel.sayNow(card.row) : "" }
                 readonly property color c: card.modelData.colour
-                readonly property color onArt: PrismTheme.light ? PrismTheme.ink : PrismTheme.paper
+                // White light on the card's own dusk, in every scheme and over any colour (an orange or a yellow
+                // swallowed white words; dark ones sank where the art falls into night).
+                readonly property color onArt: PrismTheme.paper
                 width: Math.floor((root.width - root.gap * (root.roles.length - 1)) * card.modelData.share / root.shares)
                 height: root.cardHeight
 
@@ -52,6 +54,17 @@ Item {
                     centre: Qt.point(0.72, 0.28)
                     thickness: 0.8
                     strength: PrismTheme.light ? 0.85 : 1
+                }
+                // The dusk the words stand on: a fall of night at the foot, a lighter one at the head.
+                Rectangle {
+                    anchors.fill: parent
+                    radius: PrismTheme.dp(22)
+                    gradient: Gradient {
+                        GradientStop { position: 0; color: Qt.rgba(0.03, 0.03, 0.04, 0.34) } // iris-literal: Prism's night over its art, the same in every scheme
+                        GradientStop { position: 0.3; color: "transparent" }
+                        GradientStop { position: 0.36; color: "transparent" }
+                        GradientStop { position: 1; color: Qt.rgba(0.03, 0.03, 0.04, 0.74) } // iris-literal: Prism's night over its art, the same in every scheme
+                    }
                 }
                 // The pointer shades the card; nothing grows.
                 Rectangle {
@@ -66,7 +79,7 @@ Item {
                     y: PrismTheme.dp(16)
                     width: parent.width - PrismTheme.dp(36)
                     text: Translation.tr(card.modelData.use)
-                    color: ColorUtils.applyAlpha(card.onArt, 0.72) // iris-literal: the role's use, quiet on its own light
+                    color: ColorUtils.applyAlpha(card.onArt, 0.8) // iris-literal: the role's use, quiet on its own light
                     font.pixelSize: PrismTheme.small
                     elide: Text.ElideRight
                 }
@@ -89,7 +102,7 @@ Item {
                         width: parent.width
                         visible: card.said.length > 0
                         text: card.said
-                        color: ColorUtils.applyAlpha(card.onArt, 0.62) // iris-literal: the value, the second tone of the name
+                        color: ColorUtils.applyAlpha(card.onArt, 0.8) // iris-literal: the value, the second tone of the name
                         font.pixelSize: PrismTheme.dp(22)
                         font.weight: Font.Bold
                         font.letterSpacing: -PrismTheme.dp(22) * 0.025

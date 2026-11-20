@@ -6,7 +6,8 @@ import qs.modules.iris.prism.model
 
 // A page's groups, in their order, as cards on one scroll. A gallery (faces, palettes, pieces) or a long group reads
 // across the page; the short ones between two wide ones stand two to a line, each line as tall as its taller card, so
-// the eye reads down the page and never zigzags through a ragged wall. Runs of groups that hold one self-named row each
+// the eye reads down the page and never zigzags through a ragged wall. Two share a line only when they hold about as
+// much: a card of one switch beside one of five was a tall empty folder (his 11-20: "detalles"). Runs of groups that hold one self-named row each
 // (a bubble, a sound) read as one card of rows, under their band's name.
 Item {
     id: root
@@ -65,6 +66,13 @@ Item {
         return root.columns === 1 || rows.length >= 7 || rows.some(row => root.laysOut(row))
     }
 
+    // How much a card holds, counted by rows: its height changes with the width it gets, its rows do not.
+    function weight(card: var): int { return Math.max(1, Array.from(card?.rows ?? []).length) }
+    function pairs(a: var, b: var): bool {
+        const one = root.weight(a.modelData), two = root.weight(b.modelData)
+        return Math.min(one, two) / Math.max(one, two) >= 0.5
+    }
+
     function boxOf(title: string): var {
         for (let i = 0; i < cardsRepeater.count; ++i) {
             const box = cardsRepeater.itemAt(i)
@@ -86,7 +94,7 @@ Item {
         while (i < boxes.length) {
             const box = boxes[i]
             const next = boxes[i + 1]
-            if (box.wideBox || !next || next.wideBox) {
+            if (box.wideBox || !next || next.wideBox || !root.pairs(box, next)) {
                 box.cellWidth = root.width
                 box.x = 0
                 box.y = top

@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "מילוי רוחב המסך",
   "Centre the column": "מרכוז העמודה",
   "Next column width": "רוחב העמודה הבא",
-  "Stack into the column at the left": "הערמה לעמודה שמשמאל"
+  "Stack into the column at the left": "הערמה לעמודה שמשמאל",
+  "What the right column shows, in the order you turn on.": "מה שהעמודה הימנית מציגה, לפי סדר ההפעלה.",
+  "This page": "דף זה",
+  "The cover large, or one line with its keys.": "הכריכה בגדול, או שורה אחת עם הכפתורים שלה.",
+  "Player": "נגן",
+  "Cover": "כריכה",
+  "Bar": "סרגל",
+  "Up next": "הבא בתור",
+  "Vitals": "מדדים",
+  "Memory": "זיכרון",
+  "Temperature": "טמפרטורה",
+  "Profile": "פרופיל",
+  "Now playing": "פועל כעת",
+  "Done": "הושלם"
 }

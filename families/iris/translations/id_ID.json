@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Penuhi lebar layar",
   "Centre the column": "Pusatkan kolom",
   "Next column width": "Lebar kolom berikutnya",
-  "Stack into the column at the left": "Tumpuk ke kolom di sebelah kiri"
+  "Stack into the column at the left": "Tumpuk ke kolom di sebelah kiri",
+  "What the right column shows, in the order you turn on.": "Isi kolom kanan, sesuai urutan saat Anda mengaktifkannya.",
+  "This page": "Halaman ini",
+  "The cover large, or one line with its keys.": "Sampul besar, atau satu baris dengan tombolnya.",
+  "Player": "Pemutar",
+  "Cover": "Sampul",
+  "Bar": "Bilah",
+  "Up next": "Berikutnya",
+  "Vitals": "Tanda vital",
+  "Memory": "Memori",
+  "Temperature": "Suhu",
+  "Profile": "Profil",
+  "Now playing": "Sedang diputar",
+  "Done": "Selesai"
 }

@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Ekran genişliğini doldur",
   "Centre the column": "Sütunu ortala",
   "Next column width": "Sonraki sütun genişliği",
-  "Stack into the column at the left": "Soldaki sütuna yığ"
+  "Stack into the column at the left": "Soldaki sütuna yığ",
+  "What the right column shows, in the order you turn on.": "Sağ sütunda görünenler, açtığınız sırayla.",
+  "This page": "Bu sayfa",
+  "The cover large, or one line with its keys.": "Büyük kapak ya da düğmeleriyle tek satır.",
+  "Player": "Oynatıcı",
+  "Cover": "Kapak",
+  "Bar": "Çubuk",
+  "Up next": "Sıradaki",
+  "Vitals": "Hayati değerler",
+  "Memory": "Bellek",
+  "Temperature": "Sıcaklık",
+  "Profile": "Profil",
+  "Now playing": "Şu anda çalıyor",
+  "Done": "Bitti"
 }

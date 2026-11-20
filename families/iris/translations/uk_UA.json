@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Розтягнути на ширину екрана",
   "Centre the column": "Центрувати колонку",
   "Next column width": "Наступна ширина колонки",
-  "Stack into the column at the left": "Додати до колонки ліворуч"
+  "Stack into the column at the left": "Додати до колонки ліворуч",
+  "What the right column shows, in the order you turn on.": "Що показує права колонка, у порядку ввімкнення.",
+  "This page": "Ця сторінка",
+  "The cover large, or one line with its keys.": "Велика обкладинка або один рядок з кнопками.",
+  "Player": "Плеєр",
+  "Cover": "Обкладинка",
+  "Bar": "Панель",
+  "Up next": "Далі",
+  "Vitals": "Показники",
+  "Memory": "Пам'ять",
+  "Temperature": "Температура",
+  "Profile": "Профіль",
+  "Now playing": "Зараз відтворюється",
+  "Done": "Готово"
 }

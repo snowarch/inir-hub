@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "占满屏幕宽度",
   "Centre the column": "将列居中",
   "Next column width": "下一个列宽",
-  "Stack into the column at the left": "并入左侧的列"
+  "Stack into the column at the left": "并入左侧的列",
+  "What the right column shows, in the order you turn on.": "右侧栏显示的内容，按你开启的顺序排列。",
+  "This page": "此页面",
+  "The cover large, or one line with its keys.": "大封面，或带按钮的单行。",
+  "Player": "播放器",
+  "Cover": "封面",
+  "Bar": "栏",
+  "Up next": "接下来",
+  "Vitals": "状态",
+  "Memory": "内存",
+  "Temperature": "温度",
+  "Profile": "个人资料",
+  "Now playing": "正在播放",
+  "Done": "完成"
 }

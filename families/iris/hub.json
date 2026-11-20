@@ -1,7 +1,13 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.116",
+    "version": "2.33.117",
     "changes": {
+      "2.33.117": [
+          "Prism Settings: the side column is yours to arrange, with Up next, Forecast and Vitals among its blocks",
+          "The player there comes as the large cover or as a compact bar",
+          "Two short groups share a line only when they hold about as much, so no folder stands half empty",
+          "Colour's cards keep their words legible over any accent, highlight or signal"
+      ],
       "2.33.116": [
           "Prism Settings: calmer sizes everywhere, clearer text, and your accent marks where you are in the sidebar",
           "The side column is yours: your picture (press it to change it), the day, Do Not Disturb, what you changed here, the player",

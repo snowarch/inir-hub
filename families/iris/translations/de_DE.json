@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Bildschirmbreite ausfüllen",
   "Centre the column": "Spalte zentrieren",
   "Next column width": "Nächste Spaltenbreite",
-  "Stack into the column at the left": "In die Spalte links stapeln"
+  "Stack into the column at the left": "In die Spalte links stapeln",
+  "What the right column shows, in the order you turn on.": "Was die rechte Spalte zeigt, in der Reihenfolge, in der du es einschaltest.",
+  "This page": "Diese Seite",
+  "The cover large, or one line with its keys.": "Das Cover groß oder eine Zeile mit den Tasten.",
+  "Player": "Player",
+  "Cover": "Cover",
+  "Bar": "Leiste",
+  "Up next": "Als Nächstes",
+  "Vitals": "Vitalwerte",
+  "Memory": "Arbeitsspeicher",
+  "Temperature": "Temperatur",
+  "Profile": "Profil",
+  "Now playing": "Läuft gerade",
+  "Done": "Fertig"
 }

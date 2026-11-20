@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Lấp đầy chiều rộng màn hình",
   "Centre the column": "Căn giữa cột",
   "Next column width": "Chiều rộng cột tiếp theo",
-  "Stack into the column at the left": "Xếp vào cột bên trái"
+  "Stack into the column at the left": "Xếp vào cột bên trái",
+  "What the right column shows, in the order you turn on.": "Nội dung cột bên phải, theo thứ tự bạn bật.",
+  "This page": "Trang này",
+  "The cover large, or one line with its keys.": "Ảnh bìa lớn, hoặc một dòng kèm các nút.",
+  "Player": "Trình phát",
+  "Cover": "Ảnh bìa",
+  "Bar": "Thanh",
+  "Up next": "Tiếp theo",
+  "Vitals": "Chỉ số",
+  "Memory": "Bộ nhớ",
+  "Temperature": "Nhiệt độ",
+  "Profile": "Hồ sơ",
+  "Now playing": "Đang phát",
+  "Done": "Đã xong"
 }

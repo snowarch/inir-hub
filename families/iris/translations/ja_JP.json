@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "画面の幅いっぱいに広げる",
   "Centre the column": "列を中央に配置",
   "Next column width": "次の列幅",
-  "Stack into the column at the left": "左の列に積み重ねる"
+  "Stack into the column at the left": "左の列に積み重ねる",
+  "What the right column shows, in the order you turn on.": "右の列に表示する内容。オンにした順に並びます。",
+  "This page": "このページ",
+  "The cover large, or one line with its keys.": "大きなカバー、またはボタン付きの1行。",
+  "Player": "プレイヤー",
+  "Cover": "カバー",
+  "Bar": "バー",
+  "Up next": "次の予定",
+  "Vitals": "バイタル",
+  "Memory": "メモリ",
+  "Temperature": "温度",
+  "Profile": "プロフィール",
+  "Now playing": "再生中",
+  "Done": "完了"
 }

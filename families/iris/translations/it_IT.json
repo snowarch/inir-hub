@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Riempi la larghezza dello schermo",
   "Centre the column": "Centra la colonna",
   "Next column width": "Larghezza colonna successiva",
-  "Stack into the column at the left": "Impila nella colonna a sinistra"
+  "Stack into the column at the left": "Impila nella colonna a sinistra",
+  "What the right column shows, in the order you turn on.": "Cosa mostra la colonna destra, nell'ordine in cui lo attivi.",
+  "This page": "Questa pagina",
+  "The cover large, or one line with its keys.": "La copertina grande, o una sola riga con i suoi pulsanti.",
+  "Player": "Lettore",
+  "Cover": "Copertina",
+  "Bar": "Barra",
+  "Up next": "A seguire",
+  "Vitals": "Parametri vitali",
+  "Memory": "Memoria",
+  "Temperature": "Temperatura",
+  "Profile": "Profilo",
+  "Now playing": "In riproduzione",
+  "Done": "Fatto"
 }

@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "स्क्रीन की चौड़ाई भरें",
   "Centre the column": "कॉलम को केंद्र में रखें",
   "Next column width": "अगली कॉलम चौड़ाई",
-  "Stack into the column at the left": "बाईं ओर के कॉलम में जोड़ें"
+  "Stack into the column at the left": "बाईं ओर के कॉलम में जोड़ें",
+  "What the right column shows, in the order you turn on.": "दाएँ कॉलम में क्या दिखे, उसी क्रम में जिसमें आप चालू करें।",
+  "This page": "यह पृष्ठ",
+  "The cover large, or one line with its keys.": "बड़ा कवर, या उसके बटनों के साथ एक पंक्ति।",
+  "Player": "प्लेयर",
+  "Cover": "कवर",
+  "Bar": "बार",
+  "Up next": "अगला",
+  "Vitals": "मुख्य आँकड़े",
+  "Memory": "मेमोरी",
+  "Temperature": "तापमान",
+  "Profile": "प्रोफ़ाइल",
+  "Now playing": "अभी खेल रहा है",
+  "Done": "हो गया"
 }

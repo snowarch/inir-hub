@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Растянуть на ширину экрана",
   "Centre the column": "Центрировать колонку",
   "Next column width": "Следующая ширина колонки",
-  "Stack into the column at the left": "Добавить в колонку слева"
+  "Stack into the column at the left": "Добавить в колонку слева",
+  "What the right column shows, in the order you turn on.": "Что показывает правая колонка, в порядке включения.",
+  "This page": "Эта страница",
+  "The cover large, or one line with its keys.": "Крупная обложка или одна строка с кнопками.",
+  "Player": "Плеер",
+  "Cover": "Обложка",
+  "Bar": "Панель",
+  "Up next": "Далее",
+  "Vitals": "Показатели",
+  "Memory": "Память",
+  "Temperature": "Температура",
+  "Profile": "Профиль",
+  "Now playing": "Сейчас играет",
+  "Done": "Готово"
 }

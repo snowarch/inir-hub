@@ -10,9 +10,9 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
-// The right column (his 11-19: "del lado derecho nuevo mejorado"): what differs from how iNiR ships it, on the page
-// open (Home and a search: everywhere), each a press away with its own way back, and what is playing at the foot.
-// It says nothing the page already says.
+// The right column (his 11-19: "del lado derecho nuevo mejorado"; 11-20: "customizable con otras cosas"): the blocks
+// the person chose, in their order: who they are, the open page's own changes, keys and tip, what is playing, what comes
+// next, the forecast, the machine. It says nothing the page already says.
 Item {
     id: root
     property bool active: true
@@ -114,92 +114,97 @@ Item {
     // One group on a page needs no caption: the page already says where it is.
     readonly property bool captioned: root.sections.length > 1
 
-    // Whoever sits here, under the window's keys (his 11-19: "algo de usuario"): their picture (a press gives it a new
-    // one), their name and the day; the bell silences notifications. Then the page they read: what they changed on it,
-    // its keys and how its thing is used. What is playing at the foot.
-    Item {
-        id: person
-        x: root.pad
-        y: PrismTheme.dp(60)
-        width: root.width - 2 * root.pad
-        height: PrismTheme.dp(52)
-        PrismAvatar {
-            id: face
-            anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: PrismTheme.dp(46)
-            // Pointed, the picture offers a new one.
-            Rectangle {
-                anchors.fill: parent
-                radius: width / 2
-                color: PrismTheme.spotScrim
-                opacity: faceArea.containsMouse ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
-                PrismGlyph {
-                    anchors.centerIn: parent
-                    text: "photo_camera"
-                    iconSize: PrismTheme.dp(18)
-                    color: PrismTheme.paper
+    // The column is the person's (iris.appearance.settingsAside): the blocks they chose, in their order. The player,
+    // when it is the last, stands at the foot, where the column ends.
+    readonly property var known: ["profile", "page", "player", "agenda", "forecast", "vitals"]
+    readonly property var blocks: {
+        const ids = Array.from(Config.options?.iris?.appearance?.settingsAside ?? ["profile", "page", "player"], String)
+        return ids.filter((id, at) => root.known.includes(id) && ids.indexOf(id) === at)
+    }
+    readonly property string playerForm: String(Config.options?.iris?.appearance?.settingsPlayer ?? "cover")
+    readonly property bool pinned: root.blocks.length > 0 && root.blocks[root.blocks.length - 1] === "player"
+    readonly property var parts: ({ profile: personBlock, page: pageBlock, player: playerBlock, agenda: agendaBlock, forecast: forecastBlock, vitals: vitalsBlock })
+
+    // Whoever sits here (his 11-19: "algo de usuario"): their picture (a press gives it a new one), their name and the
+    // day; the bell silences notifications.
+    Component {
+        id: personBlock
+        Item {
+            id: person
+            readonly property bool shown: true
+            implicitHeight: PrismTheme.dp(52)
+            PrismAvatar {
+                id: face
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: PrismTheme.dp(46)
+                // Pointed, the picture offers a new one.
+                Rectangle {
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: PrismTheme.spotScrim
+                    opacity: faceArea.containsMouse ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+                    PrismGlyph {
+                        anchors.centerIn: parent
+                        text: "photo_camera"
+                        iconSize: PrismTheme.dp(18)
+                        color: PrismTheme.paper
+                    }
+                }
+                MouseArea {
+                    id: faceArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
+                    Accessible.name: Translation.tr("Profile picture")
+                    onClicked: root.pictureAsked()
                 }
             }
-            MouseArea {
-                id: faceArea
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                Accessible.role: Accessible.Button
-                Accessible.name: Translation.tr("Profile picture")
-                onClicked: root.pictureAsked()
+            Column {
+                anchors.left: face.right
+                anchors.leftMargin: PrismTheme.dp(12)
+                anchors.right: bell.left
+                anchors.rightMargin: PrismTheme.dp(8)
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: PrismTheme.dp(2)
+                PrismText {
+                    width: parent.width
+                    text: face.name
+                    font.pixelSize: PrismTheme.row
+                    font.weight: Font.DemiBold
+                    font.letterSpacing: -PrismTheme.row * 0.01
+                }
+                PrismText {
+                    width: parent.width
+                    readonly property string temp: Weather.enabled ? String(Weather.data?.temp ?? "") : ""
+                    text: Translation.locale.toString(DateTime.clock.date, "dddd d MMM")
+                        + (temp.length > 0 && !temp.startsWith("--") ? "  ·  " + temp : "")
+                    color: PrismTheme.ink2
+                    font.pixelSize: PrismTheme.small
+                }
             }
-        }
-        Column {
-            anchors.left: face.right
-            anchors.leftMargin: PrismTheme.dp(12)
-            anchors.right: bell.left
-            anchors.rightMargin: PrismTheme.dp(8)
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: PrismTheme.dp(2)
-            PrismText {
-                width: parent.width
-                text: face.name
-                font.pixelSize: PrismTheme.row
-                font.weight: Font.DemiBold
-                font.letterSpacing: -PrismTheme.row * 0.01
+            PrismRound {
+                id: bell
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: PrismTheme.dp(32)
+                ghost: !Notifications.silent
+                lit: Notifications.silent
+                glyph: Notifications.silent ? "notifications_off" : "notifications"
+                glyphSize: PrismTheme.dp(17)
+                Accessible.name: Translation.tr("Do Not Disturb")
+                onClicked: Config.setNestedValue("notifications.silent", !Notifications.silent)
             }
-            PrismText {
-                width: parent.width
-                readonly property string temp: Weather.enabled ? String(Weather.data?.temp ?? "") : ""
-                text: Translation.locale.toString(DateTime.clock.date, "dddd d MMM")
-                    + (temp.length > 0 && !temp.startsWith("-") ? "  ·  " + temp : "")
-                color: PrismTheme.ink2
-                font.pixelSize: PrismTheme.small
-            }
-        }
-        PrismRound {
-            id: bell
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            implicitWidth: PrismTheme.dp(32)
-            ghost: !Notifications.silent
-            lit: Notifications.silent
-            glyph: Notifications.silent ? "notifications_off" : "notifications"
-            glyphSize: PrismTheme.dp(17)
-            Accessible.name: Translation.tr("Do Not Disturb")
-            onClicked: Config.setNestedValue("notifications.silent", !Notifications.silent)
         }
     }
 
-    Flickable {
-        id: scroll
-        y: person.y + person.height + PrismTheme.dp(20)
-        width: root.width
-        height: (player.visible ? player.y - PrismTheme.dp(14) : root.height - PrismTheme.dp(22)) - y
-        contentHeight: stack.implicitHeight
-        boundsBehavior: Flickable.StopAtBounds
-        clip: true
+    // The page they read: what they changed on it, its keys and how its thing is used.
+    Component {
+        id: pageBlock
         Column {
-            id: stack
-            x: root.pad
-            width: root.width - 2 * root.pad
+            id: pageBox
+            readonly property bool shown: root.changes.length > 0 || root.keys.length > 0 || root.tip.length > 0
             spacing: 0
 
             // What was changed on this page, only while something was: its name and, at its end, the page back to iNiR's
@@ -447,14 +452,89 @@ Item {
         }
     }
 
+    Component {
+        id: playerBlock
+        PrismNowPlaying {
+            readonly property bool shown: playing
+            form: root.playerForm
+            active: root.active && root.visible
+        }
+    }
+    Component { id: agendaBlock; PrismGlance { kind: "agenda"; active: root.active && root.visible } }
+    Component { id: forecastBlock; PrismGlance { kind: "forecast"; active: root.active && root.visible } }
+    Component { id: vitalsBlock; PrismGlance { kind: "vitals"; active: root.active && root.visible } }
+
+    Flickable {
+        id: scroll
+        y: PrismTheme.dp(60)
+        width: root.width
+        height: (player.visible ? player.y - PrismTheme.dp(16) : root.height - PrismTheme.dp(22)) - y
+        contentHeight: stack.implicitHeight
+        boundsBehavior: Flickable.StopAtBounds
+        clip: true
+        Column {
+            id: stack
+            x: root.pad
+            width: root.width - 2 * root.pad
+            spacing: PrismTheme.dp(26)
+            Repeater {
+                model: root.blocks
+                delegate: Loader {
+                    id: block
+                    required property string modelData
+                    width: stack.width
+                    visible: block.item?.shown ?? false
+                    sourceComponent: block.modelData === "player" && root.pinned ? null : root.parts[block.modelData] ?? null
+                }
+            }
+            // The column's own way to be arranged, quiet at its end.
+            Item {
+                width: parent.width
+                height: PrismTheme.dp(24)
+                Row {
+                    id: arrangeLine
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: PrismTheme.dp(6)
+                    PrismGlyph {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "tune"
+                        iconSize: PrismTheme.dp(15)
+                        color: arrange.containsMouse ? PrismTheme.accentInk : PrismTheme.ink3
+                    }
+                    PrismText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Translation.tr("Customize")
+                        color: arrange.containsMouse ? PrismTheme.accentInk : PrismTheme.ink3
+                        font.pixelSize: PrismTheme.small
+                        font.weight: Font.DemiBold
+                    }
+                }
+                MouseArea {
+                    id: arrange
+                    anchors.fill: arrangeLine
+                    anchors.margins: -PrismTheme.dp(6)
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Link
+                    Accessible.name: Translation.tr("Customize")
+                    onClicked: {
+                        PrismState.go("general")
+                        PrismState.pickGroup("general", "Settings window")
+                    }
+                }
+            }
+        }
+    }
+
     PrismNowPlaying {
         id: player
-        visible: player.playing
+        visible: root.pinned && player.playing
+        form: root.playerForm
         x: root.pad
         width: root.width - 2 * root.pad
         // The cover as itself: square while the column is tall enough, never under a third of it.
-        height: Math.max(PrismTheme.dp(220), Math.min(width * 1.08, root.height * 0.46))
+        height: player.bar ? player.implicitHeight : Math.max(PrismTheme.dp(220), Math.min(width * 1.08, root.height * 0.46))
         y: root.height - PrismTheme.dp(22) - height
-        active: root.active && root.visible
+        active: root.active && root.visible && root.pinned
     }
 }

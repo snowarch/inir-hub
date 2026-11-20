@@ -21,3 +21,4 @@ PrismTile 1.0 PrismTile.qml
 PrismLead 1.0 PrismLead.qml
 PrismAside 1.0 PrismAside.qml
 PrismNowPlaying 1.0 PrismNowPlaying.qml
+PrismGlance 1.0 PrismGlance.qml

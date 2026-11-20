@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Fill the screen's width",
   "Centre the column": "Centre the column",
   "Next column width": "Next column width",
-  "Stack into the column at the left": "Stack into the column at the left"
+  "Stack into the column at the left": "Stack into the column at the left",
+  "What the right column shows, in the order you turn on.": "What the right column shows, in the order you turn on.",
+  "This page": "This page",
+  "The cover large, or one line with its keys.": "The cover large, or one line with its keys.",
+  "Player": "Player",
+  "Cover": "Cover",
+  "Bar": "Bar",
+  "Up next": "Up next",
+  "Vitals": "Vitals",
+  "Memory": "Memory",
+  "Temperature": "Temperature",
+  "Profile": "Profile",
+  "Now playing": "Now playing",
+  "Done": "Done"
 }

@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "ملء عرض الشاشة",
   "Centre the column": "توسيط العمود",
   "Next column width": "عرض العمود التالي",
-  "Stack into the column at the left": "الدمج في العمود على اليسار"
+  "Stack into the column at the left": "الدمج في العمود على اليسار",
+  "What the right column shows, in the order you turn on.": "ما يعرضه العمود الأيمن، بترتيب تفعيلك له.",
+  "This page": "هذه الصفحة",
+  "The cover large, or one line with its keys.": "الغلاف كبيرًا، أو سطر واحد بأزراره.",
+  "Player": "المشغّل",
+  "Cover": "الغلاف",
+  "Bar": "شريط",
+  "Up next": "التالي",
+  "Vitals": "المؤشرات الحيوية",
+  "Memory": "الذاكرة",
+  "Temperature": "درجة الحرارة",
+  "Profile": "الملف الشخصي",
+  "Now playing": "قيد التشغيل الآن",
+  "Done": "تم"
 }

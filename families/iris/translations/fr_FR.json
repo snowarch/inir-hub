@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Remplir la largeur de l'écran",
   "Centre the column": "Centrer la colonne",
   "Next column width": "Largeur de colonne suivante",
-  "Stack into the column at the left": "Empiler dans la colonne à gauche"
+  "Stack into the column at the left": "Empiler dans la colonne à gauche",
+  "What the right column shows, in the order you turn on.": "Ce que montre la colonne de droite, dans l'ordre d'activation.",
+  "This page": "Cette page",
+  "The cover large, or one line with its keys.": "La pochette en grand, ou une seule ligne avec ses boutons.",
+  "Player": "Lecteur",
+  "Cover": "Pochette",
+  "Bar": "Barre",
+  "Up next": "À suivre",
+  "Vitals": "Constantes",
+  "Memory": "Mémoire",
+  "Temperature": "Température",
+  "Profile": "Profil",
+  "Now playing": "En cours de lecture",
+  "Done": "Terminé"
 }

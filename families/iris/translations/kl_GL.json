@@ -2695,5 +2695,18 @@
   "Fill the screen's width": "Qarasaasiap silissusia tamarmik",
   "Centre the column": "Kolonni qeqqanngortuk",
   "Next column width": "Kolonnip silissusia tulleq",
-  "Stack into the column at the left": "Kolonnimut kiinami ilaqqitsiguk"
+  "Stack into the column at the left": "Kolonnimut kiinami ilaqqitsiguk",
+  "What the right column shows, in the order you turn on.": "Kolonni talerpiup suut takutissavai, ikkussuinerit tulleriaarlugit.",
+  "This page": "Quppersaq una",
+  "The cover large, or one line with its keys.": "Cover-i angisoq, imaluunniit tamaasa nalunaarutillit ataaseq.",
+  "Player": "Player",
+  "Cover": "Cover-i",
+  "Bar": "Bar",
+  "Up next": "Tulliuttoq",
+  "Vitals": "Uumassutsimut tunngasut",
+  "Memory": "Memori",
+  "Temperature": "Temperaturi",
+  "Profile": "Profili",
+  "Now playing": "Maanna play-eqartoq",
+  "Done": "Naammassivoq"
 }
