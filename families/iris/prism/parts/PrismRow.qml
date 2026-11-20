@@ -100,7 +100,7 @@ Item {
         if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "now"
         if (root.below === "palettes") return "now"
         // A face's whole installed list stays one press away at the end; a pairing is only its cards.
-        if (root.below === "typefaces") return root.spec.installedFonts ? "fonts" : "now"
+        if (root.below === "typefaces") return root.spec.installedFonts === true ? "fonts" : "now"
         if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
         if (root.kind === "choice" && root.headless && root.below === "chips") return ""
         if (root.kind === "choice" && root.choices.length > 1) return "choice"
