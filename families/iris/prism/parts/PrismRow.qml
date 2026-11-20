@@ -65,6 +65,8 @@ Item {
         }
         return twins * 2 < root.choices.length
     }
+    // A colour role (Accent, Highlight, Signal): its sources and colours laid out under its name as one palette.
+    readonly property bool paletted: root.kind === "choice" && root.spec.sources === true && root.choices.length > 1
     // Past what the line's end holds they are laid out under it, each with its name.
     readonly property bool manySwatches: root.swatched && (root.choices.length - 1) * PrismTheme.dp(26) + PrismTheme.dp(96) > root.controlWidth
     readonly property bool listed: root.kind === "pieces" || Boolean(root.spec.flags)
@@ -81,6 +83,7 @@ Item {
         if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "faces"
         if (root.kind === "choice" && root.choices.length > 1 && root.choices.every(choice => choice.palette)) return "palettes"
         if (root.kind === "choice" && root.spec.previewFont && root.faces.length > 1) return "typefaces"
+        if (root.paletted) return "palette"
         if (root.kind === "choice" && root.manySwatches) return "swatches"
         // A group's own choice under a head that says its name: its choices laid out, one press each, not a lone pill.
         if (root.kind === "choice" && !root.swatched && (root.open || root.headless)) return "chips"
@@ -101,6 +104,7 @@ Item {
         if (root.below === "palettes") return "now"
         // A face's whole installed list stays one press away at the end; a pairing is only its cards.
         if (root.below === "typefaces") return root.spec.installedFonts === true ? "fonts" : "now"
+        if (root.paletted) return ""
         if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
         if (root.kind === "choice" && root.headless && root.below === "chips") return ""
         if (root.kind === "choice" && root.choices.length > 1) return "choice"
@@ -300,7 +304,7 @@ Item {
             anchors.leftMargin: slot.full ? 0 : name.x
             width: slot.full ? parent.width : parent.width - name.x - (root.compact ? 0 : PrismTheme.dp(56))
             height: item ? item.implicitHeight : 0
-            sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow,
+            sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow, palette: paletteBelow,
                 palettes: palettesBelow, typefaces: typefacesBelow,
                 view: viewBelow, icon: iconBelow, curve: curveBelow, niriMotion: niriBelow, widgets: widgetsBelow, themes: themesBelow })[root.below] ?? null
         }
@@ -546,6 +550,16 @@ Item {
         PrismSwatches {
             width: slot.width
             chart: true
+            choices: root.choices.map(choice => ({ label: choice.label, value: choice.value, colour: choice.swatch ?? PrismTheme.ink3 }))
+            current: root.value
+            onPicked: value => PrismModel.write(root.row, value)
+        }
+    }
+    Component {
+        id: paletteBelow
+        PrismSwatches {
+            width: slot.width
+            palette: true
             choices: root.choices.map(choice => ({ label: choice.label, value: choice.value, colour: choice.swatch ?? PrismTheme.ink3 }))
             current: root.value
             onPicked: value => PrismModel.write(root.row, value)

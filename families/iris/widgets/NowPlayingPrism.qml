@@ -24,6 +24,9 @@ Item {
     readonly property bool compact: view.face.small
     readonly property bool label: view.face.nothing ?? false
     readonly property color songLight: view.label ? view.face.signal : view.face.accent
+    // The hour's ink: on the lit flap, the ink that reads on the song's colour; with the background off there is no
+    // flap, and the hour stands on the wallpaper in the song's colour, as the player's name does.
+    readonly property color flapInk: !view.face.clear ? view.face.onFill(view.songLight) : view.label ? view.face.ink : view.songLight
     function dp(value: real): real { return view.face.dp(value) }
 
     // What it shows: the song, the paused one, the one that played last, or nothing yet.
@@ -166,7 +169,7 @@ Item {
             id: hourFigure
             face: view.face
             text: view.hour[0]
-            color: view.face.onFill(view.songLight)
+            color: view.flapInk
             size: view.compact ? 12 : view.wide ? 13 : 17
             weight: Font.Bold
             font.family: view.face.fontNumbers
@@ -177,7 +180,7 @@ Item {
             face: view.face
             y: Math.round(hourFigure.height * 0.06)
             text: view.hour[1]
-            color: view.face.onFill(view.songLight)
+            color: view.flapInk
             size: view.compact ? 7 : view.wide ? 7.5 : 9
             weight: Font.Bold
         }

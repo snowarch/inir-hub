@@ -1074,19 +1074,22 @@ QtObject {
     // Status: done and alert read as text (4.5:1), a warning as a mark (3:1); the same hues in every scheme.
     // Under Signal done is ink, and a warning and an error are the signal: one colour that means "look".
     readonly property color success: root.mono ? root.text : root.role("success", "#8de0a3")
+    // An alert speaks in the signal in every look once the person picks one; the factory's Nothing red leaves a colour
+    // look its own red (a colour theme's stays whole). Under Signal the signal is the one alert colour always.
+    readonly property bool signalSpeaks: root.mono || root.signalChoice !== "nothing"
     readonly property color warning: root.mono ? root.signalInk : root.role("warning", "#ffb340")
-    readonly property color danger: root.mono ? root.signalInk : root.role("danger", "#ff6961")
+    readonly property color danger: root.signalSpeaks ? root.signalInk : root.role("danger", "#ff6961")
     // The night palette's red: a veil over imagery stays dark in every scheme.
-    readonly property color dangerOnMedia: root.mono ? Lume.mark(root.signal, 0.35, 0, false, 4.5) : Qt.color(root.washiDark?.danger ?? "#ff6961")
-    readonly property color inkOnDanger: root.mono ? root.onTintFor(root.signalInk) : root.role("onDanger", "#160000")
+    readonly property color dangerOnMedia: root.signalSpeaks ? Lume.mark(root.signal, 0.35, 0, false, 4.5) : Qt.color(root.washiDark?.danger ?? "#ff6961")
+    readonly property color inkOnDanger: root.signalSpeaks ? root.onTintFor(root.signalInk) : root.role("onDanger", "#160000")
     // A filled alert (a badge): the shu pigment with its own ink; `danger` stays the red that reads as text.
     // The accent as a filled shape (a seal, a lit plate): the solver's pigment, which a Design palette keeps exact
     // (AIRISU's vermilion hanko) where the accent that is text has to move to read.
     readonly property color accentFill: root.signalChosen ? root.signal : root.mono || !root.washi?.accentFill ? root.accent : root.vivid(Qt.color(root.washi.accentFill), true)
     readonly property color inkOnAccentFill: root.signalChosen ? root.inkOnSignal : root.mono || !root.washi?.onAccentFill ? root.inkOnAccent
         : IrisDesign.current === "iris" ? root.onTintFor(root.accentFill) : Qt.color(root.washi.onAccentFill)
-    readonly property color dangerFill: root.mono ? root.signal : root.role("dangerFill", "#e57766")
-    readonly property color inkOnDangerFill: root.mono ? root.inkOnSignal : root.role("onDangerFill", "#22110d")
+    readonly property color dangerFill: root.signalSpeaks ? root.signal : root.role("dangerFill", "#e57766")
+    readonly property color inkOnDangerFill: root.signalSpeaks ? root.inkOnSignal : root.role("onDangerFill", "#22110d")
     function line(base: color): color {
         const t = root.tweak("lines", 0, 2)
         return t <= 1 ? ColorUtils.mix(base, root.surfaceOpaque, t) : ColorUtils.mix(root.text, base, (t - 1) * 0.35)
