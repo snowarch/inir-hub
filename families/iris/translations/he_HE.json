@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "פריסות, חזרה ואופן הקלדת מקשים",
   "Speed, scrolling, the cursor and hot corners": "מהירות, גלילה, סמן ופינות חמות",
   "Every key and what it does": "כל מקש ומה הוא עושה",
-  "App rules, borders and corners": "כללי אפליקציות, מסגרות ופינות"
+  "App rules, borders and corners": "כללי אפליקציות, מסגרות ופינות",
+  "Close the window": "סגירת החלון",
+  "Float or tile the window": "החלפה בין חלון צף לחלון מרוצף",
+  "Fullscreen": "מסך מלא",
+  "Fill the screen's width": "מילוי רוחב המסך",
+  "Centre the column": "מרכוז העמודה",
+  "Next column width": "רוחב העמודה הבא",
+  "Stack into the column at the left": "הערמה לעמודה שמשמאל"
 }

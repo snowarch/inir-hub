@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "Tata letak, pengulangan, dan cara tombol diketik",
   "Speed, scrolling, the cursor and hot corners": "Kecepatan, gulir, kursor, dan sudut panas",
   "Every key and what it does": "Setiap tombol dan fungsinya",
-  "App rules, borders and corners": "Aturan aplikasi, batas, dan sudut"
+  "App rules, borders and corners": "Aturan aplikasi, batas, dan sudut",
+  "Close the window": "Tutup jendela",
+  "Float or tile the window": "Ubah jendela antara mengambang dan ubin",
+  "Fullscreen": "Layar penuh",
+  "Fill the screen's width": "Penuhi lebar layar",
+  "Centre the column": "Pusatkan kolom",
+  "Next column width": "Lebar kolom berikutnya",
+  "Stack into the column at the left": "Tumpuk ke kolom di sebelah kiri"
 }

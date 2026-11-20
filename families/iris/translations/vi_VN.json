@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "Bố cục, lặp lại và cách gõ phím",
   "Speed, scrolling, the cursor and hot corners": "Tốc độ, cuộn, con trỏ và góc nóng",
   "Every key and what it does": "Mọi phím và chức năng của nó",
-  "App rules, borders and corners": "Quy tắc ứng dụng, viền và góc"
+  "App rules, borders and corners": "Quy tắc ứng dụng, viền và góc",
+  "Close the window": "Đóng cửa sổ",
+  "Float or tile the window": "Chuyển cửa sổ giữa nổi và xếp ô",
+  "Fullscreen": "Toàn màn hình",
+  "Fill the screen's width": "Lấp đầy chiều rộng màn hình",
+  "Centre the column": "Căn giữa cột",
+  "Next column width": "Chiều rộng cột tiếp theo",
+  "Stack into the column at the left": "Xếp vào cột bên trái"
 }

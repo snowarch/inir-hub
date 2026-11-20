@@ -5,6 +5,7 @@ import qs
 import qs.services
 import qs.services.deferred
 import qs.modules.common
+import qs.modules.iris.settings
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
@@ -30,7 +31,9 @@ Item {
     // The keys that reach this page's own things, as the compositor binds them now (one per action, a handful at most).
     readonly property var keyMatch: ({
         general: /"settings"|cheatsheet/, capture: /"region"|screenshot/, sound: /"audio"|equalizer/, player: /"mpris"/,
-        display: /"brightness"/, lock: /"lock"/, wallpaper: /wallpaperSelector/, spotlight: /"overview"/
+        display: /"brightness"/, lock: /"lock"/, wallpaper: /wallpaperSelector/, spotlight: /"overview"/,
+        windows: /close-window|toggle-window-floating|fullscreen-window|maximize-column/,
+        layout: /center-column|switch-preset-column-width|consume-or-expel-window-left/
     })
     readonly property var keys: {
         const match = root.keyMatch[root.everywhere ? "general" : root.pageId]
@@ -59,7 +62,11 @@ Item {
         [/"audio" "mute"/, "Mute"], [/"audio" "micMute"/, "Mute the microphone"], [/"brightness" "increment"/, "Brighter"],
         [/"brightness" "decrement"/, "Dimmer"], [/"mpris" "playPause"/, "Play or pause"], [/"mpris" "next"/, "Next track"],
         [/"mpris" "previous"/, "Previous track"], [/"lock"/, "Lock the screen"], [/wallpaperSelector/, "Wallpaper picker"],
-        [/"overview"/, "Search apps and more"], [/"settings"/, "Settings"], [/cheatsheet/, "Every key at a glance"]
+        [/"overview"/, "Search apps and more"], [/"settings"/, "Settings"], [/cheatsheet/, "Every key at a glance"],
+        [/close-window/, "Close the window"], [/toggle-window-floating/, "Float or tile the window"],
+        [/fullscreen-window/, "Fullscreen"], [/maximize-column/, "Fill the screen's width"],
+        [/center-column/, "Centre the column"], [/switch-preset-column-width/, "Next column width"],
+        [/consume-or-expel-window-left/, "Stack into the column at the left"]
     ]
     function sayOf(raw: string, fallback: string): string {
         const known = root.verbs.find(([match]) => match.test(raw))
@@ -95,13 +102,22 @@ Item {
         }
         return out
     }
+    // How the page's own thing is used, said once: the area's tip (IrisOptions), on the area's own page only, where it
+    // speaks of what is on screen (a chapter's area tip would speak of another page).
+    readonly property string tip: {
+        if (root.everywhere || root.pageId === "general") return ""
+        const page = PrismModel.page(root.pageId)
+        if (!page || page.area !== root.pageId) return ""
+        return String(IrisOptions.sectionById(root.pageId)?.tip ?? "")
+    }
     // One group on a page needs no caption: the page already says where it is.
     readonly property bool captioned: root.everywhere || root.sections.length > 1
 
+    // The window's own keys head the column (PrismPanel's chrome); its own head starts under them.
     Item {
         id: head
         x: root.pad
-        y: PrismTheme.dp(30)
+        y: PrismTheme.dp(58)
         width: root.width - 2 * root.pad
         height: PrismTheme.dp(28)
         PrismText {
@@ -234,17 +250,10 @@ Item {
                                 color: changeArea.pressed ? PrismTheme.fillPress : change.pointed ? PrismTheme.fill : "transparent"
                                 Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
                             }
-                            // The changed row's own bar, as it wears it on its page.
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: PrismTheme.dp(3)
-                                height: PrismTheme.dp(14)
-                                radius: width / 2
-                                color: PrismTheme.mark
-                            }
+                            // No changed bar here: every line of this list is a change, a bar on each would say it twenty times.
                             PrismText {
                                 id: name
-                                x: PrismTheme.dp(12)
+                                x: 0
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: Math.min(implicitWidth, parent.width - x - (said.visible ? Math.min(said.implicitWidth, parent.width * 0.42) + PrismTheme.dp(10) : 0)
                                     - (undo.visible ? undo.width + PrismTheme.dp(6) : 0))
@@ -372,6 +381,29 @@ Item {
                             }
                         }
                     }
+                }
+            }
+
+            // Good to know: how the page's thing is used, a quiet line under a bulb.
+            Row {
+                visible: root.tip.length > 0
+                width: parent.width
+                topPadding: PrismTheme.dp(28)
+                spacing: PrismTheme.dp(10)
+                PrismGlyph {
+                    id: bulb
+                    text: "lightbulb"
+                    iconSize: PrismTheme.dp(17)
+                    color: PrismTheme.ink3
+                }
+                PrismText {
+                    width: parent.width - bulb.width - parent.spacing
+                    text: Translation.tr(root.tip)
+                    color: PrismTheme.ink2
+                    font.pixelSize: PrismTheme.small
+                    lineHeight: 1.15
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 6
                 }
             }
         }

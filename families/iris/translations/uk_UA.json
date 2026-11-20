@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "Розкладки, повтор і введення клавіш",
   "Speed, scrolling, the cursor and hot corners": "Швидкість, прокручування, курсор і гарячі кути",
   "Every key and what it does": "Кожна клавіша і що вона робить",
-  "App rules, borders and corners": "Правила застосунків, рамки і кути"
+  "App rules, borders and corners": "Правила застосунків, рамки і кути",
+  "Close the window": "Закрити вікно",
+  "Float or tile the window": "Перемкнути вікно між плаваючим і мозаїчним",
+  "Fullscreen": "Повноекранний режим",
+  "Fill the screen's width": "Розтягнути на ширину екрана",
+  "Centre the column": "Центрувати колонку",
+  "Next column width": "Наступна ширина колонки",
+  "Stack into the column at the left": "Додати до колонки ліворуч"
 }

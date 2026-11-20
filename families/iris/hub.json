@@ -1,7 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.114",
+    "version": "2.33.115",
     "changes": {
+      "2.33.115": [
+          "Prism Settings: the window's buttons head the side column, so scrolled groups never pass under them",
+          "The side column says how the page's own thing is used and lists the window and layout keys; page heads are shorter"
+      ],
       "2.33.114": [
           "Prism Settings: short groups stand two to a line beside the side column, each with its art behind it",
           "A group that is one level, like Night Light's warmth, shows its figure large over a full fader",

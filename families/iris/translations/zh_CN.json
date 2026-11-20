@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "布局、重复以及按键输入方式",
   "Speed, scrolling, the cursor and hot corners": "速度、滚动、光标和热角",
   "Every key and what it does": "每个按键及其作用",
-  "App rules, borders and corners": "应用规则、边框与圆角"
+  "App rules, borders and corners": "应用规则、边框与圆角",
+  "Close the window": "关闭窗口",
+  "Float or tile the window": "切换窗口的浮动与平铺",
+  "Fullscreen": "全屏",
+  "Fill the screen's width": "占满屏幕宽度",
+  "Centre the column": "将列居中",
+  "Next column width": "下一个列宽",
+  "Stack into the column at the left": "并入左侧的列"
 }

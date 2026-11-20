@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "लेआउट, दोहराव और कुंजियाँ कैसे टाइप होती हैं",
   "Speed, scrolling, the cursor and hot corners": "गति, स्क्रॉलिंग, कर्सर और हॉट कॉर्नर",
   "Every key and what it does": "हर कुंजी और उसका काम",
-  "App rules, borders and corners": "ऐप नियम, बॉर्डर और कोने"
+  "App rules, borders and corners": "ऐप नियम, बॉर्डर और कोने",
+  "Close the window": "विंडो बंद करें",
+  "Float or tile the window": "विंडो को फ़्लोट या टाइल करें",
+  "Fullscreen": "पूर्ण स्क्रीन",
+  "Fill the screen's width": "स्क्रीन की चौड़ाई भरें",
+  "Centre the column": "कॉलम को केंद्र में रखें",
+  "Next column width": "अगली कॉलम चौड़ाई",
+  "Stack into the column at the left": "बाईं ओर के कॉलम में जोड़ें"
 }

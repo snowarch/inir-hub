@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "Dispositions, répétition et saisie des touches",
   "Speed, scrolling, the cursor and hot corners": "Vitesse, défilement, curseur et coins actifs",
   "Every key and what it does": "Chaque touche et ce qu'elle fait",
-  "App rules, borders and corners": "Règles des applis, bordures et coins"
+  "App rules, borders and corners": "Règles des applis, bordures et coins",
+  "Close the window": "Fermer la fenêtre",
+  "Float or tile the window": "Basculer la fenêtre entre flottante et en mosaïque",
+  "Fullscreen": "Plein écran",
+  "Fill the screen's width": "Remplir la largeur de l'écran",
+  "Centre the column": "Centrer la colonne",
+  "Next column width": "Largeur de colonne suivante",
+  "Stack into the column at the left": "Empiler dans la colonne à gauche"
 }

@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "التخطيطات والتكرار وكيفية كتابة المفاتيح",
   "Speed, scrolling, the cursor and hot corners": "السرعة والتمرير والمؤشر والزوايا النشطة",
   "Every key and what it does": "كل مفتاح وما يفعله",
-  "App rules, borders and corners": "قواعد التطبيقات والحدود والزوايا"
+  "App rules, borders and corners": "قواعد التطبيقات والحدود والزوايا",
+  "Close the window": "إغلاق النافذة",
+  "Float or tile the window": "تبديل النافذة بين العائمة والمرتبة",
+  "Fullscreen": "ملء الشاشة",
+  "Fill the screen's width": "ملء عرض الشاشة",
+  "Centre the column": "توسيط العمود",
+  "Next column width": "عرض العمود التالي",
+  "Stack into the column at the left": "الدمج في العمود على اليسار"
 }

@@ -465,19 +465,22 @@ Item {
         }
 
         // The window's own keys, where every window keeps them: as a window or over the desktop, the whole room, close.
-        // Over a page they stand inside its art's top corner, smoked, so they never hang half off its edge.
+        // With the side column open they head it, plain on its ground, so a scrolled card never runs under them; without
+        // it they stand inside the page art's top corner, smoked, so they never hang half off its edge.
         Row {
+            id: chrome
+            readonly property bool plain: PrismState.searching || root.asideOpen
             anchors.right: parent.right
-            anchors.rightMargin: PrismState.searching ? PrismTheme.dp(16)
-                : root.asideWidth + Math.round((centre.width - root.measure) / 2) + PrismTheme.dp(14)
-            y: PrismState.searching ? PrismTheme.dp(16) : PrismTheme.dp(24) + PrismTheme.dp(14)
+            anchors.rightMargin: chrome.plain ? PrismTheme.dp(14)
+                : Math.round((centre.width - root.measure) / 2) + PrismTheme.dp(14)
+            y: chrome.plain ? PrismTheme.dp(14) : PrismTheme.dp(24) + PrismTheme.dp(14)
             z: 5
             spacing: PrismTheme.dp(2)
             PrismRound {
                 visible: root.asideFits
-                ghost: PrismState.searching
-                overArt: !PrismState.searching
-                smoked: !PrismState.searching
+                ghost: chrome.plain
+                overArt: !chrome.plain
+                smoked: !chrome.plain
                 glyph: root.asideOpen ? "right_panel_close" : "right_panel_open"
                 glyphSize: PrismTheme.dp(17)
                 Accessible.role: Accessible.Button
@@ -485,9 +488,9 @@ Item {
                 onClicked: root.toggleAside()
             }
             PrismRound {
-                ghost: PrismState.searching
-                overArt: !PrismState.searching
-                smoked: !PrismState.searching
+                ghost: chrome.plain
+                overArt: !chrome.plain
+                smoked: !chrome.plain
                 glyph: root.windowed ? "picture_in_picture_center" : "open_in_new"
                 glyphSize: PrismTheme.dp(17)
                 Accessible.role: Accessible.Button
@@ -496,9 +499,9 @@ Item {
             }
             PrismRound {
                 visible: root.windowed
-                ghost: PrismState.searching
-                overArt: !PrismState.searching
-                smoked: !PrismState.searching
+                ghost: chrome.plain
+                overArt: !chrome.plain
+                smoked: !chrome.plain
                 glyph: "remove"
                 glyphSize: PrismTheme.dp(17)
                 Accessible.role: Accessible.Button
@@ -506,9 +509,9 @@ Item {
                 onClicked: root.minimizeRequested()
             }
             PrismRound {
-                ghost: PrismState.searching
-                overArt: !PrismState.searching
-                smoked: !PrismState.searching
+                ghost: chrome.plain
+                overArt: !chrome.plain
+                smoked: !chrome.plain
                 glyph: root.windowed || !PrismState.wide ? "open_in_full" : "close_fullscreen"
                 glyphSize: PrismTheme.dp(16)
                 Accessible.role: Accessible.Button
@@ -516,9 +519,9 @@ Item {
                 onClicked: root.windowed ? root.growRequested() : (PrismState.wide = !PrismState.wide)
             }
             PrismRound {
-                ghost: PrismState.searching
-                overArt: !PrismState.searching
-                smoked: !PrismState.searching
+                ghost: chrome.plain
+                overArt: !chrome.plain
+                smoked: !chrome.plain
                 glyph: "close"
                 glyphSize: PrismTheme.dp(18)
                 Accessible.role: Accessible.Button

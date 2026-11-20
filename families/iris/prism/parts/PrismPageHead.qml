@@ -31,7 +31,8 @@ Item {
     signal restore()
 
     readonly property real pad: PrismTheme.dp(24)
-    readonly property real artHeight: root.plain ? 0 : Math.max(PrismTheme.dp(196), words.implicitHeight + PrismTheme.dp(76))
+    // Tall enough for the name to stand on the art's floor, no taller: the page's first setting stays in the first half.
+    readonly property real artHeight: root.plain ? 0 : Math.max(PrismTheme.dp(168), words.implicitHeight + PrismTheme.dp(72))
     readonly property bool told: root.fact !== null && String(root.fact?.say ?? "").length > 0
     // The page's keys stand at the right while they leave the name room; more of them go under what the page is for.
     readonly property bool keysUnder: keysProbe.implicitWidth > root.width * 0.4

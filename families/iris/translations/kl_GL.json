@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "Qalipaatit, ataqatigiinneq aamma qanoq tassatigut allaffigineqarnerat",
   "Speed, scrolling, the cursor and hot corners": "Siunnersuutit, sunnernerit, sammiviit aamma kulsa",
   "Every key and what it does": "Immikkut tassaniit tamarmi aamma suliaat",
-  "App rules, borders and corners": "Apit inuiaqatigiit, kantit aamma qaaqqat"
+  "App rules, borders and corners": "Apit inuiaqatigiit, kantit aamma qaaqqat",
+  "Close the window": "Igalaaq matuuk",
+  "Float or tile the window": "Igalaaq naggataartoq imaluunniit tassaniittoq",
+  "Fullscreen": "Qarasaasiaq tamarmi",
+  "Fill the screen's width": "Qarasaasiap silissusia tamarmik",
+  "Centre the column": "Kolonni qeqqanngortuk",
+  "Next column width": "Kolonnip silissusia tulleq",
+  "Stack into the column at the left": "Kolonnimut kiinami ilaqqitsiguk"
 }

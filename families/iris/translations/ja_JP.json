@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "レイアウト、リピート、キー入力の方法",
   "Speed, scrolling, the cursor and hot corners": "速度、スクロール、カーソル、ホットコーナー",
   "Every key and what it does": "すべてのキーとその動作",
-  "App rules, borders and corners": "アプリのルール、境界線、角"
+  "App rules, borders and corners": "アプリのルール、境界線、角",
+  "Close the window": "ウィンドウを閉じる",
+  "Float or tile the window": "ウィンドウを浮動またはタイル表示にする",
+  "Fullscreen": "全画面表示",
+  "Fill the screen's width": "画面の幅いっぱいに広げる",
+  "Centre the column": "列を中央に配置",
+  "Next column width": "次の列幅",
+  "Stack into the column at the left": "左の列に積み重ねる"
 }

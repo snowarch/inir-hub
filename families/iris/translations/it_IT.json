@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "Layout, ripetizione e come si digitano i tasti",
   "Speed, scrolling, the cursor and hot corners": "Velocità, scorrimento, cursore e angoli attivi",
   "Every key and what it does": "Ogni tasto e cosa fa",
-  "App rules, borders and corners": "Regole delle app, bordi e angoli"
+  "App rules, borders and corners": "Regole delle app, bordi e angoli",
+  "Close the window": "Chiudi la finestra",
+  "Float or tile the window": "Alterna la finestra tra fluttuante e in mosaico",
+  "Fullscreen": "Schermo intero",
+  "Fill the screen's width": "Riempi la larghezza dello schermo",
+  "Centre the column": "Centra la colonna",
+  "Next column width": "Larghezza colonna successiva",
+  "Stack into the column at the left": "Impila nella colonna a sinistra"
 }

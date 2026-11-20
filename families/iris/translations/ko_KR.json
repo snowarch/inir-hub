@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "레이아웃, 반복, 키 입력 방식",
   "Speed, scrolling, the cursor and hot corners": "속도, 스크롤, 커서와 핫 코너",
   "Every key and what it does": "모든 키와 그 기능",
-  "App rules, borders and corners": "앱 규칙, 테두리와 모서리"
+  "App rules, borders and corners": "앱 규칙, 테두리와 모서리",
+  "Close the window": "창 닫기",
+  "Float or tile the window": "창을 부동 또는 타일 방식으로 전환",
+  "Fullscreen": "전체 화면",
+  "Fill the screen's width": "화면 너비에 맞추기",
+  "Centre the column": "열을 가운데로 맞추기",
+  "Next column width": "다음 열 너비",
+  "Stack into the column at the left": "왼쪽 열에 쌓기"
 }

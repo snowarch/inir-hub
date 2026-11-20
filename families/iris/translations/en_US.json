@@ -2688,5 +2688,12 @@
   "Layouts, repeat and how keys type": "Layouts, repeat and how keys type",
   "Speed, scrolling, the cursor and hot corners": "Speed, scrolling, the cursor and hot corners",
   "Every key and what it does": "Every key and what it does",
-  "App rules, borders and corners": "App rules, borders and corners"
+  "App rules, borders and corners": "App rules, borders and corners",
+  "Close the window": "Close the window",
+  "Float or tile the window": "Float or tile the window",
+  "Fullscreen": "Fullscreen",
+  "Fill the screen's width": "Fill the screen's width",
+  "Centre the column": "Centre the column",
+  "Next column width": "Next column width",
+  "Stack into the column at the left": "Stack into the column at the left"
 }
