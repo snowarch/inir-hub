@@ -1,6 +1,7 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.iris.style
@@ -19,16 +20,20 @@ Singleton {
     function dp(value: real): real { return Math.round(value * root.density * root.fine) }
     function room(value: real): real { return Math.round(value * root.density) }
 
-    // The panel's material follows iRiS's glass (Settings › Glass, his 11-16): Blur lays a veil of the canvas over what
-    // the compositor blurs behind the panel, Glass blurs the wallpaper inside it, Off is the solid canvas. A window
-    // cannot know where it sits on screen, so a window over the wallpaper's glass stays solid, as iRiS's windows do.
+    // The panel's material follows the shell's glass (Settings › Glass; his 11-16, and 11-20: "tiene que respetar la
+    // shell"), over the desktop and as a window alike: Blur lays a veil of the canvas over what the compositor blurs
+    // behind the panel, Glass blurs the wallpaper inside it, Off is the solid canvas. Settings window › Material alone
+    // overrides it: Solid keeps Prism solid over a glass desktop, Glass gives it glass over a solid one.
     readonly property bool windowHost: String(Config.options?.iris?.appearance?.settingsHost ?? "overlay") === "window"
-    // Settings window › Material: Solid keeps Prism solid over a glass desktop; Glass gives it the wallpaper's glass
-    // when the desktop has none.
     readonly property string ownMaterial: IrisStyle.surfaceMaterial("settings")
-    readonly property bool glassBlur: root.ownMaterial !== "solid" && IrisStyle.glassCompositor
-    readonly property bool glassWallpaper: root.ownMaterial !== "solid" && !root.windowHost
-        && (IrisStyle.glassWallpaper || (root.ownMaterial === "glass" && !IrisStyle.glassCompositor && Appearance.effectsEnabled))
+    readonly property bool wantsGlass: root.ownMaterial === "glass" || (root.ownMaterial === "" && IrisStyle.glassy)
+    // A window cannot know where it sits on screen, so it cannot cut the wallpaper's glass: it takes the compositor's
+    // blur instead, where the compositor gives it one (Niri: any surface that publishes its region; Umbriel: only under
+    // Blur, whose rule names the window), else it stays solid.
+    readonly property bool windowCanBlur: IrisCompositorBlur.usable
+        && (CompositorService.isUmbriel ? IrisStyle.glassCompositor : Appearance.compositorBlurActive)
+    readonly property bool glassBlur: root.wantsGlass && (IrisStyle.glassCompositor || (root.windowHost && root.windowCanBlur))
+    readonly property bool glassWallpaper: root.wantsGlass && !root.windowHost && !IrisStyle.glassCompositor && Appearance.effectsEnabled
     // Settings window › Corners: Auto is Prism's own round.
     readonly property real corner: IrisStyle.surfaceRadius("settings", root.dp(28))
     readonly property bool glass: root.glassBlur || root.glassWallpaper

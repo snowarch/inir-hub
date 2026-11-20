@@ -100,7 +100,7 @@ Item {
         if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "now"
         if (root.below === "palettes") return "now"
         // A face's whole installed list stays one press away at the end; a pairing is only its cards.
-        if (root.below === "typefaces") return root.spec.installedFonts ? "choice" : "now"
+        if (root.below === "typefaces") return root.spec.installedFonts ? "fonts" : "now"
         if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
         if (root.kind === "choice" && root.headless && root.below === "chips") return ""
         if (root.kind === "choice" && root.choices.length > 1) return "choice"
@@ -242,7 +242,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 active: root.inline.length > 0
                 sourceComponent: ({ switch: switchKind, range: rangeKind, hue: hueKind, text: textKind, action: actionKind,
-                    zone: zoneKind, now: nowKind, swatches: swatchKind, choice: choiceKind })[root.inline] ?? null
+                    zone: zoneKind, now: nowKind, swatches: swatchKind, choice: choiceKind, fonts: fontsKind })[root.inline] ?? null
             }
         }
 
@@ -504,14 +504,41 @@ Item {
             onPicked: value => PrismModel.write(root.row, value)
         }
     }
+    // The faces worth a card; under them, while the pill at the line's end is open, every face this computer has.
     Component {
         id: typefacesBelow
-        PrismTypefaces {
+        Column {
             width: slot.width
-            choices: root.faces
-            current: root.value
-            sample: String(root.spec.path ?? "").includes("numbers") ? "24" : "Ag"
-            onPicked: value => PrismModel.write(root.row, value)
+            spacing: PrismTheme.dp(14)
+            PrismTypefaces {
+                width: parent.width
+                choices: root.faces
+                current: root.value
+                sample: String(root.spec.path ?? "").includes("numbers") ? "24" : "Ag"
+                onPicked: value => PrismModel.write(root.row, value)
+            }
+            Loader {
+                active: root.open && root.spec.installedFonts === true
+                visible: active
+                width: parent.width
+                sourceComponent: Component {
+                    PrismFonts {
+                        current: root.value
+                        onPicked: value => { PrismModel.write(root.row, value); root.open = false }
+                    }
+                }
+            }
+        }
+    }
+    // At the end of a face's line: the face it wears when no card shows it, else a way to the others.
+    Component {
+        id: fontsKind
+        PrismPill {
+            readonly property bool carded: root.faces.some(choice => String(choice.value ?? "") === String(root.value ?? ""))
+            tone: "quiet"
+            glyph: root.open ? "close" : "search"
+            text: carded ? Translation.tr("Other font…") : String(root.value ?? "")
+            onClicked: root.open = !root.open
         }
     }
     Component {

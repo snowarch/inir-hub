@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import qs
 import qs.services
@@ -22,6 +23,9 @@ Item {
     // The open page's parts (its groups' names) under its line, and those the page shows now; a press goes to one.
     property var subsections: []
     property var reading: []
+    // A page of a chapter is open: the other chapters step back. Home or a search: every line in full ink.
+    readonly property bool located: !PrismState.searching && PrismModel.groups.some(name => name.length > 0
+        && PrismModel.inGroup(name).some(page => page.pageId === PrismState.page))
     signal pickGroup(string title)
     // The open page's line comes into sight once its parts have opened under it.
     property Item opened: null
@@ -137,6 +141,14 @@ Item {
         contentHeight: column.implicitHeight + PrismTheme.dp(28)
         boundsBehavior: Flickable.StopAtBounds
         clip: true
+        // Over glass the rows fade out through a mask: a band of the fill would stand darker than the glass.
+        layer.enabled: listEdge.active
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: listEdge.mask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1
+        }
 
         Column {
             id: column
@@ -154,16 +166,31 @@ Item {
                     // The caption over the open page wears the accent's ink: where you stand, at two levels.
                     readonly property bool here: !PrismState.searching && group.pages.some(page => page.pageId === PrismState.page)
                     width: column.width
-                    PrismText {
-                        topPadding: PrismTheme.dp(18)
-                        bottomPadding: PrismTheme.dp(6)
-                        leftPadding: PrismTheme.dp(10)
-                        text: Translation.tr(group.modelData)
-                        color: group.here ? PrismTheme.accentInk : PrismTheme.ink3
-                        font.pixelSize: PrismTheme.small
-                        font.weight: Font.DemiBold
-                        font.letterSpacing: PrismTheme.small * 0.02
-                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+                    // The chapter's name and a hairline to the column's edge: a chapter reads as a block, not one more line.
+                    Item {
+                        width: group.width
+                        height: caption.implicitHeight + PrismTheme.dp(28)
+                        PrismText {
+                            id: caption
+                            x: PrismTheme.dp(8)
+                            y: PrismTheme.dp(20)
+                            width: Math.min(implicitWidth, parent.width - x - PrismTheme.dp(24))
+                            text: Translation.tr(group.modelData)
+                            color: group.here ? PrismTheme.accentInk : PrismTheme.ink3
+                            font.pixelSize: PrismTheme.small
+                            font.weight: Font.Bold
+                            font.letterSpacing: PrismTheme.small * 0.03
+                            Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+                        }
+                        Rectangle {
+                            anchors.left: caption.right
+                            anchors.leftMargin: PrismTheme.dp(10)
+                            anchors.right: parent.right
+                            anchors.rightMargin: PrismTheme.dp(8)
+                            anchors.verticalCenter: caption.verticalCenter
+                            height: 1
+                            color: PrismTheme.line
+                        }
                     }
                     Repeater {
                         model: group.pages
@@ -179,6 +206,7 @@ Item {
                                 glyph: place.modelData.glyph
                                 text: Translation.tr(place.modelData.name)
                                 current: place.current
+                                inGroup: group.here || !root.located
                                 onClicked: PrismState.go(place.modelData.pageId)
                             }
                             // The page's parts, threaded under its glyph: the ones on screen wear the accent's tick.
@@ -210,7 +238,7 @@ Item {
                                             width: partList.width
                                             height: Math.max(PrismTheme.dp(28), partName.implicitHeight + PrismTheme.dp(10))
                                             Rectangle {
-                                                x: PrismTheme.dp(30)
+                                                x: PrismTheme.dp(32)
                                                 width: parent.width - x
                                                 height: parent.height
                                                 radius: PrismTheme.dp(8)
@@ -229,7 +257,7 @@ Item {
                                             }
                                             PrismText {
                                                 id: partName
-                                                x: PrismTheme.dp(40)
+                                                x: PrismTheme.dp(42)
                                                 width: parent.width - x - PrismTheme.dp(8)
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 text: Translation.tr(part.modelData)
@@ -290,13 +318,14 @@ Item {
         }
     }
 
-    // The list fades where it meets the column's ends.
+    // The list fades where it meets the column's ends: into the fill over a solid body, through the mask over glass.
     IrisScrollEdge {
+        id: listEdge
         flick: flick
         anchors.fill: flick
         blurs: false
         reach: PrismTheme.dp(24)
-        veil: PrismTheme.canvas
+        veil: PrismTheme.glass ? "transparent" : PrismTheme.canvas
         bottomLeftRadius: root.corner
     }
 }

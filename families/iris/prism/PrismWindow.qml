@@ -87,6 +87,8 @@ PanelWindow {
         Behavior on width { NumberAnimation { duration: PrismTheme.ms(260 / PrismTheme.openSpeed); easing.type: Easing.OutCubic } }
         Behavior on height { NumberAnimation { duration: PrismTheme.ms(260 / PrismTheme.openSpeed); easing.type: Easing.OutCubic } }
         active: GlobalStates.settingsOverlayOpen
+        backdrop: glassLoader.item?.ready ? glassLoader.item.texture : null
+        screenAt: Qt.point(panel.x, panel.y)
         focus: true
         onCloseRequested: root.close()
         MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons }

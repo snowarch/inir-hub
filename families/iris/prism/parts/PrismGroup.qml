@@ -24,6 +24,9 @@ Item {
     readonly property var titles: Array.from(root.entry?.titles ?? [root.title])
 
     readonly property bool headed: root.title.length > 0
+    // Every layer of the card is complete (the art's layer is a texture only then).
+    property bool built: false
+    Component.onCompleted: root.built = true
     // A card standing beside another on its line wears its back like its neighbour, so both fronts step down together.
     property bool lined: false
     readonly property bool backed: root.headed && (Array.from(root.entry?.rows ?? []).length > 2 || root.lined)
@@ -87,7 +90,8 @@ Item {
         height: art.height
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
-            fillItem: root.headed ? art : null
+            // Only once the art's layer stands: a fill item that is no texture provider yet warns and draws nothing.
+            fillItem: root.headed && art.layer.enabled && root.built ? art : null
             strokeColor: "transparent"
             strokeWidth: -1
             PathSvg {

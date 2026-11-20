@@ -181,10 +181,13 @@ Item {
             sourceComponent: keysRow
         }
     }
-    // The keys, measured once off screen so where they stand never loops on their own width.
+    // The keys, measured off screen so where they stand never loops on their own width. Unseen by opacity, not by
+    // `visible`: a hidden Row is never laid out again, so a page that came to have a way back kept a width of nothing.
     Row {
         id: keysProbe
-        visible: false
+        opacity: 0
+        enabled: false
+        Accessible.ignored: true
         spacing: PrismTheme.dp(8)
         PrismPill { visible: root.restorable; tone: "quiet"; glyph: "restart_alt"; text: Translation.tr("Restore defaults") }
         Repeater {

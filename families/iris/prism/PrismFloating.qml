@@ -9,7 +9,8 @@ import qs.modules.iris.prism.core
 // Prism as a window of its own (`iris.appearance.settingsHost` = window): the same panel in a Niri window that tiles,
 // floats and takes focus like any app, the desktop left alone behind it. Its lights act on the window: red and yellow
 // put Settings away, green maximises its column. Under Blur the compositor blurs the whole window behind the panel's
-// veil (Niri: this region; Umbriel: its window rule); under Glass a window stays solid, as iRiS's windows do.
+// veil (Niri: this region; Umbriel: its window rule); under Glass the window takes that blur where the compositor gives
+// it one (PrismTheme.windowCanBlur), else it stays solid.
 FloatingWindow {
     id: root
     // Untranslated: niri's rule that opens Settings at two thirds of the screen matches this title (as the classic one).

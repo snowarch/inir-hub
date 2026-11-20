@@ -1,7 +1,12 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.118",
+    "version": "2.33.119",
     "changes": {
+      "2.33.119": [
+          "Prism Settings: the sidebar says where you are, the open page on an accent key, its chapter lit and the others stepped back",
+          "Font rows open a search of your installed fonts; the side column lists only what you changed on this visit, each with its undo",
+          "Prism follows the shell's glass, blur or solid in the panel and in the window, unless Settings' own material says otherwise"
+      ],
       "2.33.118": [
           "Prism Settings: Style's presets are one calm set of keys, each named in its own type with a dot of its accent",
           "Home's wallpaper card carries its name alone, with no row of colours under it"

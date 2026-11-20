@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import qs
@@ -24,6 +25,9 @@ Item {
     property string flashPath: ""
     // Hosted as a window: square corners (the compositor rounds a window), the keys act on the window.
     property bool windowed: false
+    // Under Glass the overlay lends the blurred wallpaper and where the panel lies on it.
+    property Item backdrop: null
+    property point screenAt: Qt.point(0, 0)
     signal closeRequested()
     // In a window: the window goes to the dock as any app's would.
     signal minimizeRequested()
@@ -296,11 +300,51 @@ Item {
     Timer { id: readLater; interval: 60; onTriggered: root.readNow() }
     onSubsectionsChanged: readLater.restart()
 
+    // The panel wears the shell's glass (his 11-20: "tiene que respetar la shell"): under Glass the wallpaper, blurred,
+    // where the panel lies on it, cut by the body's own round (a fill: a clip is square); under Blur nothing, the
+    // compositor blurs behind. Over either, the body is the canvas at the veil's share.
+    Loader {
+        anchors.fill: parent
+        active: PrismTheme.glassWallpaper && root.backdrop !== null
+        sourceComponent: Item {
+            id: glass
+            // The cut fills only once the picture's layer stands (a fill that is no texture yet warns, draws nothing).
+            property bool built: false
+            Component.onCompleted: glass.built = true
+            // The screen's blurred wallpaper, moved so the panel's part of it lies under the panel: a texture of the
+            // panel's own size, redrawn only when the picture changes.
+            Item {
+                id: picture
+                width: glass.width
+                height: glass.height
+                visible: false
+                clip: true
+                layer.enabled: true
+                ShaderEffect {
+                    x: -root.screenAt.x
+                    y: -root.screenAt.y
+                    width: root.backdrop?.width ?? 0
+                    height: root.backdrop?.height ?? 0
+                    property variant source: root.backdrop
+                }
+            }
+            Shape {
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    fillItem: glass.built ? picture : null
+                    strokeColor: "transparent"
+                    strokeWidth: -1
+                    PathRectangle { width: glass.width; height: glass.height; radius: body.radius }
+                }
+            }
+        }
+    }
     Rectangle {
         id: body
         anchors.fill: parent
         radius: root.windowed ? 0 : PrismTheme.corner
-        color: PrismTheme.canvas
+        color: PrismTheme.glass ? ColorUtils.applyAlpha(PrismTheme.canvas, PrismTheme.veil) : PrismTheme.canvas
         clip: true
 
         PrismSidebar {
@@ -364,8 +408,8 @@ Item {
                     line: PrismState.searching ? Translation.tr("Pages and settings that match")
                         : Translation.tr(String(root.page.subtitle ?? ""))
                     actions: PrismState.searching ? [] : root.pageActions
-                    // With the side column open, the way back is there, beside what changed.
-                    restorable: !PrismState.searching && !root.asideOpen && PrismModel.restorableOf(root.pageId) > 0
+                    // The page's way back to iNiR's stands here alone: the side column says only what this visit changed.
+                    restorable: !PrismState.searching && PrismModel.restorableOf(root.pageId) > 0
                     onAction: id => root.act(id)
                     onRestore: PrismModel.restore(root.pageId)
                     onPictureAsked: root.chooseAvatar()
@@ -491,9 +535,10 @@ Item {
         }
 
         // Rows leaving the top fade into the page, and so does the foot while rows wait past it.
+        // Over glass a band drawn again would darken the glass: rows end at the column's edge, as any glass window's.
         IrisScrollEdge {
             id: centreEdge
-            visible: centre.visible
+            visible: centre.visible && !PrismTheme.glass
             flick: centre
             anchors.fill: centre
             reach: PrismTheme.dp(36)

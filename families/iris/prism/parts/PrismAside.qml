@@ -22,12 +22,31 @@ Item {
     signal reach(var row)
     signal pictureAsked()
 
-    readonly property var changes: {
-        const all = Array.from(PrismModel.changes)
-        // Home and a search: no list of every change (his 11-19: bloat); each page keeps its own.
-        return root.everywhere ? [] : all.filter(row => row.page === root.pageId)
+    // What was changed on this page in this visit, newest first: Settings' own history (Ctrl+Z's, forgotten when Settings
+    // closes), each row once and only while it holds another value than when the visit began. A page set up long ago
+    // opens quiet (his 11-20: "que no aparezcan 300 cambios cada vez que entro"); its head keeps Restore defaults for the
+    // rest. Home and a search list nothing (his 11-19: bloat).
+    readonly property var visit: {
+        if (root.everywhere) return ({ rows: [], before: ({}) })
+        const _ = PrismModel.revision
+        const own = ({})
+        for (const row of PrismModel.rows)
+            if (row.page === root.pageId && !PrismModel.virtual(row)) own[IrisOptions.rowKey(row.spec)] = row
+        const before = ({})
+        const order = []
+        for (const entry of Array.from(IrisOptions.history)) {
+            if (entry.kind !== "change" || !(entry.key in own)) continue
+            if (!(entry.key in before)) before[entry.key] = entry.steps[0].before
+            const at = order.indexOf(entry.key)
+            if (at >= 0) order.splice(at, 1)
+            order.push(entry.key)
+        }
+        const rows = order.reverse()
+            .filter(key => !IrisOptions.same(before[key], IrisOptions.plain(IrisOptions.currentValue(own[key].spec))))
+            .slice(0, 6).map(key => own[key])
+        return ({ rows: rows, before: before })
     }
-    readonly property bool restorable: !root.everywhere && PrismModel.restorableOf(root.pageId) > 0
+    readonly property var changes: root.visit.rows
     readonly property real pad: PrismTheme.dp(14)
 
     // The keys that reach this page's own things, as the compositor binds them now (one per action, a handful at most).
@@ -207,42 +226,16 @@ Item {
             readonly property bool shown: root.changes.length > 0 || root.keys.length > 0 || root.tip.length > 0
             spacing: 0
 
-            // What was changed on this page, only while something was: its name and, at its end, the page back to iNiR's
-            // in one change Ctrl+Z takes back.
-            Item {
+            // What this visit changed on the page, while it holds: each line's way back is the value it had before.
+            PrismText {
                 visible: root.changes.length > 0
                 width: parent.width
                 height: PrismTheme.dp(30)
-                PrismText {
-                    anchors.left: parent.left
-                    anchors.right: back.visible ? back.left : parent.right
-                    anchors.rightMargin: PrismTheme.dp(10)
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: Translation.tr("Changed here")
-                    font.pixelSize: PrismTheme.row
-                    font.weight: Font.DemiBold
-                    font.letterSpacing: -PrismTheme.row * 0.01
-                }
-                PrismText {
-                    id: back
-                    visible: root.restorable
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: Translation.tr("Restore all")
-                    color: backArea.containsMouse ? PrismTheme.ink : PrismTheme.accentInk
-                    font.pixelSize: PrismTheme.small
-                    font.weight: Font.DemiBold
-                    MouseArea {
-                        id: backArea
-                        anchors.fill: parent
-                        anchors.margins: -PrismTheme.dp(6)
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        Accessible.role: Accessible.Button
-                        Accessible.name: back.text
-                        onClicked: PrismModel.restore(root.pageId)
-                    }
-                }
+                verticalAlignment: Text.AlignVCenter
+                text: Translation.tr("Changed here")
+                font.pixelSize: PrismTheme.row
+                font.weight: Font.DemiBold
+                font.letterSpacing: -PrismTheme.row * 0.01
             }
             Repeater {
                 // Keyed: a write elsewhere keeps the groups and lines that stayed instead of rebuilding the list.
@@ -280,11 +273,18 @@ Item {
                         delegate: Item {
                             id: change
                             required property var modelData
-                            readonly property bool pointed: changeArea.containsMouse || undo.hovered
-                            readonly property bool undoable: PrismModel.restorable(change.modelData)
-                            readonly property string now: { const _ = PrismModel.revision; return String(PrismModel.sayNow(change.modelData) ?? "") }
+                            // A hover handler sees the pointer over the way back too, so the line never flickers under it.
+                            readonly property bool pointed: lineHover.hovered
+                            // A value outside the row's choices (an installed face) says itself.
+                            readonly property string now: {
+                                const _ = PrismModel.revision
+                                const said = String(PrismModel.sayNow(change.modelData) ?? "")
+                                const held = PrismModel.read(change.modelData)
+                                return said.length > 0 ? said : typeof held === "string" ? held : ""
+                            }
                             width: stack.width
                             height: PrismTheme.dp(34)
+                            HoverHandler { id: lineHover }
                             Rectangle {
                                 anchors.fill: parent
                                 anchors.leftMargin: -PrismTheme.dp(8)
@@ -308,7 +308,7 @@ Item {
                             // What it holds now, at the line's end; pointed, its way back stands there instead.
                             PrismText {
                                 id: said
-                                visible: change.now.length > 0 && !(change.pointed && change.undoable)
+                                visible: change.now.length > 0 && !change.pointed
                                 anchors.right: parent.right
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: Math.min(implicitWidth, parent.width * 0.42)
@@ -330,7 +330,7 @@ Item {
                             }
                             PrismRound {
                                 id: undo
-                                visible: change.pointed && change.undoable
+                                visible: change.pointed
                                 anchors.right: parent.right
                                 anchors.rightMargin: -PrismTheme.dp(4)
                                 anchors.verticalCenter: parent.verticalCenter
@@ -339,7 +339,7 @@ Item {
                                 glyph: "undo"
                                 glyphSize: PrismTheme.dp(15)
                                 Accessible.name: Translation.tr("Restore")
-                                onClicked: PrismModel.restoreRow(change.modelData)
+                                onClicked: IrisOptions.commit(change.modelData.spec, root.visit.before[IrisOptions.rowKey(change.modelData.spec)])
                             }
                         }
                     }
