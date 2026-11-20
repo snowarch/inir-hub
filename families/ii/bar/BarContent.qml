@@ -20,6 +20,11 @@ Item { // Bar content region
     layer.enabled: Appearance.shouldDesaturate("bar") && root.visible
     layer.effect: ShellDesaturationEffect {}
 
+    PaletteFade {
+        target: root
+        active: root.visible
+    }
+
     property var screen: root.QsWindow.window?.screen
     property alias backgroundItem: barBackground
     property bool nativeBlurAllowed: true

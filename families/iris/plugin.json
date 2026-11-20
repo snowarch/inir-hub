@@ -195,7 +195,7 @@
   },
   "widgetOptions": {
     "clock": [
-      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":["face",{"wears":"iris"}],"choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"],["hour","Hour","wb_twilight"],["greeting","Greeting","waving_hand"]]},
+      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":["face",{"wears":"iris"}],"choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"],["hour","Hour","wb_twilight"],["greeting","Greeting","waving_hand"],["poster","Poster","format_size"]]},
       {"key":"iris.seconds","label":"Second hand","type":"switch","default":true,"when":["face",{"wears":"iris"},{"iris.face":"analog"}]},
       {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"wears":"iris"},{"iris.face":["analog","digital","greeting"]},{"not":{"sizeClass":"small"}}]}
     ],

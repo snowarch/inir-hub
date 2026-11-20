@@ -50,7 +50,8 @@ ContentPage {
                         { displayName: Translation.tr("Pill"),   icon: "interests",      value: "pill"   },
                         { displayName: Translation.tr("macOS"),  icon: "desktop_mac",    value: "macos"  },
                         { displayName: Translation.tr("Island"), icon: "blur_on",        value: "island" },
-                        { displayName: Translation.tr("M3"),     icon: "category",       value: "m3"     }
+                        { displayName: Translation.tr("M3"),     icon: "category",       value: "m3"     },
+                        { displayName: Translation.tr("Notch"),  icon: "vertical_align_bottom", value: "notch" }
                     ]
                 }
 
@@ -91,6 +92,16 @@ ContentPage {
 
             // Both only mean something under Empty workspace: Hover already hides the dock, and a pinned dock would
             // cancel Hover. Disabled there so the contradiction shows.
+            SettingsSwitch {
+                buttonIcon: "window"
+                text: Translation.tr("Dodge windows")
+                enabled: Config.options?.material?.dock?.hoverToReveal ?? true
+                checked: Config.options?.material?.dock?.dodgeWindows ?? false
+                onCheckedChanged: Config.setNestedValue('material.dock.dodgeWindows', checked)
+                StyledToolTip {
+                    text: Translation.tr("Keep the dock visible on empty workspaces and hide it only when windows are open")
+                }
+            }
             SettingsSwitch {
                 buttonIcon: "desktop_windows"
                 text: Translation.tr("Show on desktop")

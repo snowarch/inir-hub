@@ -16,13 +16,72 @@ DashCard {
     readonly property string username: Config.options?.material?.dashboard?.github?.username ?? ""
     property var weeks: [] // [[level 0–4 per day] per week]
     property int total: -1
+    property int streak: 0
+    property int longestStreak: 0
     property double _lastFetch: 0
     property bool fetching: false
     readonly property bool hasData: total >= 0 && weeks.length > 0
 
     onVisibleChanged: if (visible) refresh()
     Component.onCompleted: if (visible) refresh()
-    onUsernameChanged: { total = -1; weeks = []; _lastFetch = 0; if (visible) refresh() }
+    onUsernameChanged: { total = -1; streak = 0; longestStreak = 0; weeks = []; _lastFetch = 0; if (visible) refresh() }
+
+    function _applyDays(days, totalVal) {
+        if (!Array.isArray(days) || days.length === 0) return false
+        root.total = totalVal >= 0 ? totalVal : days.reduce((acc, d) => acc + (d.count ?? 0), 0)
+        let cur = 0, best = 0, run = 0
+        for (const d of days) {
+            const active = (d.count ?? 0) > 0 || (d.level ?? 0) > 0
+            run = active ? run + 1 : 0
+            if (run > best) best = run
+        }
+        const todayIso = Qt.formatDate(new Date(), "yyyy-MM-dd")
+        for (let i = days.length - 1; i >= 0; i--) {
+            const d = days[i]
+            const active = (d.count ?? 0) > 0 || (d.level ?? 0) > 0
+            if (active) cur++
+            else if (d.date === todayIso && cur === 0) continue
+            else break
+        }
+        root.streak = cur
+        root.longestStreak = best
+        const wk = []
+        for (let i = 0; i < days.length; i += 7) {
+            wk.push(days.slice(i, i + 7).map(d => d.level ?? 0))
+        }
+        root.weeks = wk
+        root._lastFetch = Date.now()
+        heatmap.requestPaint()
+        return true
+    }
+
+    function _parseHtmlPage(page) {
+        const tipRe = /<tool-tip\b[^>]*\bfor="([^"]+)"[^>]*>([^<]*)<\/tool-tip>/g
+        const countRe = /^\s*([\d,]+)\s+contributions?\b/i
+        const counts = {}
+        let m
+        while ((m = tipRe.exec(page)) !== null) {
+            const cm = countRe.exec(m[2])
+            counts[m[1]] = cm ? parseInt(cm[1].replace(/,/g, ""), 10) : 0
+        }
+        const cellRe = /<td\b[^>]*\bdata-date="(\d{4}-\d{2}-\d{2})"[^>]*>/g
+        const idRe = /\bid="([^"]+)"/
+        const levelRe = /\bdata-level="(\d)"/
+        const byDate = {}
+        while ((m = cellRe.exec(page)) !== null) {
+            const tag = m[0]
+            const idMatch = idRe.exec(tag)
+            const lvMatch = levelRe.exec(tag)
+            const lv = lvMatch ? parseInt(lvMatch[1], 10) : 0
+            const cnt = idMatch && (idMatch[1] in counts) ? counts[idMatch[1]] : lv
+            byDate[m[1]] = { date: m[1], count: cnt, level: lv }
+        }
+        const dates = Object.keys(byDate).sort()
+        const days = dates.map(d => byDate[d])
+        const totalMatch = /id="js-contribution-activity-description"[^>]*>\s*([\d,]+)\s+contributions?/i.exec(page)
+        const totalVal = totalMatch ? parseInt(totalMatch[1].replace(/,/g, ""), 10) : -1
+        return root._applyDays(days, totalVal)
+    }
 
     function refresh() {
         if (root.username.length === 0 || root.fetching) return
@@ -32,24 +91,29 @@ DashCard {
         xhr.onreadystatechange = () => {
             if (xhr.readyState !== XMLHttpRequest.DONE) return
             if (!root) return  // dashboard closed mid-fetch
-            root.fetching = false
-            if (xhr.status !== 200) return
-            try {
-                const data = JSON.parse(xhr.responseText)
-                const days = data?.contributions ?? []
-                root.total = data?.total?.lastYear ?? days.reduce((acc, d) => acc + (d.count ?? 0), 0)
-                const wk = []
-                for (let i = 0; i < days.length; i += 7) {
-                    wk.push(days.slice(i, i + 7).map(d => d.level ?? 0))
-                }
-                root.weeks = wk
-                root._lastFetch = Date.now()
-                heatmap.requestPaint()
-            } catch (e) {
-                console.log("[DashGithub] failed to parse contributions:", e)
+            if (xhr.status === 200 && root._parseHtmlPage(xhr.responseText)) {
+                root.fetching = false
+                return
             }
+            // Fallback to JSON mirror API
+            const fb = new XMLHttpRequest()
+            fb.onreadystatechange = () => {
+                if (fb.readyState !== XMLHttpRequest.DONE) return
+                if (!root) return
+                root.fetching = false
+                if (fb.status !== 200) return
+                try {
+                    const data = JSON.parse(fb.responseText)
+                    const days = data?.contributions ?? []
+                    root._applyDays(days, data?.total?.lastYear ?? -1)
+                } catch (e) {
+                    console.log("[DashGithub] failed to parse contributions:", e)
+                }
+            }
+            fb.open("GET", `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(root.username)}?y=last`)
+            fb.send()
         }
-        xhr.open("GET", `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(root.username)}?y=last`)
+        xhr.open("GET", `https://github.com/users/${encodeURIComponent(root.username)}/contributions`)
         xhr.send()
     }
 
@@ -139,7 +203,7 @@ DashCard {
         StyledText {
             Layout.alignment: Qt.AlignHCenter
             visible: root.hasData
-            text: `@${root.username}`
+            text: root.streak > 0 ? `@${root.username} · ${root.streak}d` : `@${root.username}`
             font.pixelSize: Appearance.font.pixelSize.smaller
             color: root.colSubtext
         }

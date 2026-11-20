@@ -35,6 +35,7 @@ Scope {
     readonly property bool isMacosStyle:  Config.options?.material?.dock?.style === "macos"
     readonly property bool isIslandStyle: Config.options?.material?.dock?.style === "island"
     readonly property bool isM3Style:     Config.options?.material?.dock?.style === "m3"
+    readonly property bool isNotchStyle:  Config.options?.material?.dock?.style === "notch"
     readonly property bool isPanelStyle:  Config.options?.material?.dock?.style === "panel"
     // Island is a complete Ricelin material. Pill and macOS are layout modes
     // that still inherit the selected global worldview (except ZZZ, whose shelf
@@ -93,11 +94,18 @@ Scope {
                     id: dockEdge
                     hovered: (Config.options?.material?.dock?.hoverToReveal ?? false) && dockMouseArea.containsMouse
                 }
+                readonly property bool workspaceBusy: CompositorService.isNiri
+                    ? NiriService.hasWindowsOnActiveWorkspace(dockRoot.screen?.name ?? "")
+                    : (ToplevelManager.activeToplevel?.activated ?? false)
+                readonly property bool dodgeReveal: (Config.options?.material?.dock?.hoverToReveal ?? false)
+                    && (Config.options?.material?.dock?.dodgeWindows ?? false)
+                    && !dockRoot.workspaceBusy
                 property bool reveal: !GlobalStates.coverflowSelectorOpen && !DesktopEditStage.receding
                     && !(GlobalStates.wallpaperLauncherOpen && root.position === "bottom")
                     && GlobalStates.shellEntryReady
                     && (ShellEditSession.active || root.pinned
                         || dockEdge.revealed
+                        || dockRoot.dodgeReveal
                         || (dockApps?.requestDockShow || dockAppsVertical?.requestDockShow)
                         || (Config.options?.material?.dock?.showOnDesktop !== false
                             && !ToplevelManager.activeToplevel?.activated))
@@ -292,12 +300,17 @@ Scope {
                             }
                         }
 
-                        Item {
-                            id: dockBackground
+                         Item {
+                             id: dockBackground
 
-                            // Shell desaturation effect
-                            layer.enabled: Appearance.shouldDesaturate("dock") && dockBackground.visible
-                            layer.effect: ShellDesaturationEffect {}
+                             PaletteFade {
+                                 target: dockBackground
+                                 active: dockRoot.visible && dockRoot.reveal
+                             }
+
+                             // Shell desaturation effect
+                             layer.enabled: Appearance.shouldDesaturate("dock") && dockBackground.visible
+                             layer.effect: ShellDesaturationEffect {}
 
                             anchors {
                                 top: !root.isVertical ? parent.top : undefined
@@ -373,46 +386,51 @@ Scope {
                                         color: ColorUtils.mix(dockVisualBackground.wallpaperDominantColor, Appearance.colors.colPrimaryContainer, 0.8) || Appearance.colors.colSecondaryContainer
                                     }
 
-                                    anchors.fill: parent
-                                    anchors.topMargin: root.isTop ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
-                                    anchors.bottomMargin: root.position === "bottom" ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
-                                    anchors.leftMargin: root.isLeft ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
-                                    anchors.rightMargin: root.position === "right" ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
+                                     anchors.fill: parent
+                                     anchors.topMargin: root.isTop ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
+                                     anchors.bottomMargin: root.position === "bottom" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
+                                     anchors.leftMargin: root.isLeft ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
+                                     anchors.rightMargin: root.position === "right" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
 
-                                // Hide shared background in pill mode — each pill is its own background
-                                // Hide in macOS mode — DockMacBackground is the unified shelf
-                                // Island is an explicit opt-in to the Ricelin dialect,
-                                // so it replaces the zzz surface too (same rule as the
-                                // islands bar).
-                                visible: (Config.options?.material?.dock?.showBackground ?? true) && !gameModeMinimal && ((root.zzzEverywhere && !root.isIslandStyle) || (!root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle))
-                                // ZZZ: the visible shelf is the chamfered ZzzPlate below.
-                                color: dockVisualBackground.editorialGlassActive
-                                    ? (!dockVisualBackground.editorialBackdropReady ? Appearance.editorial.rail
-                                        : dockRoot.nativeBlurActive && !Appearance.editorial.paperStack ? Appearance.editorial.glassRail
-                                        : "transparent")
-                                    : Appearance.editorialEverywhere ? Appearance.editorial.rail
-                                    : root.isM3Style ? Appearance.colors.colLayer0
-                                    : root.zzzEverywhere || regaliaEverywhere ? "transparent"
-                                    : auroraEverywhere ? ColorUtils.applyAlpha(
-                                        (blendedColors?.colLayer0 ?? Appearance.colors.colLayer0),
-                                        dockRoot.nativeBlurActive ? 0.46 : 1)
-                                    : inirEverywhere ? Appearance.inir.colLayer1
-                                    : (cardStyle ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
-                                border.width: root.isM3Style ? 1
-                                    : root.zzzEverywhere || regaliaEverywhere ? 0
-                                    : angelEverywhere ? Appearance.angel.panelBorderWidth : 1
-                                border.color: root.isM3Style ? Appearance.colors.colLayer0Border
-                                    : root.zzzEverywhere || regaliaEverywhere ? "transparent"
-                                    : angelEverywhere ? Appearance.angel.colPanelBorder
-                                    : inirEverywhere ? Appearance.inir.colBorder
-                                    : Appearance.colors.colLayer0Border
-                                radius: root.isM3Style ? Appearance.rounding.normal + 6
-                                    : root.zzzEverywhere ? Appearance.zzz.panelRadius
-                                    : regaliaEverywhere && root.isPanelStyle ? Appearance.regalia.roundLarge
-                                    : regaliaEverywhere ? Appearance.regalia.panelRadius
-                                    : angelEverywhere ? Appearance.angel.roundingNormal
-                                    : inirEverywhere ? Appearance.inir.roundingNormal
-                                    : cardStyle ? Appearance.rounding.normal : Appearance.rounding.large
+                                 // Hide shared background in pill mode — each pill is its own background
+                                 // Hide in macOS mode — DockMacBackground is the unified shelf
+                                 // Island is an explicit opt-in to the Ricelin dialect,
+                                 // so it replaces the zzz surface too (same rule as the
+                                 // islands bar).
+                                 visible: (Config.options?.material?.dock?.showBackground ?? true) && !gameModeMinimal && ((root.zzzEverywhere && !root.isIslandStyle) || (!root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle))
+                                 // ZZZ: the visible shelf is the chamfered ZzzPlate below.
+                                 color: dockVisualBackground.editorialGlassActive
+                                     ? (!dockVisualBackground.editorialBackdropReady ? Appearance.editorial.rail
+                                         : dockRoot.nativeBlurActive && !Appearance.editorial.paperStack ? Appearance.editorial.glassRail
+                                         : "transparent")
+                                     : Appearance.editorialEverywhere ? Appearance.editorial.rail
+                                     : (root.isM3Style || root.isNotchStyle) ? Appearance.colors.colLayer0
+                                     : root.zzzEverywhere || regaliaEverywhere ? "transparent"
+                                     : auroraEverywhere ? ColorUtils.applyAlpha(
+                                         (blendedColors?.colLayer0 ?? Appearance.colors.colLayer0),
+                                         dockRoot.nativeBlurActive ? 0.46 : 1)
+                                     : inirEverywhere ? Appearance.inir.colLayer1
+                                     : (cardStyle ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
+                                 border.width: root.isNotchStyle ? 0
+                                     : root.isM3Style ? 1
+                                     : root.zzzEverywhere || regaliaEverywhere ? 0
+                                     : angelEverywhere ? Appearance.angel.panelBorderWidth : 1
+                                 border.color: root.isM3Style ? Appearance.colors.colLayer0Border
+                                     : root.zzzEverywhere || regaliaEverywhere ? "transparent"
+                                     : angelEverywhere ? Appearance.angel.colPanelBorder
+                                     : inirEverywhere ? Appearance.inir.colBorder
+                                     : Appearance.colors.colLayer0Border
+                                 radius: (root.isM3Style || root.isNotchStyle) ? Appearance.rounding.normal + 6
+                                     : root.zzzEverywhere ? Appearance.zzz.panelRadius
+                                     : regaliaEverywhere && root.isPanelStyle ? Appearance.regalia.roundLarge
+                                     : regaliaEverywhere ? Appearance.regalia.panelRadius
+                                     : angelEverywhere ? Appearance.angel.roundingNormal
+                                     : inirEverywhere ? Appearance.inir.roundingNormal
+                                     : cardStyle ? Appearance.rounding.normal : Appearance.rounding.large
+                                 topLeftRadius: root.isNotchStyle && (root.isTop || root.isLeft) ? 0 : radius
+                                 topRightRadius: root.isNotchStyle && (root.isTop || root.position === "right") ? 0 : radius
+                                 bottomLeftRadius: root.isNotchStyle && (root.position === "bottom" || root.isLeft) ? 0 : radius
+                                 bottomRightRadius: root.isNotchStyle && (root.position === "bottom" || root.position === "right") ? 0 : radius
                                 EditorialPaperStack {
                                     anchors.fill: parent
                                     faceColor: Appearance.editorial.rail
@@ -549,6 +567,36 @@ Scope {
                                 }
 
                             }
+
+                             // Notch concave edge flares
+                             RoundCorner {
+                                 visible: root.isNotchStyle && dockVisualBackground.visible
+                                 implicitSize: 16
+                                 color: dockVisualBackground.color
+                                 corner: root.position === "bottom" ? RoundCorner.CornerEnum.BottomRight
+                                     : root.isTop ? RoundCorner.CornerEnum.TopRight
+                                     : root.isLeft ? RoundCorner.CornerEnum.BottomLeft
+                                     : RoundCorner.CornerEnum.BottomRight
+                                 x: !root.isVertical ? (dockVisualBackground.x - implicitSize)
+                                     : (root.isLeft ? dockVisualBackground.x : dockVisualBackground.x + dockVisualBackground.width - implicitSize)
+                                 y: !root.isVertical
+                                     ? (root.isTop ? dockVisualBackground.y : dockVisualBackground.y + dockVisualBackground.height - implicitSize)
+                                     : (dockVisualBackground.y - implicitSize)
+                             }
+                             RoundCorner {
+                                 visible: root.isNotchStyle && dockVisualBackground.visible
+                                 implicitSize: 16
+                                 color: dockVisualBackground.color
+                                 corner: root.position === "bottom" ? RoundCorner.CornerEnum.BottomLeft
+                                     : root.isTop ? RoundCorner.CornerEnum.TopLeft
+                                     : root.isLeft ? RoundCorner.CornerEnum.TopLeft
+                                     : RoundCorner.CornerEnum.TopRight
+                                 x: !root.isVertical ? (dockVisualBackground.x + dockVisualBackground.width)
+                                     : (root.isLeft ? dockVisualBackground.x : dockVisualBackground.x + dockVisualBackground.width - implicitSize)
+                                 y: !root.isVertical
+                                     ? (root.isTop ? dockVisualBackground.y : dockVisualBackground.y + dockVisualBackground.height - implicitSize)
+                                     : (dockVisualBackground.y + dockVisualBackground.height)
+                             }
 
                              // macOS unified shelf background — visible only in macOS style
                                DockMacBackground {
