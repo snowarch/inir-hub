@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.119",
+    "version": "2.33.120",
     "changes": {
+      "2.33.120": [
+          "Prism Settings: text is drawn sharp at every size, in the side list and on every page"
+      ],
       "2.33.119": [
           "Prism Settings: the sidebar says where you are, the open page on an accent key, its chapter lit and the others stepped back",
           "Font rows open a search of your installed fonts; the side column lists only what you changed on this visit, each with its undo",
