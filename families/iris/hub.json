@@ -1,7 +1,13 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.115",
+    "version": "2.33.116",
     "changes": {
+      "2.33.116": [
+          "Prism Settings: calmer sizes everywhere, clearer text, and your accent marks where you are in the sidebar",
+          "The side column is yours: your picture (press it to change it), the day, Do Not Disturb, what you changed here, the player",
+          "A section pressed in the sidebar stays marked, and its group glows in your accent a moment as the page lands on it",
+          "Home: the wallpaper card carries its name and colours, and Every day holds the volume and brightness"
+      ],
       "2.33.115": [
           "Prism Settings: the window's buttons head the side column, so scrolled groups never pass under them",
           "The side column says how the page's own thing is used and lists the window and layout keys; page heads are shorter"

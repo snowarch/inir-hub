@@ -16,6 +16,8 @@ Item {
     property real size: PrismTheme.head
     // The line under the name may run past the name's own width (a folder's tab holds the name; the line sits on the body).
     property real lineWidth: root.width
+    // The folder's warm-up (PrismGroup.flash): the name takes the accent's ink with it.
+    property real glow: 0
 
     readonly property string title: String(root.entry?.title ?? "")
     readonly property var rows: Array.from(root.entry?.rows ?? [])
@@ -51,6 +53,7 @@ Item {
         PrismText {
             width: parent.width
             text: Translation.tr(root.title)
+            color: root.glow > 0 ? Qt.tint(PrismTheme.ink, Qt.alpha(PrismTheme.accentInk, root.glow)) : PrismTheme.ink
             font.pixelSize: root.size
             font.weight: Font.DemiBold
             font.letterSpacing: -root.size * 0.012

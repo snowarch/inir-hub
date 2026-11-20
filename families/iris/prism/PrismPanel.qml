@@ -1,9 +1,11 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.widgets
 import qs.modules.iris.components
 import qs.modules.iris.settings
 import qs.modules.iris.style
@@ -124,6 +126,14 @@ Item {
     property real aimUntil: 0
     property string aimed: ""
     // A group asked for glides to its card's top, clear of the blurred edge.
+    // A group asked for by name (the sidebar, a search's place): it is marked as read, glides into view and its folder
+    // warms with the accent a moment, so the eye lands on it.
+    function markGroup(title: string): void {
+        root.held = title
+        root.showGroup(title)
+        shelf.boxOf(title)?.flash()
+        readLater.restart()
+    }
     function showGroup(title: string): void {
         root.aimed = title
         root.aimUntil = Date.now() + 700
@@ -132,6 +142,7 @@ Item {
     }
     function glide(y: real): void {
         const to = Math.max(0, Math.min(centre.contentHeight - centre.height, y))
+        root.heldY = to
         if (glider.running && Math.abs(glider.to - to) < 2) return
         if (!glider.running && Math.abs(centre.contentY - to) < 2) return
         glider.stop()
@@ -148,6 +159,22 @@ Item {
             if (root.flashPath.length > 0) { root.placeRow(); return }
             if (root.aimed.length > 0) root.showGroup(root.aimed)
         }
+    }
+
+    // A new picture for the person (the side column's or Home's own face): the shell's picker, then the account's.
+    function chooseAvatar(): void { avatarPicker.open() }
+    FilePickerDialog {
+        id: avatarPicker
+        title: Translation.tr("Profile picture")
+        nameFilters: [Translation.tr("Images") + " (*.png *.jpg *.jpeg *.webp *.bmp *.avif)"]
+        onAccepted: {
+            setAvatar.command = [Quickshell.shellPath("scripts/accounts/set-avatar.sh"), FileUtils.trimFileProtocol(String(avatarPicker.selectedFile))]
+            setAvatar.running = true
+        }
+    }
+    Process {
+        id: setAvatar
+        onExited: exitCode => { if (exitCode === 0) Directories.userAvatarRevision++ }
     }
 
     function focusSearch(): void { sidebar.search.input.forceActiveFocus() }
@@ -201,7 +228,7 @@ Item {
 
     Connections {
         target: PrismState
-        function onPageChanged() { glider.stop(); root.aimed = ""; centre.contentY = 0; IrisOptions.settle() }
+        function onPageChanged() { glider.stop(); root.aimed = ""; root.held = ""; centre.contentY = 0; IrisOptions.settle() }
         // A search reads from its top: the best hits and the places they name come first.
         function onQueryChanged() { glider.stop(); root.aimed = ""; centre.contentY = 0 }
         // A group asked for (a search place, a request "section/group") comes into sight once the page is laid out.
@@ -210,7 +237,7 @@ Item {
     Timer {
         id: groupLater
         interval: 40
-        onTriggered: if (root.flashPath.length === 0 && root.group.length > 0) root.showGroup(root.group)
+        onTriggered: if (root.flashPath.length === 0 && root.group.length > 0) root.markGroup(root.group)
     }
 
     readonly property bool watching: root.active && root.visible
@@ -239,8 +266,19 @@ Item {
     // The open page's parts for the sidebar, and those on screen now (a line of cards holds one or two).
     readonly property var subsections: root.home || PrismState.searching || root.hosted ? [] : root.sections.map(section => String(section.title))
     property var reading: []
+    // A group pressed in the sidebar is the one read while the page rests where it glided to; a scroll away lets the
+    // page say again what is on screen (a short card used to hand the mark to its neighbour under the reading line).
+    property string held: ""
+    property real heldY: -1
     function readNow(): void {
         if (root.subsections.length < 2 || !shelf.visible) { if (root.reading.length > 0) root.reading = []; return }
+        if (root.held.length > 0) {
+            if (glider.running || Math.abs(centre.contentY - root.heldY) < PrismTheme.dp(24)) {
+                if (root.reading.join("|") !== root.held) root.reading = [root.held]
+                return
+            }
+            root.held = ""
+        }
         const top = centre.contentY + centre.height * 0.32
         const atEnd = centre.contentY >= centre.contentHeight - centre.height - 2
         let best = null
@@ -274,7 +312,7 @@ Item {
             reading: root.reading
             onReach: row => root.reach(row)
             onSearchEntered: root.takeFirstHit()
-            onPickGroup: title => root.showGroup(title)
+            onPickGroup: title => root.markGroup(title)
         }
 
         PrismAside {
@@ -289,6 +327,7 @@ Item {
             pageId: root.pageId
             everywhere: root.home || PrismState.searching
             onReach: row => root.reach(row)
+            onPictureAsked: root.chooseAvatar()
         }
 
         Flickable {
@@ -329,6 +368,7 @@ Item {
                     restorable: !PrismState.searching && !root.asideOpen && PrismModel.restorableOf(root.pageId) > 0
                     onAction: id => root.act(id)
                     onRestore: PrismModel.restore(root.pageId)
+                    onPictureAsked: root.chooseAvatar()
                 }
                 Item { width: 1; height: PrismTheme.dp(20) }
                 Loader {

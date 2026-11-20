@@ -13,7 +13,11 @@ Singleton {
 
     readonly property bool light: IrisStyle.light
     readonly property real density: IrisStyle.settingsDensity
-    function dp(value: real): real { return Math.round(value * root.density) }
+    // Prism's own measure (his 11-19: "todo es demasiado grande"): every distance inside the panel a step under iRiS's
+    // density, so a page holds more at a calmer size. The window itself keeps its room (`room`).
+    readonly property real fine: 0.88
+    function dp(value: real): real { return Math.round(value * root.density * root.fine) }
+    function room(value: real): real { return Math.round(value * root.density) }
 
     // The panel's material follows iRiS's glass (Settings › Glass, his 11-16): Blur lays a veil of the canvas over what
     // the compositor blurs behind the panel, Glass blurs the wallpaper inside it, Off is the solid canvas. A window
@@ -64,8 +68,9 @@ Singleton {
     readonly property color fillPress: root.light ? Qt.rgba(0, 0, 0, 0.11) : Qt.rgba(1, 1, 1, 0.13) // iris-literal: Prism's own fills and scrims, scheme-aware above
 
     readonly property color ink: root.light ? "#1d1d1f" : "#ffffff" // iris-literal: Prism's text, Apple's label colours
-    readonly property color ink2: root.light ? "#6e6e73" : "#a6a6ad" // iris-literal: secondary label
-    readonly property color ink3: root.light ? "#8e8e93" : "#6e6e75" // iris-literal: tertiary label, numbers, headers
+    // Each step still reads at 4.5:1 on the card (his 11-19: legibility): what a row does, then captions and numbers.
+    readonly property color ink2: root.light ? "#636368" : "#b2b2b9" // iris-literal: secondary label
+    readonly property color ink3: root.light ? "#7a7a80" : "#86868e" // iris-literal: tertiary label, numbers, headers
     readonly property color inkNav: root.light ? "#3a3a3c" : "#d6d6db" // iris-literal: a page's name in the sidebar, near the text (omusic-app)
 
     // The reference's white controls: a white pill on dark, its ink black; in light the same idea inverted.
@@ -165,15 +170,16 @@ Singleton {
     // The type ladder, in px at density 1: caption, small, body, row, head, title, display. Each step reads apart from
     // the next in size or weight: a page's name (display) over its groups' names (head) over a row's name (row, Medium)
     // over what the row does (small, ink2). Long languages wrap a row or shrink a page's name to its width; nothing is cut.
-    readonly property real caption: 11 * IrisStyle.typeScale
-    readonly property real small: 12.5 * IrisStyle.typeScale
-    readonly property real body: 13.5 * IrisStyle.typeScale
-    readonly property real row: 14.5 * IrisStyle.typeScale
-    readonly property real head: 18 * IrisStyle.typeScale
-    readonly property real title: 30 * IrisStyle.typeScale
-    readonly property real display: 40 * IrisStyle.typeScale
+    // A desktop settings app's sizes (his 11-19: everything was too big): a row's name at 13.5, what it does at 11.5.
+    readonly property real caption: 10.5 * IrisStyle.typeScale
+    readonly property real small: 11.5 * IrisStyle.typeScale
+    readonly property real body: 12.5 * IrisStyle.typeScale
+    readonly property real row: 13.5 * IrisStyle.typeScale
+    readonly property real head: 16 * IrisStyle.typeScale
+    readonly property real title: 24 * IrisStyle.typeScale
+    readonly property real display: 32 * IrisStyle.typeScale
     // A page's name on its poster (the posters' titles: one big word over the art's calm floor).
-    readonly property real poster: 52 * IrisStyle.typeScale
+    readonly property real poster: 44 * IrisStyle.typeScale
 
     readonly property bool motion: IrisStyle.motionEnabled
     // Settings window › Motion speed: how fast the panel opens and closes.

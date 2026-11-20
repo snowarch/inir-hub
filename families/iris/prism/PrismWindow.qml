@@ -77,9 +77,9 @@ PanelWindow {
 
     PrismPanel {
         id: panel
-        readonly property real band: IrisFrame.band + PrismTheme.dp(24)
-        width: PrismState.wide ? root.width - band * 2 : Math.min(root.width - band * 2, PrismTheme.dp(1280))
-        height: PrismState.wide ? root.height - band * 2 : Math.min(root.height - band * 2, PrismTheme.dp(840))
+        readonly property real band: IrisFrame.band + PrismTheme.room(24)
+        width: PrismState.wide ? root.width - band * 2 : Math.min(root.width - band * 2, PrismTheme.room(1280))
+        height: PrismState.wide ? root.height - band * 2 : Math.min(root.height - band * 2, PrismTheme.room(840))
         anchors.centerIn: parent
         opacity: PrismTheme.glassBlur && GlobalStates.settingsOverlayOpen ? 1 : shown.opacity
         scale: GlobalStates.settingsOverlayOpen ? 1 : 0.97

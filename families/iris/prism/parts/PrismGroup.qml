@@ -29,6 +29,19 @@ Item {
     readonly property bool backed: root.headed && (Array.from(root.entry?.rows ?? []).length > 2 || root.lined)
     readonly property var bodyRows: root.headed ? head.bodyRows : Array.from(root.entry?.rows ?? [])
 
+    // Asked for by name (the sidebar, a search): the front warms with the person's accent a moment, then rests.
+    property real glow: 0
+    function flash(): void { glowing.restart() }
+    SequentialAnimation {
+        id: glowing
+        NumberAnimation { target: root; property: "glow"; to: 1; duration: PrismTheme.ms(260); easing.type: Easing.OutCubic }
+        // Held even with motion off: the mark then comes and goes at once, but still long enough to be seen.
+        PauseAnimation { duration: 900 }
+        NumberAnimation { target: root; property: "glow"; to: 0; duration: PrismTheme.ms(900); easing.type: Easing.InOutQuad }
+    }
+    readonly property color face: root.glow > 0 ? Qt.tint(PrismTheme.card, Qt.alpha(PrismTheme.accent, PrismTheme.accentPlate.a * 1.6 * root.glow))
+        : PrismTheme.card
+
     readonly property real r: PrismTheme.cardRadius
     readonly property real pad: PrismTheme.dp(20)
     // The back sheet's tab stands this far over the rest of its edge; the front starts a little under the back's low
@@ -104,13 +117,13 @@ Item {
         rise: root.frontRise
         slope: root.slope
         radius: root.r
-        fill: PrismTheme.card
+        fill: root.face
     }
     Rectangle {
         visible: !root.headed
         anchors.fill: parent
         radius: root.r
-        color: PrismTheme.card
+        color: root.face
     }
 
     PrismGroupHead {
@@ -123,6 +136,7 @@ Item {
         // The name sits in the tab; the line under it is already on the body, so it runs the folder's width.
         lineWidth: root.width - 2 * root.pad
         size: PrismTheme.head
+        glow: root.glow
         entry: root.entry
     }
     PrismSection {

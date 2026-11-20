@@ -19,9 +19,9 @@ FloatingWindow {
     Binding { target: root; property: "visible"; value: GlobalStates.settingsOverlayOpen }
     surfaceFormat: ({ opaque: false })
     color: PrismTheme.glassBlur ? "transparent" : PrismTheme.canvas
-    implicitWidth: PrismTheme.dp(1280)
-    implicitHeight: PrismTheme.dp(840)
-    minimumSize: Qt.size(PrismTheme.dp(760), PrismTheme.dp(520))
+    implicitWidth: PrismTheme.room(1280)
+    implicitHeight: PrismTheme.room(840)
+    minimumSize: Qt.size(PrismTheme.room(760), PrismTheme.room(520))
     onClosed: GlobalStates.settingsOverlayOpen = false
 
     readonly property var niriWindow: {

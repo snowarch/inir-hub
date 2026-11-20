@@ -4,7 +4,8 @@ import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 
 // One sidebar line: glyph and name. The open page is the one thing in the list that wears the person's accent: a quiet
-// plate of it, its glyph in the accent's ink and its name in full ink. Pointed, a line takes Prism's quiet fill.
+// plate of it, its glyph in the accent's ink and its name in full ink, a step larger than its neighbours (his 11-19: "un
+// pequeño zoom"), so where you stand reads from across the room. Pointed, a line takes Prism's quiet fill.
 Item {
     id: root
     property string glyph: "circle"
@@ -14,7 +15,8 @@ Item {
     signal clicked()
     signal trailingClicked()
 
-    implicitHeight: PrismTheme.dp(34)
+    implicitHeight: root.current ? PrismTheme.dp(38) : PrismTheme.dp(34)
+    Behavior on implicitHeight { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
     readonly property bool pointed: area.containsMouse || tailArea.containsMouse
 
     Rectangle {
@@ -29,7 +31,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: root.glyph
         filled: root.current
-        iconSize: PrismTheme.dp(18)
+        iconSize: root.current ? PrismTheme.dp(20) : PrismTheme.dp(18)
         color: root.current ? PrismTheme.accentInk : root.pointed ? PrismTheme.ink : PrismTheme.ink2
     }
     PrismText {
@@ -39,8 +41,9 @@ Item {
         anchors.rightMargin: PrismTheme.dp(8)
         anchors.verticalCenter: parent.verticalCenter
         text: root.text
-        font.pixelSize: PrismTheme.body
+        font.pixelSize: root.current ? PrismTheme.row : PrismTheme.body
         font.weight: root.current ? Font.DemiBold : Font.Normal
+        font.letterSpacing: root.current ? -PrismTheme.row * 0.01 : 0
         color: root.current || root.pointed ? PrismTheme.ink : PrismTheme.inkNav
     }
     PrismGlyph {

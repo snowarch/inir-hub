@@ -151,16 +151,19 @@ Item {
                     id: group
                     required property string modelData
                     readonly property var pages: PrismModel.inGroup(group.modelData)
+                    // The caption over the open page wears the accent's ink: where you stand, at two levels.
+                    readonly property bool here: !PrismState.searching && group.pages.some(page => page.pageId === PrismState.page)
                     width: column.width
                     PrismText {
                         topPadding: PrismTheme.dp(18)
                         bottomPadding: PrismTheme.dp(6)
                         leftPadding: PrismTheme.dp(10)
                         text: Translation.tr(group.modelData)
-                        color: PrismTheme.ink3
-                        font.pixelSize: PrismTheme.caption
+                        color: group.here ? PrismTheme.accentInk : PrismTheme.ink3
+                        font.pixelSize: PrismTheme.small
                         font.weight: Font.DemiBold
-                        font.letterSpacing: PrismTheme.caption * 0.05
+                        font.letterSpacing: PrismTheme.small * 0.02
+                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
                     }
                     Repeater {
                         model: group.pages
@@ -230,9 +233,10 @@ Item {
                                                 width: parent.width - x - PrismTheme.dp(8)
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 text: Translation.tr(part.modelData)
-                                                color: part.here || partArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
-                                                font.pixelSize: PrismTheme.small
-                                                font.weight: part.here ? Font.Medium : Font.Normal
+                                                color: part.here ? PrismTheme.accentInk : partArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+                                                font.pixelSize: PrismTheme.body
+                                                font.weight: part.here ? Font.DemiBold : Font.Normal
+                                                Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
                                                 wrapMode: Text.WordWrap
                                                 maximumLineCount: 2
                                                 elide: Text.ElideRight

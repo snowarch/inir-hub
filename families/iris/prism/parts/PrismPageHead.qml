@@ -29,6 +29,7 @@ Item {
     property bool restorable: false
     signal action(string id)
     signal restore()
+    signal pictureAsked()
 
     readonly property real pad: PrismTheme.dp(24)
     // Tall enough for the name to stand on the art's floor, no taller: the page's first setting stays in the first half.
@@ -63,7 +64,8 @@ Item {
         y: PrismTheme.dp(20)
         width: root.width * 0.5
         text: root.eyebrow
-        color: PrismTheme.ink2
+        // Where the page lives, in the accent's ink: the one coloured word on the head.
+        color: PrismTheme.accentInk
         font.pixelSize: PrismTheme.small
         font.weight: Font.DemiBold
         font.letterSpacing: PrismTheme.small * 0.04
@@ -84,7 +86,30 @@ Item {
                 id: avatar
                 visible: root.person
                 anchors.verticalCenter: parent.verticalCenter
-                implicitWidth: PrismTheme.dp(52)
+                implicitWidth: PrismTheme.dp(56)
+                // Pointed, the picture offers a new one.
+                Rectangle {
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: PrismTheme.spotScrim
+                    opacity: avatarArea.containsMouse ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+                    PrismGlyph {
+                        anchors.centerIn: parent
+                        text: "photo_camera"
+                        iconSize: PrismTheme.dp(20)
+                        color: PrismTheme.paper
+                    }
+                }
+                MouseArea {
+                    id: avatarArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
+                    Accessible.name: Translation.tr("Profile picture")
+                    onClicked: root.pictureAsked()
+                }
             }
             PrismText {
                 width: parent.width - (avatar.visible ? avatar.width + parent.spacing : 0)

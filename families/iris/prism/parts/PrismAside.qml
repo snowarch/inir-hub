@@ -20,10 +20,12 @@ Item {
     // Home and a search list every change, each with its page.
     property bool everywhere: false
     signal reach(var row)
+    signal pictureAsked()
 
     readonly property var changes: {
         const all = Array.from(PrismModel.changes)
-        return root.everywhere ? all : all.filter(row => row.page === root.pageId)
+        // Home and a search: no list of every change (his 11-19: bloat); each page keeps its own.
+        return root.everywhere ? [] : all.filter(row => row.page === root.pageId)
     }
     readonly property bool restorable: !root.everywhere && PrismModel.restorableOf(root.pageId) > 0
     readonly property real pad: PrismTheme.dp(14)
@@ -36,7 +38,7 @@ Item {
         layout: /center-column|switch-preset-column-width|consume-or-expel-window-left/
     })
     readonly property var keys: {
-        const match = root.keyMatch[root.everywhere ? "general" : root.pageId]
+        const match = root.everywhere ? undefined : root.keyMatch[root.pageId]
         if (!match) return []
         const seen = {}
         const out = []
@@ -50,7 +52,7 @@ Item {
         return out
     }
     // The compositor's binds are read once, the first time a page with keys of its own opens.
-    readonly property bool wantsKeys: root.active && root.keyMatch[root.everywhere ? "general" : root.pageId] !== undefined
+    readonly property bool wantsKeys: root.active && !root.everywhere && root.keyMatch[root.pageId] !== undefined
     onWantsKeysChanged: if (root.wantsKeys && (NiriKeybinds.allBinds ?? []).length === 0) NiriKeybinds.reload()
     Component.onCompleted: if (root.wantsKeys && (NiriKeybinds.allBinds ?? []).length === 0) NiriKeybinds.reload()
     // iNiR's own verbs said as a person would; any other bind keeps its own description.
@@ -86,16 +88,15 @@ Item {
         }))
     }
 
-    // What changed, gathered: by page on Home and in a search, by group on a page. One line each: the name, and what it
-    // holds now at the line's end, which gives way to its own restore while pointed.
+    // What changed on the page, gathered by group. One line each: the name, and what it holds now at the line's end,
+    // which gives way to its own restore while pointed.
     readonly property var sections: {
         const out = []
         for (const row of root.changes) {
-            const page = PrismModel.page(row.page) ?? {}
-            const title = root.everywhere ? String(page.name ?? "") : String(row.section ?? "")
+            const title = String(row.section ?? "")
             let at = out.find(section => section.key === title)
             if (!at) {
-                at = { key: title, title: title, glyph: root.everywhere ? String(page.glyph ?? "") : "", rows: [] }
+                at = { key: title, title: title, glyph: "", rows: [] }
                 out.push(at)
             }
             at.rows.push(row)
@@ -111,52 +112,85 @@ Item {
         return String(IrisOptions.sectionById(root.pageId)?.tip ?? "")
     }
     // One group on a page needs no caption: the page already says where it is.
-    readonly property bool captioned: root.everywhere || root.sections.length > 1
+    readonly property bool captioned: root.sections.length > 1
 
-    // The window's own keys head the column (PrismPanel's chrome); its own head starts under them.
+    // Whoever sits here, under the window's keys (his 11-19: "algo de usuario"): their picture (a press gives it a new
+    // one), their name and the day; the bell silences notifications. Then the page they read: what they changed on it,
+    // its keys and how its thing is used. What is playing at the foot.
     Item {
-        id: head
+        id: person
         x: root.pad
-        y: PrismTheme.dp(58)
+        y: PrismTheme.dp(60)
         width: root.width - 2 * root.pad
-        height: PrismTheme.dp(28)
-        PrismText {
-            anchors.left: parent.left
-            anchors.right: back.visible ? back.left : parent.right
-            anchors.rightMargin: PrismTheme.dp(10)
+        height: PrismTheme.dp(52)
+        PrismAvatar {
+            id: face
             anchors.verticalCenter: parent.verticalCenter
-            text: root.everywhere ? Translation.tr("Your changes") : Translation.tr("Changed here")
-            font.pixelSize: PrismTheme.row
-            font.weight: Font.DemiBold
-            font.letterSpacing: -PrismTheme.row * 0.01
-            elide: Text.ElideRight
-        }
-        // The page back to iNiR's, in one change Ctrl+Z takes back.
-        PrismText {
-            id: back
-            visible: root.restorable
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            text: Translation.tr("Restore all")
-            color: backArea.containsMouse ? PrismTheme.ink : PrismTheme.accentInk
-            font.pixelSize: PrismTheme.small
-            font.weight: Font.DemiBold
-            MouseArea {
-                id: backArea
+            implicitWidth: PrismTheme.dp(46)
+            // Pointed, the picture offers a new one.
+            Rectangle {
                 anchors.fill: parent
-                anchors.margins: -PrismTheme.dp(6)
+                radius: width / 2
+                color: PrismTheme.spotScrim
+                opacity: faceArea.containsMouse ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+                PrismGlyph {
+                    anchors.centerIn: parent
+                    text: "photo_camera"
+                    iconSize: PrismTheme.dp(18)
+                    color: PrismTheme.paper
+                }
+            }
+            MouseArea {
+                id: faceArea
+                anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 Accessible.role: Accessible.Button
-                Accessible.name: back.text
-                onClicked: PrismModel.restore(root.pageId)
+                Accessible.name: Translation.tr("Profile picture")
+                onClicked: root.pictureAsked()
             }
+        }
+        Column {
+            anchors.left: face.right
+            anchors.leftMargin: PrismTheme.dp(12)
+            anchors.right: bell.left
+            anchors.rightMargin: PrismTheme.dp(8)
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: PrismTheme.dp(2)
+            PrismText {
+                width: parent.width
+                text: face.name
+                font.pixelSize: PrismTheme.row
+                font.weight: Font.DemiBold
+                font.letterSpacing: -PrismTheme.row * 0.01
+            }
+            PrismText {
+                width: parent.width
+                readonly property string temp: Weather.enabled ? String(Weather.data?.temp ?? "") : ""
+                text: Translation.locale.toString(DateTime.clock.date, "dddd d MMM")
+                    + (temp.length > 0 && !temp.startsWith("-") ? "  ·  " + temp : "")
+                color: PrismTheme.ink2
+                font.pixelSize: PrismTheme.small
+            }
+        }
+        PrismRound {
+            id: bell
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            implicitWidth: PrismTheme.dp(32)
+            ghost: !Notifications.silent
+            lit: Notifications.silent
+            glyph: Notifications.silent ? "notifications_off" : "notifications"
+            glyphSize: PrismTheme.dp(17)
+            Accessible.name: Translation.tr("Do Not Disturb")
+            onClicked: Config.setNestedValue("notifications.silent", !Notifications.silent)
         }
     }
 
     Flickable {
         id: scroll
-        y: head.y + head.height + PrismTheme.dp(4)
+        y: person.y + person.height + PrismTheme.dp(20)
         width: root.width
         height: (player.visible ? player.y - PrismTheme.dp(14) : root.height - PrismTheme.dp(22)) - y
         contentHeight: stack.implicitHeight
@@ -168,36 +202,40 @@ Item {
             width: root.width - 2 * root.pad
             spacing: 0
 
-            // Nothing changed: said once, quietly, with where changes will show.
-            Row {
-                visible: root.changes.length === 0
+            // What was changed on this page, only while something was: its name and, at its end, the page back to iNiR's
+            // in one change Ctrl+Z takes back.
+            Item {
+                visible: root.changes.length > 0
                 width: parent.width
-                topPadding: PrismTheme.dp(6)
-                spacing: PrismTheme.dp(10)
-                PrismGlyph {
-                    id: calm
-                    text: "task_alt"
-                    iconSize: PrismTheme.dp(18)
-                    color: PrismTheme.ink3
+                height: PrismTheme.dp(30)
+                PrismText {
+                    anchors.left: parent.left
+                    anchors.right: back.visible ? back.left : parent.right
+                    anchors.rightMargin: PrismTheme.dp(10)
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Translation.tr("Changed here")
+                    font.pixelSize: PrismTheme.row
+                    font.weight: Font.DemiBold
+                    font.letterSpacing: -PrismTheme.row * 0.01
                 }
-                Column {
-                    width: parent.width - calm.width - parent.spacing
-                    spacing: PrismTheme.dp(3)
-                    PrismText {
-                        width: parent.width
-                        text: root.everywhere ? Translation.tr("Everything is as iNiR ships it.") : Translation.tr("As iNiR ships it")
-                        color: PrismTheme.ink2
-                        font.pixelSize: PrismTheme.body
-                        wrapMode: Text.WordWrap
-                        maximumLineCount: 2
-                    }
-                    PrismText {
-                        width: parent.width
-                        text: root.everywhere ? Translation.tr("What you change shows up here.") : Translation.tr("What you change on this page shows up here.")
-                        color: PrismTheme.ink3
-                        font.pixelSize: PrismTheme.small
-                        wrapMode: Text.WordWrap
-                        maximumLineCount: 3
+                PrismText {
+                    id: back
+                    visible: root.restorable
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Translation.tr("Restore all")
+                    color: backArea.containsMouse ? PrismTheme.ink : PrismTheme.accentInk
+                    font.pixelSize: PrismTheme.small
+                    font.weight: Font.DemiBold
+                    MouseArea {
+                        id: backArea
+                        anchors.fill: parent
+                        anchors.margins: -PrismTheme.dp(6)
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        Accessible.role: Accessible.Button
+                        Accessible.name: back.text
+                        onClicked: PrismModel.restore(root.pageId)
                     }
                 }
             }
@@ -307,7 +345,7 @@ Item {
             Column {
                 visible: root.keys.length > 0
                 width: parent.width
-                topPadding: PrismTheme.dp(28)
+                topPadding: root.changes.length > 0 ? PrismTheme.dp(24) : 0
                 spacing: 0
                 PrismText {
                     width: parent.width
@@ -388,7 +426,7 @@ Item {
             Row {
                 visible: root.tip.length > 0
                 width: parent.width
-                topPadding: PrismTheme.dp(28)
+                topPadding: root.changes.length > 0 || root.keys.length > 0 ? PrismTheme.dp(24) : PrismTheme.dp(4)
                 spacing: PrismTheme.dp(10)
                 PrismGlyph {
                     id: bulb
@@ -414,7 +452,8 @@ Item {
         visible: player.playing
         x: root.pad
         width: root.width - 2 * root.pad
-        height: Math.max(PrismTheme.dp(200), Math.min(width, root.height * 0.36))
+        // The cover as itself: square while the column is tall enough, never under a third of it.
+        height: Math.max(PrismTheme.dp(220), Math.min(width * 1.08, root.height * 0.46))
         y: root.height - PrismTheme.dp(22) - height
         active: root.active && root.visible
     }
