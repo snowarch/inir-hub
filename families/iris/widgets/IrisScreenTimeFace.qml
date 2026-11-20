@@ -137,7 +137,7 @@ IrisWidgetFace {
 
     // Ribbon: the day as one strip of 24 hours, each hour the colour of the app that held it, an unbroken run where one
     // app held on. It shows what the curve can't: which part of the day went where.
-    readonly property var ribbonTints: [root.accent, root.warm, root.accent2, root.highlight]
+    readonly property var ribbonTints: [root.accent, root.accent2, root.highlight, root.inkSecondary]
     function ribbonTint(rank: int): color {
         return rank < root.ribbonTints.length ? root.ribbonTints[rank] : root.inkTertiary
     }

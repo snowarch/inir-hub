@@ -34,7 +34,7 @@ JsonObject {
         property int radius: 22
         property int opacity: 100
         property string tint: "wallpaper" // accents: "wallpaper", "system" (iRiS), "spectrum" or "mono"
-        property int vibrance: 85 // how strong widget accents are (0-100)
+        property int vibrance: 60 // how strong widget accents are (0-100)
         property bool legibleAlways: false // Lume backs every widget as if the wallpaper under it were bright and busy
         property string design: "iris" // "iris" faces, "prism", "material" (each widget's own style), "instrument" or "readout"
         property string material: "glass" // "glass", "clear", "solid" or "tinted"
@@ -127,9 +127,9 @@ JsonObject {
         // widgets is how colourful the desktop widgets read (40..160 %); warmth (0..100) is how much washi fibre the paper
         // (or Dark's ink night) carries.
         property JsonObject tune: JsonObject {
-            property JsonObject dark: JsonObject { property int tone: 0; property int warmth: 20; property int colour: 100; property int widgets: 100 }
-            property JsonObject ink: JsonObject { property int tone: 0; property int warmth: 50; property int colour: 100; property int widgets: 100 }
-            property JsonObject light: JsonObject { property int tone: -8; property int warmth: 38; property int colour: 85; property int widgets: 110 }
+            property JsonObject dark: JsonObject { property int tone: 0; property int warmth: 20; property int colour: 100; property int widgets: 90 }
+            property JsonObject ink: JsonObject { property int tone: 0; property int warmth: 50; property int colour: 100; property int widgets: 90 }
+            property JsonObject light: JsonObject { property int tone: -8; property int warmth: 38; property int colour: 85; property int widgets: 85 }
         }
         property string highlight: "orange" // "orange", "yellow", "red", "pink", "green", "accent" or "wallpaper"
         property JsonObject anime: JsonObject {

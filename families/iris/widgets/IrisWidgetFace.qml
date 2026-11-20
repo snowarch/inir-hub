@@ -65,12 +65,16 @@ Item {
     // In the light scheme a plate is light, so its ink is the dark one; a bare widget still follows the wallpaper.
     // A glass face is the shell's material in every scheme, veiled as reading needs: turning it white over a bright region
     // left white cards among a dark shell. Only a transparent face, which has no material, follows the wallpaper.
-    readonly property bool lightBackdrop: IrisStyle.light && !root.clear ? true : root.clear ? root.widget.inkOnLight
-        : root.widget.forceDarkInk
-    readonly property bool ownInk: root.lightBackdrop || (IrisStyle.light && root.clear) || root.stockInk
+    readonly property bool lightBackdrop: root.widget.forceDarkInk ? true
+        : root.widget.forceLightInk ? false
+        : IrisStyle.light && !root.clear ? true
+        : root.clear ? root.widget.inkOnLight
+        : root.glass ? root.widget.glassInkOnLight
+        : false
+    readonly property bool ownInk: root.lightBackdrop !== IrisStyle.light || root.lightBackdrop || root.stockInk
     // A paper scheme's face is the shell's paper with the shell's own ink and accents, as the quick-controls sheet is;
     // the light-backdrop path (white frost, accents deepened to 0.3-0.4 lightness) turned orange brown there.
-    readonly property bool paper: IrisStyle.light && !root.clear
+    readonly property bool paper: IrisStyle.light && !root.clear && root.lightBackdrop
     readonly property real textShadow: root.clear ? 1
         : root.glass && !root.widget.legibleAlways ? Math.min(1, (1 - root.strength) * 1.4) : 0
     // Background off means no plate, Lume on every widget or not: there it only deepens the text's shadow (10-25).
@@ -90,15 +94,15 @@ Item {
     readonly property real frostLevel: root.widget.legibleAlways ? Math.min(0.5, root.widget.regionBrightness) : root.widget.regionBrightness
     readonly property real readSpread: root.widget.legibleAlways ? Math.max(0.24, root.widget.regionBrightnessSpread) : root.widget.regionBrightnessSpread
 
-    // One palette: the widget's data colours and the shell's status colours. Only a face that is not paper and sits over a
-    // light region (a transparent face, or forced dark ink), or a light scheme's bare face over a dark one (its accents are
-    // deep for paper), solves them again, against what Lume read behind it.
-    readonly property bool resolvesMarks: root.lightBackdrop ? !root.paper : IrisStyle.light && root.clear
+    // One palette, solved for the face's actual backdrop polarity (light paper vs dark glass vs bare over any wallpaper).
+    // Bare faces over a mid-tone or busy patch are lifted by Lume to 4.5:1 so headings and figures never sink into it.
+    readonly property bool resolvesMarks: root.clear || (root.lightBackdrop && !root.paper)
     readonly property real seenLevel: root.clear ? root.widget.regionBrightness
         : root.widget.regionBrightness * (1 - root.veil) + Math.pow(ColorUtils.relativeLuminance(IrisStyle.frost), 1 / 2.2) * root.veil
     function mark(seed: color): color {
-        return root.resolvesMarks ? Lume.mark(seed, root.seenLevel, root.clear ? root.readSpread : 0, root.lightBackdrop, 3) : seed
+        return root.resolvesMarks ? Lume.mark(seed, root.seenLevel, root.clear ? root.readSpread : 0, root.lightBackdrop, root.clear ? 4.5 : 3) : seed
     }
+    readonly property var facePalette: root.widget.look.paletteFor(root.lightBackdrop)
     // A Design's stock brings its own pigments for the data.
     readonly property bool stockInk: root.stocked && !root.clear && stockLoader.item !== null
     // Nothing worn on the desktop (DESIGN.md S1-S2): a monochrome face, ink levels for the data, the signal for the one
@@ -107,20 +111,25 @@ Item {
     // As text it must read (4.5:1 on the face), as a mark the pure red is enough; one token keeps both legible.
     readonly property color signal: root.mark(IrisStyle.signalInk)
     function inked(seed: color): color { return root.nothing ? root.ink : seed }
-    // A heading in the highlight; under Nothing it is ink, so the signal is left for the face's one live value.
-    readonly property color heading: root.nothing ? root.ink : root.highlight
-    readonly property color accent: root.nothing ? root.ink : root.stockInk ? stockLoader.item.accent : root.mark(root.widget.look.accent)
-    readonly property color highlight: root.nothing ? root.signal : root.stockInk ? stockLoader.item.ink : root.mark(root.widget.look.accent3)
-    readonly property color accent2: root.nothing ? root.inkSecondary : root.stockInk ? stockLoader.item.accent2 : root.mark(root.widget.look.accent2)
-    readonly property color warm: root.nothing ? root.ink : root.mark(IrisStyle.secondaryAccent)
-    readonly property color danger: root.nothing ? root.signal : root.mark(IrisStyle.danger)
+    // Every widget's primary header and lead mark share `accent`, so sibling cards read as one desk.
+    readonly property color heading: root.nothing ? root.ink : root.accent
+    readonly property color accent: root.nothing ? root.ink : root.stockInk ? stockLoader.item.accent : root.mark(root.facePalette[0])
+    readonly property color highlight: root.nothing ? root.signal : root.stockInk ? stockLoader.item.ink : root.mark(root.facePalette[2])
+    readonly property color accent2: root.nothing ? root.inkSecondary : root.stockInk ? stockLoader.item.accent2 : root.mark(root.facePalette[1])
+    readonly property color warm: root.nothing ? root.ink
+        : root.stockInk ? stockLoader.item.accent
+        : root.widget.look.paletteName === "mono" ? root.accent2
+        : root.widget.look.paletteName === "wallpaper" ? root.accent
+        : root.mark(IrisStyle.widgetRoleFor("highlight", root.lightBackdrop, IrisStyle.secondaryAccent))
+    readonly property color danger: root.nothing ? root.signal : root.mark(IrisStyle.widgetRoleFor("danger", root.lightBackdrop, IrisStyle.danger))
     // Every colour a face wears is one of these roles, from the widget palette the person picked (`iris.widgets.tint`):
-    // accent is the widget's own, accent2 and highlight a second and third series, warm the person's highlight for
-    // daylight and charge, danger only past a limit. A face never picks a hue of its own: a pink player, a yellow note
-    // and an indigo screen time side by side read as three apps, not one desk (his 11-11 "coherencia visual en todo").
+    // accent is the widget's own, accent2 and highlight a second and third series, warm stays inside the wallpaper or
+    // mono palette (or wears the highlight in system/spectrum), danger only past a limit.
     function skyOf(glyph: string): color {
         return glyph === "clear_day" ? root.warm
-            : ["bedtime", "partly_cloudy_night", "thunderstorm"].includes(glyph) ? root.accent2 : root.accent
+            : ["bedtime", "partly_cloudy_night", "thunderstorm"].includes(glyph)
+                ? (root.nothing ? root.inkSecondary : ColorUtils.mix(root.accent, root.inkSecondary, 0.72))
+            : root.accent
     }
     readonly property color ink: root.stockInk ? stockLoader.item.ink : root.paper ? IrisStyle.text : root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.light ? IrisStyle.inkOnDark : IrisStyle.text
     readonly property color inkSecondary: IrisStyle.secondaryOf(root.ink)
@@ -144,9 +153,11 @@ Item {
         && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
     readonly property bool flatRim: root.rimShown && !root.glassEdge
         && !(root.glass && !root.lightBackdrop && root.widget.look.outline(root.widget) === "auto")
-    readonly property color plateColor: ColorUtils.applyAlpha(root.opaque ? root.widget.look.plate(root.widget)
-        : root.lightBackdrop && !root.paper ? IrisStyle.frost : IrisStyle.surface, root.veil)
-    readonly property color knockout: root.opaque ? root.plateColor : root.lightBackdrop && !root.paper ? IrisStyle.frost : IrisStyle.surface
+    readonly property color plateBase: root.lightBackdrop && !root.paper ? IrisStyle.frost
+        : !root.lightBackdrop && IrisStyle.light ? IrisStyle.darkSurfaceOpaque
+        : root.opaque ? root.widget.look.plate(root.widget) : IrisStyle.surface
+    readonly property color plateColor: ColorUtils.applyAlpha(root.plateBase, root.veil)
+    readonly property color knockout: root.opaque ? root.plateColor : root.plateBase
 
     // In a stack the plate stays and the pages' contents slide over it (DesktopWidgetStacks).
     readonly property bool stacked: root.widget.stacked

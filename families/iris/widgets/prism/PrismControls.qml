@@ -107,8 +107,8 @@ PrismFolder {
         muted: root.muted
         icon: root.volumeGlyph
         value: root.volume
-        fillColor: root.nothing ? root.ink : IrisStyle.appleAccentFill
-        inkOnFill: root.nothing ? IrisStyle.surface : IrisStyle.appleInkOnAccentFill
+        fillColor: root.nothing ? root.ink : root.shelf
+        inkOnFill: root.nothing ? root.knockout : root.inkOnShelf
         Accessible.name: Translation.tr("Volume")
         onMoved: next => Audio.setSinkVolume(next)
         onIconClicked: Audio.toggleMute()

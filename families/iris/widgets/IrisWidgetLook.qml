@@ -61,8 +61,9 @@ WidgetLook {
         const name = String(look.options.tint ?? "wallpaper")
         return IrisStyle.widgetPaletteNames.includes(name) ? name : "wallpaper"
     }
-    readonly property real vibrance: Math.max(0, Math.min(100, Number(look.options.vibrance ?? 85))) / 100
-    readonly property var palette: IrisStyle.widgetPalette(look.paletteName, look.vibrance)
+    readonly property real vibrance: Math.max(0, Math.min(100, Number(look.options.vibrance ?? 60))) / 100
+    function paletteFor(lightBackdrop: bool): var { return IrisStyle.widgetPaletteFor(look.paletteName, lightBackdrop) }
+    readonly property var palette: look.paletteFor(IrisStyle.light)
     readonly property color accent: look.palette[0]
     readonly property color accent2: look.palette[1]
     readonly property color accent3: look.palette[2]
@@ -137,12 +138,14 @@ WidgetLook {
     }
     function readsRegion(widget: var): bool {
         const material = look.material(widget)
-        return widget.familyFaced && (material === "glass" || material === "clear")
+        return material === "glass" || material === "clear"
     }
     function plateColor(widget: var): color {
-        return widget.familyDesign && widget.forceDarkInk ? ColorUtils.mix(IrisStyle.text, IrisStyle.accent, 0.98)
-            : widget.familyDesign && widget.forceLightInk ? IrisStyle.surface
-            : widget.widgetSemanticContainer(widget.widgetSurfaceRole)
+        const onLight = widget.forceDarkInk ? true : widget.forceLightInk ? false
+            : IrisStyle.light || (look.material(widget) === "glass" && widget.glassInkOnLight)
+        return onLight && !IrisStyle.light ? IrisStyle.frost
+            : !onLight && IrisStyle.light ? IrisStyle.darkSurfaceOpaque
+            : look.plate(widget)
     }
 
     function bodyFamily(widget: var): string { return widget.familyDesign ? IrisStyle.fontMain : Appearance.font.family.main }
@@ -166,42 +169,34 @@ WidgetLook {
     }
 
     function semanticSet(widget: var, role: string): var {
-        if (widget.familyDesign) {
-            const lifted = role === "surface" ? IrisStyle.text
-                : role === "signal" ? IrisStyle.danger
-                : role === "success" ? IrisStyle.success
-                : role === "warning" ? IrisStyle.secondaryAccent
-                : role === "tertiary" ? look.accent3
-                : role === "secondary" ? look.accent2 : look.accent
-            const onLight = widget.inkOnLight && !widget.widgetHasSurface
-            const sample = widget.widgetHasSurface || widget.regionBrightness < 0 || !look.adaptsToWallpaper ? null
-                : { level: widget.regionBrightness, spread: widget.regionBrightnessSpread }
-            const foreground = role === "surface" ? (onLight ? IrisStyle.inkOnLight : lifted)
-                : sample ? IrisStyle.markOn(lifted, sample, onLight, 3)
-                : onLight ? IrisStyle.deepAccent(lifted, IrisStyle.inkOnLight) : lifted
-            const plate = look.plate(widget)
-            return { color: foreground, onColor: IrisStyle.surface,
-                container: role === "surface" ? plate : ColorUtils.mix(plate, IrisStyle.text, 0.9),
-                onContainer: IrisStyle.text }
+        const plated = widget.widgetHasSurface
+        const onLight = plated
+            ? (widget.forceDarkInk ? true : widget.forceLightInk ? false
+                : IrisStyle.light || (look.material(widget) === "glass" && widget.glassInkOnLight))
+            : widget.inkOnLight
+        const pal = look.paletteFor(onLight)
+        const ink = onLight ? (IrisStyle.light ? IrisStyle.text : IrisStyle.inkOnLight)
+            : (IrisStyle.light ? IrisStyle.inkOnDark : IrisStyle.text)
+        const plate = onLight && !IrisStyle.light ? IrisStyle.frost
+            : !onLight && IrisStyle.light ? IrisStyle.darkSurfaceOpaque
+            : look.plate(widget)
+        if (role === "surface") {
+            return { color: plated ? ink : widget.colText,
+                onColor: onLight ? IrisStyle.inkOnDark : IrisStyle.inkOnLight,
+                container: plate, onContainer: ink }
         }
-        // Bare Material widgets under iRiS (iNstrument, Readout) draw with the same three accents as the faces. Their
-        // neutral is the ink itself and their states the Island's, never the scheme's tones, which follow the shell's
-        // mode rather than the wallpaper. With adaptation off the accents keep their hue and the Lume shadow holds them.
-        if (!widget.widgetHasSurface) {
-            const onLight = widget.inkOnLight
-            if (role === "surface")
-                return { color: widget.colText, onColor: onLight ? IrisStyle.inkOnDark : IrisStyle.inkOnLight,
-                    container: ColorUtils.mix(IrisStyle.surface, widget.colText, 0.9), onContainer: IrisStyle.text }
-            const seed = role === "signal" ? IrisStyle.dangerOnMedia : role === "warning" ? IrisStyle.highlightOnMedia
-                : role === "success" ? (IrisStyle.light ? Lume.mark(IrisStyle.success, 0.35, 0, false, 3) : IrisStyle.success)
-                : role === "tertiary" ? look.accent3 : role === "secondary" ? look.accent2 : look.accent
-            const sample = widget.regionBrightness < 0 || !look.adaptsToWallpaper ? null
-                : { level: widget.regionBrightness, spread: widget.regionBrightnessSpread }
-            const shown = sample ? IrisStyle.markOn(seed, sample, onLight, 3)
-                : onLight ? IrisStyle.deepAccent(seed, IrisStyle.inkOnLight) : seed
-            return { color: shown, onColor: IrisStyle.onTintFor(seed),
-                container: ColorUtils.mix(IrisStyle.surface, seed, 0.78), onContainer: IrisStyle.text }
-        }
-        return look.plainSet(widget, role)
+        const warmSeed = look.paletteName === "mono" ? pal[1]
+            : look.paletteName === "wallpaper" ? pal[0]
+            : IrisStyle.widgetRoleFor("highlight", onLight, IrisStyle.secondaryAccent)
+        const seed = role === "signal" ? IrisStyle.widgetRoleFor("danger", onLight, IrisStyle.danger)
+            : role === "success" ? IrisStyle.widgetRoleFor("success", onLight, IrisStyle.success)
+            : role === "warning" ? warmSeed
+            : role === "tertiary" ? pal[2]
+            : role === "secondary" ? pal[1] : pal[0]
+        const sample = plated || widget.regionBrightness < 0 ? null
+            : { level: widget.regionBrightness, spread: widget.regionBrightnessSpread }
+        const shown = sample ? IrisStyle.markOn(seed, sample, onLight, 4.5) : seed
+        return { color: shown, onColor: IrisStyle.onTintFor(shown),
+            container: ColorUtils.mix(plate, shown, 0.84), onContainer: ink }
     }
 }

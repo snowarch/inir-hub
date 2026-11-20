@@ -872,10 +872,24 @@ QtObject {
     function readableHighlight(c: color): color { return Lume.mark(c, root.markLevel, 0, root.light, 3) }
     readonly property var widgetPaletteNames: ["wallpaper", "system", "spectrum", "mono"]
     // Data in widgets (rings, bars, figures): three colours of the identity band, solved with the palette. The
-    // vibrance setting is part of the solve (iris.widgets.vibrance).
+    // vibrance setting is part of the solve (iris.widgets.vibrance). When a widget sits on the opposite polarity
+    // (bare over a dark wallpaper in Light, or over a bright wallpaper in Dark), it pulls from that polarity's solve.
+    function schemeWashi(lightBackdrop: bool): var {
+        if (lightBackdrop === root.light) return root.washi
+        return lightBackdrop ? root.washiLight : root.washiDark
+    }
+    function widgetPaletteFor(name: string, lightBackdrop: bool): var {
+        const w = root.schemeWashi(lightBackdrop)
+        const set = w?.widgets?.[name] ?? w?.widgets?.wallpaper ?? []
+        const fallback = Qt.color(w?.accent ?? root.accent)
+        return [0, 1, 2].map(i => Qt.color(set[i] ?? fallback))
+    }
+    function widgetRoleFor(role: string, lightBackdrop: bool, fallback: color): color {
+        const value = root.schemeWashi(lightBackdrop)?.[role]
+        return value ? Qt.color(value) : fallback
+    }
     function widgetPalette(name: string, vibrance: real): var {
-        const set = root.washi?.widgets?.[name] ?? root.washi?.widgets?.wallpaper ?? []
-        return [0, 1, 2].map(i => Qt.color(set[i] ?? root.accent))
+        return root.widgetPaletteFor(name, root.light)
     }
     // Swatches for Settings: each choice as this scheme would solve it.
     readonly property var accents: root.washi?.accents ?? ({})
@@ -1271,8 +1285,8 @@ QtObject {
     readonly property color plateShadow: root.glowing(Math.min(0.9, 0.36 * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
     // A grey sky is no light: it only greyed the face. On paper the wash is half as strong, a tint and not a film.
     // On paper a face's colour is a faint pigment wash, never a lamp behind it.
-    function skyWash(light: color): color { return ColorUtils.applyAlpha(light, light.hslSaturation < 0.15 ? 0 : root.light ? 0.1 : 0.46) }
-    function skyWashFade(light: color): color { return ColorUtils.applyAlpha(light, 0.05) }
+    function skyWash(light: color): color { return ColorUtils.applyAlpha(light, light.hslSaturation < 0.15 ? 0 : root.light ? 0.06 : 0.18) }
+    function skyWashFade(light: color): color { return ColorUtils.applyAlpha(light, 0.02) }
     readonly property color glassShadow: Qt.rgba(0, 0, 0, Math.min(0.6, 0.22 * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
     readonly property real glassBlur: 1
     readonly property real glassWash: 0.55

@@ -130,7 +130,7 @@ PrismFolder {
             font.family: root.fontMain
             font.pixelSize: root.px(13)
             clip: true
-            cursorDelegate: TextCursor { accent: IrisStyle.accent }
+            cursorDelegate: TextCursor { accent: root.accent }
             Keys.onReturnPressed: root.commit(entry.text)
             Keys.onEnterPressed: root.commit(entry.text)
             Keys.onEscapePressed: root.adding = false

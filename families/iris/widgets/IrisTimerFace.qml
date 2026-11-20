@@ -21,7 +21,7 @@ IrisWidgetFace {
             paused: TimerService.pomodoroPaused,
             progress: 1 - TimerService.pomodoroSecondsLeft / Math.max(1, TimerService.pomodoroLapDuration),
             tint: root.nothing ? (TimerService.pomodoroRunning && !TimerService.pomodoroPaused ? root.signal : root.ink)
-                : TimerService.pomodoroBreak ? root.accent2 : root.highlight
+                : TimerService.pomodoroBreak ? root.accent2 : root.accent
         },
         {
             key: "stopwatch",
@@ -42,7 +42,7 @@ IrisWidgetFace {
             paused: TimerService.countdownPaused,
             progress: 1 - TimerService.countdownSecondsLeft / Math.max(1, TimerService.countdownDuration),
             // Nothing: a timer is ink until it runs; running, it is the one live thing and wears the signal.
-            tint: root.nothing ? (TimerService.countdownRunning && !TimerService.countdownPaused ? root.signal : root.ink) : root.highlight
+            tint: root.nothing ? (TimerService.countdownRunning && !TimerService.countdownPaused ? root.signal : root.ink) : root.accent
         }
     ]
     readonly property var lead: {
@@ -221,7 +221,7 @@ IrisWidgetFace {
             Layout.bottomMargin: root.dp(4)
             glyph: "timer"
             text: Translation.tr("Timers")
-            tint: root.highlight
+            tint: root.accent
         }
         Repeater {
             model: root.large ? root.timers : []

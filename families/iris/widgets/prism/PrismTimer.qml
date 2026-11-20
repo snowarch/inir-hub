@@ -17,13 +17,13 @@ PrismFolder {
             label: TimerService.pomodoroLongBreak ? Translation.tr("Long break") : TimerService.pomodoroBreak ? Translation.tr("Break") : Translation.tr("Focus"),
             value: root.widget.formatSeconds(TimerService.pomodoroSecondsLeft),
             running: TimerService.pomodoroRunning, paused: TimerService.pomodoroPaused,
-            tint: TimerService.pomodoroBreak ? root.accent2 : root.highlight },
+            tint: TimerService.pomodoroBreak ? root.accent2 : root.accent },
         { key: "stopwatch", glyph: "timer", label: Translation.tr("Stopwatch"),
             value: root.widget.formatSeconds(TimerService.stopwatchTime / 100),
             running: TimerService.stopwatchRunning, paused: TimerService.stopwatchPaused, tint: root.accent },
         { key: "countdown", glyph: "hourglass_top", label: Translation.tr("Timer"),
             value: root.widget.formatSeconds(TimerService.countdownSecondsLeft),
-            running: TimerService.countdownRunning, paused: TimerService.countdownPaused, tint: root.highlight }
+            running: TimerService.countdownRunning, paused: TimerService.countdownPaused, tint: root.accent }
     ]
     readonly property var lead: {
         const active = root.timers.filter(timer => timer.running && !timer.paused)

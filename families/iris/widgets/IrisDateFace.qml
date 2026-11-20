@@ -33,7 +33,7 @@ IrisWidgetFace {
             Layout.fillWidth: true
             glyph: "calendar_today"
             text: root.weekday
-            tint: root.highlight
+            tint: root.accent
         }
         FaceFigure {
             face: root
@@ -79,7 +79,7 @@ IrisWidgetFace {
             spacing: root.dp(8)
             FaceFact {
                 face: root
-                tint: root.highlight
+                tint: root.accent
                 Layout.fillWidth: true
                 rule: false
                 glyph: "view_week"
@@ -88,7 +88,7 @@ IrisWidgetFace {
             }
             FaceFact {
                 face: root
-                tint: root.highlight
+                tint: root.accent
                 visible: root.widget.showOrdinal
                 Layout.fillWidth: true
                 glyph: "today"
@@ -97,7 +97,7 @@ IrisWidgetFace {
             }
             FaceFact {
                 face: root
-                tint: root.highlight
+                tint: root.accent
                 Layout.fillWidth: true
                 glyph: "hourglass_bottom"
                 label: Translation.tr("Left this year")
@@ -151,7 +151,7 @@ IrisWidgetFace {
             Layout.fillWidth: true
             glyph: "calendar_today"
             text: root.widget.showWeekday ? root.weekday : root.month
-            tint: root.highlight
+            tint: root.accent
             trailing: root.lit ? (root.lengthening ? Translation.tr("Days getting longer") : Translation.tr("Days getting shorter")) : ""
         }
         RowLayout {

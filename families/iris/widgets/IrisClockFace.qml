@@ -75,7 +75,7 @@ IrisWidgetFace {
             visible: root.small
             Layout.fillWidth: true
             text: root.weekday
-            color: root.highlight
+            color: root.accent
             size: root.small ? 13 : 14
             weight: Font.DemiBold
         }
@@ -106,7 +106,7 @@ IrisWidgetFace {
             pixelSize: root.px(root.small ? 42 : root.large ? 86 : 58)
             weight: root.figureWeight
             color: root.ink
-            separatorColor: root.highlight
+            separatorColor: root.accent
             family: root.fontNumbers
         }
         FaceText {
@@ -234,7 +234,7 @@ IrisWidgetFace {
                     pixelSize: hour.figure
                     weight: root.figureWeight
                     color: root.ink
-                    separatorColor: root.highlight
+                    separatorColor: root.accent
                     family: root.fontNumbers
                 }
                 Item { visible: root.medium; Layout.fillWidth: true }
@@ -310,7 +310,7 @@ IrisWidgetFace {
                 id: minuteFigure
                 text: stack.parts[2]
                 size: stack.size / root.t
-                tone: root.highlight
+                tone: root.accent
                 rolls: false
                 face: root
             }
@@ -428,7 +428,8 @@ IrisWidgetFace {
                 Layout.fillWidth: true
                 implicitHeight: root.dp(20)
                 radius: height / 2
-                color: weekday.today ? (root.nothing ? root.signal : IrisStyle.accentFill) : "transparent"
+                readonly property color todayFill: root.nothing ? root.signal : root.accent
+                color: weekday.today ? weekday.todayFill : "transparent"
                 FaceText {
                     face: root
                     anchors.centerIn: parent
@@ -436,7 +437,7 @@ IrisWidgetFace {
                     text: Translation.locale.toString(new Date(2024, 0, 1 + weekday.index), "ddd").replace(/\./g, "").slice(0, 2)
                     size: 10.5
                     weight: weekday.today ? Font.DemiBold : Font.Medium
-                    color: weekday.today ? (root.nothing ? IrisStyle.onTintFor(root.signal) : IrisStyle.inkOnAccentFill)
+                    color: weekday.today ? root.onFill(weekday.todayFill)
                         : weekday.index >= 5 ? root.inkTertiary : root.inkSecondary
                 }
             }

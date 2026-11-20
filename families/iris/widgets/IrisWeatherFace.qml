@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
 
@@ -381,7 +382,7 @@ IrisWidgetFace {
                         radius: IrisStyle.capsule(height)
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
-                            GradientStop { position: 0; color: root.accent }
+                            GradientStop { position: 0; color: ColorUtils.mix(root.accent, root.inkSecondary, 0.62) }
                             GradientStop { position: 1; color: root.warm }
                         }
                     }

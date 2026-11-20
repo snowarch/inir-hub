@@ -39,8 +39,8 @@ IrisWidgetFace {
     }
     // Today as Apple marks it, in the person's accent: a solid fill with its own ink (a pale bubble with dark ink read
     // as chosen, not as today). Under Nothing it is the signal.
-    readonly property color todayFill: root.nothing ? root.signal : IrisStyle.accentFill
-    readonly property color todayInk: root.nothing ? IrisStyle.onTintFor(root.signal) : IrisStyle.inkOnAccentFill
+    readonly property color todayFill: root.nothing ? root.signal : root.accent
+    readonly property color todayInk: root.onFill(root.todayFill)
     readonly property string monthName: IrisFaceData.capitalized(Translation.locale.standaloneMonthName(root.viewing.getMonth()))
 
     component MonthHead: Row {

@@ -19,7 +19,7 @@ Item {
     property int pick: 0
     readonly property int lead: Math.min(view.pick, Math.max(0, view.cities.length - 1))
     readonly property var city: view.cities[view.lead] ?? null
-    readonly property color mark: view.face.highlight
+    readonly property color mark: view.face.accent
 
     // Hours the city's clock runs ahead (+) or behind (-) yours, and the same folded into the ruler's 24 hours.
     function hoursOf(index: int): real {

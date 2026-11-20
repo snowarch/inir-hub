@@ -36,10 +36,13 @@ Singleton {
         accentHue: Number(root.appearance?.theme?.accentHue ?? 212),
         highlight: IrisDesign.colourChoice("highlight", String(root.appearance?.highlight ?? "orange"), root.followsTheme),
         highlightHue: Number(root.appearance?.theme?.highlightHue ?? 32),
-        vibrance: Math.max(0, Math.min(100, Number(Config.options?.iris?.widgets?.vibrance ?? 85))) / 100,
+        vibrance: Math.max(0, Math.min(100, Number(Config.options?.iris?.widgets?.vibrance ?? 60))) / 100,
         tune: ["dark", "ink", "light"].reduce((out, name) => {
             const t = root.appearance?.tune?.[name]
-            out[name] = { tone: Number(t?.tone ?? 0), colour: Number(t?.colour ?? 100), widgets: t?.widgets === undefined ? null : Number(t.widgets),
+            const rawWidgets = t?.widgets === undefined ? (name === "light" ? 85 : 90) : Number(t.widgets)
+            const widgetScale = name === "light" ? 0.68 : 0.78
+            out[name] = { tone: Number(t?.tone ?? 0), colour: Number(t?.colour ?? 100),
+                widgets: Math.max(40, Math.min(160, Math.round(rawWidgets * widgetScale))),
                 warmth: t?.warmth === undefined ? null : Number(t.warmth) }
             return out
         }, ({})),

@@ -74,8 +74,8 @@ PrismFolder {
         face: root
         x: root.inset
         width: root.innerWidth
-        y: root.footTop + root.pick(8, 8, 22)
-        height: Math.min(root.pick(20, 20, 62), Math.max(root.dp(14), root.footHeight - root.dp(24)))
+        y: root.footTop + root.pick(4, 4, 20)
+        height: Math.min(root.pick(20, 20, 62), Math.max(root.dp(14), root.footHeight - root.dp(26)))
         from: root.bootAt
         to: root.nowAt
         tint: root.ink
@@ -89,7 +89,7 @@ PrismFolder {
             required property int index
             face: root
             x: Math.round(session.x + session.width * mark.index / 4 - (mark.index === 0 ? 0 : mark.index === 4 ? width : width / 2))
-            y: session.y + session.height + root.dp(4)
+            y: session.y + session.height + root.dp(2)
             text: String(mark.modelData)
             color: root.inkTertiary
             size: root.type(10, 10.5, 12)

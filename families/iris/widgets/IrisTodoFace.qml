@@ -131,7 +131,7 @@ IrisWidgetFace {
             radius: root.innerRadius
             color: root.fill
             TextInput {
-                cursorDelegate: TextCursor { accent: IrisStyle.accent }
+                cursorDelegate: TextCursor { accent: root.accent }
                 id: entry
                 anchors.fill: parent
                 anchors.leftMargin: root.dp(10)

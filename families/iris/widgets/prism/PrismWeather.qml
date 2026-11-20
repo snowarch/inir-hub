@@ -145,7 +145,7 @@ PrismFolder {
         visible: root.ready && root.hours.length > 0
         x: root.inset
         width: root.innerWidth
-        y: root.large ? root.footTop + root.dp(10) : Math.round(root.footTop + (root.footHeight - height) / 2)
+        y: root.large ? root.footTop + root.dp(10) : Math.round(root.footTop + (root.footHeight - height) / 2 - root.dp(4))
         Repeater {
             model: root.hours
             Column {
@@ -154,7 +154,7 @@ PrismFolder {
                 required property int index
                 readonly property string glyph: Icons.getWeatherIcon(hour.modelData.code, hour.modelData.isNight) ?? "cloud"
                 width: coming.width / Math.max(1, root.hours.length)
-                spacing: root.dp(3)
+                spacing: root.dp(2)
                 FaceText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     face: root

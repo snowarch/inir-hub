@@ -51,7 +51,7 @@ Item {
             pixelSize: view.figure
             weight: view.face.figureWeight
             color: view.face.ink
-            separatorColor: view.face.highlight
+            separatorColor: view.face.accent
             family: view.face.fontNumbers
         }
         FaceText {

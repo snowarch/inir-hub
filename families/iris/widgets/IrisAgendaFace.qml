@@ -16,8 +16,8 @@ IrisWidgetFace {
     readonly property var shown: root.events.slice(0, root.capacity)
 
     // Today as the month calendar marks it: the accent's solid fill under its own ink.
-    readonly property color todayFill: root.nothing ? root.signal : IrisStyle.accentFill
-    readonly property color todayInk: root.nothing ? IrisStyle.onTintFor(root.signal) : IrisStyle.inkOnAccentFill
+    readonly property color todayFill: root.nothing ? root.signal : root.accent
+    readonly property color todayInk: root.onFill(root.todayFill)
     readonly property var next: root.shown[0] ?? null
     readonly property var nextTime: root.next && !root.next.allDay ? IrisFaceData.timeParts(IrisFaceData.clockText(IrisFaceData.eventDate(root.next))) : null
     // An all-day event has no hour to lead with: its date does, the head keeps only the day's name (10-25: small sat
