@@ -3,6 +3,9 @@ import qs.modules.iris.prism.core
 
 // Prism's text: its face, its ink and a size from the ladder.
 Text {
+    // Prism's sizes are small: the font's own rasteriser, glyphs snapped to whole pixels, stays sharp where Qt's
+    // distance fields (the shell's default) blur them.
+    renderType: Text.NativeRendering
     property bool mono: false
     property bool figures: false
     color: PrismTheme.ink

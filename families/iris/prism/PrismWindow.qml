@@ -80,7 +80,9 @@ PanelWindow {
         readonly property real band: IrisFrame.band + PrismTheme.room(24)
         width: PrismState.wide ? root.width - band * 2 : Math.min(root.width - band * 2, PrismTheme.room(1280))
         height: PrismState.wide ? root.height - band * 2 : Math.min(root.height - band * 2, PrismTheme.room(840))
-        anchors.centerIn: parent
+        // Centred on whole pixels: a half-pixel place would resample every layer inside it (the glass, the list's fade).
+        x: Math.round((root.width - width) / 2)
+        y: Math.round((root.height - height) / 2)
         opacity: PrismTheme.glassBlur && GlobalStates.settingsOverlayOpen ? 1 : shown.opacity
         scale: GlobalStates.settingsOverlayOpen ? 1 : 0.97
         Behavior on scale { NumberAnimation { duration: PrismTheme.ms(220 / PrismTheme.openSpeed); easing.type: Easing.OutCubic } }

@@ -135,8 +135,9 @@ Item {
 
     Flickable {
         id: flick
-        anchors.top: head.bottom
-        anchors.bottom: parent.bottom
+        // On a whole pixel: over glass the list is drawn through a layer, and a layer at a half pixel blurs its text.
+        y: Math.ceil(head.height)
+        height: parent.height - y
         width: parent.width
         contentHeight: column.implicitHeight + PrismTheme.dp(28)
         boundsBehavior: Flickable.StopAtBounds

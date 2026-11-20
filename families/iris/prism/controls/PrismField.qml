@@ -59,6 +59,7 @@ Item {
         anchors.leftMargin: root.glyph.length > 0 ? PrismTheme.dp(32) : PrismTheme.dp(14)
         anchors.rightMargin: PrismTheme.dp(14)
         verticalAlignment: TextInput.AlignVCenter
+        renderType: TextInput.NativeRendering
         color: PrismTheme.ink
         selectionColor: PrismTheme.accent
         selectedTextColor: PrismTheme.inkAccent
