@@ -3206,5 +3206,13 @@
   "Show every setting": "Hiện mọi cài đặt",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Cổ điển là cửa sổ Cài đặt của v2.33: thanh tiêu đề có ô tìm kiếm, danh sách trang hẹp và mỗi mục nằm trong thẻ riêng. Mọi trang và tùy chọn đều có ở cả hai.",
   "Screens, workspaces, layout, windows, input": "Màn hình, các workspace, bố cục, cửa sổ, nhập liệu",
-  "Show in the sidebar": "Hiện trong thanh bên"
+  "Show in the sidebar": "Hiện trong thanh bên",
+  "Edit bar": "Sửa thanh",
+  "Bar and dock": "Thanh và dock",
+  "Edit on screen": "Sửa trên màn hình",
+  "Drag it along the bar to move it, or off the bar to remove it.": "Kéo dọc thanh để di chuyển, hoặc kéo ra ngoài để gỡ bỏ.",
+  "More options": "Tùy chọn khác",
+  "Remove from bar": "Gỡ khỏi thanh",
+  "Add to bar": "Thêm vào thanh",
+  "Notch": "Tai thỏ"
 }

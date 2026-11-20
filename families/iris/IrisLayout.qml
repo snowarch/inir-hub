@@ -9,6 +9,9 @@ import qs.modules.iris.style
 QtObject {
     id: root
 
+    // What the shell edit mode would snapshot for Undo and Revert (iRiS has no surfaces in that mode yet).
+    readonly property var editKeys: ["iris.bar", "iris.dock"]
+
     function density(): real {
         return Math.max(0.8, Math.min(1.35, Number(Config.options?.iris?.appearance?.density ?? 1)))
     }

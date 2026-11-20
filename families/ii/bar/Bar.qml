@@ -147,6 +147,7 @@ Scope {
                     : !autoHideEnabled ? barRoot.panelSurfaceHeight
                     : (pushWindowsWhenShown && reservationActive ? barRoot.panelSurfaceHeight : 0)
                 WlrLayershell.namespace: "quickshell:bar"
+                WlrLayershell.keyboardFocus: barContent.editDragging ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
                 implicitHeight: barRoot.panelSurfaceHeight + barRoot.roundDecoratorAllowance
                     + barRoot.islandShadowAllowance + barRoot.organicAuraAllowance
                 // Explicit zero-size item prevents ambiguous null input region during
@@ -448,6 +449,9 @@ Scope {
                     ShellEditSurfaceFrame {
                         anchors.fill: barContent
                         surfaceId: "iiBar"
+                        holes: barContent.editHoles
+                        onContextRequested: ShellEditSession.openSheet("bar", "", barRoot.outputName,
+                            BarModules.screenRect(barContent, barRoot, barRoot.screen, Config.options?.material?.bar?.bottom ?? false))
                         label: Translation.tr("Bar")
                         active: ShellEditSession.blocksNormalActions(surfaceId)
                         selected: ShellEditSession.selectedSurfaceId === surfaceId

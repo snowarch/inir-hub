@@ -3206,5 +3206,13 @@
   "Show every setting": "显示所有设置",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "经典是 v2.33 的设置窗口：带搜索的标题栏、窄的页面列表，每个部分都在自己的卡片里。两种设计包含相同的页面和选项。",
   "Screens, workspaces, layout, windows, input": "屏幕、工作区、布局、窗口、输入",
-  "Show in the sidebar": "在侧边栏中显示"
+  "Show in the sidebar": "在侧边栏中显示",
+  "Edit bar": "编辑栏",
+  "Bar and dock": "栏和程序坞",
+  "Edit on screen": "在屏幕上编辑",
+  "Drag it along the bar to move it, or off the bar to remove it.": "沿栏拖动可移动，拖出栏外可移除。",
+  "More options": "更多选项",
+  "Remove from bar": "从栏中移除",
+  "Add to bar": "添加到栏",
+  "Notch": "刘海"
 }

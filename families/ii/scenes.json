@@ -1,0 +1,48 @@
+[
+  {
+    "name": "edit-mode",
+    "open": [
+      "ipc shellLayout open",
+      "wait 900"
+    ],
+    "close": [
+      "ipc shellLayout close"
+    ]
+  },
+  {
+    "name": "edit-bar-sheet",
+    "open": [
+      "ipc shellLayout open",
+      "wait 700",
+      "ipc shellLayout sheet bar bar",
+      "wait 600"
+    ],
+    "close": [
+      "ipc shellLayout close"
+    ]
+  },
+  {
+    "name": "edit-module-sheet",
+    "open": [
+      "ipc shellLayout open",
+      "wait 700",
+      "ipc shellLayout sheet module clockWidget",
+      "wait 600"
+    ],
+    "close": [
+      "ipc shellLayout close"
+    ]
+  },
+  {
+    "name": "edit-dock-sheet",
+    "open": [
+      "ipc shellLayout open",
+      "wait 700",
+      "ipc shellLayout sheet dock dock",
+      "wait 600"
+    ],
+    "close": [
+      "ipc shellLayout close"
+    ]
+  }
+]

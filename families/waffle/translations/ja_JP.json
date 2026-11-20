@@ -577,5 +577,6 @@
   "What a corner does when the pointer rests in it": "ポインターが角に留まったときの動作",
   "Which screen takes touch": "タッチを受け付けるディスプレイ",
   "Which screen the pen draws on": "ペンで描画するディスプレイ",
-  "Windows stacked as tabs in one column": "ウィンドウを1列にタブとして積み重ねる"
+  "Windows stacked as tabs in one column": "ウィンドウを1列にタブとして積み重ねる",
+  "Edit bar and dock": "バーとドックを編集"
 }

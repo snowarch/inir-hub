@@ -414,6 +414,19 @@ Variants {
                 }
             }
 
+            // Shell layout edit mode: a calm veil over the wallpaper so the taskbar reads as what is edited.
+            Rectangle {
+                anchors.fill: parent
+                z: 1
+                visible: opacity > 0
+                opacity: GlobalStates.shellLayoutEditMode ? 1 : 0
+                color: Qt.rgba(0, 0, 0, 0.3)
+                Behavior on opacity {
+                    enabled: Looks.transition.enabled
+                    NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                }
+            }
+
             // Live snips kept on this desktop, in this window as Background.qml keeps them: a layer of their own
             // would stack over this one and take the pointer everywhere.
             Loader {

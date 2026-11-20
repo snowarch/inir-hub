@@ -1,9 +1,11 @@
 module qs.modules.ii.bar
 ActiveWindow 1.0 ActiveWindow.qml
 BarContent 1.0 BarContent.qml
+BarEditMarks 1.0 BarEditMarks.qml
 BarGroup 1.0 BarGroup.qml
 BarIslandSurface 1.0 BarIslandSurface.qml
 Bar 1.0 Bar.qml
+singleton BarModules 1.0 BarModules.qml
 BarTaskbarButton 1.0 BarTaskbarButton.qml
 BarTaskbarPreview 1.0 BarTaskbarPreview.qml
 BarTaskbar 1.0 BarTaskbar.qml

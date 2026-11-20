@@ -577,5 +577,6 @@
   "What a corner does when the pointer rests in it": "İşaretçi bir köşede durduğunda köşenin ne yaptığı",
   "Which screen takes touch": "Dokunmayı hangi ekranın aldığı",
   "Which screen the pen draws on": "Kalemin hangi ekrana çizdiği",
-  "Windows stacked as tabs in one column": "Pencereler tek sütunda sekme gibi üst üste dizilir"
+  "Windows stacked as tabs in one column": "Pencereler tek sütunda sekme gibi üst üste dizilir",
+  "Edit bar and dock": "Çubuğu ve dock'u düzenle"
 }

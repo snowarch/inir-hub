@@ -3206,5 +3206,13 @@
   "Show every setting": "Mostrar todos los ajustes",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Clásico es la ventana de Ajustes de v2.33: un encabezado con la búsqueda, una lista angosta de páginas y cada sección en su propia tarjeta. Todas las páginas y opciones están en los dos.",
   "Screens, workspaces, layout, windows, input": "Pantallas, espacios de trabajo, distribución, ventanas, entrada",
-  "Show in the sidebar": "Mostrar en la barra lateral"
+  "Show in the sidebar": "Mostrar en la barra lateral",
+  "Edit bar": "Editar barra",
+  "Bar and dock": "Barra y dock",
+  "Edit on screen": "Editar en pantalla",
+  "Drag it along the bar to move it, or off the bar to remove it.": "Arrástralo por la barra para moverlo, o fuera de ella para quitarlo.",
+  "More options": "Más opciones",
+  "Remove from bar": "Quitar de la barra",
+  "Add to bar": "Agregar a la barra",
+  "Notch": "Muesca"
 }

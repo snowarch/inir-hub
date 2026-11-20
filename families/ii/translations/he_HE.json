@@ -3206,5 +3206,13 @@
   "Show every setting": "הצג את כל ההגדרות",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "קלאסי הוא חלון ההגדרות של v2.33: כותרת עם החיפוש, רשימת דפים צרה וכל מקטע בכרטיס משלו. כל הדפים והאפשרויות נמצאים בשניהם.",
   "Screens, workspaces, layout, windows, input": "מסכים, מרחבי עבודה, פריסה, חלונות, קלט",
-  "Show in the sidebar": "הצג בסרגל הצד"
+  "Show in the sidebar": "הצג בסרגל הצד",
+  "Edit bar": "עריכת הסרגל",
+  "Bar and dock": "סרגל ומעגן",
+  "Edit on screen": "עריכה על המסך",
+  "Drag it along the bar to move it, or off the bar to remove it.": "גרור לאורך הסרגל כדי להזיז, או אל מחוץ לסרגל כדי להסיר.",
+  "More options": "אפשרויות נוספות",
+  "Remove from bar": "הסר מהסרגל",
+  "Add to bar": "הוסף לסרגל",
+  "Notch": "חריץ"
 }

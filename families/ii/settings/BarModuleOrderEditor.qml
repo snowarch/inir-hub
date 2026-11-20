@@ -3,6 +3,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.ii.kit
+import qs.modules.ii.bar
 import qs.modules.common.functions
 import QtQuick
 import QtQuick.Layouts
@@ -32,137 +33,39 @@ ColumnLayout {
     readonly property real pitch: rowH + rowGap
     readonly property string availableZone: "__available__"
 
-    // ─── Defaults / metadata ────────────────────────────────────────────
-    readonly property var _defaultLayout: ({
-        left: ["leftSidebarButton", "activeWindow"],
-        centerLeft: ["resources", "media"],
-        center: ["workspaces"],
-        centerRight: ["clock", "utilButtons", "battery"],
-        right: ["rightSidebarButton", "tray", "timer", "shellUpdate", "spacer", "weather"],
-    })
-    readonly property var _knownIds: [
-        "leftSidebarButton", "activeWindow", "resources", "media", "workspaces",
-        "clock", "utilButtons", "battery", "rightSidebarButton", "tray", "timer", "shellUpdate", "spacer", "weather"
-    ]
-    readonly property var _zones: ["left", "centerLeft", "center", "centerRight", "right"]
+    // ─── Catalogue and moves: BarModules owns them (classic, islands, scenic, frame) ──
+    readonly property var _zones: BarModules.classicZones
     readonly property var _visKeys: ({
         leftSidebarButton: "leftSidebarButton", activeWindow: "activeWindow",
         resources: "resources", media: "media", workspaces: "workspaces", clock: "clock",
         utilButtons: "utilButtons", battery: "battery", rightSidebarButton: "rightSidebarButton",
         tray: "sysTray", weather: "weather",
     })
-
-    function _metaIcon(id) {
-        if (id === "activeWindow" && (Config.options?.material?.bar?.modules?.taskbar ?? false))
-            return "dock_to_bottom"
-        return ({ leftSidebarButton: "side_navigation", activeWindow: "window",
-            resources: "memory", media: "music_note", workspaces: "workspaces", clock: "schedule",
-            utilButtons: "build", battery: "battery_full", rightSidebarButton: "call_to_action",
-            tray: "shelf_auto_hide", timer: "timer", shellUpdate: "system_update", spacer: "space_bar",
-            weather: "cloud" })[id] || "widgets"
-    }
-    function _metaLabel(id) {
-        if (id === "activeWindow" && (Config.options?.material?.bar?.modules?.taskbar ?? false))
-            return Translation.tr("Taskbar")
-        return ({ leftSidebarButton: Translation.tr("Left sidebar"), activeWindow: Translation.tr("Active window"),
-            resources: Translation.tr("Resources"), media: Translation.tr("Media"),
-            workspaces: Translation.tr("Workspaces"), clock: Translation.tr("Clock"), utilButtons: Translation.tr("Utility buttons"),
-            battery: Translation.tr("Battery"), rightSidebarButton: Translation.tr("Right sidebar"), tray: Translation.tr("System tray"),
-            timer: Translation.tr("Timer"), shellUpdate: Translation.tr("Shell update"), spacer: Translation.tr("Flexible spacer"),
-            weather: Translation.tr("Weather") })[id] || id
-    }
-    function _zoneLabel(z) {
-        return ({ left: Translation.tr("Left edge"), centerLeft: Translation.tr("Center left"),
-            center: Translation.tr("Center"), centerRight: Translation.tr("Center right"),
-            right: Translation.tr("Right edge") })[z] || z
-    }
-    function _zoneIcon(z) {
-        return ({ left: "first_page", centerLeft: "align_horizontal_left", center: "align_horizontal_center",
-            centerRight: "align_horizontal_right", right: "last_page" })[z] || "widgets"
-    }
+    function _metaIcon(id) { return BarModules.info(id, "classic").icon }
+    function _metaLabel(id) { return BarModules.info(id, "classic").name }
+    function _zoneLabel(z) { return BarModules.classicZoneLabel(z) }
+    function _zoneIcon(z) { return BarModules.classicZoneIcon(z) }
 
     // ─── Reactive layout view ───────────────────────────────────────────
-    readonly property bool migrated: Config.options?.material?.bar?.layout?.migrated === true
-    readonly property bool _layoutContainsActiveWindow: root._zones.some(zoneName => {
-        const ids = Config.options?.material?.bar?.layout?.[zoneName] ?? []
-        return ids.includes("activeWindow")
-    })
-    function _getZone(name) {
-        if (!root.migrated) return root._defaultLayout[name] ?? []
-        const a = Config.options?.material?.bar?.layout?.[name]
-        const ids = (a && a.length >= 0) ? Array.from(a) : Array.from(root._defaultLayout[name] ?? [])
-        return ids
-            .map(id => id === "taskbar" && !root._layoutContainsActiveWindow ? "activeWindow" : id)
-            .filter(id => id !== "taskbar")
-    }
-    function _placed() {
-        let s = []
-        for (let i = 0; i < root._zones.length; i++) s = s.concat(root._getZone(root._zones[i]))
-        return s
-    }
-    function _available() {
-        const placed = root._placed()
-        // `spacer` is a reusable filler — always offered, can appear any number
-        // of times in any zone.
-        return root._knownIds.filter(id => id === "spacer" || placed.indexOf(id) === -1)
-    }
-    readonly property var availableIds: root._available()
+    readonly property bool migrated: BarModules.classicMigrated
+    function _getZone(name) { return BarModules.ids(name, "classic") }
+    readonly property var availableIds: BarModules.available("classic")
 
-    // ─── Mutators (per-leaf only) ───────────────────────────────────────
-    function _ensureMigrated() {
-        if (root.migrated) return
-        const d = root._defaultLayout
-        Config.setNestedValues({
-            "material.bar.layout.left": d.left, "material.bar.layout.centerLeft": d.centerLeft, "material.bar.layout.center": d.center,
-            "material.bar.layout.centerRight": d.centerRight, "material.bar.layout.right": d.right, "material.bar.layout.migrated": true })
-    }
-    function _resetToDefaults() {
-        const d = root._defaultLayout
-        Config.setNestedValues({
-            "material.bar.layout.left": d.left, "material.bar.layout.centerLeft": d.centerLeft, "material.bar.layout.center": d.center,
-            "material.bar.layout.centerRight": d.centerRight, "material.bar.layout.right": d.right, "material.bar.layout.migrated": true })
-    }
-    function _addToZone(id, toZone, atIndex) {
-        root._ensureMigrated()
-        const dst = root._getZone(toZone).slice()
-        if (id !== "spacer" && dst.indexOf(id) !== -1) return
-        const idx = (atIndex === undefined || atIndex < 0) ? dst.length : Math.max(0, Math.min(atIndex, dst.length))
-        dst.splice(idx, 0, id)
-        Config.setNestedValue("material.bar.layout." + toZone, dst)
-    }
-    function _remove(zone, idx) {
-        root._ensureMigrated()
-        const arr = root._getZone(zone).slice()
-        arr.splice(idx, 1)
-        Config.setNestedValue("material.bar.layout." + zone, arr)
-    }
-    // Move from (srcZone, srcIdx) to dstZone at dstIdx. Handles same- and
-    // cross-zone with a single atomic write per affected zone. Source zone
-    // `availableZone` means "add new from the tray, no source removal".
+    // ─── Mutators ───────────────────────────────────────────────────────
+    function _resetToDefaults() { BarModules.resetClassic() }
+    function _addToZone(id, toZone, atIndex) { BarModules.add(id, toZone, atIndex, "classic") }
+    function _remove(zone, idx) { BarModules.remove(zone, idx, "classic") }
+    // Move from (srcZone, srcIdx) to dstZone at dstIdx. Source zone `availableZone` means "add new from the
+    // tray, no source removal". dstIdx is the insert position AMONG the remaining rows (the editor
+    // computes it against liveCount, which already excludes the lifted row); BarModules takes it
+    // before the removal, so a same-zone drop at or after the source moves one slot on.
     function _dropMove(srcZone, srcIdx, srcId, dstZone, dstIdx) {
-        root._ensureMigrated()
         if (srcZone === root.availableZone) {
             root._addToZone(srcId, dstZone, dstIdx)
             return
         }
-        if (srcZone === dstZone) {
-            // dstIdx is the insert position AMONG the remaining rows (the editor
-            // computes it against liveCount, which already excludes the lifted
-            // row), so no srcIdx adjustment is needed after the splice.
-            const arr = root._getZone(srcZone).slice()
-            const [m] = arr.splice(srcIdx, 1)
-            arr.splice(Math.max(0, Math.min(dstIdx, arr.length)), 0, m)
-            Config.setNestedValue("material.bar.layout." + srcZone, arr)
-        } else {
-            const src = root._getZone(srcZone).slice()
-            const dst = root._getZone(dstZone).slice()
-            const [m] = src.splice(srcIdx, 1)
-            dst.splice(Math.max(0, Math.min(dstIdx, dst.length)), 0, m)
-            let u = {}
-            u["material.bar.layout." + srcZone] = src
-            u["material.bar.layout." + dstZone] = dst
-            Config.setNestedValues(u)
-        }
+        BarModules.move(srcZone, srcIdx, dstZone,
+            srcZone === dstZone && dstIdx >= srcIdx ? dstIdx + 1 : dstIdx, "classic")
     }
 
     // ─── Drag state ─────────────────────────────────────────────────────

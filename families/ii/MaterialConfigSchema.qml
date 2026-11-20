@@ -607,7 +607,6 @@ JsonObject {
         property real hoverRegionHeight: 2
         property bool pinnedOnStartup: true
         property bool hoverToReveal: false // When false, only reveals on empty workspace
-        property bool dodgeWindows: false // When hoverToReveal is true, only hide while the active workspace has windows
         property bool showOnDesktop: true // Show dock when no window is focused (desktop visible)
         property bool showBackground: true
         property bool minimizeUnfocused: false // Show dot for unfocused apps

@@ -21,6 +21,7 @@ Item { // Bar content region
     layer.effect: ShellDesaturationEffect {}
 
     PaletteFade {
+        anchors.fill: parent
         target: root
         active: root.visible
     }
@@ -84,6 +85,17 @@ Item { // Bar content region
                 },
             },
             { type: "separator" },
+            {
+                iconName: "edit",
+                monochromeIcon: true,
+                text: Translation.tr("Edit bar"),
+                action: () => {
+                    const name = root.screen?.name ?? ""
+                    ShellEditSession.enter(name)
+                    ShellEditSession.openSheet("bar", "", name, BarModules.screenRect(
+                        root, root.QsWindow.window, root.screen, Config.options?.material?.bar?.bottom ?? false))
+                },
+            },
             {
                 iconName: "settings",
                 monochromeIcon: true,
@@ -447,7 +459,7 @@ Item { // Bar content region
         Layout.minimumWidth: root._minWidth(modelData, item)
         Layout.fillHeight: root._fillHeight(modelData)
         active: root._moduleShown(modelData, zone)
-        visible: active
+        visible: active || ShellEditSession.active
         sourceComponent: root._allComponents[modelData] ?? null
         onLoaded: if (modelData === "activeWindow" && item)
             item.fillSlot = Qt.binding(() => root._fillSlot(zone) && !root.isIslands)
@@ -584,10 +596,13 @@ Item { // Bar content region
         return false
     }
     function _maxWidth(id, item) {
-        return id === "media" && item ? item.implicitWidth : Number.POSITIVE_INFINITY
+        return id === "media" && item ? Math.max(item.implicitWidth, ShellEditSession.active ? BarModules.standInWidth : 0) : Number.POSITIVE_INFINITY
     }
     function _minWidth(id, item) {
-        return id === "media" && item ? item.minimumWidth : 0
+        const base = id === "media" && item ? item.minimumWidth : 0
+        // In edit mode a module that shows nothing keeps room for its stand-in mark.
+        return ShellEditSession.active && (!item || !(item.implicitWidth >= 1))
+            ? Math.max(base, BarModules.standInWidth) : base
     }
     function _fillHeight(id) {
         // Islands: filling the row's height means filling the BAR's height, which is
@@ -1165,6 +1180,8 @@ Item { // Bar content region
         onScrollUp: root.performScrollAction(root.leftAction, true)
         onMovedAway: root.closeOSD(root.leftAction)
         onPressed: event => {
+            if (ShellEditSession.active && event.button === Qt.LeftButton)
+                return
             if (event.button === Qt.LeftButton)
                 ShellLayoutController.toggleSidebarAtSlot("left", root.screen?.name ?? "");
             else if (event.button === Qt.RightButton)
@@ -1215,6 +1232,7 @@ Item { // Bar content region
             clip: root.layoutCompressionActive
 
             Repeater {
+                id: leftEdgeRepeater
                 model: root._leftIds
                 delegate: EdgeZoneLoader { zone: "left" }
             }
@@ -1281,6 +1299,7 @@ Item { // Bar content region
             // still collapses the group completely when it is genuinely empty.
 
             Repeater {
+                id: centerRepeater
                 model: root._centerIds
                 delegate: Loader {
                     required property string modelData
@@ -1292,7 +1311,7 @@ Item { // Bar content region
                     // Hidden modules must leave the layout entirely, or their
                     // implicit width lingers as a ghost gap inside the pill.
                     active: root._moduleShown(modelData, "center")
-                    visible: active
+                    visible: active || ShellEditSession.active
                     sourceComponent: root._allComponents[modelData] ?? null
                     onLoaded: if (modelData === "activeWindow" && item) item.fillSlot = false
                 }
@@ -1350,6 +1369,7 @@ Item { // Bar content region
             clipContent: true
 
             Repeater {
+                id: centerLeftRepeater
                 model: root._centerLeftIds
                 delegate: Loader {
                     required property string modelData
@@ -1359,7 +1379,7 @@ Item { // Bar content region
                     Layout.minimumWidth: root._minWidth(modelData, item)
                     Layout.fillHeight: root._fillHeight(modelData)
                     active: root._moduleShown(modelData, "centerLeft")
-                    visible: active
+                    visible: active || ShellEditSession.active
                     sourceComponent: root._allComponents[modelData] ?? null
                     onLoaded: if (modelData === "activeWindow" && item) item.fillSlot = false
                 }
@@ -1430,6 +1450,7 @@ Item { // Bar content region
                 clipContent: true
 
                 Repeater {
+                    id: centerRightRepeater
                     model: root._centerRightIds
                     delegate: Loader {
                         required property string modelData
@@ -1439,7 +1460,7 @@ Item { // Bar content region
                         Layout.minimumWidth: root._minWidth(modelData, item)
                         Layout.fillHeight: root._fillHeight(modelData)
                         active: root._moduleShown(modelData, "centerRight")
-                        visible: active
+                        visible: active || ShellEditSession.active
                         sourceComponent: root._allComponents[modelData] ?? null
                         onLoaded: if (modelData === "activeWindow" && item) item.fillSlot = false
                     }
@@ -1452,6 +1473,8 @@ Item { // Bar content region
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 z: -1
                 onPressed: event => {
+                    if (ShellEditSession.active)
+                        return
                     if (event.button === Qt.RightButton) {
                         GlobalStates.controlPanelOpen = !GlobalStates.controlPanelOpen;
                     } else {
@@ -1517,6 +1540,8 @@ Item { // Bar content region
         onScrollUp: root.performScrollAction(root.rightAction, true)
         onMovedAway: root.closeOSD(root.rightAction)
         onPressed: event => {
+            if (ShellEditSession.active && event.button === Qt.LeftButton)
+                return
             if (event.button === Qt.LeftButton) {
                 ShellLayoutController.toggleSidebarAtSlot("right", root.screen?.name ?? "");
             } else if (event.button === Qt.RightButton) {
@@ -1570,6 +1595,7 @@ Item { // Bar content region
             clip: root.layoutCompressionActive
 
             Repeater {
+                id: rightEdgeRepeater
                 model: root._rightIds
                 delegate: EdgeZoneLoader {
                     zone: "right"
@@ -1790,6 +1816,26 @@ Item { // Bar content region
                     }
                 }
             }
+        }
+    }
+    readonly property var editZones: [
+        { name: "left", repeater: leftEdgeRepeater, rtl: false },
+        { name: "centerLeft", repeater: centerLeftRepeater, rtl: false },
+        { name: "center", repeater: centerRepeater, rtl: false },
+        { name: "centerRight", repeater: centerRightRepeater, rtl: false },
+        { name: "right", repeater: rightEdgeRepeater, rtl: true }
+    ]
+    readonly property var editHoles: editMarks.item ? editMarks.item.holes : []
+    readonly property bool editDragging: editMarks.item ? editMarks.item.dragging : false
+    Loader {
+        id: editMarks
+        anchors.fill: parent
+        z: 50
+        active: ShellEditSession.active && (root.screen?.name ?? "") === ShellEditSession.targetOutputName
+        sourceComponent: BarEditMarks {
+            zones: root.editZones
+            screenObject: root.screen
+            barBottom: Config.options?.material?.bar?.bottom ?? false
         }
     }
 }

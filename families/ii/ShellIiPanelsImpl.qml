@@ -23,6 +23,7 @@ import qs.services.deferred
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.ii.kit
+import qs.modules.ii.edit
 
 Item {
     id: panelsRoot
@@ -325,6 +326,7 @@ Item {
     OnDemandPanelLoader { identifier: "iiShellUpdate"; open: ShellUpdates.overlayOpen; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/shellUpdate/ShellUpdateOverlay.qml") }
     OnDemandPanelLoader { identifier: "iiRecordingOsd"; open: RecorderStatus.isRecording; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/recordingOsd/RecordingOsd.qml") }
     DeferredPanelLoader { identifier: "iiWorkspaceStrip"; component: WorkspaceStrip {} }
+    LazyLoader { active: ShellEditSession.active; component: MaterialShellEditLayer {} }
     DeferredPanelLoader { identifier: "iiMascotCompanion"; extraCondition: (Config.options?.mascot?.enable ?? false) && (Config.options?.mascot?.companion?.enable ?? true); component: MascotCompanion {} }
 
     Loader {

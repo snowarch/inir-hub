@@ -97,7 +97,7 @@ DockButton {
     property bool pillStyle: Config.options?.material?.dock?.style === "pill" && !root.zzzStyle
     property bool islandStyle: root.surfaceDialect === "island"
     property bool macosStyle: Config.options?.material?.dock?.style === "macos" && !root.zzzStyle
-    // Lucid's dock: an icon swells and lifts under the pointer.
+    // M3 dock: an icon swells and lifts under the pointer.
     property bool m3Style: Config.options?.material?.dock?.style === "m3" && !root.zzzStyle
 
     readonly property int notificationCount: {

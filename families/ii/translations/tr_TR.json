@@ -3206,5 +3206,13 @@
   "Show every setting": "Tüm ayarları göster",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Klasik, v2.33'ün Ayarlar penceresidir: aramalı bir başlık, dar bir sayfa listesi ve her bölüm kendi kartında. Tüm sayfalar ve seçenekler ikisinde de var.",
   "Screens, workspaces, layout, windows, input": "Ekranlar, çalışma alanları, düzen, pencereler, giriş",
-  "Show in the sidebar": "Kenar çubuğunda göster"
+  "Show in the sidebar": "Kenar çubuğunda göster",
+  "Edit bar": "Çubuğu düzenle",
+  "Bar and dock": "Çubuk ve dock",
+  "Edit on screen": "Ekranda düzenle",
+  "Drag it along the bar to move it, or off the bar to remove it.": "Taşımak için çubuk boyunca, kaldırmak için çubuğun dışına sürükle.",
+  "More options": "Diğer seçenekler",
+  "Remove from bar": "Çubuktan kaldır",
+  "Add to bar": "Çubuğa ekle",
+  "Notch": "Çentik"
 }

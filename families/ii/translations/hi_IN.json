@@ -3206,5 +3206,13 @@
   "Show every setting": "सभी सेटिंग्स दिखाएँ",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "क्लासिक v2.33 की सेटिंग्स विंडो है: खोज वाला हेडर, पन्नों की पतली सूची और हर सेक्शन अपने कार्ड में। हर पन्ना और विकल्प दोनों में है।",
   "Screens, workspaces, layout, windows, input": "स्क्रीन, वर्कस्पेस, लेआउट, विंडो, इनपुट",
-  "Show in the sidebar": "साइडबार में दिखाएँ"
+  "Show in the sidebar": "साइडबार में दिखाएँ",
+  "Edit bar": "बार संपादित करें",
+  "Bar and dock": "बार और डॉक",
+  "Edit on screen": "स्क्रीन पर संपादित करें",
+  "Drag it along the bar to move it, or off the bar to remove it.": "इसे हिलाने के लिए बार पर खींचें, या हटाने के लिए बार से बाहर खींचें।",
+  "More options": "और विकल्प",
+  "Remove from bar": "बार से हटाएँ",
+  "Add to bar": "बार में जोड़ें",
+  "Notch": "नॉच"
 }

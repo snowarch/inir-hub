@@ -29,6 +29,16 @@ Rectangle {
     clip: true
     implicitHeight: Looks.scaledBar(48, panelScreen)
 
+    PaletteFade {
+        anchors.fill: parent
+        target: root
+        active: root.visible && Looks.transition.enabled
+        topLeftRadius: root.topLeftRadius
+        topRightRadius: root.topRightRadius
+        bottomLeftRadius: root.bottomLeftRadius
+        bottomRightRadius: root.bottomRightRadius
+    }
+
     // Right-click context menu anchor (invisible, positioned at click)
     Item {
         id: contextMenuAnchor

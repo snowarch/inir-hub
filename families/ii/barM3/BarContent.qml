@@ -7,6 +7,7 @@ import Quickshell.Hyprland
 import qs
 import qs.services
 import qs.modules.ii.barM3
+import qs.modules.ii.bar as BarKit
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
@@ -63,8 +64,15 @@ Item {
         || Quickshell.screens.length <= 1
         || String(root.screen?.name ?? "") === String(GlobalStates.primaryScreen?.name ?? "")
 
+    // In edit mode nothing is filtered: every module on the bar keeps its slot, so a mark can carry it.
+    function editMinWidth(item) {
+        return ShellEditSession.active && (!item || !(item.implicitWidth >= 1)) ? BarKit.BarModules.standInWidth : 0
+    }
+
     function filterLayout(layout) {
         let filtered = Array.from(layout ?? [])
+        if (ShellEditSession.active)
+            return filtered
         if (!root.trayHasItems)
             filtered = filtered.filter(name => name !== "sysTray")
         if (!Battery.available)
@@ -479,6 +487,7 @@ Item {
                             bgColor: root.getMaterialPillColor(modelData)
                             Loader {
                                 Layout.fillHeight: true
+                                Layout.minimumWidth: root.editMinWidth(item)
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
                                     if (item)
@@ -498,6 +507,7 @@ Item {
                 spacing: Config.options.material.bar.m3.borderless === "transparent" ? -7 : 2
 
                 Repeater {
+                    id: leftPlainRepeater
                     model: root.effectiveLeftLayout
                     delegate: leftBarGroupDelegate
                 }
@@ -510,6 +520,7 @@ Item {
                         totalCount: root.effectiveLeftLayout.length
                         Loader {
                             Layout.fillHeight: true
+                            Layout.minimumWidth: root.editMinWidth(item)
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
                                 if (item)
@@ -597,6 +608,7 @@ Item {
                             bgColor: root.getMaterialPillColor(modelData)
                             Loader {
                                 Layout.fillHeight: true
+                                Layout.minimumWidth: root.editMinWidth(item)
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
                                     if (item)
@@ -616,6 +628,7 @@ Item {
                 spacing: Config.options.material.bar.m3.borderless === "transparent" ? -7 : 2
 
                 Repeater {
+                    id: middlePlainRepeater
                     model: root.effectiveMiddleLayout
                     delegate: middleBarGroupDelegate
                 }
@@ -628,6 +641,7 @@ Item {
                         totalCount: root.effectiveMiddleLayout.length
                         Loader {
                             Layout.fillHeight: true
+                            Layout.minimumWidth: root.editMinWidth(item)
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
                                 if (item)
@@ -715,6 +729,7 @@ Item {
                             bgColor: root.getMaterialPillColor(modelData)
                             Loader {
                                 Layout.fillHeight: true
+                                Layout.minimumWidth: root.editMinWidth(item)
                                 source: root.getWidgetUrl(modelData)
                                 onLoaded: {
                                     if (item)
@@ -734,6 +749,7 @@ Item {
                 spacing: Config.options.material.bar.m3.borderless === "transparent" ? -7 : 2
 
                 Repeater {
+                    id: rightPlainRepeater
                     model: root.effectiveRightLayout
                     delegate: rightBarGroupDelegate
                 }
@@ -746,6 +762,7 @@ Item {
                         totalCount: root.effectiveRightLayout.length
                         Loader {
                             Layout.fillHeight: true
+                            Layout.minimumWidth: root.editMinWidth(item)
                             source: root.getWidgetUrl(modelData)
                             onLoaded: {
                                 if (item)
@@ -768,6 +785,23 @@ Item {
                     }
                 }
             }
+        }
+    }
+    readonly property var editZones: [
+        { name: "left", repeater: root.isMaterial ? leftMaterialRepeater : leftPlainRepeater, rtl: false },
+        { name: "middle", repeater: root.isMaterial ? centerMaterialRepeater : middlePlainRepeater, rtl: false },
+        { name: "right", repeater: root.isMaterial ? rightMaterialRepeater : rightPlainRepeater, rtl: false }
+    ]
+    readonly property bool editDragging: editMarks.item ? editMarks.item.dragging : false
+    Loader {
+        id: editMarks
+        anchors.fill: parent
+        z: 50
+        active: ShellEditSession.active && (root.screen?.name ?? "") === ShellEditSession.targetOutputName
+        sourceComponent: BarKit.BarEditMarks {
+            zones: root.editZones
+            screenObject: root.screen
+            barBottom: Config.options?.material?.bar?.bottom ?? false
         }
     }
 }

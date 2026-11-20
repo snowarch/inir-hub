@@ -3206,5 +3206,13 @@
   "Show every setting": "Tampilkan semua pengaturan",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Klasik adalah jendela Pengaturan v2.33: header dengan pencarian, daftar halaman yang ramping, dan setiap bagian di kartunya sendiri. Semua halaman dan opsi ada di keduanya.",
   "Screens, workspaces, layout, windows, input": "Layar, ruang kerja, tata letak, jendela, input",
-  "Show in the sidebar": "Tampilkan di bilah sisi"
+  "Show in the sidebar": "Tampilkan di bilah sisi",
+  "Edit bar": "Edit bilah",
+  "Bar and dock": "Bilah dan dock",
+  "Edit on screen": "Edit di layar",
+  "Drag it along the bar to move it, or off the bar to remove it.": "Seret di sepanjang bilah untuk memindahkan, atau keluar bilah untuk menghapus.",
+  "More options": "Opsi lainnya",
+  "Remove from bar": "Hapus dari bilah",
+  "Add to bar": "Tambah ke bilah",
+  "Notch": "Takik"
 }

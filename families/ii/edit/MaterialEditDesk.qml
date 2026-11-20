@@ -241,6 +241,39 @@ Scope {
                         StyledToolTip { text: lockKey.Accessible.name }
                     }
                     RippleButton {
+                        id: barKey
+                        anchors.verticalCenter: parent.verticalCenter
+                        implicitHeight: 32
+                        implicitWidth: barRow.implicitWidth + 24
+                        buttonRadius: Appearance.rounding.full
+                        colBackground: "transparent"
+                        colBackgroundHover: Appearance.colors.colLayer2Hover
+                        Accessible.name: Translation.tr("Bar and dock")
+                        onClicked: {
+                            const output = desk.screen?.name ?? ""
+                            GlobalStates.setWidgetEditMode(false)
+                            ShellEditSession.enter(output)
+                        }
+                        contentItem: Row {
+                            id: barRow
+                            anchors.centerIn: parent
+                            spacing: 6
+                            MaterialSymbol {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "dashboard_customize"
+                                iconSize: 16
+                                color: Appearance.colors.colOnLayer2
+                            }
+                            StyledText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Translation.tr("Bar and dock")
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                font.weight: Font.DemiBold
+                                color: Appearance.colors.colOnLayer2
+                            }
+                        }
+                    }
+                    RippleButton {
                         id: doneKey
                         anchors.verticalCenter: parent.verticalCenter
                         implicitHeight: 32

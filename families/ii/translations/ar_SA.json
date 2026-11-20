@@ -3206,5 +3206,13 @@
   "Show every setting": "اعرض كل الإعدادات",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "الكلاسيكي هو نافذة الإعدادات في v2.33: ترويسة فيها البحث، وقائمة صفحات ضيقة، وكل قسم في بطاقته. كل الصفحات والخيارات موجودة في التصميمين.",
   "Screens, workspaces, layout, windows, input": "الشاشات ومساحات العمل والتخطيط والنوافذ والإدخال",
-  "Show in the sidebar": "إظهار في الشريط الجانبي"
+  "Show in the sidebar": "إظهار في الشريط الجانبي",
+  "Edit bar": "تحرير الشريط",
+  "Bar and dock": "الشريط والرصيف",
+  "Edit on screen": "التحرير على الشاشة",
+  "Drag it along the bar to move it, or off the bar to remove it.": "اسحبه على الشريط لنقله، أو خارجه لإزالته.",
+  "More options": "خيارات أخرى",
+  "Remove from bar": "إزالة من الشريط",
+  "Add to bar": "إضافة إلى الشريط",
+  "Notch": "شق"
 }

@@ -3206,5 +3206,13 @@
   "Show every setting": "모든 설정 보기",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "클래식은 v2.33의 설정 창입니다. 검색이 있는 헤더, 좁은 페이지 목록, 각 섹션은 자체 카드에 들어 있습니다. 모든 페이지와 옵션은 두 디자인 모두에 있습니다.",
   "Screens, workspaces, layout, windows, input": "화면, 작업 공간, 레이아웃, 창, 입력",
-  "Show in the sidebar": "사이드바에 표시"
+  "Show in the sidebar": "사이드바에 표시",
+  "Edit bar": "바 편집",
+  "Bar and dock": "바와 독",
+  "Edit on screen": "화면에서 편집",
+  "Drag it along the bar to move it, or off the bar to remove it.": "바를 따라 끌어 옮기거나, 바 밖으로 끌어 제거하세요.",
+  "More options": "추가 옵션",
+  "Remove from bar": "바에서 제거",
+  "Add to bar": "바에 추가",
+  "Notch": "노치"
 }

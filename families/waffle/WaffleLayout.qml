@@ -20,6 +20,8 @@ QtObject {
             resetScopes: ["surface", "family"]
         }
     ]
+    // What the shell edit mode snapshots for Undo and Revert.
+    readonly property var editKeys: ["waffles.bar"]
     readonly property var rebuilds: ["waffleBar"]
 
     function surfaceState(surfaceId: string, desc: var, outputName: string): var {

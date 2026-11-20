@@ -84,12 +84,13 @@ Scope {
                 readonly property bool interactionHold: contextMenuHold || leftSidebarHold
                     || rightSidebarHold || mediaControlsHold || controlPanelHold
                 readonly property bool pointerShow: !overviewOwnsEdge && hoverRegion.containsMouse
-                property bool mustShow: pointerShow || superShow || interactionHold
+                property bool mustShow: pointerShow || superShow || ShellEditSession.active || interactionHold
                 property bool reservationActive: false
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: GlobalStates.widgetEditMode ? 0 : !autoHideEnabled ? shownExclusiveZone
                     : (pushWindowsWhenShown && reservationActive ? shownExclusiveZone : 0)
                 WlrLayershell.namespace: "quickshell:bar"
+                WlrLayershell.keyboardFocus: barContent.editDragging ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
                 // Upstream raised the bar to Overlay only while a Hyprland
                 // special workspace sat over a fullscreen window. Niri has no
                 // special workspace, so the bar stays on Top and fullscreen

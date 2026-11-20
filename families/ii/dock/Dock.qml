@@ -94,18 +94,11 @@ Scope {
                     id: dockEdge
                     hovered: (Config.options?.material?.dock?.hoverToReveal ?? false) && dockMouseArea.containsMouse
                 }
-                readonly property bool workspaceBusy: CompositorService.isNiri
-                    ? NiriService.hasWindowsOnActiveWorkspace(dockRoot.screen?.name ?? "")
-                    : (ToplevelManager.activeToplevel?.activated ?? false)
-                readonly property bool dodgeReveal: (Config.options?.material?.dock?.hoverToReveal ?? false)
-                    && (Config.options?.material?.dock?.dodgeWindows ?? false)
-                    && !dockRoot.workspaceBusy
                 property bool reveal: !GlobalStates.coverflowSelectorOpen && !DesktopEditStage.receding
                     && !(GlobalStates.wallpaperLauncherOpen && root.position === "bottom")
                     && GlobalStates.shellEntryReady
                     && (ShellEditSession.active || root.pinned
                         || dockEdge.revealed
-                        || dockRoot.dodgeReveal
                         || (dockApps?.requestDockShow || dockAppsVertical?.requestDockShow)
                         || (Config.options?.material?.dock?.showOnDesktop !== false
                             && !ToplevelManager.activeToplevel?.activated))
@@ -301,17 +294,18 @@ Scope {
                             }
                         }
 
-                         Item {
-                             id: dockBackground
+                        Item {
+                            id: dockBackground
 
-                             PaletteFade {
-                                 target: dockBackground
-                                 active: dockRoot.visible && dockRoot.reveal
-                             }
+                            PaletteFade {
+                                anchors.fill: parent
+                                target: dockBackground
+                                active: dockRoot.visible && dockRoot.reveal
+                            }
 
-                             // Shell desaturation effect
-                             layer.enabled: Appearance.shouldDesaturate("dock") && dockBackground.visible
-                             layer.effect: ShellDesaturationEffect {}
+                            // Shell desaturation effect
+                            layer.enabled: Appearance.shouldDesaturate("dock") && dockBackground.visible
+                            layer.effect: ShellDesaturationEffect {}
 
                             anchors {
                                 top: !root.isVertical ? parent.top : undefined
@@ -396,52 +390,52 @@ Scope {
                                         color: ColorUtils.mix(dockVisualBackground.wallpaperDominantColor, Appearance.colors.colPrimaryContainer, 0.8) || Appearance.colors.colSecondaryContainer
                                     }
 
-                                     anchors.fill: parent
-                                     anchors.topMargin: root.isTop ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
-                                     anchors.bottomMargin: root.position === "bottom" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
-                                     anchors.leftMargin: root.isLeft ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
-                                     anchors.rightMargin: root.position === "right" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
+                                    anchors.fill: parent
+                                    anchors.topMargin: root.isTop ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
+                                    anchors.bottomMargin: root.position === "bottom" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? -dockVisualBackground.flareSize : Appearance.sizes.elevationMargin)
+                                    anchors.leftMargin: root.isLeft ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
+                                    anchors.rightMargin: root.position === "right" ? (root.isNotchStyle ? 0 : Appearance.sizes.hyprlandGapsOut) : (root.isVertical ? Appearance.sizes.elevationMargin : -dockVisualBackground.flareSize)
 
-                                 // Hide shared background in pill mode — each pill is its own background
-                                 // Hide in macOS mode — DockMacBackground is the unified shelf
-                                 // Island is an explicit opt-in to the Ricelin dialect,
-                                 // so it replaces the zzz surface too (same rule as the
-                                 // islands bar).
-                                 visible: (Config.options?.material?.dock?.showBackground ?? true) && !gameModeMinimal && ((root.zzzEverywhere && !root.isIslandStyle) || (!root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle))
-                                 // ZZZ: the visible shelf is the chamfered ZzzPlate below.
-                                 readonly property color surfaceColor: dockVisualBackground.editorialGlassActive
-                                     ? (!dockVisualBackground.editorialBackdropReady ? Appearance.editorial.rail
-                                         : dockRoot.nativeBlurActive && !Appearance.editorial.paperStack ? Appearance.editorial.glassRail
-                                         : "transparent")
-                                     : Appearance.editorialEverywhere ? Appearance.editorial.rail
-                                     : root.isM3Style ? Appearance.colors.colLayer0
-                                     : root.zzzEverywhere || regaliaEverywhere ? "transparent"
-                                     : auroraEverywhere ? ColorUtils.applyAlpha(
-                                         (blendedColors?.colLayer0 ?? Appearance.colors.colLayer0),
-                                         dockRoot.nativeBlurActive ? 0.46 : 1)
-                                     : inirEverywhere ? Appearance.inir.colLayer1
-                                     : (cardStyle ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
-                                 color: root.isNotchStyle ? "transparent" : surfaceColor
-                                 border.width: root.isNotchStyle ? 0
-                                     : root.isM3Style ? 1
-                                     : root.zzzEverywhere || regaliaEverywhere ? 0
-                                     : angelEverywhere ? Appearance.angel.panelBorderWidth : 1
-                                 border.color: root.isM3Style ? Appearance.colors.colLayer0Border
-                                     : root.zzzEverywhere || regaliaEverywhere ? "transparent"
-                                     : angelEverywhere ? Appearance.angel.colPanelBorder
-                                     : inirEverywhere ? Appearance.inir.colBorder
-                                     : Appearance.colors.colLayer0Border
-                                 radius: (root.isM3Style || root.isNotchStyle) ? Appearance.rounding.normal + 6
-                                     : root.zzzEverywhere ? Appearance.zzz.panelRadius
-                                     : regaliaEverywhere && root.isPanelStyle ? Appearance.regalia.roundLarge
-                                     : regaliaEverywhere ? Appearance.regalia.panelRadius
-                                     : angelEverywhere ? Appearance.angel.roundingNormal
-                                     : inirEverywhere ? Appearance.inir.roundingNormal
-                                     : cardStyle ? Appearance.rounding.normal : Appearance.rounding.large
-                                 topLeftRadius: root.isNotchStyle && (root.isTop || root.isLeft) ? 0 : radius
-                                 topRightRadius: root.isNotchStyle && (root.isTop || root.position === "right") ? 0 : radius
-                                 bottomLeftRadius: root.isNotchStyle && (root.position === "bottom" || root.isLeft) ? 0 : radius
-                                 bottomRightRadius: root.isNotchStyle && (root.position === "bottom" || root.position === "right") ? 0 : radius
+                                // Hide shared background in pill mode — each pill is its own background
+                                // Hide in macOS mode — DockMacBackground is the unified shelf
+                                // Island is an explicit opt-in to the Ricelin dialect,
+                                // so it replaces the zzz surface too (same rule as the
+                                // islands bar).
+                                visible: (Config.options?.material?.dock?.showBackground ?? true) && !gameModeMinimal && ((root.zzzEverywhere && !root.isIslandStyle) || (!root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle))
+                                // ZZZ: the visible shelf is the chamfered ZzzPlate below.
+                                readonly property color surfaceColor: dockVisualBackground.editorialGlassActive
+                                    ? (!dockVisualBackground.editorialBackdropReady ? Appearance.editorial.rail
+                                        : dockRoot.nativeBlurActive && !Appearance.editorial.paperStack ? Appearance.editorial.glassRail
+                                        : "transparent")
+                                    : Appearance.editorialEverywhere ? Appearance.editorial.rail
+                                    : root.isM3Style ? Appearance.colors.colLayer0
+                                    : root.zzzEverywhere || regaliaEverywhere ? "transparent"
+                                    : auroraEverywhere ? ColorUtils.applyAlpha(
+                                        (blendedColors?.colLayer0 ?? Appearance.colors.colLayer0),
+                                        dockRoot.nativeBlurActive ? 0.46 : 1)
+                                    : inirEverywhere ? Appearance.inir.colLayer1
+                                    : (cardStyle ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
+                                color: root.isNotchStyle ? "transparent" : surfaceColor
+                                border.width: root.isNotchStyle ? 0
+                                    : root.isM3Style ? 1
+                                    : root.zzzEverywhere || regaliaEverywhere ? 0
+                                    : angelEverywhere ? Appearance.angel.panelBorderWidth : 1
+                                border.color: root.isM3Style ? Appearance.colors.colLayer0Border
+                                    : root.zzzEverywhere || regaliaEverywhere ? "transparent"
+                                    : angelEverywhere ? Appearance.angel.colPanelBorder
+                                    : inirEverywhere ? Appearance.inir.colBorder
+                                    : Appearance.colors.colLayer0Border
+                                radius: (root.isM3Style || root.isNotchStyle) ? Appearance.rounding.normal + 6
+                                    : root.zzzEverywhere ? Appearance.zzz.panelRadius
+                                    : regaliaEverywhere && root.isPanelStyle ? Appearance.regalia.roundLarge
+                                    : regaliaEverywhere ? Appearance.regalia.panelRadius
+                                    : angelEverywhere ? Appearance.angel.roundingNormal
+                                    : inirEverywhere ? Appearance.inir.roundingNormal
+                                    : cardStyle ? Appearance.rounding.normal : Appearance.rounding.large
+                                topLeftRadius: root.isNotchStyle && (root.isTop || root.isLeft) ? 0 : radius
+                                topRightRadius: root.isNotchStyle && (root.isTop || root.position === "right") ? 0 : radius
+                                bottomLeftRadius: root.isNotchStyle && (root.position === "bottom" || root.isLeft) ? 0 : radius
+                                bottomRightRadius: root.isNotchStyle && (root.position === "bottom" || root.position === "right") ? 0 : radius
 
                                 Rectangle {
                                     id: notchBodyFill
@@ -480,7 +474,7 @@ Scope {
 
                                 EditorialPaperStack {
                                     anchors.fill: parent
-                                    visible: !root.isM3Style && !root.isNotchStyle && Appearance.editorialEverywhere
+                                    visible: !root.isNotchStyle && Appearance.editorialEverywhere && Appearance.editorial.paperStack
                                     faceColor: Appearance.editorial.rail
                                     radius: dockVisualBackground.radius
                                     materialOpacity: dockVisualBackground.editorialBackdropReady ? Appearance.editorial.glassOpacity : 1
@@ -554,7 +548,7 @@ Scope {
                                             y: root.isVertical ? dockVisualBackground.flareSize : 0
                                             width: parent.width - (!root.isVertical ? dockVisualBackground.flareSize * 2 : 0)
                                             height: parent.height - (root.isVertical ? dockVisualBackground.flareSize * 2 : 0)
-                                            radius: dockVisualBackground.radius
+                                        radius: dockVisualBackground.radius
                                             topLeftRadius: dockVisualBackground.topLeftRadius
                                             topRightRadius: dockVisualBackground.topRightRadius
                                             bottomLeftRadius: dockVisualBackground.bottomLeftRadius
@@ -744,6 +738,19 @@ Scope {
                         width: Math.round(visualTarget.width)
                         height: Math.round(visualTarget.height)
                         surfaceId: "iiDock"
+                        // Right click opens the Dock's sheet beside it (rect in screen coordinates).
+                        onContextRequested: {
+                            const scr = dockRoot.screen
+                            const pos = Config.options?.material?.dock?.position ?? "bottom"
+                            const outW = scr?.width ?? dockRoot.width
+                            const outH = scr?.height ?? dockRoot.height
+                            const ox = pos === "left" ? 0 : pos === "right" ? outW - dockRoot.width
+                                : (dockRoot.width >= outW - 2 ? 0 : (outW - dockRoot.width) / 2)
+                            const oy = pos === "top" ? 0 : pos === "bottom" ? outH - dockRoot.height
+                                : (dockRoot.height >= outH - 2 ? 0 : (outH - dockRoot.height) / 2)
+                            ShellEditSession.openSheet("dock", "", scr?.name ?? "",
+                                { x: ox + dockEditFrame.x, y: oy + dockEditFrame.y, width: dockEditFrame.width, height: dockEditFrame.height })
+                        }
                         label: Translation.tr("Dock")
                         active: ShellEditSession.blocksNormalActions(surfaceId)
                         selected: ShellEditSession.selectedSurfaceId === surfaceId

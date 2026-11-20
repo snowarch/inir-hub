@@ -5,6 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.ii.kit
+import qs.modules.ii.bar
 import qs.modules.common.functions
 
 ContentPage {
@@ -293,47 +294,14 @@ ContentPage {
     }
 
     function moveM3Widget(sourceSection, sourceIndex, id, targetSection, targetIndex): bool {
-        const layouts = root.currentM3Layouts()
-        if (!layouts[sourceSection] || !layouts[targetSection])
+        if (!root.m3ControlsReady)
             return false
-
-        const source = layouts[sourceSection].slice()
-        if (sourceIndex < 0 || sourceIndex >= source.length)
-            return false
-        const moved = source.splice(sourceIndex, 1)[0]
-        const target = sourceSection === targetSection ? source : layouts[targetSection].slice()
-        let insertAt = targetIndex
-        if (sourceSection === targetSection && insertAt > sourceIndex)
-            insertAt--
-        insertAt = Math.max(0, Math.min(insertAt, target.length))
-        target.splice(insertAt, 0, moved)
-        layouts[sourceSection] = sourceSection === targetSection ? target : source
-        layouts[targetSection] = target
-
-        root.setM3Values({
-            "material.bar.m3.layoutMode": "custom",
-            "material.bar.m3.customLayoutSaved": true,
-            "material.bar.m3.layouts.leftLayout": layouts.left,
-            "material.bar.m3.layouts.middleLayout": layouts.middle,
-            "material.bar.m3.layouts.rightLayout": layouts.right,
-            "material.bar.m3.customLayouts.leftLayout": layouts.left,
-            "material.bar.m3.customLayouts.middleLayout": layouts.middle,
-            "material.bar.m3.customLayouts.rightLayout": layouts.right
-        })
-        return true
+        return BarModules.move(sourceSection, sourceIndex, targetSection, targetIndex, "m3")
     }
 
     function updateM3CustomLayout(side, list): void {
         if (!root.m3ControlsReady) return
-        const next = Array.from(list ?? [])
-        const activePath = "material.bar.m3.layouts." + side + "Layout"
-        const customPath = "material.bar.m3.customLayouts." + side + "Layout"
-        root.setM3Values({
-            "material.bar.m3.layoutMode": "custom",
-            "material.bar.m3.customLayoutSaved": true,
-            [activePath]: next,
-            [customPath]: next
-        })
+        BarModules.setIds(side, list, "m3")
     }
 
     function applyM3LayoutPreset(value): void {
@@ -386,31 +354,7 @@ ContentPage {
         root.setM3Values(updates)
     }
 
-    readonly property var m3Widgets: [
-        { id: "leftSidebarButton", name: Translation.tr("Left Sidebar Button"), icon: "left_panel_open",
-            description: Translation.tr("Click: Left Sidebar") },
-        { id: "rightSidebarButton", name: Translation.tr("Right Sidebar Button"), icon: "right_panel_open",
-            description: Translation.tr("Click: Right Sidebar") },
-        { id: "workspaces", name: Translation.tr("Workspaces"), icon: "steppers" },
-        { id: "weatherBar", name: Translation.tr("Weather"), icon: "flare" },
-        { id: "media", name: Translation.tr("Media"), icon: "music_note" },
-        { id: "resources", name: Translation.tr("Resources"), icon: "monitoring" },
-        { id: "systemIcons", name: Translation.tr("System Icons"), icon: "info" },
-        { id: "networkSpeed", name: Translation.tr("Network Speed"), icon: "network_check" },
-        { id: "clockWidget", name: Translation.tr("Clock"), icon: "schedule" },
-        { id: "utilButtons", name: Translation.tr("Utility Buttons"), icon: "toggle_on" },
-        { id: "sysTray", name: Translation.tr("Tray"), icon: "inbox" },
-        { id: "batteryIndicator", name: Translation.tr("Battery"), icon: "battery_android_frame_full" },
-        { id: "activeWindow", name: Translation.tr("Active Window"), icon: "subtitles" },
-        { id: "powerButton", name: Translation.tr("Power Button"), icon: "power_settings_new" },
-        { id: "updatesCount", name: Translation.tr("Updates"), icon: "deployed_code_update" },
-        { id: "docktoPanel", name: Translation.tr("Dock to Panel"), icon: "apps" },
-        { id: "visualizer", name: Translation.tr("Visualizer"), icon: "graphic_eq" },
-        { id: "hyprlandXkbIndicator", name: Translation.tr("Keyboard Layout"), icon: "keyboard" },
-        { id: "divisor", name: Translation.tr("Divider"), icon: "horizontal_distribute" },
-        { id: "notificationUnreadCount", name: Translation.tr("Unread Notifications"), icon: "notifications",
-            description: Translation.tr("Click: Right Sidebar") }
-    ]
+    readonly property var m3Widgets: BarModules.m3Widgets
 
     function m3WidgetName(id): string {
         return root.m3Widgets.find(widget => widget.id === id)?.name ?? id
@@ -440,9 +384,8 @@ ContentPage {
     }
 
     function availableM3Widgets(): var {
-        const multipleAllowed = ["visualizer", "divisor"]
         return root.m3Widgets.filter(widget =>
-            !root.activeM3Widgets.includes(widget.id) || multipleAllowed.includes(widget.id))
+            !root.activeM3Widgets.includes(widget.id) || BarModules.m3Multiple.includes(widget.id))
     }
 
     // Corner style compatibility per global style
@@ -480,6 +423,17 @@ ContentPage {
         title: Translation.tr("Appearance & Layout")
 
         SettingsGroup {
+            RippleButtonWithIcon {
+                Layout.alignment: Qt.AlignLeft
+                buttonRadius: Appearance.rounding.small
+                materialIcon: "dashboard_customize"
+                mainText: Translation.tr("Edit on screen")
+                onClicked: {
+                    GlobalStates.settingsOverlayOpen = false
+                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "shellLayout", "open"])
+                }
+            }
+
             ContentSubsection {
                 title: Translation.tr("Bar appearance")
 

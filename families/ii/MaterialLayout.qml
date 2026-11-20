@@ -59,6 +59,8 @@ QtObject {
             resetScopes: ["surface", "family"]
         }
     ]
+    // What the shell edit mode snapshots for Undo and Revert.
+    readonly property var editKeys: ["material.bar", "material.dock", "material.sidebar.shellLayout"]
     readonly property var rebuilds: ["featureSidebar", "systemSidebar", "iiBar", "iiDock"]
 
     function _roleKey(surfaceId: string): string {

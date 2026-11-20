@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -33,6 +34,17 @@ ContentPage {
                 checked: Config.options.material.dock.enable
                 onCheckedChanged: {
                     Config.setNestedValue("material.dock.enable", checked);
+                }
+            }
+
+            RippleButtonWithIcon {
+                Layout.alignment: Qt.AlignLeft
+                buttonRadius: Appearance.rounding.small
+                materialIcon: "dashboard_customize"
+                mainText: Translation.tr("Edit on screen")
+                onClicked: {
+                    GlobalStates.settingsOverlayOpen = false
+                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "shellLayout", "open"])
                 }
             }
 
@@ -90,26 +102,13 @@ ContentPage {
                 }
             }
 
-            // Both only mean something under Empty workspace: Hover already hides the dock, and a pinned dock would
-            // cancel Hover. Disabled there so the contradiction shows.
-            SettingsSwitch {
-                buttonIcon: "window"
-                text: Translation.tr("Dodge windows")
-                enabled: Config.options?.material?.dock?.hoverToReveal ?? true
-                checked: Config.options?.material?.dock?.dodgeWindows ?? false
-                onCheckedChanged: Config.setNestedValue('material.dock.dodgeWindows', checked)
-                StyledToolTip {
-                    text: Translation.tr("Keep the dock visible on empty workspaces and hide it only when windows are open")
-                }
-            }
             SettingsSwitch {
                 buttonIcon: "desktop_windows"
                 text: Translation.tr("Show on desktop")
-                enabled: !(Config.options?.material?.dock?.hoverToReveal ?? true)
                 checked: Config.options?.material?.dock?.showOnDesktop ?? true
                 onCheckedChanged: Config.setNestedValue('material.dock.showOnDesktop', checked)
                 StyledToolTip {
-                    text: Translation.tr("Show dock when no window is focused (Empty workspace mode only)")
+                    text: Translation.tr("Show dock when no window is focused")
                 }
             }
             SettingsSwitch {

@@ -3206,5 +3206,13 @@
   "Show every setting": "Показать все настройки",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Классический — это окно настроек v2.33: заголовок с поиском, узкий список страниц и каждый раздел в своей карточке. Все страницы и параметры есть в обоих.",
   "Screens, workspaces, layout, windows, input": "Экраны, рабочие области, раскладка, окна, ввод",
-  "Show in the sidebar": "Показать на боковой панели"
+  "Show in the sidebar": "Показать на боковой панели",
+  "Edit bar": "Изменить панель",
+  "Bar and dock": "Панель и док",
+  "Edit on screen": "Изменить на экране",
+  "Drag it along the bar to move it, or off the bar to remove it.": "Перетащите вдоль панели, чтобы переместить, или за её пределы, чтобы убрать.",
+  "More options": "Другие параметры",
+  "Remove from bar": "Убрать с панели",
+  "Add to bar": "Добавить на панель",
+  "Notch": "Вырез"
 }
