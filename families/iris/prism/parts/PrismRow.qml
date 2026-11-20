@@ -568,11 +568,5 @@ Item {
     }
     Component { id: niriBelow; IrisNiriMotionGallery { width: slot.width } }
     Component { id: widgetsBelow; IrisWidgetGallery { width: slot.width } }
-    Component {
-        id: themesBelow
-        Loader {
-            width: slot.width
-            source: Qt.resolvedUrl("../../edit/IrisPresetGallery.qml")
-        }
-    }
+    Component { id: themesBelow; PrismPresets { width: slot.width } }
 }

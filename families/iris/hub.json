@@ -1,7 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.117",
+    "version": "2.33.118",
     "changes": {
+      "2.33.118": [
+          "Prism Settings: Style's presets are one calm set of keys, each named in its own type with a dot of its accent",
+          "Home's wallpaper card carries its name alone, with no row of colours under it"
+      ],
       "2.33.117": [
           "Prism Settings: the side column is yours to arrange, with Up next, Forecast and Vitals among its blocks",
           "The player there comes as the large cover or as a compact bar",

@@ -11,8 +11,8 @@ import qs.modules.iris.prism.fx
 import qs.modules.iris.prism.controls
 
 // Home is the person's: their desktop as it stands beside what they change every day. The picture fills its card to the
-// day's height (a press opens Wallpaper); at its foot its name and the three colours iRiS takes from it, joined in one
-// capsule, with the next wallpaper a press away. The day's card holds its keys, then the two levels people reach for
+// day's height (a press opens Wallpaper); at its foot its name alone (his 11-20: no row of colours under it), with the
+// next wallpaper a press away. The day's card holds its keys, then the two levels people reach for
 // most, so neither card stands half empty (his 11-19: "distribuí mejor el wallpaper"). A machine without a sound server
 // or a dimmable screen simply shows no level: nothing here says what is missing.
 Item {
@@ -78,7 +78,7 @@ Item {
             Accessible.name: Translation.tr("Wallpaper")
             onClicked: PrismState.go("wallpaper")
         }
-        // The picture's name (a file's own name only when a person would say it), and the colours iRiS wears from it.
+        // The picture's name (a file's own name only when a person would say it).
         Column {
             x: root.pad
             anchors.bottom: parent.bottom
@@ -93,25 +93,6 @@ Item {
                 font.pixelSize: PrismTheme.row
                 font.weight: Font.DemiBold
                 font.letterSpacing: -PrismTheme.row * 0.01
-            }
-            // One capsule, three colours: the accent, the highlight and the signal, in the order iRiS uses them.
-            ClippingRectangle {
-                width: PrismTheme.dp(54)
-                height: PrismTheme.dp(10)
-                radius: height / 2
-                color: "transparent"
-                Row {
-                    anchors.fill: parent
-                    Repeater {
-                        model: [IrisStyle.accent, IrisStyle.secondaryAccent, IrisStyle.signal]
-                        delegate: Rectangle {
-                            required property color modelData
-                            width: PrismTheme.dp(18)
-                            height: parent.height
-                            color: modelData
-                        }
-                    }
-                }
             }
         }
         PrismRound {
