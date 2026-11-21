@@ -81,7 +81,7 @@ Column {
     function bindOf(trigger: string): var { return root.bindIndex[IrisBinds.heldKey(root.held, trigger)] ?? null }
     function said(text: string): var { return { text: text, glyph: "", tint: "", free: false } }
     function freeLine(form: string): var {
-        const free = Translation.tr("Free")
+        const free = Translation.tr("Unbound")
         return { text: form.length > 0 ? form.arg(free) : free, glyph: "", tint: "", free: true }
     }
     function bindLine(bind: var, form: string): var {
