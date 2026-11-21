@@ -4,6 +4,7 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.iris.components
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
@@ -162,6 +163,32 @@ Item {
             maskSpreadAtMin: 1
         }
 
+        // The open page's plate, one for the list: it slides from the page left to the page opened and follows its line
+        // while the parts above it fold, instead of one plate fading out as another fades in.
+        Rectangle {
+            id: selection
+            readonly property Item at: root.opened && root.opened.current ? root.opened : null
+            property Item held: null
+            property bool shown: false
+            onAtChanged: {
+                if (!selection.at) { selection.shown = false; return }
+                selection.held = selection.at
+                selection.shown = true
+            }
+            x: column.x
+            y: column.y + (selection.held ? selection.held.y + selection.held.parent.y : 0)
+            width: column.width
+            height: selection.held?.line?.height ?? 0
+            radius: PrismTheme.dp(10)
+            color: PrismTheme.accentPlate
+            opacity: selection.shown ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+            Behavior on y {
+                enabled: selection.shown && PrismTheme.motion
+                SmoothedAnimation { duration: PrismTheme.ms(260); velocity: -1 }
+            }
+        }
+
         Column {
             id: column
             x: root.side
@@ -201,7 +228,8 @@ Item {
                             anchors.rightMargin: PrismTheme.dp(8)
                             anchors.verticalCenter: caption.verticalCenter
                             height: 1
-                            color: PrismTheme.line
+                            color: group.here ? ColorUtils.applyAlpha(PrismTheme.accentInk, 0.32) : PrismTheme.line
+                            Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
                         }
                     }
                     Repeater {
@@ -213,11 +241,15 @@ Item {
                             onCurrentChanged: if (place.current) { root.opened = place; revealLater.restart() }
                             Component.onCompleted: if (place.current) { root.opened = place; revealLater.restart() }
                             width: group.width
+                            readonly property Item line: navLine
                             PrismNavItem {
+                                id: navLine
                                 width: place.width
                                 glyph: place.modelData.glyph
                                 text: Translation.tr(place.modelData.name)
                                 current: place.current
+                                plate: false
+                                chapter: group.here
                                 changed: root.changedAt[place.modelData.pageId] === true
                                 inGroup: group.here || !root.located
                                 onClicked: PrismState.go(place.modelData.pageId)

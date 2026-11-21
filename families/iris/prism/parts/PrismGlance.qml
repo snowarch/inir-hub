@@ -51,7 +51,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     text: Icons.getWeatherIcon(String(sky.reading.wCode ?? "113"), Weather.isNightNow())
                     iconSize: PrismTheme.dp(30)
-                    color: PrismTheme.ink
+                    color: PrismTheme.accentInk
                 }
                 PrismText {
                     id: degrees
@@ -59,6 +59,8 @@ Item {
                     anchors.leftMargin: PrismTheme.dp(8)
                     anchors.verticalCenter: parent.verticalCenter
                     text: sky.temp.replace(/[CF]$/, "")
+                    // The reading the glance is for, in the accent's ink.
+                    color: PrismTheme.accentInk
                     figures: true
                     font.pixelSize: PrismTheme.title
                     font.weight: Font.Medium
@@ -97,13 +99,16 @@ Item {
                     delegate: Column {
                         id: hour
                         required property var modelData
+                        required property int index
                         width: sky.width / Math.max(1, sky.hours.length)
                         spacing: PrismTheme.dp(4)
                         PrismText {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: String(hour.modelData.label ?? "")
-                            color: PrismTheme.ink3
+                            // The hour that comes next reads first.
+                            color: hour.index === 0 ? PrismTheme.accentInk : PrismTheme.ink3
+                            font.weight: hour.index === 0 ? Font.DemiBold : Font.Normal
                             figures: true
                             font.pixelSize: PrismTheme.caption
                         }
@@ -164,6 +169,7 @@ Item {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: String(event.when.getDate())
+                            color: PrismTheme.accentInk
                             figures: true
                             font.pixelSize: PrismTheme.head
                             font.weight: Font.DemiBold
@@ -241,17 +247,19 @@ Item {
             onLiveChanged: machine.live ? ResourceUsage.keepAlive(machine) : ResourceUsage.releaseKeepAlive(machine)
             Component.onCompleted: if (machine.live) ResourceUsage.keepAlive(machine)
             Component.onDestruction: ResourceUsage.releaseKeepAlive(machine)
-            readonly property var measures: [
-                { label: "Processor", level: ResourceUsage.cpuUsage, value: Math.round(ResourceUsage.cpuUsage * 100) + "%" },
-                { label: "Memory", level: ResourceUsage.memoryUsedPercentage, value: Math.round(ResourceUsage.memoryUsedPercentage * 100) + "%" }
-            ].concat(ResourceUsage.maxTemp > 0 ? [{ label: "Temperature", level: ResourceUsage.tempPercentage, value: ResourceUsage.maxTemp + "°" }] : [])
+            // The measures by name only: each line reads its own value, so a new reading moves its bar instead of
+            // building the lines again (a list of readings changed with every sample and rebuilt them each time).
+            readonly property bool hasTemp: ResourceUsage.maxTemp > 0
+            readonly property var measures: machine.hasTemp ? ["cpu", "memory", "temp"] : ["cpu", "memory"]
             spacing: 0
             Head { text: Translation.tr("Vitals") }
             Repeater {
                 model: machine.measures
                 delegate: Item {
                     id: measure
-                    required property var modelData
+                    required property string modelData
+                    readonly property real level: measure.modelData === "cpu" ? ResourceUsage.cpuUsage
+                        : measure.modelData === "memory" ? ResourceUsage.memoryUsedPercentage : ResourceUsage.tempPercentage
                     width: machine.width
                     height: PrismTheme.dp(36)
                     PrismText {
@@ -259,7 +267,8 @@ Item {
                         anchors.right: value.left
                         anchors.rightMargin: PrismTheme.dp(8)
                         y: PrismTheme.dp(6)
-                        text: Translation.tr(measure.modelData.label)
+                        text: measure.modelData === "cpu" ? Translation.tr("Processor")
+                            : measure.modelData === "memory" ? Translation.tr("Memory") : Translation.tr("Temperature")
                         font.pixelSize: PrismTheme.body
                         font.weight: Font.Medium
                     }
@@ -267,10 +276,11 @@ Item {
                         id: value
                         anchors.right: parent.right
                         y: PrismTheme.dp(6)
-                        text: measure.modelData.value
-                        color: PrismTheme.ink2
+                        text: measure.modelData === "temp" ? ResourceUsage.maxTemp + "°" : Math.round(measure.level * 100) + "%"
+                        color: PrismTheme.accentInk
                         figures: true
                         font.pixelSize: PrismTheme.small
+                        font.weight: Font.DemiBold
                     }
                     Rectangle {
                         y: parent.height - PrismTheme.dp(8)
@@ -279,10 +289,11 @@ Item {
                         radius: height / 2
                         color: PrismTheme.fillPress
                         Rectangle {
-                            width: Math.max(parent.height, parent.width * Math.max(0, Math.min(1, measure.modelData.level)))
+                            width: Math.max(parent.height, parent.width * Math.max(0, Math.min(1, measure.level)))
                             height: parent.height
                             radius: parent.radius
-                            color: PrismTheme.ink
+                            // The graphs' one mark: the person's accent.
+                            color: PrismTheme.mark
                             Behavior on width { NumberAnimation { duration: PrismTheme.ms(420); easing.type: Easing.OutCubic } }
                         }
                     }

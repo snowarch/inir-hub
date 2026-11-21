@@ -18,17 +18,23 @@ Item {
     // Something on the page differs from iNiR's (his 11-21: the dot that said where the changes were): a small dot on the
     // key's corner, in the ink, so the accent still names only where you stand and a long name keeps its width.
     property bool changed: false
+    // The open page's plate is drawn here, or by the list, which slides one plate from page to page (PrismSidebar).
+    property bool plate: true
+    // A page of the open page's chapter: its key takes a breath of the accent, so the chapter reads as one block.
+    property bool chapter: false
     signal clicked()
     signal trailingClicked()
 
     implicitHeight: root.current ? PrismTheme.dp(38) : PrismTheme.dp(34)
+    onCurrentChanged: if (root.current && PrismTheme.motion) pop.restart()
     Behavior on implicitHeight { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
     readonly property bool pointed: area.containsMouse || tailArea.containsMouse
 
     Rectangle {
         anchors.fill: parent
         radius: PrismTheme.dp(10)
-        color: root.current ? PrismTheme.accentPlate : area.pressed ? PrismTheme.fillPress : root.pointed ? PrismTheme.fill : "transparent"
+        color: root.current && root.plate ? PrismTheme.accentPlate : area.pressed ? PrismTheme.fillPress
+            : root.pointed && !root.current ? PrismTheme.fill : "transparent"
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
     }
     Rectangle {
@@ -39,8 +45,15 @@ Item {
         height: width
         radius: PrismTheme.dp(8)
         // Light, the column is already frost: a key stands in white.
-        color: root.current ? PrismTheme.accent : PrismTheme.light ? PrismTheme.raised : PrismTheme.keyQuiet
+        readonly property color quiet: PrismTheme.light ? PrismTheme.raised : PrismTheme.keyQuiet
+        color: root.current ? PrismTheme.accent : root.chapter ? PrismTheme.step(icon.quiet, PrismTheme.accent, PrismTheme.light ? 0.16 : 0.22) : icon.quiet
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+        // Chosen, the key lands: a short pop as it takes the accent.
+        SequentialAnimation {
+            id: pop
+            NumberAnimation { target: icon; property: "scale"; to: 0.84; duration: PrismTheme.ms(70); easing.type: Easing.OutQuad }
+            NumberAnimation { target: icon; property: "scale"; to: 1; duration: PrismTheme.ms(300); easing.type: Easing.OutBack; easing.overshoot: 2.4 }
+        }
         PrismGlyph {
             anchors.centerIn: parent
             text: root.glyph
@@ -73,8 +86,10 @@ Item {
         radius: width / 2
         visible: scale > 0
         scale: root.changed ? 1 : 0
-        color: root.current || root.pointed ? PrismTheme.ink : PrismTheme.ink2
+        // Quiet at rest: with many pages changed, bright dots out-shouted the names.
+        color: root.current || root.pointed ? PrismTheme.ink : PrismTheme.ink3
         Behavior on scale { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutBack } }
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
     }
     PrismGlyph {
         id: tail

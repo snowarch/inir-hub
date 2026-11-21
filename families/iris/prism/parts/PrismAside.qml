@@ -319,8 +319,10 @@ Item {
                             width: Math.min(implicitWidth, parent.width * 0.42)
                             horizontalAlignment: Text.AlignRight
                             text: change.now
-                            color: PrismTheme.ink2
+                            // The value it holds now is what changed: the line's one word in the accent's ink.
+                            color: PrismTheme.accentInk
                             font.pixelSize: PrismTheme.small
+                            font.weight: Font.Medium
                             figures: true
                             elide: Text.ElideRight
                         }
@@ -362,6 +364,18 @@ Item {
             id: pageBox
             readonly property bool shown: root.changes.length > 0 || root.differs.length > 0 || root.keys.length > 0 || root.tip.length > 0
             spacing: 0
+            // Another page's notes arrive instead of swapping in place: they rise a step and fade in, so the column says
+            // the page changed.
+            transform: Translate { id: arrive }
+            Connections {
+                target: root
+                function onPageIdChanged(): void { if (PrismTheme.motion) turn.restart() }
+            }
+            ParallelAnimation {
+                id: turn
+                NumberAnimation { target: pageBox; property: "opacity"; from: 0; to: 1; duration: PrismTheme.ms(240); easing.type: Easing.OutCubic }
+                NumberAnimation { target: arrive; property: "y"; from: PrismTheme.dp(12); to: 0; duration: PrismTheme.ms(340); easing.type: Easing.OutQuint }
+            }
 
             // What this visit changed on the page, while it holds: each line's way back is the value it had before.
             PrismText {
@@ -585,6 +599,14 @@ Item {
             x: root.pad
             width: root.width - 2 * root.pad
             spacing: PrismTheme.dp(26)
+            // A block that grows or shrinks (another page's notes, a player that stops) moves the ones under it, never
+            // jumps them. Off while the column first lays itself out, so it opens still.
+            move: settle.running ? null : shift
+            Transition {
+                id: shift
+                NumberAnimation { properties: "y"; duration: PrismTheme.ms(280); easing.type: Easing.OutCubic }
+            }
+            Timer { id: settle; interval: 600; running: true }
             Repeater {
                 model: root.blocks
                 delegate: Loader {
@@ -607,12 +629,14 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "tune"
                         iconSize: PrismTheme.dp(15)
-                        color: arrange.containsMouse ? PrismTheme.accentInk : PrismTheme.ink3
+                        color: arrange.containsMouse ? PrismTheme.accentInk : PrismTheme.ink2
+                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
                     }
                     PrismText {
                         anchors.verticalCenter: parent.verticalCenter
                         text: Translation.tr("Customize")
-                        color: arrange.containsMouse ? PrismTheme.accentInk : PrismTheme.ink3
+                        color: arrange.containsMouse ? PrismTheme.accentInk : PrismTheme.ink2
+                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
                         font.pixelSize: PrismTheme.small
                         font.weight: Font.DemiBold
                     }

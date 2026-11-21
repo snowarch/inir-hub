@@ -150,7 +150,12 @@ Item {
         anchors.rightMargin: root.pad
         anchors.bottom: art.bottom
         anchors.bottomMargin: PrismTheme.dp(20)
-        width: visible ? Math.min(root.width * 0.4, Math.max(root.keysUnder ? 0 : keysProbe.implicitWidth, root.told ? Math.max(factSay.implicitWidth, factLabel.implicitWidth) : 0)) : 0
+        // The fact's words measured apart from the lines that show them: those take this column's width, so their own
+        // implicit width looped back into it.
+        width: visible ? Math.min(root.width * 0.4, Math.max(root.keysUnder ? 0 : keysProbe.implicitWidth,
+            root.told ? Math.ceil(Math.max(factSayMetrics.advanceWidth, factLabelMetrics.advanceWidth)) + 1 : 0)) : 0
+        TextMetrics { id: factLabelMetrics; font: factLabel.font; text: factLabel.text }
+        TextMetrics { id: factSayMetrics; font: factSay.font; text: factSay.text }
         spacing: PrismTheme.dp(12)
         Column {
             visible: root.told
