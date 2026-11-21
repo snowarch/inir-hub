@@ -371,50 +371,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            label: Translation.tr("Quiet hours")
-            icon: "weather-moon"
-            description: Translation.tr("Hold back popups during a daily window. Notifications still reach the history.")
-            checked: Config.options?.notifications?.quietHours?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("notifications.quietHours.enable", checked)
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 8
-            enabled: Config.options?.notifications?.quietHours?.enable ?? false
-            opacity: enabled ? 1 : 0.5
-
-            WText {
-                text: Translation.tr("From")
-                color: Looks.colors.subfg
-            }
-            WSettingsTextField {
-                Layout.preferredWidth: 100
-                placeholderText: "22:00"
-                text: Config.options?.notifications?.quietHours?.start ?? "22:00"
-                // textEdited fires per keystroke; only persist a complete HH:MM.
-                onTextEdited: newText => {
-                    if (/^([01]?\d|2[0-3]):[0-5]\d$/.test(newText))
-                        Config.setNestedValue("notifications.quietHours.start", newText)
-                }
-            }
-            WText {
-                text: Translation.tr("to")
-                color: Looks.colors.subfg
-            }
-            WSettingsTextField {
-                Layout.preferredWidth: 100
-                placeholderText: "08:00"
-                text: Config.options?.notifications?.quietHours?.end ?? "08:00"
-                onTextEdited: newText => {
-                    if (/^([01]?\d|2[0-3]):[0-5]\d$/.test(newText))
-                        Config.setNestedValue("notifications.quietHours.end", newText)
-                }
-            }
-            Item { Layout.fillWidth: true }
-        }
-        
-        WSettingsSwitch {
             label: Translation.tr("Ignore app timeout")
             icon: "alert-off"
             description: Translation.tr("Always use your timeout settings instead of app-defined ones")
@@ -459,6 +415,41 @@ WSettingsPage {
                 })
                 Config.setNestedValue("notifications.blockedApps", apps)
                 Config.flushWrites()
+            }
+        }
+    }
+
+    // a SettingsExpander with its toggle, as Windows draws one: the header turns quiet hours on, the window sits inside
+    // (two full setting rows squeezed into one line drew a field inside a card inside a card)
+    WSettingsCard {
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Quiet hours")
+        icon: "weather-moon"
+        description: Translation.tr("Hold back popups during a daily window. Notifications still reach the history.")
+        toggle: true
+        checked: Config.options?.notifications?.quietHours?.enable ?? false
+        onToggled: on => Config.setNestedValue("notifications.quietHours.enable", on)
+
+        WSettingsTextField {
+            label: Translation.tr("From")
+            icon: "timer"
+            placeholderText: "22:00"
+            text: Config.options?.notifications?.quietHours?.start ?? "22:00"
+            // textEdited fires per keystroke; only persist a complete HH:MM.
+            onTextEdited: newText => {
+                if (/^([01]?\d|2[0-3]):[0-5]\d$/.test(newText))
+                    Config.setNestedValue("notifications.quietHours.start", newText)
+            }
+        }
+        WSettingsTextField {
+            label: Translation.tr("Until")
+            icon: "timer"
+            placeholderText: "08:00"
+            text: Config.options?.notifications?.quietHours?.end ?? "08:00"
+            onTextEdited: newText => {
+                if (/^([01]?\d|2[0-3]):[0-5]\d$/.test(newText))
+                    Config.setNestedValue("notifications.quietHours.end", newText)
             }
         }
     }
