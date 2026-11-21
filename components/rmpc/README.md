@@ -134,9 +134,13 @@ In your Niri config (`inir` itself speaks MPRIS, but rmpc's own command works wi
 Mod+Shift+P { spawn "rmpc" "togglepause"; }
 ```
 
+## Cava style
+
+Pick the look of the visualiser on rmpc's page in the Hub: `spectrum` (bars from the bottom, the default), `mirror` (bars from the centre), `top` (bars hanging from the top), `solid` (one colour), `dense` (no gap between bars) and `chunky` (wider bars). Every style uses your palette and follows it live. Your choice is saved in `~/.config/inir/plugins/rmpc.json` and stays if you remove the component. The cava pane needs step 3 above.
+
 ## What it does to your system
 
-- Writes `~/.config/inir/plugins/rmpc/theme.ron`, nothing else, and tells a running rmpc to reload it (`rmpc remote set theme`).
+- Writes `~/.config/inir/plugins/rmpc/theme.ron` and, when you pick a cava style, `~/.config/inir/plugins/rmpc.json`; it tells a running rmpc to reload the theme (`rmpc remote set theme`).
 - Needs the `process` permission (it runs a small script when iNiR applies a palette) and `files` (it writes that one file).
 - Does not use the network.
 
