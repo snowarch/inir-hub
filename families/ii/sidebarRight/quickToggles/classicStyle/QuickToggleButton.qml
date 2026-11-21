@@ -1,4 +1,5 @@
 import qs.modules.common
+import qs.services
 import qs.modules.common.widgets
 import qs.modules.common.functions
 import QtQuick
@@ -10,6 +11,8 @@ GroupButton {
     baseHeight: 40
     clickedWidth: baseWidth + 20
     toggled: false
+    // Runs before each toggle's own onClicked, so it hears the state the click leaves.
+    onClicked: Audio.playEvent(button.toggled ? "toggleOff" : "toggleOn")
     // A standalone square control: cookie mode reads "on" as a six-lobed face
     // instead of a filled circle.
     cookieMorphing: true

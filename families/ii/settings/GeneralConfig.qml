@@ -399,8 +399,87 @@ ContentPage {
             { key: "powerPlug", label: Translation.tr("Power plugged in") },
             { key: "powerUnplug", label: Translation.tr("Power unplugged") },
             { key: "pomodoroDone", label: Translation.tr("Pomodoro ends") },
-            { key: "timerDone", label: Translation.tr("Timer ends") }
+            { key: "timerDone", label: Translation.tr("Timer ends") },
+            { key: "boot", label: Translation.tr("Desktop starts") },
+            { key: "login", label: Translation.tr("Screen unlocks") },
+            { key: "lock", label: Translation.tr("Screen locks") },
+            { key: "open", label: Translation.tr("Panel opens") },
+            { key: "close", label: Translation.tr("Panel closes") },
+            { key: "navigate", label: Translation.tr("Selection moves") },
+            { key: "select", label: Translation.tr("Item chosen") },
+            { key: "toggleOn", label: Translation.tr("Toggle turns on") },
+            { key: "toggleOff", label: Translation.tr("Toggle turns off") },
+            { key: "volume", label: Translation.tr("Volume changes") },
+            { key: "screenshot", label: Translation.tr("Screenshot taken") },
+            { key: "error", label: Translation.tr("Error") },
+            { key: "deviceAdded", label: Translation.tr("Device connected") },
+            { key: "deviceRemoved", label: Translation.tr("Device removed") }
         ]
+
+        SettingsGroup {
+            StyledText {
+                text: Translation.tr("Sound pack")
+                font.pixelSize: Appearance.font.pixelSize.normal
+                color: Appearance.colors.colOnLayer1
+            }
+            StyledText {
+                Layout.fillWidth: true
+                text: Translation.tr("Add your own as a folder in ~/.local/share/inir/sounds, one file per event.")
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                color: Appearance.colors.colSubtext
+                wrapMode: Text.Wrap
+            }
+            ConfigSelectionArray {
+                readonly property var glyphs: ({ lounge: "weekend", orbit: "public", crystal: "diamond", arcade: "sports_esports", classic: "notifications" })
+                currentValue: Audio.soundPack
+                onSelected: newValue => Config.setNestedValue("sounds.pack", newValue)
+                options: Audio.packs.map(pack => ({ displayName: Audio.packLabel(pack), icon: glyphs[pack] ?? "folder_special", value: pack }))
+            }
+            ConfigRow {
+                uniform: true
+                SettingsSwitch {
+                    buttonIcon: "power_settings_new"
+                    text: Translation.tr("Startup and lock")
+                    checked: Config.options?.sounds?.session ?? true
+                    onCheckedChanged: Config.setNestedValue("sounds.session", checked)
+                    StyledToolTip {
+                        text: Translation.tr("A chime when the desktop starts, locks and unlocks")
+                    }
+                }
+                SettingsSwitch {
+                    buttonIcon: "touch_app"
+                    text: Translation.tr("Interface sounds")
+                    checked: Config.options?.sounds?.ui ?? false
+                    onCheckedChanged: Config.setNestedValue("sounds.ui", checked)
+                    StyledToolTip {
+                        text: Translation.tr("Soft sounds as panels open, toggles flip and you move through lists")
+                    }
+                }
+            }
+            StyledText {
+                visible: Config.options?.sounds?.ui ?? false
+                text: Translation.tr("Interface volume")
+                font.pixelSize: Appearance.font.pixelSize.normal
+                color: Appearance.colors.colOnLayer1
+            }
+            StyledSlider {
+                visible: Config.options?.sounds?.ui ?? false
+                Layout.fillWidth: true
+                from: 0
+                to: 1
+                stepSize: 0.05
+                value: Config.options?.sounds?.uiVolume ?? 0.6
+                configuration: StyledSlider.Configuration.S
+                settingsSearchLabel: Translation.tr("Interface volume")
+                settingsSearchKeywords: ["sound", "volume", "interface", "click"]
+                onPressedChanged: {
+                    if (pressed) return
+                    Config.setNestedValue("sounds.uiVolume", value)
+                    Audio.previewEvent("toggleOn", "")
+                }
+                onMoved: if (!pressed) Config.setNestedValue("sounds.uiVolume", value)
+            }
+        }
 
         SettingsGroup {
             ConfigRow {

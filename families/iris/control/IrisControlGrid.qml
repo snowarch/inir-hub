@@ -420,6 +420,7 @@ Item {
                 return
             }
             if (ctl.moduleId === "snip" || ctl.moduleId === "colorPicker") GlobalStates.controlPanelOpen = false
+            Audio.playEvent(ctl.lit ? "toggleOff" : "toggleOn")
             ctl.model?.mainAction()
         }
         function hover(on: bool): void {

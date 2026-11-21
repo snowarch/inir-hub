@@ -69,9 +69,12 @@ WBarAttachedPanelContent {
 
         if (event.key === Qt.Key_Down) {
             const maxIndex = Math.max(0, LauncherSearch.results.length - 1);
-            context.setCurrentIndex(Math.min(context.currentIndex + 1, maxIndex));
+            const next = Math.min(context.currentIndex + 1, maxIndex);
+            if (next !== context.currentIndex) Audio.playEvent("navigate");
+            context.setCurrentIndex(next);
             event.accepted = true;
         } else if (event.key === Qt.Key_Up) {
+            if (context.currentIndex > 0) Audio.playEvent("navigate");
             context.setCurrentIndex(Math.max(context.currentIndex - 1, 0));
             event.accepted = true;
         }
@@ -97,7 +100,10 @@ WBarAttachedPanelContent {
                 focus: true
                 text: root.searchText
                 onTextChanged: LauncherSearch.query = text
-                onAccepted: context.accepted()
+                onAccepted: {
+                    Audio.playEvent("select")
+                    context.accepted()
+                }
             }
             
             Item {

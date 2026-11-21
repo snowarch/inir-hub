@@ -254,6 +254,41 @@ WSettingsPage {
             onCheckedChanged: Config.setNestedValue("compositor.autoExpandSingleTilingWindow", checked)
         }
         
+        WSettingsDropdown {
+            label: Translation.tr("Sound pack")
+            icon: "music-note-2"
+            description: Translation.tr("Add your own as a folder in ~/.local/share/inir/sounds, one file per event.")
+            currentValue: Audio.soundPack
+            options: Audio.packs.map(pack => ({ value: pack, displayName: Audio.packLabel(pack) }))
+            onSelected: newValue => Config.setNestedValue("sounds.pack", newValue)
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Startup and lock")
+            icon: "power"
+            description: Translation.tr("A chime when the desktop starts, locks and unlocks")
+            checked: Config.options?.sounds?.session ?? true
+            onCheckedChanged: Config.setNestedValue("sounds.session", checked)
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Interface sounds")
+            icon: "cursor-click"
+            description: Translation.tr("Soft sounds as panels open, toggles flip and you move through lists")
+            checked: Config.options?.sounds?.ui ?? false
+            onCheckedChanged: Config.setNestedValue("sounds.ui", checked)
+        }
+
+        WSettingsSpinBox {
+            visible: Config.options?.sounds?.ui ?? false
+            label: Translation.tr("Interface volume")
+            icon: "speaker-1"
+            suffix: "%"
+            from: 0; to: 100; stepSize: 5
+            value: Math.round((Config.options?.sounds?.uiVolume ?? 0.6) * 100)
+            onValueChanged: Config.setNestedValue("sounds.uiVolume", value / 100)
+        }
+
         WSettingsSwitch {
             label: Translation.tr("Battery sounds")
             icon: "speaker"
@@ -293,7 +328,21 @@ WSettingsPage {
             { key: "powerPlug", label: Translation.tr("Power plugged in") },
             { key: "powerUnplug", label: Translation.tr("Power unplugged") },
             { key: "pomodoroDone", label: Translation.tr("Pomodoro ends") },
-            { key: "timerDone", label: Translation.tr("Timer ends") }
+            { key: "timerDone", label: Translation.tr("Timer ends") },
+            { key: "boot", label: Translation.tr("Desktop starts") },
+            { key: "login", label: Translation.tr("Screen unlocks") },
+            { key: "lock", label: Translation.tr("Screen locks") },
+            { key: "open", label: Translation.tr("Panel opens") },
+            { key: "close", label: Translation.tr("Panel closes") },
+            { key: "navigate", label: Translation.tr("Selection moves") },
+            { key: "select", label: Translation.tr("Item chosen") },
+            { key: "toggleOn", label: Translation.tr("Toggle turns on") },
+            { key: "toggleOff", label: Translation.tr("Toggle turns off") },
+            { key: "volume", label: Translation.tr("Volume changes") },
+            { key: "screenshot", label: Translation.tr("Screenshot taken") },
+            { key: "error", label: Translation.tr("Error") },
+            { key: "deviceAdded", label: Translation.tr("Device connected") },
+            { key: "deviceRemoved", label: Translation.tr("Device removed") }
         ]
 
         Repeater {

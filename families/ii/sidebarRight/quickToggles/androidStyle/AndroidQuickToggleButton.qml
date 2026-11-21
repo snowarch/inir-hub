@@ -156,6 +156,7 @@ GroupButton {
         : toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
 
     onClicked: {
+        Audio.playEvent(root.toggled ? "toggleOff" : "toggleOn");
         root.mainAction();
     }
 

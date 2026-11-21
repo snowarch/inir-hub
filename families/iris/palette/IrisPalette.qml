@@ -252,6 +252,7 @@ Item {
     function executeSelected(): void {
         const entry = root.visibleResults[root.selectedIndex]
         if (!entry || typeof entry.execute !== "function") return
+        Audio.playEvent("select")
         entry.execute()
         if (!entry.keepOpen) GlobalStates.searchOpen = false
     }
@@ -260,7 +261,9 @@ Item {
         const count = root.visibleResults.length
         if (count === 0) return
         if (step > 0 && root.selectedIndex + step >= count - 2) root.loadMoreClipboard()
-        root.selectedIndex = Math.max(0, Math.min(root.visibleResults.length - 1, root.selectedIndex + step))
+        const next = Math.max(0, Math.min(root.visibleResults.length - 1, root.selectedIndex + step))
+        if (next !== root.selectedIndex) Audio.playEvent("navigate")
+        root.selectedIndex = next
     }
 
     function handleKey(event): void {

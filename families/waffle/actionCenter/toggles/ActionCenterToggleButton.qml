@@ -56,7 +56,10 @@ ColumnLayout {
                 bottomRightRadius: root.hasMenu ? 0 : Looks.radius.medium
                 iconName: root.icon
                 isMainToggle: true
-                onClicked: root.mainAction && root.mainAction()
+                onClicked: {
+                    Audio.playEvent(root.toggled ? "toggleOff" : "toggleOn")
+                    if (root.mainAction) root.mainAction()
+                }
             }
             FadeLoader {
                 Layout.fillHeight: true
