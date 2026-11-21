@@ -97,12 +97,9 @@ Item {
         
         // Scroll to center this element in view
         if (flick) {
-            var y = 0;
-            var n = root;
-            while (n && n !== flick) {
-                y += n.y || 0;
-                n = n.parent;
-            }
+            // the row's place in the page's content (summing parents' y also adds the content item's -contentY,
+            // so a page already scrolled landed that far too high)
+            var y = root.mapToItem(flick.contentItem, 0, 0).y;
             // Center the element in the viewport
             var centerOffset = (flick.height - root.height) / 2;
             var maxY = Math.max(0, flick.contentHeight - flick.height);

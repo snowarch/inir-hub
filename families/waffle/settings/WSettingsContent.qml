@@ -551,16 +551,29 @@ Item {
                             width: searchResultsList.width
                             height: 44
                             radius: Looks.radius.medium
-                            color: {
-                                if (ListView.isCurrentItem) return Looks.colors.accent;
-                                if (resultMouse.containsMouse) return Looks.settings.tileHover;
-                                return "transparent";
-                            }
+                            // as Windows' suggestion list and this pane mark a choice: a subtle fill and an accent pill,
+                            // the text keeps its colours (a full accent block lost contrast under a pale accent)
+                            color: resultMouse.pressed ? Qt.alpha(Looks.colors.fg, 0.03)
+                                : resultDelegate.ListView.isCurrentItem || resultMouse.containsMouse ? Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.04)
+                                : "transparent"
                             
                               Behavior on color {
                                   animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                               }
                             
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Looks.dp(3)
+                                height: Looks.dp(16)
+                                radius: width / 2
+                                color: Looks.colors.accent
+                                opacity: resultDelegate.ListView.isCurrentItem ? 1 : 0
+                                Behavior on opacity {
+                                    animation: NumberAnimation { duration: Looks.transition.enabled ? 120 : 0 }
+                                }
+                            }
+
                             MouseArea {
                                 id: resultMouse
                                 anchors.fill: parent
@@ -579,15 +592,10 @@ Item {
                                 
                                 // Page icon
                                 FluentIcon {
-                                    icon: {
-                                        var icons = ["home", "settings", "desktop", "image", "color", 
-                                                    "apps", "settings-cog-multiple", "desktop", "info"];
-                                        return icons[resultDelegate.modelData.pageIndex] || "settings";
-                                    }
+                                    // the page's own icon, as its link card shows it
+                                    icon: root.pages[resultDelegate.modelData.pageIndex]?.icon || "settings"
                                     implicitSize: 16
-                                    color: resultDelegate.ListView.isCurrentItem 
-                                        ? Looks.colors.accentFg 
-                                        : Looks.colors.accent
+                                    color: Looks.colors.fg
                                 }
                                 
                                 // Text content
@@ -602,9 +610,7 @@ Item {
                                         font.family: Looks.font.family.ui
                                         font.pixelSize: Looks.font.pixelSize.normal
                                         font.weight: Font.Medium
-                                        color: resultDelegate.ListView.isCurrentItem 
-                                            ? Looks.colors.accentFg 
-                                            : Looks.colors.fg
+                                        color: Looks.colors.fg
                                         elide: Text.ElideRight
                                     }
                                     
@@ -612,9 +618,7 @@ Item {
                                         Layout.fillWidth: true
                                         text: resultDelegate.modelData.pageName + (resultDelegate.modelData.section ? " › " + resultDelegate.modelData.section : "")
                                         font.pixelSize: Looks.font.pixelSize.small
-                                        color: resultDelegate.ListView.isCurrentItem 
-                                            ? Looks.colors.accentFg 
-                                            : Looks.colors.subfg
+                                        color: Looks.colors.subfg
                                         elide: Text.ElideRight
                                         opacity: 0.8
                                     }
@@ -624,9 +628,7 @@ Item {
                                 FluentIcon {
                                     icon: "chevron-right"
                                     implicitSize: 12
-                                    color: resultDelegate.ListView.isCurrentItem 
-                                        ? Looks.colors.accentFg 
-                                        : Looks.colors.subfg
+                                    color: Looks.colors.subfg
                                     opacity: resultMouse.containsMouse || resultDelegate.ListView.isCurrentItem ? 1 : 0
                                     
                                       Behavior on opacity {

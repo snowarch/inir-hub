@@ -46,12 +46,8 @@ Item {
         }
         
         if (flick) {
-            var y = 0;
-            var n = root;
-            while (n && n !== flick) {
-                y += n.y || 0;
-                n = n.parent;
-            }
+            // the row's place in the page's content, wherever the page is scrolled
+            var y = root.mapToItem(flick.contentItem, 0, 0).y;
             var centerOffset = (flick.height - root.height) / 2;
             var maxY = Math.max(0, flick.contentHeight - flick.height);
             flick.contentY = Math.max(0, Math.min(y - centerOffset, maxY));
