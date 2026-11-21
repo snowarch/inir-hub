@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "صورتك واسمك مرة واحدة عند بدء التشغيل، ثم سطح المكتب",
   "See the welcome screen": "عرض شاشة الترحيب",
   "Rest screen": "شاشة الراحة",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "الوقت وما يُشغَّل فوق خلفيتك بعد عدم النشاط (0 = أبدًا)"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "الوقت وما يُشغَّل فوق خلفيتك بعد عدم النشاط (0 = أبدًا)",
+  "Sound files": "ملفات الصوت"
 }

@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "Ваше фото и имя один раз при запуске, затем рабочий стол",
   "See the welcome screen": "Показать экран приветствия",
   "Rest screen": "Экран покоя",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "Время и текущее воспроизведение поверх обоев после бездействия (0 = никогда)"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "Время и текущее воспроизведение поверх обоев после бездействия (0 = никогда)",
+  "Sound files": "Звуковые файлы"
 }

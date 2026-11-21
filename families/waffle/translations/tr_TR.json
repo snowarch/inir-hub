@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "Başlangıçta bir kez resmin ve adın, ardından masaüstü",
   "See the welcome screen": "Karşılama ekranını gör",
   "Rest screen": "Dinlenme ekranı",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "Hareketsizlikten sonra duvar kağıdının üzerinde saat ve çalan içerik (0 = asla)"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "Hareketsizlikten sonra duvar kağıdının üzerinde saat ve çalan içerik (0 = asla)",
+  "Sound files": "Ses dosyaları"
 }

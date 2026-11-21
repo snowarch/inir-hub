@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "启动时显示一次你的头像和名字，然后进入桌面",
   "See the welcome screen": "查看欢迎屏幕",
   "Rest screen": "休息屏幕",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "无操作后在壁纸上显示时间和正在播放的内容（0 = 从不）"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "无操作后在壁纸上显示时间和正在播放的内容（0 = 从不）",
+  "Sound files": "声音文件"
 }

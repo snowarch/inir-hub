@@ -316,7 +316,11 @@ WSettingsPage {
     WSettingsCard {
         id: eventSoundsCard
         title: Translation.tr("Event sounds")
+        description: Translation.tr("Pick the sound each event plays: one from your sound theme, or any audio file")
         icon: "music-note-2"
+        // 23 rows: an expander, as Windows folds a long list under one card
+        collapsible: true
+        expanded: false
 
         // One row per shell sound event (keys match Audio.soundEvents)
         readonly property var soundEventRows: [
@@ -347,9 +351,8 @@ WSettingsPage {
 
         Repeater {
             model: eventSoundsCard.soundEventRows
-            delegate: SoundPicker {
+            delegate: WSoundEventRow {
                 required property var modelData
-                Layout.fillWidth: true
                 label: modelData.label
                 eventId: modelData.key
             }

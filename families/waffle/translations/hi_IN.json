@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "स्टार्टअप पर एक बार आपकी तस्वीर और नाम, फिर डेस्कटॉप",
   "See the welcome screen": "स्वागत स्क्रीन देखें",
   "Rest screen": "विश्राम स्क्रीन",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "निष्क्रियता के बाद आपके वॉलपेपर पर समय और जो चल रहा है (0 = कभी नहीं)"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "निष्क्रियता के बाद आपके वॉलपेपर पर समय और जो चल रहा है (0 = कभी नहीं)",
+  "Sound files": "ध्वनि फ़ाइलें"
 }

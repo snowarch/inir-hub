@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "시작할 때 한 번 사진과 이름을 보여 준 뒤 데스크톱으로",
   "See the welcome screen": "환영 화면 보기",
   "Rest screen": "휴식 화면",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "비활성 후 배경화면 위에 시간과 재생 중인 항목 표시 (0 = 사용 안 함)"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "비활성 후 배경화면 위에 시간과 재생 중인 항목 표시 (0 = 사용 안 함)",
+  "Sound files": "사운드 파일"
 }

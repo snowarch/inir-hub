@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "Votre photo et votre nom une fois au démarrage, puis le bureau",
   "See the welcome screen": "Voir l'écran d'accueil",
   "Rest screen": "Écran de repos",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "L'heure et la lecture en cours sur votre fond d'écran après inactivité (0 = jamais)"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "L'heure et la lecture en cours sur votre fond d'écran après inactivité (0 = jamais)",
+  "Sound files": "Fichiers audio"
 }

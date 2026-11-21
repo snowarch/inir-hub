@@ -58,7 +58,8 @@ ComboBox {
     popup: Popup {
         y: combo.height + 4
         width: combo.width
-        implicitHeight: contentItem.implicitHeight + 8
+        // a long list scrolls inside about ten rows instead of running off the window
+        implicitHeight: Math.min(contentItem.implicitHeight + 8, Looks.dp(368))
         padding: 4
         
         enter: Transition {
@@ -92,7 +93,15 @@ ComboBox {
         }
         
         contentItem: ListView {
+            id: comboList
             clip: true
+            // Qt opens a long list with the choice at the top, hiding the entries above it: show it from the top
+            // instead, scrolled only as far as the choice needs
+            function showChoice(): void {
+                comboList.positionViewAtBeginning()
+                comboList.positionViewAtIndex(Math.max(0, combo.currentIndex), ListView.Contain)
+            }
+            onModelChanged: if (comboList.model) Qt.callLater(comboList.showChoice)
             implicitHeight: contentHeight
             model: combo.popup.visible ? combo.delegateModel : null
             currentIndex: combo.highlightedIndex

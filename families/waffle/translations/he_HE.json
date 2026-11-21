@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "התמונה והשם שלך פעם אחת בהפעלה, ואז שולחן העבודה",
   "See the welcome screen": "הצגת מסך הפתיחה",
   "Rest screen": "מסך מנוחה",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "השעה ומה שמתנגן מעל הרקע שלך לאחר חוסר פעילות (0 = אף פעם)"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "השעה ומה שמתנגן מעל הרקע שלך לאחר חוסר פעילות (0 = אף פעם)",
+  "Sound files": "קובצי שמע"
 }

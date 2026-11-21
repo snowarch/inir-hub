@@ -583,5 +583,6 @@
   "Your picture and name once at startup, then the desktop": "Ảnh và tên của bạn một lần khi khởi động, sau đó là màn hình nền",
   "See the welcome screen": "Xem màn hình chào mừng",
   "Rest screen": "Màn hình nghỉ",
-  "The time and what plays over your wallpaper after inactivity (0 = never)": "Giờ và nội dung đang phát trên hình nền sau khi không hoạt động (0 = không bao giờ)"
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "Giờ và nội dung đang phát trên hình nền sau khi không hoạt động (0 = không bao giờ)",
+  "Sound files": "Tệp âm thanh"
 }
