@@ -1,0 +1,24 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Pick how a second screen is used: this one only, duplicate, extend or the second",
+    "description": "A small card like the one a projector key opens: PC screen only, Duplicate, Extend or Second screen only. It finds your displays by itself, marks the mode in use, and lets you choose the second screen when several are plugged in. Switching uses niri msg output on and off; Duplicate starts wl-mirror on the second screen. Changes last until niri restarts and your niri config is never written. Needs niri; Duplicate needs wl-mirror.",
+    "authors": [
+        "kaz-py"
+    ],
+    "license": "GPL-3.0-or-later",
+    "tags": [
+        "display",
+        "monitor",
+        "projector",
+        "mirror",
+        "wl-mirror",
+        "niri"
+    ],
+    "permissions": [
+        "process"
+    ],
+    "minInir": "3.1.1",
+    "provides": "modules/display-projection",
+    "preview": "preview.webp"
+}
