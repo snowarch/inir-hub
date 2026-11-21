@@ -41,6 +41,12 @@ Loader {
     readonly property int textSize: root.compact ? IrisStyle.typeLabel : IrisStyle.typeBody
     readonly property real glyphSize: Math.round((root.compact ? 15 : 17) * root.d)
     readonly property real pad: Math.round((root.compact ? 4 : 6) * root.d)
+    // A hero's wallpaper decodes at the menu's widest, whatever this menu's width: one size per screen, so a copy kept
+    // warm outside the popup (IrisDesktopMenuPart) is the same cached image, and the hero shows on the menu's first frame.
+    function heroDecodeSize(screen: var, dpr: real): size {
+        const w = Math.round((root.compact ? 300 : 360) * root.d * (dpr > 0 ? dpr : 1))
+        return Qt.size(w, Math.round(w * (screen?.height ?? 1080) / Math.max(1, screen?.width ?? 1920)))
+    }
 
     function requestOpen(): void {
         const other = GlobalStates.activeContextMenu
@@ -440,8 +446,7 @@ Loader {
                                         path: hero.image
                                         // A still: the menu is a glance, and a live wallpaper would decode video for it.
                                         live: false
-                                        decodeSize: Qt.size(Math.round(heroWallpaper.width * (hero.QsWindow.window?.devicePixelRatio ?? 1)),
-                                            Math.round(heroWallpaper.height * (hero.QsWindow.window?.devicePixelRatio ?? 1)))
+                                        decodeSize: root.heroDecodeSize(popup.screen, hero.QsWindow.window?.devicePixelRatio ?? 1)
                                     }
                                     Rectangle {
                                         visible: !IrisStyle.plateSelection

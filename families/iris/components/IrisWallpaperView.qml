@@ -7,6 +7,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.iris.style
 
 Item {
     id: root
@@ -36,6 +37,11 @@ Item {
     readonly property bool ready: root.isGif ? gif.status === AnimatedImage.Ready
         : still.status === Image.Ready || root.videoFrame
 
+    // A still that is cold when its surface opens fades in instead of popping onto a body already drawn; a warm one
+    // (cached, or kept warm by its owner) is there on the first frame. Once shown, a new wallpaper replaces it in place.
+    property bool revealed: false
+    onReadyChanged: if (root.ready) root.revealed = true
+
     readonly property real dim: Wallpapers.desktopDim
     // A moving wallpaper is a subtree: sampling it costs a pass per frame, so only samplers ask.
     readonly property Item textureItem: (root.animated || root.dim > 0) && root.provideTexture ? motionTexture.item : still
@@ -44,6 +50,8 @@ Item {
     Item {
         id: content
         anchors.fill: parent
+        opacity: root.revealed ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: IrisStyle.revealDuration; easing.type: Easing.OutCubic } }
 
         Image {
             id: still
@@ -52,6 +60,8 @@ Item {
             source: root.stillUrl
             fillMode: root.fillMode
             asynchronous: root.asynchronous
+            // A wallpaper change keeps the old still on screen until the new one is decoded, never a blank frame.
+            retainWhileLoading: true
             // A copy an effect samples keeps its own texture: shared with a mipmapped view it flipped its filtering.
             cache: !root.provideTexture
             // Mipmapped, 2 px over the asked size: a plain copy elsewhere at that size would share its texture (IrisImage).

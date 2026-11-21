@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import qs
 import qs.modules.common
 import qs.services
@@ -11,6 +12,17 @@ IrisDesktopMenu {
     property string wallpaperPath: ""
     readonly property int gridSize: Config.getNestedValue("background.widgets.editGrid.size", 32)
     readonly property bool gridSnap: Config.getNestedValue("background.widgets.editGrid.snap", true)
+    readonly property var hostWindow: menu.anchorItem?.QsWindow.window ?? null
+    // The hero's still, decoded here once and held: each open finds it in the image cache instead of decoding the
+    // wallpaper again while the menu grows.
+    IrisWallpaperView {
+        visible: false
+        active: IrisDesktopActions.showWallpaper && menu.wallpaperPath.length > 0
+        path: menu.wallpaperPath
+        live: false
+        screen: menu.hostWindow?.screen ?? null
+        decodeSize: menu.heroDecodeSize(menu.hostWindow?.screen ?? null, menu.hostWindow?.devicePixelRatio ?? 1)
+    }
     model: GlobalStates.widgetEditMode ? [
         { text: Translation.tr("Add widgets"), iconName: "dashboard_customize", tint: "teal",
             action: () => { GlobalStates.widgetSearchOpen = true } },
