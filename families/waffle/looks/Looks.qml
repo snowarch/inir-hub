@@ -262,11 +262,13 @@ Singleton {
         property color interactiveSurface: root.glassActive && root.useMaterial
             ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassCard : Appearance.aurora.colSubSurface, 0.72)
             : bg1
+        // Aurora's hover and press are black tints (8-32 %) laid over the resting plate; raised to a minimum
+        // opacity on their own they painted a near-black square (a light theme's close button turned black)
         property color interactiveSurfaceHover: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassCardHover : Appearance.aurora.colSubSurfaceHover, 0.78)
+            ? (root.angelEverywhere ? root.ensureMinOpacity(Appearance.angel.colGlassCardHover, 0.78) : Qt.tint(interactiveSurface, Appearance.aurora.colSubSurfaceHover))
             : bg2Hover
         property color interactiveSurfaceActive: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassCardActive : Appearance.aurora.colSubSurfaceActive, 0.84)
+            ? (root.angelEverywhere ? root.ensureMinOpacity(Appearance.angel.colGlassCardActive, 0.84) : Qt.tint(interactiveSurface, Appearance.aurora.colSubSurfaceActive))
             : bg2Active
         property color popupSurface: root.glassActive && root.useMaterial
             ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassPopup : Appearance.aurora.colPopupSurface, 0.85)
