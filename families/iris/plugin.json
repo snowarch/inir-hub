@@ -126,7 +126,7 @@
     },
     "font": {
       "key": "iris.appearance.fontFamily",
-      "fallback": "Geist"
+      "fallback": "Montserrat"
     },
     "scheme": {
       "key": "iris.appearance.scheme",

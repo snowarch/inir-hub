@@ -7,7 +7,7 @@ StyledText {
     id: root
 
     // Roles, not sizes, in the three Signal voices (DESIGN.md S2):
-    //   Read   Body, Meta, Name, Detail, Title, Display: Geist, sentence case, hierarchy by size then weight then ink.
+    //   Read   Body, Meta, Name, Detail, Title, Display: the Design's text face (Montserrat), sentence case, hierarchy by size then weight then ink.
     //   Label  Eyebrow, Group, Value, Label: Geist Mono caps, tracked +0.08 em, quiet ink, three words at most.
     //   Figure Metric, Dot: Archivo SemiExpanded Bold, a figure of 22 px or more and nothing else.
     enum Role { Body, Meta, Eyebrow, Title, Display, Metric, Name, Value, Detail, Group, Label, Dot }

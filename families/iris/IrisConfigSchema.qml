@@ -165,8 +165,8 @@ JsonObject {
         }
         property int expandedRadius: 22
         property int motionDuration: 220
-        property string fontFamily: "" // Empty = Geist (bundled)
-        property string titleFontFamily: "" // Empty = Geist (bundled)
+        property string fontFamily: "" // Empty = the Design's face (iRiS: Montserrat, bundled)
+        property string titleFontFamily: "" // Empty = the Design's face (iRiS: Montserrat, bundled)
         property string numbersFontFamily: "" // Empty = Archivo SemiExpanded (bundled; the figure voice)
         // The one colour of Signal (live, needs you, errors): "nothing" (#D71921), "wallpaper" or a #rrggbb.
         property string signal: "nothing"

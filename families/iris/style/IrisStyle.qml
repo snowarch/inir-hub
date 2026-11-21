@@ -244,7 +244,7 @@ QtObject {
     function ownFace(face: string): url {
         return Qt.resolvedUrl(`../assets/fonts/${face}.ttf`)
     }
-    // One family in three voices (DESIGN.md S2): Geist to read, Geist Mono for labels, Archivo SemiExpanded for the
+    // Three voices (DESIGN.md S2): Montserrat to read and title (the Design's, 11-21), Geist Mono for labels, Archivo SemiExpanded for the
     // one number (no dot or pixel faces: 10-23, his order). Loaded from the shell itself, so it does not wait on
     // fontconfig; a missing file falls back to the bundled Inter and the system mono instead of a blank face.
     readonly property FontLoader geistRead: FontLoader { source: root.ownFace("geist/Geist") }
