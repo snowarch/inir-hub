@@ -1,0 +1,13 @@
+{
+	"id": "display-projection",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/display-projection/",
+	"order": 24,
+	"groups": [
+		{
+			"label": "Components",
+			"pages": [
+				"DISPLAY-PROJECTION"
+			]
+		}
+	]
+}

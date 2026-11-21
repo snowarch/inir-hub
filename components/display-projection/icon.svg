@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>Display Projection</title>
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2d38"/><stop offset="1" stop-color="#101218"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0.04"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7cc4ff"/><stop offset="1" stop-color="#3a6cf0"/>
+    </linearGradient>
+    <linearGradient id="glass2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b9a4ff"/><stop offset="1" stop-color="#6a4be0"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#plate)"/>
+  <rect x="4.5" y="4.5" width="119" height="119" rx="27.5" fill="none" stroke="url(#rim)"/>
+  <rect x="16" y="34" width="52" height="36" rx="6" fill="#0b0d12" stroke="#e8ecf5" stroke-width="3"/>
+  <rect x="21" y="39" width="42" height="26" rx="3" fill="url(#glass)"/>
+  <path d="M36 70 h12 l3 10 h-18 z" fill="#e8ecf5"/>
+  <rect x="60" y="46" width="52" height="36" rx="6" fill="#0b0d12" stroke="#e8ecf5" stroke-width="3"/>
+  <rect x="65" y="51" width="42" height="26" rx="3" fill="url(#glass2)"/>
+  <path d="M80 82 h12 l3 10 h-18 z" fill="#e8ecf5"/>
+  <path d="M30 98 h44" stroke="#e8ecf5" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,12 @@
+{
+    "id": "display-projection",
+    "kind": "component",
+    "name": "Display Projection",
+    "summary": "Pick how a second screen is used: this one only, duplicate, extend or the second",
+    "icon": "desktop_windows",
+    "version": "1.0.0",
+    "parts": {
+        "panel": "Panel.qml"
+    },
+    "families": []
+}
