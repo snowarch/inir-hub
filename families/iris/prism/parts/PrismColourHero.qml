@@ -21,9 +21,9 @@ Item {
     implicitHeight: root.cardHeight
 
     readonly property var roles: [
-        { group: "Accent", name: "Accent", use: "Switches, levels, the chosen", path: "iris.appearance.accent", share: 1.7, get colour() { return IrisStyle.accent } },
-        { group: "Highlight", name: "Highlight", use: "The glanced detail", path: "iris.appearance.highlight", share: 1, get colour() { return IrisStyle.secondaryAccent } },
-        { group: "Signal", name: "Signal", use: "Live, urgent, final", path: "iris.appearance.signal", share: 1, get colour() { return IrisStyle.signal } }
+        { group: "Accent", name: "Accent", use: "Switches, levels, the chosen", path: "iris.appearance.accent", share: 1.7 },
+        { group: "Highlight", name: "Highlight", use: "The glanced detail", path: "iris.appearance.highlight", share: 1 },
+        { group: "Signal", name: "Signal", use: "Live, urgent, final", path: "iris.appearance.signal", share: 1 }
     ].filter(role => role.group !== "Highlight" || !IrisStyle.mono)
     readonly property real shares: root.roles.reduce((sum, role) => sum + role.share, 0)
 
@@ -39,7 +39,10 @@ Item {
                 required property int index
                 readonly property var row: PrismModel.find(card.modelData.path)
                 readonly property string said: { const _ = PrismModel.revision; return card.row ? PrismModel.sayNow(card.row) : "" }
-                readonly property color c: card.modelData.colour
+                // Read here, not through a getter on the model: a Repeater copies its model's entries once, so a getter
+                // there froze the card in the colour it had when Settings opened.
+                readonly property color c: card.modelData.group === "Accent" ? IrisStyle.accent
+                    : card.modelData.group === "Highlight" ? IrisStyle.secondaryAccent : IrisStyle.signal
                 // White light on the card's own dusk, in every scheme and over any colour (an orange or a yellow
                 // swallowed white words; dark ones sank where the art falls into night).
                 readonly property color onArt: PrismTheme.paper
