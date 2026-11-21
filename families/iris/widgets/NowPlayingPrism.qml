@@ -24,9 +24,24 @@ Item {
     readonly property bool compact: view.face.small
     readonly property bool label: view.face.nothing ?? false
     readonly property color songLight: view.label ? view.face.signal : view.face.accent
-    // The hour's ink: on the lit flap, the ink that reads on the song's colour; with the background off there is no
-    // flap, and the hour stands on the wallpaper in the song's colour, as the player's name does.
-    readonly property color flapInk: !view.face.clear ? view.face.onFill(view.songLight) : view.label ? view.face.ink : view.songLight
+    // How the glass is cut: the cut every Prism widget wears (PrismCut). The folder is the reference's own: the player
+    // on its dark tab, the hour on the lit flap. A slab or a stack sets the player and the hour on the head's rows, as
+    // every other Prism face does, so the music widget stands in step with them.
+    PrismCut {
+        id: cut
+        face: view.face
+        width: view.width
+        height: view.height
+        paneTop: view.paneTop
+        lean: view.lean
+    }
+    readonly property bool folded: cut.folded
+    readonly property bool nameLit: cut.stack?.nameLit ?? false
+    readonly property bool factLit: view.folded ? !view.face.clear : (cut.stack?.factLit ?? false)
+    // The hour's ink: on the lit flap or sheet, the ink that reads on the song's colour; elsewhere the song's colour, as
+    // every Prism face's fact. The player's name: the song's colour on the folder's dark tab, the face's ink on a head row.
+    readonly property color flapInk: view.factLit ? view.face.onFill(view.songLight) : view.label ? view.face.ink : view.songLight
+    readonly property color nameInk: view.nameLit ? view.face.onFill(view.songLight) : view.label || !view.folded ? view.face.ink : view.songLight
     function dp(value: real): real { return view.face.dp(value) }
 
     // What it shows: the song, the paused one, the one that played last, or nothing yet.
@@ -82,6 +97,11 @@ Item {
     readonly property real textX: view.coverX + view.coverSide + view.pick(10, 14, 18)
     readonly property real textRight: view.width - view.pick(12, 18, 24)
     readonly property real sideInset: view.pick(16, 22, 40)
+    // The head's rows off the folder: the name's and the hour's, between the head's insets (an archive's shoulders
+    // push them in).
+    readonly property real headInset: (cut.form === "archive" ? (cut.stack?.side ?? 0) + view.pick(10, 12, 14) : view.pick(16, 22, 26))
+    readonly property real nameY: cut.stack ? cut.stack.nameY : view.headY
+    readonly property real hourY: view.folded ? (view.flapTop + view.paneTop) / 2 : cut.stack ? cut.stack.factY : view.headY
 
     // Light passes while the song plays; paused, the glass keeps a little of it.
     property real lightPass: view.face.playing ? 1 : 0.3
@@ -109,14 +129,24 @@ Item {
         fanSpread: view.compact ? 0.34 : view.wide ? 0.28 : 0.3
         lightPass: view.lightPass
         shelf: view.songLight
+        slab: !view.folded && cut.stack === null
+        beamPass: cut.form === "beam" ? 0.8 : 0
+        sheets: cut.stack !== null
+        baseRect: cut.stack?.base ?? [0, 0, 0, 0]
+        baseStep: cut.stack?.baseStep ?? [0, 0, 0, 0]
+        baseShade: cut.stack?.shade ?? 0
+        litRect: cut.stack?.lit ?? [0, 0, 0, 0]
+        litStep: cut.stack?.litStep ?? [0, 0, 0, 0]
+        frontRect: cut.stack?.front ?? [0, 0, 0, 0]
+        frontStep: cut.stack?.frontStep ?? [0, 0, 0, 0]
     }
 
     // ── the tab: the player's mark and name ──
     Item {
         id: mark
-        readonly property real side: view.pick(20, 24, 34)
-        x: view.pick(14, 22, 54)
-        y: Math.round(view.headY - mark.side / 2)
+        readonly property real side: view.folded ? view.pick(20, 24, 34) : view.pick(16, 18, 24)
+        x: view.folded ? view.pick(14, 22, 54) : view.headInset
+        y: Math.round(view.nameY - mark.side / 2)
         width: mark.side
         height: mark.side
         Image {
@@ -145,12 +175,15 @@ Item {
     }
     FaceText {
         face: view.face
+        readonly property real end: view.folded ? glass.edgeAt(y) - view.dp(10)
+            : cut.stepEnd >= 0 ? cut.stepEnd : hourRow.x - view.pick(8, 10, 12)
         x: mark.x + mark.width + view.pick(6, 8, 9)
-        y: Math.round(view.headY - height / 2)
-        width: glass.edgeAt(y) - x - view.dp(10)
+        y: Math.round(view.nameY - height / 2)
+        width: Math.max(0, end - x)
         text: view.label ? view.head.toUpperCase() : view.head
-        color: view.label ? view.face.ink : view.songLight
-        size: view.label ? (view.compact ? 10.5 : view.wide ? 12 : 14) : (view.compact ? 13 : view.wide ? 16 : 21)
+        color: view.nameInk
+        size: view.label ? (view.compact ? 10.5 : view.wide ? 12 : 14)
+            : view.folded ? (view.compact ? 13 : view.wide ? 16 : 21) : (view.compact ? 12 : view.wide ? 13 : 15)
         weight: Font.Bold
         font.family: view.label ? view.face.fontLabel : view.face.fontMain
         font.letterSpacing: view.label ? view.face.px(12) * 0.08 : -view.face.px(view.compact ? 13 : view.wide ? 16 : 21) * 0.02
@@ -161,8 +194,9 @@ Item {
     // ── the flap: the hour ──
     Row {
         id: hourRow
-        readonly property real centerY: (view.flapTop + view.paneTop) / 2
-        x: Math.round((glass.edgeAt(hourRow.centerY) + view.flapRight) / 2 + view.dp(4) - width / 2)
+        readonly property real centerY: view.hourY
+        x: view.folded ? Math.round((glass.edgeAt(hourRow.centerY) + view.flapRight) / 2 + view.dp(4) - width / 2)
+            : Math.round(view.width - view.headInset - width)
         y: Math.round(hourRow.centerY - hourFigure.height / 2)
         spacing: view.dp(1)
         FaceText {
@@ -170,7 +204,7 @@ Item {
             face: view.face
             text: view.hour[0]
             color: view.flapInk
-            size: view.compact ? 12 : view.wide ? 13 : 17
+            size: view.compact ? 12 : view.wide ? 13 : view.folded ? 17 : 15
             weight: Font.Bold
             font.family: view.face.fontNumbers
             font.features: ({ "tnum": 1 })

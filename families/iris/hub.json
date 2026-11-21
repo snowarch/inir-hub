@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.122",
+    "version": "2.33.123",
     "changes": {
+      "2.33.123": [
+        "The music widget wears every Prism form with the other widgets: its name, hour and cover sit on each cut"
+      ],
       "2.33.122": [
         "A Prism form picked for every widget reaches each one; the clock leaves its small lens to wear it too",
         "Edit mode › Look splits into Design, Accents, Material and Legibility; option pages turn in steps of whole groups, no sliding",

@@ -31,17 +31,18 @@ IrisWidgetFace {
     // The slab's corners: a face may round itself further (the clock's lens).
     property real slabRadius: root.radius
 
-    // How the glass is cut. A lens stays a slab, and so does a widget with its background off (no glass to cut: a lit
-    // sheet's ink would stand on the wallpaper). "taskello" is the board's name from before it was one.
-    readonly property var forms: ["quiet", "beam", "folder", "pocket", "archive", "smoked", "board"]
-    readonly property string chosenForm: {
-        const own = String(root.widget?.familyOption("prism", "auto") ?? "auto")
-        const picked = own === "auto" ? String(Config.options?.iris?.widgets?.prism ?? "quiet") : own
-        const name = picked === "taskello" ? "board" : picked
-        return root.forms.includes(name) ? name : "quiet"
+    // How the glass is cut (PrismCut, shared with Now Playing's own face).
+    PrismCut {
+        id: cut
+        face: root
+        width: root.width
+        height: root.height
+        paneTop: root.paneTop
+        lean: root.lean
+        lens: root.slabRadius > root.radius + 0.5
     }
-    readonly property string form: (root.clear || root.slabRadius > root.radius + 0.5) && root.chosenForm !== "beam"
-        ? "quiet" : root.chosenForm
+    readonly property string chosenForm: cut.chosen
+    readonly property string form: cut.form
     readonly property bool folded: root.form === "folder"
 
     // What the head says: a mark and a name, the one fact at the right end.
@@ -89,60 +90,22 @@ IrisWidgetFace {
     readonly property real flapMiddle: Math.round((root.flapTop + root.paneTop) / 2)
     readonly property real flapLeft: root.folded ? body.edgeAt(root.flapMiddle) : root.inset
 
-    // A stack's sheets (PrismBody: rects [left, right, bottom, corners], steps [left height, right height, middle,
-    // lean]) and where its head sits: the name's and the fact's rows, and which of them stands on the lit sheet. All of
-    // it inside the head band, so the middle and the foot are the front glass on every form.
-    readonly property var stack: {
-        const W = root.width, h = root.height, H = root.paneTop, R = root.radius, L = root.lean
-        const at = share => Math.round(H * share)
-        const across = (small, other) => Math.round(W * (root.small ? small : other))
-        const flat = y => [y, y, 0, 0]
-        if (root.form === "pocket") {
-            // A lit sheet with its tab on the right, behind a glass pocket with its tab on the left.
-            return { lit: [0, W, H + R, R], litStep: [at(0.36), 0, across(0.62, 0.6), L],
-                front: [0, W, h, R], frontStep: [at(0.3), at(0.64), across(0.44, 0.4), L],
-                nameY: at(0.65), nameLit: false, factY: at(0.32), factLit: true, side: 0 }
-        }
-        if (root.form === "smoked") {
-            // A lit card out at the top left, over a smoked pocket whose tab rises on the right.
-            const top = root.pick(3, 3, 5)
-            return { lit: [root.dp(4), W - root.dp(4), H + R, Math.max(0, R - root.dp(3))], litStep: flat(top),
-                front: [0, W, h, R], frontStep: [at(0.82), at(0.3), across(0.56, 0.46), L],
-                nameY: Math.round((top + at(0.82)) / 2), nameLit: true, factY: at(0.65), factLit: false, side: 0 }
-        }
-        if (root.form === "archive") {
-            // Glass shoulders, a lit sheet standing up between them, a glass pocket in front.
-            const side = Math.round(W * 0.11), top = root.pick(3, 3, 6), row = Math.round((top + at(0.6)) / 2)
-            return { base: [0, W, h, R], baseStep: flat(at(0.34)), shade: 0.3,
-                lit: [side, W - side, H + R, root.pick(12, 14, 16)], litStep: flat(top),
-                front: [0, W, h, R], frontStep: [at(0.6), at(0.84), across(0.56, 0.46), L],
-                nameY: row, nameLit: true, factY: row, factLit: true, side: side }
-        }
-        if (root.form === "board") {
-            // A darker tray, a lit header inside it, a glass sheet with its tab on the left.
-            const b = root.pick(5, 6, 7), r = Math.max(0, R - b), row = Math.round((b + at(0.54)) / 2)
-            return { base: [0, W, h, R], baseStep: flat(0), shade: 0.5,
-                lit: [b, W - b, H + R, r], litStep: flat(b),
-                front: [b, W - b, h - b, r], frontStep: [at(0.54), at(0.86), across(0.56, 0.46), L],
-                nameY: row, nameLit: true, factY: row, factLit: true, side: b }
-        }
-        return null
-    }
+    // A stack's sheets and where its head sits (PrismCut).
+    readonly property var stack: cut.stack
 
     // The head on this form: where the name starts, its row and how far it runs; the fact's row and right end (the
     // folder centres it on its flap) and its room; the inks of what stands on the lit sheet.
     readonly property real sidePad: root.pick(10, 12, 14)
-    readonly property real nameX: root.form === "archive" ? root.stack.side + root.sidePad : root.inset
+    readonly property real nameX: root.form === "archive" ? (root.stack?.side ?? 0) + root.sidePad : root.inset
     readonly property real nameY: root.stack ? root.stack.nameY : root.headY
     readonly property real nameEnd: root.folded ? body.edgeAt(root.nameY) - root.pick(8, 10, 12)
-        : root.form === "pocket" ? root.stack.litStep[2] - root.lean / 2 - root.pick(6, 8, 10)
-        : root.form === "smoked" ? root.stack.frontStep[2] - root.lean / 2 - root.pick(6, 8, 10)
+        : cut.stepEnd >= 0 ? cut.stepEnd
         : headEnd.x - root.pick(8, 10, 12)
     readonly property real factY: root.folded ? root.flapMiddle : root.stack ? root.stack.factY : root.headY
-    readonly property real factRight: root.form === "archive" ? root.width - root.stack.side - root.sidePad
+    readonly property real factRight: root.form === "archive" ? root.width - (root.stack?.side ?? 0) - root.sidePad
         : root.width - root.inset
     readonly property real factRoom: root.folded ? root.flapRight - root.flapLeft - root.pick(10, 14, 18)
-        : root.form === "pocket" ? root.factRight - root.stack.litStep[2] - root.lean / 2 - root.pick(6, 8, 10)
+        : root.form === "pocket" && root.stack ? root.factRight - root.stack.litStep[2] - root.lean / 2 - root.pick(6, 8, 10)
         : root.innerWidth * 0.5
     readonly property bool nameLit: root.stack?.nameLit ?? false
     readonly property bool factLit: root.folded || (root.stack?.factLit ?? false)

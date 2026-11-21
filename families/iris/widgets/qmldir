@@ -19,6 +19,7 @@ ClockGreeting 1.0 ClockGreeting.qml
 WeatherWeek 1.0 WeatherWeek.qml
 NowPlayingPrism 1.0 NowPlayingPrism.qml
 PrismBody 1.0 PrismBody.qml
+PrismCut 1.0 PrismCut.qml
 NowPlayingVinyl 1.0 NowPlayingVinyl.qml
 WorldClockOffset 1.0 WorldClockOffset.qml
 IrisClockFace 1.0 IrisClockFace.qml
