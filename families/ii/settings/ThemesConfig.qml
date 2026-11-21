@@ -752,6 +752,16 @@ ContentPage {
             }
 
             ConfigSwitch {
+                buttonIcon: "swap_horiz"
+                text: Translation.tr("Swap accent colours")
+                checked: Config.options?.appearance?.palette?.swapAccents ?? false
+                onCheckedChanged: Config.setNestedValue("appearance.palette.swapAccents", checked)
+                StyledToolTip {
+                    text: Translation.tr("The scheme's third colour leads, and the accent takes its place. Shell only: apps keep the scheme as generated.")
+                }
+            }
+
+            ConfigSwitch {
                 buttonIcon: "contrast"
                 text: Translation.tr("Auto light/dark from wallpaper")
                 checked: Config.options?.appearance?.wallpaperTheming?.autoDarkLightMode ?? false

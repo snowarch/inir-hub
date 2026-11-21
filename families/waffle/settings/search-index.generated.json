@@ -190,6 +190,7 @@
 {"pageIndex": 4,"section": "Appearance","label": "Mode","description": "Light or dark color scheme"},
 {"pageIndex": 4,"section": "Appearance","label": "Palette type","description": "How colors are generated from wallpaper","keywords": ["palette","scheme","material you","material","colors","expressive","fidelity"]},
 {"pageIndex": 4,"section": "Appearance","label": "Invert colors (complementary)","description": "Rotate every color 180° on the color wheel. Shell-only: external apps keep their original colors."},
+{"pageIndex": 4,"section": "Appearance","label": "Swap accent colours","description": "The scheme's third colour leads, and the accent takes its place. Shell only: apps keep the scheme as generated."},
 {"pageIndex": 4,"section": "Theming","label": "Use Material colors","description": "Apply Material color scheme instead of Windows 11 grey"},
 {"pageIndex": 4,"section": "Theming","label": "Color strength","description": "Controls how vivid wallpaper-derived accent colors are","keywords": ["quick","wallpaper","color","strength","vivid","accent"]},
 {"pageIndex": 4,"section": "Theming","label": "Soften colors","description": "Subtly soften theme colors for a more natural look"},

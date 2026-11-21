@@ -720,6 +720,14 @@ WSettingsPage {
             checked: Config.options?.appearance?.colorInvert ?? false
             onCheckedChanged: Config.setNestedValue("appearance.colorInvert", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Swap accent colours")
+            icon: "arrow-sync"
+            description: Translation.tr("The scheme's third colour leads, and the accent takes its place. Shell only: apps keep the scheme as generated.")
+            checked: Config.options?.appearance?.palette?.swapAccents ?? false
+            onCheckedChanged: Config.setNestedValue("appearance.palette.swapAccents", checked)
+        }
     }
 
     // Theming options
