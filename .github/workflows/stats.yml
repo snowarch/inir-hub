@@ -1,11 +1,12 @@
 name: Stats
 
-# Daily, before inir.space's build (05:17 UTC): downloads from the packages release, and the installs, votes and
-# reactions people published from their own config.json (Nostr relays, newest state per person) into stats.json on
-# the "stats" branch, which `inir hub build` reads.
+# Every three hours: downloads from the packages release, and the installs, votes and reactions people published from
+# their own config.json (Nostr relays, newest state per person) into stats.json on the "stats" branch, which
+# `inir hub build` reads. inir.space builds again within 20 minutes of a new stats commit, and every shell reads the
+# catalogue from there, so the site and the shells show the same figures; a shell's live read is at most hours ahead.
 on:
   schedule:
-    - cron: "40 4 * * *"
+    - cron: "40 */3 * * *"
   workflow_dispatch:
 
 permissions:
