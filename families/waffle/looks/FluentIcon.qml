@@ -20,6 +20,6 @@ Kirigami.Icon {
     fallback: root.icon
     roundToIconSize: true
     color: Looks.colors.fg
-    isMask: true
+    isMask: !WIcons.colorIcons.includes(root.icon)
     animated: true
 }

@@ -31,6 +31,10 @@ Singleton {
         "wifi-4", "wifi-lock", "wifi-off", "wifi-tethering", "wifi-warning"
     ]
 
+    // Icons drawn in colour, whose shapes are their colours: painted as a mask they turn into a blank plate
+    // (Settings' Home and Interface showed a solid square), so they keep their own colours
+    readonly property var colorIcons: ["corporation", "widgets"]
+
     function hasFilledVariant(iconName) {
         return root.filledIcons.includes(iconName)
     }
