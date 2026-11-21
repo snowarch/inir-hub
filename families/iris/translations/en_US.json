@@ -2737,5 +2737,7 @@
   "Smoked": "Smoked",
   "Unbound": "Unbound",
   "Prism form": "Prism form",
-  "How every widget's glass is cut, unless it picks its own.": "How every widget's glass is cut, unless it picks its own."
+  "How every widget's glass is cut, unless it picks its own.": "How every widget's glass is cut, unless it picks its own.",
+  "Widgets with a form of their own": "Widgets with a form of their own",
+  "They keep the form picked in their sheet.": "They keep the form picked in their sheet."
 }

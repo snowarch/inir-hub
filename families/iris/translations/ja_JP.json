@@ -2737,5 +2737,7 @@
   "Smoked": "スモーク",
   "Unbound": "未割り当て",
   "Prism form": "Prism の形",
-  "How every widget's glass is cut, unless it picks its own.": "各ウィジェットのガラスの切り方。ウィジェットごとに選ぶこともできます。"
+  "How every widget's glass is cut, unless it picks its own.": "各ウィジェットのガラスの切り方。ウィジェットごとに選ぶこともできます。",
+  "Widgets with a form of their own": "独自の形のウィジェット",
+  "They keep the form picked in their sheet.": "シートで選んだ形のままです。"
 }

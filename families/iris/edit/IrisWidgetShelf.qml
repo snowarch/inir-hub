@@ -34,15 +34,23 @@ WidgetShelf {
         GlobalStates.desktopShelfPage = ""
     }
 
+    // An option page is an area of Settings, the same rows, so either place shows the other's change. `order` names the
+    // groups that lead it: Look is the widgets' own groups of Desktop, the design first; Style leads with the design,
+    // colour and type, and the long lists (each app's colours) come last (his 11-20: the fonts sat past sixty rows).
     pages: [
         { value: "widgets", label: Translation.tr("Widgets") },
-        // Look is the widgets' own (Settings › Desktop › Widgets, the same rows, so either place shows the other's change).
-        { value: "look", label: Translation.tr("Look") },
+        { value: "look", label: Translation.tr("Look"), section: "desktop", only: true,
+            order: ["Design", "Accents", "Material", "Legibility", "Widgets"] },
         { value: "bar", label: Translation.tr("Island") },
         { value: "dock", label: Translation.tr("Dock") },
-        { value: "appearance", label: Translation.tr("Style") },
+        { value: "appearance", label: Translation.tr("Style"),
+            order: ["Design", "Scheme", "Accent", "Faces", "Text", "Material", "Glass", "Shape", "Highlight", "Signal", "Look",
+                "Presets", "Edges", "Light", "Icons", "Wallpaper tint", "Colour theme", "Day and night", "Dark look", "Ink look",
+                "Light look", "Texture", "Frame", "Menus", "Badges", "Previews", "Customize", "Adaptive"] },
         { value: "presets", label: Translation.tr("Presets") }
     ]
+    // The option page on show, for the head's chapters.
+    property Item optionsBoard: null
 
     entries: {
         const list = IrisFaceData.galleryEntries.concat(IrisFaceData.otherEntries).map(entry => IrisSearch.prepare({
@@ -82,8 +90,12 @@ WidgetShelf {
         function pageOf(page: string): Component { return ["look", "bar", "dock", "appearance"].includes(page) ? optionsPage : null }
         readonly property Component optionsPage: Component {
             IrisShelfOptions {
-                section: root.page === "look" ? "desktop" : root.page
-                group: root.page === "look" ? "Widgets" : ""
+                id: options
+                readonly property var entry: root.pages.find(page => page.value === root.page) ?? ({})
+                section: String(options.entry.section ?? root.page)
+                order: options.entry.order ?? []
+                only: Boolean(options.entry.only)
+                Component.onCompleted: root.optionsBoard = options
             }
         }
         readonly property Component head: Component {
@@ -129,8 +141,81 @@ WidgetShelf {
                     onPicked: value => head.shelf.goTo(value)
                 }
 
+                // An option page's groups, where the search sits on the widgets: a tap turns to one, the lit ones are on show.
+                // Those that do not fit wait in the menu at the end, which names a group on show when it is one of them.
+                Item {
+                    id: chapters
+                    readonly property var list: head.shelf?.optionsBoard?.chapters ?? []
+                    readonly property var lit: head.shelf?.optionsBoard?.onShow ?? []
+                    readonly property bool crowded: chapterRow.width > chapters.width
+                    // The menu's room is set aside, not measured: sized by the group it names, the chips that fit beside it
+                    // went round in a loop.
+                    readonly property real reserve: Math.round(132 * head.d)
+                    readonly property real limit: chapters.crowded ? chapters.width - chapters.reserve - chapterRow.spacing : chapters.width
+                    // The chips past the room, for the menu, and where it sits: after the last chip that fits.
+                    readonly property var hidden: {
+                        chapterRow.width
+                        const out = []
+                        for (let at = 0; at < chipRepeater.count; at++) {
+                            const chip = chipRepeater.itemAt(at)
+                            if (chip && chip.x + chip.width > chapters.limit) out.push({ value: chip.modelData, label: chip.label })
+                        }
+                        return out
+                    }
+                    readonly property real overflowX: {
+                        chapterRow.width
+                        let end = 0
+                        for (let at = 0; at < chipRepeater.count; at++) {
+                            const chip = chipRepeater.itemAt(at)
+                            if (chip && chip.x + chip.width <= chapters.limit) end = chip.x + chip.width + chapterRow.spacing
+                        }
+                        return end
+                    }
+                    visible: !(head.shelf?.onWidgets ?? true) && head.shelf?.page !== "presets" && chapters.list.length > 1
+                    x: pageTabs.x + pageTabs.width + Math.round(14 * head.d)
+                    width: Math.max(0, (notice.text.length > 0 ? notice.x : tail.x) - chapters.x - Math.round(12 * head.d))
+                    height: head.height
+                    clip: true
+                    Accessible.role: Accessible.PageTabList
+                    Accessible.name: Translation.tr("Sections")
+                    Row {
+                        id: chapterRow
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: Math.round(2 * head.d)
+                        Repeater {
+                            id: chipRepeater
+                            model: chapters.list
+                            delegate: IrisChip {
+                                id: chapterChip
+                                required property string modelData
+                                readonly property bool fits: chapterChip.x + chapterChip.width <= chapters.limit
+                                implicitHeight: head.height - Math.round(4 * head.d)
+                                label: Translation.tr(chapterChip.modelData)
+                                selected: chapters.lit.includes(chapterChip.modelData)
+                                quiet: !chapterChip.selected
+                                opacity: chapterChip.fits ? 1 : 0
+                                enabled: chapterChip.fits
+                                onClicked: head.shelf.optionsBoard?.open(chapterChip.modelData)
+                            }
+                        }
+                    }
+                    IrisPopupButton {
+                        id: overflow
+                        maxWidth: chapters.reserve
+                        visible: chapters.crowded
+                        x: chapters.overflowX
+                        anchors.verticalCenter: parent.verticalCenter
+                        options: chapters.hidden
+                        current: chapters.hidden.find(item => chapters.lit.includes(item.value))?.value ?? ""
+                        otherText: Translation.tr("More")
+                        accessibleName: Translation.tr("More")
+                        onPicked: value => head.shelf.optionsBoard?.open(String(value))
+                    }
+                }
+
                 // What the shelf just did (saved, worn, undone), where the search sits on the other pages.
                 IrisLabel {
+                    id: notice
                     anchors.right: tail.left
                     anchors.rightMargin: Math.round(12 * head.d)
                     anchors.verticalCenter: parent.verticalCenter

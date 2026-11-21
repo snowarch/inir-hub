@@ -2737,5 +2737,7 @@
   "Smoked": "Pujortoq",
   "Unbound": "Atanngilaq",
   "Prism form": "Prism ilusaa",
-  "How every widget's glass is cut, unless it picks its own.": "Widgetit tamarmik glasiata ilusaa, nammineq toqqarsinnaanngippat."
+  "How every widget's glass is cut, unless it picks its own.": "Widgetit tamarmik glasiata ilusaa, nammineq toqqarsinnaanngippat.",
+  "Widgets with a form of their own": "Widget-it nammineq ilusillit",
+  "They keep the form picked in their sheet.": "Ilusaa nammineq toqqagaq atuarpaat."
 }

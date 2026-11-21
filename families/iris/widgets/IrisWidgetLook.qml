@@ -118,6 +118,15 @@ WidgetLook {
         const own = look.ownSurfaces.filter(entry => entry.key === "iris.material")
         if (own.length > 0) Config.setNestedValues(DesktopWidgetDesign.cleared(own, () => "auto"))
     }
+    // Prism's cut works the same way: the one picked for every widget is what each wears from then on. A form picked
+    // in a widget's sheet kept it out of step, the weather on Board and the others on cuts of their own (his 11-20).
+    readonly property var ownPrismForms: DesktopWidgetDesign.scan(["iris.prism"],
+        (key, value) => value !== undefined && value !== null && !["", "auto"].includes(String(value)))
+    function wearPrismForm(next: string): void {
+        Config.setNestedValue("iris.widgets.prism", next)
+        if (look.ownPrismForms.length > 0) Config.setNestedValues(DesktopWidgetDesign.cleared(look.ownPrismForms, () => "auto"))
+    }
+    function matchPrismForms(): void { look.wearPrismForm(String(look.options.prism ?? "quiet")) }
     function materialAction(action: string): string {
         const now = look.sharedMaterial
         if (action === "match") return look.matchSurfaces()

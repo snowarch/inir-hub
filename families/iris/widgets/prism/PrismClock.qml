@@ -34,7 +34,8 @@ PrismFolder {
         - new Date(root.now.getFullYear(), 0, 1)) / 86400000) + 1
 
     // A slab worn small is a lens: a disc of glass with the hour in its middle, the day above and the date under it.
-    readonly property bool lens: root.small
+    // A cut of Prism's own (Board, Pocket…) is worn by the clock too, small as well: the lens is Quiet's and Beam's.
+    readonly property bool lens: root.small && (root.chosenForm === "quiet" || root.chosenForm === "beam")
     slabRadius: root.lens ? Math.min(root.width, root.height) / 2 : root.radius
     prism: root.lens ? Qt.point(root.width * 0.82, root.height * 0.12)
         : Qt.point(root.width - root.pick(28, 40, 48), root.pick(2, 2, 4))

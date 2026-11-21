@@ -2737,5 +2737,7 @@
   "Smoked": "धुँधला",
   "Unbound": "असाइन नहीं",
   "Prism form": "Prism आकार",
-  "How every widget's glass is cut, unless it picks its own.": "हर विजेट का काँच कैसे कटे, जब तक वह अपना न चुने।"
+  "How every widget's glass is cut, unless it picks its own.": "हर विजेट का काँच कैसे कटे, जब तक वह अपना न चुने।",
+  "Widgets with a form of their own": "अपने आकार वाले विजेट",
+  "They keep the form picked in their sheet.": "वे अपनी शीट में चुना आकार रखते हैं।"
 }

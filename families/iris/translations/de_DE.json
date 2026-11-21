@@ -2737,5 +2737,7 @@
   "Smoked": "Rauchglas",
   "Unbound": "Nicht belegt",
   "Prism form": "Prism-Form",
-  "How every widget's glass is cut, unless it picks its own.": "Wie das Glas jedes Widgets geschnitten ist, außer es wählt seine eigene."
+  "How every widget's glass is cut, unless it picks its own.": "Wie das Glas jedes Widgets geschnitten ist, außer es wählt seine eigene.",
+  "Widgets with a form of their own": "Widgets mit eigener Form",
+  "They keep the form picked in their sheet.": "Sie behalten die Form aus ihrem Blatt."
 }
