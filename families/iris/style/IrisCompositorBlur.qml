@@ -20,8 +20,20 @@ Singleton {
     // Whether the compositor blurs behind the shell at all: Niri 26.04+ through the background-effect regions each
     // surface publishes, Umbriel through the layer rule written below (it has no background-effect protocol).
     readonly property bool active: CompositorService.isUmbriel
-        ? Appearance.effectsEnabled && (Config.options?.performance?.compositorBlur ?? true)
+        ? Appearance.effectsEnabled && (Config.options?.performance?.compositorBlur ?? true) && root.umbrielRules
         : Appearance.compositorBlurActive
+    // The theme module writes Umbriel's blur rules only into a config that is iNiR's (15-umbriel.sh). Under any other
+    // (a first login, a person's own), nothing blurs behind the shell: compositor glass would leave a thin veil over a
+    // sharp desktop, so iRiS stays solid instead.
+    property bool umbrielRules: false
+    FileView {
+        id: umbrielConfig
+        path: CompositorService.isUmbriel ? Directories.configPath + "/umbriel/config.toml" : ""
+        watchChanges: true
+        onFileChanged: umbrielConfig.reload()
+        onLoaded: root.umbrielRules = /^# iNiR — Umbriel configuration/m.test(umbrielConfig.text())
+        onLoadFailed: root.umbrielRules = false
+    }
 
     function reload(): void {
         if (CompositorService.niriNative && !reader.running) reader.running = true
