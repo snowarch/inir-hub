@@ -654,7 +654,7 @@ ContentPage {
         }
     }
 
-    // A number with its glyph, for rows and tiles: votes, downloads, a date.
+    // A number with its glyph, for rows and tiles: votes, who has it, a date.
     component Stat: Row {
         id: stat
         property string glyph: ""
@@ -684,7 +684,7 @@ ContentPage {
     }
 
     // One row of the catalogue, a tile of Settings' segmented groups: picture, name and who made it,
-    // one line of what it is, then votes, downloads, the last update and the action.
+    // one line of what it is, then votes, who has it, the last update and the action.
     component ItemRow: Rectangle {
         id: row
         required property var modelData
@@ -784,9 +784,9 @@ ContentPage {
             Stat {
                 Layout.preferredWidth: 58
                 visible: root.wideRows && root.hasStats
-                glyph: "download"
-                text: Hub.countText(row.modelData.downloads ?? 0)
-                tip: Translation.tr("%1 downloads").arg(Number(row.modelData.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
+                glyph: "group"
+                text: Hub.countText(Hub.installCount(row.modelData))
+                tip: Translation.tr("%1 have it").arg(Hub.installCount(row.modelData).toLocaleString(Qt.locale(), "f", 0))
             }
             StyledText {
                 Layout.preferredWidth: 52
@@ -811,7 +811,7 @@ ContentPage {
         }
     }
 
-    // A card of the grid: the picture, name, who made it, votes and downloads, the action.
+    // A card of the grid: the picture, name, who made it, votes and who has it, the action.
     component ItemTile: ClippingRectangle {
         id: tile
         required property var modelData
@@ -878,8 +878,9 @@ ContentPage {
                 }
                 Stat {
                     visible: root.hasStats
-                    glyph: "download"
-                    text: Hub.countText(tile.modelData.downloads ?? 0)
+                    glyph: "group"
+                    text: Hub.countText(Hub.installCount(tile.modelData))
+                    tip: Translation.tr("%1 have it").arg(Hub.installCount(tile.modelData).toLocaleString(Qt.locale(), "f", 0))
                 }
                 Item { Layout.fillWidth: true }
                 ActionButton {
@@ -1049,15 +1050,15 @@ ContentPage {
                         tint: Hub.liked(page.item) >= 0.8 ? Appearance.colors.colPrimary : SettingsMaterialPreset.supportingColor
                     }
                     Stat {
+                        visible: Hub.installCount(page.item) > 0
+                        glyph: "group"
+                        text: Hub.countText(Hub.installCount(page.item))
+                        tip: Translation.tr("%1 have it").arg(Hub.installCount(page.item).toLocaleString(Qt.locale(), "f", 0))
+                    }
+                    Stat {
                         glyph: "download"
                         text: Hub.countText(page.item?.downloads ?? 0)
                         tip: Translation.tr("%1 downloads").arg(Number(page.item?.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
-                    }
-                    Stat {
-                        visible: Number(page.item?.installs ?? 0) > 0
-                        glyph: "group"
-                        text: Hub.countText(page.item?.installs ?? 0)
-                        tip: Translation.tr("%1 have it").arg(Number(page.item?.installs ?? 0).toLocaleString(Qt.locale(), "f", 0))
                     }
                 }
             }

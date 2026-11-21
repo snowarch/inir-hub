@@ -511,7 +511,7 @@ WSettingsPage {
         }
     }
 
-    // The Store's rating and the download count, small, in the secondary ink.
+    // The Store's rating, who has it and (unless brief) the downloads, small, in the secondary ink.
     component Stats: Row {
         id: stats
         property var item
@@ -540,26 +540,27 @@ WSettingsPage {
         }
         WText {
             anchors.verticalCenter: parent.verticalCenter
-            text: stats.brief ? Hub.countText(stats.item?.downloads ?? 0) : Translation.tr("%1 downloads").arg(Hub.countText(stats.item?.downloads ?? 0))
+            visible: Hub.installCount(stats.item) > 0
+            text: stats.brief ? Hub.countText(Hub.installCount(stats.item)) : Translation.tr("%1 have it").arg(Hub.countText(Hub.installCount(stats.item)))
             font.pixelSize: Looks.font.pixelSize.small
             color: Looks.colors.subfg
-            HoverHandler { id: downloadsHover }
+            HoverHandler { id: installsHover }
             WToolTip {
-                text: Translation.tr("%1 downloads").arg(Number(stats.item?.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
-                extraVisibleCondition: stats.brief && downloadsHover.hovered
+                text: Translation.tr("%1 have it").arg(Hub.installCount(stats.item).toLocaleString(Qt.locale(), "f", 0))
+                extraVisibleCondition: stats.brief && installsHover.hovered
             }
         }
         WText {
             anchors.verticalCenter: parent.verticalCenter
-            visible: !stats.brief && Number(stats.item?.installs ?? 0) > 0
-            text: Translation.tr("%1 have it").arg(Hub.countText(stats.item?.installs ?? 0))
+            visible: !stats.brief
+            text: Translation.tr("%1 downloads").arg(Hub.countText(stats.item?.downloads ?? 0))
             font.pixelSize: Looks.font.pixelSize.small
             color: Looks.colors.subfg
         }
     }
 
     // One row of the catalogue, a Settings card: picture, name, who made it and one line of what it is,
-    // then rating, downloads, the last change and the action.
+    // then rating, who has it, the last change and the action.
     component ItemRow: Rectangle {
         id: row
         required property var modelData

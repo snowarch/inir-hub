@@ -568,7 +568,7 @@ Flickable {
         }
     }
 
-    // Liked share, downloads and (unless brief) the last update, as small tabular figures.
+    // Liked share, who has it and (unless brief) the last update, as small tabular figures.
     component Stats: Row {
         id: stats
         property var item
@@ -594,11 +594,12 @@ Flickable {
         }
         Row {
             anchors.verticalCenter: parent.verticalCenter
-            visible: stats.item?.downloads !== undefined
+            visible: Hub.installCount(stats.item) > 0
             spacing: Math.round(2 * root.d)
             MaterialSymbol {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "download"
+                text: "group"
+                fill: 1
                 iconSize: Math.round(13 * root.d)
                 color: IrisStyle.textTertiary
             }
@@ -606,7 +607,7 @@ Flickable {
                 role: IrisText.Meta
                 font.pixelSize: IrisStyle.typeFootnote
                 font.features: { "tnum": 1 }
-                text: Hub.countText(stats.item?.downloads ?? 0)
+                text: Hub.countText(Hub.installCount(stats.item))
             }
         }
         IrisText {
@@ -1032,8 +1033,8 @@ Flickable {
                     model: [
                         { figure: Hub.liked(page.item) >= 0 ? root.likedText(page.item) : "–", caption: Hub.votes(page.item) > 0
                             ? Translation.tr("%1 of %2 people liked it").arg(Hub.voteCount(page.item, "up")).arg(Hub.votes(page.item)) : Translation.tr("No votes yet") },
-                        { figure: Number(page.item?.installs ?? 0) > 0 ? Hub.countText(page.item.installs) : "", caption: Translation.tr("Have it") },
-                        { figure: page.item?.downloads !== undefined && !(Number(page.item?.installs ?? 0) > 0) ? Hub.countText(page.item.downloads) : "", caption: Translation.tr("Downloads") },
+                        { figure: Hub.installCount(page.item) > 0 ? Hub.countText(Hub.installCount(page.item)) : "", caption: Translation.tr("Have it") },
+                        { figure: page.item?.downloads !== undefined ? Hub.countText(page.item.downloads) : "", caption: Translation.tr("Downloads") },
                         { figure: String(page.item?.version ?? ""), caption: page.item?.installed && page.item.installed !== page.item.version
                             ? Translation.tr("You have %1").arg(page.item.installed) : Translation.tr("Version") },
                         { figure: root.dateText(page.item?.updated ?? ""), caption: Translation.tr("Updated") },
