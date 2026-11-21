@@ -1,0 +1,8 @@
+{
+  "id": "rmpc",
+  "label": "rmpc",
+  "module": "rmpc.sh",
+  "category": "audio",
+  "inputs": ["palette.json"],
+  "description": "Generate the rmpc theme (~/.config/inir/plugins/rmpc/theme.ron) from the theme palette."
+}
