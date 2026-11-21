@@ -15,6 +15,9 @@ Item {
     // In the open page's chapter (or nothing is open): full ink. Elsewhere, the secondary ink.
     property bool inGroup: true
     property string trailing: ""   // a glyph on the right, shown on hover (a pin's remove)
+    // Something on the page differs from iNiR's (his 11-21: the dot that said where the changes were): a small dot on the
+    // key's corner, in the ink, so the accent still names only where you stand and a long name keeps its width.
+    property bool changed: false
     signal clicked()
     signal trailingClicked()
 
@@ -54,10 +57,24 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: root.text
         font.pixelSize: root.current ? PrismTheme.row : PrismTheme.body
+        // A long name (any language) never cuts: it gives up the open page's step, then a pixel or two, to fit.
+        fontSizeMode: Text.HorizontalFit
+        minimumPixelSize: PrismTheme.small
         font.weight: root.current ? Font.DemiBold : root.inGroup ? Font.Medium : Font.Normal
         font.letterSpacing: root.current ? -PrismTheme.row * 0.01 : 0
         color: root.current || root.pointed ? PrismTheme.ink : root.inGroup ? PrismTheme.inkNav : PrismTheme.ink2
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+    }
+    Rectangle {
+        x: icon.x + icon.width - width + PrismTheme.dp(2)
+        y: icon.y - PrismTheme.dp(2)
+        width: PrismTheme.dp(7)
+        height: width
+        radius: width / 2
+        visible: scale > 0
+        scale: root.changed ? 1 : 0
+        color: root.current || root.pointed ? PrismTheme.ink : PrismTheme.ink2
+        Behavior on scale { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutBack } }
     }
     PrismGlyph {
         id: tail
@@ -76,6 +93,7 @@ Item {
         cursorShape: Qt.PointingHandCursor
         Accessible.role: Accessible.PageTab
         Accessible.name: root.text
+        Accessible.description: root.changed ? Translation.tr("Changed here") : ""
         onClicked: root.clicked()
     }
     MouseArea {

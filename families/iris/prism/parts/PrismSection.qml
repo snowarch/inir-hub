@@ -97,6 +97,7 @@ Item {
                         row: entry.modelData.rows[0]
                         headless: String(row.key ?? "") === root.headlessKey && root.headlessKey.length > 0
                         stacked: parent.stackedPair
+                        paired: parent.paired && !parent.stackedPair
                         compact: root.compact
                         dense: true
                         showPage: root.showPage
@@ -113,6 +114,10 @@ Item {
                             width: root.half
                             row: entry.modelData.rows[1]
                             stacked: second.stackedPair
+                            // The pair's two halves are one line: the same density, names and controls on one level.
+                            paired: !second.stackedPair
+                            compact: root.compact
+                            dense: true
                             controlWidth: second.stackedPair ? root.half : PrismTheme.dp(64)
                             flash: root.flashPath === row.path
                         }

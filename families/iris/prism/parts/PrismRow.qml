@@ -27,6 +27,9 @@ Item {
     property bool dense: false
     // The group's master row under a head that already says its name: the control alone, the row's whole width.
     property bool headless: false
+    // One half of two switches sharing a line: the names stand on one level and each switch beside its name's first line,
+    // so a half with a description and one without still read as one line.
+    property bool paired: false
     // An open choice keeps its place under the name: its chips fold open under the line, the pill never jumps up
     // over what the row says.
     readonly property bool tall: root.headless || root.stacked || (root.compact && (root.below === "" || root.below === "chips")
@@ -140,7 +143,12 @@ Item {
         width: parent.width
         // The control fills a flat line's height and sets a tall one's, so the flat height stands on its own: read through
         // the line, a row turning tall as its width shrinks (a colour pick's discs no longer fitting) re-entered it.
-        readonly property real flat: Math.max(root.compact || root.dense ? PrismTheme.dp(48) : PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20))
+        readonly property real base: root.compact || root.dense ? PrismTheme.dp(48) : PrismTheme.dp(58)
+        // The name's first line, and where it stands in a pair: centred in the base line, whatever follows under it.
+        readonly property real firstLine: label.implicitHeight / Math.max(1, label.lineCount)
+        readonly property real pairTop: Math.round((line.base - line.firstLine) / 2)
+        readonly property real flat: root.paired ? Math.max(line.base, line.pairTop + name.implicitHeight + PrismTheme.dp(10))
+            : Math.max(line.base, name.implicitHeight + PrismTheme.dp(20))
         height: root.headless ? (control.height > 0 ? PrismTheme.dp(6) + control.height + PrismTheme.dp(10) : PrismTheme.dp(4))
             : root.tall
             ? PrismTheme.dp(12) + name.implicitHeight + PrismTheme.dp(10) + control.height + PrismTheme.dp(14)
@@ -167,7 +175,7 @@ Item {
             anchors.left: parent.left
             anchors.right: root.tall ? parent.right : control.left
             anchors.rightMargin: root.tall ? 0 : PrismTheme.dp(16)
-            y: root.tall ? PrismTheme.dp(12) : Math.round((parent.height - height) / 2)
+            y: root.tall ? PrismTheme.dp(12) : root.paired ? line.pairTop : Math.round((parent.height - height) / 2)
             spacing: PrismTheme.dp(2)
             PrismText {
                 id: label
@@ -236,7 +244,7 @@ Item {
             x: root.tall ? 0 : parent.width - width
             y: root.headless ? PrismTheme.dp(6) : root.tall ? name.y + name.height + PrismTheme.dp(10) : 0
             width: root.headless || root.tall ? parent.width : root.compact ? Math.max(PrismTheme.dp(40), kind.item ? kind.item.implicitWidth : 0) : root.controlWidth
-            height: root.tall ? (kind.item ? kind.item.height : 0) : line.flat
+            height: root.tall ? (kind.item ? kind.item.height : 0) : root.paired ? line.base : line.flat
             enabled: !root.locked
             Loader {
                 id: kind

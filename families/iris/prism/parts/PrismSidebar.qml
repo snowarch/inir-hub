@@ -27,6 +27,17 @@ Item {
     readonly property bool located: !PrismState.searching && PrismModel.groups.some(name => name.length > 0
         && PrismModel.inGroup(name).some(page => page.pageId === PrismState.page))
     signal pickGroup(string title)
+    // Where something differs from iNiR's: every page holding a change, and under the open page each group holding one.
+    // Read from PrismModel.changes, which settles once a burst of writes ends; a row this machine hides is no place to go.
+    readonly property var changedAt: {
+        const out = ({})
+        for (const row of PrismModel.changes) {
+            if (!PrismModel.shown(row)) continue
+            out[row.page] = true
+            out[row.page + "|" + row.section] = true
+        }
+        return out
+    }
     // The open page's line comes into sight once its parts have opened under it.
     property Item opened: null
     function reveal(): void {
@@ -207,6 +218,7 @@ Item {
                                 glyph: place.modelData.glyph
                                 text: Translation.tr(place.modelData.name)
                                 current: place.current
+                                changed: root.changedAt[place.modelData.pageId] === true
                                 inGroup: group.here || !root.located
                                 onClicked: PrismState.go(place.modelData.pageId)
                             }
@@ -236,6 +248,7 @@ Item {
                                             id: part
                                             required property string modelData
                                             readonly property bool here: root.reading.includes(part.modelData)
+                                            readonly property bool changed: root.changedAt[PrismState.page + "|" + part.modelData] === true
                                             width: partList.width
                                             height: Math.max(PrismTheme.dp(28), partName.implicitHeight + PrismTheme.dp(10))
                                             Rectangle {
@@ -259,7 +272,7 @@ Item {
                                             PrismText {
                                                 id: partName
                                                 x: PrismTheme.dp(42)
-                                                width: parent.width - x - PrismTheme.dp(8)
+                                                width: parent.width - x - (part.changed ? PrismTheme.dp(24) : PrismTheme.dp(8))
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 text: Translation.tr(part.modelData)
                                                 color: part.here ? PrismTheme.accentInk : partArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
@@ -269,6 +282,16 @@ Item {
                                                 wrapMode: Text.WordWrap
                                                 maximumLineCount: 2
                                                 elide: Text.ElideRight
+                                            }
+                                            Rectangle {
+                                                anchors.right: parent.right
+                                                anchors.rightMargin: PrismTheme.dp(12)
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                width: PrismTheme.dp(5)
+                                                height: width
+                                                radius: width / 2
+                                                visible: part.changed
+                                                color: part.here || partArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
                                             }
                                             MouseArea {
                                                 id: partArea

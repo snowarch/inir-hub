@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
@@ -62,6 +63,15 @@ Item {
 
     readonly property var page: PrismModel.page(PrismState.page)
     readonly property string pageId: String(root.page.pageId ?? "")
+    // A page comes in rising a step from under where it rests, so a press in the sidebar reads as going there (his 11-21:
+    // interactions without motion). A search's answers stay put: they change with every key.
+    property real enter: 1
+    NumberAnimation { id: pageIn; target: root; property: "enter"; from: 0; to: 1; duration: PrismTheme.ms(260); easing.type: Easing.OutCubic }
+    // The new page builds in this turn; its rise starts on the next, so a slow build never eats the motion.
+    onPageIdChanged: if (root.visible && !PrismState.searching) {
+        root.enter = 0
+        Qt.callLater(() => pageIn.restart())
+    }
     readonly property bool home: !PrismState.searching && root.pageId === "general"
     // A page iRiS draws as a view of its own (Community Hub, Keyboard shortcuts, About) fills the room under its head.
     readonly property bool hosted: !PrismState.searching && String(root.page.view ?? "").length > 0
@@ -370,6 +380,8 @@ Item {
             visible: opacity > 0
             opacity: root.asideOpen ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
+            // It slides in from the edge as it comes, and back out as it goes.
+            transform: Translate { x: Math.round((1 - aside.opacity) * PrismTheme.dp(18)) }
             active: root.active && root.asideOpen
             pageId: root.pageId
             everywhere: root.home || PrismState.searching
@@ -389,6 +401,15 @@ Item {
             clip: true
             onContentHeightChanged: { if (Date.now() < root.aimUntil) aimLater.restart(); readLater.restart() }
             onContentYChanged: readLater.restart()
+            // Over glass the rows fade out through a mask, as the sidebar's do: a band of the fill would stand darker
+            // than the glass, and rows cut square at the edge read as a fault (his 11-21).
+            layer.enabled: PrismTheme.glass && centreEdge.active
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: centreEdge.mask
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1
+            }
 
             Column {
                 id: content
@@ -396,6 +417,8 @@ Item {
                 y: PrismTheme.dp(24)
                 width: root.measure
                 spacing: 0
+                opacity: root.enter
+                transform: Translate { y: Math.round((1 - root.enter) * PrismTheme.dp(14)) }
 
                 PrismPageHead {
                     width: content.width
@@ -499,6 +522,8 @@ Item {
         Item {
             id: hostedBox
             visible: root.hosted
+            opacity: root.enter
+            transform: Translate { y: Math.round((1 - root.enter) * PrismTheme.dp(14)) }
             anchors.left: sidebar.right
             anchors.right: parent.right
             height: parent.height
@@ -538,15 +563,15 @@ Item {
             }
         }
 
-        // Rows leaving the top fade into the page, and so does the foot while rows wait past it.
-        // Over glass a band drawn again would darken the glass: rows end at the column's edge, as any glass window's.
+        // Rows leaving the top fade into the page, and so does the foot while rows wait past it: into the fill over a
+        // solid body, through the page's mask over glass (a band drawn again would darken the glass).
         IrisScrollEdge {
             id: centreEdge
-            visible: centre.visible && !PrismTheme.glass
+            visible: centre.visible
             flick: centre
             anchors.fill: centre
             reach: PrismTheme.dp(36)
-            veil: PrismTheme.canvas
+            veil: PrismTheme.glass ? "transparent" : PrismTheme.canvas
             // The veil alone: a blurred band read the page into a texture on every scrolled frame (11-11).
             blurs: false
             topRightRadius: root.asideOpen ? 0 : body.radius
