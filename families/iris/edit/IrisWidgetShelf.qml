@@ -44,7 +44,7 @@ WidgetShelf {
         { value: "bar", label: Translation.tr("Island") },
         { value: "dock", label: Translation.tr("Dock") },
         { value: "appearance", label: Translation.tr("Style"),
-            order: ["Design", "Scheme", "Accent", "Faces", "Text", "Material", "Glass", "Shape", "Highlight", "Signal", "Look",
+            order: ["Design", "Scheme", "Accent", "Faces", "Text", "Material", "Glass", "Shape", "Highlight", "Intensity", "Signal", "Look",
                 "Presets", "Edges", "Light", "Icons", "Wallpaper tint", "Colour theme", "Day and night", "Dark look", "Ink look",
                 "Light look", "Texture", "Frame", "Menus", "Badges", "Previews", "Customize", "Adaptive"] },
         { value: "presets", label: Translation.tr("Presets") }

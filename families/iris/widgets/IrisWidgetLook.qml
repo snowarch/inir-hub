@@ -61,7 +61,6 @@ WidgetLook {
         const name = String(look.options.tint ?? "wallpaper")
         return IrisStyle.widgetPaletteNames.includes(name) ? name : "wallpaper"
     }
-    readonly property real vibrance: Math.max(0, Math.min(100, Number(look.options.vibrance ?? 60))) / 100
     function paletteFor(lightBackdrop: bool): var { return IrisStyle.widgetPaletteFor(look.paletteName, lightBackdrop) }
     readonly property var palette: look.paletteFor(IrisStyle.light)
     readonly property color accent: look.palette[0]

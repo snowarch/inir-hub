@@ -65,7 +65,7 @@ Item {
     property real dragValue: NaN
     readonly property var shownValue: Number.isFinite(root.dragValue) ? root.dragValue : root.value
     readonly property bool livePath: !root.spec.comp && !root.spec.bundle && String(root.spec.path ?? "").length > 0
-        && !/^iris\.appearance\.tune\.|^iris\.widgets\.vibrance$|^appearance\./.test(String(root.spec.path))
+        && !/^iris\.appearance\.tune\.|^iris\.appearance\.intensity$|^appearance\./.test(String(root.spec.path))
     function previewDrag(): void {
         // The island's Undo goes back to the value before the drag, not to one of its steps.
         if (Number.isFinite(root.dragValue) && root.livePath) { IrisOptions.hold(root.spec); Config.previewNestedValue(root.spec.path, root.dragValue) }

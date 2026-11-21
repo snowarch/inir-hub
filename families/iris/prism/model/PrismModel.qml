@@ -71,7 +71,7 @@ Singleton {
     readonly property var chapters: ({
         appearance: [
             { id: "appearance", groups: [] },
-            { id: "colour", groups: ["Scheme", "Accent", "Highlight", "Signal", "Colour theme", "Day and night", "Wallpaper tint", "Adaptive", "Dark look", "Ink look", "Light look"] },
+            { id: "colour", groups: ["Scheme", "Accent", "Highlight", "Intensity", "Signal", "Colour theme", "Day and night", "Wallpaper tint", "Adaptive", "Dark look", "Ink look", "Light look"] },
             { id: "surfaces", groups: ["Material", "Glass", "Texture", "Light", "Edges", "Shape", "Frame", "Menus"] },
             { id: "typeIcons", groups: ["Text", "Faces", "Icons", "Badges"] },
             { id: "appColours", groups: ["App colours"] }

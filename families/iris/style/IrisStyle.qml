@@ -326,8 +326,14 @@ QtObject {
     // What the person tuned for the scheme in use, as primitives so a config write that changes none does not re-run bindings.
     // Tone, colour strength and widget colour are solved into the palette (IrisWashi); these remain for what is not colour.
     readonly property int tone: Math.max(-30, Math.min(30, Number(root.tuneOptions?.[root.scheme]?.tone ?? 0)))
-    // How colourful the desktop widgets read in this scheme, 40..160 %: their data colours (solved) and their glass.
-    readonly property real widgetColour: Math.max(40, Math.min(160, Number(root.tuneOptions?.[root.scheme]?.widgets ?? (root.ink ? 120 : root.light ? 110 : 100)))) / 100
+    // How colourful the desktop widgets read in this scheme, 40..160 % of their solved data colour: their data (IrisWashi)
+    // and their glass, which keeps its own saturation at the value iRiS ships for the scheme.
+    readonly property real widgetColourShipped: root.light && !root.ink ? 0.6 : 0.7
+    readonly property real widgetColour: Math.max(40, Math.min(160, Number(root.tuneOptions?.[root.scheme]?.widgetColour ?? root.widgetColourShipped * 100))) / 100
+    // Intensity, 0..1: how vivid every colour is, the accent, the highlight and the widgets alike (solved, IrisWashi).
+    readonly property real intensity: Math.max(0, Math.min(100, Number(root.appearance?.intensity ?? 60))) / 100
+    // The chroma scale of a colour made here, as the solve's (washi.rs): Intensity times the scheme's Colour strength.
+    readonly property real chromaScale: (0.55 + 0.75 * root.intensity) * Math.max(0, Math.min(100, Number(root.tuneOptions?.[root.scheme]?.colour ?? 100))) / 100
     function toned(c: color): color {
         if (root.tone === 0) return c
         return Qt.hsla(Math.max(0, c.hslHue), c.hslSaturation, Math.max(0, Math.min(1, c.hslLightness + root.tone / 100)), c.a)
@@ -872,7 +878,7 @@ QtObject {
     function readableHighlight(c: color): color { return Lume.mark(c, root.markLevel, 0, root.light, 3) }
     readonly property var widgetPaletteNames: ["wallpaper", "system", "spectrum", "mono"]
     // Data in widgets (rings, bars, figures): three colours of the identity band, solved with the palette. The
-    // vibrance setting is part of the solve (iris.widgets.vibrance). When a widget sits on the opposite polarity
+    // Intensity is part of the solve (iris.appearance.intensity). When a widget sits on the opposite polarity
     // (bare over a dark wallpaper in Light, or over a bright wallpaper in Dark), it pulls from that polarity's solve.
     function schemeWashi(lightBackdrop: bool): var {
         if (lightBackdrop === root.light) return root.washi
@@ -947,12 +953,20 @@ QtObject {
     readonly property string accentChoice: IrisDesign.colourChoice("accent", String(root.appearance?.accent ?? "blue"), root.followsTheme)
     readonly property string highlightChoice: IrisDesign.colourChoice("highlight", String(root.appearance?.highlight ?? "orange"), root.followsTheme)
     readonly property color baseAccent: root.vivid(root.accentFrom(root.accentChoice, root.appearance?.theme?.accentHue ?? 212), false)
-    // The person's hue at the strength Apple gives an accent (systemBlue's), not the solver's pastel: #accbeb next to
-    // #dfe7ef ink made a chosen word, a lit switch and a thumb read as the rest (his 10-30). A grey accent stays grey;
-    // a Design with its own palette (AIRISU's vermilion) keeps it exact.
+    // The person's hue at an accent's strength, not the solver's pastel: #accbeb next to #dfe7ef ink made a chosen word,
+    // a lit switch and a thumb read as the rest (his 10-30). In OKLCH, one lightness per scheme, so every hue reads as
+    // bright as the next (a yellow rises on the night, where its own lightness sits), and a chroma that follows Intensity
+    // and Colour strength like the solve's. A mark holds 4.5:1 on every ground of its scheme; a fill holds it under its
+    // readable ink. A grey stays grey, a Design with its own palette (AIRISU's vermilion) keeps it exact, and a vivid
+    // colour given again comes back the same.
     function vivid(tint: color, fill: bool): color {
-        if (IrisDesign.current !== "iris" || tint.hslSaturation < 0.12) return tint
-        return Qt.hsla(tint.hslHue, Math.max(0.78, tint.hslSaturation), root.light ? (fill ? 0.5 : 0.42) : (fill ? 0.58 : 0.68), 1)
+        if (IrisDesign.current !== "iris") return tint
+        const [, chroma, hue] = root.oklchOf(tint)
+        if (chroma < 0.03) return tint
+        const yellow = !root.light && hue >= 85 && hue <= 125
+        const lightness = root.ink ? (fill ? 0.52 : 0.42) : root.light ? (fill ? 0.52 : 0.46)
+            : yellow ? (fill ? 0.8 : 0.86) : (fill ? 0.64 : 0.72)
+        return root.oklch(lightness, Math.min(0.2, (root.light ? 0.12 : 0.13) * root.chromaScale), hue)
     }
     // Prism's light (his 11-07: "los colores de prism deben de ser estéticos, el beam y el contorno, no colores fuertes ni
     // simulados; todos los colores de la shell deben de salir de un lugar"): the one place the beam, its fan, a slab's rim
@@ -987,8 +1001,8 @@ QtObject {
         }
         return Qt.rgba(l, l, l, 1)
     }
-    // A colour's OKLCH hue in degrees.
-    function oklchHue(c: color): real {
+    // A colour in OKLCH: [lightness 0..1, chroma, hue in degrees].
+    function oklchOf(c: color): var {
         const lin = x => x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
         const r = lin(c.r), g = lin(c.g), b = lin(c.b)
         const l_ = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
@@ -996,8 +1010,11 @@ QtObject {
         const s_ = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
         const a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_
         const bb = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_
-        return (Math.atan2(bb, a) * 180 / Math.PI + 360) % 360
+        return [0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_, Math.sqrt(a * a + bb * bb),
+            (Math.atan2(bb, a) * 180 / Math.PI + 360) % 360]
     }
+    // A colour's OKLCH hue in degrees.
+    function oklchHue(c: color): real { return root.oklchOf(c)[2] }
     // Under Signal the accent is the ink itself: what was an accent mark reads as ink, and an accent fill with its
     // own ink on it turns into the inverted plate (ink fill, paper word), Nothing's "chosen".
     readonly property color accent: root.animeEnabled
@@ -1296,10 +1313,11 @@ QtObject {
     readonly property color clearRim: ColorUtils.applyAlpha(root.text, 0.07)
     readonly property int glassBlurMax: 48
     readonly property real glassSaturation: 0.3
-    // The glass a widget shows the wallpaper through gains or loses colour with the scheme's Widget colour.
-    // On paper the frost is light: a saturation boost under it glows (a lit pane of the wallpaper's colour), so it stays neutral.
-    readonly property real widgetGlassSaturation: root.light ? Math.min(0, (root.widgetColour - 1) * 0.5)
-        : Math.max(-1, Math.min(1, root.glassSaturation + (root.widgetColour - 1) * 0.5))
+    // The glass a widget shows the wallpaper through gains or loses colour as the scheme's Widget colour moves from
+    // what iRiS ships. On paper the frost is light: a saturation boost under it glows (a lit pane of the wallpaper's
+    // colour), so it stays neutral.
+    readonly property real widgetGlassSaturation: root.light ? Math.min(0, (root.widgetColour - root.widgetColourShipped) * 0.6)
+        : Math.max(-1, Math.min(1, root.glassSaturation + (root.widgetColour - root.widgetColourShipped) * 0.6))
     readonly property var materialVeil: ({ glass: 0.3, clear: 0.04, panel: 0.3 })
     // "panel": a surface that is mostly reading (Settings): 7:1 for its main ink so secondary ink still reads.
     readonly property var materialContrast: ({ glass: 4.5, clear: 3, panel: 7 })

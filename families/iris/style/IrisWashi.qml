@@ -19,6 +19,17 @@ Singleton {
     readonly property string cachePath: `${Directories.stateUserPath}/generated/iris-washi.json`
     readonly property var appearance: Config.options?.iris?.appearance ?? ({})
     readonly property bool followsTheme: String(ThemeService.currentTheme ?? "auto") !== "auto" && Boolean(root.appearance?.followTheme ?? true)
+    readonly property string wallpaperPath: String(Wallpapers.effectiveWallpaperPath ?? "")
+
+    // The wallpaper's colours, each an equal share of its pixels: the solve reads its colour families from them
+    // (washi.rs colour_families), so a small vivid area outweighs a wide dull one and a grey wallpaper gives a grey.
+    ColorQuantizer {
+        id: quantizer
+        source: root.wallpaperPath.length > 0 ? Wallpapers.stillUrlFor(root.wallpaperPath) : ""
+        depth: 6
+        rescaleSize: 64
+    }
+    readonly property var colours: Array.from(quantizer.colors ?? []).filter(c => c && c.valid !== false).map(c => root.hex(c))
 
     function hex(c: color): string {
         const part = v => ("0" + Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16)).slice(-2)
@@ -36,13 +47,12 @@ Singleton {
         accentHue: Number(root.appearance?.theme?.accentHue ?? 212),
         highlight: IrisDesign.colourChoice("highlight", String(root.appearance?.highlight ?? "orange"), root.followsTheme),
         highlightHue: Number(root.appearance?.theme?.highlightHue ?? 32),
-        vibrance: Math.max(0, Math.min(100, Number(Config.options?.iris?.widgets?.vibrance ?? 60))) / 100,
+        // Intensity: how vivid every colour is, the accent, the highlight and the widgets alike.
+        vibrance: Math.max(0, Math.min(100, Number(root.appearance?.intensity ?? 60))) / 100,
         tune: ["dark", "ink", "light"].reduce((out, name) => {
             const t = root.appearance?.tune?.[name]
-            const rawWidgets = t?.widgets === undefined ? (name === "light" ? 85 : 90) : Number(t.widgets)
-            const widgetScale = name === "light" ? 0.68 : 0.78
             out[name] = { tone: Number(t?.tone ?? 0), colour: Number(t?.colour ?? 100),
-                widgets: Math.max(40, Math.min(160, Math.round(rawWidgets * widgetScale))),
+                widgets: Math.max(40, Math.min(160, Math.round(Number(t?.widgetColour ?? (name === "light" ? 60 : 70))))),
                 warmth: t?.warmth === undefined ? null : Number(t.warmth) }
             return out
         }, ({})),
@@ -52,7 +62,9 @@ Singleton {
             secondary: root.appsWearPalette ? String(root.wallpaperSeeds?.secondary ?? "") : root.hex(Appearance.colors.colSecondary),
             tertiary: root.appsWearPalette ? String(root.wallpaperSeeds?.tertiary ?? "") : root.hex(Appearance.colors.colTertiary),
             background: root.appsWearPalette ? String(root.wallpaperSeeds?.background ?? root.hex(Appearance.m3colors.m3background))
-                : root.hex(Appearance.m3colors.m3background)
+                : root.hex(Appearance.m3colors.m3background),
+            // Last: the solver writes the request back in this order, and a match skips the next solve.
+            colours: root.colours.length > 0 ? root.colours : undefined
         }
     })
     // While the apps wear this palette, the Material colours are its own output: the wallpaper's seeds come from the
@@ -96,8 +108,16 @@ Singleton {
 
     property bool again: false
     property bool warned: false
+    // A wallpaper's colours land a moment after its path: the solve waits for them, 1.5 s at most (a video with no
+    // still yet, an image that fails), then solves without them.
+    property bool coloursLate: false
+    onWallpaperPathChanged: root.coloursLate = false
+    readonly property Timer coloursWait: Timer { interval: 1500; onTriggered: { root.coloursLate = true; root.run() } }
     function run(): void {
-        if (root.data?.request === root.requestJson && root.data?.version === root.version) return
+        if (root.colours.length === 0 && root.wallpaperPath.length > 0 && !root.coloursLate) { root.coloursWait.restart(); return }
+        // An answer without families came from an older solver: a newer one answers again.
+        if (root.data?.request === root.requestJson && root.data?.version === root.version
+            && (root.colours.length === 0 || Array.isArray(root.data?.families))) return
         if (solver.running) { root.again = true; return }
         solver.command = [Quickshell.shellPath("scripts/lib/accel-run"), "washi", "--request", root.requestJson, "--out", root.cachePath]
         solver.running = true

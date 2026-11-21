@@ -34,7 +34,6 @@ JsonObject {
         property int radius: 22
         property int opacity: 100
         property string tint: "wallpaper" // accents: "wallpaper", "system" (iRiS), "spectrum" or "mono"
-        property int vibrance: 60 // how strong widget accents are (0-100)
         property bool legibleAlways: false // Lume backs every widget as if the wallpaper under it were bright and busy
         property string design: "iris" // "iris" faces, "prism", "material" (each widget's own style), "instrument" or "readout"
         property string prism: "quiet" // Prism's cut for every widget that keeps "auto": "quiet", "beam", "folder", "pocket", "archive", "smoked" or "board"
@@ -71,6 +70,7 @@ JsonObject {
         property string preset: "iris" // IrisStyle.presets: iris, soft, round, crisp, angular, contrast
         property string morph: "direct" // IrisStyle.morphStyles: direct, liquid, glide, snap, elastic, instant
         property string accent: "blue" // "blue", "mint", "rose", "lilac" or "wallpaper"
+        property int intensity: 60 // how vivid every colour is (0-100 %): the accent, the highlight and the widgets alike
         property string scheme: "auto" // "auto" (follows the system), "dark", "ink" or "light"
         property string language: "iris" // the palette's style: "iris" (iRiS's own), "washi" (paper and pigment) or "material" (Material You)
         property string variant: "tonalSpot" // Material You's scheme: "tonalSpot", "vibrant", "expressive", "fidelity" or "monochrome"
@@ -125,12 +125,12 @@ JsonObject {
             property bool develop: true
         }
         // Per scheme: tone lifts or dims the material (-30..30), colour is how strong accents read (0..100 %),
-        // widgets is how colourful the desktop widgets read (40..160 %); warmth (0..100) is how much washi fibre the paper
+        // widgetColour is how colourful the desktop widgets read (40..160 %); warmth (0..100) is how much washi fibre the paper
         // (or Dark's ink night) carries.
         property JsonObject tune: JsonObject {
-            property JsonObject dark: JsonObject { property int tone: 0; property int warmth: 20; property int colour: 100; property int widgets: 90 }
-            property JsonObject ink: JsonObject { property int tone: 0; property int warmth: 50; property int colour: 100; property int widgets: 90 }
-            property JsonObject light: JsonObject { property int tone: -8; property int warmth: 38; property int colour: 85; property int widgets: 85 }
+            property JsonObject dark: JsonObject { property int tone: 0; property int warmth: 20; property int colour: 100; property int widgetColour: 70 }
+            property JsonObject ink: JsonObject { property int tone: 0; property int warmth: 50; property int colour: 100; property int widgetColour: 70 }
+            property JsonObject light: JsonObject { property int tone: -8; property int warmth: 38; property int colour: 85; property int widgetColour: 60 }
         }
         property string highlight: "orange" // "orange", "yellow", "red", "pink", "green", "accent" or "wallpaper"
         property JsonObject anime: JsonObject {
