@@ -9,11 +9,13 @@ command -v jq >/dev/null 2>&1 || { echo "rmpc theme: jq is not installed" >&2; e
 PALETTE="${XDG_STATE_HOME:-$HOME/.local/state}/quickshell/user/generated/palette.json"
 OWN="${XDG_CONFIG_HOME:-$HOME/.config}/inir/plugins"
 OUT="$OWN/rmpc/theme.ron"
-SETTINGS="$OWN/rmpc.json"        # {"cava": "spectrum" | "mirror" | "top" | "solid" | "dense" | "chunky"}
+SETTINGS="$OWN/rmpc.json"        # {"cava": "spectrum" | "mirror" | "top" | "solid" | "dense" | "chunky", "layout": "full" | "compact"}
 [[ -s "$PALETTE" ]] || exit 0
 
 style="$(sed -n 's/.*"cava"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true)"
 case "$style" in spectrum|mirror|top|solid|dense|chunky) ;; *) style=spectrum ;; esac
+layout="$(sed -n 's/.*"layout"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true)"
+case "$layout" in full|compact) ;; *) layout=full ;; esac
 
 c() { jq -r --arg k "$1" '.[$k] // empty' "$PALETTE"; }
 bg=$(c surface); fg=$(c on_surface); surf=$(c surface_container_high)
@@ -77,6 +79,54 @@ LAYOUT=$(cat <<'LAYOUT_END'
     ),
 LAYOUT_END
 )
+
+LAYOUT_COMPACT=$(cat <<'LAYOUT_END'
+    layout: Split(
+        direction: Horizontal,
+        panes: [
+            (
+                size: "24",
+                pane: Split(
+                    direction: Vertical,
+                    panes: [
+                        (size: "12", borders: "ALL", border_symbols: Rounded, pane: Pane(AlbumArt)),
+                        (size: "100%", borders: "ALL", border_symbols: Rounded, pane: Split(
+                            direction: Vertical,
+                            panes: [
+                                (size: "1", pane: Component("title")),
+                                (size: "1", pane: Component("artist_and_album")),
+                                (size: "1", pane: Component("elapsed_and_bitrate")),
+                            ],
+                        )),
+                    ],
+                ),
+            ),
+            (
+                size: "100%",
+                pane: Split(
+                    direction: Vertical,
+                    panes: [
+                        (size: "5", borders: "ALL", border_symbols: Rounded, pane: Pane(Cava)),
+                        (size: "1", pane: Pane(Tabs)),
+                        (
+                            size: "100%",
+                            pane: Split(
+                                direction: Horizontal,
+                                panes: [
+                                    (size: "20", borders: "ALL", border_symbols: Rounded, pane: Pane(Lyrics)),
+                                    (size: "100%", pane: Pane(TabContent)),
+                                ],
+                            ),
+                        ),
+                        (size: "3", borders: "ALL", border_symbols: Rounded, pane: Pane(ProgressBar)),
+                    ],
+                ),
+            ),
+        ],
+    ),
+LAYOUT_END
+)
+[[ "$layout" == compact ]] && LAYOUT="$LAYOUT_COMPACT"
 
 render_theme() {
 cat <<EOF

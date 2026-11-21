@@ -134,6 +134,10 @@ In your Niri config (`inir` itself speaks MPRIS, but rmpc's own command works wi
 Mod+Shift+P { spawn "rmpc" "togglepause"; }
 ```
 
+## Layout
+
+The default layout is made for about 130x32 characters. For smaller terminals (about 80x24 up to 110x28), turn on **Compact layout** on rmpc's page in the Hub: the cover and song info go in a left column, and the cava, tabs, lyrics, queue and progress bar share the rest. The choice is saved in `~/.config/inir/plugins/rmpc.json`. With seven tabs the tab bar can be cut in the compact layout; switch tabs with `1` to `7` or `Tab`.
+
 ## Cava style
 
 Pick the look of the visualiser on rmpc's page in the Hub: `spectrum` (bars from the bottom, the default), `mirror` (bars from the centre), `top` (bars hanging from the top), `solid` (one colour), `dense` (no gap between bars) and `chunky` (wider bars). Every style uses your palette and follows it live. Your choice is saved in `~/.config/inir/plugins/rmpc.json` and stays if you remove the component. The cava pane needs step 3 above.
