@@ -339,6 +339,9 @@ PanelWindow {
                             Layout.alignment: Qt.AlignTop
                             quiet: true
                             buttonRadius: IrisStyle.capsule(height)
+                            // The way back in the accent, as each changed row's dot: seen at once.
+                            foreground: skinned ? IrisStyle.text : IrisStyle.accent
+                            colBackgroundHover: skinned ? "transparent" : IrisStyle.tintFillHover(IrisStyle.accent)
                             text: Translation.tr("Reset %1").arg(changed)
                             Accessible.name: Translation.tr("Reset what changed here")
                             onClicked: root.resetArea()

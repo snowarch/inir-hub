@@ -194,7 +194,7 @@ Item {
         enabled: false
         Accessible.ignored: true
         spacing: PrismTheme.dp(8)
-        PrismPill { visible: root.restorable; tone: "quiet"; glyph: "restart_alt"; text: Translation.tr("Restore defaults") }
+        PrismPill { visible: root.restorable; tone: "accent"; glyph: "restart_alt"; text: Translation.tr("Restore defaults") }
         Repeater {
             model: root.actions
             delegate: PrismPill { required property var modelData; tone: "art"; glyph: String(modelData.glyph ?? ""); text: Translation.tr(String(modelData.text ?? "")) }
@@ -206,7 +206,7 @@ Item {
             spacing: PrismTheme.dp(8)
             PrismPill {
                 visible: root.restorable
-                tone: "quiet"
+                tone: "accent"
                 glyph: "restart_alt"
                 text: Translation.tr("Restore defaults")
                 onClicked: root.restore()

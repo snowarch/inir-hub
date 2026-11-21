@@ -343,6 +343,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             implicitWidth: PrismTheme.dp(26)
                             ghost: true
+                            accented: true
                             glyph: list.before !== null ? "undo" : "restart_alt"
                             glyphSize: PrismTheme.dp(15)
                             Accessible.name: list.before !== null ? Translation.tr("Restore") : Translation.tr("Back to iNiR's")

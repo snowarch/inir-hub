@@ -14,6 +14,8 @@ Item {
     property bool smoked: false
     // On the page: no face at rest, a quiet plate under the pointer (the window's own keys).
     property bool ghost: false
+    // A ghost in the accent: its glyph and its plate under the pointer (the way back to iNiR's).
+    property bool accented: false
     property real glyphSize: PrismTheme.dp(18)
     signal clicked()
 
@@ -27,7 +29,8 @@ Item {
         visible: root.ghost
         anchors.fill: parent
         radius: width / 2
-        color: area.pressed ? PrismTheme.fillPress : root.hovered ? PrismTheme.fillHover : "transparent"
+        color: root.accented && (area.pressed || root.hovered) ? PrismTheme.accentPlate
+            : area.pressed ? PrismTheme.fillPress : root.hovered ? PrismTheme.fillHover : "transparent"
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
     }
     PrismKey {
@@ -50,7 +53,8 @@ Item {
         filled: true
         iconSize: root.glyphSize
         color: root.solid ? (root.overArt ? "#000000" : PrismTheme.inkSolid) // iris-literal: ink on the white disc over art
-            : root.lit ? PrismTheme.inkAccent : root.overArt ? PrismTheme.paper : root.ghost && !root.hovered ? PrismTheme.ink2 : PrismTheme.ink
+            : root.lit ? PrismTheme.inkAccent : root.overArt ? PrismTheme.paper : root.accented ? PrismTheme.accentInk
+            : root.ghost && !root.hovered ? PrismTheme.ink2 : PrismTheme.ink
     }
     MouseArea {
         id: area

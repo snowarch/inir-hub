@@ -3,18 +3,21 @@ import qs.modules.iris.prism.core
 
 // Pills (`.claude/ref/language`): `solid` is the white key that acts, `art` the same white over art in every scheme,
 // `quiet` a key on Prism's own page; each stands on its lip and sinks when pressed. `dark` is the smoked glass that
-// says a value over art. A glyph leads when given.
+// says a value over art. `accent` is the quiet key in the accent's wash: the way back to iNiR's values, seen at once.
+// A glyph leads when given.
 Item {
     id: root
     property string text: ""
     property string glyph: ""
-    property string tone: "solid" // solid | art (white on the art in every scheme) | dark | quiet
+    property string tone: "solid" // solid | art (white on the art in every scheme) | dark | quiet | accent
     property bool enabled_: true
     signal clicked()
 
     readonly property bool hovered: area.containsMouse
-    readonly property color face: root.tone === "art" ? PrismTheme.paper : root.tone === "solid" ? PrismTheme.solid : PrismTheme.keyQuiet
-    readonly property color ink: root.tone === "art" ? PrismTheme.night : root.tone === "solid" ? PrismTheme.inkSolid : root.tone === "dark" ? PrismTheme.paper : PrismTheme.ink
+    readonly property color face: root.tone === "art" ? PrismTheme.paper : root.tone === "solid" ? PrismTheme.solid
+        : root.tone === "accent" ? PrismTheme.accentPlate : PrismTheme.keyQuiet
+    readonly property color ink: root.tone === "art" ? PrismTheme.night : root.tone === "solid" ? PrismTheme.inkSolid : root.tone === "dark" ? PrismTheme.paper
+        : root.tone === "accent" ? PrismTheme.accentInk : PrismTheme.ink
 
     implicitHeight: PrismTheme.dp(34)
     implicitWidth: row.implicitWidth + PrismTheme.dp(root.glyph.length > 0 ? 30 : 36)

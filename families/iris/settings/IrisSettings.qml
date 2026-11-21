@@ -1243,6 +1243,7 @@ Item {
                         shown: !root.searching && root.advancedPage < 0 && modified
                         glyph: "restart_alt"
                         label: Translation.tr("Restore defaults")
+                        accented: true
                         // Act first, one Undo on the island for the lot (no confirm).
                         onClicked: IrisOptions.restore(resettable)
                     }
@@ -1497,6 +1498,8 @@ Item {
         property string glyph: ""
         property string label: ""
         property bool shown: true
+        // The way back to iNiR's values: its glyph and words in the accent, seen at once (Folio's title line too).
+        property bool accented: false
         visible: action.shown
         // When the page's name would lose its room, actions fold to their glyphs one at a time (toolbarActions.folded).
         readonly property bool folded: toolbarActions.folded.includes(action)
@@ -1522,12 +1525,13 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 text: action.glyph
                 iconSize: Math.round(16 * root.d)
-                color: IrisStyle.subtext
+                color: action.accented && !action.skinned ? IrisStyle.accent : IrisStyle.subtext
             }
             IrisText {
                 visible: !action.folded
                 anchors.verticalCenter: parent.verticalCenter
                 text: action.label
+                color: action.accented && !action.skinned ? IrisStyle.accent : IrisStyle.text
                 font.family: IrisStyle.monoCaptions ? IrisStyle.fontMono : IrisStyle.fontMain
                 font.capitalization: IrisStyle.monoCaptions ? Font.AllUppercase : Font.MixedCase
                 font.letterSpacing: IrisStyle.monoCaptions ? Math.round(IrisStyle.typeMeta * 0.12) : 0

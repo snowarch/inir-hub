@@ -84,13 +84,19 @@ Item {
                 Accessible.role: Accessible.Button
                 Accessible.name: String(titleAct.modelData.label ?? "")
                 onClicked: titleAct.modelData.clicked()
-                Rectangle { anchors.fill: parent; radius: IrisStyle.capsule(height); color: titleAct.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet }
+                readonly property bool accented: titleAct.modelData.accented === true
+                Rectangle {
+                    anchors.fill: parent
+                    radius: IrisStyle.capsule(height)
+                    color: titleAct.accented ? (titleAct.containsMouse ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.tintFill(IrisStyle.accent))
+                        : titleAct.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
+                }
                 Row {
                     id: titleActRow
                     anchors.centerIn: parent
                     spacing: page.u(6)
-                    MaterialSymbol { anchors.verticalCenter: parent.verticalCenter; text: String(titleAct.modelData.glyph ?? ""); iconSize: page.u(16); color: IrisStyle.text }
-                    IrisText { anchors.verticalCenter: parent.verticalCenter; text: String(titleAct.modelData.label ?? ""); color: IrisStyle.text; font.pixelSize: IrisStyle.typeMeta }
+                    MaterialSymbol { anchors.verticalCenter: parent.verticalCenter; text: String(titleAct.modelData.glyph ?? ""); iconSize: page.u(16); color: titleAct.accented ? IrisStyle.accent : IrisStyle.text }
+                    IrisText { anchors.verticalCenter: parent.verticalCenter; text: String(titleAct.modelData.label ?? ""); color: titleAct.accented ? IrisStyle.accent : IrisStyle.text; font.pixelSize: IrisStyle.typeMeta }
                 }
             }
         }

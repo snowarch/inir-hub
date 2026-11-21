@@ -258,7 +258,9 @@ Item {
             }
         }
 
-        // Pin, and the way back to the factory value when the row has left it: right after the name, on its first line.
+        // The way back to the factory value when the row has left it, and the pin: right after the name, on its first
+        // line. A changed row says so in the accent at rest (a dot, as Classic and Studio mark it); pointed, the dot
+        // opens into the way back.
         Row {
             id: tail
             readonly property real room: (pin.visible ? PrismTheme.dp(24) : 0) + (back.visible ? PrismTheme.dp(24) : 0) + PrismTheme.dp(4)
@@ -266,6 +268,38 @@ Item {
             x: name.x + Math.min(label.implicitWidth, label.width) + PrismTheme.dp(2)
             y: name.y + Math.round((Math.min(label.height, PrismTheme.dp(20)) - PrismTheme.dp(24)) / 2)
             spacing: 0
+            Item {
+                id: back
+                readonly property bool open: root.hovered || resetArea.containsMouse
+                width: PrismTheme.dp(24); height: PrismTheme.dp(24)
+                visible: root.restorable && !root.locked
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: back.open ? parent.width : PrismTheme.dp(6)
+                    height: width
+                    radius: width / 2
+                    color: !back.open ? PrismTheme.accent : resetArea.pressed || resetArea.containsMouse ? PrismTheme.accentPlate : "transparent"
+                    Behavior on width { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+                    Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
+                }
+                PrismGlyph {
+                    anchors.centerIn: parent
+                    text: "restart_alt"
+                    iconSize: PrismTheme.dp(16)
+                    color: PrismTheme.accentInk
+                    opacity: back.open ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+                }
+                MouseArea {
+                    id: resetArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
+                    Accessible.name: Translation.tr("Reset %1").arg(Translation.tr(root.row.label))
+                    onClicked: PrismModel.restoreRow(root.row)
+                }
+            }
             PrismGlyph {
                 id: pin
                 width: PrismTheme.dp(24); height: PrismTheme.dp(24)
@@ -277,16 +311,6 @@ Item {
                 color: pinned ? PrismTheme.accent : pinArea.containsMouse ? PrismTheme.ink : PrismTheme.ink3
                 opacity: pinned || root.hovered ? 1 : 0
                 MouseArea { id: pinArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: PrismModel.togglePin(root.row) }
-            }
-            PrismGlyph {
-                id: back
-                width: PrismTheme.dp(24); height: PrismTheme.dp(24)
-                text: "restart_alt"
-                iconSize: PrismTheme.dp(16)
-                visible: root.restorable && !root.locked
-                color: resetArea.containsMouse ? PrismTheme.ink : PrismTheme.ink3
-                opacity: root.hovered ? 1 : 0
-                MouseArea { id: resetArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: PrismModel.restoreRow(root.row) }
             }
         }
     }
