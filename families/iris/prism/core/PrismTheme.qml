@@ -19,6 +19,10 @@ Singleton {
     readonly property real fine: 0.88
     function dp(value: real): real { return Math.round(value * root.density * root.fine) }
     function room(value: real): real { return Math.round(value * root.density) }
+    // Prism's resting size on a screen this many points across and down: the room it was drawn for, growing with a
+    // larger screen up to a comfortable reach (on a 27″ screen at 100 % it sat as a small island in the middle).
+    function restWidth(across: real): real { return Math.round(Math.max(root.room(1280), Math.min(across * 0.72, root.room(1560)))) }
+    function restHeight(down: real): real { return Math.round(Math.max(root.room(840), Math.min(down * 0.82, root.room(1040)))) }
 
     // The panel's material follows the shell's glass (Settings › Glass; his 11-16, and 11-20: "tiene que respetar la
     // shell"), over the desktop and as a window alike: Blur lays a veil of the canvas over what the compositor blurs

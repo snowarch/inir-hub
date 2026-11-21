@@ -522,6 +522,7 @@ Item {
                 onLoaded: {
                     if (item && item.markDelegate !== undefined) item.markDelegate = hostedMark
                     if (item && item.plainMarks !== undefined) item.plainMarks = true
+                    if (item && item.measure !== undefined) item.measure = Qt.binding(() => root.measure)
                 }
             }
             Component {

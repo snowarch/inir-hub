@@ -78,8 +78,8 @@ PanelWindow {
     PrismPanel {
         id: panel
         readonly property real band: IrisFrame.band + PrismTheme.room(24)
-        width: PrismState.wide ? root.width - band * 2 : Math.min(root.width - band * 2, PrismTheme.room(1280))
-        height: PrismState.wide ? root.height - band * 2 : Math.min(root.height - band * 2, PrismTheme.room(840))
+        width: PrismState.wide ? root.width - band * 2 : Math.min(root.width - band * 2, PrismTheme.restWidth(root.width))
+        height: PrismState.wide ? root.height - band * 2 : Math.min(root.height - band * 2, PrismTheme.restHeight(root.height))
         // Centred on whole pixels: a half-pixel place would resample every layer inside it (the glass, the list's fade).
         x: Math.round((root.width - width) / 2)
         y: Math.round((root.height - height) / 2)

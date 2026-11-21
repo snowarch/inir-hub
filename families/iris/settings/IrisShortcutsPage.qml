@@ -38,6 +38,8 @@ Flickable {
     // A host may print each category's mark its own way (Prism: a cover of its art); iRiS's squircle otherwise. The
     // delegate reads `glyph` and `name` from its Loader.
     property Component markDelegate: null
+    // How wide the column reads; a host with its own measure (Prism) sets it, so the page runs under its head.
+    property real measure: 820 * root.d
     function categoryTint(name: string): color { return IrisStyle.identityColor(IrisBinds.tintOf(name)) }
     function parseCombo(combo: string): var {
         if (!combo || combo.length === 0) return { mods: [], key: "" }
@@ -109,7 +111,7 @@ Flickable {
 
     ColumnLayout {
         id: pageColumn
-        width: Math.min(root.width - 32 * root.d, 820 * root.d)
+        width: Math.min(root.width - 32 * root.d, root.measure)
         x: Math.round((root.width - width) / 2)
         y: Math.round(6 * root.d)
         spacing: 14 * root.d

@@ -24,6 +24,8 @@ Flickable {
     readonly property string irisVersion: irisVersionFile.text().trim()
     // A host that draws its marks in ink (Prism) sets it: the links open on their glyph alone, without a colour.
     property bool plainMarks: false
+    // How wide the column reads; a host with its own measure (Prism) sets it, so the page runs under its head.
+    property real measure: 640 * root.d
 
     FileView {
         id: versionFile
@@ -36,7 +38,7 @@ Flickable {
 
     ColumnLayout {
         id: pageColumn
-        width: Math.min(root.width - 32 * root.d, 640 * root.d)
+        width: Math.min(root.width - 32 * root.d, root.measure)
         x: Math.round((root.width - width) / 2)
         y: Math.round(18 * root.d)
         spacing: 18 * root.d

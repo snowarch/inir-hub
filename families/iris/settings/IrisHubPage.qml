@@ -35,7 +35,9 @@ Flickable {
     readonly property var opened: root.openId.length > 0 ? Hub.find(root.openId) : null
     readonly property bool hasStats: Hub.items.some(item => item.downloads !== undefined || Hub.votes(item) > 0)
 
-    readonly property real columnWidth: Math.min(root.width - Math.round(32 * root.d), Math.round(900 * root.d))
+    // How wide the column reads; a host with its own measure (Prism) sets it, so the page runs under its head.
+    property real measure: Math.round(900 * root.d)
+    readonly property real columnWidth: Math.min(root.width - Math.round(32 * root.d), root.measure)
     readonly property bool wide: root.columnWidth >= Math.round(600 * root.d)
     readonly property int gap: Math.round(10 * root.d)
     readonly property int bandColumns: root.columnWidth >= Math.round(720 * root.d) ? 3 : 2

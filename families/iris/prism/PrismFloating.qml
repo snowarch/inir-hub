@@ -20,8 +20,11 @@ FloatingWindow {
     Binding { target: root; property: "visible"; value: GlobalStates.settingsOverlayOpen }
     surfaceFormat: ({ opaque: false })
     color: PrismTheme.glassBlur ? "transparent" : PrismTheme.canvas
-    implicitWidth: PrismTheme.room(1280)
-    implicitHeight: PrismTheme.room(840)
+    // Where no compositor rule sizes it, it opens as the overlay would rest on this screen, inside the screen.
+    readonly property real screenWidth: GlobalStates.focusedScreen?.width ?? 1920
+    readonly property real screenHeight: GlobalStates.focusedScreen?.height ?? 1080
+    implicitWidth: Math.round(Math.min(root.screenWidth * 0.9, PrismTheme.restWidth(root.screenWidth)))
+    implicitHeight: Math.round(Math.min(root.screenHeight * 0.86, PrismTheme.restHeight(root.screenHeight)))
     minimumSize: Qt.size(PrismTheme.room(760), PrismTheme.room(520))
     onClosed: GlobalStates.settingsOverlayOpen = false
 
