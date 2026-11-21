@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.120",
+    "version": "2.33.121",
     "changes": {
+      "2.33.121": [
+        "Prism widgets wear the form picked in their sheet again; Pocket, Archive, Smoked and Board join Quiet, Beam and Folder"
+      ],
       "2.33.120": [
           "Prism Settings: text is drawn sharp at every size, in the side list and on every page"
       ],
