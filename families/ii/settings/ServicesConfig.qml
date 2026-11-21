@@ -58,7 +58,7 @@ ContentPage {
                     icon: "aod"
                     text: Translation.tr("Rest screen after (min)")
                     specialValueText: Translation.tr("Never")
-                    value: Math.round((Config.options?.idle?.restTimeout ?? 0) / 60)
+                    value: Math.round((Config.options?.idle?.restTimeout ?? 120) / 60)
                     from: 0
                     to: 60
                     stepSize: 1
