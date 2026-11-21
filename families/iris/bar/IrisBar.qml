@@ -995,6 +995,7 @@ Scope {
                 // Back on Top the surface may be a new one (qs-rs recreates it), above the LiveLayer boxes it hid.
                 onOverlaidChanged: if (!barWindow.overlaid) IrisState.chassisEpoch++
                 WlrLayershell.layer: barWindow.overlaid ? WlrLayer.Overlay : WlrLayer.Top
+                // iris-overlay-place: none needed, this is the chassis a menu leases.
                 WlrLayershell.keyboardFocus: PolkitService.active || IrisState.menusUp > 0 ? WlrKeyboardFocus.None : barWindow.takesKeys ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
                 anchors { left: true; right: true; top: true; bottom: true }
                 readonly property bool suppressed: islandLoader.active

@@ -45,6 +45,7 @@ Scope {
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:iris-lock-rehearsal"
             WlrLayershell.layer: WlrLayer.Overlay
+            // iris-menus: none. The lock as it will look, no menu over it.
             WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
             anchors { left: true; right: true; top: true; bottom: true }
 

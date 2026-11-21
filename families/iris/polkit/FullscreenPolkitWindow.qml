@@ -39,6 +39,7 @@ Scope {
             color: "transparent"
             WlrLayershell.namespace: "quickshell:polkit"
             // An auth prompt takes the keys at once; every shell surface that holds them gives them up meanwhile.
+            // iris-menus: none. The password is asked here alone: the keys never go to a menu.
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             WlrLayershell.layer: WlrLayer.Overlay
             exclusionMode: ExclusionMode.Ignore

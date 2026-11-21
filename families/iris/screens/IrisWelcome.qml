@@ -89,6 +89,7 @@ Scope {
             anchors { top: true; bottom: true; left: true; right: true }
             WlrLayershell.namespace: "quickshell:boot-greeting"
             WlrLayershell.layer: WlrLayer.Overlay
+            // iris-menus: none. A greeting and its keys, no menu.
             WlrLayershell.keyboardFocus: win.primary && !root.leaving && !PolkitService.active
                 ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
             // Opening, the desktop under it takes clicks already.

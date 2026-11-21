@@ -32,6 +32,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.namespace: "quickshell:iris-settings"
     WlrLayershell.layer: GlobalStates.settingsNativeDialogOpen ? WlrLayer.Bottom : WlrLayer.Overlay
+    // iris-overlay-place: IrisSettings' frame (an IrisMorphSurface with overlay: true) stands over the chassis.
     WlrLayershell.keyboardFocus: PolkitService.active || IrisState.menusUp > 0 ? WlrKeyboardFocus.None : GlobalStates.settingsNativeDialogOpen ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
     mask: GlobalStates.settingsOverlayOpen && body.frame.armed ? null : frameRegion
     Region { id: frameRegion; item: body.frame }
