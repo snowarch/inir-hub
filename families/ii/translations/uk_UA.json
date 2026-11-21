@@ -2233,7 +2233,6 @@
   "Right sidebar header": "Шапка правої бічної панелі",
   "Separate pills": "Роздільні pill",
   "Set icon or button size to zero to follow the current bar height automatically.": "Поставте розмір піктограми чи кнопки на нуль, щоб автоматично йти за поточною висотою панелі.",
-  "Show dock when no window is focused (Empty workspace mode only)": "Показувати док, коли жодне вікно не у фокусі (лише режим Порожня стільниця)",
   "Show spectrum in the bar": "Показувати спектр у панелі",
   "Show values": "Показувати значення",
   "Showcase": "Вітрина",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "Прибрати з панелі",
   "Add to bar": "Додати на панель",
   "Lifted %1 px": "Піднято на %1 px",
-  "At the edge": "Біля краю"
+  "At the edge": "Біля краю",
+  "Rest screen after (min)": "Екран спокою через (хв)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "Спокійний годинник поверх робочого столу, якщо нічого не відбувається так довго, перед вимкненням екрана"
 }

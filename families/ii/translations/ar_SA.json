@@ -2233,7 +2233,6 @@
   "Right sidebar header": "ترويسة الشريط الجانبي الأيمن",
   "Separate pills": "Pill منفصلة",
   "Set icon or button size to zero to follow the current bar height automatically.": "اجعل حجم الأيقونة أو الزر صفرًا ليتبع ارتفاع الشريط الحالي تلقائيًا.",
-  "Show dock when no window is focused (Empty workspace mode only)": "إظهار Dock حين لا تكون أي نافذة مركّزة (في وضع سطح المكتب الفارغ فقط)",
   "Show spectrum in the bar": "إظهار الطيف في الشريط",
   "Show values": "إظهار القيم",
   "Showcase": "واجهة عرض",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "إزالة من الشريط",
   "Add to bar": "إضافة إلى الشريط",
   "Lifted %1 px": "مرفوع %1 بكسل",
-  "At the edge": "عند الحافة"
+  "At the edge": "عند الحافة",
+  "Rest screen after (min)": "شاشة الراحة بعد (دقيقة)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "ساعة هادئة فوق سطح المكتب عندما لا يحدث شيء طوال هذه المدة، قبل أن تنطفئ الشاشة"
 }

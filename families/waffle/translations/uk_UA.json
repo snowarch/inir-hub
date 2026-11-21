@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "Що робить кут, коли на ньому зупиняється вказівник",
   "Which screen takes touch": "Який екран приймає дотик",
   "Which screen the pen draws on": "На якому екрані малює перо",
-  "Windows stacked as tabs in one column": "Вікна, складені вкладками в один стовпець"
+  "Windows stacked as tabs in one column": "Вікна, складені вкладками в один стовпець",
+  "Welcome and rest": "Привітання і спокій",
+  "Welcome screen": "Екран привітання",
+  "Your picture and name once at startup, then the desktop": "Ваше фото й ім'я один раз під час запуску, потім робочий стіл",
+  "See the welcome screen": "Переглянути екран привітання",
+  "Rest screen": "Екран спокою",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "Час і те, що грає, поверх шпалер після бездіяльності (0 = ніколи)"
 }

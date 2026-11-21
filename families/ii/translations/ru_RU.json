@@ -2233,7 +2233,6 @@
   "Right sidebar header": "Шапка правой боковой панели",
   "Separate pills": "Раздельные pill",
   "Set icon or button size to zero to follow the current bar height automatically.": "Поставьте размер значка или кнопки в ноль, чтобы автоматически следовать текущей высоте панели.",
-  "Show dock when no window is focused (Empty workspace mode only)": "Показывать док, когда ни одно окно не в фокусе (только режим Пустой рабочий стол)",
   "Show spectrum in the bar": "Показывать спектр в панели",
   "Show values": "Показывать значения",
   "Showcase": "Витрина",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "Убрать с панели",
   "Add to bar": "Добавить на панель",
   "Lifted %1 px": "Поднята на %1 px",
-  "At the edge": "У края"
+  "At the edge": "У края",
+  "Rest screen after (min)": "Экран покоя через (мин)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "Спокойные часы поверх рабочего стола, если ничего не происходит так долго, перед отключением экрана"
 }

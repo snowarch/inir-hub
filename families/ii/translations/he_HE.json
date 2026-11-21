@@ -2233,7 +2233,6 @@
   "Right sidebar header": "כותרת סרגל הצד הימני",
   "Separate pills": "Pill נפרדות",
   "Set icon or button size to zero to follow the current bar height automatically.": "הגדירו את גודל הסמל או הלחצן לאפס כדי לעקוב אוטומטית אחרי גובה הסרגל הנוכחי.",
-  "Show dock when no window is focused (Empty workspace mode only)": "הצגת ה-Dock כשאף חלון אינו ממוקד (במצב שולחן עבודה ריק בלבד)",
   "Show spectrum in the bar": "הצגת הספקטרום בסרגל",
   "Show values": "הצגת ערכים",
   "Showcase": "תצוגה",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "הסר מהסרגל",
   "Add to bar": "הוסף לסרגל",
   "Lifted %1 px": "מורם %1 פיקסלים",
-  "At the edge": "בקצה"
+  "At the edge": "בקצה",
+  "Rest screen after (min)": "מסך מנוחה אחרי (דק׳)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "שעון רגוע מעל שולחן העבודה כשלא קורה דבר במשך זמן זה, לפני שהמסך נכבה"
 }

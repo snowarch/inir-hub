@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "Apa yang dilakukan sudut saat pointer diam di situ",
   "Which screen takes touch": "Layar mana yang menerima sentuhan",
   "Which screen the pen draws on": "Layar mana tempat pena menggambar",
-  "Windows stacked as tabs in one column": "Jendela ditumpuk sebagai tab dalam satu kolom"
+  "Windows stacked as tabs in one column": "Jendela ditumpuk sebagai tab dalam satu kolom",
+  "Welcome and rest": "Sambutan dan istirahat",
+  "Welcome screen": "Layar sambutan",
+  "Your picture and name once at startup, then the desktop": "Foto dan namamu sekali saat mulai, lalu desktop",
+  "See the welcome screen": "Lihat layar sambutan",
+  "Rest screen": "Layar istirahat",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "Waktu dan yang sedang diputar di atas wallpaper setelah tidak aktif (0 = tidak pernah)"
 }

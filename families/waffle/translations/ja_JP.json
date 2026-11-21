@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "ポインターが角に留まったときの動作",
   "Which screen takes touch": "タッチを受け付けるディスプレイ",
   "Which screen the pen draws on": "ペンで描画するディスプレイ",
-  "Windows stacked as tabs in one column": "ウィンドウを1列にタブとして積み重ねる"
+  "Windows stacked as tabs in one column": "ウィンドウを1列にタブとして積み重ねる",
+  "Welcome and rest": "ようこそ画面と休止画面",
+  "Welcome screen": "ようこそ画面",
+  "Your picture and name once at startup, then the desktop": "起動時に一度だけ写真と名前を表示し、その後デスクトップへ",
+  "See the welcome screen": "ようこそ画面を見る",
+  "Rest screen": "休止画面",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "操作がないとき、壁紙の上に時刻と再生中の曲を表示します（0 = しない）"
 }

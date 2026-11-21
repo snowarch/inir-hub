@@ -2233,7 +2233,6 @@
   "Right sidebar header": "오른쪽 사이드바 헤더",
   "Separate pills": "분리된 필",
   "Set icon or button size to zero to follow the current bar height automatically.": "아이콘이나 버튼 크기를 0으로 두면 지금 바 높이를 자동으로 따릅니다.",
-  "Show dock when no window is focused (Empty workspace mode only)": "포커스된 창이 없을 때 독 표시 (빈 작업 공간 모드에서만)",
   "Show spectrum in the bar": "바에 스펙트럼 표시",
   "Show values": "값 표시",
   "Showcase": "쇼케이스",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "바에서 제거",
   "Add to bar": "바에 추가",
   "Lifted %1 px": "%1px 띄움",
-  "At the edge": "가장자리에 붙음"
+  "At the edge": "가장자리에 붙음",
+  "Rest screen after (min)": "휴식 화면 표시까지 (분)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "이 시간 동안 아무 일도 없으면 화면이 꺼지기 전에 데스크톱 위에 차분한 시계를 표시합니다"
 }

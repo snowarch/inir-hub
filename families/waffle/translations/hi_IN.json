@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "पॉइंटर किसी कोने पर रुकने पर वह कोना क्या करता है",
   "Which screen takes touch": "कौन-सी स्क्रीन टच लेती है",
   "Which screen the pen draws on": "पेन किस स्क्रीन पर चित्र बनाता है",
-  "Windows stacked as tabs in one column": "एक कॉलम में टैब की तरह ढेर की गई विंडो"
+  "Windows stacked as tabs in one column": "एक कॉलम में टैब की तरह ढेर की गई विंडो",
+  "Welcome and rest": "स्वागत और विश्राम",
+  "Welcome screen": "स्वागत स्क्रीन",
+  "Your picture and name once at startup, then the desktop": "स्टार्टअप पर एक बार आपकी तस्वीर और नाम, फिर डेस्कटॉप",
+  "See the welcome screen": "स्वागत स्क्रीन देखें",
+  "Rest screen": "विश्राम स्क्रीन",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "निष्क्रियता के बाद आपके वॉलपेपर पर समय और जो चल रहा है (0 = कभी नहीं)"
 }

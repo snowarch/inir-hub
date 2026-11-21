@@ -2699,5 +2699,12 @@
   "Pixel density": "पिक्सेल घनत्व",
   "Looks like": "ऐसा दिखता है",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "हल्का या चटक। एक्सेंट, हाइलाइट और विजेट एक साथ बदलते हैं।",
-  "Differs from iNiR": "iNiR से अलग"
+  "Differs from iNiR": "iNiR से अलग",
+  "Rest screen after": "विश्राम स्क्रीन इसके बाद",
+  "A calm clock over the desktop before the screen goes dark.": "स्क्रीन के अंधेरा होने से पहले डेस्कटॉप पर एक शांत घड़ी।",
+  "Any key, click or move sends it away.": "कोई भी कुंजी, क्लिक या हलचल इसे हटा देती है।",
+  "Welcome at startup": "स्टार्टअप पर स्वागत",
+  "The ring opens on your desktop once each session.": "हर सत्र में एक बार रिंग आपके डेस्कटॉप पर खुलती है।",
+  "See the welcome": "स्वागत देखें",
+  "Plays it now over the desktop.": "इसे अभी डेस्कटॉप पर चलाता है।"
 }

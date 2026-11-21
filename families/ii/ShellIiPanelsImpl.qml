@@ -58,6 +58,8 @@ Item {
         property int closeGraceMs: 300
         property int retainIdleMs: 5 * 60 * 1000
         property bool resident: open || keepLoaded
+        // A surface every family has (the rest screen) is no panel of the family's list.
+        property bool requireEnabledPanel: true
         property Timer closeGrace: Timer {
             interval: onDemandLoader.closeGraceMs
             onTriggered: onDemandLoader.resident = onDemandLoader.open || onDemandLoader.keepLoaded
@@ -67,7 +69,7 @@ Item {
             onTriggered: onDemandLoader.resident = onDemandLoader.open || onDemandLoader.keepLoaded
         }
         readonly property bool enabledPanel: Config.ready
-            && (Config.options?.enabledPanels ?? []).includes(identifier)
+            && (!requireEnabledPanel || (Config.options?.enabledPanels ?? []).includes(identifier))
 
         onOpenChanged: {
             if (open) {
@@ -150,6 +152,8 @@ Item {
 
     // Shown once at login when enabled (off by default): loaded only while open, then gone with its wallpaper.
     DeferredPanelLoader { identifier: "iiBootGreeting"; extraCondition: GlobalStates.bootGreetingOpen; component: BootGreeting {} }
+    // The rest screen (Idle shows it): built when it shows, let go once it has faded.
+    OnDemandPanelLoader { identifier: "iiRest"; requireEnabledPanel: false; open: GlobalStates.restOpen; source: "./screens/MaterialRest.qml" }
     OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }
     // Arranging the desktop: the toolbar and the shelf, while the desktop recedes into a card; held a beat after Done
     // so the card can grow back.

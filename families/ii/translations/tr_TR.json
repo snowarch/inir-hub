@@ -2233,7 +2233,6 @@
   "Right sidebar header": "Sağ kenar çubuğu başlığı",
   "Separate pills": "Ayrı Pill'ler",
   "Set icon or button size to zero to follow the current bar height automatically.": "Geçerli çubuk yüksekliğini otomatik olarak izlemek için simge veya düğme boyutunu sıfır yapın.",
-  "Show dock when no window is focused (Empty workspace mode only)": "Odakta pencere yokken dock'u göster (yalnızca Boş çalışma alanı modu)",
   "Show spectrum in the bar": "Çubukta spektrumu göster",
   "Show values": "Değerleri göster",
   "Showcase": "Vitrin",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "Çubuktan kaldır",
   "Add to bar": "Çubuğa ekle",
   "Lifted %1 px": "%1 px yükseltildi",
-  "At the edge": "Kenarda"
+  "At the edge": "Kenarda",
+  "Rest screen after (min)": "Dinlenme ekranı (dk) sonra",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "Bu süre boyunca hiçbir şey olmazsa, ekran kapanmadan önce masaüstünde sakin bir saat"
 }

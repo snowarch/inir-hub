@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell.Io
 import QtQuick.Layouts
+import Quickshell
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
@@ -844,6 +845,12 @@ ContentPage {
                 StyledToolTip {
                     text: Translation.tr("Display a fullscreen welcome screen with clock and weather when the shell starts")
                 }
+            }
+
+            RippleButtonWithIcon {
+                materialIcon: "play_arrow"
+                mainText: Translation.tr("Preview")
+                onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "greeting", "show"])
             }
 
             SettingsDivider {}

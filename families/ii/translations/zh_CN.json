@@ -2233,7 +2233,6 @@
   "Right sidebar header": "右侧栏页眉",
   "Separate pills": "分离Pill",
   "Set icon or button size to zero to follow the current bar height automatically.": "把图标或按钮大小设为零，即可自动跟随当前状态栏高度。",
-  "Show dock when no window is focused (Empty workspace mode only)": "没有窗口获得焦点时显示程序坞（仅限空桌面模式）",
   "Show spectrum in the bar": "在状态栏中显示频谱",
   "Show values": "显示数值",
   "Showcase": "展示",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "从栏中移除",
   "Add to bar": "添加到栏",
   "Lifted %1 px": "已抬起 %1 像素",
-  "At the edge": "贴边"
+  "At the edge": "贴边",
+  "Rest screen after (min)": "多久后显示休息屏幕（分钟）",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "在这段时间内无操作时，在屏幕关闭前于桌面上显示一个安静的时钟"
 }

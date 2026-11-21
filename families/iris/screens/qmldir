@@ -1,0 +1,3 @@
+module qs.modules.iris.screens
+IrisWelcome 1.0 IrisWelcome.qml
+IrisRest 1.0 IrisRest.qml

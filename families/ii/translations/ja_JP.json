@@ -2233,7 +2233,6 @@
   "Right sidebar header": "右サイドバーのヘッダー",
   "Separate pills": "分離ピル",
   "Set icon or button size to zero to follow the current bar height automatically.": "アイコンやボタンのサイズを 0 にすると、現在のバーの高さに自動で合わせます。",
-  "Show dock when no window is focused (Empty workspace mode only)": "どのウィンドウにもフォーカスがないときドックを表示（空のワークスペースモードのみ）",
   "Show spectrum in the bar": "バーにスペクトラムを表示",
   "Show values": "数値を表示",
   "Showcase": "ショーケース",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "バーから削除",
   "Add to bar": "バーに追加",
   "Lifted %1 px": "%1 px 浮かせています",
-  "At the edge": "端に接しています"
+  "At the edge": "端に接しています",
+  "Rest screen after (min)": "休止画面までの時間（分）",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "この時間なにも操作がないと、画面が消える前にデスクトップに静かな時計を表示します"
 }

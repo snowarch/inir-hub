@@ -2699,5 +2699,12 @@
   "Pixel density": "צפיפות פיקסלים",
   "Looks like": "נראה כמו",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "רך או עז. צבע ההדגשה, ההדגשה והווידג'טים משתנים יחד.",
-  "Differs from iNiR": "שונה מ-iNiR"
+  "Differs from iNiR": "שונה מ-iNiR",
+  "Rest screen after": "מסך מנוחה אחרי",
+  "A calm clock over the desktop before the screen goes dark.": "שעון רגוע מעל שולחן העבודה לפני שהמסך מחשיך.",
+  "Any key, click or move sends it away.": "כל מקש, לחיצה או תזוזה מסלקים אותו.",
+  "Welcome at startup": "קבלת פנים בהפעלה",
+  "The ring opens on your desktop once each session.": "הטבעת נפתחת אל שולחן העבודה שלך פעם אחת בכל הפעלה.",
+  "See the welcome": "הצגת קבלת הפנים",
+  "Plays it now over the desktop.": "מציג אותה עכשיו מעל שולחן העבודה."
 }

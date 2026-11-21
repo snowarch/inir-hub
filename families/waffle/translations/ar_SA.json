@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "ما تفعله الزاوية عندما يستقر المؤشر فيها",
   "Which screen takes touch": "الشاشة التي تستقبل اللمس",
   "Which screen the pen draws on": "الشاشة التي يرسم عليها القلم",
-  "Windows stacked as tabs in one column": "النوافذ مكدسة كألسنة في عمود واحد"
+  "Windows stacked as tabs in one column": "النوافذ مكدسة كألسنة في عمود واحد",
+  "Welcome and rest": "الترحيب والراحة",
+  "Welcome screen": "شاشة الترحيب",
+  "Your picture and name once at startup, then the desktop": "صورتك واسمك مرة واحدة عند بدء التشغيل، ثم سطح المكتب",
+  "See the welcome screen": "عرض شاشة الترحيب",
+  "Rest screen": "شاشة الراحة",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "الوقت وما يُشغَّل فوق خلفيتك بعد عدم النشاط (0 = أبدًا)"
 }

@@ -52,6 +52,28 @@ ContentPage {
         title: Translation.tr("Idle & Sleep")
 
         SettingsGroup {
+            ConfigRow {
+                ConfigSpinBox {
+                    Layout.fillWidth: true
+                    icon: "aod"
+                    text: Translation.tr("Rest screen after (min)")
+                    specialValueText: Translation.tr("Never")
+                    value: Math.round((Config.options?.idle?.restTimeout ?? 0) / 60)
+                    from: 0
+                    to: 60
+                    stepSize: 1
+                    onValueModified: Config.setNestedValue("idle.restTimeout", value * 60)
+                    StyledToolTip {
+                        text: Translation.tr("A calm clock over the desktop when nothing happens for this long, before the screen goes off")
+                    }
+                }
+                RippleButtonWithIcon {
+                    materialIcon: "play_arrow"
+                    mainText: Translation.tr("Preview")
+                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "rest", "show"])
+                }
+            }
+
             ConfigSpinBox {
                 icon: "monitor"
                 text: Translation.tr("Screen off after (min)")

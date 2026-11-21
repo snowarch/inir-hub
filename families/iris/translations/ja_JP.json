@@ -2699,5 +2699,12 @@
   "Pixel density": "画素密度",
   "Looks like": "見た目の解像度",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "やわらかく、または鮮やかに。アクセント、ハイライト、ウィジェットが一緒に変わります。",
-  "Differs from iNiR": "iNiR と異なる"
+  "Differs from iNiR": "iNiR と異なる",
+  "Rest screen after": "休止画面までの時間",
+  "A calm clock over the desktop before the screen goes dark.": "画面が暗くなる前に、デスクトップに静かな時計を表示します。",
+  "Any key, click or move sends it away.": "キー、クリック、マウスの移動で閉じます。",
+  "Welcome at startup": "起動時のようこそ画面",
+  "The ring opens on your desktop once each session.": "セッションごとに一度、リングが開いてデスクトップが現れます。",
+  "See the welcome": "ようこそ画面を見る",
+  "Plays it now over the desktop.": "今すぐデスクトップの上で再生します。"
 }

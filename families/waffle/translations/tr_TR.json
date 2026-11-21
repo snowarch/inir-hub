@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "İşaretçi bir köşede durduğunda köşenin ne yaptığı",
   "Which screen takes touch": "Dokunmayı hangi ekranın aldığı",
   "Which screen the pen draws on": "Kalemin hangi ekrana çizdiği",
-  "Windows stacked as tabs in one column": "Pencereler tek sütunda sekme gibi üst üste dizilir"
+  "Windows stacked as tabs in one column": "Pencereler tek sütunda sekme gibi üst üste dizilir",
+  "Welcome and rest": "Karşılama ve dinlenme",
+  "Welcome screen": "Karşılama ekranı",
+  "Your picture and name once at startup, then the desktop": "Başlangıçta bir kez resmin ve adın, ardından masaüstü",
+  "See the welcome screen": "Karşılama ekranını gör",
+  "Rest screen": "Dinlenme ekranı",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "Hareketsizlikten sonra duvar kağıdının üzerinde saat ve çalan içerik (0 = asla)"
 }

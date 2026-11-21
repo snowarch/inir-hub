@@ -2699,5 +2699,12 @@
   "Pixel density": "Плотность пикселей",
   "Looks like": "Выглядит как",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "Мягко или ярко. Акцент, выделение и виджеты меняются вместе.",
-  "Differs from iNiR": "Отличается от iNiR"
+  "Differs from iNiR": "Отличается от iNiR",
+  "Rest screen after": "Экран покоя через",
+  "A calm clock over the desktop before the screen goes dark.": "Спокойные часы поверх рабочего стола, прежде чем экран погаснет.",
+  "Any key, click or move sends it away.": "Любая клавиша, щелчок или движение убирают его.",
+  "Welcome at startup": "Приветствие при запуске",
+  "The ring opens on your desktop once each session.": "Кольцо раскрывается на рабочий стол один раз за сеанс.",
+  "See the welcome": "Показать приветствие",
+  "Plays it now over the desktop.": "Показывает его сейчас поверх рабочего стола."
 }

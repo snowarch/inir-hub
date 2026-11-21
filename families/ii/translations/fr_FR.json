@@ -2233,7 +2233,6 @@
   "Right sidebar header": "En-tête de la barre latérale droite",
   "Separate pills": "Pills séparées",
   "Set icon or button size to zero to follow the current bar height automatically.": "Mettez la taille d'icône ou de bouton à zéro pour suivre automatiquement la hauteur actuelle de la barre.",
-  "Show dock when no window is focused (Empty workspace mode only)": "Afficher le dock quand aucune fenêtre n'a le focus (mode Bureau vide uniquement)",
   "Show spectrum in the bar": "Afficher le spectre dans la barre",
   "Show values": "Afficher les valeurs",
   "Showcase": "Vitrine",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "Retirer de la barre",
   "Add to bar": "Ajouter à la barre",
   "Lifted %1 px": "Surélevé de %1 px",
-  "At the edge": "Au bord"
+  "At the edge": "Au bord",
+  "Rest screen after (min)": "Écran de repos après (min)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "Une horloge apaisée sur le bureau quand rien ne se passe pendant ce temps, avant que l'écran ne s'éteigne"
 }

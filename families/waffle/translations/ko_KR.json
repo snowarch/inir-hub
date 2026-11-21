@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "포인터가 모서리에 머물 때 하는 동작",
   "Which screen takes touch": "어느 화면이 터치를 받을지",
   "Which screen the pen draws on": "펜이 그릴 화면",
-  "Windows stacked as tabs in one column": "창을 한 열에 탭처럼 쌓은 모습"
+  "Windows stacked as tabs in one column": "창을 한 열에 탭처럼 쌓은 모습",
+  "Welcome and rest": "환영 및 휴식",
+  "Welcome screen": "환영 화면",
+  "Your picture and name once at startup, then the desktop": "시작할 때 한 번 사진과 이름을 보여 준 뒤 데스크톱으로",
+  "See the welcome screen": "환영 화면 보기",
+  "Rest screen": "휴식 화면",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "비활성 후 배경화면 위에 시간과 재생 중인 항목 표시 (0 = 사용 안 함)"
 }

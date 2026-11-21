@@ -1,0 +1,3 @@
+module qs.modules.waffle.screens
+WaffleGreeting 1.0 WaffleGreeting.qml
+WaffleRest 1.0 WaffleRest.qml

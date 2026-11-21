@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "What a corner does when the pointer rests in it",
   "Which screen takes touch": "Which screen takes touch",
   "Which screen the pen draws on": "Which screen the pen draws on",
-  "Windows stacked as tabs in one column": "Windows stacked as tabs in one column"
+  "Windows stacked as tabs in one column": "Windows stacked as tabs in one column",
+  "Welcome and rest": "Welcome and rest",
+  "Welcome screen": "Welcome screen",
+  "Your picture and name once at startup, then the desktop": "Your picture and name once at startup, then the desktop",
+  "See the welcome screen": "See the welcome screen",
+  "Rest screen": "Rest screen",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "The time and what plays over your wallpaper after inactivity (0 = never)"
 }

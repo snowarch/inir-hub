@@ -2699,5 +2699,12 @@
   "Pixel density": "Kerapatan piksel",
   "Looks like": "Terlihat seperti",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "Lembut atau cerah. Aksen, sorotan, dan widget berubah bersama.",
-  "Differs from iNiR": "Berbeda dari iNiR"
+  "Differs from iNiR": "Berbeda dari iNiR",
+  "Rest screen after": "Layar istirahat setelah",
+  "A calm clock over the desktop before the screen goes dark.": "Jam yang tenang di atas desktop sebelum layar menjadi gelap.",
+  "Any key, click or move sends it away.": "Tombol, klik, atau gerakan apa pun menutupnya.",
+  "Welcome at startup": "Sambutan saat mulai",
+  "The ring opens on your desktop once each session.": "Cincin terbuka ke desktopmu sekali setiap sesi.",
+  "See the welcome": "Lihat sambutan",
+  "Plays it now over the desktop.": "Memutarnya sekarang di atas desktop."
 }

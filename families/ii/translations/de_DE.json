@@ -2233,7 +2233,6 @@
   "Right sidebar header": "Kopfbereich der rechten Seitenleiste",
   "Separate pills": "Getrennte Pills",
   "Set icon or button size to zero to follow the current bar height automatically.": "Setze Symbol- oder Schaltflächengröße auf null, um automatisch der aktuellen Leistenhöhe zu folgen.",
-  "Show dock when no window is focused (Empty workspace mode only)": "Dock anzeigen, wenn kein Fenster fokussiert ist (nur Modus Leerer Desktop)",
   "Show spectrum in the bar": "Spektrum in der Leiste anzeigen",
   "Show values": "Werte anzeigen",
   "Showcase": "Schaufenster",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "Aus der Leiste entfernen",
   "Add to bar": "Zur Leiste hinzufügen",
   "Lifted %1 px": "Angehoben um %1 px",
-  "At the edge": "Am Rand"
+  "At the edge": "Am Rand",
+  "Rest screen after (min)": "Ruhebildschirm nach (Min.)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "Eine ruhige Uhr über dem Desktop, wenn so lange nichts passiert, bevor sich der Bildschirm ausschaltet"
 }

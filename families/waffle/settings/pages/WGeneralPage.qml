@@ -357,6 +357,43 @@ WSettingsPage {
     }
     
     WSettingsCard {
+        title: Translation.tr("Welcome and rest")
+        icon: "desktop"
+
+        WSettingsSwitch {
+            label: Translation.tr("Welcome screen")
+            icon: "emoji-add"
+            description: Translation.tr("Your picture and name once at startup, then the desktop")
+            checked: Config.options?.bootGreeting?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("bootGreeting.enable", checked)
+        }
+
+        WSettingsButton {
+            label: Translation.tr("See the welcome screen")
+            icon: "eye"
+            buttonText: Translation.tr("Preview")
+            onButtonClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "greeting", "show"])
+        }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Rest screen")
+            icon: "timer"
+            description: Translation.tr("The time and what plays over your wallpaper after inactivity (0 = never)")
+            suffix: "s"
+            from: 0; to: 1800; stepSize: 30
+            value: Config.options?.idle?.restTimeout ?? 0
+            onValueChanged: Config.setNestedValue("idle.restTimeout", value)
+        }
+
+        WSettingsButton {
+            label: Translation.tr("See the rest screen")
+            icon: "eye"
+            buttonText: Translation.tr("Preview")
+            onButtonClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "rest", "show"])
+        }
+    }
+
+    WSettingsCard {
         title: Translation.tr("Idle & Sleep")
         icon: "weather-moon"
         

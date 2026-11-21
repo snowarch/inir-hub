@@ -2233,7 +2233,6 @@
   "Right sidebar header": "दायाँ साइडबार हेडर",
   "Separate pills": "अलग pill",
   "Set icon or button size to zero to follow the current bar height automatically.": "आइकन या बटन का आकार शून्य कर दें ताकि वह अपने आप बार की मौजूदा ऊँचाई के साथ चले।",
-  "Show dock when no window is focused (Empty workspace mode only)": "जब कोई विंडो फ़ोकस में न हो तब Dock दिखाएँ (सिर्फ़ खाली वर्कस्पेस मोड)",
   "Show spectrum in the bar": "बार में स्पेक्ट्रम दिखाएँ",
   "Show values": "मान दिखाएँ",
   "Showcase": "प्रदर्शन",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "बार से हटाएँ",
   "Add to bar": "बार में जोड़ें",
   "Lifted %1 px": "%1 px ऊपर उठाया",
-  "At the edge": "किनारे पर"
+  "At the edge": "किनारे पर",
+  "Rest screen after (min)": "विश्राम स्क्रीन इसके बाद (मिनट)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "इतनी देर तक कुछ न होने पर, स्क्रीन बंद होने से पहले डेस्कटॉप पर एक शांत घड़ी"
 }

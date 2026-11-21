@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "O que um canto faz quando o ponteiro para nele",
   "Which screen takes touch": "Qual tela recebe o toque",
   "Which screen the pen draws on": "Em qual tela a caneta desenha",
-  "Windows stacked as tabs in one column": "Janelas empilhadas como abas em uma coluna"
+  "Windows stacked as tabs in one column": "Janelas empilhadas como abas em uma coluna",
+  "Welcome and rest": "Boas-vindas e descanso",
+  "Welcome screen": "Tela de boas-vindas",
+  "Your picture and name once at startup, then the desktop": "Sua foto e seu nome uma vez ao iniciar, depois a área de trabalho",
+  "See the welcome screen": "Ver a tela de boas-vindas",
+  "Rest screen": "Tela de descanso",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "A hora e o que está tocando sobre seu papel de parede após inatividade (0 = nunca)"
 }

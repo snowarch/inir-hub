@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import qs.modules.shared.bootGreeting
 import qs.modules.shared.lock
 import qs.modules.shared.mascot
 import qs.modules.shared.polkit
@@ -62,6 +61,8 @@ Item {
         property int closeGraceMs: 250
         property int retainIdleMs: 5 * 60 * 1000
         property bool resident: open
+        // A surface every family has (the rest screen) is no panel of the family's list.
+        property bool requireEnabledPanel: true
         property Timer closeGrace: Timer {
             interval: onDemandLoader.closeGraceMs
             onTriggered: onDemandLoader.resident = onDemandLoader.open
@@ -71,7 +72,7 @@ Item {
             onTriggered: onDemandLoader.resident = onDemandLoader.open
         }
         readonly property bool enabledPanel: Config.ready
-            && (Config.options?.enabledPanels ?? []).includes(identifier)
+            && (!requireEnabledPanel || (Config.options?.enabledPanels ?? []).includes(identifier))
         onOpenChanged: {
             if (open) {
                 used = true
@@ -106,7 +107,9 @@ Item {
 
     // Shared modules that work with waffle
     // Shown once at login when enabled (off by default): loaded only while open, then gone with its wallpaper.
-    DeferredPanelLoader { identifier: "iiBootGreeting"; extraCondition: GlobalStates.bootGreetingOpen; component: BootGreeting {} }
+    DeferredPanelLoader { identifier: "iiBootGreeting"; extraCondition: GlobalStates.bootGreetingOpen; source: "./screens/WaffleGreeting.qml" }
+    // The rest screen (Idle shows it): built when it shows, let go once it has faded.
+    OnDemandPanelLoader { identifier: "wRest"; requireEnabledPanel: false; open: GlobalStates.restOpen; source: "./screens/WaffleRest.qml" }
     OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }
     OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; source: Plugins.baseUrl("modules/shared/onScreenKeyboard/OnScreenKeyboard.qml") }
     OnDemandPanelLoader { identifier: "iiOverlay"; open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen); source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml") }

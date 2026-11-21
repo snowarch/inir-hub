@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "Was eine Ecke tut, wenn der Zeiger darin verweilt",
   "Which screen takes touch": "Welcher Bildschirm Touch erhält",
   "Which screen the pen draws on": "Auf welchem Bildschirm der Stift zeichnet",
-  "Windows stacked as tabs in one column": "Fenster als Tabs in einer Spalte gestapelt"
+  "Windows stacked as tabs in one column": "Fenster als Tabs in einer Spalte gestapelt",
+  "Welcome and rest": "Begrüßung und Ruhe",
+  "Welcome screen": "Begrüßungsbildschirm",
+  "Your picture and name once at startup, then the desktop": "Dein Bild und Name einmal beim Start, dann der Desktop",
+  "See the welcome screen": "Begrüßungsbildschirm ansehen",
+  "Rest screen": "Ruhebildschirm",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "Uhrzeit und laufende Wiedergabe über deinem Hintergrund nach Inaktivität (0 = nie)"
 }

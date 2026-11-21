@@ -2699,5 +2699,12 @@
   "Pixel density": "像素密度",
   "Looks like": "看起来像",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "柔和或鲜艳。强调色、高亮色和小组件一起变化。",
-  "Differs from iNiR": "与 iNiR 不同"
+  "Differs from iNiR": "与 iNiR 不同",
+  "Rest screen after": "休息屏幕显示前等待",
+  "A calm clock over the desktop before the screen goes dark.": "在屏幕变暗前，于桌面上显示一个安静的时钟。",
+  "Any key, click or move sends it away.": "按任意键、点击或移动即可关闭。",
+  "Welcome at startup": "启动时欢迎",
+  "The ring opens on your desktop once each session.": "每次会话中，圆环会展开一次，露出你的桌面。",
+  "See the welcome": "查看欢迎",
+  "Plays it now over the desktop.": "立即在桌面上播放。"
 }

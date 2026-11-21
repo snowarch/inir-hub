@@ -2699,5 +2699,12 @@
   "Pixel density": "Densidade de pixels",
   "Looks like": "Parece",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "Suave ou vívido. A cor de destaque, o realce e os widgets mudam juntos.",
-  "Differs from iNiR": "Diferente do iNiR"
+  "Differs from iNiR": "Diferente do iNiR",
+  "Rest screen after": "Tela de descanso após",
+  "A calm clock over the desktop before the screen goes dark.": "Um relógio tranquilo sobre a área de trabalho antes de a tela escurecer.",
+  "Any key, click or move sends it away.": "Qualquer tecla, clique ou movimento a fecha.",
+  "Welcome at startup": "Boas-vindas ao iniciar",
+  "The ring opens on your desktop once each session.": "O anel se abre sobre sua área de trabalho uma vez por sessão.",
+  "See the welcome": "Ver as boas-vindas",
+  "Plays it now over the desktop.": "Mostra agora sobre a área de trabalho."
 }

@@ -2699,5 +2699,12 @@
   "Pixel density": "Piksel yoğunluğu",
   "Looks like": "Şöyle görünür",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "Yumuşak ya da canlı. Vurgu rengi, öne çıkan renk ve widget'lar birlikte değişir.",
-  "Differs from iNiR": "iNiR'den farklı"
+  "Differs from iNiR": "iNiR'den farklı",
+  "Rest screen after": "Dinlenme ekranı süresi",
+  "A calm clock over the desktop before the screen goes dark.": "Ekran kararmadan önce masaüstünde sakin bir saat.",
+  "Any key, click or move sends it away.": "Herhangi bir tuş, tıklama veya hareket onu kapatır.",
+  "Welcome at startup": "Başlangıçta karşılama",
+  "The ring opens on your desktop once each session.": "Halka her oturumda bir kez masaüstüne açılır.",
+  "See the welcome": "Karşılamayı gör",
+  "Plays it now over the desktop.": "Şimdi masaüstünün üzerinde oynatır."
 }

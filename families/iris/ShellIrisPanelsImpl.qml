@@ -160,6 +160,22 @@ Item {
         source: "./notificationPopup/IrisNotificationPopup.qml"
     }
 
+    // The welcome at startup and the rest screen: the base says when (shell start, Idle), iRiS draws them.
+    OnDemandPanelLoader {
+        identifier: "irisWelcome"
+        requireEnabledPanel: false
+        open: GlobalStates.bootGreetingOpen
+        closeGraceMs: 0
+        source: "./screens/IrisWelcome.qml"
+    }
+    OnDemandPanelLoader {
+        identifier: "irisRest"
+        requireEnabledPanel: false
+        open: GlobalStates.restOpen
+        closeGraceMs: 260
+        source: "./screens/IrisRest.qml"
+    }
+
     OnDemandPanelLoader {
         identifier: "irisStudio"
         requireEnabledPanel: false

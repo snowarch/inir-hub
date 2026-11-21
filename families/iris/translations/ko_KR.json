@@ -2699,5 +2699,12 @@
   "Pixel density": "픽셀 밀도",
   "Looks like": "보이는 해상도",
   "Soft or vivid. The accent, the highlight and the widgets change together.": "부드럽게 또는 선명하게. 강조색, 강조, 위젯이 함께 바뀝니다.",
-  "Differs from iNiR": "iNiR와 다름"
+  "Differs from iNiR": "iNiR와 다름",
+  "Rest screen after": "휴식 화면 표시까지",
+  "A calm clock over the desktop before the screen goes dark.": "화면이 어두워지기 전에 데스크톱 위에 차분한 시계를 표시합니다.",
+  "Any key, click or move sends it away.": "아무 키나 클릭, 움직임으로 사라집니다.",
+  "Welcome at startup": "시작 시 환영 화면",
+  "The ring opens on your desktop once each session.": "세션마다 한 번 링이 열리며 데스크톱이 나타납니다.",
+  "See the welcome": "환영 화면 보기",
+  "Plays it now over the desktop.": "지금 데스크톱 위에서 재생합니다."
 }

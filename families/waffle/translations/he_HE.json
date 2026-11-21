@@ -577,5 +577,11 @@
   "What a corner does when the pointer rests in it": "מה פינה עושה כשהסמן נח בה",
   "Which screen takes touch": "איזה מסך מקבל מגע",
   "Which screen the pen draws on": "באיזה מסך העט מצייר",
-  "Windows stacked as tabs in one column": "חלונות מוערמים ככרטיסיות בעמודה אחת"
+  "Windows stacked as tabs in one column": "חלונות מוערמים ככרטיסיות בעמודה אחת",
+  "Welcome and rest": "קבלת פנים ומנוחה",
+  "Welcome screen": "מסך פתיחה",
+  "Your picture and name once at startup, then the desktop": "התמונה והשם שלך פעם אחת בהפעלה, ואז שולחן העבודה",
+  "See the welcome screen": "הצגת מסך הפתיחה",
+  "Rest screen": "מסך מנוחה",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "השעה ומה שמתנגן מעל הרקע שלך לאחר חוסר פעילות (0 = אף פעם)"
 }

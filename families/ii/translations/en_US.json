@@ -2233,7 +2233,6 @@
   "Right sidebar header": "Right sidebar header",
   "Separate pills": "Separate pills",
   "Set icon or button size to zero to follow the current bar height automatically.": "Set icon or button size to zero to follow the current bar height automatically.",
-  "Show dock when no window is focused (Empty workspace mode only)": "Show dock when no window is focused (Empty workspace mode only)",
   "Show spectrum in the bar": "Show spectrum in the bar",
   "Show values": "Show values",
   "Showcase": "Showcase",
@@ -3206,5 +3205,7 @@
   "Remove from bar": "Remove from bar",
   "Add to bar": "Add to bar",
   "Lifted %1 px": "Lifted %1 px",
-  "At the edge": "At the edge"
+  "At the edge": "At the edge",
+  "Rest screen after (min)": "Rest screen after (min)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "A calm clock over the desktop when nothing happens for this long, before the screen goes off"
 }
