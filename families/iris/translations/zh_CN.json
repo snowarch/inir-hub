@@ -2741,5 +2741,6 @@
   "Widgets with a form of their own": "有独立形状的小组件",
   "They keep the form picked in their sheet.": "它们保留在各自面板中选的形状。",
   "Room for windows": "窗口可用空间",
-  "Pixel density": "像素密度"
+  "Pixel density": "像素密度",
+  "Looks like": "看起来像"
 }

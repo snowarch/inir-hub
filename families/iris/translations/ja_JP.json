@@ -2741,5 +2741,6 @@
   "Widgets with a form of their own": "独自の形のウィジェット",
   "They keep the form picked in their sheet.": "シートで選んだ形のままです。",
   "Room for windows": "ウィンドウの広さ",
-  "Pixel density": "画素密度"
+  "Pixel density": "画素密度",
+  "Looks like": "見た目の解像度"
 }

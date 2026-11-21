@@ -2741,5 +2741,6 @@
   "Widgets with a form of their own": "자체 형태를 쓰는 위젯",
   "They keep the form picked in their sheet.": "시트에서 고른 형태를 유지합니다.",
   "Room for windows": "창을 둘 공간",
-  "Pixel density": "픽셀 밀도"
+  "Pixel density": "픽셀 밀도",
+  "Looks like": "보이는 해상도"
 }

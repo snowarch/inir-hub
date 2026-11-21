@@ -10,7 +10,7 @@ import qs.modules.iris.prism.controls
 // dimos a la página mouse y keyboard"). The chosen screen at its own shape, wearing its wallpaper, on its stand or as
 // a laptop's lid. Inside it one window of a fixed size in the screen's own points, so Scale and Resolution show what
 // they change while they change it; Night Light warms the picture. Beside it what no row says: the name on the box,
-// its size and shape, how fine its pixels are and the room it leaves for windows. Reads CompositorConfig, so it is
+// its size and shape, how fine its pixels are and the size Scale makes it look. Reads CompositorConfig, so it is
 // the same under Niri and Umbriel.
 Rectangle {
     id: root
@@ -46,7 +46,7 @@ Rectangle {
 
     Accessible.role: Accessible.Graphic
     Accessible.name: [CompositorConfig.screenName(root.screen), root.inches > 0 ? Math.round(root.inches) + "″" : "", root.shape,
-        Translation.tr("Room for windows") + " " + root.room.width + " × " + root.room.height].filter(part => part.length > 0).join(", ")
+        Translation.tr("Looks like") + " " + root.room.width + " × " + root.room.height].filter(part => part.length > 0).join(", ")
 
     Item {
         id: stage
@@ -243,7 +243,7 @@ Rectangle {
         Flow {
             width: parent.width
             spacing: PrismTheme.dp(22)
-            Fact { label: Translation.tr("Room for windows"); value: `${root.room.width} × ${root.room.height}` }
+            Fact { label: Translation.tr("Looks like"); value: `${root.room.width} × ${root.room.height}` }
             Fact { visible: root.ppi > 0; label: Translation.tr("Pixel density"); value: `${root.ppi} ppi` }
         }
     }

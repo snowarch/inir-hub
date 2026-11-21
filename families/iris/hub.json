@@ -1,7 +1,12 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.124",
+    "version": "2.33.125",
     "changes": {
+      "2.33.125": [
+        "Layout opens on the screen at its own points: the Island, the Dock and the bubbles where they stand, the windows the arrangement makes with its gaps, and the room left for windows",
+        "Windows and Glass & effects open on two windows up close: corners, border, focus ring, shadow, opacity and the blur behind, as set",
+        "Displays says what Scale makes the screen look like"
+      ],
       "2.33.124": [
         "Prism Settings opens larger on a large screen, as overlay or window; About, Hub and Shortcuts run as wide as their page",
         "Displays opens on the screen itself: its shape and wallpaper, a window sized by Scale, Night Light's warmth, its pixel density"
