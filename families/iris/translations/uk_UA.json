@@ -2739,5 +2739,7 @@
   "Prism form": "Форма Prism",
   "How every widget's glass is cut, unless it picks its own.": "Як вирізано скло кожного віджета, якщо він не вибрав свою.",
   "Widgets with a form of their own": "Віджети з власною формою",
-  "They keep the form picked in their sheet.": "Вони зберігають форму, вибрану в їхньому аркуші."
+  "They keep the form picked in their sheet.": "Вони зберігають форму, вибрану в їхньому аркуші.",
+  "Room for windows": "Місце для вікон",
+  "Pixel density": "Щільність пікселів"
 }

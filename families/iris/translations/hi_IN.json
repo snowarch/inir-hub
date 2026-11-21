@@ -2739,5 +2739,7 @@
   "Prism form": "Prism आकार",
   "How every widget's glass is cut, unless it picks its own.": "हर विजेट का काँच कैसे कटे, जब तक वह अपना न चुने।",
   "Widgets with a form of their own": "अपने आकार वाले विजेट",
-  "They keep the form picked in their sheet.": "वे अपनी शीट में चुना आकार रखते हैं।"
+  "They keep the form picked in their sheet.": "वे अपनी शीट में चुना आकार रखते हैं।",
+  "Room for windows": "विंडो के लिए जगह",
+  "Pixel density": "पिक्सेल घनत्व"
 }

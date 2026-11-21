@@ -2739,5 +2739,7 @@
   "Prism form": "Bentuk Prism",
   "How every widget's glass is cut, unless it picks its own.": "Cara kaca tiap widget dipotong, kecuali widget memilih sendiri.",
   "Widgets with a form of their own": "Widget dengan bentuk sendiri",
-  "They keep the form picked in their sheet.": "Widget ini memakai bentuk yang dipilih di lembarnya."
+  "They keep the form picked in their sheet.": "Widget ini memakai bentuk yang dipilih di lembarnya.",
+  "Room for windows": "Ruang untuk jendela",
+  "Pixel density": "Kerapatan piksel"
 }

@@ -2739,5 +2739,7 @@
   "Prism form": "Forme Prism",
   "How every widget's glass is cut, unless it picks its own.": "La coupe du verre de chaque widget, sauf s'il choisit la sienne.",
   "Widgets with a form of their own": "Widgets avec leur propre forme",
-  "They keep the form picked in their sheet.": "Ils gardent la forme choisie dans leur fiche."
+  "They keep the form picked in their sheet.": "Ils gardent la forme choisie dans leur fiche.",
+  "Room for windows": "Place pour les fenêtres",
+  "Pixel density": "Densité de pixels"
 }

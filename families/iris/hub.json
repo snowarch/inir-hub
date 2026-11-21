@@ -1,7 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.123",
+    "version": "2.33.124",
     "changes": {
+      "2.33.124": [
+        "Prism Settings opens larger on a large screen, as overlay or window; About, Hub and Shortcuts run as wide as their page",
+        "Displays opens on the screen itself: its shape and wallpaper, a window sized by Scale, Night Light's warmth, its pixel density"
+      ],
       "2.33.123": [
         "The music widget wears every Prism form with the other widgets: its name, hour and cover sit on each cut"
       ],

@@ -85,10 +85,12 @@ Item {
     }
     // The keyboard page draws the keyboard itself, live, where the compositor says which one it is.
     readonly property bool keyboardShown: root.pageId === "keyboard" && CompositorConfig.has("input", "keyboard.layout")
+    // Displays draws the screen it changes, wherever the compositor names one.
+    readonly property bool displayShown: root.pageId === "display" && CompositorConfig.output !== null
     // What a page shows before its groups: the person's own thing, as it is now.
     readonly property Component hero: PrismState.searching ? null
         : (({ general: homeHero, wallpaper: wallpaperHero, colour: colourHero, typeIcons: typeHero, lock: lockHero })[root.pageId]
-            ?? (root.keyboardShown ? keyboardHero : root.lead ? leadHero : null))
+            ?? (root.keyboardShown ? keyboardHero : root.displayShown ? displayHero : root.lead ? leadHero : null))
     // What acts on the page's own thing, at the head: arrange the Control Center, send a notice, take the screen.
     readonly property var pageActions: ({
         controlCenter: [{ id: "arrange", glyph: "dashboard_customize", text: "Arrange it" }],
@@ -632,6 +634,15 @@ Item {
     Component { id: typeHero; PrismTypeHero { onPickGroup: title => root.showGroup(title) } }
     Component { id: leadHero; PrismLead { page: root.pageId } }
     Component { id: lockHero; PrismLockHero { onAction: id => root.act(id); onPickGroup: title => root.showGroup(title) } }
+    // Displays: the screen itself, live, then the page's own switches.
+    Component {
+        id: displayHero
+        Column {
+            spacing: PrismTheme.dp(14)
+            PrismDisplayHero { width: parent.width }
+            PrismLead { width: parent.width; page: root.pageId }
+        }
+    }
     // Keyboard: the keyboard itself, live; Super, Ctrl, Alt or Shift held shows what each key does.
     Component {
         id: keyboardHero

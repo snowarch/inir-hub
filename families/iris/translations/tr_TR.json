@@ -2739,5 +2739,7 @@
   "Prism form": "Prism biçimi",
   "How every widget's glass is cut, unless it picks its own.": "Kendi biçimini seçmeyen her widget'ın camı nasıl kesilir.",
   "Widgets with a form of their own": "Kendi biçimi olan widget'lar",
-  "They keep the form picked in their sheet.": "Kendi sayfalarında seçilen biçimi korurlar."
+  "They keep the form picked in their sheet.": "Kendi sayfalarında seçilen biçimi korurlar.",
+  "Room for windows": "Pencereler için alan",
+  "Pixel density": "Piksel yoğunluğu"
 }

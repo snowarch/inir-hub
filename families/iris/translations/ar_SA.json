@@ -2739,5 +2739,7 @@
   "Prism form": "شكل Prism",
   "How every widget's glass is cut, unless it picks its own.": "طريقة قص زجاج كل أداة، ما لم تختر شكلها الخاص.",
   "Widgets with a form of their own": "أدوات بشكل خاص بها",
-  "They keep the form picked in their sheet.": "تبقي الشكل المختار في لوحتها."
+  "They keep the form picked in their sheet.": "تبقي الشكل المختار في لوحتها.",
+  "Room for windows": "مساحة النوافذ",
+  "Pixel density": "كثافة البكسل"
 }

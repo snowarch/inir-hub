@@ -2739,5 +2739,7 @@
   "Prism form": "צורת Prism",
   "How every widget's glass is cut, unless it picks its own.": "איך נחתכת הזכוכית של כל וידג'ט, אלא אם הוא בוחר צורה משלו.",
   "Widgets with a form of their own": "ווידג'טים עם צורה משלהם",
-  "They keep the form picked in their sheet.": "הם שומרים את הצורה שנבחרה בגיליון שלהם."
+  "They keep the form picked in their sheet.": "הם שומרים את הצורה שנבחרה בגיליון שלהם.",
+  "Room for windows": "מקום לחלונות",
+  "Pixel density": "צפיפות פיקסלים"
 }
