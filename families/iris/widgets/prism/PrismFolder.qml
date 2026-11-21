@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.services
+import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.widgets
@@ -10,7 +11,8 @@ import qs.modules.iris.widgets
 // `widgetPrism.<face>`). One body for all of them (`PrismBody`, his 11-16 "un cuerpo, mismo lenguaje"): smoked frosted
 // glass in dark, white frost in light, its material and opacity the widget's own (`iris.material`, `iris.opacity`), no
 // rim and no art on it. Its head is a mark and a name with the one fact; the data is drawn in white, the one live mark in
-// the widget's colour. Each widget picks how that glass is cut (`iris.prism`):
+// the widget's colour. Each widget picks how that glass is cut (`iris.prism`), or keeps "auto" and wears the cut every
+// widget wears (`iris.widgets.prism`):
 //   quiet (the factory): one slab; beam: the slab with white light crossing it;
 //   folder: Now Playing's folder, a glass tab for the name and a flap lit in the widget's colour for the fact;
 //   pocket, archive, smoked, board: a stack of sheets:
@@ -33,8 +35,9 @@ IrisWidgetFace {
     // sheet's ink would stand on the wallpaper). "taskello" is the board's name from before it was one.
     readonly property var forms: ["quiet", "beam", "folder", "pocket", "archive", "smoked", "board"]
     readonly property string chosenForm: {
-        const own = String(root.widget?.familyOption("prism", "quiet") ?? "quiet")
-        const name = own === "taskello" ? "board" : own
+        const own = String(root.widget?.familyOption("prism", "auto") ?? "auto")
+        const picked = own === "auto" ? String(Config.options?.iris?.widgets?.prism ?? "quiet") : own
+        const name = picked === "taskello" ? "board" : picked
         return root.forms.includes(name) ? name : "quiet"
     }
     readonly property string form: (root.clear || root.slabRadius > root.radius + 0.5) && root.chosenForm !== "beam"

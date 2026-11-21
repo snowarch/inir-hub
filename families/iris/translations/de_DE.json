@@ -2735,5 +2735,7 @@
   "Pocket": "Tasche",
   "Archive": "Archiv",
   "Smoked": "Rauchglas",
-  "Unbound": "Nicht belegt"
+  "Unbound": "Nicht belegt",
+  "Prism form": "Prism-Form",
+  "How every widget's glass is cut, unless it picks its own.": "Wie das Glas jedes Widgets geschnitten ist, außer es wählt seine eigene."
 }

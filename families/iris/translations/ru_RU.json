@@ -2735,5 +2735,7 @@
   "Pocket": "Карман",
   "Archive": "Архив",
   "Smoked": "Дымчатый",
-  "Unbound": "Не назначено"
+  "Unbound": "Не назначено",
+  "Prism form": "Форма Prism",
+  "How every widget's glass is cut, unless it picks its own.": "Как вырезано стекло каждого виджета, если он не выбрал свою."
 }

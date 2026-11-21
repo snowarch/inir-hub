@@ -2735,5 +2735,7 @@
   "Pocket": "Bolsillo",
   "Archive": "Archivo",
   "Smoked": "Ahumado",
-  "Unbound": "Sin asignar"
+  "Unbound": "Sin asignar",
+  "Prism form": "Forma Prism",
+  "How every widget's glass is cut, unless it picks its own.": "Cómo se corta el vidrio de cada widget, salvo que elija la suya."
 }

@@ -73,6 +73,7 @@ Singleton {
         "iris.wallpaper.ratio": "aspect_ratio", "iris.wallpaper.sort": "sort",
         "iris.wallpaper.suggestive": "visibility_off", "iris.widgets.design": "widgets",
         "iris.widgets.legibleAlways": "contrast", "iris.widgets.material": "layers", "iris.widgets.opacity": "opacity",
+        "iris.widgets.prism": "flare",
         "iris.widgets.radius": "rounded_corner", "iris.widgets.tint": "colors", "iris.widgets.vibrance": "palette",
         "iris.widgets.weight": "format_bold", "light.antiFlashbang.enable": "flash_off",
         "light.night.automatic": "schedule", "light.night.colorTemperature": "thermostat",

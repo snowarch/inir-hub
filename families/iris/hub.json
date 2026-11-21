@@ -4,7 +4,8 @@
     "changes": {
       "2.33.121": [
         "Prism widgets wear the form picked in their sheet again; Pocket, Archive, Smoked and Board join Quiet, Beam and Folder",
-        "Mouse map: a button with nothing on it says Unbound in every language"
+        "Mouse map: a button with nothing on it says Unbound in every language",
+        "Settings › Widgets › Prism form cuts every widget's glass at once; a widget that picks its own form keeps it"
       ],
       "2.33.120": [
           "Prism Settings: text is drawn sharp at every size, in the side list and on every page"

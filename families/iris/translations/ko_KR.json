@@ -2735,5 +2735,7 @@
   "Pocket": "포켓",
   "Archive": "보관함",
   "Smoked": "스모크",
-  "Unbound": "할당 안 됨"
+  "Unbound": "할당 안 됨",
+  "Prism form": "Prism 형태",
+  "How every widget's glass is cut, unless it picks its own.": "각 위젯의 유리를 자르는 방식. 위젯마다 따로 고를 수도 있습니다."
 }

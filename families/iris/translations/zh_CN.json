@@ -2735,5 +2735,7 @@
   "Pocket": "口袋",
   "Archive": "档案",
   "Smoked": "烟熏",
-  "Unbound": "未分配"
+  "Unbound": "未分配",
+  "Prism form": "Prism 形状",
+  "How every widget's glass is cut, unless it picks its own.": "每个小组件玻璃的切法，除非它自选形状。"
 }

@@ -2735,5 +2735,7 @@
   "Pocket": "ポケット",
   "Archive": "アーカイブ",
   "Smoked": "スモーク",
-  "Unbound": "未割り当て"
+  "Unbound": "未割り当て",
+  "Prism form": "Prism の形",
+  "How every widget's glass is cut, unless it picks its own.": "各ウィジェットのガラスの切り方。ウィジェットごとに選ぶこともできます。"
 }
