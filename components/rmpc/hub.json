@@ -1,6 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.0",
+    "version": "1.1.0",
+    "changes": {
+        "1.1.0": [
+            "The cava visualiser follows your palette, and a Hub page chip picks its style: spectrum, mirror, top, solid, dense or chunky"
+        ]
+    },
     "summary": "rmpc theme in your iNiR colours, with a cover, lyrics and cava layout",
     "description": "A theme for the rmpc music player that follows your wallpaper colours on every theme change. It brings a layout with album art, song info, synced lyrics, progress bar, tabs and a cava visualiser, sized for small screens.",
     "authors": [
