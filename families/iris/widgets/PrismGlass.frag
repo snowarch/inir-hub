@@ -33,9 +33,17 @@ layout(std140, binding = 0) uniform buf {
     // x: 1 on a light scheme (paper glass); y: 1 when frost is lent (glass material); z: grain; w: the shadow's strength
     // on the desktop (0 none, the factory; 1 full).
     vec4 look;
-    // x: 0 the folder, 1 a slab (one piece of glass: no tab, flap or pane); y: the slab's corners; z: how much of the
-    // beam a slab lets through (0 quiet: only a breath of it inside the glass, near `beam.zw`); w: unused.
+    // x: 0 the folder, 1 a slab (one piece of glass: no tab, flap or pane), 2 a stack of sheets; y: the slab's corners;
+    // z: how much of the beam a slab or a stack lets through (0 quiet: on a slab only a breath of it inside the glass,
+    // near `beam.zw`); w: how much darker a stack's back sheet is than the glass.
     vec4 form;
+    // A stack (Prism's pocket, archive, smoked and board): a back sheet of darker glass (none when its right edge is not
+    // past its left), a sheet lit in the widget's colour, and the glass in front that the face draws on. Each sheet is a
+    // rect (left, right, bottom, corners) and the step its top takes (its height left of the step, right of it, the
+    // step's middle, how far it leans), as a folder's tab steps down to the folder.
+    vec4 baseRect; vec4 baseStep;
+    vec4 litRect; vec4 litStep;
+    vec4 frontRect; vec4 frontStep;
     // The spectrum's stops, violet to red (IrisStyle.prismStops).
     vec4 s0; vec4 s1; vec4 s2; vec4 s3; vec4 s4; vec4 s5; vec4 s6;
 } u;
@@ -66,10 +74,32 @@ float slant(vec2 p) {
     return dot(p - a, vec2(d.y, -d.x));
 }
 
-// x: the folder's outline; y: the dark tab; z: the lit flap.
+// One sheet of a stack: its top steps from one height to the other across a leaning edge, the high side's shoulder
+// rounded and the foot of the step flaring into the low side, as a folder's tab does.
+float sheet(vec2 p, vec4 rect, vec4 step) {
+    float hi = min(step.x, step.y);
+    float lo = max(step.x, step.y);
+    float R = rect.w;
+    float tall = box(p, vec4(rect.x, hi, rect.y, rect.z), vec4(R));
+    if (lo - hi < 0.5) return tall;
+    // Positive on the low side of the edge from (middle - lean / 2, left height) to (middle + lean / 2, right height).
+    vec2 a = vec2(step.z - 0.5 * step.w, step.x);
+    vec2 d = normalize(vec2(max(step.w, 1.0), step.y - step.x));
+    float cut = dot(p - a, vec2(d.y, -d.x));
+    float k = min(0.75 * R, 0.5 * (lo - hi));
+    float low = box(p, vec4(rect.x, lo, rect.y, rect.z), vec4(R));
+    return smoothUnion(smoothMax(tall, cut, k), low, 0.8 * k);
+}
+
+// x: the folder's outline; y: the dark tab; z: the lit flap. A stack: x the back and lit sheets, z the lit one.
 vec3 metrics(vec2 p) {
     vec2 size = u.frame.xy;
     float R = u.radii.x;
+    if (u.form.x > 1.5) {
+        float lit = sheet(p, u.litRect, u.litStep);
+        float back = u.baseRect.y > u.baseRect.x ? sheet(p, u.baseRect, u.baseStep) : 1e4;
+        return vec3(min(back, lit), 1e4, lit);
+    }
     if (u.form.x > 0.5) {
         // A slab: the whole is the body, nothing lit, nothing leaning.
         return vec3(box(p, vec4(0.0, 0.0, size.x, size.y), vec4(u.form.y)), -1e4, 1e4);
@@ -135,6 +165,13 @@ vec3 light(vec2 p, float blur) {
     return sum;
 }
 
+// The pane: the folder's clear pane, a stack's front sheet; a slab has none.
+float paneAt(vec2 p) {
+    if (u.form.x > 1.5) return sheet(p, u.frontRect, u.frontStep);
+    if (u.form.x > 0.5) return 1e4;
+    return box(p, u.pane, vec4(u.radii.w));
+}
+
 float hash(vec2 p) {
     p = fract(p * vec2(443.897, 441.423));
     p += dot(p, p.yx + 19.19);
@@ -153,14 +190,16 @@ void main() {
     float body = m.x;
     float tab = m.y;
     float flap = m.z;
-    bool slab = u.form.x > 0.5;
-    float paneD = slab ? 1e4 : box(p, u.pane, vec4(u.radii.w));
+    bool sheets = u.form.x > 1.5;
+    bool slab = u.form.x > 0.5 && !sheets;
+    float paneD = paneAt(p);
     float all = min(body, paneD);
     float aa = px * 0.75;
     float inBody = 1.0 - smoothstep(-aa, aa, body);
     float inPane = 1.0 - smoothstep(-aa, aa, paneD);
-    // The lit flap: the body out of the tab (the fillet where the flap meets the tab's edge is the flap's).
-    float lit = inBody * smoothstep(-aa, aa, tab);
+    // The lit flap: the body out of the tab (the fillet where the flap meets the tab's edge is the flap's); a stack's
+    // lit sheet.
+    float lit = sheets ? inBody * (1.0 - smoothstep(-aa, aa, flap)) : inBody * smoothstep(-aa, aa, tab);
     float edge = slant(p);
 
     vec4 col = vec4(0.0);
@@ -168,10 +207,10 @@ void main() {
     // The shadow of the whole, on the desktop, as strong as the person set it.
     float lift = 0.022 * size.y;
     float spread = 0.06 * size.y;
-    float shadowD = slab ? metrics(p - vec2(0.0, lift)).x
-        : min(metrics(p - vec2(0.0, lift)).x, box(p - vec2(0.0, lift), u.pane, vec4(u.radii.w)));
+    float shadowD = min(metrics(p - vec2(0.0, lift)).x, paneAt(p - vec2(0.0, lift)));
     // The lit flap throws light, not shadow, where it stands above the pane.
-    float flapSide = smoothstep(-u.radii.y, u.radii.y, edge) * (1.0 - smoothstep(u.pane.y - spread, u.pane.y, p.y));
+    float flapSide = sheets ? 0.0
+        : smoothstep(-u.radii.y, u.radii.y, edge) * (1.0 - smoothstep(u.pane.y - spread, u.pane.y, p.y));
     float shade = (1.0 - smoothstep(-spread, spread * 1.6, shadowD)) * u.look.w * (paper ? 0.45 : 1.0) * (1.0 - 0.85 * flapSide);
     col = vec4(0.0, 0.0, 0.0, shade * (1.0 - inBody) * (1.0 - inPane));
 
@@ -180,18 +219,25 @@ void main() {
     vec4 glass = vec4(u.tone.rgb * u.tone.a, u.tone.a) + under * (1.0 - u.tone.a);
 
     // Body, with the pane's shadow on it.
-    float paneShade = slab ? 0.0 : 1.0 - smoothstep(-0.03 * size.y, 0.05 * size.y, box(p - vec2(0.0, 0.02 * size.y), u.pane, vec4(u.radii.w)));
+    float paneShade = slab ? 0.0 : 1.0 - smoothstep(-0.03 * size.y, 0.05 * size.y, paneAt(p - vec2(0.0, 0.02 * size.y)));
     vec4 bodyCol = glass;
+    // A stack's back sheet stands deeper than its front: the same glass, darker (the board's frame, the archive's
+    // shoulders).
+    if (sheets) bodyCol.rgb *= 1.0 - u.form.w * (paper ? 0.12 : 0.55);
     bodyCol.rgb *= 1.0 - paneShade * (paper ? 0.08 : 0.32);
     // The flap: the song's colour, a little brighter toward its top, where the light comes from.
     // The tab lies over it and darkens it a little along its edge.
-    vec3 shelfRgb = u.shelf.rgb * (1.0 + 0.1 * smoothstep(u.pane.y, u.folder.z, p.y));
-    shelfRgb *= 1.0 - (paper ? 0.1 : 0.22) * exp(-max(tab, 0.0) / (0.05 * size.y));
+    // A stack's lit sheet: brighter toward its top, darker where the front glass lies over it.
+    float litTop = sheets ? min(u.litStep.x, u.litStep.y) : u.folder.z;
+    float litFoot = sheets ? max(u.frontStep.x, u.frontStep.y) : u.pane.y;
+    vec3 shelfRgb = u.shelf.rgb * (1.0 + 0.1 * smoothstep(litFoot, litTop, p.y));
+    shelfRgb *= 1.0 - (paper ? 0.1 : 0.22) * exp(-max(sheets ? paneD : tab, 0.0) / (0.05 * size.y));
     bodyCol = mix(bodyCol, vec4(shelfRgb, 1.0), lit);
 
     // The pane: the same glass, frosted further and lifted (Figma's 16 % white radial fill).
-    vec2 paneC = vec2(mix(u.pane.x, u.pane.z, 0.3), u.pane.y);
-    float lift16 = (paper ? 0.42 : 0.1) * (1.0 - smoothstep(0.0, length(u.pane.zw - u.pane.xy) * 0.9, length(p - paneC)));
+    vec2 paneC = sheets ? vec2(0.3 * size.x, min(u.frontStep.x, u.frontStep.y)) : vec2(mix(u.pane.x, u.pane.z, 0.3), u.pane.y);
+    float paneSpan = sheets ? length(size) : length(u.pane.zw - u.pane.xy);
+    float lift16 = (paper ? 0.42 : 0.1) * (1.0 - smoothstep(0.0, paneSpan * 0.9, length(p - paneC)));
     vec4 paneCol = glass + vec4(vec3(lift16), 0.0) * glass.a;
     paneCol.rgb = min(paneCol.rgb, vec3(glass.a));
 
@@ -199,7 +245,7 @@ void main() {
     col = over(paneCol * inPane, col * (1.0 - inPane));
 
     // The light: through the body's frost, then the pane's thicker frost; not on the lit flap.
-    float through = max(inBody * (1.0 - lit), inPane) * u.fan.z * (slab ? u.form.z : 1.0);
+    float through = max(inBody * (1.0 - lit), inPane) * u.fan.z * (slab || sheets ? u.form.z : 1.0);
     if (through > 0.0) {
         float blurBody = 0.018 * size.y;
         float blurPane = 0.045 * size.y;
@@ -226,8 +272,7 @@ void main() {
     // nearest the break, a breath of its light just inside the glass.
     vec2 e = vec2(0.5 * px, 0.0);
     vec2 nBody = normalize(vec2(metrics(p + e.xy).x - metrics(p - e.xy).x, metrics(p + e.yx).x - metrics(p - e.yx).x) + 1e-5);
-    vec2 nPane = normalize(vec2(box(p + e.xy, u.pane, vec4(u.radii.w)) - box(p - e.xy, u.pane, vec4(u.radii.w)),
-        box(p + e.yx, u.pane, vec4(u.radii.w)) - box(p - e.yx, u.pane, vec4(u.radii.w))) + 1e-5);
+    vec2 nPane = normalize(vec2(paneAt(p + e.xy) - paneAt(p - e.xy), paneAt(p + e.yx) - paneAt(p - e.yx)) + 1e-5);
     float lineBody = (1.0 - smoothstep(0.0, px * 1.1, abs(body + 0.5 * px))) * (1.0 - inPane);
     float linePane = 1.0 - smoothstep(0.0, px * 1.1, abs(paneD + 0.5 * px));
     if (slab && u.fan.z > 0.0) {

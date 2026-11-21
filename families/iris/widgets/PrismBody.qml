@@ -37,6 +37,19 @@ Item {
     property bool slab: false
     property real slabRadius: body.face.radius
     property real beamPass: 0
+    // A stack of sheets instead (Prism's pocket, archive, smoked and board): a back sheet of darker glass (`baseShade`
+    // darker; leave `baseRect` empty for none), a sheet lit in `shelf`, and the glass in front that the face draws on.
+    // Each rect is [left, right, bottom, corners]; each step is [its top's height left of the step, right of it, the
+    // step's middle, its lean].
+    property bool sheets: false
+    property var baseRect: [0, 0, 0, 0]
+    property var baseStep: [0, 0, 0, 0]
+    property real baseShade: 0
+    property var litRect: [0, 0, 0, 0]
+    property var litStep: [0, 0, 0, 0]
+    property var frontRect: [0, 0, 0, 0]
+    property var frontStep: [0, 0, 0, 0]
+    function v4(list: var): vector4d { return Qt.vector4d(list[0], list[1], list[2], list[3]) }
 
     readonly property real room: body.face.dp(40)
     // The shadow on the desktop: the widget's own, none with the background off.
@@ -74,7 +87,13 @@ Item {
         readonly property vector4d shelf: Qt.vector4d(body.shelf.r, body.shelf.g, body.shelf.b, 0)
         readonly property vector4d look: Qt.vector4d(glass.light ? 1 : 0, body.face.frost !== null ? 1 : 0,
             glass.light ? 0.022 : 0.04, body.shadow)
-        readonly property vector4d form: Qt.vector4d(body.slab ? 1 : 0, body.slabRadius, body.beamPass, 0)
+        readonly property vector4d form: Qt.vector4d(body.sheets ? 2 : body.slab ? 1 : 0, body.slabRadius, body.beamPass, body.baseShade)
+        readonly property vector4d baseRect: body.v4(body.baseRect)
+        readonly property vector4d baseStep: body.v4(body.baseStep)
+        readonly property vector4d litRect: body.v4(body.litRect)
+        readonly property vector4d litStep: body.v4(body.litStep)
+        readonly property vector4d frontRect: body.v4(body.frontRect)
+        readonly property vector4d frontStep: body.v4(body.frontStep)
         readonly property Item frost: body.face.frost ?? noFrost
         // Prism's light, the shell's one source of it (IrisStyle.prismStops).
         readonly property var stops: IrisStyle.prismStops

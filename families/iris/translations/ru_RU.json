@@ -2731,5 +2731,8 @@
   "Down: %1": "Вниз: %1",
   "Left: %1": "Влево: %1",
   "Right: %1": "Вправо: %1",
-  "Press a button or roll the wheel over the mouse": "Нажмите кнопку или покрутите колесо над мышью"
+  "Press a button or roll the wheel over the mouse": "Нажмите кнопку или покрутите колесо над мышью",
+  "Pocket": "Карман",
+  "Archive": "Архив",
+  "Smoked": "Дымчатый"
 }

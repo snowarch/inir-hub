@@ -2731,5 +2731,8 @@
   "Down: %1": "Down: %1",
   "Left: %1": "Left: %1",
   "Right: %1": "Right: %1",
-  "Press a button or roll the wheel over the mouse": "Press a button or roll the wheel over the mouse"
+  "Press a button or roll the wheel over the mouse": "Press a button or roll the wheel over the mouse",
+  "Pocket": "Pocket",
+  "Archive": "Archive",
+  "Smoked": "Smoked"
 }

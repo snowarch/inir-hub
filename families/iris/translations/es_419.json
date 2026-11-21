@@ -2731,5 +2731,8 @@
   "Down: %1": "Abajo: %1",
   "Left: %1": "Izquierda: %1",
   "Right: %1": "Derecha: %1",
-  "Press a button or roll the wheel over the mouse": "Presiona un botón o gira la rueda sobre el mouse"
+  "Press a button or roll the wheel over the mouse": "Presiona un botón o gira la rueda sobre el mouse",
+  "Pocket": "Bolsillo",
+  "Archive": "Archivo",
+  "Smoked": "Ahumado"
 }

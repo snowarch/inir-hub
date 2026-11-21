@@ -2731,5 +2731,8 @@
   "Down: %1": "Ammut: %1",
   "Left: %1": "Saamimmut: %1",
   "Right: %1": "Talerpimmut: %1",
-  "Press a button or roll the wheel over the mouse": "Mouse-ip qulaani button naqiguk imaluunniit assakaasaq kaavittiguk"
+  "Press a button or roll the wheel over the mouse": "Mouse-ip qulaani button naqiguk imaluunniit assakaasaq kaavittiguk",
+  "Pocket": "Kaasarfik",
+  "Archive": "Toqqorsivik",
+  "Smoked": "Pujortoq"
 }
