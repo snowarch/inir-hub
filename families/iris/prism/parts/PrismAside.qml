@@ -664,8 +664,9 @@ Item {
         form: root.playerForm
         x: root.pad
         width: root.width - 2 * root.pad
-        // The cover as itself: square while the column is tall enough, never under a third of it.
-        height: player.bar ? player.implicitHeight : Math.max(PrismTheme.dp(220), Math.min(width * 1.08, root.height * 0.46))
+        // The cover as itself while the column has room: square at most, never past a third of the column, so the
+        // blocks above keep theirs (at 46 % they were pressed against the top).
+        height: player.bar ? player.implicitHeight : Math.max(PrismTheme.dp(200), Math.min(width, root.height * 0.36))
         y: root.height - PrismTheme.dp(22) - height
         active: root.active && root.visible && root.pinned
     }

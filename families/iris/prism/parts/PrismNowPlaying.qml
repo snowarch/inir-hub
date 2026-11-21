@@ -68,7 +68,8 @@ Item {
             id: sheet
             x: PrismTheme.dp(8)
             width: parent.width - PrismTheme.dp(16)
-            height: Math.min(parent.height * 0.6, PrismTheme.dp(138))
+            // As tall as what it holds: no empty foot under the keys, and the cover keeps the rest.
+            height: Math.min(parent.height - PrismTheme.dp(16), song.implicitHeight + PrismTheme.dp(30))
             y: parent.height - height - PrismTheme.dp(8)
             radius: PrismTheme.dp(18)
             color: Qt.rgba(0.07, 0.07, 0.09, 0.42) // iris-literal: Prism's own ink over its art, the same in every scheme
@@ -181,9 +182,10 @@ Item {
     Rectangle { id: sheetShape; width: sheet.width; height: sheet.height; radius: sheet.radius; visible: false; layer.enabled: true }
 
     Column {
+        id: song
         visible: art.visible
         x: sheet.x + PrismTheme.dp(14)
-        y: sheet.y + PrismTheme.dp(14)
+        y: sheet.y + PrismTheme.dp(15)
         width: sheet.width - PrismTheme.dp(28)
         spacing: PrismTheme.dp(2)
         PrismText {
