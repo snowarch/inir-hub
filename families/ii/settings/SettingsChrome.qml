@@ -205,9 +205,16 @@ Item {
             if (seen[key] === undefined) {
                 seen[key] = { index: unique.length, hasOptionId: r.optionId !== undefined }
                 unique.push(r)
-            } else if (r.optionId !== undefined && !seen[key].hasOptionId) {
-                unique[seen[key].index] = r
-                seen[key].hasOptionId = true
+            } else {
+                // a live row lands on the control itself; the index still knows the title of its tab
+                const kept = unique[seen[key].index]
+                if (r.optionId !== undefined && !seen[key].hasOptionId) {
+                    if (!r.taskTitle) r.taskTitle = kept.taskTitle
+                    unique[seen[key].index] = r
+                    seen[key].hasOptionId = true
+                } else if (!kept.taskTitle && r.taskTitle) {
+                    kept.taskTitle = r.taskTitle
+                }
             }
         }
         root.searchResults = unique.slice(0, 40)
@@ -1206,8 +1213,9 @@ Item {
                                 }
                                 StyledText {
                                     Layout.fillWidth: true
-                                    // where it lands, outermost first
-                                    text: [result.page.name, result.modelData.section !== result.modelData.label ? result.modelData.section : ""]
+                                    // where it lands, outermost first: the tab too, so a row of one name in two tabs reads apart
+                                    text: [result.page.name, result.modelData.taskTitle ?? "", result.modelData.section !== result.modelData.label
+                                        && String(result.modelData.section).toLowerCase() !== String(result.modelData.taskTitle ?? "").toLowerCase() ? result.modelData.section : ""]
                                         .filter(s => s && String(s).length > 0).join("  ›  ")
                                     font.pixelSize: SettingsMaterialPreset.supportingSize
                                     color: SettingsMaterialPreset.supportingColor

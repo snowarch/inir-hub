@@ -379,6 +379,7 @@ Singleton {
                     pageIndex: pageIndex,
                     pageName: root.pages[pageIndex].name,
                     task: String(entry.task || ""),
+                    taskTitle: entry.taskTitle ? Translation.tr(String(entry.taskTitle)) : "",
                     panelFamily: String(entry.panelFamily || ""),
                     section: section.length > 0 ? Translation.tr(section) : "",
                     label: Translation.tr(label),
