@@ -43,8 +43,7 @@
             "texture": "flat",
             "edge": "none",
             "edgeWidth": 0,
-            "plates": { "black": ["#1e1e21", "#0f0f11"], "white": ["#ffffff", "#f5f5f7"] },
-            "glass": "refuse"
+            "plates": { "black": ["#1e1e21", "#0f0f11"], "white": ["#ffffff", "#f5f5f7"] }
         },
         "motion": {
             "morph": "snap",
