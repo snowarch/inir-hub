@@ -175,7 +175,13 @@ GridLayout {
         spacing: Math.round(12 * IrisStyle.density)
         Tabular {
             Layout.minimumWidth: Math.round(34 * IrisStyle.density)
-            text: page.island.clockText(media.effectivePosition)
+            // Closed, the page's clock holds (the page stays built for a quick open): the shared position still moves,
+            // the resting ring reads it, and each tick here redrew the whole chassis once a second.
+            Binding on text {
+                when: media.positionUpdatesActive
+                value: page.island.clockText(media.effectivePosition)
+                restoreMode: Binding.RestoreNone
+            }
             color: IrisStyle.textSecondary
             font.pixelSize: IrisStyle.typeMeta
             font.weight: IrisStyle.weight(Font.DemiBold)
