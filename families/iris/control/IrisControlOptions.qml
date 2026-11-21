@@ -108,7 +108,10 @@ QtObject {
         return Array.from(root.options?.levels ?? []).map(entry => String(entry)).filter(id => root.levelKinds.includes(id))
     }
     readonly property string accentMode: String(root.options?.accent ?? "system")
-    readonly property bool accentSliders: String(root.options?.sliders ?? "neutral") === "accent"
+    // Sliders fill in grey, or in one of the person's colours.
+    readonly property string sliderMode: ["accent", "highlight", "wallpaper"].includes(String(root.options?.sliders ?? ""))
+        ? String(root.options.sliders) : "neutral"
+    readonly property color sliderFill: root.sliderMode === "neutral" ? IrisStyle.fillStrong : IrisStyle.partColour(root.sliderMode, IrisStyle.fillStrong)
 
     // Colourful gives each control the hue it means; mono lights everything in the ink colour.
     readonly property var identities: ({
@@ -124,6 +127,7 @@ QtObject {
         if (IrisStyle.wornAt("control") === "prism") return root.lookTint
         if (root.accentMode === "mono") return IrisStyle.text
         if (root.accentMode === "accent") return root.lookTint
+        if (root.accentMode === "highlight" || root.accentMode === "wallpaper") return IrisStyle.partColour(root.accentMode, root.lookTint)
         if (root.accentMode === "colourful") {
             const hue = root.identities[id] ?? ""
             return hue === "gray" ? IrisStyle.textSecondary : IrisStyle.identityColor(hue)
@@ -208,7 +212,7 @@ QtObject {
             modules: Array.from(root.modules), sizes: Array.from(root.options?.sizes ?? []).map(entry => String(entry)),
             columns: root.columns, labels: root.labelled, controls: root.roundControls ? "round" : "tiles",
             preset: String(root.options?.preset ?? ""), platter: Array.from(root.platterIds), levels: Array.from(root.levelIds),
-            accent: root.accentMode, sliders: root.accentSliders ? "accent" : "neutral"
+            accent: root.accentMode, sliders: root.sliderMode
         }
     }
     property var history: []

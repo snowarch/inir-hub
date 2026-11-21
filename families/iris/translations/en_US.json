@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "How heavy the big numbers are: clocks, timers and readouts.",
   "Which edge of the screen the Island sits on.": "Which edge of the screen the Island sits on.",
   "Space between the Island and its screen edge.": "Space between the Island and its screen edge.",
-  "Control Center sliders filled in grey or in your accent.": "Control Center sliders filled in grey or in your accent.",
   "How wide the Control Center opens.": "How wide the Control Center opens.",
   "The Island's player shows the cover as a disc.": "The Island's player shows the cover as a disc.",
   "How wide Spotlight opens.": "How wide Spotlight opens.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Discs with names, or rounded tiles.",
   "The Island becomes it, or a panel hangs from it.": "The Island becomes it, or a panel hangs from it.",
   "How what plays is drawn.": "How what plays is drawn.",
-  "The artwork's, the accent, the highlight or ink.": "The artwork's, the accent, the highlight or ink.",
   "A sheet of its own, or the Island itself.": "A sheet of its own, or the Island itself.",
   "Own gives each level its colour.": "Own gives each level its colour.",
   "Where levels show when the Island is hidden.": "Where levels show when the Island is hidden.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Welcome at startup",
   "The ring opens on your desktop once each session.": "The ring opens on your desktop once each session.",
   "See the welcome": "See the welcome",
-  "Plays it now over the desktop.": "Plays it now over the desktop."
+  "Plays it now over the desktop.": "Plays it now over the desktop.",
+  "Swap with the accent": "Swap with the accent",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "The accent takes the highlight's colour, and the highlight the accent's.",
+  "Control Center sliders filled in grey or in one of your colours.": "Control Center sliders filled in grey or in one of your colours.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "The artwork's, one of your colours, the wallpaper's or ink."
 }

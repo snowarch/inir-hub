@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "Độ đậm của các con số lớn: đồng hồ, hẹn giờ và chỉ số.",
   "Which edge of the screen the Island sits on.": "Đảo nằm ở cạnh nào của màn hình.",
   "Space between the Island and its screen edge.": "Khoảng cách giữa Đảo và cạnh màn hình.",
-  "Control Center sliders filled in grey or in your accent.": "Thanh trượt của Trung tâm điều khiển tô xám hoặc bằng màu nhấn.",
   "How wide the Control Center opens.": "Trung tâm điều khiển mở rộng bao nhiêu.",
   "The Island's player shows the cover as a disc.": "Trình phát của Đảo hiện bìa dạng đĩa.",
   "How wide Spotlight opens.": "Spotlight mở rộng bao nhiêu.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Đĩa có tên hoặc ô bo tròn.",
   "The Island becomes it, or a panel hangs from it.": "Chính Đảo thành nó, hoặc một bảng treo từ nó.",
   "How what plays is drawn.": "Thứ đang phát được vẽ như thế nào.",
-  "The artwork's, the accent, the highlight or ink.": "Màu của ảnh bìa, màu nhấn, màu nổi bật hoặc màu mực.",
   "A sheet of its own, or the Island itself.": "Một tờ riêng, hoặc chính Đảo.",
   "Own gives each level its colour.": "Riêng tô sáng mỗi mức bằng màu của nó.",
   "Where levels show when the Island is hidden.": "Mức hiện ở đâu khi Đảo bị ẩn.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Chào mừng khi khởi động",
   "The ring opens on your desktop once each session.": "Vòng tròn mở ra màn hình nền một lần mỗi phiên.",
   "See the welcome": "Xem màn hình chào mừng",
-  "Plays it now over the desktop.": "Phát ngay trên màn hình nền."
+  "Plays it now over the desktop.": "Phát ngay trên màn hình nền.",
+  "Swap with the accent": "Hoán đổi với màu nhấn",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "Màu nhấn lấy màu nổi bật, còn màu nổi bật lấy màu nhấn.",
+  "Control Center sliders filled in grey or in one of your colours.": "Thanh trượt của Trung tâm điều khiển tô xám hoặc bằng một trong các màu của bạn.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "Màu của ảnh bìa, một trong các màu của bạn, màu hình nền hoặc màu mực."
 }

@@ -138,6 +138,7 @@ QtObject {
         const chosen = String(root.typeOptions?.accent ?? "plain")
         if (chosen === "accent") return IrisStyle.accentOnMedia
         if (chosen === "highlight") return IrisStyle.highlightOnMedia
+        if (chosen === "wallpaper") return IrisStyle.wallpaperOnMedia
         return IrisStyle.onMedia
     }
 }

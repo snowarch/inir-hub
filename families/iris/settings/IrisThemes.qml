@@ -80,7 +80,7 @@ Singleton {
         "iris.appearance.theme.lightReach", "iris.appearance.theme.glow", "iris.appearance.tint", "iris.appearance.theme.rimTint",
         "iris.appearance.glass.edgeColour", "iris.bar.clockAccent", "iris.controlCenter.accent", "iris.controlCenter.sliders",
         "iris.lock.type.accent", "iris.appearance.anime.enabled", "iris.appearance.anime.palette", "iris.appearance.anime.strength",
-        "iris.appearance.anime.highlight", "iris.widgets.tint"]
+        "iris.appearance.anime.highlight", "iris.widgets.tint", "iris.appearance.swapAccents"]
     function applyColours(theme: var): void {
         if (!theme) return
         const all = root.resolved(theme.values)
@@ -252,10 +252,12 @@ Singleton {
         const highlight = animeOn && Boolean(v["iris.appearance.anime.highlight"] ?? false)
             ? IrisStyle.animeHighlight(baseHighlight, animePalette, animeStrength) : baseHighlight
         const preset = IrisStyle.presets[v["iris.appearance.preset"]] ?? IrisStyle.presets.iris
+        // swapped as IrisStyle swaps them: each takes the other's colour, solved again for its role
+        const swapped = Boolean(v["iris.appearance.swapAccents"] ?? false) && String(v["iris.appearance.highlight"] ?? "orange") !== "accent"
         return {
             surface: IrisStyle.materialSwatch(String(v["iris.appearance.theme.surface"])),
-            accent: accent,
-            highlight: highlight,
+            accent: swapped ? IrisStyle.vivid(IrisStyle.readableAccent(highlight), false) : accent,
+            highlight: swapped ? IrisStyle.readableHighlight(accent) : highlight,
             glass: v["iris.appearance.glass.mode"] !== "off",
             tint: Number(v["iris.appearance.glass.tint"]) / 100,
             shape: preset.shape * Number(v["iris.appearance.theme.shape"]) / 100,

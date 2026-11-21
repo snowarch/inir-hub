@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "बड़े अंक कितने मोटे हैं: घड़ियाँ, टाइमर और रीडआउट।",
   "Which edge of the screen the Island sits on.": "स्क्रीन की कौन सी किनार पर द्वीप बैठता है।",
   "Space between the Island and its screen edge.": "द्वीप और उसकी स्क्रीन किनार के बीच की जगह।",
-  "Control Center sliders filled in grey or in your accent.": "कंट्रोल सेंटर के स्लाइडर धूसर या आपके एक्सेंट रंग में भरे जाते हैं।",
   "How wide the Control Center opens.": "कंट्रोल सेंटर कितना चौड़ा खुलता है।",
   "The Island's player shows the cover as a disc.": "द्वीप का प्लेयर कवर को गोल डिस्क की तरह दिखाता है।",
   "How wide Spotlight opens.": "Spotlight कितना चौड़ा खुलता है।",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "गोल: नाम वाली डिस्क; टाइल: गोल कोनों वाले वर्ग।",
   "The Island becomes it, or a panel hangs from it.": "द्वीप खुद कंट्रोल सेंटर बनता है, या उससे पैनल लटकता है।",
   "How what plays is drawn.": "चल रही चीज़ कैसे बनती है।",
-  "The artwork's, the accent, the highlight or ink.": "आर्टवर्क, एक्सेंट, हाइलाइट या स्याही का।",
   "A sheet of its own, or the Island itself.": "अपनी शीट, या द्वीप खुद।",
   "Own gives each level its colour.": "अपना हर स्तर को उसका रंग देता है।",
   "Where levels show when the Island is hidden.": "द्वीप छिपा हो तो स्तर कहाँ दिखें।",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "स्टार्टअप पर स्वागत",
   "The ring opens on your desktop once each session.": "हर सत्र में एक बार रिंग आपके डेस्कटॉप पर खुलती है।",
   "See the welcome": "स्वागत देखें",
-  "Plays it now over the desktop.": "इसे अभी डेस्कटॉप पर चलाता है।"
+  "Plays it now over the desktop.": "इसे अभी डेस्कटॉप पर चलाता है।",
+  "Swap with the accent": "एक्सेंट से अदला-बदली करें",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "एक्सेंट हाइलाइट का रंग लेता है, और हाइलाइट एक्सेंट का।",
+  "Control Center sliders filled in grey or in one of your colours.": "कंट्रोल सेंटर के स्लाइडर धूसर या आपके किसी रंग में भरे जाते हैं।",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "आर्टवर्क का, आपका कोई रंग, वॉलपेपर का या स्याही।"
 }

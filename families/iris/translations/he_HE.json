@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "כמה כבדים המספרים הגדולים: שעונים, טיימרים וקריאות.",
   "Which edge of the screen the Island sits on.": "באיזו שפה של המסך נמצא האיילנד.",
   "Space between the Island and its screen edge.": "המרווח בין האיילנד לשפת המסך.",
-  "Control Center sliders filled in grey or in your accent.": "המחוונים של מרכז הבקרה מתמלאים באפור או בצבע המודגש שלך.",
   "How wide the Control Center opens.": "כמה רחב נפתח מרכז הבקרה.",
   "The Island's player shows the cover as a disc.": "הנגן של האיילנד מציג את העטיפה כדיסק.",
   "How wide Spotlight opens.": "כמה רחב נפתח Spotlight.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "עגולים: דיסקים עם שם; אריחים: ריבועים מעוגלים.",
   "The Island becomes it, or a panel hangs from it.": "האיילנד עצמו הופך למרכז הבקרה, או לוח תלוי ממנו.",
   "How what plays is drawn.": "איך מה שמתנגן מצויר.",
-  "The artwork's, the accent, the highlight or ink.": "של העטיפה, צבע ההדגשה, הסימון או הדיו.",
   "A sheet of its own, or the Island itself.": "גיליון משלו, או האיילנד עצמו.",
   "Own gives each level its colour.": "משלו נותן לכל רמה את צבעה.",
   "Where levels show when the Island is hidden.": "איפה הרמות מופיעות כשהאיילנד מוסתר.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "קבלת פנים בהפעלה",
   "The ring opens on your desktop once each session.": "הטבעת נפתחת אל שולחן העבודה שלך פעם אחת בכל הפעלה.",
   "See the welcome": "הצגת קבלת הפנים",
-  "Plays it now over the desktop.": "מציג אותה עכשיו מעל שולחן העבודה."
+  "Plays it now over the desktop.": "מציג אותה עכשיו מעל שולחן העבודה.",
+  "Swap with the accent": "החלפה עם צבע ההדגשה",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "צבע ההדגשה מקבל את צבע הסימון, והסימון את צבע ההדגשה.",
+  "Control Center sliders filled in grey or in one of your colours.": "המחוונים של מרכז הבקרה מתמלאים באפור או באחד מהצבעים שלך.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "של העטיפה, אחד מהצבעים שלך, של הטפט או הדיו."
 }

@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "Seberapa tebal angka besar: jam, timer, dan pembacaan.",
   "Which edge of the screen the Island sits on.": "Di tepi layar mana Pulau berada.",
   "Space between the Island and its screen edge.": "Jarak antara Pulau dan tepi layarnya.",
-  "Control Center sliders filled in grey or in your accent.": "Penggeser Pusat Kontrol diisi abu-abu atau warna aksenmu.",
   "How wide the Control Center opens.": "Seberapa lebar Pusat Kontrol terbuka.",
   "The Island's player shows the cover as a disc.": "Pemutar Pulau menampilkan sampul sebagai cakram.",
   "How wide Spotlight opens.": "Seberapa lebar Spotlight terbuka.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Bulat: cakram berlabel; Ubin: kotak membulat.",
   "The Island becomes it, or a panel hangs from it.": "Pulau itu sendiri jadi Pusat Kontrol, atau panel tergantung darinya.",
   "How what plays is drawn.": "Cara memutar ditampilkan.",
-  "The artwork's, the accent, the highlight or ink.": "Milik sampul, aksen, sorotan, atau tinta.",
   "A sheet of its own, or the Island itself.": "Lembar sendiri, atau Pulau itu sendiri.",
   "Own gives each level its colour.": "Sendiri memberi setiap level warnanya.",
   "Where levels show when the Island is hidden.": "Tempat level muncul saat Pulau tersembunyi.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Sambutan saat mulai",
   "The ring opens on your desktop once each session.": "Cincin terbuka ke desktopmu sekali setiap sesi.",
   "See the welcome": "Lihat sambutan",
-  "Plays it now over the desktop.": "Memutarnya sekarang di atas desktop."
+  "Plays it now over the desktop.": "Memutarnya sekarang di atas desktop.",
+  "Swap with the accent": "Tukar dengan aksen",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "Aksen memakai warna sorotan, dan sorotan memakai warna aksen.",
+  "Control Center sliders filled in grey or in one of your colours.": "Penggeser Pusat Kontrol diisi abu-abu atau salah satu warnamu.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "Milik sampul, salah satu warnamu, milik wallpaper, atau tinta."
 }

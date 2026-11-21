@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "大きな数字の太さ：時計、タイマー、表示値。",
   "Which edge of the screen the Island sits on.": "アイランドを置く画面の端。",
   "Space between the Island and its screen edge.": "アイランドと画面の端のすき間。",
-  "Control Center sliders filled in grey or in your accent.": "コントロールセンターのスライダーをグレーかアクセントで塗ります。",
   "How wide the Control Center opens.": "コントロールセンターが開く幅。",
   "The Island's player shows the cover as a disc.": "アイランドのプレーヤーがジャケットを円盤で表示します。",
   "How wide Spotlight opens.": "Spotlight が開く幅。",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "丸：名前付きの円盤。タイル：角丸の四角。",
   "The Island becomes it, or a panel hangs from it.": "アイランド自体がコントロールセンターになるか、パネルがぶら下がります。",
   "How what plays is drawn.": "再生中の表示の描き方。",
-  "The artwork's, the accent, the highlight or ink.": "ジャケット、アクセント、ハイライト、またはインクの色。",
   "A sheet of its own, or the Island itself.": "専用のシート、またはアイランド自体。",
   "Own gives each level its colour.": "固有は各レベルに色を付けます。",
   "Where levels show when the Island is hidden.": "アイランドが隠れているときにレベルを表示する場所。",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "起動時のようこそ画面",
   "The ring opens on your desktop once each session.": "セッションごとに一度、リングが開いてデスクトップが現れます。",
   "See the welcome": "ようこそ画面を見る",
-  "Plays it now over the desktop.": "今すぐデスクトップの上で再生します。"
+  "Plays it now over the desktop.": "今すぐデスクトップの上で再生します。",
+  "Swap with the accent": "アクセントと入れ替える",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "アクセントがハイライトの色に、ハイライトがアクセントの色になります。",
+  "Control Center sliders filled in grey or in one of your colours.": "コントロールセンターのスライダーをグレーか、あなたの色のひとつで塗ります。",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "ジャケット、あなたの色のひとつ、壁紙、またはインクの色。"
 }

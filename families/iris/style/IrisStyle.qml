@@ -384,11 +384,12 @@ QtObject {
     readonly property var synthOptions: root.lookOptions?.synth ?? ({})
     readonly property var gelOptions: root.lookOptions?.gel ?? ({})
     readonly property var nothingOptions: root.lookOptions?.nothing ?? ({})
-    // Where a look's colour comes from: the person's accent, highlight or signal; "classic" is the look's own lamp.
+    // Where a look's colour comes from: the person's accent, highlight, wallpaper or signal; "classic" is the look's own lamp.
     function lookColour(source: string, classic: color): color {
         if (source === "classic") return classic
         if (source === "signal") return root.signal
         if (source === "highlight") return root.vivid(root.baseSecondaryAccent, true)
+        if (source === "wallpaper") return root.vivid(Qt.color(root.accents.wallpaper ?? root.wallpaperLight), true)
         return root.vivid(root.baseAccent, true)
     }
     // A lamp needs a hue: a grey accent or highlight lights in the signal.
@@ -952,7 +953,12 @@ QtObject {
     // The accent: actions, selection, links, live marks. 4.5:1 on every ground, and on paper a fill under white ink.
     readonly property string accentChoice: IrisDesign.colourChoice("accent", String(root.appearance?.accent ?? "blue"), root.followsTheme)
     readonly property string highlightChoice: IrisDesign.colourChoice("highlight", String(root.appearance?.highlight ?? "orange"), root.followsTheme)
-    readonly property color baseAccent: root.vivid(root.accentFrom(root.accentChoice, root.appearance?.theme?.accentHue ?? 212), false)
+    // Swapped (`iris.appearance.swapAccents`), the accent and the highlight trade colours, each solved again for its own
+    // role: the accent still reads as text, the highlight as a figure. A highlight that is the accent leaves one colour.
+    readonly property bool accentsSwapped: Boolean(root.appearance?.swapAccents ?? false) && root.highlightChoice !== "accent"
+    readonly property color chosenAccent: root.vivid(root.accentFrom(root.accentChoice, root.appearance?.theme?.accentHue ?? 212), false)
+    readonly property color chosenHighlight: root.highlightFrom(root.highlightChoice, root.appearance?.theme?.highlightHue ?? 32, root.chosenAccent)
+    readonly property color baseAccent: root.accentsSwapped ? root.vivid(root.readableAccent(root.chosenHighlight), false) : root.chosenAccent
     // The person's hue at an accent's strength, not the solver's pastel: #accbeb next to #dfe7ef ink made a chosen word,
     // a lit switch and a thumb read as the rest (his 10-30). In OKLCH, one lightness per scheme, so every hue reads as
     // bright as the next (a yellow rises on the night, where its own lightness sits), and a chroma that follows Intensity
@@ -1037,7 +1043,7 @@ QtObject {
     readonly property color accentContainer: root.mono ? root.text : root.role("accentContainer", "#1f3a5f")
     readonly property color inkOnAccentContainer: root.mono ? root.paper : root.role("onAccentContainer", "#d6e3ff")
     // The highlight: the glanced detail (a clock separator, a day number, a timer). A figure: 3:1 on every ground.
-    readonly property color baseSecondaryAccent: root.highlightFrom(root.highlightChoice, root.appearance?.theme?.highlightHue ?? 32, root.baseAccent)
+    readonly property color baseSecondaryAccent: root.accentsSwapped ? root.readableHighlight(root.chosenAccent) : root.chosenHighlight
     readonly property color secondaryAccent: {
         if (root.mono && !(root.animeEnabled && root.animeHighlightOn)) return root.text
         const base = root.baseSecondaryAccent
@@ -1046,8 +1052,22 @@ QtObject {
     }
     // The clock's own accent, the one the person picked for its separator and day (`iris.bar.clockAccent`): every
     // surface that sets the day as a figure wears it, so the Control Center and Today never disagree with the Island.
-    readonly property color clockAccent: ({ accent: root.accent, plain: root.text })[String(root.options?.bar?.clockAccent ?? "highlight")]
-        ?? root.secondaryAccent
+    readonly property color clockAccent: root.partColour(String(root.options?.bar?.clockAccent ?? "highlight"), root.secondaryAccent)
+    // A colour a part takes from the person's colours, named as its setting stores it: the accent, the highlight, the
+    // wallpaper's own or the ink ("plain"). Anything else is the part's own fallback.
+    function partColour(source: string, fallback: color): color {
+        switch (source) {
+        case "accent": return root.accent
+        case "highlight": return root.secondaryAccent
+        case "wallpaper": return root.wallpaperTone
+        case "plain": case "ink": return root.text
+        }
+        return fallback
+    }
+    // The wallpaper's colour as the palette solves it for a highlight (3:1 on every ground); ink under Nothing's look, as
+    // the highlight is. Over imagery (the lock) the night palette's.
+    readonly property color wallpaperTone: root.mono ? root.text : Qt.color(root.highlights.wallpaper ?? root.wallpaperLight)
+    readonly property color wallpaperOnMedia: root.mono ? root.mediaInk : Qt.color(root.washiDark?.highlights?.wallpaper ?? root.wallpaperLight)
     // A wallpaper or theme accent already is the apps' palette.
     readonly property bool appsShareAccent: Boolean(root.appearance?.accentForApps ?? true)
         && !["theme", "wallpaper"].includes(root.accentChoice)
@@ -1079,13 +1099,11 @@ QtObject {
         }
     }
     readonly property string badgeStyle: String(root.theme?.badge ?? "alert")
-    readonly property color badge: root.badgeStyle === "accent" ? root.accent
-        : root.badgeStyle === "highlight" ? root.secondaryAccent
-        : root.badgeStyle === "neutral" ? root.surfaceHighestOpaque
-        : root.dangerFill
+    readonly property color badge: root.badgeStyle === "neutral" ? root.surfaceHighestOpaque
+        : root.badgeStyle === "alert" ? root.dangerFill : root.partColour(root.badgeStyle, root.dangerFill)
     readonly property color inkOnBadge: root.badgeStyle === "alert" ? root.inkOnDangerFill
         : root.badgeStyle === "neutral" ? root.text
-        : root.badgeStyle === "highlight" ? root.onTintFor(root.secondaryAccent) : root.inkOnAccent
+        : root.badgeStyle === "accent" ? root.inkOnAccent : root.onTintFor(root.badge)
     readonly property color badgeInk: root.badgeStyle === "alert" ? root.danger
         : root.badgeStyle === "neutral" ? root.text : root.badge
     // Status: done and alert read as text (4.5:1), a warning as a mark (3:1); the same hues in every scheme.
@@ -1186,8 +1204,8 @@ QtObject {
         : root.look === "gel" ? Qt.rgba(1, 1, 1, root.light ? 0.8 : 0.32) // iris-literal: gel's lit rim
         : root.lineRim
     readonly property color lineRim: root.edgeStyle !== "line" ? Qt.color("transparent")
-        : root.rimTint === "accent" ? ColorUtils.applyAlpha(root.accent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
-        : root.rimTint === "highlight" ? ColorUtils.applyAlpha(root.secondaryAccent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
+        : ["accent", "highlight", "wallpaper"].includes(root.rimTint)
+            ? ColorUtils.applyAlpha(root.partColour(root.rimTint, root.accent), Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
         : root.border
     // One edge width for every body, the line and the lit glass edge alike, counted in device pixels: 1 is the sharpest
     // line the screen can draw at any scale (a logical pixel at 1.5x was a smeared 1.5 px band). Two knobs used to
@@ -1287,8 +1305,7 @@ QtObject {
     }
     // `art` is the host's own colour (the artwork's tint on the Island), the rest are iRiS's.
     function visualizerTint(art: color): color {
-        return root.visualizerColour === "accent" ? root.accent : root.visualizerColour === "highlight" ? root.secondaryAccent
-            : root.visualizerColour === "ink" ? root.text : art
+        return root.visualizerColour === "art" ? art : root.partColour(root.visualizerColour, art)
     }
     // What a sound device is, read from its own name: earbuds, headphones, a screen's speakers or a speaker.
     function soundDeviceGlyph(node, input: bool): string {
@@ -1544,11 +1561,11 @@ QtObject {
     // Auto: each area's colour, and the ink in a line voice.
     readonly property string iconColour: {
         const wanted = String(root.iconOptions.colour ?? "auto")
-        return ["area", "accent", "mono"].includes(wanted) ? wanted : root.lineMarks ? "mono" : "area"
+        return ["area", "accent", "highlight", "wallpaper", "mono"].includes(wanted) ? wanted : root.lineMarks ? "mono" : "area"
     }
-    // The colour an icon of an area wears: its own, the accent for every area, or a grey plate (mono).
+    // The colour an icon of an area wears: its own, one of the person's colours for every area, or a grey plate (mono).
     function iconHue(area: color): color {
-        return root.iconColour === "accent" ? root.accent : root.iconColour === "mono" ? root.identity.gray : area
+        return root.iconColour === "mono" ? root.identity.gray : root.iconColour === "area" ? area : root.partColour(root.iconColour, area)
     }
     // The glyph set every glyph of the shell is drawn from while iRiS is worn (FamilyStyle.glyphFont).
     // A set this machine lacks stays Rounded: an update brings no fonts, and a missing face prints each glyph's name.

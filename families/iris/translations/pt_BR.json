@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "O peso dos números grandes: relógios, timers e leituras.",
   "Which edge of the screen the Island sits on.": "Em qual borda da tela a Ilha fica.",
   "Space between the Island and its screen edge.": "Espaço entre a Ilha e a borda da tela.",
-  "Control Center sliders filled in grey or in your accent.": "Controles deslizantes da Central de Controle em cinza ou na sua cor de destaque.",
   "How wide the Control Center opens.": "A largura com que a Central de Controle abre.",
   "The Island's player shows the cover as a disc.": "O player da Ilha mostra a capa como um disco.",
   "How wide Spotlight opens.": "A largura com que o Spotlight abre.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Discos com nomes, ou blocos arredondados.",
   "The Island becomes it, or a panel hangs from it.": "A Ilha vira o painel, ou um painel pende dela.",
   "How what plays is drawn.": "Como o conteúdo em reprodução é desenhado.",
-  "The artwork's, the accent, the highlight or ink.": "A cor da capa, o destaque, o realce ou a tinta.",
   "A sheet of its own, or the Island itself.": "Uma folha própria, ou a própria Ilha.",
   "Own gives each level its colour.": "Própria acende cada nível com a sua cor.",
   "Where levels show when the Island is hidden.": "Onde os níveis aparecem quando a Ilha está oculta.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Boas-vindas ao iniciar",
   "The ring opens on your desktop once each session.": "O anel se abre sobre sua área de trabalho uma vez por sessão.",
   "See the welcome": "Ver as boas-vindas",
-  "Plays it now over the desktop.": "Mostra agora sobre a área de trabalho."
+  "Plays it now over the desktop.": "Mostra agora sobre a área de trabalho.",
+  "Swap with the accent": "Trocar com o destaque",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "O destaque fica com a cor do realce, e o realce com a do destaque.",
+  "Control Center sliders filled in grey or in one of your colours.": "Controles deslizantes da Central de Controle em cinza ou em uma das suas cores.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "A cor da capa, uma das suas cores, a do papel de parede ou a tinta."
 }

@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "مدى ثقل الأرقام الكبيرة: الساعات والمؤقتات والقراءات.",
   "Which edge of the screen the Island sits on.": "على أي حافة من الشاشة تقع الجزيرة.",
   "Space between the Island and its screen edge.": "المسافة بين الجزيرة وحافة الشاشة.",
-  "Control Center sliders filled in grey or in your accent.": "شرائح مركز التحكم تُملأ بالرمادي أو بلونك المميز.",
   "How wide the Control Center opens.": "مدى اتساع فتح مركز التحكم.",
   "The Island's player shows the cover as a disc.": "مشغّل الجزيرة يعرض الغلاف كقرص.",
   "How wide Spotlight opens.": "مدى اتساع فتح Spotlight.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "مستدير: أقراص بأسماء؛ بلاط: مربعات مدورة.",
   "The Island becomes it, or a panel hangs from it.": "الجزيرة نفسها تصبح مركز التحكم، أو تتدلى منها لوحة.",
   "How what plays is drawn.": "كيف يُرسم ما يُشغَّل.",
-  "The artwork's, the accent, the highlight or ink.": "لون الغلاف أو المميز أو الإبراز أو الحبر.",
   "A sheet of its own, or the Island itself.": "ورقة خاصة، أو الجزيرة نفسها.",
   "Own gives each level its colour.": "الخاص يلوّن كل مستوى بلونه.",
   "Where levels show when the Island is hidden.": "أين تظهر المستويات حين تكون الجزيرة مخفية.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "ترحيب عند بدء التشغيل",
   "The ring opens on your desktop once each session.": "تنفتح الحلقة على سطح مكتبك مرة في كل جلسة.",
   "See the welcome": "عرض الترحيب",
-  "Plays it now over the desktop.": "يعرضه الآن فوق سطح المكتب."
+  "Plays it now over the desktop.": "يعرضه الآن فوق سطح المكتب.",
+  "Swap with the accent": "تبديل مع لون التمييز",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "يأخذ لون التمييز لون الإبراز، ويأخذ الإبراز لون التمييز.",
+  "Control Center sliders filled in grey or in one of your colours.": "شرائح مركز التحكم تُملأ بالرمادي أو بأحد ألوانك.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "لون الغلاف أو أحد ألوانك أو لون الخلفية أو الحبر."
 }

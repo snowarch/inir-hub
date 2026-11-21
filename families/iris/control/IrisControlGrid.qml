@@ -709,7 +709,7 @@ Item {
             : level.moduleId === "microphone" ? Audio.source !== null : true
         vertical: level.height > level.width
         readout: level.ready && level.span >= Math.round(96 * root.d)
-        fillColor: IrisControlOptions.accentSliders ? IrisStyle.accent : IrisStyle.fillStrong
+        fillColor: IrisControlOptions.sliderFill
         cornerCap: level.thickness / 2
         enabled: level.ready && !root.editing
         opacity: level.ready ? 1 : 0.45

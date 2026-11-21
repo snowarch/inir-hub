@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "Wie kräftig große Zahlen sind: Uhren, Timer und Anzeigen.",
   "Which edge of the screen the Island sits on.": "An welchem Bildschirmrand die Insel sitzt.",
   "Space between the Island and its screen edge.": "Abstand zwischen der Insel und ihrem Bildschirmrand.",
-  "Control Center sliders filled in grey or in your accent.": "Schieberegler im Kontrollzentrum grau oder in deinem Akzent gefüllt.",
   "How wide the Control Center opens.": "Wie breit sich das Kontrollzentrum öffnet.",
   "The Island's player shows the cover as a disc.": "Der Player der Insel zeigt das Cover als Scheibe.",
   "How wide Spotlight opens.": "Wie breit sich Spotlight öffnet.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Rund: Scheiben mit Namen; Kacheln: abgerundete Quadrate.",
   "The Island becomes it, or a panel hangs from it.": "Die Insel wird selbst zum Kontrollzentrum oder ein Panel hängt daran.",
   "How what plays is drawn.": "Wie Abgespieltes gezeichnet wird.",
-  "The artwork's, the accent, the highlight or ink.": "Die des Covers, der Akzent, die Hervorhebung oder die Tinte.",
   "A sheet of its own, or the Island itself.": "Ein eigenes Blatt oder die Insel selbst.",
   "Own gives each level its colour.": "Eigene färbt jede Stufe in ihrer Farbe.",
   "Where levels show when the Island is hidden.": "Wo Pegel erscheinen, wenn die Insel verborgen ist.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Begrüßung beim Start",
   "The ring opens on your desktop once each session.": "Der Ring öffnet sich einmal pro Sitzung auf deinen Desktop.",
   "See the welcome": "Begrüßung ansehen",
-  "Plays it now over the desktop.": "Spielt sie jetzt über dem Desktop ab."
+  "Plays it now over the desktop.": "Spielt sie jetzt über dem Desktop ab.",
+  "Swap with the accent": "Mit dem Akzent tauschen",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "Der Akzent nimmt die Farbe der Hervorhebung an, die Hervorhebung die des Akzents.",
+  "Control Center sliders filled in grey or in one of your colours.": "Schieberegler im Kontrollzentrum grau oder in einer deiner Farben gefüllt.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "Die des Covers, eine deiner Farben, die des Hintergrundbilds oder die Tinte."
 }

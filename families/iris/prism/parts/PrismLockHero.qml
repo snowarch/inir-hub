@@ -54,7 +54,8 @@ Item {
     }
     readonly property color clockInk: {
         const pick = String(root.type.accent ?? "plain")
-        return pick === "accent" ? IrisStyle.accent : pick === "highlight" ? IrisStyle.secondaryAccent : PrismTheme.paper
+        // The same colours the lock solves over its wallpaper.
+        return ({ accent: IrisStyle.accentOnMedia, highlight: IrisStyle.highlightOnMedia, wallpaper: IrisStyle.wallpaperOnMedia })[pick] ?? PrismTheme.paper
     }
     readonly property string clockFace: {
         const pick = String(root.type.clockFont ?? "numbers")

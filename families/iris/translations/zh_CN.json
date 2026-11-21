@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "大数字的粗细：时钟、计时器和读数。",
   "Which edge of the screen the Island sits on.": "岛屿位于屏幕的哪条边。",
   "Space between the Island and its screen edge.": "岛屿与屏幕边缘的间距。",
-  "Control Center sliders filled in grey or in your accent.": "控制中心的滑块用灰色或你的强调色填充。",
   "How wide the Control Center opens.": "控制中心展开的宽度。",
   "The Island's player shows the cover as a disc.": "岛屿的播放器把封面显示为圆盘。",
   "How wide Spotlight opens.": "Spotlight 展开的宽度。",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "带名称的圆盘，或圆角方块。",
   "The Island becomes it, or a panel hangs from it.": "岛屿变成它，或从它下方悬挂一个面板。",
   "How what plays is drawn.": "正在播放的内容如何绘制。",
-  "The artwork's, the accent, the highlight or ink.": "封面、强调色、高亮或墨色。",
   "A sheet of its own, or the Island itself.": "独立的面板，或岛屿本身。",
   "Own gives each level its colour.": "自有模式让每个级别使用各自的颜色。",
   "Where levels show when the Island is hidden.": "岛屿隐藏时，各级别显示的位置。",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "启动时欢迎",
   "The ring opens on your desktop once each session.": "每次会话中，圆环会展开一次，露出你的桌面。",
   "See the welcome": "查看欢迎",
-  "Plays it now over the desktop.": "立即在桌面上播放。"
+  "Plays it now over the desktop.": "立即在桌面上播放。",
+  "Swap with the accent": "与强调色互换",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "强调色换成高亮的颜色，高亮换成强调色的颜色。",
+  "Control Center sliders filled in grey or in one of your colours.": "控制中心的滑块用灰色或你的某个颜色填充。",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "封面、你的某个颜色、壁纸或墨色。"
 }

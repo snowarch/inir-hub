@@ -23,7 +23,7 @@ Singleton {
         "iris.appearance.aura": "light_mode", "iris.appearance.density": "density_medium",
         "iris.appearance.figureWeight": "pin", "iris.appearance.glass.blur": "lens_blur",
         "iris.appearance.glass.mode": "blur_on", "iris.appearance.glass.tint": "opacity",
-        "iris.appearance.highlight": "highlight", "iris.appearance.intensity": "palette",
+        "iris.appearance.highlight": "highlight", "iris.appearance.swapAccents": "swap_horiz", "iris.appearance.intensity": "palette",
         "iris.appearance.look": "auto_awesome",
         "iris.appearance.morph": "gesture", "iris.appearance.motion": "motion_photos_off",
         "iris.appearance.scheme": "contrast", "iris.appearance.settingsHost": "open_in_new",

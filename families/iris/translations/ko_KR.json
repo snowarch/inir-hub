@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "큰 숫자의 굵기: 시계, 타이머, 수치.",
   "Which edge of the screen the Island sits on.": "아일랜드가 놓이는 화면 가장자리.",
   "Space between the Island and its screen edge.": "아일랜드와 화면 가장자리 사이의 간격.",
-  "Control Center sliders filled in grey or in your accent.": "제어 센터의 슬라이더를 회색 또는 강조색으로 채웁니다.",
   "How wide the Control Center opens.": "제어 센터가 열리는 너비.",
   "The Island's player shows the cover as a disc.": "아일랜드의 플레이어가 커버를 원반으로 보여 줍니다.",
   "How wide Spotlight opens.": "Spotlight가 열리는 너비.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "이름이 있는 원반, 또는 둥근 타일.",
   "The Island becomes it, or a panel hangs from it.": "아일랜드가 되거나, 패널이 매달립니다.",
   "How what plays is drawn.": "재생 중인 것을 어떻게 그리는지.",
-  "The artwork's, the accent, the highlight or ink.": "앨범 아트, 강조색, 하이라이트 또는 잉크의 색.",
   "A sheet of its own, or the Island itself.": "자체 시트, 또는 아일랜드 자체.",
   "Own gives each level its colour.": "Own은 각 레벨에 고유한 색을 줍니다.",
   "Where levels show when the Island is hidden.": "아일랜드가 숨겨졌을 때 레벨이 나타나는 곳.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "시작 시 환영 화면",
   "The ring opens on your desktop once each session.": "세션마다 한 번 링이 열리며 데스크톱이 나타납니다.",
   "See the welcome": "환영 화면 보기",
-  "Plays it now over the desktop.": "지금 데스크톱 위에서 재생합니다."
+  "Plays it now over the desktop.": "지금 데스크톱 위에서 재생합니다.",
+  "Swap with the accent": "강조색과 바꾸기",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "강조색은 하이라이트의 색을, 하이라이트는 강조색의 색을 가집니다.",
+  "Control Center sliders filled in grey or in one of your colours.": "제어 센터의 슬라이더를 회색 또는 내 색 중 하나로 채웁니다.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "앨범 아트, 내 색 중 하나, 바탕화면 또는 잉크의 색."
 }

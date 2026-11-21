@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "Насколько жирные крупные цифры: часы, таймеры и показания.",
   "Which edge of the screen the Island sits on.": "У какого края экрана находится Остров.",
   "Space between the Island and its screen edge.": "Расстояние между Островом и краем экрана.",
-  "Control Center sliders filled in grey or in your accent.": "Ползунки Пункта управления серые или в цвете акцента.",
   "How wide the Control Center opens.": "Насколько широко открывается Пункт управления.",
   "The Island's player shows the cover as a disc.": "Плеер Острова показывает обложку диском.",
   "How wide Spotlight opens.": "Насколько широко открывается Spotlight.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Диски с именами или скруглённые плитки.",
   "The Island becomes it, or a panel hangs from it.": "Остров становится им или к нему прикреплена панель.",
   "How what plays is drawn.": "Как рисуется то, что играет.",
-  "The artwork's, the accent, the highlight or ink.": "Цвет обложки, акцент, выделение или основной цвет текста.",
   "A sheet of its own, or the Island itself.": "Отдельный лист или сам Остров.",
   "Own gives each level its colour.": "Свой окрашивает каждый уровень в свой цвет.",
   "Where levels show when the Island is hidden.": "Где уровни видны, когда Остров скрыт.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Приветствие при запуске",
   "The ring opens on your desktop once each session.": "Кольцо раскрывается на рабочий стол один раз за сеанс.",
   "See the welcome": "Показать приветствие",
-  "Plays it now over the desktop.": "Показывает его сейчас поверх рабочего стола."
+  "Plays it now over the desktop.": "Показывает его сейчас поверх рабочего стола.",
+  "Swap with the accent": "Поменять с акцентом",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "Акцент берёт цвет выделения, а выделение — цвет акцента.",
+  "Control Center sliders filled in grey or in one of your colours.": "Ползунки Пункта управления серые или в одном из ваших цветов.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "Цвет обложки, один из ваших цветов, цвет обоев или основной цвет текста."
 }

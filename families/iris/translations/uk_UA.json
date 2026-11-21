@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "Наскільки жирні великі цифри: годинники, таймери й показники.",
   "Which edge of the screen the Island sits on.": "Біля якого краю екрана Острів.",
   "Space between the Island and its screen edge.": "Відстань між Островом і краєм екрана.",
-  "Control Center sliders filled in grey or in your accent.": "Повзунки Центру керування сірі або в кольорі акценту.",
   "How wide the Control Center opens.": "Наскільки широко відкривається Центр керування.",
   "The Island's player shows the cover as a disc.": "Плеєр Острова показує обкладинку диском.",
   "How wide Spotlight opens.": "Наскільки широко відкривається Spotlight.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Диски з назвами або скруглені плитки.",
   "The Island becomes it, or a panel hangs from it.": "Острів стає ним або до нього прикріплюється панель.",
   "How what plays is drawn.": "Як малюється те, що грає.",
-  "The artwork's, the accent, the highlight or ink.": "Колір обкладинки, акцент, виділення або чорнило.",
   "A sheet of its own, or the Island itself.": "Окремий аркуш або сам Острів.",
   "Own gives each level its colour.": "Своє підсвічує гучність індиго, мікрофон помаранчевим.",
   "Where levels show when the Island is hidden.": "Де рівні видно, коли Острів прихований.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Привітання під час запуску",
   "The ring opens on your desktop once each session.": "Кільце розкривається на робочий стіл один раз за сеанс.",
   "See the welcome": "Переглянути привітання",
-  "Plays it now over the desktop.": "Показує його зараз поверх робочого столу."
+  "Plays it now over the desktop.": "Показує його зараз поверх робочого столу.",
+  "Swap with the accent": "Поміняти з акцентом",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "Акцент бере колір виділення, а виділення — колір акценту.",
+  "Control Center sliders filled in grey or in one of your colours.": "Повзунки Центру керування сірі або в одному з ваших кольорів.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "Колір обкладинки, один із ваших кольорів, колір шпалер або чорнило."
 }

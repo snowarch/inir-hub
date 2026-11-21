@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "Qué tan gruesos son los números grandes: relojes, temporizadores y lecturas.",
   "Which edge of the screen the Island sits on.": "En qué borde de la pantalla está la Isla.",
   "Space between the Island and its screen edge.": "Espacio entre la Isla y su borde de la pantalla.",
-  "Control Center sliders filled in grey or in your accent.": "Deslizadores del Centro de control rellenos en gris o en tu acento.",
   "How wide the Control Center opens.": "Qué tan ancho se abre el Centro de control.",
   "The Island's player shows the cover as a disc.": "El reproductor de la Isla muestra la portada como un disco.",
   "How wide Spotlight opens.": "Qué tan ancho se abre Spotlight.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Discos con nombre, o mosaicos redondeados.",
   "The Island becomes it, or a panel hangs from it.": "La Isla se convierte en él, o cuelga un panel de ella.",
   "How what plays is drawn.": "Cómo se dibuja lo que suena.",
-  "The artwork's, the accent, the highlight or ink.": "La de la carátula, el acento, el resaltado o la tinta.",
   "A sheet of its own, or the Island itself.": "Una hoja propia, o la propia Isla.",
   "Own gives each level its colour.": "Propia da a cada nivel su color.",
   "Where levels show when the Island is hidden.": "Dónde aparecen los niveles si la Isla está oculta.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Bienvenida al iniciar",
   "The ring opens on your desktop once each session.": "El anillo se abre sobre tu escritorio una vez por sesión.",
   "See the welcome": "Ver la bienvenida",
-  "Plays it now over the desktop.": "La muestra ahora sobre el escritorio."
+  "Plays it now over the desktop.": "La muestra ahora sobre el escritorio.",
+  "Swap with the accent": "Intercambiar con el acento",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "El acento toma el color del resaltado, y el resaltado el del acento.",
+  "Control Center sliders filled in grey or in one of your colours.": "Deslizadores del Centro de control rellenos en gris o en uno de tus colores.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "La de la carátula, uno de tus colores, la del fondo de pantalla o la tinta."
 }

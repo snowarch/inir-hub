@@ -133,6 +133,7 @@ JsonObject {
             property JsonObject light: JsonObject { property int tone: -8; property int warmth: 38; property int colour: 85; property int widgetColour: 60 }
         }
         property string highlight: "orange" // "orange", "yellow", "red", "pink", "green", "accent" or "wallpaper"
+        property bool swapAccents: false // the accent and the highlight trade colours, each solved again for its own role
         property JsonObject anime: JsonObject {
             property bool enabled: false
             property string palette: "sakura" // IrisStyle.animePalettes
@@ -157,7 +158,7 @@ JsonObject {
             property string style: "glyph" // "glyph" (the glyph alone in its colour, as the widgets head themselves), "iris" (on a plate) or "tile"
             property string plate: "black" // "black", "white", "tint" or "surface"
             property string shape: "auto" // a plate's corners: "auto" (the look's), "round" or "square"
-            property string colour: "auto" // "auto" (each area's colour, the ink in a line voice), "area", "accent" or "mono"
+            property string colour: "auto" // "auto" (each area's colour, the ink in a line voice), "area", "accent", "highlight", "wallpaper" or "mono"
             property string glyphs: "rounded" // the glyph set: "rounded", "standard" (Material Symbols Outlined) or "sharp"
             property string fill: "auto" // "auto", "filled" or "outlined"
             property string weight: "regular" // "light", "regular" or "bold"
@@ -185,7 +186,7 @@ JsonObject {
             property string notifications: ""
             property string osd: ""
         }
-        // Each look's own make. Colours come from "accent", "highlight", "signal" or "classic" (the look's own lamp).
+        // Each look's own make. Colours come from "accent", "highlight", "wallpaper", "signal" or "classic" (the look's own lamp).
         property JsonObject looks: JsonObject {
             // chosen: "ink" (the inverted plate) or "signal"
             // chosen marks the chosen segment; figures sets large figures as Nothing OS's dot matrix ("dots") or in Archivo
@@ -215,13 +216,13 @@ JsonObject {
             property string weight: "regular" // iRiS type weight: "light", "regular" or "bold"
             property bool rim: true     // the hairline around the field's silhouette
             property string edges: "light" // the edge every body wears: "line" (the hairline) or "light" (lit from above like glass); rim false turns it off
-            property string rimTint: "neutral" // that hairline's ink: "neutral", "accent" or "highlight"
+            property string rimTint: "neutral" // that hairline's ink: "neutral", "accent", "highlight" or "wallpaper"
             property int rimWidth: 1    // the width of every body's edge, line or lit glass: 1-3 device pixels
             property int glow: 0        // how much shadows take the accent colour, 0-100
             property int accentHue: 212    // accent "custom": its hue, 0-359
             property int highlightHue: 32  // highlight "custom": its hue, 0-359
             property int lightReach: 100   // how far into a body its light reaches
-            property string badge: "alert" // unread counts: "alert", "accent", "highlight" or "neutral"
+            property string badge: "alert" // unread counts: "alert", "accent", "highlight", "wallpaper" or "neutral"
             property int air: 8            // gap between an opened body and the bar or piece it came from
             property string placement: "auto" // where bodies open from a piece: "auto" (away from its edge) or "along" (along its edge)
             property string curve: "expressive" // direct motion curve: "expressive", "standard", "gentle", "swift" or "custom"
@@ -297,7 +298,7 @@ JsonObject {
         property string shape: "auto" // "auto" (capsule when notched, else the bubbles' shape), "round", "squircle" or "square"
         property int satelliteGap: 6
         property int clockScale: 100 // resting clock and date size, %
-        property string clockAccent: "highlight" // time separator and day number: "highlight", "accent" or "plain"
+        property string clockAccent: "highlight" // time separator and day number: "highlight", "accent", "wallpaper" or "plain"
         property int padding: 100 // room around the resting Island's content, %
         property int satelliteScale: 100 // bubbles beside the Island, % of its height
         // How the resting Island sits on its edge: "island" hugs its
@@ -521,7 +522,7 @@ JsonObject {
         property JsonObject visualizer: JsonObject {
             property string style: "capsules" // capsules | rise | dots | wave | ring
             property int bars: 5
-            property string colour: "art" // art | accent | highlight | ink
+            property string colour: "art" // art | accent | highlight | wallpaper | ink
         }
     }
     // Where each Island bubble slot rests: "island", a zone ("top-left",
@@ -812,8 +813,8 @@ JsonObject {
         property list<string> sizes: ["devices:2x1", "record:2x1"]
         property list<string> platter: ["network", "bluetooth", "focus", "gameMode"]
         property list<string> levels: ["brightness", "volume", "microphone"]
-        property string accent: "system" // "system", "accent", "colourful" or "mono"
-        property string sliders: "neutral" // "neutral" or "accent"
+        property string accent: "system" // "system", "accent", "highlight", "wallpaper", "colourful" or "mono"
+        property string sliders: "neutral" // "neutral", "accent", "highlight" or "wallpaper"
     }
     property JsonObject lock: JsonObject {
         property string preset: "iris"
@@ -837,7 +838,7 @@ JsonObject {
             property string clockFont: "numbers" // "numbers", "main" or "title"
             property int clockWeight: 700
             property int clockTracking: -2
-            property string accent: "plain" // "plain", "accent" or "highlight"
+            property string accent: "plain" // "plain", "accent", "highlight" or "wallpaper"
             property string clockFormat: "auto" // "auto", "24h" or "12h"
             property bool seconds: false
             property string dateFormat: "long" // "long", "short", "numeric" or "weekday"

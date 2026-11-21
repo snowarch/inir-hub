@@ -2186,7 +2186,6 @@
   "How heavy the big numbers are: clocks, timers and readouts.": "Büyük rakamların kalınlığı: saatler, zamanlayıcılar ve göstergeler.",
   "Which edge of the screen the Island sits on.": "Ada'nın ekranın hangi kenarında durduğu.",
   "Space between the Island and its screen edge.": "Ada ile ekran kenarı arasındaki boşluk.",
-  "Control Center sliders filled in grey or in your accent.": "Denetim Merkezi kaydırıcıları gri ya da vurgu renginle dolu.",
   "How wide the Control Center opens.": "Denetim Merkezi'nin ne kadar geniş açıldığı.",
   "The Island's player shows the cover as a disc.": "Ada'nın oynatıcısı kapağı bir disk olarak gösterir.",
   "How wide Spotlight opens.": "Spotlight'ın ne kadar geniş açıldığı.",
@@ -2460,7 +2459,6 @@
   "Discs with names, or rounded tiles.": "Adlı diskler ya da yuvarlatılmış kutucuklar.",
   "The Island becomes it, or a panel hangs from it.": "Ada kendisi olur ya da bir panel asılır.",
   "How what plays is drawn.": "Çalan şeyin nasıl çizildiği.",
-  "The artwork's, the accent, the highlight or ink.": "Kapak, vurgu, öne çıkarma ya da mürekkep rengi.",
   "A sheet of its own, or the Island itself.": "Kendi sayfası ya da Ada'nın kendisi.",
   "Own gives each level its colour.": "Kendi her seviyeyi kendi rengiyle yakar.",
   "Where levels show when the Island is hidden.": "Ada gizliyken seviyelerin nerede göründüğü.",
@@ -2706,5 +2704,9 @@
   "Welcome at startup": "Başlangıçta karşılama",
   "The ring opens on your desktop once each session.": "Halka her oturumda bir kez masaüstüne açılır.",
   "See the welcome": "Karşılamayı gör",
-  "Plays it now over the desktop.": "Şimdi masaüstünün üzerinde oynatır."
+  "Plays it now over the desktop.": "Şimdi masaüstünün üzerinde oynatır.",
+  "Swap with the accent": "Vurgu rengiyle değiştir",
+  "The accent takes the highlight's colour, and the highlight the accent's.": "Vurgu rengi öne çıkarma rengini, öne çıkarma da vurgu rengini alır.",
+  "Control Center sliders filled in grey or in one of your colours.": "Denetim Merkezi kaydırıcıları gri ya da renklerinden biriyle dolu.",
+  "The artwork's, one of your colours, the wallpaper's or ink.": "Kapak, renklerinden biri, duvar kağıdı ya da mürekkep rengi."
 }
