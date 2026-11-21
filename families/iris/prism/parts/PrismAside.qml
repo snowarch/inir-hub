@@ -24,8 +24,8 @@ Item {
 
     // What was changed on this page in this visit, newest first: Settings' own history (Ctrl+Z's, forgotten when Settings
     // closes), each row once and only while it holds another value than when the visit began. A page set up long ago
-    // opens quiet (his 11-20: "que no aparezcan 300 cambios cada vez que entro"); its head keeps Restore defaults for the
-    // rest. Home and a search list nothing (his 11-19: bloat).
+    // opens quiet (his 11-20: "que no aparezcan 300 cambios cada vez que entro"): the rest waits folded (differs), and
+    // its head keeps Restore defaults. Home and a search list nothing (his 11-19: bloat).
     readonly property var visit: {
         if (root.everywhere) return ({ rows: [], before: ({}) })
         const _ = PrismModel.revision
@@ -107,11 +107,10 @@ Item {
         }))
     }
 
-    // What changed on the page, gathered by group. One line each: the name, and what it holds now at the line's end,
-    // which gives way to its own restore while pointed.
-    readonly property var sections: {
+    // Changed rows gathered by group, in their order.
+    function sectionsOf(rows: var): var {
         const out = []
-        for (const row of root.changes) {
+        for (const row of rows) {
             const title = String(row.section ?? "")
             let at = out.find(section => section.key === title)
             if (!at) {
@@ -130,8 +129,18 @@ Item {
         if (!page || page.area !== root.pageId) return ""
         return String(IrisOptions.sectionById(root.pageId)?.tip ?? "")
     }
-    // One group on a page needs no caption: the page already says where it is.
-    readonly property bool captioned: root.sections.length > 1
+    readonly property var sections: root.sectionsOf(root.changes)
+    // What else differs from iNiR's on the page (the rail's dot), from the model's own list, read once a burst of writes
+    // settles; a line this visit lists above stays there alone. It waits folded under one line: a page set up long ago
+    // opens quiet (his 11-20: "que no aparezcan 300 cambios cada vez que entro").
+    readonly property var differs: {
+        if (root.everywhere || root.pageId.length === 0) return []
+        const listed = root.changes
+        return PrismModel.changes.filter(row => row.page === root.pageId && PrismModel.shown(row) && !listed.includes(row))
+    }
+    readonly property var differSections: root.sectionsOf(root.differs)
+    property bool differsOpen: false
+    onPageIdChanged: root.differsOpen = false
 
     // The column is the person's (iris.appearance.settingsAside): the blocks they chose, in their order. The player,
     // when it is the last, stands at the foot, where the column ends.
@@ -218,12 +227,140 @@ Item {
         }
     }
 
-    // The page they read: what they changed on it, its keys and how its thing is used.
+    // Changed lines gathered by group, one each: the name, and what it holds now at the line's end, which gives way to its
+    // way back while pointed. The visit's way back is the value a row had before the visit (`before`); without it, the
+    // way back is iNiR's own value.
+    component ChangeList: Column {
+        id: list
+        required property var sections
+        property var before: null
+        signal reached(var row)
+        // One group needs no caption: the page already says where it is.
+        readonly property bool captioned: list.sections.length > 1
+        Repeater {
+            // Keyed: a write elsewhere keeps the groups and lines that stayed instead of rebuilding the list.
+            model: ScriptModel { objectProp: "key"; values: list.sections }
+            delegate: Column {
+                id: section
+                required property var modelData
+                required property int index
+                // A group of one line named like it needs no caption: "Scheme" over "Scheme" said it twice.
+                readonly property bool titled: list.captioned
+                    && !(section.modelData.rows.length === 1 && String(section.modelData.rows[0].label ?? "") === section.modelData.title)
+                width: list.width
+                topPadding: section.index === 0 ? PrismTheme.dp(4) : section.titled ? PrismTheme.dp(14) : 0
+                Row {
+                    visible: section.titled
+                    height: PrismTheme.dp(24)
+                    spacing: PrismTheme.dp(6)
+                    PrismGlyph {
+                        visible: section.modelData.glyph.length > 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: section.modelData.glyph
+                        iconSize: PrismTheme.dp(14)
+                        color: PrismTheme.ink3
+                    }
+                    PrismText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: Math.min(implicitWidth, list.width - PrismTheme.dp(20))
+                        text: Translation.tr(section.modelData.title)
+                        color: PrismTheme.ink3
+                        font.pixelSize: PrismTheme.small
+                        font.weight: Font.DemiBold
+                        font.letterSpacing: PrismTheme.small * 0.02
+                        elide: Text.ElideRight
+                    }
+                }
+                Repeater {
+                    model: ScriptModel { objectProp: "key"; values: section.modelData.rows }
+                    delegate: Item {
+                        id: change
+                        required property var modelData
+                        // A hover handler sees the pointer over the way back too, so the line never flickers under it.
+                        readonly property bool pointed: lineHover.hovered
+                        // The visit's way back is always there; iNiR's only where iNiR keeps a value of its own.
+                        readonly property bool undoable: list.before !== null || PrismModel.restorable(change.modelData)
+                        // A value outside the row's choices (an installed face) says itself.
+                        readonly property string now: {
+                            const _ = PrismModel.revision
+                            const said = String(PrismModel.sayNow(change.modelData) ?? "")
+                            const held = PrismModel.read(change.modelData)
+                            return said.length > 0 ? said : typeof held === "string" ? held : ""
+                        }
+                        width: list.width
+                        height: PrismTheme.dp(34)
+                        HoverHandler { id: lineHover }
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.leftMargin: -PrismTheme.dp(8)
+                            anchors.rightMargin: -PrismTheme.dp(8)
+                            radius: PrismTheme.dp(10)
+                            color: changeArea.pressed ? PrismTheme.fillPress : change.pointed ? PrismTheme.fill : "transparent"
+                            Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+                        }
+                        // No changed bar here: every line of this list is a change, a bar on each would say it twenty times.
+                        PrismText {
+                            id: name
+                            x: 0
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: Math.min(implicitWidth, parent.width - x - (said.visible ? Math.min(said.implicitWidth, parent.width * 0.42) + PrismTheme.dp(10) : 0)
+                                - (undo.visible ? undo.width + PrismTheme.dp(6) : 0))
+                            text: Translation.tr(String(change.modelData.label ?? ""))
+                            font.pixelSize: PrismTheme.body
+                            font.weight: Font.Medium
+                            elide: Text.ElideRight
+                        }
+                        // What it holds now, at the line's end; pointed, its way back stands there instead.
+                        PrismText {
+                            id: said
+                            visible: change.now.length > 0 && !(change.pointed && change.undoable)
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: Math.min(implicitWidth, parent.width * 0.42)
+                            horizontalAlignment: Text.AlignRight
+                            text: change.now
+                            color: PrismTheme.ink2
+                            font.pixelSize: PrismTheme.small
+                            figures: true
+                            elide: Text.ElideRight
+                        }
+                        MouseArea {
+                            id: changeArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            Accessible.role: Accessible.Link
+                            Accessible.name: Translation.tr(String(change.modelData.label ?? ""))
+                            onClicked: list.reached(change.modelData)
+                        }
+                        PrismRound {
+                            id: undo
+                            visible: change.pointed && change.undoable
+                            anchors.right: parent.right
+                            anchors.rightMargin: -PrismTheme.dp(4)
+                            anchors.verticalCenter: parent.verticalCenter
+                            implicitWidth: PrismTheme.dp(26)
+                            ghost: true
+                            glyph: list.before !== null ? "undo" : "restart_alt"
+                            glyphSize: PrismTheme.dp(15)
+                            Accessible.name: list.before !== null ? Translation.tr("Restore") : Translation.tr("Back to iNiR's")
+                            onClicked: {
+                                if (list.before !== null) IrisOptions.commit(change.modelData.spec, list.before[IrisOptions.rowKey(change.modelData.spec)])
+                                else PrismModel.restoreRow(change.modelData)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // The page they read: what they changed on it, what else differs from iNiR's, its keys and how its thing is used.
     Component {
         id: pageBlock
         Column {
             id: pageBox
-            readonly property bool shown: root.changes.length > 0 || root.keys.length > 0 || root.tip.length > 0
+            readonly property bool shown: root.changes.length > 0 || root.differs.length > 0 || root.keys.length > 0 || root.tip.length > 0
             spacing: 0
 
             // What this visit changed on the page, while it holds: each line's way back is the value it had before.
@@ -237,110 +374,81 @@ Item {
                 font.weight: Font.DemiBold
                 font.letterSpacing: -PrismTheme.row * 0.01
             }
-            Repeater {
-                // Keyed: a write elsewhere keeps the groups and lines that stayed instead of rebuilding the list.
-                model: ScriptModel { objectProp: "key"; values: root.sections }
-                delegate: Column {
-                    id: section
-                    required property var modelData
-                    required property int index
-                    width: stack.width
-                    topPadding: section.index === 0 ? PrismTheme.dp(4) : PrismTheme.dp(14)
+            ChangeList {
+                width: parent.width
+                sections: root.sections
+                before: root.visit.before
+                onReached: row => root.reach(row)
+            }
+
+            // What else differs from iNiR's, folded under one line that says how much; a press lists it, each line with
+            // its way back to iNiR's. The head's Restore defaults puts the whole page back.
+            Column {
+                visible: root.differs.length > 0
+                width: parent.width
+                topPadding: root.changes.length > 0 ? PrismTheme.dp(18) : 0
+                Item {
+                    width: parent.width
+                    height: PrismTheme.dp(34)
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.leftMargin: -PrismTheme.dp(8)
+                        anchors.rightMargin: -PrismTheme.dp(8)
+                        radius: PrismTheme.dp(10)
+                        color: foldArea.pressed ? PrismTheme.fillPress : foldArea.containsMouse ? PrismTheme.fill : "transparent"
+                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
+                    }
+                    PrismText {
+                        anchors.left: parent.left
+                        anchors.right: foldEnd.left
+                        anchors.rightMargin: PrismTheme.dp(8)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Translation.tr("Differs from iNiR")
+                        font.pixelSize: PrismTheme.row
+                        font.weight: Font.DemiBold
+                        font.letterSpacing: -PrismTheme.row * 0.01
+                        elide: Text.ElideRight
+                    }
                     Row {
-                        visible: root.captioned
-                        height: PrismTheme.dp(24)
-                        spacing: PrismTheme.dp(6)
-                        PrismGlyph {
-                            visible: section.modelData.glyph.length > 0
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: section.modelData.glyph
-                            iconSize: PrismTheme.dp(14)
-                            color: PrismTheme.ink3
-                        }
+                        id: foldEnd
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: PrismTheme.dp(2)
                         PrismText {
                             anchors.verticalCenter: parent.verticalCenter
-                            width: Math.min(implicitWidth, stack.width - PrismTheme.dp(20))
-                            text: Translation.tr(section.modelData.title)
-                            color: PrismTheme.ink3
+                            text: String(root.differs.length)
+                            color: PrismTheme.ink2
                             font.pixelSize: PrismTheme.small
-                            font.weight: Font.DemiBold
-                            font.letterSpacing: PrismTheme.small * 0.02
-                            elide: Text.ElideRight
+                            figures: true
+                        }
+                        PrismGlyph {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "expand_more"
+                            iconSize: PrismTheme.dp(18)
+                            color: PrismTheme.ink3
+                            rotation: root.differsOpen ? 180 : 0
+                            Behavior on rotation { NumberAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
                         }
                     }
-                    Repeater {
-                        model: ScriptModel { objectProp: "key"; values: section.modelData.rows }
-                        delegate: Item {
-                            id: change
-                            required property var modelData
-                            // A hover handler sees the pointer over the way back too, so the line never flickers under it.
-                            readonly property bool pointed: lineHover.hovered
-                            // A value outside the row's choices (an installed face) says itself.
-                            readonly property string now: {
-                                const _ = PrismModel.revision
-                                const said = String(PrismModel.sayNow(change.modelData) ?? "")
-                                const held = PrismModel.read(change.modelData)
-                                return said.length > 0 ? said : typeof held === "string" ? held : ""
-                            }
-                            width: stack.width
-                            height: PrismTheme.dp(34)
-                            HoverHandler { id: lineHover }
-                            Rectangle {
-                                anchors.fill: parent
-                                anchors.leftMargin: -PrismTheme.dp(8)
-                                anchors.rightMargin: -PrismTheme.dp(8)
-                                radius: PrismTheme.dp(10)
-                                color: changeArea.pressed ? PrismTheme.fillPress : change.pointed ? PrismTheme.fill : "transparent"
-                                Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
-                            }
-                            // No changed bar here: every line of this list is a change, a bar on each would say it twenty times.
-                            PrismText {
-                                id: name
-                                x: 0
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: Math.min(implicitWidth, parent.width - x - (said.visible ? Math.min(said.implicitWidth, parent.width * 0.42) + PrismTheme.dp(10) : 0)
-                                    - (undo.visible ? undo.width + PrismTheme.dp(6) : 0))
-                                text: Translation.tr(String(change.modelData.label ?? ""))
-                                font.pixelSize: PrismTheme.body
-                                font.weight: Font.Medium
-                                elide: Text.ElideRight
-                            }
-                            // What it holds now, at the line's end; pointed, its way back stands there instead.
-                            PrismText {
-                                id: said
-                                visible: change.now.length > 0 && !change.pointed
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: Math.min(implicitWidth, parent.width * 0.42)
-                                horizontalAlignment: Text.AlignRight
-                                text: change.now
-                                color: PrismTheme.ink2
-                                font.pixelSize: PrismTheme.small
-                                figures: true
-                                elide: Text.ElideRight
-                            }
-                            MouseArea {
-                                id: changeArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                Accessible.role: Accessible.Link
-                                Accessible.name: Translation.tr(String(change.modelData.label ?? ""))
-                                onClicked: root.reach(change.modelData)
-                            }
-                            PrismRound {
-                                id: undo
-                                visible: change.pointed
-                                anchors.right: parent.right
-                                anchors.rightMargin: -PrismTheme.dp(4)
-                                anchors.verticalCenter: parent.verticalCenter
-                                implicitWidth: PrismTheme.dp(26)
-                                ghost: true
-                                glyph: "undo"
-                                glyphSize: PrismTheme.dp(15)
-                                Accessible.name: Translation.tr("Restore")
-                                onClicked: IrisOptions.commit(change.modelData.spec, root.visit.before[IrisOptions.rowKey(change.modelData.spec)])
-                            }
+                    MouseArea {
+                        id: foldArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        Accessible.role: Accessible.Button
+                        Accessible.name: Translation.tr("Differs from iNiR")
+                        onClicked: root.differsOpen = !root.differsOpen
+                    }
+                }
+                // Built only while open: a page of forty differences costs nothing folded.
+                Loader {
+                    active: root.differsOpen
+                    visible: active
+                    width: parent.width
+                    sourceComponent: Component {
+                        ChangeList {
+                            sections: root.differSections
+                            onReached: row => root.reach(row)
                         }
                     }
                 }
@@ -350,7 +458,7 @@ Item {
             Column {
                 visible: root.keys.length > 0
                 width: parent.width
-                topPadding: root.changes.length > 0 ? PrismTheme.dp(24) : 0
+                topPadding: root.changes.length > 0 || root.differs.length > 0 ? PrismTheme.dp(24) : 0
                 spacing: 0
                 PrismText {
                     width: parent.width
@@ -431,7 +539,7 @@ Item {
             Row {
                 visible: root.tip.length > 0
                 width: parent.width
-                topPadding: root.changes.length > 0 || root.keys.length > 0 ? PrismTheme.dp(24) : PrismTheme.dp(4)
+                topPadding: root.changes.length > 0 || root.differs.length > 0 || root.keys.length > 0 ? PrismTheme.dp(24) : PrismTheme.dp(4)
                 spacing: PrismTheme.dp(10)
                 PrismGlyph {
                     id: bulb

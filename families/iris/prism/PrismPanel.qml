@@ -434,7 +434,7 @@ Item {
                     line: PrismState.searching ? Translation.tr("Pages and settings that match")
                         : Translation.tr(String(root.page.subtitle ?? ""))
                     actions: PrismState.searching ? [] : root.pageActions
-                    // The page's way back to iNiR's stands here alone: the side column says only what this visit changed.
+                    // The page's way back to iNiR's at once stands here alone: the side column puts back one line at a time.
                     restorable: !PrismState.searching && PrismModel.restorableOf(root.pageId) > 0
                     onAction: id => root.act(id)
                     onRestore: PrismModel.restore(root.pageId)
