@@ -294,7 +294,7 @@ Item {
                     height: parent.height
                     radius: parent.radius
                     color: root.tint
-                    width: parent.width * (media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0)
+                    width: Math.round(parent.width * (media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0) * 2) / 2
                 }
             }
         }

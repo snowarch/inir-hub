@@ -111,7 +111,7 @@ IrisWidgetFace {
         radius: IrisStyle.capsule(height)
         color: progressBar.overMedia ? IrisStyle.onMediaFill : root.fill
         Rectangle {
-            width: parent.width * root.progress
+            width: Math.round(parent.width * root.progress * 2) / 2
             height: parent.height
             radius: IrisStyle.capsule(height)
             color: progressBar.overMedia ? IrisStyle.onMedia : root.ink

@@ -19,7 +19,10 @@ Item {
     property real sweep: 360
     readonly property real startAt: ring.sweep >= 360 ? -90 : 90 + (360 - ring.sweep) / 2
     readonly property real radius: Math.max(0, Math.min(ring.width, ring.height) / 2 - ring.stroke / 2)
-    readonly property real level: Math.max(0, Math.min(1, ring.progress))
+    // In half-pixel steps of the arc: a song's position, read four times a second, moved it by a fraction of a pixel
+    // and redrew the whole chassis each time.
+    readonly property real arcSteps: Math.max(1, Math.ceil(4 * Math.PI * ring.radius * ring.sweep / 360))
+    readonly property real level: Math.round(Math.max(0, Math.min(1, ring.progress)) * ring.arcSteps) / ring.arcSteps
 
     // A Design may draw it its own way (AIRISU: the needle gauge's 270° arc).
     IrisSkin { id: ringSkin; part: "ring" }

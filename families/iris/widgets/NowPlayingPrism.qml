@@ -427,7 +427,7 @@ Item {
             radius: height / 2
             color: view.face.fill
             Rectangle {
-                width: parent.width * view.face.progress
+                width: Math.round(parent.width * view.face.progress * 2) / 2
                 height: parent.height
                 radius: parent.radius
                 color: view.songLight

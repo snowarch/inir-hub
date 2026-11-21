@@ -96,7 +96,7 @@ Item {
             color: root.synth ? IrisStyle.synthLedOff : Qt.rgba(root.trackColor.r, root.trackColor.g, root.trackColor.b, Math.max(root.trackColor.a, 0.1))
         }
         Item {
-            width: bar.width * root.shownValue
+            width: Math.round(bar.width * root.shownValue * 2) / 2
             height: bar.height
             clip: true
             Rectangle {
@@ -144,7 +144,7 @@ Item {
         width: Math.round((root.synth ? (root.engaged ? 12 : 10) : root.engaged ? 20 : 18) * IrisStyle.density)
         height: root.synth ? Math.round(20 * IrisStyle.density) : width
         radius: root.synth ? IrisStyle.synthCapRadius : IrisStyle.capsule(width)
-        x: Math.max(0, Math.min(bar.width - width, bar.width * root.shownValue - width / 2))
+        x: Math.max(0, Math.min(bar.width - width, Math.round(bar.width * root.shownValue * 2) / 2 - width / 2))
         anchors.verticalCenter: parent.verticalCenter
         color: root.synth ? IrisStyle.synthCap : IrisStyle.onTint
         // A white knob on a light plate is only its edge once Shadows is at 0: a hairline of ink keeps it (Apple's

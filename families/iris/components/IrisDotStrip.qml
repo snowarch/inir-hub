@@ -69,7 +69,10 @@ ShaderEffect {
         IrisStyle.capsule(2) > 0 ? 1 : 0)
     readonly property vector4d grid: Qt.vector4d(root.dots, root.start, root.pitch, root.dotSize)
     // The knob covers the dots it sits on; one peeking past its rim reads as a smudge.
-    readonly property vector4d phase: Qt.vector4d(root.level, root.knobShown ? root.knobSize : 0,
-        root.vertical ? root.span - (root.start + root.shown * root.lane) : root.start + root.shown * root.lane,
+    // The knob's centre in half pixels, and none without a knob: a song's position, read four times a second,
+    // changed this uniform each time, and a hidden strip redrew its whole window with it.
+    readonly property real knobAt: root.knobShown ? Math.round(2 * (root.vertical ? root.span - (root.start + root.shown * root.lane)
+        : root.start + root.shown * root.lane)) / 2 : 0
+    readonly property vector4d phase: Qt.vector4d(root.level, root.knobShown ? root.knobSize : 0, root.knobAt,
         root.indeterminate ? root.head : -1000)
 }

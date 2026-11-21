@@ -125,6 +125,12 @@ Item {
     component Ring: Shape {
         id: ring
         property real progress: 0
+        // In half-pixel steps of the rim: a song's position, read four times a second, moved it by a fraction of a
+        // pixel and redrew the whole chassis each time.
+        readonly property real level: {
+            const steps = Math.max(1, Math.ceil(8 * ring.width))
+            return Math.round(Math.max(0, Math.min(1, ring.progress)) * steps) / steps
+        }
         property color tint: root.ink
         property real stroke: Math.max(2, (root.edgeRings ? 2 : 2.5) * root.d)
         // The bubble's own outline, inset by the ring's margin and half its stroke so it runs parallel to the body.
@@ -152,13 +158,13 @@ Item {
         preferredRendererType: Shape.CurveRenderer
         // Traced on the edge, the level alone: a resting outline would frame the bubble as a box.
         ShapePath {
-            strokeColor: root.edgeRings && ring.progress > 0 ? ring.tint : "transparent"
+            strokeColor: root.edgeRings && ring.level > 0 ? ring.tint : "transparent"
             strokeWidth: root.edgeRings ? ring.stroke : 0
             fillColor: "transparent"
             joinStyle: ShapePath.MiterJoin
             capStyle: ShapePath.FlatCap
             // An empty list reaches PathPolyline as no value at all and warns: a lone point draws nothing.
-            PathPolyline { path: root.edgeRings && ring.progress > 0 ? ring.traced(ring.progress) : [Qt.point(0, 0)] }
+            PathPolyline { path: root.edgeRings && ring.level > 0 ? ring.traced(ring.level) : [Qt.point(0, 0)] }
         }
         ShapePath {
             strokeColor: root.edgeRings ? "transparent" : IrisStyle.trackOf(ring.tint)
@@ -172,7 +178,7 @@ Item {
         }
         ShapePath {
             strokeColor: root.edgeRings ? "transparent"
-                : IrisStyle.arcInk(ring.tint, Math.PI * (ring.width - ring.stroke) * Math.max(0, Math.min(1, ring.progress)), ring.stroke)
+                : IrisStyle.arcInk(ring.tint, Math.PI * (ring.width - ring.stroke) * ring.level, ring.stroke)
             strokeWidth: ring.stroke
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
@@ -180,7 +186,7 @@ Item {
                 centerX: ring.width / 2; centerY: ring.height / 2
                 radiusX: ring.width / 2 - ring.stroke / 2; radiusY: ring.width / 2 - ring.stroke / 2
                 startAngle: -90
-                sweepAngle: 360 * Math.max(0, Math.min(1, ring.progress))
+                sweepAngle: 360 * ring.level
             }
         }
     }

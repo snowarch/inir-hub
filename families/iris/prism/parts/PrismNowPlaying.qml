@@ -171,7 +171,7 @@ Item {
         }
         Rectangle {
             anchors.bottom: parent.bottom
-            width: parent.width * root.share
+            width: Math.round(parent.width * root.share * 2) / 2
             height: PrismTheme.dp(2)
             color: Qt.rgba(1, 1, 1, 0.8) // iris-literal: Prism's own ink over its art, the same in every scheme
         }
@@ -216,7 +216,7 @@ Item {
                 height: PrismTheme.dp(3)
                 radius: height / 2
                 color: Qt.rgba(1, 1, 1, 0.22) // iris-literal: Prism's own ink over its art, the same in every scheme
-                Rectangle { width: parent.width * root.share; height: parent.height; radius: parent.radius; color: PrismTheme.paper }
+                Rectangle { width: Math.round(parent.width * root.share * 2) / 2; height: parent.height; radius: parent.radius; color: PrismTheme.paper }
                 MouseArea {
                     anchors.fill: parent
                     anchors.margins: -PrismTheme.dp(6)
