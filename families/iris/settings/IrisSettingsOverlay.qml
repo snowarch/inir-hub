@@ -7,6 +7,7 @@ import qs.modules.common
 import qs.modules.iris.frame
 import qs.modules.iris.components
 import qs.modules.iris.field as Field
+import qs.modules.iris.state
 import qs.services
 
 PanelWindow {
@@ -31,7 +32,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.namespace: "quickshell:iris-settings"
     WlrLayershell.layer: GlobalStates.settingsNativeDialogOpen ? WlrLayer.Bottom : WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : GlobalStates.settingsNativeDialogOpen ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: PolkitService.active || IrisState.menusUp > 0 ? WlrKeyboardFocus.None : GlobalStates.settingsNativeDialogOpen ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
     mask: GlobalStates.settingsOverlayOpen && body.frame.armed ? null : frameRegion
     Region { id: frameRegion; item: body.frame }
     Field.IrisBlurRegion {

@@ -58,8 +58,9 @@ Item {
     property bool leasesOnAnyRuntime: false
     readonly property string leaseScreen: root.QsWindow.window?.screen?.name ?? ""
     readonly property bool overlayShown: root.overlay && root.visible && (root.open || root.armed || root.presentation > 0)
-    onOverlayShownChanged: IrisFrame.stackOverlay(root.chassisKey, root.leaseScreen, root.overlayShown)
-    onLeaseScreenChanged: if (root.overlayShown) IrisFrame.stackOverlay(root.chassisKey, root.leaseScreen, true)
+    function standOver(): void { IrisFrame.stackOverlay(root.chassisKey, root.leaseScreen, root.overlayShown) }
+    onOverlayShownChanged: root.standOver()
+    onLeaseScreenChanged: root.standOver()
     readonly property bool chassisLeases: root.overlay && IrisFrame.leases(root.chassisKey, root.leaseScreen, root.leasesOnAnyRuntime)
     // Glass materialises by its blur, as Liquid Glass does, not by fading: over the first three quarters of the
     // movement the body goes from the clear wallpaper to its full frost and tint (`IrisField` reads it per body).
@@ -288,7 +289,11 @@ Item {
             armLater.restart()
         }
     }
-    Component.onCompleted: armLater.restart()
+    Component.onCompleted: {
+        armLater.restart()
+        // Built already shown (a host loaded as it opens): no change follows, so it takes its place now.
+        if (root.overlay) root.standOver()
+    }
 
     function lerp(a: real, b: real): real { return a + (b - a) * Math.min(1, root.presentation) }
     // A corner on its way from the origin's radius to `target`, never past the body's half.

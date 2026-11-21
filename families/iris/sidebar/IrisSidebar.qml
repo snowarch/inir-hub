@@ -99,7 +99,7 @@ PanelWindow {
         windowHeight: root.height
     }
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : !root.open ? WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: PolkitService.active || IrisState.menusUp > 0 ? WlrKeyboardFocus.None : !root.open ? WlrKeyboardFocus.None
         : root.pinned || root.peek ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.Exclusive
     mask: ownMask
     Region { id: ownMask; item: !root.open || !frame.armed ? frame : root.pinned || root.peek ? peekZone : dismiss }

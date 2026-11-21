@@ -129,6 +129,9 @@ PanelWindow {
     IrisMorphSurface {
         id: frame
         open: IrisState.studioOpen
+        // An Overlay window over the chassis: a menu from one of its rows draws its own field over Studio.
+        overlay: true
+        chassisKey: "studio"
         motionSurface: "settings"
         radius: IrisStyle.surfaceRadius("settings", IrisStyle.radiusPanel)
         light: IrisStyle.surfaceLight("settings", IrisStyle.wallpaperLight)

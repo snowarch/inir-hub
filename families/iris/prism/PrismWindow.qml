@@ -9,6 +9,7 @@ import qs.modules.iris.components
 import qs.modules.iris.style
 import qs.modules.iris.field as Field
 import qs.modules.iris.prism.core
+import qs.modules.iris.state
 import qs.services
 
 // Prism's host: an overlay on the focused output, a light scrim over the desktop and the panel centred at its
@@ -29,9 +30,18 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.namespace: "quickshell:iris-prism"
     WlrLayershell.layer: GlobalStates.settingsNativeDialogOpen ? WlrLayer.Bottom : WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : GlobalStates.settingsNativeDialogOpen || !GlobalStates.settingsOverlayOpen ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: PolkitService.active || IrisState.menusUp > 0 ? WlrKeyboardFocus.None : GlobalStates.settingsNativeDialogOpen || !GlobalStates.settingsOverlayOpen ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
 
     function close(): void { GlobalStates.settingsOverlayOpen = false }
+
+    // Above the chassis while it shows (Bottom only under a native dialog): a body that would lease the chassis, a menu
+    // from a page, draws its own field over Prism instead of a chassis body hidden under it (IrisFrame.leases).
+    readonly property bool overChassis: root.visible && !GlobalStates.settingsNativeDialogOpen
+    function standOver(): void { IrisFrame.stackOverlay("prism", root.screen?.name ?? "", root.overChassis) }
+    onOverChassisChanged: root.standOver()
+    onScreenChanged: root.standOver()
+    Component.onCompleted: root.standOver()
+    Component.onDestruction: IrisFrame.stackOverlay("prism", "", false)
 
     PrismRequests { onOpened: panel.forceActiveFocus() }
 

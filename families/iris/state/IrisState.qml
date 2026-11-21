@@ -71,6 +71,9 @@ Singleton {
     // iRiS Studio, the panel form of Customize, is open. It and Customize on the shell never show together.
     property bool studioOpen: false
     onStudioOpenChanged: if (studioOpen && edit) edit = false
+    // IrisDesktopMenu popups that exist now. A host that holds the keyboard exclusively lets go while one is up: Niri
+    // keeps exclusive focus on the layer that took it first, and a menu over Settings never got its arrows or Esc.
+    property int menusUp: 0
     // Customize, in the form the person chose (iris.appearance.customize), on a target ("" = where it was).
     function openCustomize(target): void {
         const wanted = String(target ?? "")

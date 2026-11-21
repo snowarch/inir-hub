@@ -8,6 +8,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.iris.style
 import qs.modules.iris.field as Field
+import qs.modules.iris.state
 
 // Arranging the desktop on one output: the shelf, a chosen widget's controls and the lights on what a carried widget
 // meets, in a window above the chassis. The chassis and the desktop recede into the card under it, so everything here
@@ -21,7 +22,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:iris-edit"
-    WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : bar.holdsKeyboard || sheet.typing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: PolkitService.active || IrisState.menusUp > 0 ? WlrKeyboardFocus.None : bar.holdsKeyboard || sheet.typing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors { left: true; right: true; top: true; bottom: true }
 
     readonly property string outputName: root.screen?.name ?? ""

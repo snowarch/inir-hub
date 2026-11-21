@@ -13,6 +13,7 @@ import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.field as Field
 import qs.modules.iris.frame
+import qs.modules.iris.state
 
 Loader {
     id: root
@@ -119,6 +120,15 @@ Loader {
         }
         WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
         anchors { top: true; bottom: true; left: true; right: true }
+        // Counted for as long as the popup exists, so a menu unloaded with its page never keeps a host off the keyboard.
+        Component.onCompleted: IrisState.menusUp++
+        Component.onDestruction: IrisState.menusUp = Math.max(0, IrisState.menusUp - 1)
+        // It goes with the window that opened it: Settings put away by its key left the menu over the desktop.
+        Connections {
+            target: popup.anchorWindow
+            ignoreUnknownSignals: true
+            function onVisibleChanged(): void { if (!popup.anchorWindow.visible) root.close() }
+        }
 
         readonly property real edge: Math.round(8 * root.d)
         readonly property real gap: Math.round(6 * root.d)
