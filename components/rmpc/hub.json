@@ -1,0 +1,23 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "rmpc theme in your iNiR colours, with a cover, lyrics and cava layout",
+    "description": "A theme for the rmpc music player that follows your wallpaper colours on every theme change. It brings a layout with album art, song info, synced lyrics, progress bar, tabs and a cava visualiser, sized for small screens.",
+    "authors": [
+        "Imperiumjervi"
+    ],
+    "license": "MIT",
+    "tags": [
+        "terminal",
+        "music",
+        "rmpc",
+        "colours"
+    ],
+    "permissions": [
+        "process",
+        "files"
+    ],
+    "minInir": "2.33.0",
+    "provides": "modules/rmpc",
+    "preview": "preview.webp"
+}
