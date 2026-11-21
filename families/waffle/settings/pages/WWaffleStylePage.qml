@@ -83,7 +83,7 @@ WSettingsPage {
             icon: "flash-on"
             description: Translation.tr("Single Alt+Tab switches instantly without UI")
             checked: Config.options?.waffles?.altSwitcher?.quickSwitch ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.quickSwitch", checked)
+            onToggled: checked => Config.setNestedValue("waffles.altSwitcher.quickSwitch", checked)
         }
 
         WSettingsSwitch {
@@ -102,7 +102,7 @@ WSettingsPage {
                     return false
                 return Config.options?.waffles?.altSwitcher?.noVisualUi ?? false
             }
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.noVisualUi", checked)
+            onToggled: checked => Config.setNestedValue("waffles.altSwitcher.noVisualUi", checked)
         }
         
         WSettingsSwitch {
@@ -110,7 +110,7 @@ WSettingsPage {
             icon: "arrow-counterclockwise"
             description: Translation.tr("Order windows by most recently used")
             checked: Config.options?.waffles?.altSwitcher?.useMostRecentFirst ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.useMostRecentFirst", checked)
+            onToggled: checked => Config.setNestedValue("waffles.altSwitcher.useMostRecentFirst", checked)
         }
         
         WSettingsSwitch {
@@ -118,7 +118,7 @@ WSettingsPage {
             icon: "eye-off"
             description: Translation.tr("Switches to the pick after the delay, even with Alt still held")
             checked: Config.options?.waffles?.altSwitcher?.autoHide ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.autoHide", checked)
+            onToggled: checked => Config.setNestedValue("waffles.altSwitcher.autoHide", checked)
         }
         
         WSettingsSpinBox {
@@ -135,7 +135,7 @@ WSettingsPage {
             label: Translation.tr("Close on window focus")
             icon: "dismiss"
             checked: Config.options?.waffles?.altSwitcher?.closeOnFocus ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.closeOnFocus", checked)
+            onToggled: checked => Config.setNestedValue("waffles.altSwitcher.closeOnFocus", checked)
         }
 
         WSettingsSpinBox {
@@ -173,7 +173,7 @@ WSettingsPage {
             icon: "open"
             description: Translation.tr("Open compositor overview alongside the switcher")
             checked: Config.options?.waffles?.altSwitcher?.showOverviewWhileSwitching ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.showOverviewWhileSwitching", checked)
+            onToggled: checked => Config.setNestedValue("waffles.altSwitcher.showOverviewWhileSwitching", checked)
         }
     }
     
@@ -206,7 +206,7 @@ WSettingsPage {
             icon: "dismiss"
             description: Translation.tr("Exit Task View when clicking a window")
             checked: Config.options?.waffles?.taskView?.closeOnSelect ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.taskView.closeOnSelect", checked)
+            onToggled: checked => Config.setNestedValue("waffles.taskView.closeOnSelect", checked)
         }
     }
 
@@ -226,7 +226,7 @@ WSettingsPage {
             icon: "panel-left-expand"
             description: Translation.tr("Keep start menu open when opening action center")
             checked: Config.options?.waffles?.behavior?.allowMultiplePanels ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.behavior.allowMultiplePanels", checked)
+            onToggled: checked => Config.setNestedValue("waffles.behavior.allowMultiplePanels", checked)
         }
         
         WSettingsSwitch {
@@ -234,7 +234,7 @@ WSettingsPage {
             icon: "wand"
             description: Translation.tr("Use smoother closing animations for popups")
             checked: Config.options?.waffles?.tweaks?.smootherMenuAnimations ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.tweaks.smootherMenuAnimations", checked)
+            onToggled: checked => Config.setNestedValue("waffles.tweaks.smootherMenuAnimations", checked)
         }
 
         WSettingsSwitch {
@@ -242,7 +242,7 @@ WSettingsPage {
             icon: "settings"
             description: Translation.tr("Fix toggle switch handle alignment")
             checked: Config.options?.waffles?.tweaks?.switchHandlePositionFix ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.tweaks.switchHandlePositionFix", checked)
+            onToggled: checked => Config.setNestedValue("waffles.tweaks.switchHandlePositionFix", checked)
         }
     }
 
@@ -299,7 +299,7 @@ WSettingsPage {
             icon: "wand"
             description: Translation.tr("Smooth animated overlay when switching between panel families")
             checked: Config.options?.familyTransitionAnimation ?? true
-            onCheckedChanged: Config.setNestedValue("familyTransitionAnimation", checked)
+            onToggled: checked => Config.setNestedValue("familyTransitionAnimation", checked)
         }
     }
     
@@ -320,7 +320,7 @@ WSettingsPage {
             icon: "schedule"
             description: Translation.tr("Display date and time widget")
             checked: Config.options?.waffles?.widgetsPanel?.showDateTime ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showDateTime", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showDateTime", checked)
         }
         
         WSettingsSwitch {
@@ -328,7 +328,7 @@ WSettingsPage {
             icon: "weather-sunny"
             description: Translation.tr("Display weather conditions widget")
             checked: Config.options?.waffles?.widgetsPanel?.showWeather ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showWeather", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showWeather", checked)
         }
 
         WSettingsSwitch {
@@ -336,7 +336,7 @@ WSettingsPage {
             icon: "eye-off"
             description: Translation.tr("Hide the city/location name in the weather widget and taskbar button")
             checked: Config.options?.weather?.hideLocation ?? false
-            onCheckedChanged: Config.setNestedValue("weather.hideLocation", checked)
+            onToggled: checked => Config.setNestedValue("weather.hideLocation", checked)
         }
         
         WSettingsSwitch {
@@ -344,7 +344,7 @@ WSettingsPage {
             icon: "pulse"
             description: Translation.tr("Display CPU, RAM, and disk usage")
             checked: Config.options?.waffles?.widgetsPanel?.showSystem ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSystem", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showSystem", checked)
         }
         
         WSettingsSwitch {
@@ -352,7 +352,7 @@ WSettingsPage {
             icon: "music-note-2"
             description: Translation.tr("Display now playing and media controls")
             checked: Config.options?.waffles?.widgetsPanel?.showMedia ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showMedia", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showMedia", checked)
         }
         
         WSettingsSwitch {
@@ -360,7 +360,7 @@ WSettingsPage {
             icon: "apps"
             description: Translation.tr("Cards from widgets you installed, from the Hub or your own")
             checked: Config.options?.waffles?.widgetsPanel?.showCustom ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showCustom", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showCustom", checked)
         }
     }
 
@@ -378,43 +378,43 @@ WSettingsPage {
             label: Translation.tr("Files shortcut")
             icon: "folder"
             checked: Config.options?.waffles?.widgetsPanel?.showFiles ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showFiles", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showFiles", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Terminal shortcut")
             icon: "terminal"
             checked: Config.options?.waffles?.widgetsPanel?.showTerminal ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showTerminal", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showTerminal", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Settings shortcut")
             icon: "settings"
             checked: Config.options?.waffles?.widgetsPanel?.showSettings ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSettings", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showSettings", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Wallpaper shortcut")
             icon: "image"
             checked: Config.options?.waffles?.widgetsPanel?.showWallpaper ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showWallpaper", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showWallpaper", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Screenshot shortcut")
             icon: "screenshot"
             checked: Config.options?.waffles?.widgetsPanel?.showScreenshot ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showScreenshot", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showScreenshot", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Screen Record shortcut")
             icon: "record"
             checked: Config.options?.waffles?.widgetsPanel?.showScreenRecord ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showScreenRecord", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showScreenRecord", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Session shortcut")
             icon: "power"
             checked: Config.options?.waffles?.widgetsPanel?.showSession ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSession", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showSession", checked)
         }
     }
 
@@ -423,7 +423,7 @@ WSettingsPage {
             label: Translation.tr("Color Scheme selector")
             icon: "color"
             checked: Config.options?.waffles?.widgetsPanel?.showColorScheme ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showColorScheme", checked)
+            onToggled: checked => Config.setNestedValue("waffles.widgetsPanel.showColorScheme", checked)
         }
     }
 
@@ -481,7 +481,7 @@ WSettingsPage {
             icon: "globe-search"
             description: Translation.tr("Uses GPS when no manual location is set (requires geoclue)")
             checked: Config.options?.weather?.enableGPS ?? false
-            onCheckedChanged: Config.setNestedValue("weather.enableGPS", checked)
+            onToggled: checked => Config.setNestedValue("weather.enableGPS", checked)
         }
         
         // Current detected location
@@ -497,7 +497,7 @@ WSettingsPage {
             icon: "weather-sunny"
             description: Translation.tr("Display temperature in °F instead of °C")
             checked: Config.options?.weather?.useUSCS ?? false
-            onCheckedChanged: Config.setNestedValue("weather.useUSCS", checked)
+            onToggled: checked => Config.setNestedValue("weather.useUSCS", checked)
         }
         
         WSettingsSpinBox {
@@ -528,7 +528,7 @@ WSettingsPage {
             icon: "news"
             description: Translation.tr("Use Mo, Tu, We instead of Mon, Tue, Wed")
             checked: Config.options?.waffles?.calendar?.force2CharDayOfWeek ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.calendar.force2CharDayOfWeek", checked)
+            onToggled: checked => Config.setNestedValue("waffles.calendar.force2CharDayOfWeek", checked)
         }
     }
 }

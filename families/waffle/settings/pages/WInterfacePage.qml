@@ -375,7 +375,7 @@ WSettingsPage {
             icon: "alert-off"
             description: Translation.tr("Always use your timeout settings instead of app-defined ones")
             checked: Config.options?.notifications?.ignoreAppTimeout ?? false
-            onCheckedChanged: Config.setNestedValue("notifications.ignoreAppTimeout", checked)
+            onToggled: checked => Config.setNestedValue("notifications.ignoreAppTimeout", checked)
         }
         
         WSettingsDropdown {
@@ -396,7 +396,7 @@ WSettingsPage {
             icon: "weather-moon"
             description: Translation.tr("Silence all notifications")
             checked: Config.options?.notifications?.silent ?? false
-            onCheckedChanged: Config.setNestedValue("notifications.silent", checked)
+            onToggled: checked => Config.setNestedValue("notifications.silent", checked)
         }
 
         WSettingsTextField {
@@ -467,7 +467,7 @@ WSettingsPage {
             label: Translation.tr("Enable")
             icon: "apps"
             checked: root.floatingToolsEnabled()
-            onCheckedChanged: root.setFloatingToolsEnabled(checked)
+            onToggled: checked => root.setFloatingToolsEnabled(checked)
         }
 
         WSettingsButton {
@@ -485,7 +485,7 @@ WSettingsPage {
             icon: "weather-moon"
             description: Translation.tr("Add a dark scrim behind overlay panels for better visibility")
             checked: Config.options?.overlay?.darkenScreen ?? false
-            onCheckedChanged: Config.setNestedValue("overlay.darkenScreen", checked)
+            onToggled: checked => Config.setNestedValue("overlay.darkenScreen", checked)
         }
 
         WSettingsSpinBox {
@@ -532,7 +532,7 @@ WSettingsPage {
             icon: "eye"
             description: Translation.tr("Set panel opacity to 0%; metrics remain visible")
             checked: Config.options?.overlay?.gamePerformance?.transparentBackground ?? false
-            onCheckedChanged: Config.setNestedValue(
+            onToggled: checked => Config.setNestedValue(
                 "overlay.gamePerformance.transparentBackground", checked)
         }
 
@@ -540,7 +540,7 @@ WSettingsPage {
             label: Translation.tr("Enable opening zoom animation")
             icon: "play"
             checked: Config.options?.overlay?.openingZoomAnimation ?? true
-            onCheckedChanged: Config.setNestedValue("overlay.openingZoomAnimation", checked)
+            onToggled: checked => Config.setNestedValue("overlay.openingZoomAnimation", checked)
         }
 
         WSettingsSpinBox {
@@ -571,7 +571,7 @@ WSettingsPage {
             icon: "music-note-2"
             description: Translation.tr("Show feedback for explicit media controls. Pill also announces automatic track changes outside games.")
             checked: Config.options?.osd?.mediaEnabled ?? true
-            onCheckedChanged: Config.setNestedValue("osd.mediaEnabled", checked)
+            onToggled: checked => Config.setNestedValue("osd.mediaEnabled", checked)
         }
         
         WSettingsSpinBox {
@@ -600,56 +600,56 @@ WSettingsPage {
             icon: "ethernet"
             description: Translation.tr("Wi-Fi or cable connected and dropped")
             checked: Config.options?.osd?.connections?.network ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.network", checked)
+            onToggled: checked => Config.setNestedValue("osd.connections.network", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Internet")
             icon: "wifi-warning"
             description: Translation.tr("Lost and back online")
             checked: Config.options?.osd?.connections?.internet ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.internet", checked)
+            onToggled: checked => Config.setNestedValue("osd.connections.internet", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Bluetooth devices")
             icon: "bluetooth-connected"
             description: Translation.tr("Headphones, keyboards, controllers")
             checked: Config.options?.osd?.connections?.bluetooth ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.bluetooth", checked)
+            onToggled: checked => Config.setNestedValue("osd.connections.bluetooth", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("USB devices")
             icon: "keyboard"
             description: Translation.tr("Mice, keyboards, controllers, cameras, phones, by name")
             checked: Config.options?.osd?.connections?.usb ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.usb", checked)
+            onToggled: checked => Config.setNestedValue("osd.connections.usb", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Charger")
             icon: "battery-charge"
             description: Translation.tr("Plugged in and on battery")
             checked: Config.options?.osd?.connections?.power ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.power", checked)
+            onToggled: checked => Config.setNestedValue("osd.connections.power", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Sound output")
             icon: "headphones"
             description: Translation.tr("Headphones or speakers take over")
             checked: Config.options?.osd?.connections?.audio ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.audio", checked)
+            onToggled: checked => Config.setNestedValue("osd.connections.audio", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Displays")
             icon: "desktop"
             description: Translation.tr("A monitor plugged in or removed")
             checked: Config.options?.osd?.connections?.displays ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.displays", checked)
+            onToggled: checked => Config.setNestedValue("osd.connections.displays", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Drives and memory cards")
             icon: "folder"
             description: Translation.tr("Pendrives, external disks and SD cards, with their name and size")
             checked: Config.options?.osd?.connections?.drives ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.drives", checked)
+            onToggled: checked => Config.setNestedValue("osd.connections.drives", checked)
         }
     }
     
@@ -662,7 +662,7 @@ WSettingsPage {
             icon: "eye"
             description: Translation.tr("Blur background on lock screen")
             checked: Config.options?.waffles?.lock?.blur?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.lock.blur.enable", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.blur.enable", checked)
         }
         
         WSettingsSpinBox {
@@ -678,21 +678,21 @@ WSettingsPage {
             label: Translation.tr("Center clock")
             icon: "panel-left-contract"
             checked: Config.options?.waffles?.lock?.centerClock ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.lock.centerClock", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.centerClock", checked)
         }
         
         WSettingsSwitch {
             label: Translation.tr("Show 'Locked' text")
             icon: "lock-closed"
             checked: Config.options?.waffles?.lock?.showLockedText ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.lock.showLockedText", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.showLockedText", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Weather")
             icon: "weather-sunny"
             checked: Config.options?.waffles?.lock?.widgets?.weather ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.lock.widgets.weather", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.widgets.weather", checked)
         }
 
         WSettingsSwitch {
@@ -700,7 +700,7 @@ WSettingsPage {
             icon: "music-note-2"
             description: Translation.tr("While something plays or is paused")
             checked: Config.options?.waffles?.lock?.widgets?.media ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.lock.widgets.media", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.widgets.media", checked)
         }
 
         WSettingsSwitch {
@@ -709,14 +709,14 @@ WSettingsPage {
             icon: "text-font"
             description: Translation.tr("Under the player, once the song has them.")
             checked: Config.options?.waffles?.lock?.widgets?.lyrics ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.lock.widgets.lyrics", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.widgets.lyrics", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Power buttons")
             icon: "power"
             checked: Config.options?.waffles?.lock?.widgets?.powerButtons ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.lock.widgets.powerButtons", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.widgets.powerButtons", checked)
         }
     }
 
@@ -735,7 +735,7 @@ WSettingsPage {
             icon: "eye"
             description: Translation.tr("Display message content. Disable for privacy.")
             checked: Config.options?.waffles?.lock?.notifications?.showBody ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.lock.notifications.showBody", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.notifications.showBody", checked)
         }
         WSettingsSpinBox {
             label: Translation.tr("Max notifications shown")
@@ -791,7 +791,7 @@ WSettingsPage {
             icon: "info"
             description: Translation.tr("Show WiFi, Bluetooth, volume and battery on the lock screen")
             checked: Config.options?.waffles?.lock?.status?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.lock.status.enable", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.status.enable", checked)
         }
 
         WSettingsSwitch {
@@ -799,7 +799,7 @@ WSettingsPage {
             icon: "dark-theme"
             description: Translation.tr("Apply a dark overlay to the wallpaper for better contrast")
             checked: Config.options?.waffles?.lock?.dim?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.lock.dim.enable", checked)
+            onToggled: checked => Config.setNestedValue("waffles.lock.dim.enable", checked)
         }
 
         WSettingsSlider {
@@ -966,7 +966,7 @@ WSettingsPage {
             icon: "arrow-sync"
             description: Translation.tr("Retry with a safer recording path if the preferred encoder fails")
             checked: Config.options?.screenRecord?.enableFallback ?? true
-            onCheckedChanged: root.setRecordingConfig("screenRecord.enableFallback", checked)
+            onToggled: checked => root.setRecordingConfig("screenRecord.enableFallback", checked)
         }
     }
 
@@ -1016,7 +1016,7 @@ WSettingsPage {
             label: Translation.tr("Skip compression when already under target")
             icon: "checkmark"
             checked: Config.options?.screenRecord?.discordCompress?.onlyIfNeeded ?? true
-            onCheckedChanged: Config.setNestedValue("screenRecord.discordCompress.onlyIfNeeded", checked)
+            onToggled: checked => Config.setNestedValue("screenRecord.discordCompress.onlyIfNeeded", checked)
         }
     }
 

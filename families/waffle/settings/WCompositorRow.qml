@@ -44,12 +44,11 @@ Item {
     Component {
         id: switchRow
         WSettingsSwitch {
-            id: flip
             label: row.spec.label
             description: row.spec.description ?? ""
             cardStyle: row.cardStyle
-            Binding { target: flip; property: "checked"; value: row.now === true }
-            onCheckedChanged: if (flip.checked !== (row.now === true)) CompositorConfig.set(row.spec, flip.checked)
+            checked: row.now === true
+            onToggled: checked => { if (checked !== (row.now === true)) CompositorConfig.set(row.spec, checked) }
         }
     }
     Component {

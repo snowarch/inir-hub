@@ -93,7 +93,7 @@ WSettingsPage {
             description: Translation.tr("Show the iNiR mascot in About, empty states and other shell surfaces")
             enabled: MascotCatalog.packAvailable
             checked: Config.options?.mascot?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("mascot.enable", checked)
+            onToggled: checked => Config.setNestedValue("mascot.enable", checked)
         }
 
         WSettingsSwitch {
@@ -102,7 +102,7 @@ WSettingsPage {
             description: Translation.tr("She occasionally peeks from a screen edge and reacts to music, battery and updates. Never over fullscreen apps or games")
             checked: Config.options?.mascot?.companion?.enable ?? true
             enabled: Config.options?.mascot?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("mascot.companion.enable", checked)
+            onToggled: checked => Config.setNestedValue("mascot.companion.enable", checked)
         }
 
         WSettingsSpinBox {
@@ -125,21 +125,21 @@ WSettingsPage {
                 label: Translation.tr("Respect Do Not Disturb and quiet hours")
                 icon: "alert-snooze"
                 checked: Config.options?.mascot?.companion?.respectQuiet ?? true
-                onCheckedChanged: Config.setNestedValue("mascot.companion.respectQuiet", checked)
+                onToggled: checked => Config.setNestedValue("mascot.companion.respectQuiet", checked)
             }
 
             WSettingsSwitch {
                 label: Translation.tr("React to opened shell panels")
                 icon: "panel-left-expand"
                 checked: Config.options?.mascot?.companion?.shellReactions ?? true
-                onCheckedChanged: Config.setNestedValue("mascot.companion.shellReactions", checked)
+                onToggled: checked => Config.setNestedValue("mascot.companion.shellReactions", checked)
             }
 
             WSettingsSwitch {
                 label: Translation.tr("Speech bubbles")
                 icon: "news"
                 checked: Config.options?.mascot?.companion?.dialogue ?? true
-                onCheckedChanged: Config.setNestedValue("mascot.companion.dialogue", checked)
+                onToggled: checked => Config.setNestedValue("mascot.companion.dialogue", checked)
             }
 
         WSettingsSpinBox {
@@ -195,7 +195,7 @@ WSettingsPage {
             description: Translation.tr("She sits on the bar/dock instead of floating off-screen edges")
             checked: Config.options?.mascot?.companion?.placement === "panel-sitter"
             enabled: Config.options?.mascot?.companion?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.companion.placement", checked ? "panel-sitter" : "peek")
+            onToggled: checked => Config.setNestedValue("mascot.companion.placement", checked ? "panel-sitter" : "peek")
         }
 
         WSettingsSwitch {
@@ -204,7 +204,7 @@ WSettingsPage {
             description: Translation.tr("Event reactions appear near the triggering widget instead of a random edge")
             checked: Config.options?.mascot?.companion?.contextualPlacement ?? false
             enabled: Config.options?.mascot?.companion?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.companion.contextualPlacement", checked)
+            onToggled: checked => Config.setNestedValue("mascot.companion.contextualPlacement", checked)
         }
 
         WSettingsSwitch {
@@ -213,7 +213,7 @@ WSettingsPage {
             description: Translation.tr("She appears on the monitor with the focused workspace instead of the primary one")
             checked: (Config.options?.mascot?.companion?.monitor ?? "primary") === "focused"
             enabled: Config.options?.mascot?.companion?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.companion.monitor", checked ? "focused" : "primary")
+            onToggled: checked => Config.setNestedValue("mascot.companion.monitor", checked ? "focused" : "primary")
         }
 
         WSettingsSwitch {
@@ -222,7 +222,7 @@ WSettingsPage {
             description: Translation.tr("Observations about YOUR habits (3AM sessions, uptime, marathons); off = generic small talk only")
             checked: Config.options?.mascot?.personality?.commentary ?? true
             enabled: Config.options?.mascot?.companion?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.personality.commentary", checked)
+            onToggled: checked => Config.setNestedValue("mascot.personality.commentary", checked)
         }
 
         WSettingsDropdown {
@@ -247,7 +247,7 @@ WSettingsPage {
             description: Translation.tr("Her lines change with session mood (sleepy/hyper/snarky/contemplative)")
             checked: Config.options?.mascot?.personality?.enabled ?? true
             enabled: Config.options?.mascot?.companion?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.personality.enabled", checked)
+            onToggled: checked => Config.setNestedValue("mascot.personality.enabled", checked)
         }
 
         WSettingsSpinBox {
@@ -298,28 +298,28 @@ WSettingsPage {
             icon: "speaker-0"
             description: Translation.tr("Little thuds and bells from the system sound theme when she hits things")
             checked: Config.options?.mascot?.chaos?.sfx ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.chaos.sfx", checked)
+            onToggled: checked => Config.setNestedValue("mascot.chaos.sfx", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Let her rearrange widgets")
             icon: "drag_pan"
             description: Translation.tr("Displaced widgets keep their new position; otherwise everything bounces back")
             checked: Config.options?.mascot?.chaos?.allowRearrange ?? false
-            onCheckedChanged: Config.setNestedValue("mascot.chaos.allowRearrange", checked)
+            onToggled: checked => Config.setNestedValue("mascot.chaos.allowRearrange", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("React to system events")
             icon: "flash-on"
             description: Translation.tr("Occasional reactions to real shell activity, sharing the same quiet time and visit limit")
             checked: Config.options?.mascot?.chaos?.systemEvents ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.chaos.systemEvents", checked)
+            onToggled: checked => Config.setNestedValue("mascot.chaos.systemEvents", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Calling-card notifications")
             icon: "news"
             description: Translation.tr("After a destructive prank, Kira may leave a playful desktop notification")
             checked: Config.options?.mascot?.chaos?.callingCards ?? false
-            onCheckedChanged: Config.setNestedValue("mascot.chaos.callingCards", checked)
+            onToggled: checked => Config.setNestedValue("mascot.chaos.callingCards", checked)
         }
         WSettingsButton {
             label: Translation.tr("Unleash chaos")
@@ -417,7 +417,7 @@ WSettingsPage {
                 description: Translation.tr("Skips browser videos and players without artist metadata")
                 checked: Config.options?.mascot?.companion?.musicRequireArtist ?? true
                 enabled: Config.options?.mascot?.companion?.enable ?? true
-                onCheckedChanged: Config.setNestedValue("mascot.companion.musicRequireArtist", checked)
+                onToggled: checked => Config.setNestedValue("mascot.companion.musicRequireArtist", checked)
             }
 
             WMascotPoseGallery {
@@ -437,25 +437,25 @@ WSettingsPage {
             label: Translation.tr("Peek from left edge")
             icon: "chevron-left"
             checked: Config.options?.mascot?.companion?.edges?.left ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.companion.edges.left", checked)
+            onToggled: checked => Config.setNestedValue("mascot.companion.edges.left", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Peek from right edge")
             icon: "chevron-right"
             checked: Config.options?.mascot?.companion?.edges?.right ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.companion.edges.right", checked)
+            onToggled: checked => Config.setNestedValue("mascot.companion.edges.right", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Peek from top edge")
             icon: "chevron-up"
             checked: Config.options?.mascot?.companion?.edges?.top ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.companion.edges.top", checked)
+            onToggled: checked => Config.setNestedValue("mascot.companion.edges.top", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Peek from bottom edge")
             icon: "chevron-down"
             checked: Config.options?.mascot?.companion?.edges?.bottom ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.companion.edges.bottom", checked)
+            onToggled: checked => Config.setNestedValue("mascot.companion.edges.bottom", checked)
         }
     }
 
@@ -468,56 +468,56 @@ WSettingsPage {
             icon: "alert"
             description: Translation.tr("Notifications, clipboard, todo, media, calendar, wallpapers, search results")
             checked: Config.options?.mascot?.surfaces?.emptyStates ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.emptyStates", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.emptyStates", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("About pages")
             icon: "info"
             checked: Config.options?.mascot?.surfaces?.about ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.about", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.about", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Session screen")
             icon: "power"
             checked: Config.options?.mascot?.surfaces?.session ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.session", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.session", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("AI chat")
             icon: "alert-snooze"
             checked: Config.options?.mascot?.surfaces?.aiChat ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.aiChat", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.aiChat", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Dashboard")
             icon: "apps"
             checked: Config.options?.mascot?.surfaces?.dashboard ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.dashboard", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.dashboard", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Cheatsheet")
             icon: "keyboard"
             checked: Config.options?.mascot?.surfaces?.cheatsheet ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.cheatsheet", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.cheatsheet", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Boot greeting")
             icon: "weather-sunny"
             checked: Config.options?.mascot?.surfaces?.bootGreeting ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.bootGreeting", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.bootGreeting", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Update overlay")
             icon: "arrow-sync"
             checked: Config.options?.mascot?.surfaces?.updates ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.updates", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.updates", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Dialogs")
             icon: "alert"
             description: Translation.tr("Close confirmation and similar dialogs")
             checked: Config.options?.mascot?.surfaces?.dialogs ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.surfaces.dialogs", checked)
+            onToggled: checked => Config.setNestedValue("mascot.surfaces.dialogs", checked)
         }
     }
 

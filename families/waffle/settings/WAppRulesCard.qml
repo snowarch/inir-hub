@@ -365,13 +365,12 @@ ColumnLayout {
                     onValueChanged: if (root.current && through.value !== through.held) root.change({ opacity: through.value / 100 })
                 }
                 WSettingsSwitch {
-                    id: hidden
                     cardStyle: "item"
                     enableSettingsSearch: false
                     label: Translation.tr("Left out of captures")
                     description: Translation.tr("Screenshots, recordings and screen sharing show a blank where its windows are.")
-                    Binding { target: hidden; property: "checked"; value: root.current?.hidden === true }
-                    onCheckedChanged: if (root.current && hidden.checked !== (root.current.hidden === true)) root.change({ hidden: hidden.checked })
+                    checked: root.current?.hidden === true
+                    onToggled: checked => { if (root.current && checked !== (root.current.hidden === true)) root.change({ hidden: checked }) }
                 }
                 WSettingsTextField {
                     cardStyle: "item"

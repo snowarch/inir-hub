@@ -40,7 +40,7 @@ WSettingsPage {
             label: Translation.tr("Allow compositor blur")
             icon: "eye"
             checked: Config.options?.performance?.compositorBlur ?? true
-            onCheckedChanged: Config.setNestedValue("performance.compositorBlur", checked)
+            onToggled: checked => Config.setNestedValue("performance.compositorBlur", checked)
         }
     }
 
@@ -67,19 +67,19 @@ WSettingsPage {
             label: Translation.tr("Reduce animations")
             icon: "eye-off"
             checked: Config.options?.performance?.reduceAnimations ?? false
-            onCheckedChanged: Config.setNestedValue("performance.reduceAnimations", checked)
+            onToggled: checked => Config.setNestedValue("performance.reduceAnimations", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Low power effects")
             icon: "leaf-two"
             checked: Config.options?.performance?.lowPower ?? false
-            onCheckedChanged: Config.setNestedValue("performance.lowPower", checked)
+            onToggled: checked => Config.setNestedValue("performance.lowPower", checked)
         }
         WSettingsSwitch {
             label: Translation.tr("Notify when a restart would free memory")
             icon: "alert"
             checked: Config.options?.performance?.memoryWarningNotification ?? false
-            onCheckedChanged: Config.setNestedValue("performance.memoryWarningNotification", checked)
+            onToggled: checked => Config.setNestedValue("performance.memoryWarningNotification", checked)
         }
     }
 }

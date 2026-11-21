@@ -318,7 +318,7 @@ WSettingsPage {
             icon: "people"
             description: Translation.tr("Without your name, from a key kept on this computer")
             checked: Hub.sharing
-            onCheckedChanged: if (checked !== Hub.sharing) Hub.setSharing(checked)
+            onToggled: checked => { if (checked !== Hub.sharing) Hub.setSharing(checked) }
         }
 
         Repeater {

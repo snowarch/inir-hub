@@ -81,7 +81,7 @@ Column {
         label: Translation.tr("Adjust this look")
         icon: "options"
         checked: root.adjusting
-        onCheckedChanged: root.adjusting = checked
+        onToggled: checked => root.adjusting = checked
     }
 
     Repeater {
@@ -104,7 +104,7 @@ Column {
                     label: Translation.tr(row.spec.label)
                     icon: root.icons[row.spec.group]
                     checked: row.value
-                    onCheckedChanged: root.write(row.spec.key, checked)
+                    onToggled: checked => root.write(row.spec.key, checked)
                 }
             }
             Component {

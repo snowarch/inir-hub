@@ -577,7 +577,7 @@ WSettingsPage {
             icon: "link"
             description: Translation.tr("Waffle wears Material's global style and transparency. Off: its own Fluent look.")
             checked: Looks.styleFromMaterial
-            onCheckedChanged: if (checked !== Looks.styleFromMaterial) Config.setNestedValue("waffles.theming.styleFromMaterial", checked)
+            onToggled: checked => { if (checked !== Looks.styleFromMaterial) Config.setNestedValue("waffles.theming.styleFromMaterial", checked) }
         }
 
         WSettingsDropdown {
@@ -718,7 +718,7 @@ WSettingsPage {
             icon: "dark-theme"
             description: Translation.tr("Rotate every color 180° on the color wheel. Shell-only: external apps keep their original colors.")
             checked: Config.options?.appearance?.colorInvert ?? false
-            onCheckedChanged: Config.setNestedValue("appearance.colorInvert", checked)
+            onToggled: checked => Config.setNestedValue("appearance.colorInvert", checked)
         }
 
         WSettingsSwitch {
@@ -726,7 +726,7 @@ WSettingsPage {
             icon: "arrow-sync"
             description: Translation.tr("The scheme's third colour leads, and the accent takes its place. Shell only: apps keep the scheme as generated.")
             checked: Config.options?.appearance?.palette?.swapAccents ?? false
-            onCheckedChanged: Config.setNestedValue("appearance.palette.swapAccents", checked)
+            onToggled: checked => Config.setNestedValue("appearance.palette.swapAccents", checked)
         }
     }
 
@@ -741,7 +741,7 @@ WSettingsPage {
             description: Translation.tr("Apply Material color scheme instead of Windows 11 grey")
             enabled: !Looks.editorialEverywhere
             checked: Looks.editorialEverywhere || (Config.options?.waffles?.theming?.useMaterialColors ?? false)
-            onCheckedChanged: {
+            onToggled: checked => {
                 if (!Looks.editorialEverywhere) Config.setNestedValue("waffles.theming.useMaterialColors", checked)
             }
         }
@@ -779,7 +779,7 @@ WSettingsPage {
             icon: "paint-bucket"
             description: Translation.tr("Subtly soften theme colors for a more natural look")
             checked: Config.options?.appearance?.softenColors ?? true
-            onCheckedChanged: {
+            onToggled: checked => {
                 Config.setNestedValue("appearance.softenColors", checked);
                 ThemeService.regenerateAutoTheme();
             }
@@ -790,7 +790,7 @@ WSettingsPage {
             icon: "auto"
             description: Translation.tr("Pick the light or dark scheme from each wallpaper's brightness so text stays readable")
             checked: Config.options?.appearance?.wallpaperTheming?.autoDarkLightMode ?? false
-            onCheckedChanged: {
+            onToggled: checked => {
                 Config.setNestedValue("appearance.wallpaperTheming.autoDarkLightMode", checked);
                 ThemeService.regenerateAutoTheme();
             }
@@ -801,7 +801,7 @@ WSettingsPage {
             icon: "people"
             description: Translation.tr("Generate Discord theme from wallpaper colors")
             checked: Config.options?.appearance?.wallpaperTheming?.enableVesktop ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableVesktop", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableVesktop", checked)
         }
 
         WSettingsSwitch {
@@ -809,7 +809,7 @@ WSettingsPage {
             icon: "music-note-2"
             description: Translation.tr("Generate and apply Spicetify theme from wallpaper colors")
             checked: Config.options?.appearance?.wallpaperTheming?.enableSpicetify ?? true
-            onCheckedChanged: {
+            onToggled: checked => {
                 Config.setNestedValue("appearance.wallpaperTheming.enableSpicetify", checked)
                 Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
             }
@@ -836,7 +836,7 @@ WSettingsPage {
             icon: "gamepad"
             description: Translation.tr("Apply Material You colors to Steam via Millennium Material-Theme")
             checked: Config.options?.appearance?.wallpaperTheming?.enableSteam ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableSteam", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableSteam", checked)
         }
 
         WSettingsSwitch {
@@ -844,7 +844,7 @@ WSettingsPage {
             icon: "music-note-2"
             description: Translation.tr("Apply Material You colors to YouTube Music Desktop App")
             checked: Config.options?.appearance?.wallpaperTheming?.enablePearDesktop ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enablePearDesktop", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enablePearDesktop", checked)
         }
 
         WSettingsSwitch {
@@ -852,7 +852,7 @@ WSettingsPage {
             icon: "headphones"
             description: Translation.tr("LiMusic follows your wallpaper colours, from the next time it opens")
             checked: Config.options?.appearance?.wallpaperTheming?.enableLimusic ?? false
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableLimusic", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableLimusic", checked)
         }
 
         WSettingsSwitch {
@@ -860,7 +860,7 @@ WSettingsPage {
             icon: "terminal"
             description: Translation.tr("Adds iNiR themes to Claude Code's theme list: two follow your wallpaper, two keep a fixed Monokai palette")
             checked: Config.options?.appearance?.wallpaperTheming?.enableClaudeCode ?? false
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableClaudeCode", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableClaudeCode", checked)
         }
 
         WSettingsSwitch {
@@ -868,7 +868,7 @@ WSettingsPage {
             icon: "flash-on"
             description: Translation.tr("Generate Zed editor theme from wallpaper colors")
             checked: Config.options?.appearance?.wallpaperTheming?.enableZed ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableZed", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableZed", checked)
         }
 
         WSettingsSwitch {
@@ -876,7 +876,7 @@ WSettingsPage {
             icon: "window-console"
             description: Translation.tr("Generate theme for VSCode and its forks from wallpaper colors")
             checked: Config.options?.appearance?.wallpaperTheming?.enableVSCode ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableVSCode", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableVSCode", checked)
         }
 
         WSettingsSwitch {
@@ -884,7 +884,7 @@ WSettingsPage {
             icon: "globe-search"
             description: Translation.tr("Apply wallpaper-derived colors to Chrome and Chromium browser")
             checked: Config.options?.appearance?.wallpaperTheming?.enableChrome ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableChrome", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableChrome", checked)
         }
 
         WSettingsSwitch {
@@ -892,7 +892,7 @@ WSettingsPage {
             icon: "globe-shield"
             description: Translation.tr("Follows the wallpaper from its next launch; LibreWolf, Floorp, Waterfox and Zen too.")
             checked: Config.options?.appearance?.wallpaperTheming?.enableFirefox ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableFirefox", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableFirefox", checked)
         }
 
         WSettingsSwitch {
@@ -900,7 +900,7 @@ WSettingsPage {
             icon: "wand"
             description: Translation.tr("Apply wallpaper-derived theme to OpenCode AI editor")
             checked: Config.options?.appearance?.wallpaperTheming?.enableOpenCode ?? false
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableOpenCode", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableOpenCode", checked)
         }
 
         WSettingsSwitch {
@@ -908,7 +908,7 @@ WSettingsPage {
             icon: "text-font"
             description: Translation.tr("Generate inir.nvim theme plugin for Neovim/LazyVim from wallpaper colors (writes to ~/.config/nvim/lua/plugins/neovim.lua)")
             checked: Config.options?.appearance?.wallpaperTheming?.enableNeovim ?? false
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableNeovim", checked)
+            onToggled: checked => Config.setNestedValue("appearance.wallpaperTheming.enableNeovim", checked)
         }
 
         WSettingsSwitch {
@@ -917,7 +917,7 @@ WSettingsPage {
             icon: "music-note-2"
             description: Translation.tr("Manage ~/.config/cava/config; internal visualizers always use the options below")
             checked: Config.options?.appearance?.wallpaperTheming?.enableCava ?? true
-            onCheckedChanged: root.setCavaValue(
+            onToggled: checked => root.setCavaValue(
                 "appearance.wallpaperTheming.enableCava", checked, true)
         }
 
@@ -927,7 +927,7 @@ WSettingsPage {
             icon: "eye"
             description: Translation.tr("Enable transparent UI elements")
             checked: Config.options?.material?.style?.transparency?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("material.style.transparency.enable", checked)
+            onToggled: checked => Config.setNestedValue("material.style.transparency.enable", checked)
         }
     }
 
@@ -1024,7 +1024,7 @@ WSettingsPage {
             icon: "headphones"
             description: Translation.tr("Split visualizer into left/right channels")
             checked: Config.options?.appearance?.cava?.stereo ?? true
-            onCheckedChanged: root.setCavaValue(
+            onToggled: checked => root.setCavaValue(
                 "appearance.cava.stereo", checked, true)
         }
 
@@ -1231,7 +1231,7 @@ WSettingsPage {
             icon: "apps"
             description: Translation.tr("Your apps' text follows the font the shell shows.")
             checked: Config.options?.appearance?.typography?.syncWithSystem ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.typography.syncWithSystem", checked)
+            onToggled: checked => Config.setNestedValue("appearance.typography.syncWithSystem", checked)
         }
 
         WSettingsSpinBox {

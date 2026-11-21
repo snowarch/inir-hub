@@ -37,7 +37,7 @@ WSettingsPage {
             icon: "caret-down"
             description: Translation.tr("Place taskbar at bottom of screen")
             checked: Config.options?.waffles?.bar?.bottom ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.bar.bottom", checked)
+            onToggled: checked => Config.setNestedValue("waffles.bar.bottom", checked)
         }
         
         WSettingsSwitch {
@@ -45,7 +45,7 @@ WSettingsPage {
             icon: "chevron-left"
             description: Translation.tr("Align taskbar apps to the left instead of center")
             checked: Config.options?.waffles?.bar?.leftAlignApps ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.bar.leftAlignApps", checked)
+            onToggled: checked => Config.setNestedValue("waffles.bar.leftAlignApps", checked)
         }
     }
     
@@ -59,7 +59,7 @@ WSettingsPage {
             icon: "dark-theme"
             description: Translation.tr("Apply accent color to taskbar app icons")
             checked: Config.options?.waffles?.bar?.monochromeIcons ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.bar.monochromeIcons", checked)
+            onToggled: checked => Config.setNestedValue("waffles.bar.monochromeIcons", checked)
         }
         
         WSettingsSwitch {
@@ -67,7 +67,7 @@ WSettingsPage {
             icon: "eyedropper"
             description: Translation.tr("Apply accent color to system tray icons")
             checked: Config.options?.waffles?.bar?.tintTrayIcons ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.bar.tintTrayIcons", checked)
+            onToggled: checked => Config.setNestedValue("waffles.bar.tintTrayIcons", checked)
         }
 
         WSettingsSpinBox {
@@ -99,7 +99,7 @@ WSettingsPage {
             icon: "eye"
             description: Translation.tr("Show desktop when hovering the corner button")
             checked: Config.options?.waffles?.bar?.desktopPeek?.hoverPeek ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.bar.desktopPeek.hoverPeek", checked)
+            onToggled: checked => Config.setNestedValue("waffles.bar.desktopPeek.hoverPeek", checked)
         }
         
         WSettingsSpinBox {
@@ -123,7 +123,7 @@ WSettingsPage {
             icon: "schedule"
             description: Translation.tr("Display seconds in taskbar clock")
             checked: Config.options?.time?.secondPrecision ?? false
-            onCheckedChanged: Config.setNestedValue("time.secondPrecision", checked)
+            onToggled: checked => Config.setNestedValue("time.secondPrecision", checked)
         }
         
         WSettingsSwitch {
@@ -131,7 +131,7 @@ WSettingsPage {
             icon: "alert-filled"
             description: Translation.tr("Display notification count badge on clock")
             checked: Config.options?.waffles?.bar?.notifications?.showUnreadCount ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.bar.notifications.showUnreadCount", checked)
+            onToggled: checked => Config.setNestedValue("waffles.bar.notifications.showUnreadCount", checked)
         }
 
         WSettingsSwitch {
@@ -139,7 +139,7 @@ WSettingsPage {
             icon: "key"
             description: Translation.tr("Show a fake activation message on the taskbar")
             checked: Config.options?.waffles?.bar?.activationWatermark?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("waffles.bar.activationWatermark.enable", checked)
+            onToggled: checked => Config.setNestedValue("waffles.bar.activationWatermark.enable", checked)
         }
     }
     

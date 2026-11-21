@@ -110,7 +110,7 @@ WSettingsPage {
             icon: "link"
             description: Translation.tr("Adopt the same wallpaper used by Material ii")
             checked: root.waffleUseMainWallpaper
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.useMainWallpaper", checked)
+            onToggled: checked => root.setNestedValueWhenReady("waffles.background.useMainWallpaper", checked)
         }
 
         WSettingsSwitch {
@@ -118,7 +118,7 @@ WSettingsPage {
             icon: "settings-cog-multiple"
             description: Translation.tr("Set different wallpapers for each monitor")
             checked: Config.options?.background?.multiMonitor?.enable ?? false
-            onCheckedChanged: {
+            onToggled: checked => {
                 if (!root.settingsHandlersReady)
                     return
                 Config.setNestedValue("background.multiMonitor.enable", checked)
@@ -136,7 +136,7 @@ WSettingsPage {
             icon: "eyedropper"
             description: Translation.tr("Use a wallpaper as a palette source without replacing the background")
             checked: Config.options?.appearance?.wallpaperTheming?.colorsOnlyMode ?? false
-            onCheckedChanged: {
+            onToggled: checked => {
                 if (checked === (Config.options?.appearance?.wallpaperTheming?.colorsOnlyMode ?? false)) return
                 Config.setNestedValue("appearance.wallpaperTheming.colorsOnlyMode", checked)
                 if (!checked)
@@ -149,7 +149,7 @@ WSettingsPage {
             icon: "eye-off"
             description: Translation.tr("Hide the main wallpaper while a fullscreen window is active. The Task View backdrop stays available.")
             checked: root.wBg.hideWhenFullscreen ?? true
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.hideWhenFullscreen", checked)
+            onToggled: checked => root.setNestedValueWhenReady("waffles.background.hideWhenFullscreen", checked)
         }
 
         WSettingsDropdown {
@@ -918,7 +918,7 @@ WSettingsPage {
                             label: Translation.tr("Derive theme colors from backdrop")
                             icon: "eyedropper"
                             checked: Config.options?.appearance?.wallpaperTheming?.useBackdropForColors ?? false
-                            onCheckedChanged: {
+                            onToggled: checked => {
                                 if (!root.settingsHandlersReady)
                                     return
                                 Config.setNestedValue("appearance.wallpaperTheming.useBackdropForColors", checked)
@@ -1127,7 +1127,7 @@ WSettingsPage {
             icon: "play"
             description: Translation.tr("Animate wallpaper changes and previews. This is shared with Material ii so both panel families use the same transition pipeline.")
             checked: root.wallpaperTransitionEnabled
-            onCheckedChanged: root.setNestedValueWhenReady("background.transition.enable", checked)
+            onToggled: checked => root.setNestedValueWhenReady("background.transition.enable", checked)
         }
 
         WSettingsDropdown {
@@ -1214,7 +1214,7 @@ WSettingsPage {
                     icon: "play"
                     description: Translation.tr("Play videos and GIFs as wallpaper. When disabled, shows a frozen frame")
                     checked: root.wBg.enableAnimation ?? true
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.enableAnimation", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.enableAnimation", checked)
                 }
 
                 WSettingsSwitch {
@@ -1223,7 +1223,7 @@ WSettingsPage {
                     icon: "battery-saver"
                     description: Translation.tr("Freeze videos and GIFs while on battery power to save energy")
                     checked: Config.options?.background?.pauseAnimationOnBattery ?? true
-                    onCheckedChanged: root.setNestedValueWhenReady("background.pauseAnimationOnBattery", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("background.pauseAnimationOnBattery", checked)
                 }
 
                 WSettingsDropdown {
@@ -1245,7 +1245,7 @@ WSettingsPage {
                     icon: "grid"
                     description: Translation.tr("Pictures, GIFs and videos are redrawn as glowing characters.")
                     checked: Config.options?.background?.effects?.glyphs?.enable ?? false
-                    onCheckedChanged: root.setNestedValueWhenReady("background.effects.glyphs.enable", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("background.effects.glyphs.enable", checked)
                 }
 
                 Loader {
@@ -1260,7 +1260,7 @@ WSettingsPage {
                     icon: "eye"
                     description: Translation.tr("Blur wallpaper when windows are open. Temporarily hides during wallpaper transitions.")
                     checked: root.wEffects.enableBlur ?? false
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.effects.enableBlur", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.effects.enableBlur", checked)
                 }
 
                 WSettingsSwitch {
@@ -1269,7 +1269,7 @@ WSettingsPage {
                     icon: "pulse"
                     description: Translation.tr("Apply blur to animated wallpapers. Independent from window blur. May significantly impact performance.")
                     checked: root.wEffects.enableAnimatedBlur ?? false
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.effects.enableAnimatedBlur", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.effects.enableAnimatedBlur", checked)
                 }
 
                 WSettingsSpinBox {
@@ -1323,7 +1323,7 @@ WSettingsPage {
                     icon: "eye"
                     description: Translation.tr("Show backdrop layer for overview")
                     checked: root.wBackdrop.enable ?? true
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.backdrop.enable", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.backdrop.enable", checked)
                 }
 
                 WSettingsSwitch {
@@ -1332,7 +1332,7 @@ WSettingsPage {
                     icon: "play"
                     description: Translation.tr("Play videos and GIFs in backdrop (may impact performance)")
                     checked: root.wBackdrop.enableAnimation ?? false
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.backdrop.enableAnimation", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.backdrop.enableAnimation", checked)
                 }
 
                 WSettingsSwitch {
@@ -1341,7 +1341,7 @@ WSettingsPage {
                     icon: "pulse"
                     description: Translation.tr("Apply blur to animated wallpapers in backdrop. May significantly impact performance.")
                     checked: root.wBackdrop.enableAnimatedBlur ?? false
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.backdrop.enableAnimatedBlur", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.backdrop.enableAnimatedBlur", checked)
                 }
 
                 WSettingsSwitch {
@@ -1350,7 +1350,7 @@ WSettingsPage {
                     icon: "image"
                     description: Translation.tr("Use a different wallpaper for backdrop")
                     checked: !(root.wBackdrop.useMainWallpaper ?? true)
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.backdrop.useMainWallpaper", !checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.backdrop.useMainWallpaper", !checked)
                 }
 
                 WSettingsButton {
@@ -1370,7 +1370,7 @@ WSettingsPage {
                     icon: "eyedropper"
                     description: Translation.tr("Generate theme colors from the backdrop wallpaper instead of the main wallpaper")
                     checked: Config.options?.appearance?.wallpaperTheming?.useBackdropForColors ?? false
-                    onCheckedChanged: {
+                    onToggled: checked => {
                         if (!root.settingsHandlersReady)
                             return
                         Config.setNestedValue("appearance.wallpaperTheming.useBackdropForColors", checked)
@@ -1386,7 +1386,7 @@ WSettingsPage {
                     icon: "eye-off"
                     description: Translation.tr("Show only backdrop, hide main wallpaper")
                     checked: root.wBackdrop.hideWallpaper ?? false
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.backdrop.hideWallpaper", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.backdrop.hideWallpaper", checked)
                 }
 
                 WSettingsSpinBox {
@@ -1438,7 +1438,7 @@ WSettingsPage {
                     icon: "border-outside"
                     description: Translation.tr("Add a dark gradient around the edges of the backdrop")
                     checked: root.wBackdrop.vignetteEnabled ?? false
-                    onCheckedChanged: root.setNestedValueWhenReady("waffles.background.backdrop.vignetteEnabled", checked)
+                    onToggled: checked => root.setNestedValueWhenReady("waffles.background.backdrop.vignetteEnabled", checked)
                 }
 
                 WSettingsSpinBox {
@@ -1473,7 +1473,7 @@ WSettingsPage {
             icon: "schedule"
             description: Translation.tr("Show a desktop clock on the Waffle wallpaper layer")
             checked: root.wClock.enable ?? false
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.enable", checked)
+            onToggled: checked => root.setNestedValueWhenReady("waffles.background.widgets.clock.enable", checked)
         }
 
         ColumnLayout {
@@ -1545,7 +1545,7 @@ WSettingsPage {
                         icon: "timer"
                         description: Translation.tr("Update the wallpaper clock every second")
                         checked: root.wClock.showSeconds ?? false
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showSeconds", checked)
+                        onToggled: checked => root.setNestedValueWhenReady("waffles.background.widgets.clock.showSeconds", checked)
                     }
 
                     WSettingsSwitch {
@@ -1553,7 +1553,7 @@ WSettingsPage {
                         icon: "news"
                         description: Translation.tr("Display a second line with the current date")
                         checked: root.wClock.showDate ?? true
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showDate", checked)
+                        onToggled: checked => root.setNestedValueWhenReady("waffles.background.widgets.clock.showDate", checked)
                     }
 
                     WSettingsDropdown {
@@ -1589,7 +1589,7 @@ WSettingsPage {
                         icon: "arrow-clockwise"
                         description: Translation.tr("Smoothly animate the clock text when time changes")
                         checked: root.wClock.digital?.animateChange ?? true
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.digital.animateChange", checked)
+                        onToggled: checked => root.setNestedValueWhenReady("waffles.background.widgets.clock.digital.animateChange", checked)
                     }
 
                     WSettingsSpinBox {
@@ -1628,7 +1628,7 @@ WSettingsPage {
                         icon: "dark-theme"
                         description: Translation.tr("Use a shadow behind the text for better contrast")
                         checked: root.wClock.showShadow ?? true
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showShadow", checked)
+                        onToggled: checked => root.setNestedValueWhenReady("waffles.background.widgets.clock.showShadow", checked)
                     }
 
                     WSettingsSwitch {
@@ -1636,7 +1636,7 @@ WSettingsPage {
                         icon: "lock-closed"
                         description: Translation.tr("Show the locked status row when the screen is locked")
                         checked: root.wClock.showLockStatus ?? true
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showLockStatus", checked)
+                        onToggled: checked => root.setNestedValueWhenReady("waffles.background.widgets.clock.showLockStatus", checked)
                     }
 
                     WSettingsFontSelector {

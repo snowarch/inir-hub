@@ -44,7 +44,7 @@ WSettingsPage {
             icon: "desktop"
             description: Translation.tr("Keeps a compact workspace strip visible on the configured edge")
             checked: root.isPanelEnabled()
-            onCheckedChanged: root.setPanelEnabled(checked)
+            onToggled: checked => root.setPanelEnabled(checked)
         }
 
         WSettingsRow {
@@ -144,7 +144,7 @@ WSettingsPage {
             icon: "desktop"
             description: Translation.tr("Also focus the workspace in the compositor when scrolling through the strip")
             checked: Config.options?.workspaceStrip?.scrollNavigationSwitchWorkspace ?? true
-            onCheckedChanged: Config.setNestedValue("workspaceStrip.scrollNavigationSwitchWorkspace", checked)
+            onToggled: checked => Config.setNestedValue("workspaceStrip.scrollNavigationSwitchWorkspace", checked)
         }
         WSettingsSpinBox {
             label: Translation.tr("Scroll debounce")
@@ -165,7 +165,7 @@ WSettingsPage {
             icon: "image"
             description: Translation.tr("Live preview for the active workspace and refreshed snapshots for hidden workspaces")
             checked: Config.options?.workspaceStrip?.showPreviews ?? true
-            onCheckedChanged: Config.setNestedValue("workspaceStrip.showPreviews", checked)
+            onToggled: checked => Config.setNestedValue("workspaceStrip.showPreviews", checked)
         }
 
         WSettingsSwitch {
@@ -173,7 +173,7 @@ WSettingsPage {
             icon: "info"
             description: Translation.tr("Show workspace name, focused window title and window count")
             checked: Config.options?.workspaceStrip?.showMetadata ?? true
-            onCheckedChanged: Config.setNestedValue("workspaceStrip.showMetadata", checked)
+            onToggled: checked => Config.setNestedValue("workspaceStrip.showMetadata", checked)
         }
 
         WSettingsSwitch {
@@ -181,7 +181,7 @@ WSettingsPage {
             icon: "apps"
             description: Translation.tr("Show icons for open applications on the selected workspace card")
             checked: Config.options?.workspaceStrip?.showAppIcons ?? true
-            onCheckedChanged: Config.setNestedValue("workspaceStrip.showAppIcons", checked)
+            onToggled: checked => Config.setNestedValue("workspaceStrip.showAppIcons", checked)
         }
 
         WSettingsSwitch {
@@ -189,7 +189,7 @@ WSettingsPage {
             icon: "settings"
             description: Translation.tr("Add a media card at the top of the strip with playback controls when music is playing")
             checked: Config.options?.workspaceStrip?.showMediaPlayer ?? true
-            onCheckedChanged: Config.setNestedValue("workspaceStrip.showMediaPlayer", checked)
+            onToggled: checked => Config.setNestedValue("workspaceStrip.showMediaPlayer", checked)
         }
 
         WSettingsSwitch {
@@ -200,7 +200,7 @@ WSettingsPage {
                 ? Translation.tr("Each screen shows only its own Niri workspaces")
                 : Translation.tr("Only available on Niri")
             checked: Config.options?.workspaceStrip?.perMonitor ?? true
-            onCheckedChanged: Config.setNestedValue("workspaceStrip.perMonitor", checked)
+            onToggled: checked => Config.setNestedValue("workspaceStrip.perMonitor", checked)
         }
     }
 }

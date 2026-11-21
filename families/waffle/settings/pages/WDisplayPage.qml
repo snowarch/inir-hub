@@ -134,12 +134,11 @@ WSettingsPage {
             onSelected: newValue => { if (String(newValue) !== String(root.display("workspace-axis"))) CompositorConfig.applyDisplay("workspace-axis", newValue) }
         }
         WSettingsSwitch {
-            id: loops
             visible: root.shows("workspaces")
             label: Translation.tr("Loops around")
             description: Translation.tr("Past the last comes the first.")
-            Binding { target: loops; property: "checked"; value: root.display("cyclic") === true }
-            onCheckedChanged: if (loops.checked !== (root.display("cyclic") === true)) CompositorConfig.applyDisplay("cyclic", loops.checked)
+            checked: root.display("cyclic") === true
+            onToggled: checked => { if (checked !== (root.display("cyclic") === true)) CompositorConfig.applyDisplay("cyclic", checked) }
         }
         WSettingsDropdown {
             visible: root.shows("new-width") && root.several

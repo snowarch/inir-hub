@@ -115,7 +115,7 @@ WSettingsPage {
                 label: modelData.label
                 icon: "arrow-sync"
                 checked: cycle.includes(modelData.value)
-                onCheckedChanged: {
+                onToggled: checked => {
                     if (checked === cycle.includes(modelData.value)) return
                     const next = cycle.filter(family => family !== modelData.value)
                     if (checked) next.push(modelData.value)
@@ -158,56 +158,56 @@ WSettingsPage {
             label: Translation.tr("Taskbar")
             icon: "panel-left-expand"
             checked: root.isPanelEnabled("wBar")
-            onCheckedChanged: root.setPanelEnabled("wBar", checked)
+            onToggled: checked => root.setPanelEnabled("wBar", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Background")
             icon: "image"
             checked: root.isPanelEnabled("wBackground")
-            onCheckedChanged: root.setPanelEnabled("wBackground", checked)
+            onToggled: checked => root.setPanelEnabled("wBackground", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Start Menu")
             icon: "start-here"
             checked: root.isPanelEnabled("wStartMenu")
-            onCheckedChanged: root.setPanelEnabled("wStartMenu", checked)
+            onToggled: checked => root.setPanelEnabled("wStartMenu", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Action Center")
             icon: "options"
             checked: root.isPanelEnabled("wActionCenter")
-            onCheckedChanged: root.setPanelEnabled("wActionCenter", checked)
+            onToggled: checked => root.setPanelEnabled("wActionCenter", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Notification Center")
             icon: "alert-filled"
             checked: root.isPanelEnabled("wNotificationCenter")
-            onCheckedChanged: root.setPanelEnabled("wNotificationCenter", checked)
+            onToggled: checked => root.setPanelEnabled("wNotificationCenter", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Notification Popups")
             icon: "alert"
             checked: root.isPanelEnabled("wNotificationPopup")
-            onCheckedChanged: root.setPanelEnabled("wNotificationPopup", checked)
+            onToggled: checked => root.setPanelEnabled("wNotificationPopup", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("OSD")
             icon: "pulse"
             checked: root.isPanelEnabled("wOnScreenDisplay")
-            onCheckedChanged: root.setPanelEnabled("wOnScreenDisplay", checked)
+            onToggled: checked => root.setPanelEnabled("wOnScreenDisplay", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Widgets Panel")
             icon: "widgets"
             checked: root.isPanelEnabled("wWidgets")
-            onCheckedChanged: root.setPanelEnabled("wWidgets", checked)
+            onToggled: checked => root.setPanelEnabled("wWidgets", checked)
         }
 
         WSettingsSwitch {
@@ -215,7 +215,7 @@ WSettingsPage {
             icon: "library"
             description: Translation.tr("Overview of all workspaces and windows. Supports carousel and centered focus modes.")
             checked: root.isPanelEnabled("wTaskView")
-            onCheckedChanged: root.setPanelEnabled("wTaskView", checked)
+            onToggled: checked => root.setPanelEnabled("wTaskView", checked)
         }
 
         WSettingsSwitch {
@@ -223,7 +223,7 @@ WSettingsPage {
             icon: "schedule"
             description: Translation.tr("Track time spent in each application. Shows in the Action Center.")
             checked: Config.options?.screenTime?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("screenTime.enable", checked)
+            onToggled: checked => Config.setNestedValue("screenTime.enable", checked)
         }
     }
 
@@ -238,7 +238,7 @@ WSettingsPage {
                 label: modelData.label
                 icon: modelData.icon
                 checked: root.isToggleEnabled(modelData.id)
-                onCheckedChanged: root.setToggleEnabled(modelData.id, checked)
+                onToggled: checked => root.setToggleEnabled(modelData.id, checked)
             }
         }
     }
