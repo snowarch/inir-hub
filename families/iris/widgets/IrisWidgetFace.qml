@@ -399,9 +399,11 @@ Item {
                 colorization: IrisStyle.glow > 0 && !root.lightBackdrop ? 1 : 0
                 colorizationColor: Qt.rgba(IrisStyle.plateShadow.r, IrisStyle.plateShadow.g, IrisStyle.plateShadow.b, 1)
                 blurEnabled: true
-                blur: 0.5
+                // A bare face has no plate, and a wallpaper is rarely one tone: over a light collar across a dark picture its
+                // white figures fell to a soft grey smudge. Drawn tight and dense, the shadow is an edge every glyph keeps.
+                blur: root.clear ? 0.15 : 0.5
                 autoPaddingEnabled: true
-                opacity: (root.lightBackdrop ? IrisStyle.frostShadow : IrisStyle.plateShadow.a) * root.textShadow
+                opacity: Math.min(1, (root.lightBackdrop ? IrisStyle.frostShadow : IrisStyle.plateShadow.a) * root.textShadow + (root.clear ? 0.45 : 0))
             }
 
             Loader {
