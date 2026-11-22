@@ -102,7 +102,7 @@ Item {
     OnDemandPanelLoader { identifier: "wWidgets"; open: WaffleState.widgetsOpen && (Config.options?.waffles?.modules?.widgets ?? true); source: "./widgets/WaffleWidgets.qml" }
     DeferredPanelLoader { identifier: "wLock"; component: Lock {} }
     DeferredPanelLoader { identifier: "wPolkit"; component: Polkit {} }
-    OnDemandPanelLoader { identifier: "wSessionScreen"; open: GlobalStates.sessionOpen; source: Plugins.baseUrl("modules/shared/sessionScreen/SessionScreen.qml") }
+    OnDemandPanelLoader { identifier: "wSessionScreen"; open: GlobalStates.sessionOpen; source: "./session/WaffleSessionScreen.qml" }
     OnDemandPanelLoader { identifier: "wTaskView"; open: WaffleState.taskViewOpen; source: "./taskview/WaffleTaskView.qml" }
 
     // Shared modules that work with waffle

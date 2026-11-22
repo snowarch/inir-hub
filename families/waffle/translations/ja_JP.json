@@ -590,5 +590,18 @@
   "How windows open, move and look": "ウィンドウの開き方、動き方、見た目",
   "Floating taskbar": "フローティングタスクバー",
   "Lift the taskbar off the screen edge, with rounded corners": "タスクバーを画面の端から浮かせ、角を丸くします",
-  "Apps you open show up here": "開いたアプリがここに表示されます"
+  "Apps you open show up here": "開いたアプリがここに表示されます",
+  "Lock": "ロック",
+  "Sleep": "スリープ",
+  "Restart": "再起動",
+  "Shut down": "シャットダウン",
+  "Hibernate": "休止状態",
+  "Task Manager": "タスク マネージャー",
+  "Firmware settings": "ファームウェア設定",
+  "Your package manager is running": "パッケージマネージャーが実行中です",
+  "There might be a download in progress": "ダウンロード中の可能性があります",
+  "Move": "移動",
+  "Choose": "選択",
+  "Back": "戻る",
+  "Up for %1": "起動から %1"
 }

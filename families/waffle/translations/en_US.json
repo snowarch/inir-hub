@@ -590,5 +590,18 @@
   "How windows open, move and look": "How windows open, move and look",
   "Floating taskbar": "Floating taskbar",
   "Lift the taskbar off the screen edge, with rounded corners": "Lift the taskbar off the screen edge, with rounded corners",
-  "Apps you open show up here": "Apps you open show up here"
+  "Apps you open show up here": "Apps you open show up here",
+  "Lock": "Lock",
+  "Sleep": "Sleep",
+  "Restart": "Restart",
+  "Shut down": "Shut down",
+  "Hibernate": "Hibernate",
+  "Task Manager": "Task Manager",
+  "Firmware settings": "Firmware settings",
+  "Your package manager is running": "Your package manager is running",
+  "There might be a download in progress": "There might be a download in progress",
+  "Move": "Move",
+  "Choose": "Choose",
+  "Back": "Back",
+  "Up for %1": "Up for %1"
 }

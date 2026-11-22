@@ -590,5 +590,18 @@
   "How windows open, move and look": "Wie Fenster sich öffnen, bewegen und aussehen",
   "Floating taskbar": "Schwebende Taskleiste",
   "Lift the taskbar off the screen edge, with rounded corners": "Die Taskleiste löst sich vom Bildschirmrand, mit runden Ecken",
-  "Apps you open show up here": "Geöffnete Apps erscheinen hier"
+  "Apps you open show up here": "Geöffnete Apps erscheinen hier",
+  "Lock": "Sperren",
+  "Sleep": "Energie sparen",
+  "Restart": "Neu starten",
+  "Shut down": "Herunterfahren",
+  "Hibernate": "Ruhezustand",
+  "Task Manager": "Task-Manager",
+  "Firmware settings": "Firmware-Einstellungen",
+  "Your package manager is running": "Dein Paketmanager läuft",
+  "There might be a download in progress": "Möglicherweise läuft gerade ein Download",
+  "Move": "Bewegen",
+  "Choose": "Auswählen",
+  "Back": "Zurück",
+  "Up for %1": "Läuft seit %1"
 }

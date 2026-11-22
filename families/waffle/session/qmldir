@@ -1,0 +1,2 @@
+module qs.modules.waffle.session
+WaffleSessionScreen 1.0 WaffleSessionScreen.qml

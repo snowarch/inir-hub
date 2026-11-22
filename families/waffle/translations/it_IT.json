@@ -590,5 +590,18 @@
   "How windows open, move and look": "Come le finestre si aprono, si muovono e appaiono",
   "Floating taskbar": "Barra delle applicazioni mobile",
   "Lift the taskbar off the screen edge, with rounded corners": "Stacca la barra dal bordo dello schermo, con angoli arrotondati",
-  "Apps you open show up here": "Le app che apri compaiono qui"
+  "Apps you open show up here": "Le app che apri compaiono qui",
+  "Lock": "Blocca",
+  "Sleep": "Sospendi",
+  "Restart": "Riavvia",
+  "Shut down": "Arresta",
+  "Hibernate": "Iberna",
+  "Task Manager": "Gestione attività",
+  "Firmware settings": "Impostazioni firmware",
+  "Your package manager is running": "Il gestore dei pacchetti è in esecuzione",
+  "There might be a download in progress": "Potrebbe esserci un download in corso",
+  "Move": "Sposta",
+  "Choose": "Scegli",
+  "Back": "Indietro",
+  "Up for %1": "Acceso da %1"
 }

@@ -590,5 +590,18 @@
   "How windows open, move and look": "Pencerelerin nasıl açıldığı, hareket ettiği ve göründüğü",
   "Floating taskbar": "Yüzen görev çubuğu",
   "Lift the taskbar off the screen edge, with rounded corners": "Görev çubuğunu ekran kenarından ayırır, köşeleri yuvarlar",
-  "Apps you open show up here": "Açtığınız uygulamalar burada görünür"
+  "Apps you open show up here": "Açtığınız uygulamalar burada görünür",
+  "Lock": "Kilitle",
+  "Sleep": "Uyku",
+  "Restart": "Yeniden başlat",
+  "Shut down": "Kapat",
+  "Hibernate": "Hazırda beklet",
+  "Task Manager": "Görev Yöneticisi",
+  "Firmware settings": "Ürün yazılımı ayarları",
+  "Your package manager is running": "Paket yöneticiniz çalışıyor",
+  "There might be a download in progress": "Devam eden bir indirme olabilir",
+  "Move": "Taşı",
+  "Choose": "Seç",
+  "Back": "Geri",
+  "Up for %1": "%1 süredir açık"
 }

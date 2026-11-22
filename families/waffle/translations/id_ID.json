@@ -590,5 +590,18 @@
   "How windows open, move and look": "Cara jendela terbuka, bergerak, dan tampil",
   "Floating taskbar": "Bilah tugas mengambang",
   "Lift the taskbar off the screen edge, with rounded corners": "Angkat bilah tugas dari tepi layar, dengan sudut membulat",
-  "Apps you open show up here": "Aplikasi yang Anda buka muncul di sini"
+  "Apps you open show up here": "Aplikasi yang Anda buka muncul di sini",
+  "Lock": "Kunci",
+  "Sleep": "Tidur",
+  "Restart": "Mulai ulang",
+  "Shut down": "Matikan",
+  "Hibernate": "Hibernasi",
+  "Task Manager": "Pengelola Tugas",
+  "Firmware settings": "Pengaturan firmware",
+  "Your package manager is running": "Pengelola paket Anda sedang berjalan",
+  "There might be a download in progress": "Mungkin ada unduhan yang sedang berlangsung",
+  "Move": "Pindah",
+  "Choose": "Pilih",
+  "Back": "Kembali",
+  "Up for %1": "Menyala selama %1"
 }

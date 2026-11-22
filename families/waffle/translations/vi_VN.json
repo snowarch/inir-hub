@@ -590,5 +590,18 @@
   "How windows open, move and look": "Cách cửa sổ mở, di chuyển và hiển thị",
   "Floating taskbar": "Thanh tác vụ nổi",
   "Lift the taskbar off the screen edge, with rounded corners": "Tách thanh tác vụ khỏi mép màn hình, với các góc bo tròn",
-  "Apps you open show up here": "Ứng dụng bạn mở sẽ hiện ở đây"
+  "Apps you open show up here": "Ứng dụng bạn mở sẽ hiện ở đây",
+  "Lock": "Khóa",
+  "Sleep": "Ngủ",
+  "Restart": "Khởi động lại",
+  "Shut down": "Tắt máy",
+  "Hibernate": "Ngủ đông",
+  "Task Manager": "Trình quản lý tác vụ",
+  "Firmware settings": "Cài đặt firmware",
+  "Your package manager is running": "Trình quản lý gói đang chạy",
+  "There might be a download in progress": "Có thể đang có tải xuống",
+  "Move": "Di chuyển",
+  "Choose": "Chọn",
+  "Back": "Quay lại",
+  "Up for %1": "Đã bật %1"
 }

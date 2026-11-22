@@ -590,5 +590,18 @@
   "How windows open, move and look": "Як вікна відкриваються, рухаються й виглядають",
   "Floating taskbar": "Плаваюча панель завдань",
   "Lift the taskbar off the screen edge, with rounded corners": "Відділяє панель завдань від краю екрана й заокруглює кути",
-  "Apps you open show up here": "Відкриті застосунки з'являться тут"
+  "Apps you open show up here": "Відкриті застосунки з'являться тут",
+  "Lock": "Заблокувати",
+  "Sleep": "Режим сну",
+  "Restart": "Перезавантажити",
+  "Shut down": "Завершити роботу",
+  "Hibernate": "Гібернація",
+  "Task Manager": "Диспетчер завдань",
+  "Firmware settings": "Налаштування мікропрограми",
+  "Your package manager is running": "Працює менеджер пакетів",
+  "There might be a download in progress": "Можливо, триває завантаження",
+  "Move": "Перейти",
+  "Choose": "Вибрати",
+  "Back": "Назад",
+  "Up for %1": "Працює %1"
 }
