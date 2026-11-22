@@ -80,6 +80,10 @@ PrismFolder {
         to: root.nowAt
         tint: root.ink
         curve: t => 0.8
+        // Split light: the time on runs through the spectrum, white where it began.
+        layer.enabled: root.spectrum
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing; white: 0.18; from: 0.1; to: 0.9 }
     }
     Repeater {
         model: [0, 6, 12, 18, 24]

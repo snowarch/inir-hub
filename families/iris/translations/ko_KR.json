@@ -2692,6 +2692,8 @@
   "Unbound": "할당 안 됨",
   "Prism form": "Prism 형태",
   "How every widget's glass is cut, unless it picks its own.": "각 위젯의 유리를 자르는 방식. 위젯마다 따로 고를 수도 있습니다.",
+  "Prism light": "Prism 빛",
+  "White light, or the spectrum it splits into.": "흰빛, 또는 그 빛이 나뉜 스펙트럼.",
   "Widgets with a form of their own": "자체 형태를 쓰는 위젯",
   "They keep the form picked in their sheet.": "시트에서 고른 형태를 유지합니다.",
   "Room for windows": "창을 둘 공간",

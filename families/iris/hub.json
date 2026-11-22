@@ -1,7 +1,13 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.125",
+    "version": "2.33.126",
     "changes": {
+      "2.33.126": [
+        "Settings › Desktop › Prism light: Prism widgets keep white light, or split it into the spectrum",
+        "A Design can keep its glass tinted over any wallpaper, and set the light of the Prism widgets",
+        "Prism Settings: the side list reads clearer, bare glyphs and brighter names on near-black",
+        "Text and titles read in Montserrat by default; Geist stays a choice"
+      ],
       "2.33.125": [
         "Layout opens on the screen at its own points: the Island, the Dock and the bubbles where they stand, the windows the arrangement makes with its gaps, and the room left for windows",
         "Windows and Glass & effects open on two windows up close: corners, border, focus ring, shadow, opacity and the blur behind, as set",

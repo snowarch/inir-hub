@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import qs.modules.common
 import qs.modules.iris.style
 
 // Prism's body (PrismGlass.frag): the folder of frosted glass every Prism face stands on, drawn whole by one shader that
@@ -29,9 +30,9 @@ Item {
     // How much light passes (0 none, 1 all), and the flap's colour.
     property real lightPass: 1
     property color shelf: body.face.accent
-    // White light only (his 11-16: the split light read as a rainbow pasted on every card). The shader keeps its
-    // spectrum path for a Design that asks for it.
-    property bool white: true
+    // White light by factory (his 11-16: the split light read as a rainbow pasted on every card), or split into the
+    // spectrum (his 11-21: Prism lost its colours): the worn Design's light, else the person's `iris.widgets.prismLight`.
+    property bool white: (IrisDesign.light || String(Config.options?.iris?.widgets?.prismLight ?? "white")) !== "spectrum"
     // One piece of glass instead of the folder (Prism's quiet and beam looks): no tab, flap or pane; its corners, and how
     // much of the beam it lets through (0: only a breath of it inside the glass near `prism`).
     property bool slab: false

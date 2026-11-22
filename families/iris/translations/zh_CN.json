@@ -2692,6 +2692,8 @@
   "Unbound": "未分配",
   "Prism form": "Prism 形状",
   "How every widget's glass is cut, unless it picks its own.": "每个小组件玻璃的切法，除非它自选形状。",
+  "Prism light": "Prism 光",
+  "White light, or the spectrum it splits into.": "白光，或它分解成的光谱。",
   "Widgets with a form of their own": "有独立形状的小组件",
   "They keep the form picked in their sheet.": "它们保留在各自面板中选的形状。",
   "Room for windows": "窗口可用空间",

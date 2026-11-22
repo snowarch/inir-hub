@@ -88,7 +88,8 @@ PrismFolder {
             weight: Font.Bold
         }
     }
-    // The hour passing, as a thread of white light under the figure; the rest of the hour a faint line.
+    // The hour passing, as a thread of light under the figure (split, white where the hour began and the colours as it
+    // goes); the rest of the hour a faint line.
     Item {
         id: thread
         readonly property real share: root.now.getMinutes() / 60
@@ -97,11 +98,17 @@ PrismFolder {
         y: root.lens ? Math.round(root.height * 0.64) : figure.y + figure.height + root.pick(4, 4, 8)
         height: root.dp(root.large ? 3 : 2)
         Rectangle { anchors.fill: parent; radius: height / 2; color: root.fill }
-        Rectangle {
-            width: Math.max(parent.height, parent.width * thread.share)
-            height: parent.height
-            radius: height / 2
-            color: root.ink
+        Item {
+            anchors.fill: parent
+            layer.enabled: root.spectrum
+            layer.smooth: true
+            layer.effect: PrismSpectrum { mono: root.nothing; white: 0.12 }
+            Rectangle {
+                width: Math.max(parent.height, parent.width * thread.share)
+                height: parent.height
+                radius: height / 2
+                color: root.ink
+            }
         }
     }
     Column {

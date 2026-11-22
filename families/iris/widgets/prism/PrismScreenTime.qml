@@ -110,6 +110,10 @@ PrismFolder {
         y: root.footTop + root.pick(6, 6, 12)
         height: root.pick(22, 20, 38)
         readonly property real pitch: hours.width / 24
+        // Split light runs the day through the spectrum, midnight violet to the next midnight red; hours to come stay faint.
+        layer.enabled: root.spectrum
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing }
         Repeater {
             model: hours.visible ? 24 : 0
             Rectangle {

@@ -116,6 +116,8 @@ Singleton {
     readonly property string texture: String(root.ownToken("material.texture") ?? "")
     readonly property string edge: String(root.ownToken("material.edge") ?? "")
     readonly property int edgeWidth: Number(root.ownToken("material.edgeWidth") ?? 0)
+    // How much of its surface glass keeps under this Design, at least: 0 leaves the person's tint alone.
+    readonly property real glassTint: Number(root.ownToken("material.tint") ?? 0)
     readonly property real shadow: Number(root.token("material.shadow") ?? 1)
     function plate(tone: string, rungIndex: int): string { return String(root.token(`material.plates.${tone}`)?.[rungIndex] ?? "#000000") }
     readonly property string morph: String(root.ownToken("motion.morph") ?? "")
@@ -123,6 +125,8 @@ Singleton {
     readonly property string look: String(root.ownToken("look.look") ?? "")
     // The design every desktop widget wears while this Design is on (`DesktopWidgetDesign.worn`); a widget's own pick stays.
     readonly property string widgets: String(root.ownToken("look.widgets") ?? "")
+    // The light of the widgets' Prism faces while this Design is on: "white" or "spectrum"; empty keeps the person's.
+    readonly property string light: String(root.ownToken("look.light") ?? "")
     // How the Design reads, as traits any surface honours: marks "glyph" (no tinted squircles), selection "plate" (the
     // chosen row is a solid plate, not an accent wash), index (lists numbered 01, 02…), captions "mono" (labels in mono
     // capitals), titles "lower" (page titles in lower case), sections "line", hover "plate", rings "edge", pages "hang".
@@ -192,6 +196,7 @@ Singleton {
         case "iris.appearance.highlight": return root.fixedRole("highlight") || String(root.ownToken("colour.highlight") ?? "").length > 0
         case "iris.appearance.theme.surface": return root.fixedRole("surface")
         case "iris.widgets.design": return root.widgets.length > 0
+        case "iris.widgets.prismLight": return root.light.length > 0
         // A Design that draws the resting Island decides its design and the time's accent; a bar across the edge still
         // shows the engine's clock in its zones.
         case "iris.bar.design": return root.has("islandFace")

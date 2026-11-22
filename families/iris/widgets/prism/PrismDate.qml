@@ -82,6 +82,10 @@ PrismFolder {
         height: root.dp(root.large ? 6 : 5)
         y: root.small ? Math.round(root.footTop + root.footHeight * 0.28) : root.footBottom - root.dp(44)
         spacing: root.dp(root.large ? 4 : 3)
+        // Split light spends the year through the spectrum: January violet to December red, the months to come faint.
+        layer.enabled: root.spectrum
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing }
         Repeater {
             model: 12
             Rectangle {

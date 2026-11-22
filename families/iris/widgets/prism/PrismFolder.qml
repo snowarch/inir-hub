@@ -68,6 +68,9 @@ IrisWidgetFace {
     property point prism: root.folded ? Qt.point(Math.round(root.inset * 0.5), root.paneBottom - root.pick(10, 10, 16))
         : Qt.point(root.width - root.pick(28, 40, 48), root.pick(2, 2, 4))
     property real lightPass: 1
+    // The light splits (the person's Prism light, or the worn Design's): a face's live marks wear the spectrum
+    // (PrismSpectrum); white, they keep their ink.
+    readonly property bool spectrum: !body.white
 
     // The places every face fills: the head over `paneTop`, the middle to `paneBottom`, the foot to `footBottom`.
     readonly property real inset: root.pick(16, 22, 26)

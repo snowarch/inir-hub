@@ -44,6 +44,10 @@ PrismFolder {
         y: root.paneTop + root.pick(6, 6, 10)
         width: root.innerWidth
         height: root.paneBottom - root.pick(6, 6, 10) - y
+        // Split light draws the day in its colours: dawn violet to dusk red along the path.
+        layer.enabled: root.spectrum
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing; from: 0.05; to: 0.95; bright: 1.1 }
     }
     Rectangle {
         id: sun

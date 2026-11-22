@@ -281,6 +281,12 @@ void main() {
         float near = exp(-length(v) / reach);
         float a = atan(v.y, v.x);
         vec3 hue = u.fan.w > 0.5 ? vec3(1.0) : spectrum(0.5 + 0.5 * sin(a * 1.5 + u.fan.x));
+        // Split, the edge takes the light where it passes nearest the break: a short run of the spectrum, its colour
+        // turning round the break, gone a third of the way round. White light leaves the edge bare.
+        if (u.fan.w < 0.5) {
+            float glint = (1.0 - smoothstep(0.0, px * 1.4, abs(body + 0.7 * px))) * near * near * u.fan.z * 1.3;
+            col.rgb = mix(col.rgb, hue * col.a, clamp(glint * (paper ? 0.55 : 0.7), 0.0, 1.0));
+        }
         float haze = (1.0 - smoothstep(0.0, 0.07 * size.y, -body)) * inBody * near * near * u.fan.z;
         col.rgb += hue * haze * (paper ? 0.05 : 0.12) * col.a;
     }

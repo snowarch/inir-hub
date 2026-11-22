@@ -37,6 +37,7 @@ JsonObject {
         property bool legibleAlways: false // Lume backs every widget as if the wallpaper under it were bright and busy
         property string design: "iris" // "iris" faces, "prism", "material" (each widget's own style), "instrument" or "readout"
         property string prism: "quiet" // Prism's cut for every widget that keeps "auto": "quiet", "beam", "folder", "pocket", "archive", "smoked" or "board"
+        property string prismLight: "white" // Prism's beam: "white", or "spectrum" (it splits into its colours)
         property string material: "glass" // "glass", "clear", "solid" or "tinted"
         property int blur: 100 // how much the glass behind widgets frosts the wallpaper, % of the maximum
         property string weight: "regular" // "light", "regular" or "bold"

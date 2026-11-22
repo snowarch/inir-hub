@@ -565,9 +565,10 @@ QtObject {
     readonly property bool glassCompositor: root.glassy && root.compositorGlassReady
     readonly property bool glassWallpaper: root.glassy && root.glassRequested === "wallpaper"
     readonly property real glassBlurAmount: Math.max(0, Math.min(1, Number(root.glassOptions?.blur ?? 100) / 100))
-    // Solved at the panel's 7:1 so secondary ink still reads on the worst part; the chosen tint is a floor.
+    // Solved at the panel's 7:1 so secondary ink still reads on the worst part; the chosen tint is a floor, and so is the
+    // worn Design's (his 11-21: under glass every Design looked the same, the wallpaper showing through each alike).
     readonly property real wallpaperGlassTint: {
-        const chosen = Math.max(0.12, Math.min(0.96, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
+        const chosen = Math.max(0.12, IrisDesign.glassTint, Math.min(0.96, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
         const needed = IrisMood.sampled ? root.legibleVeil("panel", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
         return Math.max(chosen, Math.min(0.9, needed))
     }

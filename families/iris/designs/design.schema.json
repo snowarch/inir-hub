@@ -79,6 +79,7 @@
                         "texture": { "type": "string", "enum": ["", "solid", "aurora", "angel", "regalia", "flat", "streak", "afterglow", "leak"] },
                         "edge": { "type": "string", "enum": ["", "light", "line", "none"] },
                         "edgeWidth": { "description": "In device pixels; 0 keeps the person's.", "type": "integer", "minimum": 0, "maximum": 3 },
+                        "tint": { "description": "How much of its surface every glass body keeps over the wallpaper, as a floor under the person's: a smoked or lacquered Design reads as itself on any wallpaper; 0 keeps theirs.", "type": "number", "minimum": 0, "maximum": 0.95 },
                         "shadow": { "description": "How much of its shadow a body casts: 0 none, 1 iRiS's.", "type": "number", "minimum": 0, "maximum": 2 },
                         "plates": {
                             "description": "The black and the white an icon plate can wear: [top, base].",
@@ -106,6 +107,7 @@
                     "properties": {
                         "look": { "description": "The dialect it speaks; empty keeps the person's.", "type": "string", "enum": ["", "apple", "nothing", "synth", "gel", "prism"] },
                         "widgets": { "description": "The design every desktop widget wears while the Design is on (a widget given its own keeps it); empty keeps the person's.", "type": "string", "enum": ["", "iris", "prism", "material", "instrument", "readout"] },
+                        "light": { "description": "The light of the desktop widgets' Prism faces: white, or split into the spectrum; empty keeps the person's.", "type": "string", "enum": ["", "white", "spectrum"] },
                         "traits": {
                             "type": "object",
                             "additionalProperties": false,

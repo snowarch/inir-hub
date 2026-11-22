@@ -78,12 +78,13 @@ Item {
     readonly property real textShadow: root.clear ? 1
         : root.glass && !root.widget.legibleAlways ? Math.min(1, (1 - root.strength) * 1.4) : 0
     // Background off means no plate, Lume on every widget or not: there it only deepens the text's shadow (10-25).
+    // A worn Design's glass keeps at least its own share of the plate, as every body's does (IrisDesign.glassTint).
     readonly property real veil: root.opaque ? root.strength
         : root.clear ? 0
-        : (root.paper ? IrisStyle.legibleVeil(root.readMaterial, root.frostLevel, root.readSpread, 1)
+        : Math.max(IrisDesign.glassTint * root.strength, (root.paper ? IrisStyle.legibleVeil(root.readMaterial, root.frostLevel, root.readSpread, 1)
             : root.lightBackdrop ? IrisStyle.legibleFrost(root.readMaterial, root.frostLevel, root.readSpread, 1)
             : IrisStyle.legibleVeil(root.readMaterial, root.readLevel, root.readSpread, 1))
-            * (root.widget.legibleAlways ? 1 : root.paperGlass ? 0.52 + 0.48 * root.strength : root.strength)
+            * (root.widget.legibleAlways ? 1 : root.paperGlass ? 0.52 + 0.48 * root.strength : root.strength))
     // On paper, Surface opacity thins a frost; it never turns the face into clear glass lit by the wallpaper's colour.
     readonly property bool paperGlass: root.paper && root.glass
     // Lume on every widget: the veil (light ink) is solved as if the region were bright and busy, the frost

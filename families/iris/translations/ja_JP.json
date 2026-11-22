@@ -2692,6 +2692,8 @@
   "Unbound": "未割り当て",
   "Prism form": "Prism の形",
   "How every widget's glass is cut, unless it picks its own.": "各ウィジェットのガラスの切り方。ウィジェットごとに選ぶこともできます。",
+  "Prism light": "Prism の光",
+  "White light, or the spectrum it splits into.": "白い光、またはそれが分かれたスペクトル。",
   "Widgets with a form of their own": "独自の形のウィジェット",
   "They keep the form picked in their sheet.": "シートで選んだ形のままです。",
   "Room for windows": "ウィンドウの広さ",
