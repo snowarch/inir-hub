@@ -81,7 +81,7 @@ LAYOUT=$(cat <<'LAYOUT_END'
                             panes: [
                                 (size: "1", pane: Component("title")),
                                 (size: "1", pane: Component("artist_and_album")),
-                                (size: "1", pane: Component("elapsed_and_bitrate")),
+                                (size: "1", pane: Pane(Property(content: [(kind: Property(Status(QueueLength()))), (kind: Text(" songs / ")), (kind: Property(Status(QueueTimeTotal()))), (kind: Text(" total"))], align: Center))),
                             ],
                         )),
                         (size: "100%", borders: "ALL", border_symbols: Rounded, pane: Pane(Lyrics)),
@@ -93,7 +93,7 @@ LAYOUT=$(cat <<'LAYOUT_END'
                 pane: Split(
                     direction: Vertical,
                     panes: [
-                        (size: "3", borders: "ALL", border_symbols: Rounded, pane: Pane(ProgressBar)),
+                        (size: "3", borders: "ALL", border_symbols: Rounded, border_title: [(kind: Text(" ")), (kind: Property(Status(Elapsed))), (kind: Text(" / ")), (kind: Property(Status(Duration))), (kind: Group([(kind: Text(" (")), (kind: Property(Status(Bitrate))), (kind: Text(" kbps)"))])), (kind: Text(" "))], border_title_alignment: Left, pane: Pane(ProgressBar)),
                         (size: "1", pane: Pane(Tabs)),
                         (size: "100%", pane: Pane(TabContent)),
                         (size: "6", borders: "ALL", border_symbols: Rounded, pane: Pane(Cava)),
@@ -120,7 +120,7 @@ LAYOUT_COMPACT=$(cat <<'LAYOUT_END'
                             panes: [
                                 (size: "1", pane: Component("title")),
                                 (size: "1", pane: Component("artist_and_album")),
-                                (size: "1", pane: Component("elapsed_and_bitrate")),
+                                (size: "1", pane: Pane(Property(content: [(kind: Property(Status(QueueLength()))), (kind: Text(" songs / ")), (kind: Property(Status(QueueTimeTotal()))), (kind: Text(" total"))], align: Center))),
                             ],
                         )),
                     ],
@@ -143,7 +143,7 @@ LAYOUT_COMPACT=$(cat <<'LAYOUT_END'
                                 ],
                             ),
                         ),
-                        (size: "3", borders: "ALL", border_symbols: Rounded, pane: Pane(ProgressBar)),
+                        (size: "3", borders: "ALL", border_symbols: Rounded, border_title: [(kind: Text(" ")), (kind: Property(Status(Elapsed))), (kind: Text(" / ")), (kind: Property(Status(Duration))), (kind: Group([(kind: Text(" (")), (kind: Property(Status(Bitrate))), (kind: Text(" kbps)"))])), (kind: Text(" "))], border_title_alignment: Left, pane: Pane(ProgressBar)),
                     ],
                 ),
             ),

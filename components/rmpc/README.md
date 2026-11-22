@@ -6,11 +6,11 @@ It brings a layout made for small screens (tested at 130x32 characters):
 
 ```
 +-------------+--------------------------+
-| album art   | progress bar             |
+| album art   | progress + time          |
 +-------------+--------------------------+
 | title       | tabs                     |
 | artist      | queue / directories ...  |
-| time        |                          |
+| queue time  |                          |
 +-------------+                          |
 | lyrics      +--------------------------+
 |             | cava                     |
