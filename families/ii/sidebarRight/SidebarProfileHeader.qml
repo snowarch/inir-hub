@@ -139,9 +139,9 @@ Item {
         : root._island ? 4
         : root._regalia ? Appearance.regalia.surfaceInset : 0
     readonly property real _bannerHeight: root._bannerAllowed
-        ? Math.max(80, Math.min(94, root.width * 0.22)) : 0
-    readonly property real _avatarSize: Math.max(50, Math.min(56, root.width * 0.14))
-    readonly property real _avatarOverlap: root._bannerAllowed ? root._avatarSize * 0.4 : 0
+        ? Math.round(Math.max(80, Math.min(94, root.width * 0.22))) : 0
+    readonly property real _avatarSize: Math.round(Math.max(50, Math.min(56, root.width * 0.14)))
+    readonly property real _avatarOverlap: root._bannerAllowed ? Math.round(root._avatarSize * 0.4) : 0
     readonly property real _footerHeight: root._bannerAllowed
         ? Math.max(46, root._avatarSize - root._avatarOverlap + 12)
         : root._avatarSize + root._contentPadding * 2

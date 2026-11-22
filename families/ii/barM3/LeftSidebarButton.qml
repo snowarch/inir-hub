@@ -58,8 +58,8 @@ RippleButton {
     CustomIcon {
         id: distroIcon
         anchors.centerIn: parent
-        width: root.isMaterial ? (root.vertical ? 24 : 22) : 19.5
-        height: root.isMaterial ? (root.vertical ? 24 : 22) : 19.5
+        width: root.isMaterial ? (root.vertical ? 24 : 22) : 20
+        height: root.isMaterial ? (root.vertical ? 24 : 22) : 20
         // Config.options.custom.distroIcon/colorizeIcon do not exist in iNiR;
         // ported to the same source iNiR's own LeftSidebarButton uses.
         source: (Config.options?.material?.bar?.topLeftIcon ?? "distro") === "distro"
