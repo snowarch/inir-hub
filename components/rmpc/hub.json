@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "changes": {
+        "1.4.2": [
+            "The song time moves to the top edge of the progress bar and the song info shows how long the queue is"
+        ],
         "1.4.1": [
             "A Song notifications switch on its Hub page saves your choice for a hook script of yours (see the README)"
         ],
