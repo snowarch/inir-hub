@@ -23,10 +23,14 @@ Rectangle {
     readonly property bool nativeBlurActive: nativeBlurAllowed && glassActive
         && Appearance.useCompositorBlur("waffle", root.nativeBlurTopology)
     readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? false
+    readonly property bool floating: Looks.barFloating
+    // floating, the end groups keep off the rounded corners
+    readonly property real endPad: root.floating ? Looks.dp(6) : 0
     readonly property real _screenW: panelScreen?.width ?? Quickshell.screens[0]?.width ?? 1920
     readonly property real _screenH: panelScreen?.height ?? Quickshell.screens[0]?.height ?? 1080
     color: root.glassActive ? "transparent" : Looks.colors.bg0
     clip: true
+    radius: root.floating ? Looks.radius.large : 0
     implicitHeight: Looks.scaledBar(48, panelScreen)
 
     PaletteFade {
@@ -91,9 +95,9 @@ Rectangle {
     GlassBackground {
         anchors.fill: parent
         visible: root.glassActive && !root.nativeBlurActive && !Looks.gameModeMinimal
-        radius: 0
-        screenX: 0
-        screenY: root.barAtBottom ? (root._screenH - root.height) : 0
+        radius: root.radius
+        screenX: Looks.barGap
+        screenY: root.barAtBottom ? (root._screenH - root.height - Looks.barGap) : Looks.barGap
         screenWidth: root._screenW
         screenHeight: root._screenH
         auroraTransparency: Appearance.aurora.overlayTransparentize
@@ -101,6 +105,7 @@ Rectangle {
 
     Rectangle {
         id: border
+        visible: !root.floating
         anchors {
             left: parent.left
             right: parent.right
@@ -116,6 +121,7 @@ Rectangle {
     BarGroupRow {
         id: bloatRow
         anchors.left: parent.left
+        anchors.leftMargin: root.endPad
         opacity: (Config.options?.waffles?.bar?.leftAlignApps ?? false) ? 0 : 1
         visible: opacity > 0
         Behavior on opacity {
@@ -129,6 +135,7 @@ Rectangle {
         id: appsRow
         anchors.left: undefined
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.leftMargin: root.endPad
 
         states: State {
             name: "left"
@@ -154,6 +161,7 @@ Rectangle {
     BarGroupRow {
         id: systemRow
         anchors.right: parent.right
+        anchors.rightMargin: root.endPad
         FadeLoader {
             Layout.fillHeight: true
             shown: Config.options?.waffles?.bar?.leftAlignApps ?? false
@@ -165,6 +173,29 @@ Rectangle {
         SystemButton {}
         TimeButton {}
         DesktopPeekButton {}
+    }
+
+    // Floating, the bar is a pane of its own: the dark ring parts it from the wallpaper, the lit rim inside catches
+    // the light from above, as every Waffle Next surface does
+    Rectangle {
+        visible: root.floating
+        z: 10
+        anchors.fill: parent
+        radius: root.radius
+        color: "transparent"
+        border.width: 1
+        border.color: root.glassActive ? Looks.colors.tooltipBorder : Looks.colors.ring
+    }
+    Rectangle {
+        visible: root.floating
+        z: 10
+        anchors.fill: parent
+        anchors.margins: 1
+        radius: Math.max(0, root.radius - 1)
+        color: "transparent"
+        border.width: 1
+        border.color: Looks.colors.rim
+        opacity: root.glassActive ? 0.6 : 1
     }
 
     component BarGroupRow: RowLayout {

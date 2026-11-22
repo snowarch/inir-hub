@@ -15,7 +15,7 @@ QtObject {
         const listed = outputs.length === 0 || outputs.includes(name)
             || !outputs.some(output => Quickshell.screens.some(s => s?.name === output))
         if ((Config.options?.enabledPanels ?? []).includes("wBar") && (GlobalStates.barOpen ?? true) && listed)
-            insets[(bar?.bottom ?? true) ? "bottom" : "top"] = Looks.scaledBar(48, screen)
+            insets[(bar?.bottom ?? true) ? "bottom" : "top"] = Looks.barReach(screen)
         return insets
     }
 }

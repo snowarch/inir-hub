@@ -588,5 +588,8 @@
   "Sound, power, displays and what starts with you": "ध्वनि, पावर, डिस्प्ले और जो आपके साथ शुरू होता है",
   "Wallpaper, colours, the taskbar and its style": "वॉलपेपर, रंग, टास्कबार और उसकी शैली",
   "How windows open, move and look": "विंडो कैसे खुलती, हिलती और दिखती हैं",
-  "Light mode": "लाइट मोड"
+  "Light mode": "लाइट मोड",
+  "Floating taskbar": "तैरता टास्कबार",
+  "Lift the taskbar off the screen edge, with rounded corners": "टास्कबार को स्क्रीन के किनारे से अलग करें, गोल कोनों के साथ",
+  "floating": "तैरता"
 }

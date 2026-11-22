@@ -105,6 +105,7 @@
 {"pageIndex": 1,"section": "Event sounds","label": "Event sounds","targetLabel": "Event sounds","description": "","keywords": ["sound","audio","event","custom","theme","notification","battery","timer","pomodoro"]},
 {"pageIndex": 2,"section": "","label": "Taskbar","targetLabel": "","description": "Taskbar appearance and behavior"},
 {"pageIndex": 2,"section": "Position & Layout","label": "Bottom position","description": "Place taskbar at bottom of screen","keywords": ["taskbar","bar","position","bottom","top"]},
+{"pageIndex": 2,"section": "Position & Layout","label": "Floating taskbar","description": "Lift the taskbar off the screen edge, with rounded corners"},
 {"pageIndex": 2,"section": "Position & Layout","label": "Left-align apps","description": "Align taskbar apps to the left instead of center","keywords": ["taskbar","align","left","center","apps"]},
 {"pageIndex": 2,"section": "Icons","label": "Tint app icons","description": "Apply accent color to taskbar app icons","keywords": ["taskbar","icons","tint","monochrome","accent","color"]},
 {"pageIndex": 2,"section": "Icons","label": "Tint tray icons","description": "Apply accent color to system tray icons","keywords": ["tray","icons","tint","system","monochrome"]},

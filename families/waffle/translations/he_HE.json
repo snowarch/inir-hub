@@ -588,5 +588,8 @@
   "Sound, power, displays and what starts with you": "צליל, חשמל, מסכים ומה שמתחיל איתך",
   "Wallpaper, colours, the taskbar and its style": "רקע, צבעים, שורת המשימות והסגנון שלה",
   "How windows open, move and look": "איך חלונות נפתחים, זזים ונראים",
-  "Light mode": "מצב בהיר"
+  "Light mode": "מצב בהיר",
+  "Floating taskbar": "שורת משימות צפה",
+  "Lift the taskbar off the screen edge, with rounded corners": "מרחיק את שורת המשימות משולי המסך, עם פינות מעוגלות",
+  "floating": "צפה"
 }

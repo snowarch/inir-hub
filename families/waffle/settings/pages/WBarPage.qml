@@ -39,6 +39,14 @@ WSettingsPage {
             checked: Config.options?.waffles?.bar?.bottom ?? true
             onToggled: checked => Config.setNestedValue("waffles.bar.bottom", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Floating taskbar")
+            icon: "border-outside"
+            description: Translation.tr("Lift the taskbar off the screen edge, with rounded corners")
+            checked: Config.options?.waffles?.bar?.floating ?? true
+            onToggled: checked => Config.setNestedValue("waffles.bar.floating", checked)
+        }
         
         WSettingsSwitch {
             label: Translation.tr("Left-align apps")

@@ -32,6 +32,12 @@ Singleton {
     readonly property bool glassActive: root.auroraEverywhere && !root.inirEverywhere
 
     readonly property bool effectsEnabled: Appearance.effectsEnabled
+    // Waffle Next floats the taskbar off its edge; barReach is the room it takes there, its gap included
+    readonly property bool barFloating: Config.options?.waffles?.bar?.floating ?? true
+    readonly property int barGap: root.barFloating ? root.dp(8) : 0
+    function barReach(screen) {
+        return root.scaledBar(48, screen) + root.barGap
+    }
     readonly property bool gameModeActive: Appearance._gameModeActive
     readonly property bool gameModeMinimal: Appearance.gameModeMinimal
 

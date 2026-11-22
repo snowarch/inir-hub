@@ -119,6 +119,7 @@ JsonObject {
     }
     property JsonObject bar: JsonObject {
         property bool bottom: true
+        property bool floating: true // a rounded pane a gap off its edge; false docks it flat on the edge
         property bool leftAlignApps: false
         property bool monochromeIcons: false
         property bool tintTrayIcons: false

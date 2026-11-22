@@ -588,5 +588,8 @@
   "Sound, power, displays and what starts with you": "Son, alimentation, écrans et ce qui démarre avec vous",
   "Wallpaper, colours, the taskbar and its style": "Fond d'écran, couleurs, la barre des tâches et son style",
   "How windows open, move and look": "Comment les fenêtres s'ouvrent, bougent et s'affichent",
-  "Light mode": "Mode clair"
+  "Light mode": "Mode clair",
+  "Floating taskbar": "Barre des tâches flottante",
+  "Lift the taskbar off the screen edge, with rounded corners": "Détache la barre des tâches du bord de l'écran, avec des coins arrondis",
+  "floating": "flottante"
 }

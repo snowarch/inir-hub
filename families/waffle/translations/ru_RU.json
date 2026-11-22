@@ -588,5 +588,8 @@
   "Sound, power, displays and what starts with you": "Звук, питание, дисплеи и то, что запускается вместе с вами",
   "Wallpaper, colours, the taskbar and its style": "Обои, цвета, панель задач и её стиль",
   "How windows open, move and look": "Как окна открываются, двигаются и выглядят",
-  "Light mode": "Светлый режим"
+  "Light mode": "Светлый режим",
+  "Floating taskbar": "Плавающая панель задач",
+  "Lift the taskbar off the screen edge, with rounded corners": "Отделяет панель задач от края экрана и скругляет углы",
+  "floating": "плавающая"
 }

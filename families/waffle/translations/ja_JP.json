@@ -588,5 +588,8 @@
   "Sound, power, displays and what starts with you": "サウンド、電源、ディスプレイ、一緒に起動するもの",
   "Wallpaper, colours, the taskbar and its style": "壁紙、色、タスクバーとそのスタイル",
   "How windows open, move and look": "ウィンドウの開き方、動き方、見た目",
-  "Light mode": "ライトモード"
+  "Light mode": "ライトモード",
+  "Floating taskbar": "フローティングタスクバー",
+  "Lift the taskbar off the screen edge, with rounded corners": "タスクバーを画面の端から浮かせ、角を丸くします",
+  "floating": "フローティング"
 }

@@ -29,7 +29,7 @@ Variants {
         readonly property bool activationWatermarkEnabled: Config.options?.waffles?.bar?.activationWatermark?.enable ?? false
         readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? true
         readonly property real activationWatermarkBottomMargin: panelRoot.barAtBottom
-            ? (Looks.scaledBar(48, panelRoot.screen) + Looks.dp(8))
+            ? (Looks.barReach(panelRoot.screen) + Looks.dp(8))
             : Looks.dp(14)
 
         // Multi-monitor wallpaper support

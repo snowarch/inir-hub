@@ -13,6 +13,7 @@ Rectangle {
 
     readonly property var bar: Config.options?.waffles?.bar ?? ({})
     readonly property bool atBottom: root.bar.bottom ?? true
+    readonly property bool floating: root.bar.floating ?? true
     readonly property bool leftAlign: root.bar.leftAlignApps ?? false
     readonly property bool tintApps: root.bar.monochromeIcons ?? false
     readonly property bool tintTray: root.bar.tintTrayIcons ?? false
@@ -47,17 +48,28 @@ Rectangle {
         // the bar, 48 px like Windows', drawn at three quarters
         Rectangle {
             id: strip
+            // floating, it lifts off the edge as a rounded pane, as the real one does
+            property real inset: root.floating ? Looks.dp(6) : 0
+            Behavior on inset {
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+            }
             anchors.left: parent.left
             anchors.right: parent.right
-            y: root.atBottom ? parent.height - height : 0
+            anchors.leftMargin: strip.inset
+            anchors.rightMargin: strip.inset
+            y: root.atBottom ? parent.height - height - strip.inset : strip.inset
             height: Looks.dp(36)
+            radius: strip.inset * 1.5
             color: Qt.alpha(Looks.colors.bg1Base, Looks.dark ? 0.86 : 0.9)
+            border.width: root.floating ? 1 : 0
+            border.color: Looks.colors.ring
             Behavior on y {
                 animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
             }
             Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
+                visible: !root.floating
                 y: root.atBottom ? 0 : parent.height - 1
                 height: 1
                 color: Qt.alpha(Looks.colors.fg, 0.08)
@@ -177,6 +189,7 @@ Rectangle {
                 anchors.centerIn: parent
                 text: [root.leftAlign ? Translation.tr("Apps on the left") : Translation.tr("Apps centered"),
                     root.atBottom ? Translation.tr("bottom edge") : Translation.tr("top edge"),
+                    root.floating ? Translation.tr("floating") : "",
                     root.tintApps ? Translation.tr("tinted icons") : ""].filter(t => t.length > 0).join(" · ")
                 font.pixelSize: Looks.settings.caption
             }

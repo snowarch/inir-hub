@@ -50,7 +50,7 @@ QtObject {
             return result
         const screen = Quickshell.screens.find(item => (item?.name ?? "") === outputName) ?? Quickshell.screens[0]
         result.barEdge = (Config.options?.waffles?.bar?.bottom ?? true) ? "bottom" : "top"
-        result.barThickness = Looks.scaledBar(48, screen)
+        result.barThickness = Looks.barReach(screen)
         ShellLayoutController.applyInset(result, result.barEdge, result.barThickness)
         return result
     }

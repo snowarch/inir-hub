@@ -588,5 +588,8 @@
   "Sound, power, displays and what starts with you": "소리, 전원, 디스플레이 및 함께 시작되는 항목",
   "Wallpaper, colours, the taskbar and its style": "배경 화면, 색상, 작업 표시줄과 스타일",
   "How windows open, move and look": "창이 열리고 움직이고 보이는 방식",
-  "Light mode": "라이트 모드"
+  "Light mode": "라이트 모드",
+  "Floating taskbar": "떠 있는 작업 표시줄",
+  "Lift the taskbar off the screen edge, with rounded corners": "작업 표시줄을 화면 가장자리에서 띄우고 모서리를 둥글게 합니다",
+  "floating": "플로팅"
 }

@@ -588,5 +588,8 @@
   "Sound, power, displays and what starts with you": "Suara, daya, layar, dan yang mulai bersamamu",
   "Wallpaper, colours, the taskbar and its style": "Wallpaper, warna, bilah tugas, dan gayanya",
   "How windows open, move and look": "Cara jendela terbuka, bergerak, dan tampil",
-  "Light mode": "Mode terang"
+  "Light mode": "Mode terang",
+  "Floating taskbar": "Bilah tugas mengambang",
+  "Lift the taskbar off the screen edge, with rounded corners": "Angkat bilah tugas dari tepi layar, dengan sudut membulat",
+  "floating": "mengambang"
 }
