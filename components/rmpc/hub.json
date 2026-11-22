@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "changes": {
+        "1.4.1": [
+            "A Song notifications switch on its Hub page saves your choice for a hook script of yours (see the README)"
+        ],
         "1.4.0": [
             "Progress bar choices (line, dots, rounded) and a tree-like look for Directories, both optional on its Hub page"
         ],
