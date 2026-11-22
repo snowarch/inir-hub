@@ -43,7 +43,7 @@ Item {
         // (Angel roundingLarge=0 → sharp corners, Aurora screenRounding→18px — both wrong for waffle)
         radius: root.radius
         // Use Looks' glass-aware subtle border instead of raw Angel/Aurora primary borders
-        border.color: root.glassActive ? Looks.colors.tooltipBorder : Looks.colors.bg2Border
+        border.color: root.glassActive ? Looks.colors.tooltipBorder : Looks.colors.ring
         border.width: 1
         implicitWidth: contentItem.implicitWidth + border.width * 2
         implicitHeight: contentItem.implicitHeight + border.width * 2
@@ -86,5 +86,16 @@ Item {
         }
 
         children: [glassBackground, root.contentItem]
+    }
+
+    // the glass edge: a lit hairline inside the dark ring, brightest along the top
+    Rectangle {
+        z: 2
+        anchors.fill: contentRect
+        radius: borderRect.radius - borderRect.border.width
+        color: "transparent"
+        border.width: 1
+        border.color: Looks.colors.rim
+        opacity: root.glassActive && Looks.useMaterial ? 0.6 : 1
     }
 }
