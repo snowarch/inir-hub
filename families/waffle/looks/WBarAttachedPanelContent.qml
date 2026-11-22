@@ -17,17 +17,17 @@ Item {
     property bool presented: true
     property bool closing: false
     property bool panelRightAligned: false
-    property real visualMargin: Looks.dp(12)
+    property real visualMargin: Looks.dp(16)
     // The bar exclusive zone already offsets attached windows.
-    property int closeAnimDuration: Looks.transition.duration.medium
+    property int closeAnimDuration: Looks.transition.duration.leave
     property bool revealFromSides: false
     property bool revealFromLeft: true
 
     // Animation configuration
-    property real openScale: 0.94
-    property real closeScale: 0.97
+    property real openScale: 0.96
+    property real closeScale: 0.98
     property int openDuration: Looks.transition.duration.panel
-    property int slideOffset: Looks.dp(20)
+    property int slideOffset: Looks.dp(28)
 
     function close() {
         if (root.closing)
@@ -123,7 +123,7 @@ Item {
                 to: root.visualMargin
                 duration: Looks.transition.enabled ? root.openDuration : 0
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive
             }
             NumberAnimation {
                 target: panelContent
@@ -131,15 +131,15 @@ Item {
                 to: root.visualMargin
                 duration: Looks.transition.enabled ? root.openDuration : 0
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive
             }
             NumberAnimation {
                 target: panelContent
                 property: "opacity"
                 to: 1
-                duration: Looks.transition.enabled ? (root.openDuration * 0.7) : 0
+                duration: Looks.transition.enabled ? (root.openDuration * 0.55) : 0
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive
             }
             NumberAnimation {
                 target: panelContent
@@ -147,7 +147,7 @@ Item {
                 to: 1
                 duration: Looks.transition.enabled ? root.openDuration : 0
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Looks.transition.easing.bezierCurve.spring
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive
             }
         }
         
@@ -162,7 +162,7 @@ Item {
                     to: -root.slideOffset * 0.5
                     duration: Looks.transition.enabled ? root.closeAnimDuration : 0
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Looks.transition.easing.bezierCurve.accelerate
+                    easing.bezierCurve: Looks.transition.easing.bezierCurve.leave
                 }
                 NumberAnimation {
                     target: panelContent
@@ -170,7 +170,7 @@ Item {
                     to: -root.slideOffset * 0.5
                     duration: Looks.transition.enabled ? root.closeAnimDuration : 0
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Looks.transition.easing.bezierCurve.accelerate
+                    easing.bezierCurve: Looks.transition.easing.bezierCurve.leave
                 }
                 NumberAnimation {
                     target: panelContent
@@ -178,7 +178,7 @@ Item {
                     to: 0
                     duration: Looks.transition.enabled ? (root.closeAnimDuration * 0.8) : 0
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Looks.transition.easing.bezierCurve.accelerate
+                    easing.bezierCurve: Looks.transition.easing.bezierCurve.leave
                 }
                 NumberAnimation {
                     target: panelContent
@@ -186,7 +186,7 @@ Item {
                     to: root.closeScale
                     duration: Looks.transition.enabled ? root.closeAnimDuration : 0
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Looks.transition.easing.bezierCurve.accelerate
+                    easing.bezierCurve: Looks.transition.easing.bezierCurve.leave
                 }
             }
             ScriptAction {

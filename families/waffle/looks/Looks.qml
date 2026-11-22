@@ -106,12 +106,16 @@ Singleton {
             return col
         return Qt.rgba(c.r, c.g, c.b, Math.max(c.a, minAlpha))
     }
+    // Mica: Waffle's own greys take a breath of the accent, so every plate belongs to the wallpaper it sits on
+    function mica(col: color): color {
+        return ColorUtils.mix(Appearance.colors.colPrimary, col, root.dark ? 0.07 : 0.05)
+    }
     lightColors: QtObject {
         id: lightColors
-        property color bgPanelFooter: "#EEEEEE"
-        property color bgPanelBody: "#F2F2F2"
-        property color bgPanelSeparator: "#E0E0E0"
-        property color bg0: "#EEEEEE"
+        property color bgPanelFooter: "#ECEDF1"
+        property color bgPanelBody: "#F2F2F5"
+        property color bgPanelSeparator: "#E0E1E6"
+        property color bg0: "#F1F2F5"
         property color bg0Border: '#adadad'
         property color bg1: "#F7F7F7"
         property color bg1Base: "#F7F7F7"
@@ -137,17 +141,17 @@ Singleton {
     }
     darkColors: QtObject {
         id: darkColors
-        property color bgPanelFooter: "#1C1C1C"
+        property color bgPanelFooter: "#1A1B1F"
         property color bgPanelBody: '#616161'
-        property color bgPanelSeparator: "#191919"
-        property color bg0: "#1C1C1C"
-        property color bg0Border: "#404040"
-        property color bg1Base: "#2C2C2C"
+        property color bgPanelSeparator: "#16171A"
+        property color bg0: "#17181C"
+        property color bg0Border: "#3B3D44"
+        property color bg1Base: "#25262B"
         property color bg1: "#a8a8a8"
         property color bg1Hover: "#b3b3b3"
         property color bg1Active: '#727272'
         property color bg1Border: '#bebebe'
-        property color bg2Base: "#313131"
+        property color bg2Base: "#2D2E34"
         property color bg2: '#8a8a8a'
         property color bg2Hover: '#b1b1b1'
         property color bg2Active: '#919191'
@@ -166,7 +170,7 @@ Singleton {
     }
     colors: QtObject {
         id: colors
-        property color shadow: ColorUtils.transparentize('#161616', 0.62)
+        property color shadow: ColorUtils.transparentize('#08090C', root.dark ? 0.45 : 0.72)
         property color ambientShadow: ColorUtils.transparentize("#000000", 0.75)
         
         // Material-aware colors - 3 paths:
@@ -178,10 +182,10 @@ Singleton {
         // 3. !useMaterial + (!glass || !dark) → original Win11 colors at intended transparency
         property color bgPanelFooterBase: root.useMaterial
             ? Appearance.colors.colLayer0
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelFooter : root.lightColors.bgPanelFooter, root.panelBackgroundTransparency)
+            : ColorUtils.transparentize(root.mica(root.dark ? root.darkColors.bgPanelFooter : root.lightColors.bgPanelFooter), root.panelBackgroundTransparency)
         property color bgPanelFooter: root.useMaterial
             ? Appearance.colors.colLayer1
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelFooter : root.lightColors.bgPanelFooter, root.panelLayerTransparency)
+            : ColorUtils.transparentize(root.mica(root.dark ? root.darkColors.bgPanelFooter : root.lightColors.bgPanelFooter), root.panelLayerTransparency)
         // bgPanelBody is only used inside WPane-backed panels (BodyRectangle),
         // so making it transparent when glass+material lets GlassBackground show through
         property color bgPanelBody: root.glassActive && root.useMaterial
@@ -200,7 +204,7 @@ Singleton {
                     root.backgroundTransparency)
         property color bg0Opaque: root.editorialEverywhere ? Appearance.editorial.paper : root.useMaterial
             ? Appearance.m3colors.m3background
-            : (root.dark ? root.darkColors.bg0 : root.lightColors.bg0)
+            : root.mica(root.dark ? root.darkColors.bg0 : root.lightColors.bg0)
         property color bg0: root.useMaterial
             ? Appearance.colors.colLayer0 
             : ColorUtils.transparentize(bg0Opaque, root.backgroundTransparency)
@@ -211,7 +215,7 @@ Singleton {
                 : ColorUtils.transparentize(root.dark ? root.darkColors.bg0Border : root.lightColors.bg0Border, root.backgroundTransparency)
         property color bg1Base: root.useMaterial 
             ? Appearance.colors.colLayer1 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bg1Base : root.lightColors.bg1Base, root.backgroundTransparency)
+            : ColorUtils.transparentize(root.mica(root.dark ? root.darkColors.bg1Base : root.lightColors.bg1Base), root.backgroundTransparency)
         property color bg1: root.useMaterial 
             ? Appearance.colors.colLayer1 
             : ColorUtils.transparentize(
@@ -236,7 +240,7 @@ Singleton {
                     root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg2Base: root.useMaterial 
             ? Appearance.colors.colLayer2 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bg2Base : root.lightColors.bg2Base, root.backgroundTransparency)
+            : ColorUtils.transparentize(root.mica(root.dark ? root.darkColors.bg2Base : root.lightColors.bg2Base), root.backgroundTransparency)
         property color bg2: root.useMaterial 
             ? Appearance.colors.colLayer2 
             : ColorUtils.transparentize(
@@ -327,22 +331,30 @@ Singleton {
         property color accentFg: ColorUtils.isDark(accent) ? "#FFFFFF" : "#000000"
         property color selection: Appearance.colors.colPrimaryContainer
         property color selectionFg: Appearance.colors.colOnPrimaryContainer
+        // the lit top edge of a glass plate, and the ring that lifts it off any wallpaper
+        property color rim: ColorUtils.applyAlpha("#FFFFFF", root.dark ? 0.09 : 0.75) // literal: light caught by the glass edge
+        property color ring: ColorUtils.applyAlpha("#000000", root.dark ? 0.42 : 0.10) // literal: the hairline that separates glass from the wallpaper
+        // a wash of the accent for selected rows and active tiles
+        property color accentWash: ColorUtils.applyAlpha(accent, root.dark ? 0.16 : 0.12)
+        property color accentWashHover: ColorUtils.applyAlpha(accent, root.dark ? 0.22 : 0.17)
     }
 
+    // Waffle Next: soft corners that nest. A plate's corner is its content's corner plus the padding between them.
     radius: QtObject {
         id: radius
         property int none: 0
-        property int small: root.dp(2)
-        property int medium: root.dp(4)
-        property int large: root.editorialEverywhere ? root.dp(Appearance.editorial.radius) : root.dp(8)
-        property int xLarge: root.dp(12)
+        property int small: root.dp(4)
+        property int medium: root.dp(7)
+        property int large: root.editorialEverywhere ? root.dp(Appearance.editorial.radius) : root.dp(14)
+        property int xLarge: root.dp(20)
+        property int pill: 9999
     }
 
     settings: QtObject {
-        property int radiusSmall: root.dp(4)
-        property int radiusMedium: root.dp(7)
-        property int radiusLarge: root.dp(9)
-        property int radiusXLarge: root.dp(12)
+        property int radiusSmall: root.dp(8)
+        property int radiusMedium: root.dp(10)
+        property int radiusLarge: root.dp(14)
+        property int radiusXLarge: root.dp(18)
         property int panelPadding: root.dp(16)
         readonly property color ink: root.dark
             ? ColorUtils.mix("#FFFFFF", colors.fg, 0.55)
@@ -354,20 +366,24 @@ Singleton {
         readonly property color tilePressed: ColorUtils.applyAlpha(ink, root.dark ? 0.19 : 0.115)
         // Windows 11 SettingsCard (CommunityToolkit SettingsCard.xaml, read 10-29): CardBackgroundFillColorDefault,
         // CardStrokeColorDefault (a shade, not a light rim), ControlFillColorSecondary / Tertiary under the pointer
-        readonly property color card: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.05) : ColorUtils.applyAlpha("#FFFFFF", 0.7)
-        readonly property color cardHover: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.085) : ColorUtils.applyAlpha("#F9F9F9", 0.5)
-        readonly property color cardPressed: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.035) : ColorUtils.applyAlpha("#F9F9F9", 0.3)
-        readonly property color cardStroke: ColorUtils.applyAlpha("#000000", root.dark ? 0.1 : 0.0578)
-        readonly property int cardMinHeight: root.dp(68)
+        readonly property color card: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.045) : ColorUtils.applyAlpha("#FFFFFF", 0.78)
+        readonly property color cardHover: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.075) : ColorUtils.applyAlpha("#FFFFFF", 0.95)
+        readonly property color cardPressed: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.03) : ColorUtils.applyAlpha("#F6F6F8", 0.7)
+        readonly property color cardStroke: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.06) : ColorUtils.applyAlpha("#000000", 0.06)
+        // the window behind the cards: deeper than the cards in dark, a shade under them in light
+        readonly property color canvas: root.dark ? ColorUtils.mix(Appearance.colors.colPrimary, "#121317", 0.06) : ColorUtils.mix(Appearance.colors.colPrimary, "#EEF0F4", 0.05)
+        readonly property color pane: root.dark ? ColorUtils.mix(Appearance.colors.colPrimary, "#0E0F12", 0.05) : ColorUtils.mix(Appearance.colors.colPrimary, "#E6E8EE", 0.06)
+        readonly property int cardMinHeight: root.dp(64)
         readonly property int cardItemMinHeight: root.dp(52)
-        readonly property int cardPadding: root.dp(16)
-        readonly property int cardSpacing: root.dp(4)
+        readonly property int cardPadding: root.dp(18)
+        readonly property int cardSpacing: root.dp(3)
         readonly property int cardIconSize: root.dp(20)
         // Windows type ramp: Caption 12, Body 14, BodyStrong 14 semibold, Subtitle 20, Title 28
         readonly property int caption: root.dp(12)
         readonly property int body: root.dp(14)
         readonly property int subtitle: root.dp(20)
         readonly property int title: root.dp(28)
+        readonly property int display: root.dp(40)
     }
 
     font: QtObject {
@@ -427,6 +443,10 @@ Singleton {
                 readonly property list<real> popOut: [0.5, 0.0, 1.0, 0.5, 1, 1]          // Quick pop-out
                 readonly property list<real> bounce: [0.34, 1.56, 0.64, 1.0, 1, 1]       // Playful bounce
                 readonly property list<real> smooth: [0.25, 0.1, 0.25, 1.0, 1, 1]        // Very smooth, natural
+                // Waffle Next: a long, soft landing for what arrives; a short lift for what leaves
+                readonly property list<real> arrive: [0.05, 0.7, 0.1, 1.0, 1, 1]
+                readonly property list<real> leave: [0.3, 0.0, 0.8, 0.15, 1, 1]
+                readonly property list<real> glide: [0.2, 0.0, 0.0, 1.0, 1, 1]
             }
         }
         
@@ -438,9 +458,10 @@ Singleton {
             readonly property int normal: 150
             readonly property int medium: 200
             readonly property int slow: 300
-            readonly property int panel: 250         // Slightly faster panels
+            readonly property int panel: 380         // a panel lands softly
+            readonly property int leave: 170         // and leaves at once
             readonly property int overlay: 300
-            readonly property int page: 350          // Page transitions
+            readonly property int page: 420          // Page transitions
             readonly property int chromeHover: 90
             readonly property int chromePress: 120
             readonly property int chromeRelease: 170
