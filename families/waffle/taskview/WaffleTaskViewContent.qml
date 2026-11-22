@@ -32,8 +32,8 @@ Item {
     
     // Thumbnail sizing
     readonly property real workspaceSpacing: 48
-    readonly property real thumbnailWidth: Math.min(screenWidth * 0.38, 600)
-    readonly property real thumbnailHeight: thumbnailWidth * (screenHeight / screenWidth)
+    readonly property real thumbnailWidth: Math.round(Math.min(screenWidth * 0.38, 600))
+    readonly property real thumbnailHeight: Math.round(thumbnailWidth * (screenHeight / screenWidth))
     readonly property real labelHeight: 28
     readonly property real labelSpacing: 10
     readonly property real hintsSpacing: 55  // Space between workspace and hints
@@ -440,7 +440,7 @@ Item {
             width: workspaceRow.width
             height: workspaceRow.height
             y: 0
-            x: (root.screenWidth / 2) - (root.selectedSlot * (root.thumbnailWidth + root.workspaceSpacing)) - (root.thumbnailWidth / 2)
+            x: Math.round((root.screenWidth / 2) - (root.selectedSlot * (root.thumbnailWidth + root.workspaceSpacing)) - (root.thumbnailWidth / 2))
             
             Behavior on x {
                 NumberAnimation { 
@@ -502,7 +502,7 @@ Item {
                 anchors.leftMargin: root.workspaceSpacing / 2
                 anchors.top: workspaceRow.top
                 anchors.topMargin: root.labelHeight + root.labelSpacing
-                width: root.thumbnailWidth * 0.6
+                width: Math.round(root.thumbnailWidth * 0.6)
                 height: root.thumbnailHeight
                 opacity: newWsDropArea.containsDrag ? 1 : 0.6
                 
