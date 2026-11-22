@@ -152,25 +152,31 @@ Item {
     property bool flatBottom: false
     // an expander's header keeps its control left of the chevron, over its items' controls (44)
     property real endInset: root._item ? Looks.dp(44) : Looks.settings.cardPadding
+    // where an item's text starts when it has no icon: past an expander's icon, or the group's padding
+    property real itemIndent: Looks.dp(58)
+    // the group draws a hairline above every row but its first (a row's own y says nothing inside a wrapper)
+    property bool hairline: false
     readonly property string settingsCardRole: "row"
     readonly property bool _item: root.cardStyle === "item"
 
     implicitHeight: Math.max(root._item ? Looks.settings.cardItemMinHeight : Looks.settings.cardMinHeight,
-        contentRow.implicitHeight + (root._item ? Looks.dp(16) : Looks.dp(26)))
+        contentRow.implicitHeight + (root._item ? Looks.dp(20) : Looks.dp(26)))
 
     Rectangle {
         id: background
         anchors.fill: parent
-        radius: root._item ? 0 : Looks.settings.radiusSmall
+        radius: root._item ? 0 : Looks.settings.radiusLarge
         // an open expander's header meets its rows with a straight edge
         bottomLeftRadius: root.flatBottom ? 0 : radius
         bottomRightRadius: root.flatBottom ? 0 : radius
         color: {
+            if (root._item)
+                return "transparent"
             if (root.clickable && mouseArea.pressed)
                 return Looks.settings.cardPressed
             if (root.clickable && mouseArea.containsMouse)
                 return Looks.settings.cardHover
-            return root._item ? "transparent" : Looks.settings.card
+            return Looks.settings.card
         }
         border.width: root._item ? 0 : 1
         border.color: Looks.settings.cardStroke
@@ -178,12 +184,25 @@ Item {
             animation: ColorAnimation { duration: Looks.transition.enabled ? 83 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
         Rectangle {
-            visible: root._item
+            visible: root._item && root.hairline
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.leftMargin: root.itemIndent
             height: 1
             color: Looks.settings.cardStroke
+        }
+        // an item under the pointer lights an inset plate of its own
+        Rectangle {
+            visible: root._item && root.clickable
+            anchors.fill: parent
+            anchors.margins: Looks.dp(4)
+            radius: Looks.settings.radiusSmall
+            color: mouseArea.pressed ? Looks.settings.tilePressed : Looks.settings.tile
+            opacity: mouseArea.containsMouse || mouseArea.pressed ? 1 : 0
+            Behavior on opacity {
+                animation: NumberAnimation { duration: Looks.transition.enabled ? 110 : 0 }
+            }
         }
     }
 
@@ -222,20 +241,27 @@ Item {
             left: parent.left
             right: parent.right
             verticalCenter: parent.verticalCenter
-            leftMargin: root._item ? Looks.dp(root.icon !== "" ? 16 : 58) : Looks.settings.cardPadding
+            leftMargin: root._item ? (root.icon !== "" ? Looks.settings.cardPadding : root.itemIndent) : Looks.settings.cardPadding
             rightMargin: root.endInset
         }
         spacing: Looks.dp(16)
 
-        // SettingsCard header icon: 20 px glyph, 20 px before the text (HeaderIconMargin 2,0,20,0)
-        FluentIcon {
+        // the setting's glyph on a small tile of its own
+        Rectangle {
             visible: root.icon !== ""
-            Layout.leftMargin: Looks.dp(2)
-            Layout.rightMargin: Looks.dp(4)
             Layout.alignment: Qt.AlignVCenter
-            icon: root.icon
-            implicitSize: Looks.settings.cardIconSize
-            color: Looks.colors.fg
+            implicitWidth: Looks.dp(32)
+            implicitHeight: Looks.dp(32)
+            radius: Looks.dp(9)
+            color: Looks.settings.tile
+            border.width: 1
+            border.color: Looks.settings.cardStroke
+            FluentIcon {
+                anchors.centerIn: parent
+                icon: root.icon
+                implicitSize: Looks.dp(17)
+                color: Looks.colors.fg
+            }
         }
 
         ColumnLayout {
@@ -272,7 +298,11 @@ Item {
             visible: root.showChevron
             icon: "chevron-right"
             implicitSize: Looks.dp(13)
-            color: Looks.colors.fg
+            color: Looks.colors.subfg
+            transform: Translate {
+                x: mouseArea.containsMouse ? Looks.dp(3) : 0
+                Behavior on x { animation: NumberAnimation { duration: Looks.transition.enabled ? 160 : 0; easing.type: Easing.OutCubic } }
+            }
         }
     }
 }

@@ -584,5 +584,9 @@
   "See the welcome screen": "ようこそ画面を見る",
   "Rest screen": "休止画面",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "操作がないとき、壁紙の上に時刻と再生中の曲を表示します（0 = しない）",
-  "Sound files": "サウンドファイル"
+  "Sound files": "サウンドファイル",
+  "Sound, power, displays and what starts with you": "サウンド、電源、ディスプレイ、一緒に起動するもの",
+  "Wallpaper, colours, the taskbar and its style": "壁紙、色、タスクバーとそのスタイル",
+  "How windows open, move and look": "ウィンドウの開き方、動き方、見た目",
+  "Light mode": "ライトモード"
 }

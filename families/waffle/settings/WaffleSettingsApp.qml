@@ -156,15 +156,15 @@ ApplicationWindow {
     
     // the pane shows these; a category with one page opens it, more show their link cards (Windows' Settings IA)
     readonly property var categories: [
-        { name: Translation.tr("Home"), icon: "widgets", tint: "#0067C0", tintDark: "#60CDFF", pages: [0] },
-        { name: Translation.tr("System"), icon: "desktop", tint: "#0067C0", tintDark: "#4CC2FF", pages: [1, 19, 11, 12], hero: "system" },
-        { name: Translation.tr("Personalization"), icon: "paint-bucket", tint: "#C239B3", tintDark: "#F08CE4", pages: [3, 4, 2, 8, 5, 14], hero: "desktop" },
-        { name: Translation.tr("Windows & layout"), icon: "apps", tint: "#8764B8", tintDark: "#C6A8F5", pages: [20, 6, 7, 17, 13, 16] },
-        { name: Translation.tr("Devices"), icon: "phone-desktop", tint: "#0078D4", tintDark: "#4CC2FF", pages: [21] },
-        { name: Translation.tr("Keyboard & shortcuts"), icon: "keyboard", tint: "#038387", tintDark: "#4FD8D8", pages: [9] },
-        { name: Translation.tr("AI"), icon: "wand", tint: "#CA5010", tintDark: "#FFA266", pages: [15] },
-        { name: Translation.tr("Hub"), icon: "store-microsoft", tint: "#107C10", tintDark: "#6CCB5F", pages: [18] },
-        { name: Translation.tr("About"), icon: "info", tint: "#5D5A58", tintDark: "#C8C6C4", pages: [10], apart: true }
+        { name: Translation.tr("Home"), icon: "widgets", tint: "#0A6CD6", tintDark: "#60CDFF", pages: [0] },
+        { name: Translation.tr("System"), desc: Translation.tr("Sound, power, displays and what starts with you"), icon: "desktop", tint: "#2A62E8", tintDark: "#7FA8FF", pages: [1, 19, 11, 12], hero: "system" },
+        { name: Translation.tr("Personalization"), desc: Translation.tr("Wallpaper, colours, the taskbar and its style"), icon: "paint-bucket", tint: "#C2338F", tintDark: "#F58AD0", pages: [3, 4, 2, 8, 5, 14], hero: "desktop" },
+        { name: Translation.tr("Windows & layout"), desc: Translation.tr("How windows open, move and look"), icon: "apps", tint: "#7A4FD6", tintDark: "#C2A6FF", pages: [20, 6, 7, 17, 13, 16] },
+        { name: Translation.tr("Devices"), icon: "phone-desktop", tint: "#0F8A9E", tintDark: "#5ED3E6", pages: [21] },
+        { name: Translation.tr("Keyboard & shortcuts"), icon: "keyboard", tint: "#1F8A5B", tintDark: "#6BDDA6", pages: [9] },
+        { name: Translation.tr("AI"), icon: "wand", tint: "#D9622B", tintDark: "#FFAA78", pages: [15] },
+        { name: Translation.tr("Hub"), icon: "store-microsoft", tint: "#C7871A", tintDark: "#F5C55E", pages: [18] },
+        { name: Translation.tr("About"), icon: "info", tint: "#5F6470", tintDark: "#BFC4CF", pages: [10], apart: true }
     ]
 
     property int currentPage: 0
@@ -240,7 +240,7 @@ ApplicationWindow {
     minimumHeight: 450
     width: 1280
     height: 820
-    color: root.uiReady ? Looks.colors.bg0Opaque : "transparent"
+    color: root.uiReady ? Looks.settings.canvas : "transparent"
     
     // Loading state
     Item {

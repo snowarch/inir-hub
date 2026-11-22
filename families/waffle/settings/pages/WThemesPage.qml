@@ -245,11 +245,11 @@ WSettingsPage {
                             icon: "apps"
                         },
                         {
-                            label: Translation.tr("Dark"),
+                            label: Translation.tr("Dark mode"),
                             icon: "weather-moon"
                         },
                         {
-                            label: Translation.tr("Light"),
+                            label: Translation.tr("Light mode"),
                             icon: "weather-sunny"
                         }
                     ]
@@ -645,11 +645,11 @@ WSettingsPage {
             options: [
                 {
                     value: "light",
-                    displayName: Translation.tr("Light")
+                    displayName: Translation.tr("Light mode")
                 },
                 {
                     value: "dark",
-                    displayName: Translation.tr("Dark")
+                    displayName: Translation.tr("Dark mode")
                 }
             ]
             onSelected: newValue => {

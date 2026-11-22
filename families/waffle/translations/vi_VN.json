@@ -584,5 +584,9 @@
   "See the welcome screen": "Xem màn hình chào mừng",
   "Rest screen": "Màn hình nghỉ",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "Giờ và nội dung đang phát trên hình nền sau khi không hoạt động (0 = không bao giờ)",
-  "Sound files": "Tệp âm thanh"
+  "Sound files": "Tệp âm thanh",
+  "Sound, power, displays and what starts with you": "Âm thanh, nguồn, màn hình và những gì khởi động cùng bạn",
+  "Wallpaper, colours, the taskbar and its style": "Hình nền, màu sắc, thanh tác vụ và phong cách của nó",
+  "How windows open, move and look": "Cách cửa sổ mở, di chuyển và hiển thị",
+  "Light mode": "Chế độ sáng"
 }

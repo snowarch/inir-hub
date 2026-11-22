@@ -23,7 +23,7 @@ Flickable {
     property string settingsPageName: pageTitle
     
     clip: true
-    contentHeight: contentColumn.implicitHeight + 56
+    contentHeight: contentColumn.implicitHeight + 64
     boundsBehavior: Flickable.StopAtBounds
     pressDelay: 50
     
@@ -33,12 +33,12 @@ Flickable {
         id: contentColumn
         // Windows' Settings keeps a page to 1000 px, left-aligned under its title
         x: root.sidePadding
-        y: root.showHeader ? 24 : 0
+        y: root.showHeader ? 24 : 4
         width: Math.min(root.width - root.sidePadding * 2, Looks.dp(1000))
         spacing: Looks.settings.cardSpacing
 
         opacity: 0
-        transform: Translate { id: contentTranslate; y: Looks.transition.enabled ? 14 : 0 }
+        transform: Translate { id: contentTranslate; y: Looks.transition.enabled ? 22 : 0 }
 
         Component.onCompleted: {
             if (Looks.transition.enabled) {
@@ -57,15 +57,15 @@ Flickable {
                 from: 0; to: 1
                 duration: Looks.transition.duration.page
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive
             }
             NumberAnimation {
                 target: contentTranslate
                 property: "y"
-                from: 14; to: 0
+                from: 22; to: 0
                 duration: Looks.transition.duration.page
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive
             }
         }
 

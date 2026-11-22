@@ -184,6 +184,7 @@ WSettingsPage {
 
         // ─── Wallpaper folder browser ───
         ColumnLayout {
+            id: wpBrowser
             Layout.fillWidth: true
             Layout.topMargin: 4
             spacing: 3
@@ -226,12 +227,26 @@ WSettingsPage {
                 }
             }
 
-            WSettingsButton {
+            // the strip loads on demand: a line on this plate, not a card of its own inside it
+            RowLayout {
                 visible: !root.heavySectionsReady
-                label: Translation.tr("Wallpaper previews")
-                icon: "image"
-                buttonText: Translation.tr("Load")
-                onButtonClicked: root.ensureHeavySectionsReady(_effectivePath)
+                Layout.fillWidth: true
+                Layout.topMargin: Looks.dp(4)
+                spacing: Looks.dp(12)
+                WText {
+                    Layout.fillWidth: true
+                    text: Translation.tr("Wallpaper previews")
+                    font.pixelSize: Looks.settings.body
+                    elide: Text.ElideRight
+                }
+                WButton {
+                    text: Translation.tr("Load")
+                    icon.name: "image"
+                    colBackground: Looks.colors.interactiveSurface
+                    colBackgroundHover: Looks.colors.interactiveSurfaceHover
+                    colBackgroundActive: Looks.colors.interactiveSurfaceActive
+                    onClicked: root.ensureHeavySectionsReady(wpBrowser._effectivePath)
+                }
             }
 
             ListView {

@@ -584,5 +584,9 @@
   "See the welcome screen": "स्वागत स्क्रीन देखें",
   "Rest screen": "विश्राम स्क्रीन",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "निष्क्रियता के बाद आपके वॉलपेपर पर समय और जो चल रहा है (0 = कभी नहीं)",
-  "Sound files": "ध्वनि फ़ाइलें"
+  "Sound files": "ध्वनि फ़ाइलें",
+  "Sound, power, displays and what starts with you": "ध्वनि, पावर, डिस्प्ले और जो आपके साथ शुरू होता है",
+  "Wallpaper, colours, the taskbar and its style": "वॉलपेपर, रंग, टास्कबार और उसकी शैली",
+  "How windows open, move and look": "विंडो कैसे खुलती, हिलती और दिखती हैं",
+  "Light mode": "लाइट मोड"
 }

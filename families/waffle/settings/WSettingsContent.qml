@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Io
 import qs.services
@@ -11,7 +10,7 @@ import qs.modules.common.widgets
 import qs.modules.common.functions as CF
 import qs.modules.waffle.looks
 
-// Main Windows 11 style settings container
+// Waffle Settings: a mica window, a pane of tinted tiles, a page that rises into place
 Item {
     id: root
     
@@ -275,48 +274,290 @@ Item {
         root.currentPage = page
     }
 
+
+    readonly property string titleKey: root.landingCategory + ":" + root.currentPage
+    onTitleKeyChanged: {
+        titleIn.restart()
+        if (root.landingCategory >= 0)
+            landingIn.restart()
+    }
+
+    // a tile in a category's page: the page's icon on its category's colour, its name, what is inside
+    component PageTile: Rectangle {
+        id: tile
+        property int page: -1
+        property var category: null
+        readonly property color tint: tile.category ? (Looks.dark ? tile.category.tintDark : tile.category.tint) : Looks.colors.accent
+        Layout.fillWidth: true
+        implicitHeight: Looks.dp(80)
+        radius: Looks.settings.radiusMedium
+        color: tileMouse.pressed ? Looks.settings.cardPressed : tileMouse.containsMouse ? Looks.settings.cardHover : Looks.settings.card
+        border.width: 1
+        border.color: Looks.settings.cardStroke
+        Behavior on color {
+            animation: ColorAnimation { duration: Looks.transition.enabled ? 90 : 0 }
+        }
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: Looks.dp(16)
+            anchors.rightMargin: Looks.dp(16)
+            spacing: Looks.dp(14)
+            Rectangle {
+                implicitWidth: Looks.dp(42)
+                implicitHeight: Looks.dp(42)
+                radius: Looks.dp(12)
+                color: Qt.alpha(tile.tint, Looks.dark ? 0.18 : 0.13)
+                FluentIcon {
+                    anchors.centerIn: parent
+                    icon: root.pages[tile.page]?.icon ?? ""
+                    filled: true
+                    implicitSize: Looks.dp(20)
+                    color: tile.tint
+                }
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Looks.dp(2)
+                WText {
+                    Layout.fillWidth: true
+                    text: root.pages[tile.page]?.name ?? ""
+                    font.pixelSize: Looks.settings.body
+                    font.weight: Looks.font.weight.strong
+                    elide: Text.ElideRight
+                }
+                WText {
+                    Layout.fillWidth: true
+                    text: root.pages[tile.page]?.desc ?? ""
+                    font.pixelSize: Looks.settings.caption
+                    color: Looks.colors.subfg
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
+                }
+            }
+            FluentIcon {
+                icon: "chevron-right"
+                implicitSize: Looks.dp(14)
+                color: Looks.colors.subfg
+                transform: Translate { x: tileMouse.containsMouse ? Looks.dp(3) : 0
+                    Behavior on x { animation: NumberAnimation { duration: Looks.transition.enabled ? 160 : 0; easing.type: Easing.OutCubic } }
+                }
+            }
+        }
+        MouseArea {
+            id: tileMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.openPage(tile.page)
+        }
+    }
+
+    // one half of the light and dark pill
+    component ModeHalf: Item {
+        id: modeHalf
+        property bool dark: false
+        property string icon: ""
+        property string label: ""
+        readonly property bool chosen: Looks.dark === modeHalf.dark
+        implicitWidth: modeLabel.implicitWidth + Looks.dp(42)
+        implicitHeight: Looks.dp(26)
+        RowLayout {
+            anchors.centerIn: parent
+            spacing: Looks.dp(6)
+            FluentIcon {
+                icon: modeHalf.icon
+                implicitSize: Looks.dp(14)
+                color: modeHalf.chosen ? Looks.colors.accentFg : Looks.colors.fg
+            }
+            WText {
+                id: modeLabel
+                text: modeHalf.label
+                font.pixelSize: Looks.settings.body
+                color: modeHalf.chosen ? Looks.colors.accentFg : Looks.colors.fg
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: MaterialThemeLoader.setDarkMode(modeHalf.dark)
+        }
+    }
+
+    // a small button of the frame: accent or quiet, or the chosen half of a pair
+    component PillButton: Rectangle {
+        id: pb
+        property string text: ""
+        property string icon: ""
+        property bool accent: false
+        property bool chosen: false
+        signal clicked()
+        implicitWidth: pbRow.implicitWidth + Looks.dp(28)
+        implicitHeight: Looks.dp(34)
+        radius: height / 2
+        readonly property bool lit: pb.accent || pb.chosen
+        color: pb.lit
+            ? (pbMouse.pressed ? Looks.colors.accentActive : pbMouse.containsMouse ? Looks.colors.accentHover : Looks.colors.accent)
+            : (pbMouse.pressed ? Looks.settings.tilePressed : pbMouse.containsMouse ? Looks.settings.tileHover : Looks.settings.tile)
+        border.width: pb.lit ? 0 : 1
+        border.color: Looks.settings.cardStroke
+        Behavior on color {
+            animation: ColorAnimation { duration: Looks.transition.enabled ? 90 : 0 }
+        }
+        scale: pbMouse.pressed ? 0.97 : 1
+        Behavior on scale {
+            animation: NumberAnimation { duration: Looks.transition.enabled ? 140 : 0; easing.type: Easing.OutCubic }
+        }
+        RowLayout {
+            id: pbRow
+            anchors.centerIn: parent
+            spacing: Looks.dp(8)
+            FluentIcon {
+                visible: pb.icon !== ""
+                icon: pb.icon
+                implicitSize: Looks.dp(15)
+                color: pb.lit ? Looks.colors.accentFg : Looks.colors.fg
+            }
+            WText {
+                text: pb.text
+                font.pixelSize: Looks.settings.body
+                font.weight: pb.lit ? Looks.font.weight.strong : Looks.font.weight.regular
+                color: pb.lit ? Looks.colors.accentFg : Looks.colors.fg
+            }
+        }
+        MouseArea {
+            id: pbMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: pb.clicked()
+        }
+    }
+
+    // the window: deeper than the cards, with the accent's light pooled in a corner
+    Rectangle {
+        anchors.fill: parent
+        color: Looks.settings.canvas
+    }
+    Rectangle {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        width: parent.width * 0.7
+        height: Looks.dp(260)
+        gradient: Gradient {
+            orientation: Gradient.Vertical
+            GradientStop { position: 0; color: Qt.alpha(Looks.colors.accent, Looks.dark ? 0.07 : 0.06) }
+            GradientStop { position: 1; color: "transparent" }
+        }
+    }
+
     RowLayout {
         anchors.fill: parent
         spacing: 0
 
-        // ── Navigation pane (NavigationView, OpenPaneLength 320) ──
+        // ── The pane: the app's mark, the person, a search, and the categories as tinted tiles ──
         Item {
             id: navPane
             Layout.fillHeight: true
-            Layout.preferredWidth: root.navExpanded ? Looks.dp(320) : Looks.dp(56)
+            Layout.preferredWidth: root.navExpanded ? Looks.dp(304) : Looks.dp(68)
+            clip: true
 
             Behavior on Layout.preferredWidth {
-                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.slow : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: Looks.settings.pane
+            }
+            Rectangle {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: 1
+                color: Looks.settings.cardStroke
             }
 
             ColumnLayout {
+                id: paneColumn
                 anchors {
                     fill: parent
                     topMargin: Looks.dp(14)
-                    bottomMargin: Looks.dp(8)
-                    leftMargin: root.navExpanded ? Looks.dp(16) : Looks.dp(4)
-                    rightMargin: root.navExpanded ? Looks.dp(16) : Looks.dp(4)
+                    bottomMargin: Looks.dp(10)
+                    leftMargin: Looks.dp(12)
+                    rightMargin: Looks.dp(12)
                 }
-                spacing: Looks.dp(4)
+                spacing: Looks.dp(8)
 
-                // the person, as Windows opens Settings: picture, name, and what this machine runs
-                Revealer {
-                    vertical: true
-                    reveal: root.navExpanded
+                // the app's mark and name, and the way out
+                RowLayout {
                     Layout.fillWidth: true
-                    RowLayout {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        spacing: Looks.dp(14)
+                    Layout.leftMargin: Looks.dp(8)
+                    Layout.preferredHeight: Looks.dp(32)
+                    spacing: Looks.dp(10)
+                    Rectangle {
+                        implicitWidth: Looks.dp(28)
+                        implicitHeight: Looks.dp(28)
+                        radius: Looks.dp(8)
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: Qt.lighter(Looks.colors.accent, 1.3) }
+                            GradientStop { position: 1; color: Looks.colors.accent }
+                        }
+                        FluentIcon {
+                            anchors.centerIn: parent
+                            icon: "settings"
+                            filled: true
+                            implicitSize: Looks.dp(16)
+                            color: Looks.colors.accentFg
+                        }
+                    }
+                    WText {
+                        visible: root.navExpanded
+                        Layout.fillWidth: true
+                        text: Translation.tr("Settings")
+                        font.pixelSize: Looks.settings.body
+                        font.weight: Looks.font.weight.strong
+                        elide: Text.ElideRight
+                    }
+                    WBorderlessButton {
+                        visible: root.navExpanded
+                        implicitWidth: Looks.dp(32)
+                        implicitHeight: Looks.dp(32)
+                        onClicked: root.closeRequested()
+                        contentItem: FluentIcon {
+                            anchors.centerIn: parent
+                            icon: "dismiss"
+                            implicitSize: Looks.dp(14)
+                            color: Looks.colors.subfg
+                        }
+                    }
+                }
 
+                // the person: picture, name, and what this machine runs; it opens About
+                Rectangle {
+                    id: userCard
+                    visible: root.navExpanded
+                    Layout.fillWidth: true
+                    Layout.topMargin: Looks.dp(6)
+                    implicitHeight: Looks.dp(70)
+                    radius: Looks.settings.radiusLarge
+                    color: userMouse.pressed ? Looks.settings.cardPressed : userMouse.containsMouse ? Looks.settings.cardHover : Looks.settings.card
+                    border.width: 1
+                    border.color: Looks.settings.cardStroke
+                    Behavior on color {
+                        animation: ColorAnimation { duration: Looks.transition.enabled ? 90 : 0 }
+                    }
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: Looks.dp(12)
+                        anchors.rightMargin: Looks.dp(14)
+                        spacing: Looks.dp(12)
                         WUserAvatar {
-                            Layout.topMargin: Looks.dp(6)
-                            Layout.bottomMargin: Looks.dp(14)
-                            sourceSize: Qt.size(Looks.dp(64), Looks.dp(64))
+                            sourceSize: Qt.size(Looks.dp(46), Looks.dp(46))
                         }
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: Looks.dp(2)
+                            spacing: Looks.dp(1)
                             WText {
                                 Layout.fillWidth: true
                                 text: SystemInfo.displayName || SystemInfo.username
@@ -326,459 +567,257 @@ Item {
                             }
                             WText {
                                 Layout.fillWidth: true
-                                text: [SystemInfo.distroName, "iNiR " + Translation.tr("Waffle")].filter(t => t && t !== "Unknown").join(" \u00b7 ")
+                                text: [SystemInfo.distroName, SystemInfo.hostname].filter(t => t && t !== "Unknown").join(" · ")
                                 font.pixelSize: Looks.settings.caption
-                                font.weight: Looks.font.weight.thin
                                 color: Looks.colors.subfg
                                 elide: Text.ElideRight
                             }
                         }
-                        WBorderlessButton {
-                            Layout.alignment: Qt.AlignTop
-                            implicitWidth: Looks.dp(32)
-                            implicitHeight: Looks.dp(32)
-                            onClicked: root.closeRequested()
-                            contentItem: FluentIcon {
-                                anchors.centerIn: parent
-                                icon: "dismiss"
-                                implicitSize: Looks.dp(14)
-                                color: Looks.colors.subfg
-                            }
-                        }
-                    }
-                }
-
-                Revealer {
-                    vertical: true
-                    reveal: !root.navExpanded
-                    Layout.fillWidth: true
-                    Item {
-                        implicitWidth: parent.width
-                        implicitHeight: Looks.dp(40)
                         FluentIcon {
-                            anchors.centerIn: parent
-                            icon: "settings"
-                            implicitSize: Looks.dp(18)
+                            icon: "chevron-right"
+                            implicitSize: Looks.dp(12)
                             color: Looks.colors.subfg
                         }
                     }
+                    MouseArea {
+                        id: userMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.openCategory(root.categories.length - 1)
+                    }
                 }
 
-                // Search bar (only when expanded)
-                Revealer {
-                    vertical: true
-                    reveal: root.navExpanded
-                    Layout.fillWidth: true
+                // Find a setting: a pill that lights with the accent while typed in
                 Rectangle {
-                    id: searchBarContainer
-                    // Revealer sizes itself from its child's implicit size.
-                    implicitWidth: parent.width
-                    implicitHeight: Looks.dp(32)
-                    radius: Looks.settings.radiusSmall
-                    color: searchInput.activeFocus ? (Looks.dark ? Qt.rgba(0.12, 0.12, 0.12, 0.7) : "#FFFFFF")
+                    id: searchPill
+                    visible: root.navExpanded
+                    Layout.fillWidth: true
+                    Layout.topMargin: Looks.dp(4)
+                    implicitHeight: Looks.dp(38)
+                    radius: height / 2
+                    color: searchInput.activeFocus ? (Looks.dark ? Looks.settings.cardPressed : Looks.colors.bg0Opaque)
                         : searchHover.hovered ? Looks.settings.cardHover : Looks.settings.card
-                    border.width: 1
-                    border.color: Looks.settings.cardStroke
-                    clip: true
-                    HoverHandler { id: searchHover }
-                    // TextControlElevationBorder: a darker line at the bottom, the accent and 2 px on focus
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        height: searchInput.activeFocus ? 2 : 1
-                        color: searchInput.activeFocus ? Looks.colors.accent : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.54 : 0.45)
+                    border.width: searchInput.activeFocus ? 2 : 1
+                    border.color: searchInput.activeFocus ? Looks.colors.accent : Looks.settings.cardStroke
+                    Behavior on border.color {
+                        animation: ColorAnimation { duration: Looks.transition.enabled ? 120 : 0 }
                     }
+                    HoverHandler { id: searchHover; cursorShape: Qt.IBeamCursor }
+                    TapHandler { onTapped: searchInput.forceActiveFocus() }
 
                     RowLayout {
-                        anchors {
-                            fill: parent
-                            leftMargin: Looks.dp(11)
-                            rightMargin: Looks.dp(6)
+                        anchors.fill: parent
+                        anchors.leftMargin: Looks.dp(14)
+                        anchors.rightMargin: Looks.dp(8)
+                        spacing: Looks.dp(10)
+                        FluentIcon {
+                            icon: "search"
+                            implicitSize: Looks.dp(15)
+                            color: searchInput.activeFocus ? Looks.colors.accent : Looks.colors.subfg
                         }
-                        spacing: Looks.dp(6)
-
                         Item {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            
                             TextInput {
-                                cursorDelegate: TextCursor { accent: Looks.colors.accent }
                                 id: searchInput
                                 anchors.fill: parent
                                 verticalAlignment: Text.AlignVCenter
+                                cursorDelegate: TextCursor { accent: Looks.colors.accent }
                                 color: Looks.colors.fg
                                 selectionColor: Looks.colors.accent
                                 selectedTextColor: Looks.colors.accentFg
                                 font.family: Looks.font.family.ui
                                 font.pixelSize: Looks.settings.body
                                 clip: true
-                                
                                 onTextChanged: {
-                                    root.searchText = text;
-                                    root.recomputeSearchResults();
+                                    root.searchText = text
+                                    root.recomputeSearchResults()
+                                    searchResultsList.currentIndex = root.searchResults.length > 0 ? 0 : -1
                                 }
-                                
                                 Keys.onPressed: event => {
                                     if (event.key === Qt.Key_Down && root.searchResults.length > 0) {
-                                        searchResultsList.forceActiveFocus();
-                                        searchResultsList.currentIndex = 0;
-                                        event.accepted = true;
+                                        searchResultsList.currentIndex = Math.min(searchResultsList.currentIndex + 1, searchResultsList.count - 1)
+                                        event.accepted = true
+                                    } else if (event.key === Qt.Key_Up && root.searchResults.length > 0) {
+                                        searchResultsList.currentIndex = Math.max(searchResultsList.currentIndex - 1, 0)
+                                        event.accepted = true
                                     } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && root.searchResults.length > 0) {
-                                        root.openSearchResult(root.searchResults[0]);
-                                        event.accepted = true;
-                                    } else if (event.key === Qt.Key_Escape) {
-                                        root.openSearchResult({});
-                                        event.accepted = true;
+                                        root.openSearchResult(root.searchResults[Math.max(0, searchResultsList.currentIndex)])
+                                        event.accepted = true
+                                    } else if (event.key === Qt.Key_Escape && text.length > 0) {
+                                        text = ""
+                                        event.accepted = true
                                     }
                                 }
                             }
-                            
-                            // Placeholder text (separate element to avoid overlap)
                             WText {
-                                anchors.fill: parent
-                                verticalAlignment: Text.AlignVCenter
-                                text: Translation.tr("Find a setting")
-                                color: Looks.colors.subfg
-                                font.family: Looks.font.family.ui
-                                font.pixelSize: Looks.settings.body
-                                font.weight: Looks.font.weight.thin
-                                visible: !searchInput.text
-                            }
-                        }
-                        
-                        // Clear button
-                        Item {
-                            Layout.preferredWidth: 20
-                            Layout.preferredHeight: 20
-                            visible: searchInput.text.length > 0
-                            
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: 10  // pill shape
-                                color: clearMouse.containsMouse
-                                    ? Looks.settings.tileHover : "transparent"
-                                
-                                FluentIcon {
-                                    anchors.centerIn: parent
-                                    icon: "dismiss"
-                                    implicitSize: 12
-                                    color: Looks.colors.subfg
-                                }
-                                
-                                MouseArea {
-                                    id: clearMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        searchInput.text = "";
-                                        searchInput.forceActiveFocus();
-                                    }
-                                }
-                            }
-                        }
-                        FluentIcon {
-                            Layout.rightMargin: Looks.dp(4)
-                            icon: "search"
-                            implicitSize: Looks.dp(14)
-                            color: Looks.colors.subfg
-                        }
-                    }
-                }
-                }
-                
-                // Search results dropdown
-                Revealer {
-                    vertical: true
-                    reveal: root.searchText.length > 0 && root.searchResults.length > 0
-                    Layout.fillWidth: true
-                Rectangle {
-                    id: searchResultsDropdown
-                    // Revealer sizes itself from its child's implicit size.
-                    implicitWidth: parent.width
-                    implicitHeight: Math.min(
-                        (searchResultsList.contentHeight || 0) + Looks.dp(8),
-                        Looks.dp(300))
-                    radius: Looks.settings.radiusLarge
-                    color: Looks.settings.tile
-                    border.width: 1
-                    border.color: Looks.settings.strokeStrong
-                    
-                    layer.enabled: Looks.effectsEnabled && searchResultsDropdown.visible
-                    layer.effect: DropShadow {
-                        color: Looks.colors.shadow
-                        radius: 6
-                        samples: 7
-                        verticalOffset: 2
-                    }
-                    
-                    ListView {
-                        id: searchResultsList
-                        anchors {
-                            fill: parent
-                            margins: 4
-                        }
-                        spacing: 2
-                        model: root.searchResults
-                        clip: true
-                        currentIndex: -1
-                        boundsBehavior: Flickable.StopAtBounds
-                        
-                        Keys.onPressed: event => {
-                            if (event.key === Qt.Key_Up) {
-                                if (currentIndex > 0) currentIndex--;
-                                else searchInput.forceActiveFocus();
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_Down) {
-                                if (currentIndex < count - 1) currentIndex++;
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                if (currentIndex >= 0) root.openSearchResult(root.searchResults[currentIndex]);
-                                event.accepted = true;
-                            } else if (event.key === Qt.Key_Escape) {
-                                root.openSearchResult({});
-                                searchInput.forceActiveFocus();
-                                event.accepted = true;
-                            }
-                        }
-                        
-                        delegate: Rectangle {
-                            id: resultDelegate
-                            required property var modelData
-                            required property int index
-                            
-                            width: searchResultsList.width
-                            height: 44
-                            radius: Looks.radius.medium
-                            // as Windows' suggestion list and this pane mark a choice: a subtle fill and an accent pill,
-                            // the text keeps its colours (a full accent block lost contrast under a pale accent)
-                            color: resultMouse.pressed ? Qt.alpha(Looks.colors.fg, 0.03)
-                                : resultDelegate.ListView.isCurrentItem || resultMouse.containsMouse ? Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.04)
-                                : "transparent"
-                            
-                              Behavior on color {
-                                  animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
-                              }
-                            
-                            Rectangle {
-                                anchors.left: parent.left
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: Looks.dp(3)
-                                height: Looks.dp(16)
-                                radius: width / 2
-                                color: Looks.colors.accent
-                                opacity: resultDelegate.ListView.isCurrentItem ? 1 : 0
-                                Behavior on opacity {
-                                    animation: NumberAnimation { duration: Looks.transition.enabled ? 120 : 0 }
-                                }
-                            }
-
-                            MouseArea {
-                                id: resultMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.openSearchResult(resultDelegate.modelData)
-                            }
-                            
-                            RowLayout {
-                                anchors {
-                                    fill: parent
-                                    leftMargin: 10
-                                    rightMargin: 10
-                                }
-                                spacing: 10
-                                
-                                // Page icon
-                                FluentIcon {
-                                    // the page's own icon, as its link card shows it
-                                    icon: root.pages[resultDelegate.modelData.pageIndex]?.icon || "settings"
-                                    implicitSize: 16
-                                    color: Looks.colors.fg
-                                }
-                                
-                                // Text content
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 0
-                                    
-                                    Text {
-                                        Layout.fillWidth: true
-                                        text: resultDelegate.modelData.labelHighlighted || resultDelegate.modelData.label || ""
-                                        textFormat: Text.StyledText
-                                        font.family: Looks.font.family.ui
-                                        font.pixelSize: Looks.font.pixelSize.normal
-                                        font.weight: Font.Medium
-                                        color: Looks.colors.fg
-                                        elide: Text.ElideRight
-                                    }
-                                    
-                                    WText {
-                                        Layout.fillWidth: true
-                                        text: resultDelegate.modelData.pageName + (resultDelegate.modelData.section ? " › " + resultDelegate.modelData.section : "")
-                                        font.pixelSize: Looks.font.pixelSize.small
-                                        color: Looks.colors.subfg
-                                        elide: Text.ElideRight
-                                        opacity: 0.8
-                                    }
-                                }
-                                
-                                // Arrow
-                                FluentIcon {
-                                    icon: "chevron-right"
-                                    implicitSize: 12
-                                    color: Looks.colors.subfg
-                                    opacity: resultMouse.containsMouse || resultDelegate.ListView.isCurrentItem ? 1 : 0
-                                    
-                                      Behavior on opacity {
-                                          animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
-                                      }
-                                }
-                            }
-                        }
-                    }
-                }
-                }
-                
-                // No results indicator
-                Revealer {
-                    vertical: true
-                    reveal: root.searchText.length > 0 && root.searchResults.length === 0
-                    Layout.fillWidth: true
-                Rectangle {
-                    implicitWidth: parent.width
-                    implicitHeight: noResultsCol.implicitHeight + 16
-                    radius: Looks.radius.medium
-                    color: Looks.settings.tile
-
-                    ColumnLayout {
-                        id: noResultsCol
-                        anchors.centerIn: parent
-                        spacing: 6
-
-                        MascotImage {
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 88
-                            Layout.preferredHeight: 88
-                            pose: "settings-judging"
-                            surface: "emptyStates"
-                        }
-
-                        RowLayout {
-                            Layout.alignment: Qt.AlignHCenter
-                            spacing: 8
-
-                            FluentIcon {
-                                icon: "search"
-                                implicitSize: 14
+                                visible: searchInput.text.length === 0
+                                text: Translation.tr("Find a setting")
+                                font.pixelSize: Looks.settings.body
                                 color: Looks.colors.subfg
                             }
-
+                        }
+                        // the key that brings you here, until something is typed; then the way to clear it
+                        Rectangle {
+                            visible: searchInput.text.length === 0
+                            implicitWidth: keyHint.implicitWidth + Looks.dp(12)
+                            implicitHeight: Looks.dp(22)
+                            radius: Looks.dp(6)
+                            color: Looks.settings.tile
+                            border.width: 1
+                            border.color: Looks.settings.cardStroke
                             WText {
-                                text: Voice.miss(Translation.tr("No results"), root.searchText)
-                                font.pixelSize: Looks.font.pixelSize.small
+                                id: keyHint
+                                anchors.centerIn: parent
+                                text: "Ctrl F" // literal: the key names on the keyboard
+                                font.pixelSize: Looks.settings.caption - 1
+                                color: Looks.colors.subfg
+                            }
+                        }
+                        WBorderlessButton {
+                            visible: searchInput.text.length > 0
+                            implicitWidth: Looks.dp(26)
+                            implicitHeight: Looks.dp(26)
+                            onClicked: {
+                                searchInput.text = ""
+                                searchInput.forceActiveFocus()
+                            }
+                            contentItem: FluentIcon {
+                                anchors.centerIn: parent
+                                icon: "dismiss"
+                                implicitSize: Looks.dp(11)
                                 color: Looks.colors.subfg
                             }
                         }
                     }
                 }
-                }
 
-
-                Item { implicitHeight: Looks.dp(8) }
-
+                // the categories: the chosen one's plate glides to it
                 Flickable {
                     id: navFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    Layout.topMargin: Looks.dp(6)
                     contentHeight: navColumn.implicitHeight
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
-                    // NavigationView's menu is one Tab stop (TabFocusNavigation Once): ↑ ↓ open the category above or
-                    // below; the entries were mouse-only before.
+                    // one Tab stop, as NavigationView: up and down open the category above or below
                     activeFocusOnTab: true
                     Accessible.role: Accessible.List
                     Keys.onUpPressed: if (root.activeCategory > 0) root.openCategory(root.activeCategory - 1)
                     Keys.onDownPressed: if (root.activeCategory < root.categories.length - 1) root.openCategory(root.activeCategory + 1)
 
-                    ColumnLayout {
+                    Item {
                         id: navColumn
-                        width: parent.width
-                        spacing: Looks.dp(4)
+                        width: navFlick.width
+                        implicitHeight: navList.implicitHeight
 
-                        Repeater {
-                            model: root.categories
+                        Rectangle {
+                            id: navIndicator
+                            readonly property Item target: {
+                                navRepeater.count
+                                return navRepeater.itemAt(root.activeCategory)
+                            }
+                            visible: target !== null
+                            width: parent.width
+                            y: target ? target.y : 0
+                            height: target ? target.height : 0
+                            radius: Looks.settings.radiusMedium
+                            color: Looks.colors.accentWash
+                            Behavior on y {
+                                enabled: root.navigationReady
+                                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.slow + 60 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                            }
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Looks.dp(3)
+                                height: Looks.dp(18)
+                                radius: width / 2
+                                color: Looks.colors.accent
+                            }
+                        }
 
-                            // NavigationViewItem: 36 px, radius 4, 16 px icon, Body text; the chosen one on a subtle
-                            // fill with a 3 x 16 accent pill at its left edge
-                            Item {
-                                id: navEntry
-                                required property int index
-                                required property var modelData
-                                readonly property bool selected: root.activeCategory === navEntry.index
-                                Layout.fillWidth: true
-                                // the last one (About) stands apart, as Windows Update does
-                                Layout.topMargin: navEntry.modelData.apart ? Looks.dp(12) : 0
-                                implicitHeight: Looks.dp(36)
+                        ColumnLayout {
+                            id: navList
+                            width: parent.width
+                            spacing: Looks.dp(2)
 
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: Looks.settings.radiusSmall
-                                    color: navMouse.pressed ? Qt.alpha(Looks.colors.fg, 0.03)
-                                        : navEntry.selected || navMouse.containsMouse ? Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.04)
-                                        : "transparent"
-                                    Behavior on color {
-                                        animation: ColorAnimation { duration: Looks.transition.enabled ? 83 : 0 }
+                            Repeater {
+                                id: navRepeater
+                                model: root.categories
+
+                                Item {
+                                    id: navEntry
+                                    required property int index
+                                    required property var modelData
+                                    readonly property bool selected: root.activeCategory === navEntry.index
+                                    Layout.fillWidth: true
+                                    // the last one (About) stands apart
+                                    Layout.topMargin: navEntry.modelData.apart ? Looks.dp(14) : 0
+                                    implicitHeight: Looks.dp(42)
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: Looks.settings.radiusMedium
+                                        color: navMouse.pressed ? Looks.settings.tilePressed
+                                            : navMouse.containsMouse && !navEntry.selected ? Looks.settings.tile : "transparent"
+                                        Behavior on color {
+                                            animation: ColorAnimation { duration: Looks.transition.enabled ? 90 : 0 }
+                                        }
                                     }
-                                }
-                                Rectangle {
-                                    anchors.left: parent.left
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: Looks.dp(3)
-                                    height: navMouse.pressed && navEntry.selected ? Looks.dp(10) : Looks.dp(16)
-                                    radius: width / 2
-                                    color: Looks.colors.accent
-                                    opacity: navEntry.selected ? 1 : 0
-                                    Behavior on opacity {
-                                        animation: NumberAnimation { duration: Looks.transition.enabled ? 120 : 0 }
+                                    WFocusVisual {
+                                        shown: navFlick.activeFocus && navEntry.selected
+                                        margin: 0
+                                        radius: Looks.settings.radiusMedium
                                     }
-                                    Behavior on height {
-                                        animation: NumberAnimation { duration: Looks.transition.enabled ? 120 : 0 }
+                                    MouseArea {
+                                        id: navMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root.openCategory(navEntry.index)
                                     }
-                                }
-                                WFocusVisual {
-                                    shown: navFlick.activeFocus && navEntry.selected
-                                    margin: 0
-                                    radius: Looks.settings.radiusSmall
-                                }
-                                MouseArea {
-                                    id: navMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: root.openCategory(navEntry.index)
-                                }
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: root.navExpanded ? Looks.dp(16) : 0
-                                    spacing: Looks.dp(16)
-                                    FluentIcon {
-                                        Layout.alignment: root.navExpanded ? Qt.AlignVCenter : Qt.AlignCenter
-                                        Layout.fillWidth: !root.navExpanded
-                                        icon: navEntry.modelData.icon
-                                        filled: true
-                                        implicitSize: Looks.dp(18)
-                                        // each category keeps its colour, as Windows' Settings icons do: found by hue
-                                        color: Looks.dark ? navEntry.modelData.tintDark : navEntry.modelData.tint
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: Looks.dp(8)
+                                        anchors.rightMargin: Looks.dp(8)
+                                        spacing: Looks.dp(12)
+                                        // the category's own colour and a white glyph: found by hue at a glance
+                                        Rectangle {
+                                            implicitWidth: Looks.dp(28)
+                                            implicitHeight: Looks.dp(28)
+                                            radius: Looks.dp(8)
+                                            gradient: Gradient {
+                                                GradientStop { position: 0; color: Qt.lighter(navEntry.modelData.tint, 1.25) }
+                                                GradientStop { position: 1; color: navEntry.modelData.tint }
+                                            }
+                                            scale: navMouse.pressed ? 0.9 : 1
+                                            Behavior on scale {
+                                                animation: NumberAnimation { duration: Looks.transition.enabled ? 180 : 0; easing.type: Easing.OutBack; easing.overshoot: 2 }
+                                            }
+                                            FluentIcon {
+                                                anchors.centerIn: parent
+                                                icon: navEntry.modelData.icon
+                                                filled: true
+                                                implicitSize: Looks.dp(16)
+                                                color: "#FFFFFF" // literal: a white glyph on the category's own colour
+                                            }
+                                        }
+                                        WText {
+                                            visible: root.navExpanded
+                                            Layout.fillWidth: true
+                                            text: navEntry.modelData.name
+                                            font.pixelSize: Looks.settings.body
+                                            font.weight: navEntry.selected ? Looks.font.weight.strong : Looks.font.weight.regular
+                                            elide: Text.ElideRight
+                                        }
                                     }
-                                    WText {
-                                        visible: root.navExpanded
-                                        Layout.fillWidth: true
+                                    WToolTip {
+                                        visible: !root.navExpanded && navMouse.containsMouse
                                         text: navEntry.modelData.name
-                                        font.pixelSize: Looks.settings.body
-                                        font.weight: Looks.font.weight.thin
-                                        elide: Text.ElideRight
                                     }
                                 }
                             }
@@ -788,13 +827,11 @@ Item {
 
                 WBorderlessButton {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Looks.dp(36)
+                    Layout.preferredHeight: Looks.dp(38)
                     contentItem: RowLayout {
-                        spacing: Looks.dp(16)
+                        spacing: Looks.dp(12)
                         FluentIcon {
-                            Layout.leftMargin: root.navExpanded ? Looks.dp(16) : 0
-                            Layout.fillWidth: !root.navExpanded
-                            Layout.alignment: root.navExpanded ? Qt.AlignVCenter : Qt.AlignCenter
+                            Layout.leftMargin: Looks.dp(14)
                             icon: root.navExpanded ? "panel-left-contract" : "panel-left-expand"
                             implicitSize: Looks.dp(16)
                             color: Looks.colors.subfg
@@ -804,82 +841,266 @@ Item {
                             Layout.fillWidth: true
                             text: Translation.tr("Collapse")
                             font.pixelSize: Looks.settings.body
-                            font.weight: Looks.font.weight.thin
                             color: Looks.colors.subfg
                         }
                     }
                     onClicked: root.navExpanded = !root.navExpanded
                 }
             }
+
+            // what the search finds, floating over the categories
+            Rectangle {
+                id: searchResultsDropdown
+                readonly property bool shown: root.navExpanded && root.searchText.length > 0
+                x: paneColumn.x
+                y: paneColumn.y + searchPill.y + searchPill.height + Looks.dp(8)
+                z: 10
+                width: paneColumn.width
+                height: Math.min(root.searchResults.length > 0 ? searchResultsList.contentHeight + Looks.dp(12) : noResultsCol.implicitHeight + Looks.dp(28),
+                    navPane.height - y - Looks.dp(16))
+                radius: Looks.settings.radiusLarge
+                color: Looks.colors.bg0Opaque
+                border.width: 1
+                border.color: Looks.settings.strokeStrong
+                visible: opacity > 0
+                opacity: shown ? 1 : 0
+                scale: shown ? 1 : 0.97
+                transformOrigin: Item.Top
+                Behavior on opacity {
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? 140 : 0; easing.type: Easing.OutCubic }
+                }
+                Behavior on scale {
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? 220 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                }
+
+                ListView {
+                    id: searchResultsList
+                    anchors.fill: parent
+                    anchors.margins: Looks.dp(6)
+                    visible: root.searchResults.length > 0
+                    spacing: Looks.dp(2)
+                    model: root.searchResults
+                    clip: true
+                    currentIndex: -1
+                    boundsBehavior: Flickable.StopAtBounds
+                    ScrollBar.vertical: WScrollBar {}
+
+                    delegate: Rectangle {
+                        id: resultDelegate
+                        required property var modelData
+                        required property int index
+                        readonly property bool current: resultDelegate.ListView.isCurrentItem
+                        width: searchResultsList.width
+                        height: Looks.dp(48)
+                        radius: Looks.settings.radiusMedium
+                        color: resultMouse.pressed ? Looks.settings.tilePressed
+                            : resultDelegate.current ? Looks.colors.accentWash
+                            : resultMouse.containsMouse ? Looks.settings.tile : "transparent"
+                        Behavior on color {
+                            animation: ColorAnimation { duration: Looks.transition.enabled ? 80 : 0 }
+                        }
+                        MouseArea {
+                            id: resultMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: searchResultsList.currentIndex = resultDelegate.index
+                            onClicked: root.openSearchResult(resultDelegate.modelData)
+                        }
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: Looks.dp(10)
+                            anchors.rightMargin: Looks.dp(10)
+                            spacing: Looks.dp(10)
+                            Rectangle {
+                                readonly property var cat: root.categories[root.categoryOf(resultDelegate.modelData.pageIndex)] ?? null
+                                implicitWidth: Looks.dp(28)
+                                implicitHeight: Looks.dp(28)
+                                radius: Looks.dp(8)
+                                color: Qt.alpha(cat ? (Looks.dark ? cat.tintDark : cat.tint) : Looks.colors.accent, Looks.dark ? 0.18 : 0.13)
+                                FluentIcon {
+                                    anchors.centerIn: parent
+                                    icon: root.pages[resultDelegate.modelData.pageIndex]?.icon || "settings"
+                                    filled: true
+                                    implicitSize: Looks.dp(15)
+                                    color: parent.cat ? (Looks.dark ? parent.cat.tintDark : parent.cat.tint) : Looks.colors.accent
+                                }
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 0
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: resultDelegate.modelData.labelHighlighted || resultDelegate.modelData.label || ""
+                                    textFormat: Text.StyledText
+                                    font.family: Looks.font.family.ui
+                                    font.pixelSize: Looks.settings.body
+                                    color: Looks.colors.fg
+                                    elide: Text.ElideRight
+                                }
+                                WText {
+                                    Layout.fillWidth: true
+                                    text: resultDelegate.modelData.pageName + (resultDelegate.modelData.section ? " › " + resultDelegate.modelData.section : "")
+                                    font.pixelSize: Looks.settings.caption
+                                    color: Looks.colors.subfg
+                                    elide: Text.ElideRight
+                                }
+                            }
+                            FluentIcon {
+                                icon: "arrow-enter-left"
+                                implicitSize: Looks.dp(13)
+                                color: Looks.colors.subfg
+                                opacity: resultDelegate.current ? 1 : 0
+                                Behavior on opacity {
+                                    animation: NumberAnimation { duration: Looks.transition.enabled ? 100 : 0 }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    id: noResultsCol
+                    visible: root.searchResults.length === 0
+                    anchors.centerIn: parent
+                    width: parent.width - Looks.dp(24)
+                    spacing: Looks.dp(6)
+                    MascotImage {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: Looks.dp(84)
+                        Layout.preferredHeight: Looks.dp(84)
+                        pose: "settings-judging"
+                        surface: "emptyStates"
+                    }
+                    WText {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        text: Voice.miss(Translation.tr("No results"), root.searchText)
+                        font.pixelSize: Looks.settings.caption
+                        color: Looks.colors.subfg
+                        wrapMode: Text.WordWrap
+                    }
+                }
+            }
         }
 
-        // ── Content: a layer over the window with its top-left corner rounded, as Windows' Settings frame ──
-        Rectangle {
+        // ── The page: its place in the categories as a title, then its cards ──
+        Item {
             id: contentLayer
             Layout.fillWidth: true
             Layout.fillHeight: true
-            topLeftRadius: Looks.dp(8)
-            color: Looks.dark ? Qt.rgba(0.227, 0.227, 0.227, 0.3) : Qt.rgba(1, 1, 1, 0.5)
-            border.width: 1
-            border.color: Looks.settings.cardStroke
 
-            readonly property int sidePadding: width < Looks.dp(640) ? Looks.dp(20) : Looks.dp(40)
+            readonly property int sidePadding: width < Looks.dp(640) ? Looks.dp(20) : Looks.dp(44)
             readonly property int columnWidth: Math.min(width - sidePadding * 2, Looks.dp(1000))
+            // how far the open page has scrolled: the header takes a hairline once it has
+            readonly property real pageScroll: {
+                if (root.landingCategory >= 0)
+                    return landing.contentY
+                pageRepeater.count
+                const loader = pageRepeater.itemAt(root.currentPage)
+                return loader && loader.item && loader.item.contentY !== undefined ? loader.item.contentY : 0
+            }
 
-            // breadcrumb: the category, then the page, in Windows' Title (28 semibold); the category goes back
-            RowLayout {
-                id: crumb
-                x: contentLayer.sidePadding
-                y: Looks.dp(26)
-                width: contentLayer.columnWidth
-                spacing: Looks.dp(14)
-                readonly property var cat: root.categories[root.activeCategory] ?? null
-                readonly property bool nested: crumb.cat !== null && crumb.cat.pages.length > 1 && root.landingCategory < 0
-                // As WinUI's BreadcrumbBar: when the path runs out of room the category folds into "…", still the way back.
-                readonly property bool folded: {
-                    crumbType.font
-                    return crumb.nested && crumbType.advanceWidth(crumb.cat.name) + crumbType.advanceWidth(pageCrumb.text)
-                        + Looks.dp(16) + 2 * crumb.spacing > crumb.width
-                }
-                FontMetrics { id: crumbType; font: pageCrumb.font }
+            Item {
+                id: header
+                z: 2
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: crumbColumn.y + crumbColumn.implicitHeight + Looks.dp(16)
 
-                WText {
-                    visible: crumb.nested
-                    text: crumb.folded ? "…" : crumb.cat ? crumb.cat.name : ""
-                    Accessible.name: crumb.cat ? crumb.cat.name : ""
-                    font.pixelSize: Looks.settings.title
-                    font.weight: Looks.font.weight.strong
-                    color: crumbMouse.containsMouse ? Looks.colors.fg : Looks.colors.subfg
-                    MouseArea {
-                        id: crumbMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.landingCategory = root.activeCategory
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: 1
+                    color: Looks.settings.cardStroke
+                    opacity: contentLayer.pageScroll > 2 ? 1 : 0
+                    Behavior on opacity {
+                        animation: NumberAnimation { duration: Looks.transition.enabled ? 160 : 0 }
                     }
                 }
-                FluentIcon {
-                    visible: crumb.nested
-                    icon: "chevron-right"
-                    implicitSize: Looks.dp(16)
-                    color: Looks.colors.subfg
-                }
-                WText {
-                    id: pageCrumb
-                    Layout.fillWidth: true
-                    text: root.landingCategory >= 0 ? (crumb.cat ? crumb.cat.name : "")
-                        : (root.pages[root.currentPage]?.name ?? "")
-                    font.pixelSize: Looks.settings.title
-                    font.weight: Looks.font.weight.strong
-                    elide: Text.ElideRight
-                    Accessible.role: Accessible.Heading
+
+                ColumnLayout {
+                    id: crumbColumn
+                    x: contentLayer.sidePadding
+                    y: Looks.dp(26)
+                    width: contentLayer.columnWidth
+                    spacing: Looks.dp(4)
+                    opacity: 1
+                    transform: Translate { id: titleShift }
+
+                    ParallelAnimation {
+                        id: titleIn
+                        NumberAnimation { target: crumbColumn; property: "opacity"; from: 0.2; to: 1; duration: Looks.transition.enabled ? 260 : 0; easing.type: Easing.OutCubic }
+                        NumberAnimation { target: titleShift; property: "x"; from: Looks.dp(-10); to: 0; duration: Looks.transition.enabled ? Looks.transition.duration.page : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                    }
+
+                    // the category, then the page; the category goes back. As WinUI's BreadcrumbBar, a path too long
+                    // for the room folds the category into "…", still the way back.
+                    RowLayout {
+                        id: crumb
+                        Layout.fillWidth: true
+                        spacing: Looks.dp(12)
+                        readonly property var cat: root.categories[root.activeCategory] ?? null
+                        readonly property bool nested: crumb.cat !== null && crumb.cat.pages.length > 1 && root.landingCategory < 0
+                        readonly property bool folded: {
+                            crumbType.font
+                            return crumb.nested && crumbType.advanceWidth(crumb.cat.name) + crumbType.advanceWidth(pageCrumb.text)
+                                + Looks.dp(16) + 2 * crumb.spacing > crumb.width
+                        }
+                        FontMetrics { id: crumbType; font: pageCrumb.font }
+
+                        WText {
+                            visible: crumb.nested
+                            text: crumb.folded ? "…" : crumb.cat ? crumb.cat.name : ""
+                            Accessible.name: crumb.cat ? crumb.cat.name : ""
+                            font.pixelSize: Looks.settings.title
+                            font.weight: Looks.font.weight.strong
+                            color: crumbMouse.containsMouse ? Looks.colors.accent : Looks.colors.subfg
+                            Behavior on color {
+                                animation: ColorAnimation { duration: Looks.transition.enabled ? 100 : 0 }
+                            }
+                            MouseArea {
+                                id: crumbMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.landingCategory = root.activeCategory
+                            }
+                        }
+                        FluentIcon {
+                            visible: crumb.nested
+                            icon: "chevron-right"
+                            implicitSize: Looks.dp(16)
+                            color: Looks.colors.subfg
+                        }
+                        WText {
+                            id: pageCrumb
+                            Layout.fillWidth: true
+                            text: root.landingCategory >= 0 ? (crumb.cat ? crumb.cat.name : "")
+                                : (root.pages[root.currentPage]?.name ?? "")
+                            font.pixelSize: Looks.settings.title
+                            font.weight: Looks.font.weight.strong
+                            elide: Text.ElideRight
+                            Accessible.role: Accessible.Heading
+                        }
+                    }
+                    WText {
+                        Layout.fillWidth: true
+                        text: root.landingCategory >= 0 ? (crumb.cat?.desc ?? "") : (root.pages[root.currentPage]?.desc ?? "")
+                        visible: text.length > 0
+                        font.pixelSize: Looks.settings.body
+                        color: Looks.colors.subfg
+                        elide: Text.ElideRight
+                    }
                 }
             }
 
             Item {
                 id: pageStack
                 anchors.fill: parent
-                anchors.topMargin: crumb.y + crumb.height + Looks.dp(10)
+                anchors.topMargin: header.height
                 visible: root.landingCategory < 0
 
                 // Keep only the active page alive. Search navigates to an unloaded page and the targetLabel focus
@@ -898,17 +1119,12 @@ Item {
                         asynchronous: index !== root.currentPage
                         source: root.pages[index].component
                         visible: index === root.currentPage && status === Loader.Ready
-                        opacity: visible ? 1 : 0
-                        // Disabled pages must not intercept mouse events even at opacity 0
+                        // Disabled pages must not intercept mouse events
                         enabled: visible
-                        // the breadcrumb above says the page's name: the page drops its own
+                        // the header above says the page's name: the page drops its own
                         onLoaded: if (item && item.hasOwnProperty("showHeader")) {
                             item.showHeader = false
                             item.sidePadding = Qt.binding(() => contentLayer.sidePadding)
-                        }
-
-                        Behavior on opacity {
-                            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutCubic }
                         }
 
                         Connections {
@@ -924,65 +1140,51 @@ Item {
                 }
             }
 
-            // a category's page: what is inside it, one link card per page (SettingsCard with an action chevron)
+            // a category's page: the desktop or the machine at a glance, then each page as a tile
             Flickable {
                 id: landing
                 anchors.fill: parent
-                anchors.topMargin: pageStack.anchors.topMargin
+                anchors.topMargin: header.height
                 visible: root.landingCategory >= 0
                 clip: true
-                contentHeight: landingColumn.implicitHeight + Looks.dp(32)
+                contentHeight: landingColumn.implicitHeight + Looks.dp(40)
                 boundsBehavior: Flickable.StopAtBounds
                 ScrollBar.vertical: WScrollBar {}
 
                 ColumnLayout {
                     id: landingColumn
                     x: contentLayer.sidePadding
-                    y: Looks.dp(8)
+                    y: Looks.dp(4)
                     width: contentLayer.columnWidth
-                    spacing: Looks.settings.cardSpacing
+                    spacing: Looks.dp(20)
+                    transform: Translate { id: landingShift }
 
-                    // Windows opens Personalization and System on the desktop itself: ours shows the real one
+                    ParallelAnimation {
+                        id: landingIn
+                        NumberAnimation { target: landingColumn; property: "opacity"; from: 0; to: 1; duration: Looks.transition.enabled ? 260 : 0; easing.type: Easing.OutCubic }
+                        NumberAnimation { target: landingShift; property: "y"; from: Looks.dp(18); to: 0; duration: Looks.transition.enabled ? Looks.transition.duration.page : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                    }
+
                     Rectangle {
                         id: hero
                         readonly property string kind: root.landingCategory >= 0 ? (root.categories[root.landingCategory].hero ?? "") : ""
                         visible: hero.kind !== ""
                         Layout.fillWidth: true
-                        Layout.bottomMargin: Looks.dp(20)
-                        implicitHeight: heroRow.implicitHeight + Looks.dp(32)
-                        radius: Looks.settings.radiusSmall
+                        implicitHeight: heroRow.implicitHeight + Looks.dp(40)
+                        radius: Looks.settings.radiusXLarge
                         color: Looks.settings.card
                         border.width: 1
                         border.color: Looks.settings.cardStroke
+                        clip: true
 
-                        component FluentButton: Rectangle {
-                            id: fb
-                            property string text: ""
-                            property bool accent: false
-                            property bool chosen: false
-                            signal clicked()
-                            implicitWidth: fbText.implicitWidth + Looks.dp(24)
-                            implicitHeight: Looks.dp(32)
-                            radius: Looks.settings.radiusSmall
-                            color: fb.accent || fb.chosen
-                                ? (fbMouse.pressed ? Qt.alpha(Looks.colors.accent, 0.8) : fbMouse.containsMouse ? Qt.alpha(Looks.colors.accent, 0.9) : Looks.colors.accent)
-                                : (fbMouse.pressed ? Qt.alpha(Looks.colors.fg, 0.03) : fbMouse.containsMouse ? Qt.alpha(Looks.colors.fg, 0.08) : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.7))
-                            border.width: 1
-                            border.color: Qt.alpha(fb.accent || fb.chosen ? "#FFFFFF" : Looks.colors.fg, fb.accent || fb.chosen ? 0.08 : 0.07)
-                            WText {
-                                id: fbText
-                                anchors.centerIn: parent
-                                text: fb.text
-                                font.pixelSize: Looks.settings.body
-                                font.weight: Looks.font.weight.thin
-                                color: fb.accent || fb.chosen ? Looks.colors.accentFg : Looks.colors.fg
-                            }
-                            MouseArea {
-                                id: fbMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: fb.clicked()
+                        // the accent's light behind the desktop
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: parent.radius
+                            gradient: Gradient {
+                                orientation: Gradient.Horizontal
+                                GradientStop { position: 0; color: Qt.alpha(Looks.colors.accent, Looks.dark ? 0.14 : 0.10) }
+                                GradientStop { position: 0.6; color: "transparent" }
                             }
                         }
 
@@ -991,45 +1193,46 @@ Item {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.top: parent.top
-                            anchors.margins: Looks.dp(16)
-                            spacing: Looks.dp(24)
+                            anchors.margins: Looks.dp(20)
+                            spacing: Looks.dp(28)
 
-                            // the desktop at a glance: wallpaper and the bar where it sits
+                            // the desktop at a glance: the wallpaper, and the taskbar floating where it sits
                             Rectangle {
-                                Layout.preferredWidth: Looks.dp(256)
-                                Layout.preferredHeight: Looks.dp(144)
-                                radius: Looks.dp(6)
-                                color: Looks.colors.bg0
-                                border.width: 1
-                                border.color: Looks.settings.cardStroke
+                                readonly property real span: landingColumn.width > Looks.dp(820) ? Looks.dp(288) : Looks.dp(208)
+                                Layout.preferredWidth: span
+                                Layout.preferredHeight: Math.round(span * 9 / 16)
+                                radius: Looks.dp(12)
+                                color: Looks.colors.bg0Opaque
+                                border.width: 4
+                                border.color: Looks.dark ? Looks.settings.pane : Looks.colors.bg0Opaque
                                 clip: true
                                 StyledImage {
                                     anchors.fill: parent
-                                    anchors.margins: 1
+                                    anchors.margins: 4
                                     fillMode: Image.PreserveAspectCrop
                                     source: hero.visible ? Wallpapers.effectiveWallpaperUrl : ""
-                                    sourceSize.width: 520
+                                    sourceSize.width: 580
                                     asynchronous: true
                                     cache: false
                                 }
                                 Rectangle {
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.margins: 1
-                                    y: (Config.options?.waffles?.bar?.bottom ?? true) ? parent.height - height - 1 : 1
-                                    height: Looks.dp(12)
-                                    color: Qt.alpha(Looks.colors.bg1Base, 0.9)
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    y: (Config.options?.waffles?.bar?.bottom ?? true) ? parent.height - height - Looks.dp(10) : Looks.dp(10)
+                                    width: Looks.dp(96)
+                                    height: Looks.dp(14)
+                                    radius: Looks.dp(5)
+                                    color: Qt.alpha(Looks.colors.bg1Base, 0.92)
                                     Row {
                                         anchors.centerIn: parent
-                                        spacing: Looks.dp(3)
+                                        spacing: Looks.dp(4)
                                         Repeater {
-                                            model: 5
+                                            model: 6
                                             Rectangle {
                                                 required property int index
-                                                width: Looks.dp(6)
-                                                height: Looks.dp(6)
-                                                radius: Looks.dp(1.5)
-                                                color: index === 0 ? Looks.colors.accent : Qt.alpha(Looks.colors.fg, 0.6)
+                                                width: Looks.dp(7)
+                                                height: Looks.dp(7)
+                                                radius: Looks.dp(2)
+                                                color: index === 0 ? Looks.colors.accent : Qt.alpha(Looks.colors.fg, 0.55)
                                             }
                                         }
                                     }
@@ -1039,60 +1242,118 @@ Item {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 Layout.alignment: Qt.AlignVCenter
-                                spacing: Looks.dp(4)
+                                spacing: Looks.dp(6)
 
                                 WText {
                                     Layout.fillWidth: true
                                     text: hero.kind === "system" ? (SystemInfo.hostname || SystemInfo.distroName) : Translation.tr("Your desktop")
-                                    font.pixelSize: Looks.settings.subtitle
+                                    font.pixelSize: Looks.settings.subtitle + Looks.dp(2)
                                     font.weight: Looks.font.weight.strong
                                     elide: Text.ElideRight
                                 }
                                 WText {
                                     Layout.fillWidth: true
                                     text: hero.kind === "system"
-                                        ? [SystemInfo.distroName, SystemInfo.windowingSystem, Array.from(Quickshell.screens).map(sc => `${sc.width}\u00d7${sc.height}`).join(", ")].filter(t => t && t !== "Unknown").join(" \u00b7 ")
+                                        ? [SystemInfo.distroName, SystemInfo.windowingSystem].filter(t => t && t !== "Unknown").join(" · ")
                                         : decodeURIComponent(String(Wallpapers.effectiveWallpaperUrl).split("/").pop() || "")
-                                    font.pixelSize: Looks.settings.caption
-                                    font.weight: Looks.font.weight.thin
+                                    font.pixelSize: Looks.settings.body
                                     color: Looks.colors.subfg
                                     elide: Text.ElideMiddle
                                 }
-                                RowLayout {
+                                // each screen, as a chip
+                                Flow {
+                                    visible: hero.kind === "system"
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: Looks.dp(8)
+                                    spacing: Looks.dp(6)
+                                    Repeater {
+                                        model: hero.kind === "system" ? Array.from(Quickshell.screens) : []
+                                        Rectangle {
+                                            id: screenChip
+                                            required property var modelData
+                                            implicitWidth: chipRow.implicitWidth + Looks.dp(20)
+                                            implicitHeight: Looks.dp(28)
+                                            radius: height / 2
+                                            color: Looks.settings.tile
+                                            border.width: 1
+                                            border.color: Looks.settings.cardStroke
+                                            RowLayout {
+                                                id: chipRow
+                                                anchors.centerIn: parent
+                                                spacing: Looks.dp(6)
+                                                FluentIcon { icon: "desktop"; implicitSize: Looks.dp(13); color: Looks.colors.subfg }
+                                                WText {
+                                                    text: (screenChip.modelData?.name ?? "") + "  " + (screenChip.modelData?.width ?? 0) + "×" + (screenChip.modelData?.height ?? 0)
+                                                    font.pixelSize: Looks.settings.caption
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                Flow {
                                     visible: hero.kind === "desktop"
-                                    Layout.topMargin: Looks.dp(10)
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: Looks.dp(12)
                                     spacing: Looks.dp(8)
-                                    FluentButton {
+                                    PillButton {
                                         accent: true
+                                        icon: "image"
                                         text: Translation.tr("Change wallpaper")
                                         onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
                                     }
-                                    FluentButton {
-                                        text: Translation.tr("Light")
-                                        chosen: !Looks.dark
-                                        onClicked: MaterialThemeLoader.setDarkMode(false)
-                                    }
-                                    FluentButton {
-                                        text: Translation.tr("Dark")
-                                        chosen: Looks.dark
-                                        onClicked: MaterialThemeLoader.setDarkMode(true)
+                                    // light and dark, one pill split in two
+                                    Rectangle {
+                                        implicitWidth: modeRow.implicitWidth + Looks.dp(8)
+                                        implicitHeight: Looks.dp(34)
+                                        radius: height / 2
+                                        color: Looks.settings.tile
+                                        border.width: 1
+                                        border.color: Looks.settings.cardStroke
+                                        Rectangle {
+                                            x: Looks.dp(4) + (Looks.dark ? lightHalf.width : 0)
+                                            y: Looks.dp(4)
+                                            width: Looks.dark ? darkHalf.width : lightHalf.width
+                                            height: parent.height - Looks.dp(8)
+                                            radius: height / 2
+                                            color: Looks.colors.accent
+                                            Behavior on x {
+                                                animation: NumberAnimation { duration: Looks.transition.enabled ? 280 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                                            }
+                                        }
+                                        Row {
+                                            id: modeRow
+                                            anchors.centerIn: parent
+                                            ModeHalf {
+                                                id: lightHalf
+                                                dark: false
+                                                icon: "weather-sunny"
+                                                label: Translation.tr("Light mode")
+                                            }
+                                            ModeHalf {
+                                                id: darkHalf
+                                                dark: true
+                                                icon: "weather-moon"
+                                                label: Translation.tr("Dark mode")
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
 
-                    Repeater {
-                        model: root.landingCategory >= 0 ? root.categories[root.landingCategory].pages : []
-                        WSettingsRow {
-                            required property int modelData
-                            enableSettingsSearch: false
-                            icon: root.pages[modelData]?.icon ?? ""
-                            label: root.pages[modelData]?.name ?? ""
-                            description: root.pages[modelData]?.desc ?? ""
-                            clickable: true
-                            showChevron: true
-                            onClicked: root.openPage(modelData)
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: landingColumn.width > Looks.dp(720) ? 2 : 1
+                        columnSpacing: Looks.dp(8)
+                        rowSpacing: Looks.dp(8)
+                        Repeater {
+                            model: root.landingCategory >= 0 ? root.categories[root.landingCategory].pages : []
+                            PageTile {
+                                required property int modelData
+                                page: modelData
+                                category: root.categories[root.landingCategory] ?? null
+                            }
                         }
                     }
                 }

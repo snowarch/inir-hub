@@ -584,5 +584,9 @@
   "See the welcome screen": "See the welcome screen",
   "Rest screen": "Rest screen",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "The time and what plays over your wallpaper after inactivity (0 = never)",
-  "Sound files": "Sound files"
+  "Sound files": "Sound files",
+  "Sound, power, displays and what starts with you": "Sound, power, displays and what starts with you",
+  "Wallpaper, colours, the taskbar and its style": "Wallpaper, colours, the taskbar and its style",
+  "How windows open, move and look": "How windows open, move and look",
+  "Light mode": "Light mode"
 }

@@ -15,6 +15,46 @@ import qs.modules.waffle.settings
 
 WSettingsPage {
     id: root
+
+    // one side of the hero's light / dark pill
+    component ModeSide: Item {
+        id: side
+        property string icon
+        property string label
+        property bool dark
+        readonly property bool toggled: Appearance.m3colors.darkmode === side.dark
+        implicitWidth: sideRow.implicitWidth + Looks.dp(22)
+        implicitHeight: Looks.dp(26)
+        Row {
+            id: sideRow
+            anchors.centerIn: parent
+            spacing: Looks.dp(6)
+            FluentIcon {
+                anchors.verticalCenter: parent.verticalCenter
+                icon: side.icon
+                implicitSize: Looks.dp(14)
+                color: "#FFFFFF" // literal: white over the darkened picture
+            }
+            WText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: side.label
+                font.pixelSize: Looks.font.pixelSize.small
+                font.weight: side.toggled ? Looks.font.weight.strong : Looks.font.weight.regular
+                color: "#FFFFFF" // literal: white over the darkened picture
+                opacity: side.toggled || sideMa.containsMouse ? 1 : 0.78
+            }
+        }
+        MouseArea {
+            id: sideMa
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: MaterialThemeLoader.setDarkMode(side.dark)
+        }
+        Accessible.role: Accessible.RadioButton
+        Accessible.name: side.label
+        Accessible.checked: side.toggled
+    }
     settingsPageIndex: 0
     pageTitle: Translation.tr("Quick Settings")
     pageIcon: "flash-on"
@@ -223,8 +263,8 @@ WSettingsPage {
     Rectangle {
         id: heroCard
         Layout.fillWidth: true
-        Layout.preferredHeight: 200
-        radius: Looks.radius.large
+        Layout.preferredHeight: Math.round(Math.max(Looks.dp(220), Math.min(Looks.dp(300), width * 0.36)))
+        radius: Looks.settings.radiusXLarge
         color: Looks.colors.bg1Base
         clip: true
 
@@ -288,12 +328,12 @@ WSettingsPage {
             }
         }
 
-        // Bottom gradient — heavier, for lower controls
+        // Bottom gradient — heavier, for the greeting and the lower controls
         Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 80
+            height: parent.height * 0.62
             gradient: Gradient {
                 GradientStop { position: 0.0; color: "transparent" }
                 GradientStop { position: 0.35; color: Qt.rgba(0, 0, 0, 0.25) }
@@ -315,74 +355,75 @@ WSettingsPage {
             }
         }
 
-        // ── Top-right: Light / Dark toggle group ───
-        Row {
+        // ── Top-right: light / dark, one glass pill with a thumb that slides ───
+        Rectangle {
+            id: modePill
             anchors.top: parent.top
             anchors.right: parent.right
-            anchors.margins: 10
-            spacing: 0
+            anchors.margins: Looks.dp(16)
+            readonly property int pad: Looks.dp(3)
+            implicitWidth: modeRow.implicitWidth + pad * 2
+            implicitHeight: Looks.dp(32)
+            radius: height / 2
+            color: Qt.rgba(0, 0, 0, 0.38)
+            border.width: 1
+            border.color: Qt.rgba(1, 1, 1, 0.14)
 
-            Repeater {
-                model: [
-                    { icon: "weather-sunny", label: Translation.tr("Light"), dark: false },
-                    { icon: "weather-moon", label: Translation.tr("Dark"), dark: true }
-                ]
-
-                Rectangle {
-                    id: modeBtn
-                    required property var modelData
-                    required property int index
-
-                    readonly property bool toggled: Appearance.m3colors.darkmode === modelData.dark
-
-                    width: modeBtnRow.implicitWidth + 16
-                    height: 30
-                    radius: index === 0 ? Looks.radius.medium : 0
-                    topRightRadius: index === 1 ? Looks.radius.medium : (index === 0 ? Looks.radius.medium : 0)
-                    bottomRightRadius: index === 1 ? Looks.radius.medium : 0
-                    topLeftRadius: index === 0 ? Looks.radius.medium : 0
-                    bottomLeftRadius: index === 0 ? Looks.radius.medium : 0
-                    color: modeBtn.toggled
-                        ? Qt.rgba(1, 1, 1, 0.25)
-                        : modeBtnMa.containsMouse
-                            ? Qt.rgba(1, 1, 1, 0.12)
-                            : Qt.rgba(0, 0, 0, 0.40)
-                    border.width: 1
-                    border.color: Qt.rgba(1, 1, 1, modeBtn.toggled ? 0.35 : 0.10)
-
-                    Behavior on color {
-                        animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0 }
-                    }
-
-                    Row {
-                        id: modeBtnRow
-                        anchors.centerIn: parent
-                        spacing: 5
-
-                        FluentIcon {
-                            icon: modeBtn.modelData.icon
-                            implicitSize: 14
-                            color: "white"
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        WText {
-                            text: modeBtn.modelData.label
-                            font.pixelSize: Looks.font.pixelSize.small
-                            font.weight: modeBtn.toggled ? Looks.font.weight.strong : Looks.font.weight.regular
-                            color: "white"
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-
-                    MouseArea {
-                        id: modeBtnMa
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: MaterialThemeLoader.setDarkMode(modeBtn.modelData.dark)
-                    }
+            Rectangle {
+                id: modeThumb
+                readonly property Item on: Appearance.m3colors.darkmode ? modeDark : modeLight
+                x: modePill.pad + on.x
+                y: modePill.pad
+                width: on.width
+                height: modePill.height - modePill.pad * 2
+                radius: height / 2
+                color: Qt.rgba(1, 1, 1, 0.24)
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.30)
+                Behavior on x {
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? 260 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
                 }
+                Behavior on width {
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? 260 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                }
+            }
+
+            Row {
+                id: modeRow
+                x: modePill.pad
+                y: modePill.pad
+                ModeSide { id: modeLight; icon: "weather-sunny"; label: Translation.tr("Light mode"); dark: false }
+                ModeSide { id: modeDark; icon: "weather-moon"; label: Translation.tr("Dark mode"); dark: true }
+            }
+        }
+
+        // ── The person, greeted over their own picture ───
+        ColumnLayout {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: modeBadge.top
+            anchors.leftMargin: Looks.dp(22)
+            anchors.rightMargin: Looks.dp(22)
+            anchors.bottomMargin: Looks.dp(10)
+            spacing: 0
+            WText {
+                Layout.fillWidth: true
+                text: {
+                    const h = new Date().getHours()
+                    return h < 5 || h >= 19 ? Translation.tr("Good evening") : h < 12 ? Translation.tr("Good morning") : Translation.tr("Good afternoon")
+                }
+                font.pixelSize: Looks.settings.body
+                color: "#FFFFFF" // literal: white over the darkened picture, in light and dark
+                opacity: 0.86
+                elide: Text.ElideRight
+            }
+            WText {
+                Layout.fillWidth: true
+                text: SystemInfo.displayName || SystemInfo.username
+                font.pixelSize: Looks.settings.title + Looks.dp(6)
+                font.weight: Looks.font.weight.stronger
+                color: "#FFFFFF" // literal: white over the darkened picture, in light and dark
+                elide: Text.ElideRight
             }
         }
 
@@ -391,7 +432,8 @@ WSettingsPage {
             id: modeBadge
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            anchors.margins: 12
+            anchors.leftMargin: Looks.dp(20)
+            anchors.bottomMargin: Looks.dp(16)
             width: modeBadgeRow.implicitWidth + 16
             height: 26
             radius: height / 2
@@ -451,7 +493,8 @@ WSettingsPage {
         Row {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
-            anchors.margins: 10
+            anchors.rightMargin: Looks.dp(16)
+            anchors.bottomMargin: Looks.dp(14)
             spacing: 6
 
             // Shuffle button
@@ -594,10 +637,10 @@ WSettingsPage {
             // ends at its last row: a short folder left a plate of air under its pictures (10-29)
             return Math.min(380, Math.ceil(itemCount / cols) * cell * 0.625 + 12 + navH)
         }
-        radius: Looks.radius.large
-        color: Looks.colors.bg1Base
+        radius: Looks.settings.radiusLarge
+        color: Looks.settings.card
         border.width: 1
-        border.color: Looks.colors.bg1Border
+        border.color: Looks.settings.cardStroke
         clip: true
 
         layer.enabled: true
@@ -716,8 +759,14 @@ WSettingsPage {
                 Rectangle {
                     id: wpThumb
                     anchors.fill: parent
-                    anchors.margins: 3
-                    radius: Looks.radius.medium
+                    anchors.margins: Looks.dp(4)
+                    radius: Looks.settings.radiusSmall
+                    // a picture under the pointer comes forward a little
+                    scale: wpDelegateItem.index === wallpaperGrid.currentHoverIndex ? 1.04 : 1
+                    z: scale > 1 ? 1 : 0
+                    Behavior on scale {
+                        animation: NumberAnimation { duration: Looks.transition.enabled ? 200 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                    }
                     color: Looks.colors.bg2Base
                     clip: true
                     border.width: wpThumbSelected ? 2 : (wpDelegateItem.index === wallpaperGrid.currentHoverIndex ? 1 : 0)
