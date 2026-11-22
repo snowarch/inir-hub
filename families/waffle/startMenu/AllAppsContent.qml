@@ -25,16 +25,17 @@ WPanelPageColumn {
         .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
 
     // [{letter: "A", apps: [...]}, ...]; names that start with a digit or a sign go under #
+    // one group per letter even where the collation interleaves É with E
     readonly property var groupedApps: {
         const groups = []
-        let current = null
+        const byLetter = {}
         for (const app of root.apps) {
             const letter = root.letterOf(app.name)
-            if (!current || current.letter !== letter) {
-                current = { letter: letter, apps: [] }
-                groups.push(current)
+            if (!byLetter[letter]) {
+                byLetter[letter] = { letter: letter, apps: [] }
+                groups.push(byLetter[letter])
             }
-            current.apps.push(app)
+            byLetter[letter].apps.push(app)
         }
         return groups
     }
@@ -45,8 +46,9 @@ WPanelPageColumn {
         return base.concat(root.usedLetters.filter(l => !base.includes(l)))
     }
 
+    // É files under E and ß under S: the accent goes, and an upper case of two letters keeps its first
     function letterOf(name: string): string {
-        const c = (name || "#").charAt(0).toUpperCase()
+        const c = (name || "#").charAt(0).normalize("NFD").charAt(0).toUpperCase().charAt(0)
         return c.toLowerCase() === c ? "#" : c
     }
 
