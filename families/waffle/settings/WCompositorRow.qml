@@ -30,6 +30,9 @@ Item {
     // WSettingsCard lays this out as one of its rows and tells it whether it sits in an expander.
     readonly property string settingsCardRole: "row"
     property string cardStyle: "card"
+    property real itemIndent: Looks.dp(58)
+    property real endInset: row.cardStyle === "item" ? Looks.dp(44) : Looks.settings.cardPadding
+    property bool hairline: false
 
     Layout.fillWidth: true
     implicitHeight: face.item?.implicitHeight ?? 0
@@ -47,6 +50,9 @@ Item {
             label: row.spec.label
             description: row.spec.description ?? ""
             cardStyle: row.cardStyle
+            itemIndent: row.itemIndent
+            endInset: row.endInset
+            hairline: row.hairline
             checked: row.now === true
             onToggled: checked => { if (checked !== (row.now === true)) CompositorConfig.set(row.spec, checked) }
         }
@@ -58,6 +64,9 @@ Item {
             label: row.spec.label
             description: row.spec.description ?? ""
             cardStyle: row.cardStyle
+            itemIndent: row.itemIndent
+            endInset: row.endInset
+            hairline: row.hairline
             suffix: row.factor === 100 ? " %" : String(row.spec.unit ?? "")
             from: Math.round(Number(row.spec.min ?? 0) * row.factor)
             to: Math.round(Number(row.spec.max ?? 100) * row.factor)
@@ -73,6 +82,9 @@ Item {
             label: row.spec.label
             description: row.spec.description ?? ""
             cardStyle: row.cardStyle
+            itemIndent: row.itemIndent
+            endInset: row.endInset
+            hairline: row.hairline
             text: String(row.now ?? "")
             onEditingFinished: newText => { if (newText.trim() !== String(row.now ?? "")) CompositorConfig.set(row.spec, newText.trim()) }
         }
@@ -83,6 +95,9 @@ Item {
             label: row.spec.label
             description: row.spec.description ?? ""
             cardStyle: row.cardStyle
+            itemIndent: row.itemIndent
+            endInset: row.endInset
+            hairline: row.hairline
             options: row.picks
             // Values come back as numbers or text: the one shown is the pick that reads the same.
             currentValue: row.picks.find(pick => String(pick.value) === String(row.now))?.value ?? row.now

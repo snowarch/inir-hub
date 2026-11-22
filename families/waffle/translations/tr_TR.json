@@ -584,5 +584,9 @@
   "See the welcome screen": "Karşılama ekranını gör",
   "Rest screen": "Dinlenme ekranı",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "Hareketsizlikten sonra duvar kağıdının üzerinde saat ve çalan içerik (0 = asla)",
-  "Sound files": "Ses dosyaları"
+  "Sound files": "Ses dosyaları",
+  "Sound, power, displays and what starts with you": "Ses, güç, ekranlar ve seninle başlayanlar",
+  "Wallpaper, colours, the taskbar and its style": "Duvar kağıdı, renkler, görev çubuğu ve stili",
+  "How windows open, move and look": "Pencerelerin nasıl açıldığı, hareket ettiği ve göründüğü",
+  "Light mode": "Açık mod"
 }

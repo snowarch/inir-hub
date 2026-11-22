@@ -584,5 +584,9 @@
   "See the welcome screen": "환영 화면 보기",
   "Rest screen": "휴식 화면",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "비활성 후 배경화면 위에 시간과 재생 중인 항목 표시 (0 = 사용 안 함)",
-  "Sound files": "사운드 파일"
+  "Sound files": "사운드 파일",
+  "Sound, power, displays and what starts with you": "소리, 전원, 디스플레이 및 함께 시작되는 항목",
+  "Wallpaper, colours, the taskbar and its style": "배경 화면, 색상, 작업 표시줄과 스타일",
+  "How windows open, move and look": "창이 열리고 움직이고 보이는 방식",
+  "Light mode": "라이트 모드"
 }

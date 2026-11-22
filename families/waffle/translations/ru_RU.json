@@ -584,5 +584,9 @@
   "See the welcome screen": "Показать экран приветствия",
   "Rest screen": "Экран покоя",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "Время и текущее воспроизведение поверх обоев после бездействия (0 = никогда)",
-  "Sound files": "Звуковые файлы"
+  "Sound files": "Звуковые файлы",
+  "Sound, power, displays and what starts with you": "Звук, питание, дисплеи и то, что запускается вместе с вами",
+  "Wallpaper, colours, the taskbar and its style": "Обои, цвета, панель задач и её стиль",
+  "How windows open, move and look": "Как окна открываются, двигаются и выглядят",
+  "Light mode": "Светлый режим"
 }

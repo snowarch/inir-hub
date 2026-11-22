@@ -54,10 +54,18 @@ Item {
     function relayout(): void {
         const blocks = []
         const kids = contentColumn.children
+        let first = null
+        for (let i = 0; i < kids.length && !first; ++i)
+            if (kids[i].visible)
+                first = kids[i]
         for (let i = 0; i < kids.length; ++i) {
             const c = kids[i]
             if (c.settingsCardRole === "row") {
-                c.cardStyle = root.expander ? "item" : "card"
+                // Waffle Next: a group is one plate, its settings rows on it a hairline apart
+                c.cardStyle = "item"
+                c.hairline = root.expander || c !== first
+                c.itemIndent = root.expander ? Looks.dp(58) : Looks.settings.cardPadding
+                c.endInset = root.expander ? Looks.dp(44) : Looks.settings.cardPadding
                 if (root.toggle)
                     c.enabled = Qt.binding(() => root.checked)
                 continue
@@ -67,14 +75,18 @@ Item {
             // a note that brings its own plate (WSettingsInfoBar)
             if (c.radius !== undefined && c.color !== undefined && c.color.a > 0.02)
                 continue
-            // a plain line of text is a caption under the header, not a setting
+            // a plain line of text is a caption on the plate: it reads with the setting above it, so it keeps the
+            // plate's side padding and closes the gap below (on top only when nothing stands above it)
             if (c.children.length === 0 && typeof c.text === "string") {
-                c.Layout.leftMargin = root.expander ? Looks.dp(58) : Looks.dp(2)
-                c.Layout.rightMargin = c.Layout.leftMargin
+                c.Layout.leftMargin = root.expander ? Looks.dp(58) : Looks.settings.cardPadding
+                c.Layout.rightMargin = root.expander ? Looks.dp(44) : Looks.settings.cardPadding
+                c.Layout.topMargin = c === first ? Looks.dp(12) : 0
+                c.Layout.bottomMargin = Looks.dp(12)
                 continue
             }
             c.Layout.leftMargin = root.expander ? Looks.dp(58) : Looks.settings.cardPadding
             c.Layout.rightMargin = root.expander ? Looks.dp(44) : Looks.settings.cardPadding
+            c.Layout.fillWidth = true
             c.Layout.topMargin = Looks.settings.cardPadding
             c.Layout.bottomMargin = Looks.settings.cardPadding
             blocks.push(c)
@@ -82,6 +94,8 @@ Item {
         root._blocks = blocks
     }
     Component.onCompleted: Qt.callLater(root.relayout)
+    // a group hidden while it loaded saw no visible children: it lays them out once it shows
+    onVisibleChanged: if (visible) Qt.callLater(root.relayout)
 
     ColumnLayout {
         id: mainColumn
@@ -93,16 +107,16 @@ Item {
         ColumnLayout {
             visible: root.expander ? root.section !== "" : root.title !== ""
             Layout.fillWidth: true
-            Layout.topMargin: Looks.dp(18)
-            Layout.bottomMargin: Looks.dp(6)
-            Layout.leftMargin: Looks.dp(1)
+            Layout.topMargin: Looks.dp(22)
+            Layout.bottomMargin: Looks.dp(8)
+            Layout.leftMargin: Looks.dp(4)
             spacing: Looks.dp(2)
 
             WText {
                 Layout.fillWidth: true
                 text: root.expander ? root.section : root.title
-                font.pixelSize: Looks.settings.body
-                font.weight: Looks.font.weight.strong
+                font.pixelSize: Looks.settings.body + Looks.dp(1)
+                font.weight: Looks.font.weight.stronger
                 elide: Text.ElideRight
                 Accessible.role: Accessible.Heading
             }
@@ -175,16 +189,19 @@ Item {
 
             Behavior on implicitHeight {
                 enabled: root.expander
-                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.slow : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
             }
 
-            // an expander's body is one plate under its header
+            // an expander's body is one plate under its header; an open group is one plate whole
             Rectangle {
-                visible: root.expander
+                visible: root.expander || contentColumn.visibleChildren.length > 0
                 anchors.fill: parent
-                anchors.topMargin: -1
-                bottomLeftRadius: Looks.settings.radiusSmall
-                bottomRightRadius: Looks.settings.radiusSmall
+                anchors.topMargin: root.expander ? -1 : 0
+                radius: root.expander ? 0 : Looks.settings.radiusLarge
+                topLeftRadius: root.expander ? 0 : Looks.settings.radiusLarge
+                topRightRadius: root.expander ? 0 : Looks.settings.radiusLarge
+                bottomLeftRadius: Looks.settings.radiusLarge
+                bottomRightRadius: Looks.settings.radiusLarge
                 color: Looks.settings.card
                 border.width: 1
                 border.color: Looks.settings.cardStroke
@@ -201,12 +218,9 @@ Item {
                     y: plate.block ? plate.block.y - Looks.settings.cardPadding : 0
                     width: body.width
                     height: plate.block ? plate.block.height + Looks.settings.cardPadding * 2 : 0
-                    radius: root.expander ? 0 : Looks.settings.radiusSmall
-                    color: root.expander ? "transparent" : Looks.settings.card
-                    border.width: root.expander ? 0 : 1
-                    border.color: Looks.settings.cardStroke
+                    color: "transparent"
                     Rectangle {
-                        visible: root.expander
+                        visible: plate.y > 1
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -220,7 +234,7 @@ Item {
                 id: contentColumn
                 anchors.left: parent.left
                 anchors.right: parent.right
-                spacing: root.expander ? 0 : Looks.settings.cardSpacing
+                spacing: 0
                 opacity: root.expanded ? 1 : 0
                 onImplicitHeightChanged: Qt.callLater(root.relayout)
 

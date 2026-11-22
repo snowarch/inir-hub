@@ -584,5 +584,9 @@
   "See the welcome screen": "查看欢迎屏幕",
   "Rest screen": "休息屏幕",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "无操作后在壁纸上显示时间和正在播放的内容（0 = 从不）",
-  "Sound files": "声音文件"
+  "Sound files": "声音文件",
+  "Sound, power, displays and what starts with you": "声音、电源、显示器以及随你启动的内容",
+  "Wallpaper, colours, the taskbar and its style": "壁纸、颜色、任务栏及其样式",
+  "How windows open, move and look": "窗口如何打开、移动和显示",
+  "Light mode": "浅色模式"
 }

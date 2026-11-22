@@ -584,5 +584,9 @@
   "See the welcome screen": "Lihat layar sambutan",
   "Rest screen": "Layar istirahat",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "Waktu dan yang sedang diputar di atas wallpaper setelah tidak aktif (0 = tidak pernah)",
-  "Sound files": "Berkas suara"
+  "Sound files": "Berkas suara",
+  "Sound, power, displays and what starts with you": "Suara, daya, layar, dan yang mulai bersamamu",
+  "Wallpaper, colours, the taskbar and its style": "Wallpaper, warna, bilah tugas, dan gayanya",
+  "How windows open, move and look": "Cara jendela terbuka, bergerak, dan tampil",
+  "Light mode": "Mode terang"
 }

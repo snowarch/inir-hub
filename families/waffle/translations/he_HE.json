@@ -584,5 +584,9 @@
   "See the welcome screen": "הצגת מסך הפתיחה",
   "Rest screen": "מסך מנוחה",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "השעה ומה שמתנגן מעל הרקע שלך לאחר חוסר פעילות (0 = אף פעם)",
-  "Sound files": "קובצי שמע"
+  "Sound files": "קובצי שמע",
+  "Sound, power, displays and what starts with you": "צליל, חשמל, מסכים ומה שמתחיל איתך",
+  "Wallpaper, colours, the taskbar and its style": "רקע, צבעים, שורת המשימות והסגנון שלה",
+  "How windows open, move and look": "איך חלונות נפתחים, זזים ונראים",
+  "Light mode": "מצב בהיר"
 }

@@ -584,5 +584,9 @@
   "See the welcome screen": "Voir l'écran d'accueil",
   "Rest screen": "Écran de repos",
   "The time and what plays over your wallpaper after inactivity (0 = never)": "L'heure et la lecture en cours sur votre fond d'écran après inactivité (0 = jamais)",
-  "Sound files": "Fichiers audio"
+  "Sound files": "Fichiers audio",
+  "Sound, power, displays and what starts with you": "Son, alimentation, écrans et ce qui démarre avec vous",
+  "Wallpaper, colours, the taskbar and its style": "Fond d'écran, couleurs, la barre des tâches et son style",
+  "How windows open, move and look": "Comment les fenêtres s'ouvrent, bougent et s'affichent",
+  "Light mode": "Mode clair"
 }
