@@ -128,7 +128,7 @@ Item {
     Column {
         id: labelColumn
         anchors.bottom: thumbnailContainer.top
-        anchors.bottomMargin: root.labelSpacing
+        anchors.bottomMargin: root.labelSpacing + Looks.dp(4)
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 2
         opacity: root.isCenteredMode ? (root.isSelected ? 1 : 0) : root.coverflowOpacity
@@ -146,14 +146,28 @@ Item {
             width: Math.max(nameLabel.width, nameEditor.width)
             height: nameLabel.height
             
+            // Waffle Next names a desktop on a chip; the one you are on wears the accent
+            Rectangle {
+                anchors.centerIn: nameLabel
+                visible: !root.isEditing
+                width: nameLabel.width + Looks.dp(24)
+                height: nameLabel.height + Looks.dp(10)
+                radius: height / 2
+                color: root.isActive ? Looks.colors.accent : Qt.alpha(Looks.colors.bg0Opaque, 0.6)
+
+                Behavior on color {
+                    ColorAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0 }
+                }
+            }
+
             WText {
                 id: nameLabel
                 anchors.centerIn: parent
                 visible: !root.isEditing
                 text: root.workspaceName
                 font.pixelSize: Looks.font.pixelSize.normal
-                font.weight: root.isActive ? Font.DemiBold : Font.Normal
-                color: root.isActive ? Looks.colors.fg : ColorUtils.transparentize(Looks.colors.fg, 0.3)
+                font.weight: Looks.font.weight.strong
+                color: root.isActive ? Looks.colors.accentFg : Looks.colors.fg
                 
                 Behavior on color { 
                     ColorAnimation { 
@@ -218,22 +232,6 @@ Item {
             }
         }
         
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: root.isActive ? nameLabel.width : 0
-            height: 2
-            radius: 1
-            color: Looks.colors.accent
-            visible: !root.isEditing
-            
-            Behavior on width { 
-                NumberAnimation { 
-                    duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
-                } 
-            }
-        }
     }
 
     Item {

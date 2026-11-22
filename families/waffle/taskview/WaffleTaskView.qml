@@ -72,43 +72,41 @@ Scope {
                 }
             }
 
-            // Blur strip - Windows 11 style horizontal band
+            // Waffle Next: the whole desktop sinks behind frosted glass, the desktops float on it
             Item {
                 id: blurStrip
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-                width: parent.width
-                height: content.totalHeight + 80
+                anchors.fill: parent
                 clip: true
-                
+
                 // Entry animation - respects GameMode
                 opacity: 0
-                transform: Translate { id: stripTranslate; y: 25 }
-                
+
                 Component.onCompleted: {
                     if (Looks.transition.enabled) {
                         stripEntryAnim.start()
                     } else {
                         opacity = 1
-                        stripTranslate.y = 0
+                        contentScale.xScale = contentScale.yScale = 1
                     }
                 }
-                
+
                 ParallelAnimation {
                     id: stripEntryAnim
-                    NumberAnimation { 
+                    NumberAnimation {
                         target: blurStrip
                         property: "opacity"
                         to: 1
-                        duration: Looks.transition.enabled ? 180 : 0
-                        easing.type: Easing.OutCubic 
+                        duration: Looks.transition.duration.normal
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
                     }
-                    NumberAnimation { 
-                        target: stripTranslate
-                        property: "y"
-                        to: 0
-                        duration: Looks.transition.enabled ? 220 : 0
-                        easing.type: Easing.OutCubic 
+                    NumberAnimation {
+                        target: contentScale
+                        properties: "xScale,yScale"
+                        to: 1
+                        duration: Looks.transition.duration.panel
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive
                     }
                 }
 
@@ -117,12 +115,6 @@ Scope {
                     id: blurSource
                     anchors.fill: parent
                     sourceItem: wallpaperSource
-                    sourceRect: Qt.rect(
-                        0,
-                        (panelWindow.height - blurStrip.height) / 2,
-                        panelWindow.width,
-                        blurStrip.height
-                    )
                     visible: false
                 }
 
@@ -135,40 +127,17 @@ Scope {
                     saturation: 0.5
                 }
 
-                // Dark tint overlay
+                // tint in the scheme's own surface, a touch of accent so it reads as Waffle
                 Rectangle {
                     anchors.fill: parent
-                    color: ColorUtils.transparentize(Looks.colors.bg0Opaque, 0.4)
-                }
-
-                // Top edge fade
-                Rectangle {
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: 20
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.15) }
-                        GradientStop { position: 1.0; color: "transparent" }
-                    }
-                }
-
-                // Bottom edge fade
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: 20
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: "transparent" }
-                        GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.15) }
-                    }
+                    color: Qt.alpha(ColorUtils.mix(Looks.colors.bg0Opaque, Looks.colors.accent, 0.9), Looks.dark ? 0.62 : 0.5)
                 }
             }
 
             WaffleTaskViewContent {
                 id: content
                 anchors.centerIn: blurStrip
+                transform: Scale { id: contentScale; origin.x: content.width / 2; origin.y: content.height / 2; xScale: 0.96; yScale: 0.96 }
                 focus: true
                 onClosed: WaffleState.taskViewOpen = false
                 

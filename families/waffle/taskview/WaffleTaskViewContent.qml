@@ -684,12 +684,12 @@ Item {
         id: searchBar
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: -60
-        width: 220
-        height: 44
-        radius: Looks.radius.large
+        anchors.topMargin: -Looks.dp(76)
+        width: Looks.dp(320)
+        height: Looks.dp(44)
+        radius: height / 2
         color: Looks.colors.bg0Opaque
-        border.width: 1.2
+        border.width: 1
         border.color: searchBar.activeFocus || root.searchQuery.length > 0 ? Looks.colors.accent : Looks.colors.bg2Border
         visible: true
         
@@ -750,12 +750,22 @@ Item {
     
     // Keyboard hints bar - minimal, only essential shortcuts
     // Keyboard hints bar - more visible
+    // the hints sit on one soft pill
+    Rectangle {
+        anchors.fill: hintsBar
+        anchors.margins: -Looks.dp(8)
+        anchors.leftMargin: -Looks.dp(16)
+        anchors.rightMargin: -Looks.dp(16)
+        radius: height / 2
+        color: Qt.alpha(Looks.colors.bg0Opaque, 0.55)
+    }
+
     Row {
         id: hintsBar
         anchors.bottom: dotsRow.top
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottomMargin: 4
-        spacing: 24
+        anchors.bottomMargin: Looks.dp(14)
+        spacing: Looks.dp(20)
         
         KeyHint { keyLabel: "←→"; actionLabel: Translation.tr("Desktops") }
         KeyHint { keyLabel: "Tab"; actionLabel: Translation.tr("Windows") }
@@ -772,8 +782,8 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: keyText.width + 14
             height: 24
-            radius: 6
-            color: ColorUtils.transparentize(Looks.colors.bg0Opaque, 0.3)
+            radius: Looks.radius.medium
+            color: Qt.alpha(Looks.colors.fg, 0.08)
             border.width: 1
             border.color: ColorUtils.transparentize(Looks.colors.fg, 0.8)
             
