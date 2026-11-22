@@ -175,8 +175,9 @@ Item {
             visible: slot.valid && slot.at.o > 0.01
             width: root.cardWidth
             height: root.cardHeight
-            x: slot.at.x - width / 2
-            y: slot.at.y - height / 2
+            // On whole pixels: a card half a pixel off resamples its picture.
+            x: Math.round(slot.at.x - width / 2)
+            y: Math.round(slot.at.y - height / 2)
             z: slot.at.z
             opacity: slot.at.o
             // The run sets the size frame by frame; only touch eases (eased together, a fast run never caught up

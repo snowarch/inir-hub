@@ -140,8 +140,8 @@ Item {
         width: Math.round(bodyWidth.value)
         height: Math.round(bodyHeight.value)
         x: Math.round((root.width - width) / 2)
-        y: root.barBottom ? root.height - height - edgeGap - IrisFrame.musicReach("bottom")
-            : edgeGap + IrisFrame.musicReach("top")
+        y: Math.round(root.barBottom ? root.height - height - edgeGap - IrisFrame.musicReach("bottom")
+            : edgeGap + IrisFrame.musicReach("top"))
         onClosed: { engine.setQuery(""); root.detailsOpen = false }
         onSettledChanged: if (surface.settled && surface.open) layoutLoader.item?.focusSearch()
 
