@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.20",
+    "version": "2.34.21",
     "changes": {
+      "2.34.21": ["Waffle Settings is new: a greeting home, grouped plates and a light or dark switch on the hero", "Panels wear mica tinted by your accent, with a lit glass rim and calmer motion", "Switches grow under the pointer and spring across; menus and tooltips match"],
       "2.34.20": ["The welcome at startup rises in steps, your picture, then your name, then Welcome; leaving, the wallpaper comes into focus", "With no picture of your own, the welcome shows your initial alone"],
       "2.34.19": ["Settings lists every installed family from the Hub next to the three built in"],
         "2.34.18": ["Changing the palette type from the widgets panel no longer passes the choice through a shell", "On Umbriel, the overview backdrop no longer covers your wallpaper with a blurred copy"],
