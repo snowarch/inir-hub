@@ -43,7 +43,7 @@ Menu {
                 to: root.margins
                 duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: Looks.transition.easing.bezierCurve.popIn
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive
             }
             NumberAnimation {
                 property: "opacity"

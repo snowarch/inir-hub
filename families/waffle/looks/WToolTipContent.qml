@@ -23,9 +23,9 @@ Item {
         implicitWidth: root.realContentItem.implicitWidth + root.horizontalPadding * 2
         implicitHeight: root.realContentItem.implicitHeight + root.verticalPadding * 2
         color: Looks.colors.tooltipSurface
-        radius: Looks.radius.medium
-        border.width: Looks.glassActive ? 1 : 0
-        border.color: Looks.colors.tooltipBorder
+        radius: Looks.radius.medium + Looks.dp(1)
+        border.width: 1
+        border.color: Looks.glassActive ? Looks.colors.tooltipBorder : Looks.colors.ring
 
         children: [root.realContentItem]
     }
