@@ -89,6 +89,14 @@ WBarAttachedPanelContent {
         }
     }
 
+    component Card: BodyRectangle {
+        Layout.fillHeight: false
+        radius: Looks.radius.large
+        color: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.05 : 0.04)
+        border.width: 1
+        border.color: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.07)
+    }
+
     component WidgetsPaneContent: Rectangle {
         id: paneContent
         implicitWidth: Looks.dp(380)
@@ -98,19 +106,22 @@ WBarAttachedPanelContent {
 
         Flickable {
             anchors.fill: parent
-            contentHeight: contentColumn.implicitHeight
+            contentHeight: contentColumn.implicitHeight + Looks.dp(10)
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
+        // Waffle Next board: every widget is its own card on the sheet
         ColumnLayout {
             id: contentColumn
-            width: parent.width
-            spacing: 0
+            x: Looks.dp(10)
+            width: parent.width - Looks.dp(20)
+            spacing: Looks.dp(8)
 
             // Header
             BodyRectangle {
                 Layout.fillWidth: true
-                implicitHeight: Looks.dp(56)
+                implicitHeight: Looks.dp(52)
+                color: "transparent"
 
                 RowLayout {
                     anchors.fill: parent
@@ -141,10 +152,8 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showDateTime ?? true }
-
             // Date & Time widget
-            BodyRectangle {
+            Card {
                 Layout.fillWidth: true
                 implicitHeight: dateTimeContent.implicitHeight + Looks.dp(36)
                 visible: Config.options?.waffles?.widgetsPanel?.showDateTime ?? true
@@ -189,10 +198,8 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: (Config.options?.waffles?.widgetsPanel?.showWeather ?? true) && Weather.data.temp !== undefined && Weather.data.temp !== "" }
-
             // Weather widget
-            BodyRectangle {
+            Card {
                 Layout.fillWidth: true
                 implicitHeight: weatherContent.implicitHeight + Looks.dp(32)
                 visible: (Config.options?.waffles?.widgetsPanel?.showWeather ?? true) && Weather.data.temp !== undefined && Weather.data.temp !== ""
@@ -373,10 +380,8 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showSystem ?? true }
-
             // System Resources widget
-            BodyRectangle {
+            Card {
                 Layout.fillWidth: true
                 implicitHeight: sysContent.implicitHeight + Looks.dp(36)
                 visible: Config.options?.waffles?.widgetsPanel?.showSystem ?? true
@@ -494,21 +499,14 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator {
-                opacity: ((Config.options?.waffles?.widgetsPanel?.showMedia ?? true) && MprisController.activePlayer !== null) ? 1 : 0
-                visible: opacity > 0
-                Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic } }
-            }
-
             // Media widget (if playing)
-            BodyRectangle {
+            Card {
                 id: mediaWidget
                 Layout.fillWidth: true
                 implicitHeight: ((Config.options?.waffles?.widgetsPanel?.showMedia ?? true) && MprisController.activePlayer !== null) ? mediaContent.implicitHeight : 0
                 visible: implicitHeight > 0
                 Behavior on implicitHeight { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveEnter.duration; easing.type: Appearance.animation.elementMoveEnter.type; easing.bezierCurve: Appearance.animation.elementMoveEnter.bezierCurve } }
                 clip: true
-                color: "transparent"
 
                 // Volume feedback overlay
                 Rectangle {
@@ -732,8 +730,7 @@ WBarAttachedPanelContent {
                     spacing: 0
                     visible: customCard.shown
 
-                    WPanelSeparator {}
-                    BodyRectangle {
+                    Card {
                         Layout.fillWidth: true
                         implicitHeight: customFace.item?.implicitHeight ?? 0
 
@@ -751,14 +748,12 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true }
-
             // Quick actions — use Loader to fully unload when disabled
             Loader {
                 Layout.fillWidth: true
                 active: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
                 visible: active
-                sourceComponent: BodyRectangle {
+                sourceComponent: Card {
                     implicitHeight: actionsContent.implicitHeight + Looks.dp(36)
 
                     ColumnLayout {
@@ -794,14 +789,12 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showColorScheme ?? true }
-
             // Scheme variant selector
             Loader {
                 Layout.fillWidth: true
                 active: Config.options?.waffles?.widgetsPanel?.showColorScheme ?? true
                 visible: active
-                sourceComponent: BodyRectangle {
+                sourceComponent: Card {
                     implicitHeight: schemeContent.implicitHeight + Looks.dp(36)
 
                     ColumnLayout {
