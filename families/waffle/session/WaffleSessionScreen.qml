@@ -55,7 +55,8 @@ Scope {
 
     function choose(index: int): void {
         const action = root.mainActions.concat(root.moreActions)[index]
-        if (!action)
+        // once chosen it fades out: a second click or Enter in that time must not run it again
+        if (!action || !root.shown || root.closing)
             return
         action.run()
         root.hide()
