@@ -583,5 +583,12 @@
   "How windows open, move and look": "Igalaat qanoq ammartarnersut, nikittarnersut isikkoqarnersullu",
   "Floating taskbar": "Suliassat titarnerat puttasoq",
   "Lift the taskbar off the screen edge, with rounded corners": "Suliassat titarnerat saqqummiivimmi killinganit peerneqarpoq, teqeqqui ammaloriillutik",
-  "Apps you open show up here": "Atortussiat ammakkatit maani takuneqarsinnaapput"
+  "Apps you open show up here": "Atortussiat ammakkatit maani takuneqarsinnaapput",
+  "Welcome and rest": "Tikilluaritsineq aamma qasuersaarneq",
+  "Welcome screen": "Tikilluarit screen",
+  "Your picture and name once at startup, then the desktop": "Startup-imi assit aamma aqqit ataasiarlutik, taava desktop",
+  "See the welcome screen": "Tikilluarit screen takuuk",
+  "Rest screen": "Qasuersaarnermi screen",
+  "The time and what plays over your wallpaper after inactivity (0 = never)": "Inactivity kingorna wallpaper-it qulaani piffissaq aamma tusarnaagassaq (0 = naamik)",
+  "Sound files": "Sound file-it"
 }
