@@ -273,6 +273,28 @@ Scope {
                             }
                         }
                     }
+                    // Leaves with the desktop as it was when the mode opened; quiet until something changed.
+                    RippleButton {
+                        id: cancelKey
+                        anchors.verticalCenter: parent.verticalCenter
+                        implicitHeight: 32
+                        implicitWidth: cancelText.implicitWidth + 24
+                        buttonRadius: Appearance.rounding.full
+                        enabled: DesktopEditHistory.changed
+                        opacity: enabled ? 1 : 0.38
+                        colBackground: "transparent"
+                        colBackgroundHover: Appearance.colors.colLayer2Hover
+                        Accessible.name: Translation.tr("Cancel")
+                        onClicked: DesktopEditHistory.cancel()
+                        contentItem: StyledText {
+                            id: cancelText
+                            anchors.centerIn: parent
+                            text: Translation.tr("Cancel")
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            font.weight: Font.DemiBold
+                            color: Appearance.colors.colOnLayer2
+                        }
+                    }
                     RippleButton {
                         id: doneKey
                         anchors.verticalCenter: parent.verticalCenter

@@ -340,6 +340,14 @@ WidgetShelf {
                         Accessible.name: Translation.tr("Widget settings")
                         onClicked: GlobalStates.openSettingsAt("iris", head.shelf && !head.shelf.onWidgets && head.shelf.page !== "presets" ? head.shelf.page : "widgets")
                     }
+                    // Leaves with the desktop as it was when the mode opened; quiet until something changed.
+                    IrisButton {
+                        implicitHeight: head.height
+                        text: Translation.tr("Cancel")
+                        enabled: DesktopEditHistory.changed
+                        opacity: enabled ? 1 : 0.38
+                        onClicked: DesktopEditHistory.cancel()
+                    }
                     IrisButton {
                         implicitHeight: head.height
                         text: Translation.tr("Done")
