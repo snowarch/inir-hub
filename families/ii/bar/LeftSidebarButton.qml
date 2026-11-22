@@ -114,8 +114,8 @@ RippleButton {
     CustomIcon {
         id: distroIcon
         anchors.centerIn: parent
-        width: root.avatarShown ? 22 : 19.5
-        height: root.avatarShown ? 22 : 19.5
+        width: root.avatarShown ? 22 : 20
+        height: root.avatarShown ? 22 : 20
         source: root.avatarShown ? ""
             : root.iconName === "distro" || root.iconName === "avatar" ? SystemInfo.distroIcon : `${root.iconName}-symbolic`
         colorize: true
