@@ -134,7 +134,6 @@
   "File Explorer": "Esplora file",
   "Filename format": "Formato nome file",
   "Files shortcut": "Scorciatoia file",
-  "Filter apps...": "Filtra app...",
   "Find a setting": "Trova un'impostazione",
   "Fix toggle switch handle alignment": "Correggi allineamento maniglia interruttore a levetta",
   "Focusing": "Messa a fuoco",
@@ -604,5 +603,7 @@
   "Choose": "Scegli",
   "Back": "Indietro",
   "Up for %1": "Acceso da %1",
-  "Jump to a letter": "Vai a una lettera"
+  "Jump to a letter": "Vai a una lettera",
+  "Copy text or an image and it shows up here": "Copia un testo o un'immagine e comparirà qui",
+  "Link": "Link"
 }

@@ -134,7 +134,6 @@
   "File Explorer": "Dosya Gezgini",
   "Filename format": "Dosya adı formatı",
   "Files shortcut": "Dosyalar kısayolu",
-  "Filter apps...": "Uygulamaları filtrele...",
   "Find a setting": "Bir ayar bul",
   "Fix toggle switch handle alignment": "Geçiş anahtarı kolu hizalamasını düzelt",
   "Focusing": "Odaklanıyor",
@@ -604,5 +603,7 @@
   "Choose": "Seç",
   "Back": "Geri",
   "Up for %1": "%1 süredir açık",
-  "Jump to a letter": "Bir harfe git"
+  "Jump to a letter": "Bir harfe git",
+  "Copy text or an image and it shows up here": "Bir metin veya görsel kopyalayın, burada görünür",
+  "Link": "Bağlantı"
 }

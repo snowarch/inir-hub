@@ -134,7 +134,6 @@
   "File Explorer": "Trình khám phá tệp",
   "Filename format": "Định dạng tên tệp",
   "Files shortcut": "Phím tắt tập tin",
-  "Filter apps...": "Lọc ứng dụng...",
   "Find a setting": "Tìm một cài đặt",
   "Fix toggle switch handle alignment": "Sửa lỗi căn chỉnh tay cầm công tắc bật tắt",
   "Focusing": "Lấy nét",
@@ -604,5 +603,7 @@
   "Choose": "Chọn",
   "Back": "Quay lại",
   "Up for %1": "Đã bật %1",
-  "Jump to a letter": "Chuyển đến chữ cái"
+  "Jump to a letter": "Chuyển đến chữ cái",
+  "Copy text or an image and it shows up here": "Sao chép văn bản hoặc hình ảnh và nó sẽ hiện ở đây",
+  "Link": "Liên kết"
 }

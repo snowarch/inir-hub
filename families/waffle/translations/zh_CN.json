@@ -134,7 +134,6 @@
   "File Explorer": "文件浏览器",
   "Filename format": "文件名格式",
   "Files shortcut": "文件快捷方式",
-  "Filter apps...": "过滤应用程序...",
   "Find a setting": "找到一个设置",
   "Fix toggle switch handle alignment": "修复拨动开关手柄对齐问题",
   "Focusing": "聚焦",
@@ -604,5 +603,7 @@
   "Choose": "选择",
   "Back": "返回",
   "Up for %1": "已运行 %1",
-  "Jump to a letter": "跳转到字母"
+  "Jump to a letter": "跳转到字母",
+  "Copy text or an image and it shows up here": "复制文字或图片后会显示在这里",
+  "Link": "链接"
 }

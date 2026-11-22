@@ -134,7 +134,6 @@
   "File Explorer": "Explorateur de fichiers",
   "Filename format": "Format du nom de fichier",
   "Files shortcut": "Raccourci fichiers",
-  "Filter apps...": "Filtrer les applications...",
   "Find a setting": "Trouver un paramètre",
   "Fix toggle switch handle alignment": "Correction de l'alignement de la poignée de l'interrupteur à bascule",
   "Focusing": "Mise au point",
@@ -604,5 +603,7 @@
   "Choose": "Choisir",
   "Back": "Retour",
   "Up for %1": "Allumé depuis %1",
-  "Jump to a letter": "Aller à une lettre"
+  "Jump to a letter": "Aller à une lettre",
+  "Copy text or an image and it shows up here": "Copiez du texte ou une image et il apparaîtra ici",
+  "Link": "Lien"
 }

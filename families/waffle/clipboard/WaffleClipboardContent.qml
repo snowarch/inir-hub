@@ -192,7 +192,7 @@ Item {
             // Header with search
             FooterRectangle {
                 Layout.fillWidth: true
-                implicitHeight: 56
+                implicitHeight: Looks.dp(60)
                 color: Looks.colors.bgPanelFooter
 
                 RowLayout {
@@ -201,9 +201,18 @@ Item {
                     anchors.rightMargin: 12
                     spacing: 12
 
-                    FluentIcon {
-                        icon: "cut"
-                        implicitSize: 20
+                    // the clipboard on an accent tile, as each Waffle panel leads with its own
+                    Rectangle {
+                        implicitWidth: Looks.dp(32)
+                        implicitHeight: Looks.dp(32)
+                        radius: Looks.radius.medium
+                        color: Looks.colors.accent
+                        FluentIcon {
+                            anchors.centerIn: parent
+                            icon: "copy"
+                            implicitSize: Looks.dp(17)
+                            color: Looks.colors.accentFg
+                        }
                     }
 
                     WText {
@@ -212,18 +221,27 @@ Item {
                         font.weight: Looks.font.weight.strong
                     }
 
-                    Item { Layout.fillWidth: true }
-
-                    // Normal state: count + clear button
-                    WText {
-                        visible: !root.showClearConfirmation
-                        text: `${root.totalCount}`
-                        color: Looks.colors.subfg
-                        font.pixelSize: Looks.font.pixelSize.normal
+                    // how many: a quiet pill, gone when there is nothing
+                    Rectangle {
+                        visible: !root.showClearConfirmation && root.totalCount > 0
+                        implicitWidth: Math.max(implicitHeight, countText.implicitWidth + Looks.dp(14))
+                        implicitHeight: Looks.dp(20)
+                        radius: height / 2
+                        color: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.08 : 0.06)
+                        WText {
+                            id: countText
+                            anchors.centerIn: parent
+                            text: root.totalCount
+                            color: Looks.colors.subfg
+                            font.pixelSize: Looks.font.pixelSize.small
+                            font.weight: Looks.font.weight.strong
+                        }
                     }
 
+                    Item { Layout.fillWidth: true }
+
                     WPanelIconButton {
-                        visible: !root.showClearConfirmation
+                        visible: !root.showClearConfirmation && root.totalCount > 0
                         iconName: "delete"
                         onClicked: root.clearAll()
                         WToolTip {
@@ -279,21 +297,23 @@ Item {
                     anchors.rightMargin: 16
                     anchors.topMargin: 8
                     anchors.bottomMargin: 8
+                    // the same round search as Start
                     radius: height / 2
-                    color: Looks.colors.inputBg
+                    color: searchInput.activeFocus ? Qt.alpha(Looks.colors.fg, Looks.dark ? 0.08 : 0.06) : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.04)
                     border.width: 1
-                    border.color: Looks.colors.bg2Border
+                    border.color: searchInput.activeFocus ? Qt.alpha(Looks.colors.accent, 0.55) : "transparent"
+                    Behavior on border.color { ColorAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0 } }
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 12
-                        spacing: 8
+                        anchors.leftMargin: Looks.dp(14)
+                        anchors.rightMargin: Looks.dp(14)
+                        spacing: Looks.dp(10)
 
-                        WAppIcon {
-                            iconName: "system-search-checked"
-                            separateLightDark: true
-                            implicitSize: 16
+                        FluentIcon {
+                            icon: "search"
+                            implicitSize: Looks.dp(15)
+                            color: Looks.colors.accent
                         }
 
                         WTextInput {
@@ -356,15 +376,17 @@ Item {
                     anchors.fill: parent
                     anchors.margins: 16
                     clip: true
-                    spacing: 4
+                    spacing: Looks.dp(6)
                     highlightMoveDuration: 100
                     currentIndex: 0
 
                     model: filteredClipboardModel
 
                     highlight: Rectangle {
-                        color: Looks.colors.bg1
-                        radius: Looks.radius.medium
+                        color: "transparent"
+                        radius: Looks.radius.large
+                        border.width: 1
+                        border.color: Qt.alpha(Looks.colors.accent, 0.6)
                     }
 
                     delegate: WaffleClipboardItem {
@@ -400,26 +422,58 @@ Item {
                         }
                     }
 
-                    // Empty state
+                    // Empty state: the mascot when its pack is there, else the clipboard on a soft tile, and what to do
                     ColumnLayout {
                         anchors.centerIn: parent
+                        width: parent.width - Looks.dp(48)
                         visible: clipboardList.count === 0
-                        spacing: 8
+                        spacing: Looks.dp(10)
 
                         MascotImage {
+                            id: emptyMascot
+                            visible: emptyMascot.active
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.preferredWidth: 96
-                            Layout.preferredHeight: 96
+                            Layout.preferredWidth: Looks.dp(96)
+                            Layout.preferredHeight: Looks.dp(96)
                             surface: "clipboard"
                             fallbackSurface: "emptyStates"
                             pose: root.searchText.length > 0 ? "fisheye-inspect" : "box-hideout"
                         }
 
+                        Rectangle {
+                            visible: !emptyMascot.active
+                            Layout.alignment: Qt.AlignHCenter
+                            implicitWidth: Looks.dp(64)
+                            implicitHeight: Looks.dp(64)
+                            radius: Looks.radius.xLarge
+                            color: Qt.alpha(Looks.colors.accent, Looks.dark ? 0.18 : 0.12)
+                            FluentIcon {
+                                anchors.centerIn: parent
+                                icon: root.searchText.length > 0 ? "search" : "copy"
+                                implicitSize: Looks.dp(28)
+                                color: Looks.colors.accent
+                            }
+                        }
+
                         WText {
                             Layout.alignment: Qt.AlignHCenter
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.Wrap
                             text: root.searchText.length > 0
                                 ? Voice.miss(Translation.tr("No results found"), root.searchText)
                                 : Translation.tr("Clipboard is empty")
+                            font.pixelSize: Looks.font.pixelSize.large
+                            font.weight: Looks.font.weight.strong
+                        }
+
+                        WText {
+                            visible: root.searchText.length === 0
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.Wrap
+                            text: Translation.tr("Copy text or an image and it shows up here")
                             color: Looks.colors.subfg
                         }
                     }
@@ -433,33 +487,44 @@ Item {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 16
-                    anchors.rightMargin: 16
-                    spacing: 16
+                    anchors.leftMargin: Looks.dp(16)
+                    anchors.rightMargin: Looks.dp(16)
+                    spacing: Looks.dp(14)
 
-                    WText {
-                        text: "↑↓ " + Translation.tr("Navigate")
-                        color: Looks.colors.subfg
-                        font.pixelSize: Looks.font.pixelSize.small
-                    }
-                    WText {
-                        text: "Enter " + Translation.tr("Paste")
-                        color: Looks.colors.subfg
-                        font.pixelSize: Looks.font.pixelSize.small
-                    }
-                    WText {
-                        text: "Del " + Translation.tr("Delete")
-                        color: Looks.colors.subfg
-                        font.pixelSize: Looks.font.pixelSize.small
-                    }
+                    Hint { keyLabel: "↑↓"; label: Translation.tr("Navigate") }
+                    Hint { keyLabel: "Enter"; label: Translation.tr("Paste") }
+                    Hint { keyLabel: "Del"; label: Translation.tr("Delete") }
+                    Hint { keyLabel: "Ctrl+P"; label: Translation.tr("Pin") }
                     Item { Layout.fillWidth: true }
-                    WText {
-                        text: "Esc " + Translation.tr("Close")
-                        color: Looks.colors.subfg
-                        font.pixelSize: Looks.font.pixelSize.small
-                    }
+                    Hint { keyLabel: "Esc"; label: Translation.tr("Close") }
                 }
             }
+        }
+    }
+
+    // a key on a chip, then what it does
+    component Hint: RowLayout {
+        id: hint
+        property string keyLabel
+        property string label
+        spacing: Looks.dp(5)
+        Rectangle {
+            implicitWidth: hintKey.implicitWidth + Looks.dp(10)
+            implicitHeight: Looks.dp(18)
+            radius: Looks.dp(5)
+            color: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.09 : 0.07)
+            WText {
+                id: hintKey
+                anchors.centerIn: parent
+                text: hint.keyLabel
+                font.pixelSize: Looks.font.pixelSize.tiny
+                font.weight: Looks.font.weight.strong
+            }
+        }
+        WText {
+            text: hint.label
+            color: Looks.colors.subfg
+            font.pixelSize: Looks.font.pixelSize.small
         }
     }
 

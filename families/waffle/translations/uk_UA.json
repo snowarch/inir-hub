@@ -134,7 +134,6 @@
   "File Explorer": "Провідник файлів",
   "Filename format": "Формат імені файлу",
   "Files shortcut": "Ярлик файлів",
-  "Filter apps...": "Фільтр програм...",
   "Find a setting": "Знайдіть налаштування",
   "Fix toggle switch handle alignment": "Виправлено вирівнювання ручки тумблера",
   "Focusing": "Фокусування",
@@ -604,5 +603,7 @@
   "Choose": "Вибрати",
   "Back": "Назад",
   "Up for %1": "Працює %1",
-  "Jump to a letter": "Перейти до літери"
+  "Jump to a letter": "Перейти до літери",
+  "Copy text or an image and it shows up here": "Скопіюйте текст або зображення, і воно з’явиться тут",
+  "Link": "Посилання"
 }

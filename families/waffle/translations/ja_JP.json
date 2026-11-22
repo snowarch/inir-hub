@@ -134,7 +134,6 @@
   "File Explorer": "ファイルエクスプローラー",
   "Filename format": "ファイル名の形式",
   "Files shortcut": "ファイルのショートカット",
-  "Filter apps...": "アプリをフィルタリング...",
   "Find a setting": "設定を探す",
   "Fix toggle switch handle alignment": "トグルスイッチハンドルの位置を修正",
   "Focusing": "フォーカシング",
@@ -604,5 +603,7 @@
   "Choose": "選択",
   "Back": "戻る",
   "Up for %1": "起動から %1",
-  "Jump to a letter": "文字へ移動"
+  "Jump to a letter": "文字へ移動",
+  "Copy text or an image and it shows up here": "テキストや画像をコピーするとここに表示されます",
+  "Link": "リンク"
 }

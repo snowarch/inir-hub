@@ -134,7 +134,6 @@
   "File Explorer": "סייר הקבצים",
   "Filename format": "פורמט שם קובץ",
   "Files shortcut": "קיצור דרך לקבצים",
-  "Filter apps...": "סינון אפליקציות...",
   "Find a setting": "מצא הגדרה",
   "Fix toggle switch handle alignment": "תקן את יישור ידית מתג ההחלפה",
   "Focusing": "התמקדות",
@@ -604,5 +603,7 @@
   "Choose": "בחירה",
   "Back": "חזרה",
   "Up for %1": "פועל כבר %1",
-  "Jump to a letter": "מעבר לאות"
+  "Jump to a letter": "מעבר לאות",
+  "Copy text or an image and it shows up here": "העתיקו טקסט או תמונה והם יופיעו כאן",
+  "Link": "קישור"
 }

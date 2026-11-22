@@ -134,7 +134,6 @@
   "File Explorer": "File Explorer",
   "Filename format": "Filename format",
   "Files shortcut": "Files shortcut",
-  "Filter apps...": "Filter apps...",
   "Find a setting": "Find a setting",
   "Fix toggle switch handle alignment": "Fix toggle switch handle alignment",
   "Focusing": "Focusing",
@@ -604,5 +603,7 @@
   "Choose": "Choose",
   "Back": "Back",
   "Up for %1": "Up for %1",
-  "Jump to a letter": "Jump to a letter"
+  "Jump to a letter": "Jump to a letter",
+  "Copy text or an image and it shows up here": "Copy text or an image and it shows up here",
+  "Link": "Link"
 }

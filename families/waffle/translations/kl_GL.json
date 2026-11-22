@@ -134,7 +134,6 @@
   "File Explorer": "Filinik misissuisoq",
   "Filename format": "Filiname format",
   "Files shortcut": "File shortcut",
-  "Filter apps...": "App-it filter-gikkit...",
   "Find a setting": "Setting ujaruk",
   "Fix toggle switch handle alignment": "Toggle switch handle alignment fix-guk",
   "Focusing": "Focus-guking",
@@ -604,5 +603,7 @@
   "Choose": "Toqqaruk",
   "Back": "Utimut",
   "Up for %1": "%1 ingerlavoq",
-  "Jump to a letter": "Naqinnermut ingerlaarit"
+  "Jump to a letter": "Naqinnermut ingerlaarit",
+  "Copy text or an image and it shows up here": "Allagaq assiliarluunniit assilillugu maani takuneqarsinnaassaaq",
+  "Link": "Attaveqaat"
 }

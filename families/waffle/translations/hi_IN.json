@@ -134,7 +134,6 @@
   "File Explorer": "फ़ाइल एक्सप्लोरर",
   "Filename format": "फ़ाइलनाम प्रारूप",
   "Files shortcut": "फ़ाइलें शॉर्टकट",
-  "Filter apps...": "ऐप्स फ़िल्टर करें...",
   "Find a setting": "एक सेटिंग ढूंढें",
   "Fix toggle switch handle alignment": "टॉगल स्विच हैंडल संरेखण ठीक करें",
   "Focusing": "ध्यान केन्द्रित करना",
@@ -604,5 +603,7 @@
   "Choose": "चुनें",
   "Back": "वापस",
   "Up for %1": "%1 से चालू",
-  "Jump to a letter": "किसी अक्षर पर जाएँ"
+  "Jump to a letter": "किसी अक्षर पर जाएँ",
+  "Copy text or an image and it shows up here": "कोई टेक्स्ट या छवि कॉपी करें, वह यहाँ दिखेगी",
+  "Link": "लिंक"
 }

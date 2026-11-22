@@ -134,7 +134,6 @@
   "File Explorer": "파일 탐색기",
   "Filename format": "파일 이름 형식",
   "Files shortcut": "파일 바로가기",
-  "Filter apps...": "앱 필터링...",
   "Find a setting": "설정 찾기",
   "Fix toggle switch handle alignment": "토글 스위치 핸들 정렬 수정",
   "Focusing": "집중",
@@ -604,5 +603,7 @@
   "Choose": "선택",
   "Back": "뒤로",
   "Up for %1": "%1 동안 켜짐",
-  "Jump to a letter": "문자로 이동"
+  "Jump to a letter": "문자로 이동",
+  "Copy text or an image and it shows up here": "텍스트나 이미지를 복사하면 여기에 표시됩니다",
+  "Link": "링크"
 }

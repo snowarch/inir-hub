@@ -23,6 +23,7 @@ Center. Everything here is set in **Waffle Settings**, which opens with **Super+
   from the Hub.
 - **Task View**: the desktop sinks behind frosted glass. Each workspace wears a name chip, and the search is a pill.
 - **Alt+Tab**: cards on one frosted pane, each with its app and title on top. The picked card shows its window live.
+- **Clipboard** (**Super+V**): each entry is a card marked text, link, image or pinned. **Ctrl+P** pins the one picked.
 - **Lock screen**: a bold white clock over a soft veil, readable on any wallpaper.
 - **Power screen** (**Super+Shift+Q**): you on frosted glass over big tiles to lock, sleep, sign out, restart or shut
   down. Task Manager and the firmware settings sit below. The arrows or Tab move, Enter chooses, Esc goes back.

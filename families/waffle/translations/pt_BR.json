@@ -134,7 +134,6 @@
   "File Explorer": "Explorador de arquivos",
   "Filename format": "Formato do nome do arquivo",
   "Files shortcut": "Atalho de arquivos",
-  "Filter apps...": "Filtrar aplicativos...",
   "Find a setting": "Encontre uma configuração",
   "Fix toggle switch handle alignment": "Corrija o alinhamento da alavanca da chave seletora",
   "Focusing": "Foco",
@@ -604,5 +603,7 @@
   "Choose": "Escolher",
   "Back": "Voltar",
   "Up for %1": "Ligado há %1",
-  "Jump to a letter": "Ir para uma letra"
+  "Jump to a letter": "Ir para uma letra",
+  "Copy text or an image and it shows up here": "Copie um texto ou uma imagem e ele aparecerá aqui",
+  "Link": "Link"
 }

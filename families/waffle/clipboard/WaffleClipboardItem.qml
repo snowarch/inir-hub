@@ -29,7 +29,7 @@ WBorderlessButton {
     signal deleteRequested()
     signal pinToggleRequested()
 
-    implicitHeight: contentLayout.implicitHeight + 16
+    implicitHeight: contentLayout.implicitHeight + Looks.dp(20)
 
     checked: isSelected
 
@@ -46,32 +46,45 @@ WBorderlessButton {
         return cleaned.trim()
     }
 
-    property string entryType: {
-        if (root.isPin) return Translation.tr("Pinned")
-        const raw = entry
-        return `#${raw.match(/^[\s]*(\S+)/)?.[1] || ""}`
-    }
+    readonly property bool isLink: !root.isImage && /^(https?|ftp):\/\/\S+$/.test(root.displayText)
+    // what it is, not cliphist's number for it
+    readonly property string entryType: root.isPin ? Translation.tr("Pinned")
+        : root.isImage ? Translation.tr("Image")
+        : root.isLink ? Translation.tr("Link")
+        : Translation.tr("Text")
+    readonly property string kindIcon: root.isCopied ? "checkmark"
+        : root.isPin ? "pin"
+        : root.isImage ? "image"
+        : root.isLink ? "link"
+        : "text-font"
+
+    // each entry is a soft card of its own
+    radius: Looks.radius.large
+    colBackground: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.04 : 0.03)
 
     contentItem: RowLayout {
         id: contentLayout
         anchors.fill: parent
-        anchors.leftMargin: 12
-        anchors.rightMargin: 12
-        spacing: 12
+        anchors.leftMargin: Looks.dp(10)
+        anchors.rightMargin: Looks.dp(10)
+        spacing: Looks.dp(12)
 
-        // Copied indicator
+        // the kind on a tile: the accent fills it for what was copied last
         Rectangle {
-            visible: root.isCopied
-            Layout.preferredWidth: 20
-            Layout.preferredHeight: 20
-            radius: 10
-            color: Looks.colors.accent
+            Layout.alignment: Qt.AlignTop
+            Layout.topMargin: Looks.dp(2)
+            Layout.preferredWidth: Looks.dp(32)
+            Layout.preferredHeight: Looks.dp(32)
+            radius: Looks.radius.medium
+            color: root.isCopied ? Looks.colors.accent
+                : root.isPin ? Qt.alpha(Looks.colors.accent, Looks.dark ? 0.2 : 0.14)
+                : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.07 : 0.06)
 
             FluentIcon {
                 anchors.centerIn: parent
-                icon: "chevron-right"
-                implicitSize: 12
-                color: Looks.colors.accentFg
+                icon: root.kindIcon
+                implicitSize: Looks.dp(16)
+                color: root.isCopied ? Looks.colors.accentFg : root.isPin ? Looks.colors.accent : Looks.colors.subfg
             }
         }
 
@@ -80,12 +93,11 @@ WBorderlessButton {
             Layout.fillWidth: true
             spacing: 4
 
-            // Type label
             WText {
-                visible: root.entryType && root.entryType !== "#"
                 text: root.entryType
-                color: Looks.colors.subfg
+                color: root.isPin ? Looks.colors.accent : Looks.colors.subfg
                 font.pixelSize: Looks.font.pixelSize.small
+                font.weight: Looks.font.weight.strong
             }
 
             // Main text

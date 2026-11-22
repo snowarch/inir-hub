@@ -134,7 +134,6 @@
   "File Explorer": "Datei-Explorer",
   "Filename format": "Dateinamenformat",
   "Files shortcut": "Dateiverknüpfung",
-  "Filter apps...": "Apps filtern...",
   "Find a setting": "Finde eine Einstellung",
   "Fix toggle switch handle alignment": "Korrigiere die Ausrichtung des Kippschaltergriffs",
   "Focusing": "Fokussieren",
@@ -604,5 +603,7 @@
   "Choose": "Auswählen",
   "Back": "Zurück",
   "Up for %1": "Läuft seit %1",
-  "Jump to a letter": "Zu einem Buchstaben springen"
+  "Jump to a letter": "Zu einem Buchstaben springen",
+  "Copy text or an image and it shows up here": "Kopiere Text oder ein Bild, und es erscheint hier",
+  "Link": "Link"
 }
