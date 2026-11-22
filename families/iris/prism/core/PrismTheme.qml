@@ -60,7 +60,7 @@ Singleton {
     readonly property color canvas: root.light ? root.step(root.shellSurface, root.shellHighest, 0.35) : root.shellSurface
     readonly property color rail: root.light ? root.step(root.shellSurface, root.shellHighest, 0.75) : root.step(root.shellSurface, root.shellHigh, 0.55)
     readonly property color railGlass: root.glass ? (root.light ? Qt.rgba(1, 1, 1, 0.34) : Qt.rgba(0.086, 0.086, 0.094, 0.5)) // iris-literal: the side column, smoke over the page
-        : ColorUtils.applyAlpha(root.rail, root.light ? 0.78 : 0.7)
+        : ColorUtils.applyAlpha(root.rail, root.light ? 0.78 : 0.7) // iris-literal: the side column without glass, its rail a touch see-through
     readonly property color raised: root.glass ? (root.light ? Qt.rgba(1, 1, 1, 0.62) : Qt.rgba(0.118, 0.118, 0.13, 0.62)) // iris-literal: a field, smoke over glass
         : root.light ? root.card : root.shellHigh
     readonly property color sunk: root.glass ? (root.light ? Qt.rgba(0, 0, 0, 0.08) : Qt.rgba(0, 0, 0, 0.32)) // iris-literal: a track cut into frosted glass

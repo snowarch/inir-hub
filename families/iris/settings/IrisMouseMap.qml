@@ -228,7 +228,7 @@ Column {
             property color wheel: root.toneOf("wheel")
             property color back: root.toneOf("back")
             property color forward: root.toneOf("forward")
-            readonly property color seam: ColorUtils.applyAlpha(IrisStyle.text, 0.16)
+            readonly property color seam: ColorUtils.applyAlpha(IrisStyle.text, 0.16) // iris-literal: the seams drawn on the mouse, fainter than a hairline
             Behavior on leftButton { ColorAnimation { duration: tones.ease; easing.type: IrisStyle.feedbackEasing } }
             Behavior on rightButton { ColorAnimation { duration: tones.ease; easing.type: IrisStyle.feedbackEasing } }
             Behavior on wheel { ColorAnimation { duration: tones.ease; easing.type: IrisStyle.feedbackEasing } }
@@ -292,7 +292,7 @@ Column {
                 width: Math.round(16 * drawing.k)
                 height: Math.round(38 * drawing.k)
                 radius: width / 2
-                color: ColorUtils.applyAlpha(IrisStyle.text, 0.12)
+                color: ColorUtils.applyAlpha(IrisStyle.text, 0.12) // iris-literal: the drawn mouse's wheel slot
                 Rectangle {
                     id: wheel
                     anchors.centerIn: parent
@@ -310,7 +310,7 @@ Column {
                                 width: Math.round(wheel.width * 0.56)
                                 height: Math.max(1, Math.round(root.d))
                                 radius: height / 2
-                                color: ColorUtils.applyAlpha(root.wheelLit ? IrisStyle.inkOnAccent : IrisStyle.text, 0.3)
+                                color: ColorUtils.applyAlpha(root.wheelLit ? IrisStyle.inkOnAccent : IrisStyle.text, 0.3) // iris-literal: the ridges on the drawn wheel
                             }
                         }
                     }
@@ -397,7 +397,7 @@ Column {
             readonly property string part: String(callout.modelData.part)
             readonly property bool onLeft: callout.parent?.onLeft === true
             readonly property bool lit: root.calloutLit(callout.part)
-            readonly property color lineTone: callout.lit ? IrisStyle.accent : ColorUtils.applyAlpha(IrisStyle.text, 0.28)
+            readonly property color lineTone: callout.lit ? IrisStyle.accent : ColorUtils.applyAlpha(IrisStyle.text, 0.28) // iris-literal: an unlit callout line, quieter than its text
             // Where the line meets the drawing, in this callout's own space.
             readonly property real ax: drawing.x + Number(callout.modelData.ax) * drawing.k - (callout.parent?.x ?? 0) - callout.x
             readonly property real ay: drawing.y + Number(callout.modelData.ay) * drawing.k - (callout.parent?.y ?? 0) - callout.y
