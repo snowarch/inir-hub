@@ -368,7 +368,8 @@ QtObject {
     }
     // Sound packs as tiles: ours, the system theme, then the folders people add.
     function soundPackChoices(): var {
-        const ours = { lounge: ["weekend", "Warm mallets and soft pads"], orbit: ["public", "Wide tones and deep air"],
+        const ours = { aurora: ["auto_awesome", "Soft keys under a warm glow"], tactile: ["touch_app", "Dry keys and precise dots"],
+            lounge: ["weekend", "Warm mallets and soft pads"], orbit: ["public", "Wide tones and deep air"],
             crystal: ["diamond", "Glass and bells"], arcade: ["sports_esports", "Bright chip sounds"], classic: ["notifications", "Your system's sound theme"] }
         return Audio.packs.map(pack => ({ label: Audio.packLabel(pack), value: pack, glyph: ours[pack]?.[0] ?? "folder_special", detail: ours[pack]?.[1] ?? "Added by you" }))
     }
@@ -1604,7 +1605,7 @@ QtObject {
         { section: "notifications", group: "Sound", label: "Play a sound", path: "sounds.notifications", kind: "switch", fallback: true },
         { section: "notifications", group: "Apps", label: "Apps that notify", description: "Every app that sent you something.", kind: "list", view: Qt.resolvedUrl("IrisNotificationApps.qml"), summary: false, keywords: ["apps", "per app", "mute", "block", "quiet", "silence", "aplicaciones", "silenciar", "bloquear"] },
 
-        { section: "sound", group: "Sound pack", label: "Sound pack", description: "The voice of iRiS: alerts, startup, the lock and the interface.", path: "sounds.pack", kind: "choice", tiles: true, fallback: "lounge", get choices() { return root.soundPackChoices() }, keywords: ["sound", "pack", "theme", "chime", "steam", "console", "sonido", "paquete", "tema"] },
+        { section: "sound", group: "Sound pack", label: "Sound pack", description: "The voice of iRiS: alerts, startup, the lock and the interface.", path: "sounds.pack", kind: "choice", tiles: true, fallback: "aurora", get choices() { return root.soundPackChoices() }, keywords: ["sound", "pack", "theme", "chime", "steam", "console", "sonido", "paquete", "tema"] },
         { section: "sound", group: "Sound pack", label: "Startup and lock", description: "A chime when the desktop starts, locks and unlocks.", path: "sounds.session", kind: "switch", fallback: true, keywords: ["boot", "login", "lock", "chime", "inicio", "bloqueo"] },
         { section: "sound", group: "Sound pack", label: "Interface sounds", description: "Soft sounds as panels open, toggles flip and you move through lists.", path: "sounds.ui", kind: "switch", fallback: false, keywords: ["click", "tick", "ui", "feedback", "interfaz"] },
         { section: "sound", group: "Sound pack", label: "Interface volume", path: "sounds.uiVolume", visibleWhen: "sounds.ui", kind: "range", fallback: 0.6, min: 0, max: 1, step: 0.05, scale: 100, unit: " %" },

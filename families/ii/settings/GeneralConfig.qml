@@ -431,7 +431,7 @@ ContentPage {
                 wrapMode: Text.Wrap
             }
             ConfigSelectionArray {
-                readonly property var glyphs: ({ lounge: "weekend", orbit: "public", crystal: "diamond", arcade: "sports_esports", classic: "notifications" })
+                readonly property var glyphs: ({ aurora: "auto_awesome", tactile: "touch_app", lounge: "weekend", orbit: "public", crystal: "diamond", arcade: "sports_esports", classic: "notifications" })
                 currentValue: Audio.soundPack
                 onSelected: newValue => Config.setNestedValue("sounds.pack", newValue)
                 options: Audio.packs.map(pack => ({ displayName: Audio.packLabel(pack), icon: glyphs[pack] ?? "folder_special", value: pack }))
