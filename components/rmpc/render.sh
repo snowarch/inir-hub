@@ -9,7 +9,7 @@ command -v jq >/dev/null 2>&1 || { echo "rmpc theme: jq is not installed" >&2; e
 PALETTE="${XDG_STATE_HOME:-$HOME/.local/state}/quickshell/user/generated/palette.json"
 OWN="${XDG_CONFIG_HOME:-$HOME/.config}/inir/plugins"
 OUT="$OWN/rmpc/theme.ron"
-SETTINGS="$OWN/rmpc.json"        # {"cava": "<shape>", "color": "gradient|solid|layers", "symbols": "blocks|braille|shades", "layout": "full|compact"}
+SETTINGS="$OWN/rmpc.json"        # {"cava": "<shape>", "color": "gradient|solid|layers", "symbols": "blocks|braille|shades", "layout": "full|compact", "progress": "plain|line|dots|rounded", "dirs": "columns|tree"}
 [[ -s "$PALETTE" ]] || exit 0
 
 key() { sed -n 's/.*"'"$1"'"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true; }
@@ -20,6 +20,10 @@ case "$shape" in solid|layers) colormode="$shape"; shape=spectrum ;; esac
 case "$shape" in spectrum|mirror|top|dense|chunky|densemirror) ;; *) shape=spectrum ;; esac
 [[ -n "$colormode" ]] || colormode="$(key color)"
 case "$colormode" in gradient|solid|layers) ;; *) colormode=gradient ;; esac
+progress="$(key progress)"
+case "$progress" in plain|line|dots|rounded) ;; *) progress=plain ;; esac
+dirs="$(key dirs)"
+case "$dirs" in columns|tree) ;; *) dirs=columns ;; esac
 symbols="$(sed -n 's/.*"symbols"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true)"
 case "$symbols" in blocks|braille|shades) ;; *) symbols=blocks ;; esac
 layout="$(sed -n 's/.*"layout"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true)"
@@ -149,6 +153,27 @@ LAYOUT_END
 )
 [[ "$layout" == compact ]] && LAYOUT="$LAYOUT_COMPACT"
 
+case "$progress" in
+  line)    pbsyms='["━", "━", "●", "─", "─"]' ;;
+  dots)    pbsyms='["●", "●", "●", "○", "○"]' ;;
+  rounded) pbsyms='["", "█", "█", "░", ""]' ;;
+  *)       pbsyms='["█", "█", "█", " ", "█"]' ;;
+esac
+DIRBLOCK=""
+if [[ "$dirs" == tree ]]; then
+  DIRBLOCK="    browser_column_widths: [18, 32, 50],
+    symbols: (
+        song: \"├─ 󰎆 \",
+        dir: \" \",
+        playlist: \"P\",
+        marker: \"M\",
+        ellipsis: \"...\",
+        song_style: None,
+        dir_style: (fg: \"$sec\"),
+        playlist_style: None,
+    ),"
+fi
+
 render_theme() {
 cat <<EOF
 #![enable(implicit_some)]
@@ -173,7 +198,7 @@ cat <<EOF
         trace: (fg: "$sec", bg: "$bg"),
     ),
     progress_bar: (
-        symbols: ["█", "█", "█", " ", "█"],
+        symbols: $pbsyms,
         track_style: (fg: "$outv"),
         elapsed_style: (fg: "$prim"),
         thumb_style: (fg: "$prim"),
@@ -189,6 +214,7 @@ cat <<EOF
         active_style: (fg: "$onprim", bg: "$prim", modifiers: "Bold"),
         inactive_style: (fg: "$fg"),
     ),
+$DIRBLOCK
 $CAVA
 $LAYOUT
 )

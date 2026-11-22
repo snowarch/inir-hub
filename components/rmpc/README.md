@@ -148,6 +148,13 @@ Pick how the visualiser moves and looks on rmpc's page in the Hub. The three gro
 
 Every colour comes from your palette and follows it live. Your choices are saved in `~/.config/inir/plugins/rmpc.json` and stay if you remove the component. The cava pane needs step 3 above.
 
+## Progress bar and Directories
+
+Two more choices on rmpc's page in the Hub:
+
+- **Progress bar:** `plain` (the default), `line`, `dots` and `rounded`. `rounded` uses round caps that need a Nerd Font.
+- **Directories:** `columns` (the default) or `tree`. rmpc has no real folder tree, so `tree` gives the closest look: folder and branch symbols (`├─`) on the entries and a wider preview column that lists what is inside the selected folder. It needs a Nerd Font for the icons.
+
 ## What it does to your system
 
 - Writes `~/.config/inir/plugins/rmpc/theme.ron` and, when you pick a cava style, `~/.config/inir/plugins/rmpc.json`; it tells a running rmpc to reload the theme (`rmpc remote set theme`).
