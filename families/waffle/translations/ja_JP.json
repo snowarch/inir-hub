@@ -603,5 +603,6 @@
   "Move": "移動",
   "Choose": "選択",
   "Back": "戻る",
-  "Up for %1": "起動から %1"
+  "Up for %1": "起動から %1",
+  "Jump to a letter": "文字へ移動"
 }

@@ -603,5 +603,6 @@
   "Move": "Taşı",
   "Choose": "Seç",
   "Back": "Geri",
-  "Up for %1": "%1 süredir açık"
+  "Up for %1": "%1 süredir açık",
+  "Jump to a letter": "Bir harfe git"
 }

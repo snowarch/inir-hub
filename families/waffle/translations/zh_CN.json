@@ -603,5 +603,6 @@
   "Move": "移动",
   "Choose": "选择",
   "Back": "返回",
-  "Up for %1": "已运行 %1"
+  "Up for %1": "已运行 %1",
+  "Jump to a letter": "跳转到字母"
 }

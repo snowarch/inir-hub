@@ -603,5 +603,6 @@
   "Move": "이동",
   "Choose": "선택",
   "Back": "뒤로",
-  "Up for %1": "%1 동안 켜짐"
+  "Up for %1": "%1 동안 켜짐",
+  "Jump to a letter": "문자로 이동"
 }

@@ -10,8 +10,9 @@ Center. Everything here is set in **Waffle Settings**, which opens with **Super+
 - **Taskbar**: along the bottom, or the top. **Waffle Settings › Taskbar** sets its icons, the clock, Desktop Peek and
   the update badge.
 - **Start menu**: one sheet with a round search, your pinned tiles and the apps open now as cards. Click a card to go
-  back to that window. Files and Settings sit next to Power. **Waffle Settings › Waffle Style › Start Menu** sets its
-  layout.
+  back to that window. Files and Settings sit next to Power. **All apps** lists every app from A to Z: click a letter
+  to jump through the alphabet, right-click an app to pin it to the taskbar. **Waffle Settings › Waffle Style › Start
+  Menu** sets its layout.
 - **Action Center**: wide pills that show the state of each toggle, and thick volume and brightness bars that fill with
   your accent. Night Light sits next to brightness.
 - **Notification Center**: today on an accent tile, a Focus pill, the notification history and the calendar.

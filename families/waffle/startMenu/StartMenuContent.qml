@@ -132,12 +132,17 @@ WBarAttachedPanelContent {
                 WPageLoader {
                     id: allAppsLoader
                     anchors.fill: parent
-                    shown: root.showAllApps
+                    shown: root.showAllApps && !root.searching
                     sourceComponent: AllAppsContent { onBack: root.showAllApps = false }
                 }
             }
         }
     }
 
-    Keys.onEscapePressed: root.close()
+    Keys.onEscapePressed: {
+        if (root.showAllApps && !root.searching)
+            allAppsLoader.item?.leave()
+        else
+            root.close()
+    }
 }
