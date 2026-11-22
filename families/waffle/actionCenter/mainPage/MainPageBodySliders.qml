@@ -146,10 +146,10 @@ ColumnLayout {
                 visible: fill.to > 1
                 x: parent.width * (1 - fill.from) / (fill.to - fill.from) - width / 2
                 anchors.verticalCenter: parent.verticalCenter
-                width: 2
-                height: parent.height * 0.36
-                radius: 1
-                color: Qt.alpha(fillBar.width > x ? Looks.colors.accentFg : Looks.colors.fg, 0.35)
+                width: Looks.dp(4)
+                height: width
+                radius: width / 2
+                color: Qt.alpha(fillBar.width > x ? Looks.colors.accentFg : Looks.colors.fg, 0.3)
             }
         }
 
