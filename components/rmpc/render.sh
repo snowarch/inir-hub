@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Writes ~/.config/inir/plugins/rmpc/theme.ron from the iNiR palette and the chosen cava style, then tells a running
+# Writes ~/.config/inir/plugins/rmpc/theme.ron from the iNiR palette and the chosen cava shape, colour and symbols, then tells a running
 # rmpc to reload it. Runs on its own: the colour module and the Hub page (choices.sh) both call it.
 set -euo pipefail
 
@@ -9,11 +9,19 @@ command -v jq >/dev/null 2>&1 || { echo "rmpc theme: jq is not installed" >&2; e
 PALETTE="${XDG_STATE_HOME:-$HOME/.local/state}/quickshell/user/generated/palette.json"
 OWN="${XDG_CONFIG_HOME:-$HOME/.config}/inir/plugins"
 OUT="$OWN/rmpc/theme.ron"
-SETTINGS="$OWN/rmpc.json"        # {"cava": "spectrum" | "mirror" | "top" | "solid" | "dense" | "chunky", "layout": "full" | "compact"}
+SETTINGS="$OWN/rmpc.json"        # {"cava": "<shape>", "color": "gradient|solid|layers", "symbols": "blocks|braille|shades", "layout": "full|compact"}
 [[ -s "$PALETTE" ]] || exit 0
 
-style="$(sed -n 's/.*"cava"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true)"
-case "$style" in spectrum|mirror|top|solid|dense|chunky) ;; *) style=spectrum ;; esac
+key() { sed -n 's/.*"'"$1"'"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true; }
+shape="$(key cava)"
+colormode=""
+# Before the colour had its own choice, `solid` and `layers` were saved as the style.
+case "$shape" in solid|layers) colormode="$shape"; shape=spectrum ;; esac
+case "$shape" in spectrum|mirror|top|dense|chunky|densemirror) ;; *) shape=spectrum ;; esac
+[[ -n "$colormode" ]] || colormode="$(key color)"
+case "$colormode" in gradient|solid|layers) ;; *) colormode=gradient ;; esac
+symbols="$(sed -n 's/.*"symbols"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true)"
+case "$symbols" in blocks|braille|shades) ;; *) symbols=blocks ;; esac
 layout="$(sed -n 's/.*"layout"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true)"
 case "$layout" in full|compact) ;; *) layout=full ;; esac
 
@@ -23,21 +31,34 @@ prim=$(c primary); onprim=$(c on_primary); sec=$(c secondary); tert=$(c tertiary
 err=$(c error); succ=$(c success); outv=$(c outline_variant)
 
 extra=""
-color="        bar_color: Gradient({
-            0: \"$sec\",
-            50: \"$prim\",
-            100: \"$tert\",
-        }),"
-case "$style" in
+case "$shape" in
   mirror) extra="        orientation: Horizontal," ;;
   top)    extra="        orientation: Top," ;;
   dense)  extra="        bar_spacing: 0," ;;
+  densemirror) extra="        orientation: Horizontal,
+        bar_spacing: 0," ;;
   chunky) extra="        bar_width: 2," ;;
+esac
+case "$colormode" in
   solid)  color="        bar_color: Single(\"$prim\")," ;;
+  layers) color="        bar_color: Rows([\"$sec\", \"$prim\", \"$tert\"])," ;;
+  *)      color="        bar_color: Gradient({
+            0: \"$sec\",
+            50: \"$prim\",
+            100: \"$tert\",
+        })," ;;
+esac
+symlines=""
+case "$symbols" in
+  braille) symlines="        bar_symbols: ['⡀', '⣀', '⣄', '⣤', '⣦', '⣶', '⣷', '⣿'],
+        inverted_bar_symbols: ['⠁', '⠉', '⠋', '⠛', '⠟', '⠿', '⡿', '⣿']," ;;
+  shades)  symlines="        bar_symbols: ['░', '░', '▒', '▒', '▓', '▓', '█', '█'],
+        inverted_bar_symbols: ['░', '░', '▒', '▒', '▓', '▓', '█', '█']," ;;
 esac
 CAVA="    cava: (
         bg_color: \"$bg\",
 ${extra:+$extra
+}${symlines:+$symlines
 }$color
     ),"
 
