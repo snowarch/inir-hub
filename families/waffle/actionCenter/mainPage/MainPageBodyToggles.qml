@@ -14,15 +14,16 @@ import qs.modules.waffle.actionCenter.toggles
 Item {
     id: root
 
-    property int columns: 3
-    property int rows: 2
+    // two wide pills across, three down: the same six a page as Windows, with room for each one's state
+    property int columns: 2
+    property int rows: 3
     property int currentPage: 0
     readonly property int itemsPerPage: columns * rows
     readonly property int pages: Math.ceil(toggles.length / itemsPerPage)
     property list<string> toggles: Config.options?.waffles?.actionCenter?.toggles ?? []
 
-    property real padding: 22
-    property real reducedBottomPadding: 12
+    property real padding: Looks.dp(16)
+    property real reducedBottomPadding: Looks.dp(4)
     implicitHeight: swipeView.implicitHeight + (padding - swipeView.padding) * 2 - reducedBottomPadding
 
     function togglesInPage(index) {
@@ -75,8 +76,8 @@ Item {
 
                 columns: root.columns
                 rows: root.rows
-                rowSpacing: 12
-                columnSpacing: 12
+                rowSpacing: Looks.dp(8)
+                columnSpacing: Looks.dp(8)
 
                 Repeater {
                     model: ScriptModel {
@@ -91,8 +92,9 @@ Item {
     Column {
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
-        anchors.rightMargin: 6
+        anchors.rightMargin: Looks.dp(3)
         spacing: 6
+        visible: root.pages > 1
 
         NavigationArrow {
             down: false

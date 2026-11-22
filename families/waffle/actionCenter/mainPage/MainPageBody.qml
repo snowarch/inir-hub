@@ -7,10 +7,11 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.waffle.looks
 import qs.modules.waffle.actionCenter
-import qs.modules.waffle.actionCenter.screenTime
 
+// One sheet: the quick settings, then the bars. Screen Time moved to the footer, by the battery.
 BodyRectangle {
     id: root
+    implicitWidth: Looks.dp(388)
     implicitHeight: contentLayout.implicitHeight
 
     ColumnLayout {
@@ -23,58 +24,12 @@ BodyRectangle {
             Layout.fillWidth: true
         }
 
-        Rectangle {
-            implicitHeight: 1
-            Layout.fillWidth: true
-            color: Looks.colors.bgPanelSeparator
-        }
-
         MainPageBodySliders {
-            Layout.margins: Looks.dp(12)
-            Layout.topMargin: Looks.dp(18)
-            Layout.bottomMargin: Looks.dp(14)
-        }
-
-        // Screen Time entry point
-        WBorderlessButton {
-            visible: Config.options?.screenTime?.enable ?? false
             Layout.fillWidth: true
-            Layout.leftMargin: Looks.dp(8)
-            Layout.rightMargin: Looks.dp(8)
-            Layout.bottomMargin: Looks.dp(8)
-
-            Component {
-                id: screenTimePageComp
-                ScreenTimePage {}
-            }
-
-            onClicked: {
-                if (ActionCenterContext.stackView)
-                    ActionCenterContext.stackView.push(screenTimePageComp)
-            }
-
-            contentItem: RowLayout {
-                spacing: Looks.dp(8)
-                FluentIcon {
-                    icon: "schedule"
-                    implicitSize: 18
-                    color: Looks.colors.accent
-                }
-                WText {
-                    Layout.fillWidth: true
-                    text: Translation.tr("Screen Time")
-                }
-                WText {
-                    text: ScreenTime.formatDuration((ScreenTime.todayData?.totalSeconds) || 0)
-                    font.family: Looks.font.family.monospace
-                    color: Looks.colors.subfg
-                }
-                FluentIcon {
-                    icon: "chevron-right"
-                    implicitSize: 16
-                    color: Looks.colors.subfg
-                }
-            }
+            Layout.leftMargin: Looks.dp(16)
+            Layout.rightMargin: Looks.dp(16)
+            Layout.topMargin: Looks.dp(12)
+            Layout.bottomMargin: Looks.dp(16)
         }
     }
 }

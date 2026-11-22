@@ -12,9 +12,9 @@ import qs.modules.common.widgets
 import qs.modules.waffle.looks
 import qs.modules.waffle.actionCenter
 
-// It should be perfectly fine to use just a Column here, but somehow
-// using ColumnLayout prevents weird opening anim stutter
-ColumnLayout { 
+// Waffle Next quick setting: a wide pill that holds its name and its state, as the Windows 12 concepts draw them.
+// The body switches it, the chevron opens its page when it has one, and a right-click runs its other action.
+Item {
     id: root
 
     required property QuickToggleModel toggleModel
@@ -29,104 +29,148 @@ ColumnLayout {
     property bool hasMenu: toggleModel?.hasMenu ?? false
     property Component menu
 
-    property color colBackground: toggled ? Looks.colors.accent : Looks.colors.bg2
-    property color colBackgroundHovered: toggled ? Looks.colors.accentHover : Looks.colors.bg2Hover
-    property color colBackgroundActive: toggled ? Looks.colors.accentActive : Looks.colors.bg2Active
-    property color colBorder: toggled ? Looks.colors.accentHover : Looks.colors.bg2Border
-    property color colForeground: toggled ? Looks.colors.accentFg : Looks.colors.fg1
+    readonly property color colForeground: toggled ? Looks.colors.accentFg : Looks.colors.fg
+    readonly property real radius: Looks.radius.large
 
-    spacing: 0
-    property real wholeToggleWidth: 96
+    function openMenu(): void {
+        if (root.menu)
+            ActionCenterContext.push(root.menu)
+    }
 
-    AcrylicRectangle {
-        Layout.fillWidth: true
-        implicitWidth: root.wholeToggleWidth
-        implicitHeight: 48
-        color: root.colBackground
-        radius: Looks.radius.medium
+    Layout.fillWidth: true
+    implicitWidth: Looks.dp(160)
+    implicitHeight: Looks.dp(56)
+    opacity: root.available ? 1 : 0.45
 
-        RowLayout {
-            anchors.fill: parent
-            spacing: 0
+    Rectangle {
+        anchors.fill: parent
+        radius: root.radius
+        color: root.toggled ? Looks.colors.accent : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.07 : 0.05)
+        border.width: 1
+        border.color: root.toggled ? Qt.alpha(Looks.colors.accentFg, 0.14) : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.08)
+        Behavior on color {
+            animation: ColorAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutQuad }
+        }
+    }
 
-            ToggleFragment {
-                topLeftRadius: Looks.radius.medium
-                bottomLeftRadius: Looks.radius.medium
-                topRightRadius: root.hasMenu ? 0 : Looks.radius.medium
-                bottomRightRadius: root.hasMenu ? 0 : Looks.radius.medium
-                iconName: root.icon
-                isMainToggle: true
-                onClicked: {
-                    Audio.playEvent(root.toggled ? "toggleOff" : "toggleOn")
-                    if (root.mainAction) root.mainAction()
-                }
+    RowLayout {
+        anchors.fill: parent
+        spacing: 0
+
+        Fragment {
+            id: mainPart
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            topLeftRadius: root.radius
+            bottomLeftRadius: root.radius
+            topRightRadius: root.hasMenu ? 0 : root.radius
+            bottomRightRadius: root.hasMenu ? 0 : root.radius
+            enabled: root.available
+            onClicked: {
+                Audio.playEvent(root.toggled ? "toggleOff" : "toggleOn")
+                if (root.mainAction) root.mainAction()
             }
-            FadeLoader {
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                shown: root.hasMenu
-                sourceComponent: ToggleFragment {
-                    topLeftRadius: 0
-                    bottomLeftRadius: 0
-                    topRightRadius: Looks.radius.medium
-                    bottomRightRadius: Looks.radius.medium
-                    iconName: "chevron-right"
-                    onClicked: {
-                        ActionCenterContext.push(root.menu)
+
+            TapHandler {
+                acceptedButtons: Qt.RightButton
+                enabled: !!root.altAction
+                onTapped: root.altAction()
+            }
+
+            contentItem: RowLayout {
+                spacing: Looks.dp(10)
+
+                Rectangle {
+                    Layout.leftMargin: Looks.dp(10)
+                    Layout.preferredWidth: Looks.dp(32)
+                    Layout.preferredHeight: Looks.dp(32)
+                    radius: width / 2
+                    color: Qt.alpha(root.colForeground, root.toggled ? 0.16 : 0.08)
+                    scale: mainPart.down ? 0.88 : 1
+                    Behavior on scale {
+                        animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                    }
+
+                    FluentIcon {
+                        anchors.centerIn: parent
+                        icon: root.icon
+                        implicitSize: Looks.dp(17)
+                        monochrome: true
+                        filled: root.toggled
+                        color: root.colForeground
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.rightMargin: root.hasMenu ? Looks.dp(2) : Looks.dp(10)
+                    spacing: 0
+
+                    WText {
+                        Layout.fillWidth: true
+                        text: root.name
+                        color: root.colForeground
+                        font.weight: Looks.font.weight.strong
+                        // with no state line a long name takes two lines, not an ellipsis
+                        wrapMode: Text.Wrap
+                        maximumLineCount: statusLine.visible ? 1 : 2
+                        elide: Text.ElideRight
+                    }
+                    WText {
+                        id: statusLine
+                        Layout.fillWidth: true
+                        // Bluetooth names itself by its state: the line would say it twice
+                        visible: text.length > 0 && text !== root.name
+                        text: root.statusText
+                        color: Qt.alpha(root.colForeground, 0.72)
+                        font.pixelSize: Looks.font.pixelSize.small
+                        elide: Text.ElideRight
                     }
                 }
             }
-        }
-    }
 
-    Item {
-        id: toggleNameWidget
-        implicitWidth: root.wholeToggleWidth
-        implicitHeight: 36
-        WText {
-            id: toggleNameText
-            anchors {
-                verticalCenter: parent.verticalCenter
-                left: parent.left
-                right: parent.right
+            WToolTip {
+                text: root.tooltipText || root.name
             }
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-            text: root.name
+        }
+
+        Fragment {
+            visible: root.hasMenu
+            Layout.preferredWidth: Looks.dp(30)
+            Layout.fillHeight: true
+            topRightRadius: root.radius
+            bottomRightRadius: root.radius
+            onClicked: root.openMenu()
+
+            contentItem: Item {
+                FluentIcon {
+                    anchors.centerIn: parent
+                    icon: "chevron-right"
+                    implicitSize: Looks.dp(12)
+                    color: root.colForeground
+                }
+            }
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                width: 1
+                height: parent.height * 0.46
+                color: Qt.alpha(root.colForeground, 0.16)
+            }
         }
     }
 
-    component ToggleFragment: WButton {
-        id: toggleFragment
-        required property string iconName
-        property bool isMainToggle: false
-        Layout.fillHeight: true
-        Layout.fillWidth: true
+    component Fragment: WButton {
         inset: 0
-        backgroundOpacity: 0.8
-        checked: root.toggled
-        border.width: 1
-        border.color: root.colBorder
-
-        // Right-click to open menu (like Material ii sidebar)
-        TapHandler {
-            acceptedButtons: Qt.RightButton
-            enabled: toggleFragment.isMainToggle && root.altAction
-            onTapped: {
-                if (root.altAction) root.altAction()
-            }
-        }
-
-        contentItem: Item {
-            anchors.centerIn: parent
-            FluentIcon {
-                anchors.centerIn: parent
-                icon: toggleFragment.iconName
-                implicitSize: 18
-                monochrome: true
-                filled: root.toggled
-                color: root.colForeground
-            }
-        }
+        padding: 0
+        topLeftRadius: 0
+        bottomLeftRadius: 0
+        topRightRadius: 0
+        bottomRightRadius: 0
+        border.width: 0
+        colBackground: "transparent"
+        colBackgroundHover: Qt.alpha(root.colForeground, 0.07)
+        colBackgroundActive: Qt.alpha(root.colForeground, 0.13)
     }
 }
