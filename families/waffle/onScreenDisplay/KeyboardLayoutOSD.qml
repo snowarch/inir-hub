@@ -24,31 +24,42 @@ WBarAttachedPanelContent {
     }
 
     contentItem: WPane {
+        radius: height / 2
         screenX: root.panelScreenX + root.visualMargin
         screenY: root.panelScreenY + root.visualMargin
         screenWidth: root._screenW
         screenHeight: root._screenH
         contentItem: Item {
-            implicitWidth: contentRow.implicitWidth + 24
-            implicitHeight: 46
+            implicitWidth: Math.max(Looks.dp(160), contentRow.implicitWidth + Looks.dp(32))
+            implicitHeight: Looks.dp(56)
 
             RowLayout {
                 id: contentRow
                 anchors.fill: parent
-                anchors.margins: 12
-                spacing: 10
+                anchors.leftMargin: Looks.dp(10)
+                anchors.rightMargin: Looks.dp(22)
+                spacing: Looks.dp(12)
 
-                FluentIcon {
+                Rectangle {
                     Layout.alignment: Qt.AlignVCenter
-                    icon: KeyboardIndicators.popupFluentIcon
-                    implicitSize: 18
+                    implicitWidth: Looks.dp(36)
+                    implicitHeight: Looks.dp(36)
+                    radius: height / 2
+                    color: Qt.alpha(Looks.colors.accent, Looks.dark ? 0.24 : 0.16)
+
+                    FluentIcon {
+                        anchors.centerIn: parent
+                        icon: KeyboardIndicators.popupFluentIcon
+                        implicitSize: Looks.dp(18)
+                        color: Looks.colors.accent
+                    }
                 }
 
                 WText {
                     Layout.fillWidth: true
                     text: KeyboardIndicators.popupText
-                    font.pixelSize: Looks.font.pixelSize.normal
-                    font.weight: Font.DemiBold
+                    font.pixelSize: Looks.font.pixelSize.large
+                    font.weight: Looks.font.weight.strong
                     elide: Text.ElideRight
                     maximumLineCount: 1
                 }

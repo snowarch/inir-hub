@@ -26,26 +26,36 @@ WBarAttachedPanelContent {
     }
 
     contentItem: WPane {
+        radius: height / 2
         screenX: root.panelScreenX + root.visualMargin
         screenY: root.panelScreenY + root.visualMargin
         screenWidth: root._screenW
         screenHeight: root._screenH
         contentItem: Item {
-            implicitWidth: Math.min(380, contentRow.implicitWidth + 28)
-            implicitHeight: 56
+            implicitWidth: Math.min(Looks.dp(400), Math.max(Looks.dp(240), contentRow.implicitWidth + Looks.dp(32)))
+            implicitHeight: Looks.dp(56)
 
             RowLayout {
                 id: contentRow
                 anchors.fill: parent
-                anchors.leftMargin: 14
-                anchors.rightMargin: 14
-                spacing: 12
+                anchors.leftMargin: Looks.dp(10)
+                anchors.rightMargin: Looks.dp(22)
+                spacing: Looks.dp(12)
 
-                FluentIcon {
+                Rectangle {
+                    readonly property color tone: root.event?.tone === "warn" ? Looks.colors.danger : root.event?.tone === "on" ? Looks.colors.accent : Looks.colors.fg
                     Layout.alignment: Qt.AlignVCenter
-                    icon: root.event?.fluentIcon ?? "checkmark"
-                    implicitSize: 22
-                    color: root.event?.tone === "warn" ? Looks.colors.danger : root.event?.tone === "on" ? Looks.colors.accent : Looks.colors.fg
+                    implicitWidth: Looks.dp(36)
+                    implicitHeight: Looks.dp(36)
+                    radius: height / 2
+                    color: Qt.alpha(tone, Looks.dark ? 0.2 : 0.14)
+
+                    FluentIcon {
+                        anchors.centerIn: parent
+                        icon: root.event?.fluentIcon ?? "checkmark"
+                        implicitSize: Looks.dp(18)
+                        color: parent.tone
+                    }
                 }
 
                 ColumnLayout {
@@ -57,7 +67,7 @@ WBarAttachedPanelContent {
                         Layout.fillWidth: true
                         text: root.event?.title ?? ""
                         font.pixelSize: Looks.font.pixelSize.normal
-                        font.weight: Font.DemiBold
+                        font.weight: Looks.font.weight.strong
                         elide: Text.ElideRight
                         maximumLineCount: 1
                     }
@@ -75,8 +85,8 @@ WBarAttachedPanelContent {
                 WText {
                     visible: (root.event?.value ?? -1) >= 0
                     text: (root.event?.value ?? 0) + "%"
-                    color: Looks.colors.subfg
                     font.pixelSize: Looks.font.pixelSize.small
+                    font.weight: Looks.font.weight.strong
                 }
             }
         }

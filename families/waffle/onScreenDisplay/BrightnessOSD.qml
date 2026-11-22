@@ -9,6 +9,7 @@ OSDValue {
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: screen ? Brightness.getMonitorForScreen(screen) : null
     iconName: "weather-sunny"
+    label: Translation.tr("Brightness")
     value: brightnessMonitor?.brightness ?? 0
     showNumber: true
 
