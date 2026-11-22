@@ -30,6 +30,7 @@
             "edge": "",
             "edgeWidth": 0,
             "shadow": 1,
+            "tint": 0,
             "plates": { "black": ["#2e2e34", "#18181b"], "white": ["#f8f8fb", "#e6e6ec"] }
         },
         "motion": {
@@ -38,6 +39,7 @@
         },
         "look": {
             "look": "apple",
+            "light": "",
             "widgets": "",
             "traits": {}
         }
