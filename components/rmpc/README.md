@@ -140,7 +140,13 @@ The default layout is made for about 130x32 characters. For smaller terminals (a
 
 ## Cava style
 
-Pick the look of the visualiser on rmpc's page in the Hub: `spectrum` (bars from the bottom, the default), `mirror` (bars from the centre), `top` (bars hanging from the top), `solid` (one colour), `dense` (no gap between bars) and `chunky` (wider bars). Every style uses your palette and follows it live. Your choice is saved in `~/.config/inir/plugins/rmpc.json` and stays if you remove the component. The cava pane needs step 3 above.
+Pick how the visualiser moves and looks on rmpc's page in the Hub. The three groups combine freely:
+
+- **Shape:** `spectrum` (bars from the bottom, the default), `mirror` (bars from the centre), `top` (bars hanging from the top), `dense` (no gap between bars), `chunky` (wider bars) and `densemirror` (no gaps, from the centre).
+- **Colour:** `gradient` (the default), `solid` (one colour) and `layers` (a colour band per row).
+- **Symbols:** `blocks` (the default), `braille` and `shades`. Braille and shades need a font that has those characters, and with `top` and the mirrored shapes rmpc warns that non-default symbols can look wrong.
+
+Every colour comes from your palette and follows it live. Your choices are saved in `~/.config/inir/plugins/rmpc.json` and stay if you remove the component. The cava pane needs step 3 above.
 
 ## What it does to your system
 

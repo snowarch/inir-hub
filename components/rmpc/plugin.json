@@ -4,7 +4,7 @@
     "name": "Rmpc",
     "summary": "rmpc theme in your iNiR colours, with a cover, lyrics and cava layout",
     "icon": "music_note",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "choices": {
         "title": "Cava style",
         "run": "choices.sh"
