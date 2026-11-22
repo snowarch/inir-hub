@@ -14,6 +14,8 @@ import qs.modules.waffle.looks
 Item {
     id: root
     property size sourceSize: Qt.size(32, 32)
+    // A picture of the person is in; until then (or with none) the fallback glyph shows.
+    readonly property bool hasPicture: avatarImg.status === Image.Ready
 
     width: sourceSize.width
     height: sourceSize.height

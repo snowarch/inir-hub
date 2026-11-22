@@ -8,14 +8,16 @@ import qs.services
 import qs.modules.common
 import qs.modules.waffle.looks
 
-// Waffle's welcome at startup: your picture and name over the softened wallpaper, a ring of dots running beside
-// "Welcome", then the desktop. A key or a click goes straight to it.
+// Waffle's welcome at startup: your picture, your name and a ring of dots beside "Welcome" rise one after another over
+// the softened wallpaper; then the wallpaper comes into focus and the desktop is there. A key or a click goes straight
+// to it.
 Scope {
     id: root
 
     property bool leaving: false
+    property real reveal: 0 // 0 the welcome, 1 the wallpaper in focus and the desktop under it
+    readonly property bool motion: Looks.transition.enabled
     readonly property int holdMs: 2600
-    readonly property int fadeMs: Looks.transition.enabled ? Looks.transition.duration.page : 0
     readonly property string name: SystemInfo.displayName || SystemInfo.username
 
     function finish(): void {
@@ -33,12 +35,35 @@ Scope {
         onTriggered: root.finish()
     }
 
-    Timer {
+    SequentialAnimation {
         id: gone
-        interval: root.fadeMs + 40
-        onTriggered: {
-            GlobalStates.bootGreetingOpen = false
-            GlobalStates.bootGreetingDone = true
+        NumberAnimation {
+            target: root
+            property: "reveal"
+            to: 1
+            duration: root.motion ? 620 : 0
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
+        }
+        ScriptAction {
+            script: {
+                GlobalStates.bootGreetingOpen = false
+                GlobalStates.bootGreetingDone = true
+            }
+        }
+    }
+
+    // Each part of the greeting rises into place a beat after the one before.
+    component Rise: SequentialAnimation {
+        id: rise
+        property Item target
+        property Translate lift
+        property int delay: 0
+        running: true
+        PauseAnimation { duration: root.motion ? rise.delay : 0 }
+        ParallelAnimation {
+            NumberAnimation { target: rise.target; property: "opacity"; to: 1; duration: root.motion ? 460 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
+            NumberAnimation { target: rise.lift; property: "y"; to: 0; duration: root.motion ? 560 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
         }
     }
 
@@ -120,37 +145,33 @@ Scope {
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: win.primary && !root.leaving && !PolkitService.active
                 ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            // Leaving, the desktop under it takes clicks already.
+            mask: Region { item: root.leaving ? null : stage }
 
             Item {
                 id: stage
                 anchors.fill: parent
-                opacity: 0
-                property bool armed: false
-                Component.onCompleted: stage.armed = true
-
-                states: State {
-                    name: "in"
-                    when: stage.armed && !root.leaving
-                    PropertyChanges { target: stage; opacity: 1 }
-                }
-                transitions: Transition {
-                    NumberAnimation {
-                        property: "opacity"
-                        duration: root.fadeMs
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: root.leaving ? Looks.transition.easing.bezierCurve.accelerate : Looks.transition.easing.bezierCurve.decelerate
-                    }
+                // In over the desktop at once; out over the last third of the focus pull.
+                opacity: Math.min(stage.arrive, 1 - Math.max(0, (root.reveal - 0.62) / 0.38))
+                property real arrive: 0
+                NumberAnimation on arrive {
+                    to: 1
+                    duration: root.motion ? Looks.transition.duration.page : 0
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
                 }
 
                 // Opaque under everything: the blur fades its edges, and the desktop must not show through them.
                 Rectangle {
                     anchors.fill: parent
                     color: Looks.colors.bg0Opaque
+                    opacity: 1 - root.reveal
                 }
                 Image {
                     id: wall
                     anchors.fill: parent
-                    anchors.margins: Looks.effectsEnabled ? -64 : 0
+                    // The blur's soft edge stays off screen, and the picture settles onto the wallpaper as it sharpens.
+                    anchors.margins: Looks.effectsEnabled ? Math.round(-64 * (1 - root.reveal)) : 0
                     source: Wallpapers.stillUrlFor(Wallpapers.desktopWallpaperPath(WallpaperListener.getMonitorName(win.modelData)))
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
@@ -164,12 +185,12 @@ Scope {
                     source: wall
                     blurEnabled: true
                     blurMax: 64
-                    blur: 1
+                    blur: 1 - root.reveal
                 }
                 Rectangle {
                     anchors.fill: parent
                     color: Looks.colors.bg0Opaque
-                    opacity: 0.5
+                    opacity: 0.5 * (1 - root.reveal)
                 }
 
                 Column {
@@ -177,19 +198,18 @@ Scope {
                     visible: win.primary
                     anchors.centerIn: parent
                     spacing: Looks.dp(16)
-                    opacity: 0
-                    transform: Translate { id: lift; y: 16 }
-
-                    ParallelAnimation {
-                        running: true
-                        NumberAnimation { target: hello; property: "opacity"; to: 1; duration: Looks.transition.enabled ? 520 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
-                        NumberAnimation { target: lift; property: "y"; to: 0; duration: Looks.transition.enabled ? 620 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
-                    }
+                    // Leaving, the greeting steps back first.
+                    opacity: Math.max(0, 1 - root.reveal * 2.4)
+                    scale: 1 - root.reveal * 0.06
 
                     Item {
+                        id: picture
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: Looks.dp(176)
                         height: width
+                        opacity: 0
+                        transform: Translate { id: pictureLift; y: Looks.dp(18) }
+                        Rise { target: picture; lift: pictureLift; delay: 60 }
 
                         Rectangle {
                             anchors.fill: parent
@@ -202,22 +222,41 @@ Scope {
                                 font.weight: Looks.font.weight.thin
                             }
                         }
+                        // With no picture of their own, their initial stands in, not a generic glyph over it.
                         WUserAvatar {
+                            id: avatar
                             anchors.fill: parent
+                            visible: avatar.hasPicture
                             sourceSize: Qt.size(parent.width, parent.height)
+                        }
+                        // A hairline round the picture keeps it apart from any wallpaper.
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: width / 2
+                            color: "transparent"
+                            border.width: 1
+                            border.color: Qt.alpha(Looks.colors.fg, 0.14)
                         }
                     }
 
                     WText {
+                        id: nameLine
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: root.name
                         font.pixelSize: Looks.dp(28)
                         font.weight: Looks.font.weight.regular
+                        opacity: 0
+                        transform: Translate { id: nameLift; y: Looks.dp(14) }
+                        Rise { target: nameLine; lift: nameLift; delay: 170 }
                     }
 
                     Row {
+                        id: status
                         anchors.horizontalCenter: parent.horizontalCenter
                         spacing: Looks.dp(12)
+                        opacity: 0
+                        transform: Translate { id: statusLift; y: Looks.dp(10) }
+                        Rise { target: status; lift: statusLift; delay: 280 }
 
                         DotRing {
                             anchors.verticalCenter: parent.verticalCenter
