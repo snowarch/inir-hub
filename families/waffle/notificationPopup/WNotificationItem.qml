@@ -29,7 +29,7 @@ Item {
     readonly property int notifId: notification?.notificationId ?? -1
     readonly property bool hasImage: notifImage !== ""
     readonly property bool hasActions: notifActions.length > 0
-    readonly property bool isCritical: notification?.urgency === NotificationUrgency.Critical
+    readonly property bool isCritical: ["2", "critical"].includes(String(notification?.urgency ?? "").toLowerCase()) // the enum's number, as a string
 
     implicitHeight: contentItem.height
     clip: true

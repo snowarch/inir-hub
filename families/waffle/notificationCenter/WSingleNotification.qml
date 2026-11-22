@@ -25,7 +25,7 @@ MouseArea {
     hoverEnabled: true
 
     readonly property bool isCritical: root.notification
-        ? root.notification.urgency === NotificationUrgency.Critical
+        ? ["2", "critical"].includes(String(root.notification.urgency ?? "").toLowerCase())
         : false
     readonly property bool hasImage: root.notification
         ? (root.notification.image ?? "") !== ""
@@ -68,13 +68,29 @@ MouseArea {
     Rectangle {
         id: contentItem
         width: parent.width
-        color: root.isPopup ? Looks.colors.bg0 : Looks.colors.bgPanelBody
-        radius: root.isPopup ? Looks.radius.large : Looks.radius.medium
+        // a soft card on the sheet in the center; a popup keeps its own surface
+        color: root.isPopup ? Looks.colors.bg0 : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.05 : 0.035)
+        radius: Looks.radius.large
         property real padding: Looks.dp(12)
         implicitHeight: notificationContent.implicitHeight + padding * 2
         implicitWidth: notificationContent.implicitWidth + padding * 2
         border.width: 1
-        border.color: ColorUtils.applyAlpha(Looks.colors.ambientShadow, 0.1)
+        border.color: root.isPopup ? ColorUtils.applyAlpha(Looks.colors.ambientShadow, 0.1) : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.07)
+
+        Rectangle {
+            visible: root.isCritical
+            anchors {
+                left: parent.left
+                top: parent.top
+                bottom: parent.bottom
+                leftMargin: Looks.dp(4)
+                topMargin: Looks.dp(10)
+                bottomMargin: Looks.dp(10)
+            }
+            width: 3
+            radius: 1.5
+            color: Looks.colors.danger
+        }
 
         Behavior on x {
             animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }

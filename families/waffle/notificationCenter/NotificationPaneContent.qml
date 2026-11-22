@@ -10,7 +10,9 @@ import qs.modules.waffle.looks
 BodyRectangle {
     id: root
     anchors.fill: parent
-    implicitHeight: 230
+    // as tall as what it holds, up to the room the center gives it
+    property real maxHeight: Looks.dp(560)
+    implicitHeight: Math.min(root.maxHeight, Math.max(Looks.dp(230), contentLayout.implicitHeight + contentLayout.anchors.margins * 2))
 
     readonly property int notificationCount: Notifications.list.length
     readonly property bool hasNotifications: notificationCount > 0
@@ -33,14 +35,33 @@ BodyRectangle {
             spacing: 8
 
             WText {
-                Layout.fillWidth: true
+                Layout.fillWidth: !root.hasNotifications
                 horizontalAlignment: Text.AlignLeft
                 elide: Text.ElideRight
-                text: root.hasNotifications 
-                    ? Translation.tr("Notifications") + ` (${root.notificationCount})`
-                    : Translation.tr("Notifications")
-                font.pixelSize: Looks.font.pixelSize.large
+                text: Translation.tr("Notifications")
+                font.pixelSize: Looks.font.pixelSize.larger
                 font.weight: Looks.font.weight.strong
+            }
+
+            Rectangle {
+                visible: root.hasNotifications
+                implicitWidth: Math.max(countLabel.implicitWidth + Looks.dp(12), Looks.dp(22))
+                implicitHeight: Looks.dp(22)
+                radius: height / 2
+                color: Looks.colors.accent
+                WText {
+                    id: countLabel
+                    anchors.centerIn: parent
+                    text: root.notificationCount
+                    color: Looks.colors.accentFg
+                    font.pixelSize: Looks.font.pixelSize.small
+                    font.weight: Looks.font.weight.strong
+                }
+            }
+
+            Item {
+                visible: root.hasNotifications
+                Layout.fillWidth: true
             }
 
             // Do Not Disturb toggle
@@ -162,6 +183,8 @@ BodyRectangle {
             id: notificationListView
             Layout.fillWidth: true
             Layout.fillHeight: true
+            // the empty state's mascot and words need their room
+            implicitHeight: count > 0 ? contentHeight : Looks.dp(200)
             clip: true
             spacing: 4
             cacheBuffer: 200

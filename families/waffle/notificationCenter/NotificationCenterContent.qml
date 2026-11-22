@@ -28,7 +28,10 @@ WBarAttachedPanelContent {
         Item {
             id: notificationArea
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(Looks.dp(560), notificationPane.implicitHeight)
+            // the pane grows with its notifications into the room the calendar and the taskbar leave
+            readonly property real room: root._screenH - Looks.barReach(root._screen) - root.visualMargin * 2
+                - calendarPane.implicitHeight - contentLayout.spacing - Looks.dp(8)
+            Layout.preferredHeight: notificationPane.implicitHeight
             implicitWidth: notificationPane.implicitWidth
 
             WPane {
@@ -40,6 +43,8 @@ WBarAttachedPanelContent {
                 screenHeight: root._screenH
                 contentItem: NotificationPaneContent {
                     implicitWidth: calendarColumnLayout.implicitWidth
+                    // a pane draws at its content's size: the cap goes to the content
+                    maxHeight: Math.max(Looks.dp(200), Math.min(Looks.dp(640), notificationArea.room))
                 }
             }
         }

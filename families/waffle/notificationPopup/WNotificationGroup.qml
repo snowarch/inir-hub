@@ -23,7 +23,7 @@ Item {
     readonly property var notifications: notificationGroup?.notifications ?? []
     readonly property int notificationCount: notifications.length
     readonly property bool multipleNotifications: notificationCount > 1
-    readonly property bool hasCritical: notifications.some(n => n.urgency === NotificationUrgency.Critical)
+    readonly property bool hasCritical: notifications.some(n => ["2", "critical"].includes(String(n.urgency ?? "").toLowerCase())) // the enum's number, as a string
     property bool expanded: false
     
     implicitHeight: background.height
@@ -120,8 +120,36 @@ Item {
             ? ColorUtils.mix(Looks.colors.bgPanelFooterBase, Looks.colors.danger, 0.92)
             : Looks.colors.bgPanelFooterBase
         radius: Looks.radius.large
-        border.color: root.hasCritical ? Looks.colors.danger : Looks.colors.bg2Border
+        border.color: root.hasCritical ? Looks.colors.danger : Looks.colors.ring
         border.width: 1
+
+        // the lit hairline the panes wear
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 1
+            radius: parent.radius - 1
+            color: "transparent"
+            border.width: 1
+            border.color: Looks.colors.rim
+        }
+
+        // Waffle Next toasts lead with the app, on a tile of its own; a critical one turns it red
+        Rectangle {
+            id: appTile
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.margins: 12
+            width: Looks.dp(40)
+            height: Looks.dp(40)
+            radius: Looks.radius.large
+            color: root.hasCritical ? Qt.alpha(Looks.colors.danger, 0.22) : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.07 : 0.05)
+
+            WNotificationAppIcon {
+                anchors.centerIn: parent
+                icon: root.notificationGroup?.appIcon ?? ""
+                implicitSize: Looks.dp(24)
+            }
+        }
         
         Behavior on x {
             enabled: false
@@ -152,21 +180,17 @@ Item {
 
         ColumnLayout {
             id: content
-            anchors.left: parent.left
+            anchors.left: appTile.right
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 12
+            anchors.leftMargin: Looks.dp(12)
             spacing: 6
 
             // Header row
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
-
-                WNotificationAppIcon {
-                    icon: root.notificationGroup?.appIcon ?? ""
-                    implicitSize: 20
-                }
 
                 WText {
                     Layout.fillWidth: true
@@ -195,14 +219,15 @@ Item {
                     implicitWidth: Math.max(countText.implicitWidth + 10, 20)
                     implicitHeight: 18
                     radius: 9
-                    color: Looks.colors.bg1Base
+                    color: Looks.colors.accent
 
                     WText {
                         id: countText
                         anchors.centerIn: parent
                         text: root.notificationCount.toString()
                         font.pixelSize: Looks.font.pixelSize.small
-                        color: Looks.colors.fg
+                        font.weight: Looks.font.weight.strong
+                        color: Looks.colors.accentFg
                     }
                 }
 
@@ -211,7 +236,7 @@ Item {
                     visible: root.multipleNotifications || root.notifications[0]?.actions?.length > 0
                     implicitWidth: 24
                     implicitHeight: 24
-                    radius: Looks.radius.medium
+                    radius: height / 2
                     color: "transparent"
 
                     FluentIcon {
@@ -231,8 +256,8 @@ Item {
                 Rectangle {
                     implicitWidth: 24
                     implicitHeight: 24
-                    radius: Looks.radius.medium
-                    color: closeMA.containsMouse ? Looks.colors.bg1Hover : "transparent"
+                    radius: height / 2
+                    color: closeMA.containsMouse ? Qt.alpha(Looks.colors.fg, 0.09) : "transparent"
 
                     Behavior on color {
                         animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }

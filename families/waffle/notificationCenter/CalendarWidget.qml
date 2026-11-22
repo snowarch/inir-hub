@@ -176,8 +176,8 @@ BodyRectangle {
                                 if (Config.options?.waffles?.calendar?.force2CharDayOfWeek ?? false) result = result.substring(0,2);
                                 return result;
                             }
-                            color: Looks.colors.fg
-                            font.pixelSize: Looks.font.pixelSize.large
+                            color: Looks.colors.subfg
+                            font.pixelSize: Looks.font.pixelSize.normal
                         }
                     }
                 }
@@ -440,11 +440,15 @@ BodyRectangle {
         id: dayButton
         required property var model
         animateStateChanges: false
-        checked: model.today || (root.selectedDate !== null && root.selectedDate.toDateString() === dayButton.buttonDate?.toDateString())
-        enabled: hovered || calendarView.scrolling || checked || model.month === calendarView.focusedMonth
+        // today wears the accent; a day you pick wears a ring, so today stays findable
+        readonly property bool picked: root.selectedDate !== null && root.selectedDate.toDateString() === dayButton.buttonDate?.toDateString()
+        checked: model.today
+        enabled: hovered || calendarView.scrolling || checked || picked || model.month === calendarView.focusedMonth
         implicitWidth: calendarView.buttonSize
         implicitHeight: calendarView.buttonSize
-        radius: height / 2
+        radius: Looks.radius.large
+        border.width: dayButton.picked && !dayButton.checked ? 2 : 0
+        border.color: Looks.colors.accent
 
         required property int index
 
@@ -481,6 +485,7 @@ BodyRectangle {
                 text: dayButton.model.day
                 color: dayButton.fgColor
                 font.pixelSize: Looks.font.pixelSize.large
+                font.weight: dayButton.checked ? Looks.font.weight.strong : Looks.font.weight.regular
             }
 
             // Multi-colored event dots
@@ -540,13 +545,17 @@ BodyRectangle {
         onClicked: {
             calendarView.scrollMonthsAndSnap(scrollDown ? 1 : -1);
         }
-        implicitWidth: 32
-        implicitHeight: 34
+        implicitWidth: Looks.dp(30)
+        implicitHeight: Looks.dp(30)
+        radius: height / 2
+        padding: 0
 
-        contentItem: FluentIcon {
-            filled: true
-            implicitSize: 12
-            icon: scrollMonthButton.scrollDown ? "caret-down" : "caret-up"
+        contentItem: Item {
+            FluentIcon {
+                anchors.centerIn: parent
+                implicitSize: Looks.dp(12)
+                icon: scrollMonthButton.scrollDown ? "chevron-down" : "chevron-up"
+            }
         }
     }
 }
