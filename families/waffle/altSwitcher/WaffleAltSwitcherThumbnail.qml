@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Widgets
 import qs
@@ -10,7 +9,10 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.waffle.looks
+import qs.modules.waffle.state
 
+// Waffle Next switcher card: the app and its title on top, the window itself below; the chosen card lifts on a lit
+// plate with an accent ring and its picture moves.
 Item {
     id: root
 
@@ -18,148 +20,122 @@ Item {
     property bool selected: false
     property int thumbnailWidth: 280
     property int thumbnailHeight: 180
+    readonly property int pad: Looks.dp(8)
+    readonly property int headerHeight: Looks.dp(28)
 
     signal clicked
 
-    implicitWidth: thumbnailWidth
-    implicitHeight: thumbnailHeight + iconRow.height + 8
+    implicitWidth: thumbnailWidth + pad * 2
+    implicitHeight: headerHeight + thumbnailHeight + pad * 2
 
-    // Selection border glow
     Rectangle {
-        id: selectionGlow
-        anchors.fill: thumbnailContainer
-        anchors.margins: -4
-        radius: Looks.radius.large + 4
-        color: "transparent"
-        border.width: root.selected ? 3 : 0
+        id: plate
+        anchors.fill: parent
+        radius: Looks.radius.large + root.pad / 2
+        color: root.selected ? Qt.alpha(Looks.colors.fg, Looks.dark ? 0.1 : 0.07)
+            : mouseArea.containsMouse ? Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.04) : "transparent"
+        border.width: root.selected ? 2 : 0
         border.color: Looks.colors.accent
-        opacity: root.selected ? 1 : 0
+        scale: mouseArea.pressed ? 0.97 : 1
 
-        Behavior on opacity {
-            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+        Behavior on color {
+            ColorAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0 }
         }
-        Behavior on border.width {
-            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+        Behavior on scale {
+            NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0; easing.type: Easing.OutCubic }
         }
-    }
 
-    // Thumbnail container
-    Rectangle {
-        id: thumbnailContainer
-        width: root.thumbnailWidth
-        height: root.thumbnailHeight
-        radius: Looks.radius.large
-        color: Looks.colors.bg2Base
-        clip: true
-
-        // Hover/press states
-        property bool isHovered: mouseArea.containsMouse
-        property bool isPressed: mouseArea.pressed
-
-        // Background with subtle gradient
-        Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Looks.colors.bg2 }
-                GradientStop { position: 1.0; color: Looks.colors.bg1Base }
+        RowLayout {
+            id: header
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+                leftMargin: root.pad + Looks.dp(2)
+                rightMargin: root.pad + Looks.dp(2)
+                topMargin: root.pad
             }
-        }
+            height: root.headerHeight - Looks.dp(4)
+            spacing: Looks.dp(8)
 
-        // Hover overlay
-        Rectangle {
-            anchors.fill: parent
-            radius: parent.radius
-            color: Looks.colors.bg2Hover
-            opacity: thumbnailContainer.isHovered && !root.selected ? 0.5 : 0
-
-            Behavior on opacity {
-                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+            IconImage {
+                implicitSize: Looks.dp(18)
+                source: root.item?.icon ?? ""
             }
-        }
-
-        // Large centered app icon (placeholder for actual window thumbnail)
-        Image {
-            id: appIcon
-            anchors.centerIn: parent
-            width: 96
-            height: 96
-            source: root.item?.icon ?? ""
-            sourceSize: Qt.size(96, 96)
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            mipmap: true
-        }
-
-        // Window title overlay at bottom
-        Rectangle {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: 32
-            radius: Looks.radius.large
-            
-            // Only round bottom corners
-            Rectangle {
-                anchors.fill: parent
-                anchors.bottomMargin: parent.radius
-                color: parent.color
-            }
-            
-            color: ColorUtils.transparentize(Looks.colors.bg0Opaque, 0.2)
-
             WText {
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                verticalAlignment: Text.AlignVCenter
-                text: root.item?.title ?? ""
-                font.pixelSize: Looks.font.pixelSize.small
-                color: Looks.colors.fg
+                Layout.fillWidth: true
+                text: root.item?.title || root.item?.appName || ""
+                font.pixelSize: Looks.font.pixelSize.normal
+                font.weight: root.selected ? Looks.font.weight.strong : Looks.font.weight.regular
                 elide: Text.ElideRight
             }
-        }
+            Rectangle {
+                visible: (root.item?.workspaceIdx ?? 0) > 0
+                implicitWidth: wsLabel.implicitWidth + Looks.dp(12)
+                implicitHeight: Looks.dp(18)
+                radius: height / 2
+                color: root.selected ? Looks.colors.accent : Qt.alpha(Looks.colors.fg, 0.08)
 
-        // Scale animation on press
-        scale: thumbnailContainer.isPressed ? 0.96 : 1.0
-        Behavior on scale {
-            NumberAnimation {
-                duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0
-                easing.type: Easing.OutCubic
+                WText {
+                    id: wsLabel
+                    anchors.centerIn: parent
+                    text: root.item?.workspaceIdx ?? ""
+                    font.pixelSize: Looks.font.pixelSize.small
+                    font.weight: Looks.font.weight.strong
+                    color: root.selected ? Looks.colors.accentFg : Looks.colors.subfg
+                }
             }
         }
-    }
 
-    // App icon + workspace indicator row below thumbnail
-    Row {
-        id: iconRow
-        anchors.top: thumbnailContainer.bottom
-        anchors.topMargin: 8
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 6
+        ClippingRectangle {
+            id: preview
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                margins: root.pad
+            }
+            height: root.thumbnailHeight
+            radius: Looks.radius.large
+            color: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.05 : 0.04)
 
-        // Small app icon
-        Image {
-            width: 18
-            height: 18
-            source: root.item?.icon ?? ""
-            sourceSize: Qt.size(18, 18)
-        }
-
-        // Workspace indicator
-        Rectangle {
-            visible: (root.item?.workspaceIdx ?? 0) > 0
-            width: wsLabel.implicitWidth + 8
-            height: 18
-            radius: Looks.radius.small
-            color: root.selected ? Looks.colors.accent : Looks.colors.bg1
-
-            WText {
-                id: wsLabel
+            // the app, while no picture of the window is in
+            IconImage {
                 anchors.centerIn: parent
-                text: Translation.tr("WS") + " " + (root.item?.workspaceIdx ?? "")
-                font.pixelSize: Looks.font.pixelSize.small
-                color: root.selected ? Looks.colors.accentFg : Looks.colors.subfg
+                implicitSize: Looks.dp(64)
+                source: root.item?.icon ?? ""
+                visible: !still.visible && !live.streaming
+            }
+
+            Image {
+                id: still
+                anchors.fill: parent
+                source: WindowPreviewService.getPreviewUrl(root.item?.id ?? -1)
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                cache: false
+                sourceSize.width: root.thumbnailWidth
+                sourceSize.height: root.thumbnailHeight
+                visible: status === Image.Ready && !live.streaming
+            }
+
+            LiveWindowCapture {
+                id: live
+                anchors.fill: parent
+                windowId: root.item?.id ?? -1
+                active: WaffleState.altSwitcherOpen
+                live: root.selected
+            }
+
+            // the cards you did not pick step back a little
+            Rectangle {
+                anchors.fill: parent
+                color: Looks.colors.bg0Opaque
+                opacity: root.selected ? 0 : 0.18
+
+                Behavior on opacity {
+                    NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0 }
+                }
             }
         }
     }

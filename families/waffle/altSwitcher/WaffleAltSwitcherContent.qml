@@ -147,12 +147,12 @@ Item {
     // === PRESET: Thumbnails ===
     Component {
         id: thumbnailsPreset
-        Column {
-            spacing: 16
-            Grid {
+        WPane {
+            radius: Looks.radius.xLarge
+            contentItem: Grid {
                 columns: root.columns
-                spacing: 12
-                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Looks.dp(6)
+                padding: Looks.dp(10)
                 Repeater {
                     model: ScriptModel { values: root.itemSnapshot }
                     WaffleAltSwitcherThumbnail {
@@ -164,20 +164,6 @@ Item {
                         thumbnailHeight: root.thumbnailHeight
                         onClicked: { root.selectedIndex = index; root.activateWindow(modelData.id) }
                     }
-                }
-            }
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: appNameText.implicitWidth + 32
-                height: 36
-                radius: Looks.radius.large
-                color: Looks.colors.bg1Base
-                WText {
-                    id: appNameText
-                    anchors.centerIn: parent
-                    text: root.itemSnapshot?.[root.selectedIndex]?.appName ?? ""
-                    font.pixelSize: Looks.font.pixelSize.large
-                    color: Looks.colors.fg
                 }
             }
         }
