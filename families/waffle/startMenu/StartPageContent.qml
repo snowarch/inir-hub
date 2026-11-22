@@ -10,15 +10,30 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.waffle.looks
 
+// Waffle Next Start: one sheet under the search. Pinned apps on soft tiles, what is open now as cards under them, and
+// the places people go from Start (their account, files, settings, power) along the footer.
 WPanelPageColumn {
     id: root
 
     signal allAppsClicked()
-    
-    property list<string> pinnedApps: Config.options?.apps?.pinned ?? []
-    property var recentApps: getRecentApps()
 
-    WPanelSeparator {}
+    property list<string> pinnedApps: Config.options?.apps?.pinned ?? []
+    // what is open now, one card per app, from the taskbar's own list: it knows every compositor's windows
+    readonly property var openApps: TaskbarApps.apps.filter(app => (app?.toplevels?.length ?? 0) > 0).slice(0, 4)
+
+    function close(): void {
+        GlobalStates.searchOpen = false
+    }
+
+    function focusApp(app: var): void {
+        const toplevel = app?.toplevels?.[0] ?? null
+        const niriId = Number(toplevel?.niriWindowId ?? -1)
+        if (CompositorService.isNiri && niriId > 0)
+            NiriService.focusWindow(niriId)
+        else
+            toplevel?.activate()
+        root.close()
+    }
 
     BodyRectangle {
         Layout.fillWidth: true
@@ -27,49 +42,51 @@ WPanelPageColumn {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 16
-            spacing: 12
+            anchors.leftMargin: Looks.dp(24)
+            anchors.rightMargin: Looks.dp(24)
+            anchors.topMargin: Looks.dp(4)
+            anchors.bottomMargin: Looks.dp(18)
+            spacing: Looks.dp(10)
 
-            // Pinned header
             RowLayout {
                 Layout.fillWidth: true
-                WText {
-                    text: Translation.tr("Pinned")
-                    font.pixelSize: Looks.font.pixelSize.large
-                    font.weight: Font.DemiBold
-                }
+                SectionTitle { text: Translation.tr("Pinned") }
                 Item { Layout.fillWidth: true }
                 WBorderlessButton {
-                    implicitHeight: 28
-                    implicitWidth: allAppsRow.implicitWidth + 16
-                    contentItem: RowLayout {
-                        id: allAppsRow
-                        spacing: 4
-                        WText { text: Translation.tr("All apps"); font.pixelSize: Looks.font.pixelSize.normal }
-                        FluentIcon { icon: "chevron-right"; implicitSize: 12 }
+                    implicitHeight: Looks.dp(28)
+                    implicitWidth: allAppsRow.implicitWidth + Looks.dp(24)
+                    radius: height / 2
+                    colBackground: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.05)
+                    contentItem: Item {
+                        RowLayout {
+                            id: allAppsRow
+                            anchors.centerIn: parent
+                            spacing: Looks.dp(6)
+                            WText { text: Translation.tr("All apps"); font.pixelSize: Looks.font.pixelSize.normal }
+                            FluentIcon { icon: "chevron-right"; implicitSize: Looks.dp(12) }
+                        }
                     }
                     onClicked: root.allAppsClicked()
                 }
             }
 
-            // Pinned grid — Flow auto-reflows when StartMenu resizes (no clipping),
-            // wrapper Item centers the row when columns don't fill the available width.
+            // Flow reflows when Start resizes; the wrapper centres a row the columns don't fill
             Item {
                 Layout.fillWidth: true
                 implicitHeight: pinnedFlow.implicitHeight
 
                 Flow {
                     id: pinnedFlow
-                    readonly property int cellWidth: 88 + spacing
-                    // Cap to 6 like Windows 11; less if there's not enough room.
+                    readonly property int cellWidth: Looks.dp(90) + spacing
+                    // six across, as Windows has them; fewer when Start is narrow
                     readonly property int maxCols: Math.max(1, Math.min(6, Math.floor((parent.width + spacing) / cellWidth)))
                     width: Math.min(parent.width, maxCols * cellWidth - spacing)
                     anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 4
+                    spacing: Looks.dp(2)
 
                     Repeater {
                         model: root.pinnedApps.slice(0, 18)
-                        delegate: AppButton {
+                        delegate: AppTile {
                             required property string modelData
                             required property int index
                             appId: modelData
@@ -81,48 +98,43 @@ WPanelPageColumn {
 
             Item { Layout.fillHeight: true }
 
-            // Recommended section
-            ColumnLayout {
+            SectionTitle { text: Translation.tr("Recommended") }
+
+            GridLayout {
+                visible: root.openApps.length > 0
                 Layout.fillWidth: true
-                Layout.minimumHeight: recHeader.implicitHeight + 8 + Math.min(recGrid.implicitHeight, 2 * 44 + 1 * 4)
-                Layout.maximumHeight: recHeader.implicitHeight + 8 + recGrid.implicitHeight
-                opacity: (root.recentApps?.length ?? 0) > 0 ? 1 : 0
-                visible: opacity > 0
-                Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic } }
-                spacing: 8
+                columns: 2
+                rowSpacing: Looks.dp(6)
+                columnSpacing: Looks.dp(8)
 
-                WText {
-                    id: recHeader
-                    text: Translation.tr("Recommended")
-                    font.pixelSize: Looks.font.pixelSize.large
-                    font.weight: Font.DemiBold
+                Repeater {
+                    model: root.openApps
+                    delegate: OpenCard {
+                        required property var modelData
+                        required property int index
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        app: modelData
+                        animIndex: index
+                    }
                 }
+            }
 
-                Flickable {
-                    id: recFlickable
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    contentHeight: recGrid.implicitHeight
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
+            // nothing open yet: the place says what will come to it
+            Rectangle {
+                visible: root.openApps.length === 0
+                Layout.fillWidth: true
+                implicitHeight: Looks.dp(52)
+                radius: Looks.radius.large
+                color: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.04 : 0.03)
 
-                    Grid {
-                        id: recGrid
-                        width: parent.width
-                        columns: 2
-                        rowSpacing: 4
-                        columnSpacing: 16
-
-                        Repeater {
-                            model: root.recentApps.slice(0, 4)
-                            delegate: RecButton {
-                                required property var modelData
-                                required property int index
-                                appId: modelData.appId
-                                appName: modelData.name
-                                animIndex: index
-                            }
-                        }
+                RowLayout {
+                    anchors.centerIn: parent
+                    spacing: Looks.dp(8)
+                    FluentIcon { icon: "apps"; implicitSize: Looks.dp(16); color: Looks.colors.subfg }
+                    WText {
+                        text: Translation.tr("Apps you open show up here")
+                        color: Looks.colors.subfg
                     }
                 }
             }
@@ -133,163 +145,210 @@ WPanelPageColumn {
 
     StartFooter { Layout.fillWidth: true }
 
-    function getRecentApps() {
-        const seen = new Set()
-        const recent = []
-        const windowList = CompositorService.isNiri ? (NiriService.windows ?? []) : []
-        for (const w of windowList) {
-            const appId = w.app_id ?? ""
-            if (appId && !seen.has(appId) && recent.length < 4) {
-                seen.add(appId)
-                const entry = DesktopEntries.heuristicLookup(appId)
-                recent.push({ appId: appId, name: entry?.name ?? appId })
-            }
-        }
-        return recent
+    component SectionTitle: WText {
+        font.pixelSize: Looks.font.pixelSize.large
+        font.weight: Font.DemiBold
     }
 
-    component AppButton: WBorderlessButton {
-        id: appBtn
+    component AppTile: WBorderlessButton {
+        id: tile
         required property string appId
-        property int animIndex: 0  // For staggered animation
+        property int animIndex: 0
         readonly property var de: DesktopEntries.heuristicLookup(appId)
-        implicitWidth: 88
-        implicitHeight: 76
-        onClicked: { if (de) AppSearch.launchEntry(de); GlobalStates.searchOpen = false }
-        
-        // Staggered entry animation
+        implicitWidth: Looks.dp(90)
+        implicitHeight: Looks.dp(84)
+        radius: Looks.radius.large
+        onClicked: { if (tile.de) AppSearch.launchEntry(tile.de); root.close() }
+
+        // the tiles arrive one after another
         opacity: 0
         scale: 0.85
         Component.onCompleted: {
             if (Looks.transition.enabled) {
-                entryAnim.start()
+                tileEntry.start()
             } else {
                 opacity = 1
                 scale = 1
             }
         }
         SequentialAnimation {
-            id: entryAnim
-            PauseAnimation { duration: Looks.transition.staggerDelay(appBtn.animIndex, 25) }
+            id: tileEntry
+            PauseAnimation { duration: Looks.transition.staggerDelay(tile.animIndex, 22) }
             ParallelAnimation {
-                NumberAnimation { target: appBtn; property: "opacity"; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutQuad }
-                NumberAnimation { target: appBtn; property: "scale"; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.OutBack; easing.overshoot: 0.2 }
+                NumberAnimation { target: tile; property: "opacity"; to: 1; duration: Looks.transition.duration.normal; easing.type: Easing.OutQuad }
+                NumberAnimation { target: tile; property: "scale"; to: 1; duration: Looks.transition.duration.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
             }
         }
-        
+
         contentItem: ColumnLayout {
             anchors.centerIn: parent
-            spacing: 4
-            // A theme that ships an icon only at 16 px would draw it at 16: the box is fixed.
+            spacing: Looks.dp(6)
+            // a theme that ships an icon only at 16 px would draw it at 16: the box is fixed
             Image {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: 32
-                Layout.preferredHeight: 32
+                Layout.preferredWidth: Looks.dp(36)
+                Layout.preferredHeight: Looks.dp(36)
                 fillMode: Image.PreserveAspectFit
-                source: AppSearch.getIconSource(appBtn.appId, "application-x-executable")
-                sourceSize: Qt.size(32, 32)
+                source: AppSearch.getIconSource(tile.appId, "application-x-executable")
+                sourceSize: Qt.size(Looks.dp(36), Looks.dp(36))
                 smooth: true
                 mipmap: true
+                scale: tile.down ? 0.92 : tile.hovered ? 1.06 : 1
+                Behavior on scale {
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
+                }
             }
-            // One line, as Windows 11 does: a second line ran into the row below.
+            // one line, as Windows 11 does: a second line ran into the row below
             WText {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: 80
-                text: appBtn.de?.name ?? appBtn.appId
+                Layout.preferredWidth: Looks.dp(82)
+                text: tile.de?.name ?? tile.appId
                 font.pixelSize: Looks.font.pixelSize.small
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
             }
         }
-        WToolTip { text: appBtn.de?.name ?? appBtn.appId }
+        WToolTip { text: tile.de?.name ?? tile.appId }
     }
 
-    component RecButton: WBorderlessButton {
-        id: recBtn
-        required property string appId
-        required property string appName
-        property int animIndex: 0  // For staggered animation
-        readonly property var de: DesktopEntries.heuristicLookup(appId)
-        implicitWidth: 260
-        implicitHeight: 44
-        onClicked: { if (de) AppSearch.launchEntry(de); GlobalStates.searchOpen = false }
-        
-        // Staggered entry animation (starts after pinned apps)
+    component OpenCard: WBorderlessButton {
+        id: card
+        required property var app
+        property int animIndex: 0
+        readonly property string appId: card.app?.appId ?? ""
+        readonly property var de: DesktopEntries.heuristicLookup(card.appId)
+        implicitHeight: Looks.dp(56)
+        radius: Looks.radius.large
+        leftPadding: Looks.dp(10)
+        rightPadding: Looks.dp(14)
+        colBackground: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.04 : 0.03)
+        onClicked: root.focusApp(card.app)
+
+        // the cards slide in after the tiles
         opacity: 0
-        transform: Translate { id: recTranslate; x: -12 }
+        transform: Translate { id: cardShift; y: Looks.dp(8) }
         Component.onCompleted: {
             if (Looks.transition.enabled) {
-                recEntryAnim.start()
+                cardEntry.start()
             } else {
                 opacity = 1
-                recTranslate.x = 0
+                cardShift.y = 0
             }
         }
         SequentialAnimation {
-            id: recEntryAnim
-            PauseAnimation { duration: 300 + Looks.transition.staggerDelay(recBtn.animIndex, 40) }
+            id: cardEntry
+            PauseAnimation { duration: 160 + Looks.transition.staggerDelay(card.animIndex, 40) }
             ParallelAnimation {
-                NumberAnimation { target: recBtn; property: "opacity"; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutQuad }
-                NumberAnimation { target: recTranslate; property: "x"; to: 0; duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
+                NumberAnimation { target: card; property: "opacity"; to: 1; duration: Looks.transition.duration.normal; easing.type: Easing.OutQuad }
+                NumberAnimation { target: cardShift; property: "y"; to: 0; duration: Looks.transition.duration.medium; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.arrive }
             }
         }
-        
+
         contentItem: RowLayout {
-            spacing: 10
-            Image {
-                Layout.preferredWidth: 28
-                Layout.preferredHeight: 28
-                fillMode: Image.PreserveAspectFit
-                source: AppSearch.getIconSource(recBtn.appId, "application-x-executable")
-                sourceSize: Qt.size(28, 28)
-                smooth: true
-                mipmap: true
+            spacing: Looks.dp(12)
+            Rectangle {
+                Layout.preferredWidth: Looks.dp(36)
+                Layout.preferredHeight: Looks.dp(36)
+                radius: Looks.radius.medium
+                color: Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.05)
+                Image {
+                    anchors.centerIn: parent
+                    width: Looks.dp(24)
+                    height: Looks.dp(24)
+                    fillMode: Image.PreserveAspectFit
+                    source: AppSearch.getIconSource(card.appId, "application-x-executable")
+                    sourceSize: Qt.size(Looks.dp(24), Looks.dp(24))
+                    smooth: true
+                    mipmap: true
+                }
             }
-            WText {
+            ColumnLayout {
                 Layout.fillWidth: true
-                text: recBtn.appName
-                font.pixelSize: Looks.font.pixelSize.normal
-                elide: Text.ElideRight
+                spacing: 0
+                WText {
+                    Layout.fillWidth: true
+                    text: card.de?.name ?? card.appId
+                    font.pixelSize: Looks.font.pixelSize.normal
+                    elide: Text.ElideRight
+                }
+                WText {
+                    Layout.fillWidth: true
+                    visible: text.length > 0
+                    // the first line that says more than the name: pavucontrol's generic name is its name
+                    text: [card.de?.genericName, card.de?.comment].find(s => !!s && s !== card.de?.name) ?? ""
+                    color: Looks.colors.subfg
+                    font.pixelSize: Looks.font.pixelSize.small
+                    elide: Text.ElideRight
+                }
             }
+            // it runs: the dot the taskbar draws under it
+            Rectangle {
+                Layout.preferredWidth: Looks.dp(6)
+                Layout.preferredHeight: Looks.dp(6)
+                radius: width / 2
+                color: Looks.colors.accent
+            }
+        }
+        WToolTip { text: card.de?.name ?? card.appId }
+    }
+
+    component StartFooter: FooterRectangle {
+        implicitHeight: Looks.dp(60)
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: Looks.dp(28)
+            anchors.rightMargin: Looks.dp(28)
+            spacing: Looks.dp(4)
+
+            UserButton {}
+            Item { Layout.fillWidth: true }
+            FooterButton {
+                iconName: "folder"
+                tip: Translation.tr("Files")
+                onClicked: { Qt.openUrlExternally(Directories.home); root.close() }
+            }
+            FooterButton {
+                iconName: "settings"
+                tip: Translation.tr("Settings")
+                onClicked: { Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"]); root.close() }
+            }
+            PowerButton {}
         }
     }
 
-
-    component StartFooter: FooterRectangle {
-        implicitHeight: 63
-
-        UserButton {
-            anchors {
-                left: parent.left
-                leftMargin: 52
-                bottom: parent.bottom
-                bottomMargin: 12
+    component FooterButton: WBorderlessButton {
+        id: footerButton
+        property string iconName
+        property string tip
+        implicitWidth: Looks.dp(40)
+        implicitHeight: Looks.dp(40)
+        contentItem: Item {
+            FluentIcon {
+                anchors.centerIn: parent
+                icon: footerButton.iconName
+                implicitSize: Looks.dp(18)
             }
         }
-
-        PowerButton {
-            anchors {
-                right: parent.right
-                rightMargin: 52
-                bottom: parent.bottom
-                bottomMargin: 12
-            }
-        }
+        WToolTip { text: footerButton.tip }
     }
 
     component UserButton: WBorderlessButton {
         id: userButton
-        implicitWidth: userButtonRow.implicitWidth + 24
-        implicitHeight: 40
+        implicitWidth: userButtonRow.implicitWidth + Looks.dp(20)
+        implicitHeight: Looks.dp(42)
+        radius: height / 2
 
-        contentItem: RowLayout {
-            id: userButtonRow
-            anchors.centerIn: parent
-            spacing: 12
-            WUserAvatar { sourceSize: Qt.size(32, 32) }
-            WText {
-                Layout.alignment: Qt.AlignVCenter
-                text: SystemInfo.displayName || SystemInfo.username
+        contentItem: Item {
+            RowLayout {
+                id: userButtonRow
+                anchors.centerIn: parent
+                spacing: Looks.dp(10)
+                WUserAvatar { sourceSize: Qt.size(Looks.dp(30), Looks.dp(30)) }
+                WText {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: SystemInfo.displayName || SystemInfo.username
+                }
             }
         }
 
@@ -300,10 +359,10 @@ WPanelPageColumn {
             id: userMenu
             property double closedAt: 0
             onClosed: userMenu.closedAt = Date.now()
-            x: -51
-            y: -userMenu.implicitHeight + userButton.implicitHeight / 2 - 10
+            x: -Looks.dp(4)
+            y: -userMenu.implicitHeight - Looks.dp(6)
             background: null
-            
+
             WToolTipContent {
                 id: popupContent
                 horizontalPadding: 10
@@ -312,7 +371,7 @@ WPanelPageColumn {
                 realContentItem: Item {
                     implicitWidth: userMenuContentLayout.implicitWidth
                     implicitHeight: userMenuContentLayout.implicitHeight
-                    
+
                     ColumnLayout {
                         id: userMenuContentLayout
                         anchors {
@@ -335,9 +394,8 @@ WPanelPageColumn {
                             }
                             WText {
                                 Layout.alignment: Qt.AlignVCenter
-                                // `hostname` is an empty string until /etc/hostname
-                                // resolves, and `??` does not catch "" — this label
-                                // would otherwise render blank on the first frame.
+                                // `hostname` is "" until /etc/hostname resolves, and `??` does not catch "":
+                                // the label would render blank on the first frame
                                 text: SystemInfo.hostname || "Computer"
                                 font.pixelSize: Looks.font.pixelSize.large
                                 font.weight: Looks.font.weight.strong
@@ -355,9 +413,9 @@ WPanelPageColumn {
                                 onClicked: Session.logout()
                             }
                         }
-                        
+
                         Item { implicitWidth: 334 }
-                        
+
                         RowLayout {
                             Layout.fillWidth: true
                             Layout.bottomMargin: 7
@@ -385,7 +443,7 @@ WPanelPageColumn {
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: {
                                             AppLauncher.launch("manageUser")
-                                            GlobalStates.searchOpen = false
+                                            root.close()
                                             userMenu.close()
                                         }
                                     }
@@ -400,13 +458,15 @@ WPanelPageColumn {
 
     component PowerButton: WBorderlessButton {
         id: powerButton
-        implicitWidth: 40
-        implicitHeight: 40
+        implicitWidth: Looks.dp(40)
+        implicitHeight: Looks.dp(40)
 
-        contentItem: FluentIcon {
-            anchors.centerIn: parent
-            icon: "power"
-            implicitSize: 20
+        contentItem: Item {
+            FluentIcon {
+                anchors.centerIn: parent
+                icon: "power"
+                implicitSize: Looks.dp(18)
+            }
         }
 
         WToolTip { text: Translation.tr("Power") }

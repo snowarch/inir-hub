@@ -95,6 +95,7 @@ WBarAttachedPanelContent {
                 horizontalPadding: root.searching
                     ? Looks.dp(16)
                     : Looks.dp(24)
+                verticalPadding: root.searching ? Looks.dp(14) : Looks.dp(18)
                 // searching is read-only in SearchBar (bound to text length), so we only listen to changes
                 onSearchingChanged: if (searching !== root.searching) root.searching = searching
                 focus: true
