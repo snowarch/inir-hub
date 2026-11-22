@@ -3,25 +3,24 @@ import qs.services
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 
-// One sidebar line: its glyph on a small key, and its name. Where you stand reads at three levels (his 11-20: "no se sabe
-// dónde se está"): the open page is the one thing in the list that wears the person's accent (its key filled with it, a
-// quiet plate of it, its name in full ink a step larger, his 11-19 "un pequeño zoom"); the other pages of its chapter
-// keep full ink; the rest step back to the secondary ink. Pointed, a line takes Prism's quiet fill.
+// One sidebar line: its glyph and its name, nothing behind them. Where you stand reads at three levels (his 11-20: "no se
+// sabe dónde se está"): the open page alone wears the person's accent (its glyph filled with it, a quiet plate of it,
+// its name in full ink a step larger, his 11-19 "un pequeño zoom"); the other pages of its chapter keep a name's weight;
+// the rest are lighter, never greyer, and no glyph sits on a key (his 11-21: the keys and the grey read as one muted
+// block). Pointed, a line takes Prism's quiet fill.
 Item {
     id: root
     property string glyph: "circle"
     property string text: ""
     property bool current: false
-    // In the open page's chapter (or nothing is open): full ink. Elsewhere, the secondary ink.
+    // In the open page's chapter (or nothing is open): a name's weight and the glyph in full ink. Elsewhere, lighter.
     property bool inGroup: true
     property string trailing: ""   // a glyph on the right, shown on hover (a pin's remove)
-    // Something on the page differs from iNiR's (his 11-21: the dot that said where the changes were): a small dot on the
-    // key's corner, in the ink, so the accent still names only where you stand and a long name keeps its width.
+    // Something on the page differs from iNiR's (his 11-21: the dot that said where the changes were): a small dot at the
+    // line's end, in the ink, as the page's parts mark theirs, so the accent still names only where you stand.
     property bool changed: false
     // The open page's plate is drawn here, or by the list, which slides one plate from page to page (PrismSidebar).
     property bool plate: true
-    // A page of the open page's chapter: its key takes a breath of the accent, so the chapter reads as one block.
-    property bool chapter: false
     signal clicked()
     signal trailingClicked()
 
@@ -37,36 +36,33 @@ Item {
             : root.pointed && !root.current ? PrismTheme.fill : "transparent"
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
     }
-    Rectangle {
+    // The glyph on the line itself, in a box of one width so every name starts on the same pixel.
+    Item {
         id: icon
-        x: PrismTheme.dp(6)
+        x: PrismTheme.dp(8)
         anchors.verticalCenter: parent.verticalCenter
-        width: PrismTheme.dp(26)
+        width: PrismTheme.dp(22)
         height: width
-        radius: PrismTheme.dp(8)
-        // Light, the column is already frost: a key stands in white.
-        readonly property color quiet: PrismTheme.light ? PrismTheme.raised : PrismTheme.keyQuiet
-        color: root.current ? PrismTheme.accent : root.chapter ? PrismTheme.step(icon.quiet, PrismTheme.accent, PrismTheme.light ? 0.16 : 0.22) : icon.quiet
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
-        // Chosen, the key lands: a short pop as it takes the accent.
+        // Chosen, the glyph lands: a short pop as it takes the accent.
         SequentialAnimation {
             id: pop
-            NumberAnimation { target: icon; property: "scale"; to: 0.84; duration: PrismTheme.ms(70); easing.type: Easing.OutQuad }
+            NumberAnimation { target: icon; property: "scale"; to: 0.8; duration: PrismTheme.ms(70); easing.type: Easing.OutQuad }
             NumberAnimation { target: icon; property: "scale"; to: 1; duration: PrismTheme.ms(300); easing.type: Easing.OutBack; easing.overshoot: 2.4 }
         }
         PrismGlyph {
             anchors.centerIn: parent
             text: root.glyph
             filled: root.current
-            iconSize: PrismTheme.dp(16)
-            color: root.current ? PrismTheme.inkAccent : root.inGroup || root.pointed ? PrismTheme.ink : PrismTheme.ink2
+            iconSize: PrismTheme.dp(19)
+            color: root.current ? PrismTheme.accentInk : root.inGroup || root.pointed ? PrismTheme.ink : PrismTheme.inkNav
+            Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
         }
     }
     PrismText {
         anchors.left: icon.right
         anchors.leftMargin: PrismTheme.dp(10)
         anchors.right: tail.visible ? tail.left : parent.right
-        anchors.rightMargin: PrismTheme.dp(8)
+        anchors.rightMargin: root.changed && !tail.visible ? PrismTheme.dp(24) : PrismTheme.dp(8)
         anchors.verticalCenter: parent.verticalCenter
         text: root.text
         font.pixelSize: root.current ? PrismTheme.row : PrismTheme.body
@@ -75,19 +71,20 @@ Item {
         minimumPixelSize: PrismTheme.small
         font.weight: root.current ? Font.DemiBold : root.inGroup ? Font.Medium : Font.Normal
         font.letterSpacing: root.current ? -PrismTheme.row * 0.01 : 0
-        color: root.current || root.pointed ? PrismTheme.ink : root.inGroup ? PrismTheme.inkNav : PrismTheme.ink2
+        color: root.current || root.pointed ? PrismTheme.ink : PrismTheme.inkNav
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
     }
     Rectangle {
-        x: icon.x + icon.width - width + PrismTheme.dp(2)
-        y: icon.y - PrismTheme.dp(2)
-        width: PrismTheme.dp(7)
+        anchors.right: parent.right
+        anchors.rightMargin: PrismTheme.dp(12)
+        anchors.verticalCenter: parent.verticalCenter
+        width: PrismTheme.dp(5)
         height: width
         radius: width / 2
-        visible: scale > 0
+        visible: scale > 0 && !tail.visible
         scale: root.changed ? 1 : 0
         // Quiet at rest: with many pages changed, bright dots out-shouted the names.
-        color: root.current || root.pointed ? PrismTheme.ink : PrismTheme.ink3
+        color: root.current || root.pointed ? PrismTheme.ink : PrismTheme.ink2
         Behavior on scale { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutBack } }
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
     }

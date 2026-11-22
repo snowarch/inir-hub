@@ -205,30 +205,22 @@ Item {
                     // The caption over the open page wears the accent's ink: where you stand, at two levels.
                     readonly property bool here: !PrismState.searching && group.pages.some(page => page.pageId === PrismState.page)
                     width: column.width
-                    // The chapter's name and a hairline to the column's edge: a chapter reads as a block, not one more line.
+                    // The chapter's name, in the ink and bold, with room above it: a chapter reads as a block by its space, with
+                    // no grey and no rule (his 11-21).
                     Item {
                         width: group.width
-                        height: caption.implicitHeight + PrismTheme.dp(28)
+                        height: caption.implicitHeight + PrismTheme.dp(26)
                         PrismText {
                             id: caption
-                            x: PrismTheme.dp(8)
-                            y: PrismTheme.dp(20)
-                            width: Math.min(implicitWidth, parent.width - x - PrismTheme.dp(24))
+                            x: PrismTheme.dp(10)
+                            y: PrismTheme.dp(18)
+                            width: parent.width - x - PrismTheme.dp(8)
                             text: Translation.tr(group.modelData)
-                            color: group.here ? PrismTheme.accentInk : PrismTheme.ink3
+                            color: group.here ? PrismTheme.accentInk : PrismTheme.ink
                             font.pixelSize: PrismTheme.small
                             font.weight: Font.Bold
-                            font.letterSpacing: PrismTheme.small * 0.03
-                            Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
-                        }
-                        Rectangle {
-                            anchors.left: caption.right
-                            anchors.leftMargin: PrismTheme.dp(10)
-                            anchors.right: parent.right
-                            anchors.rightMargin: PrismTheme.dp(8)
-                            anchors.verticalCenter: caption.verticalCenter
-                            height: 1
-                            color: group.here ? ColorUtils.applyAlpha(PrismTheme.accentInk, 0.32) : PrismTheme.line
+                            font.letterSpacing: PrismTheme.small * 0.02
+                            elide: Text.ElideRight
                             Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
                         }
                     }
@@ -249,7 +241,6 @@ Item {
                                 text: Translation.tr(place.modelData.name)
                                 current: place.current
                                 plate: false
-                                chapter: group.here
                                 changed: root.changedAt[place.modelData.pageId] === true
                                 inGroup: group.here || !root.located
                                 onClicked: PrismState.go(place.modelData.pageId)
@@ -307,7 +298,7 @@ Item {
                                                 width: parent.width - x - (part.changed ? PrismTheme.dp(24) : PrismTheme.dp(8))
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 text: Translation.tr(part.modelData)
-                                                color: part.here ? PrismTheme.accentInk : partArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+                                                color: part.here ? PrismTheme.accentInk : partArea.containsMouse ? PrismTheme.ink : PrismTheme.inkNav
                                                 font.pixelSize: PrismTheme.body
                                                 font.weight: part.here ? Font.DemiBold : Font.Normal
                                                 Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
@@ -356,7 +347,7 @@ Item {
                     text: Translation.tr("Pinned")
                     color: PrismTheme.ink
                     font.pixelSize: PrismTheme.small
-                    font.weight: Font.DemiBold
+                    font.weight: Font.Bold
                 }
                 Repeater {
                     model: ScriptModel { objectProp: "key"; values: pinned.rows }
