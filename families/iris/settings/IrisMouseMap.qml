@@ -330,7 +330,7 @@ Column {
                     iconSize: Math.round(14 * root.d)
                     color: IrisStyle.accent
                     opacity: root.rolled === modelData.way ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: IrisStyle.motionEnabled ? 160 : 0 } }
+                    Behavior on opacity { NumberAnimation { duration: IrisStyle.motionEnabled ? 160 : 0; easing.type: IrisStyle.feedbackEasing } }
                 }
             }
 
