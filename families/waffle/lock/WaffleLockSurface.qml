@@ -32,7 +32,8 @@ MouseArea {
     property bool oskVisible: false
     
     // Windows 11 Lock Screen Design Tokens (from Looks.qml)
-    readonly property color textColor: Looks.colors.fg
+    // the lock always sits on a photo under a veil: white reads on every wallpaper in light and dark
+    readonly property color textColor: "#FFFFFF"
     readonly property color textShadowColor: Looks.colors.shadow
     readonly property real clockFontSize: 96 * Looks.fontScale
     readonly property real dateFontSize: 20 * Looks.fontScale
@@ -216,6 +217,17 @@ MouseArea {
 
         Behavior on opacity {
             NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
+        }
+    }
+
+    // A soft veil under the white text: it stays readable on a pale wallpaper, dimmed or not
+    Rectangle {
+        anchors.fill: parent
+        z: 0
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.24) }
+            GradientStop { position: 0.45; color: Qt.rgba(0, 0, 0, 0.14) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.34) }
         }
     }
 
@@ -433,7 +445,7 @@ MouseArea {
                     Layout.alignment: lockView.clockPosition === "center" ? Qt.AlignHCenter : Qt.AlignLeft
                     text: DateTime.time
                     font.pixelSize: lockView.clockStyle === "minimal" ? Math.round(72 * Looks.fontScale) : root.clockFontSize
-                    font.weight: Looks.font.weight.thin
+                    font.weight: Looks.font.weight.strong
                     font.family: Looks.font.family.ui
                     color: root.textColor
 
@@ -452,7 +464,7 @@ MouseArea {
                     Layout.alignment: lockView.clockPosition === "center" ? Qt.AlignHCenter : Qt.AlignLeft
                     text: Translation.locale.toString(new Date(), "dddd, MMMM d")
                     font.pixelSize: lockView.clockStyle === "minimal" ? Math.round(14 * Looks.fontScale) : root.dateFontSize
-                    font.weight: Looks.font.weight.regular
+                    font.weight: Looks.font.weight.strong
                     font.family: Looks.font.family.ui
                     color: root.textColor
                     layer.enabled: root.effectsSafe
