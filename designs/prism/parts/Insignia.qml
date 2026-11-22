@@ -1,73 +1,68 @@
 import QtQuick
 import QtQuick.Shapes
-import qs.modules.common.functions
 import qs.modules.iris.style
 
-// The Prism insignia: a glass triangle in the ink, a thread of light entering its left face and the spectrum leaving
-// its right one. Drawn on a 100-unit grid and scaled to the host's size; small, the fan keeps three bands. A host that
-// asks for a colour other than the accent (a lit tile's ink) gets the whole mark in that colour.
+// The Prism insignia: one prism, its corners rounded, lit through with the spectrum from its lower left to its upper
+// right (IrisStyle.prismStops, the shell's one). A single solid shape, nothing around it (his 11-21: the beam and fan
+// round a stroked triangle read as a scribble in the Dock), so it reads the same at a Dock's size and at a page's. A
+// host that asks for a colour other than the accent (a lit tile's ink) gets the prism in that colour.
 Item {
     id: root
     property Item host: null
     property color ink: !root.host || Qt.colorEqual(root.host.color, IrisStyle.accent) ? IrisStyle.text : root.host.color
     readonly property bool mono: !!root.host && !Qt.colorEqual(root.host.color, IrisStyle.accent)
-    readonly property real size: Math.min(width, height)
-    readonly property real unit: root.size / 100
-    readonly property bool small: root.size < 40
-    // The spectrum, the shell's one (IrisStyle.prismStops, violet to red); in one colour, that ink fading.
     readonly property var stops: IrisStyle.prismStops
-    function tone(index: int): color {
-        return root.mono ? ColorUtils.applyAlpha(root.ink, 0.25 + 0.6 * index / 6) : root.stops[index]
+    function tone(index: int): color { return root.mono ? root.ink : root.stops[index] }
+
+    // An even triangle on a 100-unit grid, its point up, its corners round; the shape sits centred in the box.
+    readonly property real side: 96
+    readonly property real tall: root.side * Math.sqrt(3) / 2
+    readonly property real corner: 13
+    // How far each corner's curve starts from the point it rounds (the corner's radius over tan 30°).
+    readonly property real cut: root.corner * Math.sqrt(3)
+    // The rounded shape stands from the top curve's crest to the base: centre that span.
+    readonly property real apex: 50 - (root.tall - root.corner) / 2 - root.corner
+    readonly property point a: Qt.point(50, root.apex)
+    readonly property point b: Qt.point(50 + root.side / 2, root.apex + root.tall)
+    readonly property point c: Qt.point(50 - root.side / 2, root.apex + root.tall)
+    function toward(from: point, to: point, by: real): point {
+        const len = Math.hypot(to.x - from.x, to.y - from.y)
+        return Qt.point(from.x + (to.x - from.x) * by / len, from.y + (to.y - from.y) * by / len)
     }
-    // The fan leaves the right face from one point: one sweep of light, no band between its colours.
-    readonly property real upper: Math.atan2(50 - 36, 38) * 180 / Math.PI
-    readonly property real lower: Math.atan2(50 - 60, 38) * 180 / Math.PI
-    function at(index: int): real { return (root.upper - root.lower) / 360 * index / 6 }
+    readonly property point ab: root.toward(root.a, root.b, root.cut)
+    readonly property point ba: root.toward(root.b, root.a, root.cut)
+    readonly property point bc: root.toward(root.b, root.c, root.cut)
+    readonly property point cb: root.toward(root.c, root.b, root.cut)
+    readonly property point ca: root.toward(root.c, root.a, root.cut)
+    readonly property point ac: root.toward(root.a, root.c, root.cut)
 
     Shape {
         width: 100
         height: 100
         anchors.centerIn: parent
-        scale: root.unit
+        scale: Math.min(root.width, root.height) / 100
         preferredRendererType: Shape.CurveRenderer
-        // The beam, from the lower left into the left face.
-        ShapePath {
-            strokeWidth: root.small ? 4.5 : 2.5
-            strokeColor: root.ink
-            capStyle: ShapePath.RoundCap
-            fillColor: "transparent"
-            startX: 3; startY: 63
-            PathLine { x: 34; y: 51 }
-        }
         ShapePath {
             strokeWidth: -1
             strokeColor: "transparent"
-            fillGradient: ConicalGradient {
-                centerX: 60; centerY: 50
-                angle: root.lower
-                GradientStop { position: root.at(0); color: root.tone(0) }
-                GradientStop { position: root.at(1); color: root.tone(1) }
-                GradientStop { position: root.at(2); color: root.tone(2) }
-                GradientStop { position: root.at(3); color: root.tone(3) }
-                GradientStop { position: root.at(4); color: root.tone(4) }
-                GradientStop { position: root.at(5); color: root.tone(5) }
-                GradientStop { position: root.at(6); color: root.tone(6) }
+            fillGradient: LinearGradient {
+                x1: root.c.x; y1: root.c.y
+                x2: root.b.x; y2: root.a.y
+                GradientStop { position: 0; color: root.tone(0) }
+                GradientStop { position: 1 / 6; color: root.tone(1) }
+                GradientStop { position: 2 / 6; color: root.tone(2) }
+                GradientStop { position: 3 / 6; color: root.tone(3) }
+                GradientStop { position: 4 / 6; color: root.tone(4) }
+                GradientStop { position: 5 / 6; color: root.tone(5) }
+                GradientStop { position: 1; color: root.tone(6) }
             }
-            startX: 60; startY: 50
-            PathLine { x: 98; y: 36 }
-            PathLine { x: 98; y: 60 }
-            PathLine { x: 60; y: 50 }
-        }
-        // The glass: drawn last so the light meets its faces.
-        ShapePath {
-            strokeWidth: root.small ? 5.5 : 3.5
-            strokeColor: root.ink
-            joinStyle: ShapePath.RoundJoin
-            fillColor: ColorUtils.applyAlpha(root.ink, 0.08)
-            startX: 50; startY: 14
-            PathLine { x: 84; y: 80 }
-            PathLine { x: 16; y: 80 }
-            PathLine { x: 50; y: 14 }
+            startX: root.ab.x; startY: root.ab.y
+            PathLine { x: root.ba.x; y: root.ba.y }
+            PathArc { x: root.bc.x; y: root.bc.y; radiusX: root.corner; radiusY: root.corner }
+            PathLine { x: root.cb.x; y: root.cb.y }
+            PathArc { x: root.ca.x; y: root.ca.y; radiusX: root.corner; radiusY: root.corner }
+            PathLine { x: root.ac.x; y: root.ac.y }
+            PathArc { x: root.ab.x; y: root.ab.y; radiusX: root.corner; radiusY: root.corner }
         }
     }
 }

@@ -15,14 +15,15 @@ were wearing it, iRiS shows again.
 
 - Colour: Prism's three near-blacks and Apple's label inks in dark and ink; in light, Prism's paper whites. Filled
   controls, chosen buttons and today's date are white solids (black in light). Your accent still marks where you are.
-- Shape: Prism's corners (panels 28, cards 18, rows 14) and squircle bubbles and pieces.
-- Material: flat, no rim; each body stands off by its fill. Glass stays your choice.
-- Motion: glide, calm and without bounce.
+- Shape: Prism's corners (panels 28, cards 18, rows 14) and round bubbles and pieces.
+- Material: flat, no rim; each body stands off by its fill. Glass stays your choice, smoked: it keeps Prism's
+  near-black over any wallpaper.
+- Motion: snap, quick and without bounce.
 - Lists and rows: chosen rows and hovers as solid plates, sections ruled by hairlines.
-- Desktop widgets: their Prism faces, frosted glass with one lit colour each. A widget you gave a design of its own
+- Desktop widgets: their Prism faces, their light split into the spectrum. A widget you gave a design of its own
   keeps it.
-- The Island at rest: a thread of white light enters from the left, meets the hour and leaves it as the spectrum.
-  Under the pointer the light comes up full. A song rides beside the hour as usual.
+- The Island at rest: the hour over a short line of the spectrum. Under the pointer the line opens to the hour's
+  full width. A song rides beside the hour as usual.
 
 Everything else (where things are, what shows, your wallpaper, fonts and glass) stays yours. While you wear Prism, the
 rows it decides leave Settings.

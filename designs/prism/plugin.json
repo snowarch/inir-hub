@@ -2,9 +2,9 @@
     "id": "prism",
     "kind": "design",
     "name": "Prism",
-    "summary": "iRiS in Prism's language: near-black, white solids, the hour as a prism",
+    "summary": "iRiS in Prism's language: smoked near-black, white solids and the spectrum",
     "icon": "flare",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "families": ["iris"],
     "provides": "modules/prism",
     "parts": {

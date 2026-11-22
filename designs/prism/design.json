@@ -43,6 +43,7 @@
             "texture": "flat",
             "edge": "none",
             "edgeWidth": 0,
+            "tint": 0.84,
             "plates": { "black": ["#1e1e21", "#0f0f11"], "white": ["#ffffff", "#f5f5f7"] }
         },
         "motion": {
@@ -52,6 +53,7 @@
         "look": {
             "look": "prism",
             "widgets": "prism",
+            "light": "spectrum",
             "traits": { "marks": "tile", "selection": "plate", "captions": "mono", "hover": "wash", "index": false, "sections": "line", "rings": "none" }
         }
     }

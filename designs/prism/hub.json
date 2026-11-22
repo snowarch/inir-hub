@@ -1,7 +1,13 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "changes": {
+        "1.1.0": [
+            "The spectrum comes back to the desktop widgets: their Prism light splits into its colours",
+            "A cleaner mark: one solid prism lit by the spectrum, in the Dock and wherever iRiS shows its mark",
+            "The Island at rest: the hour over a short line of the spectrum that opens under the pointer",
+            "Smoked glass: panels and widgets keep Prism's near-black over any wallpaper"
+        ],
         "1.0.2": [
             "Glass stays your choice: Prism no longer makes every body solid"
         ],
@@ -17,8 +23,8 @@
             "Desktop widgets wear their Prism faces while it is on"
         ]
     },
-    "summary": "iRiS in Prism's language: near-black, white solids, the hour as a prism",
-    "description": "A Design for iRiS that dresses the whole shell in the language of Prism, iRiS's Settings: the three near-black neutrals and Apple's label inks, white solids for what is chosen, squircle marks, rows numbered like a chart, a hairline of light on every edge and calm motion. At rest the Island's hour is the prism: white light enters, the spectrum leaves. Desktop widgets wear their Prism faces of frosted glass while it is on; your accent still marks where you are.",
+    "summary": "iRiS in Prism's language: smoked near-black, white solids and the spectrum",
+    "description": "A Design for iRiS that dresses the whole shell in the language of Prism, iRiS's Settings: the three near-black neutrals and Apple's label inks, white solids for what is chosen, round marks, bodies that stand off by their fill and quick motion. Its glass keeps a smoked near-black over any wallpaper. At rest the Island shows the hour over a short line of the spectrum. Desktop widgets wear their Prism faces, their light split into the spectrum; your accent still marks where you are.",
     "authors": [
         "snowarch"
     ],
