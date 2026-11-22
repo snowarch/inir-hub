@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # The plugin's part of its Hub page (plugin.json `choices`):
-#   list          [{id, label, on, lead?, note?}]: a switch for the compact layout, then one chip per cava shape,
-#                 cava colour, bar symbol set, progress bar and Directories look
-#   toggle <id>   `compact` flips the layout; any other id picks that option; the theme is rewritten either way
+#   list          [{id, label, on, lead?, note?}]: a switch for the compact layout and one for song notifications, then
+#                 one chip per cava shape, cava colour, bar symbol set, progress bar and Directories look
+#   toggle <id>   `compact` flips the layout, `notify` flips song notifications; any other id picks that option; the
+#                 theme is rewritten either way
 #   leave         run by the Hub before it removes the plugin: the generated theme goes with it
 set -euo pipefail
 
@@ -36,12 +37,13 @@ load() {
   LA="$(cur layout full full compact)"
   PR="$(cur progress plain "${PROGRESS[@]}")"
   DI="$(cur dirs columns "${DIRS[@]}")"
+  NO="$(cur notify on on off)"
 }
 
 save() {
   mkdir -p "$OWN"
-  printf '{"cava": "%s", "color": "%s", "symbols": "%s", "layout": "%s", "progress": "%s", "dirs": "%s"}\n' \
-    "$SH" "$CO" "$SY" "$LA" "$PR" "$DI" > "$SETTINGS.tmp" && mv -f "$SETTINGS.tmp" "$SETTINGS"
+  printf '{"cava": "%s", "color": "%s", "symbols": "%s", "layout": "%s", "progress": "%s", "dirs": "%s", "notify": "%s"}\n' \
+    "$SH" "$CO" "$SY" "$LA" "$PR" "$DI" "$NO" > "$SETTINGS.tmp" && mv -f "$SETTINGS.tmp" "$SETTINGS"
   bash "$HERE/render.sh" || true
 }
 
@@ -56,6 +58,8 @@ case "${1:-list}" in
     load
     if [[ "$id" == compact ]]; then
       if [[ "$LA" == compact ]]; then LA=full; else LA=compact; fi
+    elif [[ "$id" == notify ]]; then
+      if [[ "$NO" == on ]]; then NO=off; else NO=on; fi
     elif in_list "$id" "${SHAPES[@]}";   then SH="$id"
     elif in_list "$id" "${COLORS[@]}";   then CO="$id"
     elif in_list "$id" "${SYMBOLS[@]}";  then SY="$id"
@@ -69,7 +73,9 @@ esac
 
 load
 compact=false; [[ "$LA" == compact ]] && compact=true
+notify=true; [[ "$NO" == off ]] && notify=false
 printf '[{"id":"compact","label":"Compact layout","on":%s,"lead":true,"note":"For terminals smaller than about 110x28"}' "$compact"
+printf ',{"id":"notify","label":"Song notifications","on":%s,"lead":true,"note":"Needs the on-song-change hook from the README"}' "$notify"
 chips() {   # prefix current ids...
   local prefix="$1" now="$2" x on; shift 2
   for x in "$@"; do

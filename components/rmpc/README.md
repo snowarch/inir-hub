@@ -155,6 +155,25 @@ Two more choices on rmpc's page in the Hub:
 - **Progress bar:** `plain` (the default), `line`, `dots` and `rounded`. `rounded` uses round caps that need a Nerd Font.
 - **Directories:** `columns` (the default) or `tree`. rmpc has no real folder tree, so `tree` gives the closest look: folder and branch symbols (`├─`) on the entries and a wider preview column that lists what is inside the selected folder. It needs a Nerd Font for the icons.
 
+## Song notifications (optional)
+
+The page in the Hub has a **Song notifications** switch. It only saves your preference, `"notify": "on"` or `"off"`, in `~/.config/inir/plugins/rmpc.json`; it does not show anything by itself. To get a notification on every song change, point rmpc's `on_song_change` at a small script of yours that reads that preference:
+
+```bash
+#!/usr/bin/env bash
+# rmpc gives the hook ARTIST, ALBUM and TITLE
+grep -qs '"notify"[[:space:]]*:[[:space:]]*"off"' "${XDG_CONFIG_HOME:-$HOME/.config}/inir/plugins/rmpc.json" && exit 0
+notify-send -a rmpc "$TITLE" "$ARTIST"
+```
+
+In `config.ron`:
+
+```ron
+on_song_change: ["/home/you/.config/rmpc/on-song-change"],
+```
+
+Notifications arrive through the shell's service, so its Do Not Disturb mode silences them too. They are only sent while rmpc is open, because it is rmpc that runs the hook.
+
 ## What it does to your system
 
 - Writes `~/.config/inir/plugins/rmpc/theme.ron` and, when you pick a cava style, `~/.config/inir/plugins/rmpc.json`; it tells a running rmpc to reload the theme (`rmpc remote set theme`).
