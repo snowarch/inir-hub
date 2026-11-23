@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.4.2",
+    "version": "1.5.0",
     "changes": {
+        "1.5.0": [
+            "A new preview, and the README says what to expect from yt-dlp: regular YouTube links only, no lyrics"
+        ],
         "1.4.2": [
             "The song time moves to the top edge of the progress bar and the song info shows how long the queue is"
         ],
