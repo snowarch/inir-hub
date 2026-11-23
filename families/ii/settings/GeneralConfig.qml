@@ -390,7 +390,7 @@ ContentPage {
         icon: "notification_sound"
         title: Translation.tr("Sounds")
 
-        // One row per shell sound event (keys match Audio.soundEvents)
+        // One row per shell sound event (keys match the files of a sound pack)
         readonly property var soundEventRows: [
             { key: "notification", label: Translation.tr("Notification") },
             { key: "notificationCritical", label: Translation.tr("Critical notification") },
@@ -431,7 +431,7 @@ ContentPage {
                 wrapMode: Text.Wrap
             }
             ConfigSelectionArray {
-                readonly property var glyphs: ({ aurora: "auto_awesome", tactile: "touch_app", lounge: "weekend", orbit: "public", crystal: "diamond", arcade: "sports_esports", classic: "notifications" })
+                readonly property var glyphs: ({ aurora: "auto_awesome", tactile: "touch_app", lounge: "weekend", orbit: "public", crystal: "diamond", arcade: "sports_esports" })
                 currentValue: Audio.soundPack
                 onSelected: newValue => Config.setNestedValue("sounds.pack", newValue)
                 options: Audio.packs.map(pack => ({ displayName: Audio.packLabel(pack), icon: glyphs[pack] ?? "folder_special", value: pack }))
@@ -562,7 +562,7 @@ ContentPage {
             }
             StyledText {
                 Layout.fillWidth: true
-                text: Translation.tr("Pick the sound each event plays: one from your sound theme, or any audio file")
+                text: Translation.tr("Pick the sound each event plays: one from any sound pack, or any audio file")
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 color: Appearance.colors.colSubtext
                 wrapMode: Text.Wrap

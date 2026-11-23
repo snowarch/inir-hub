@@ -296,7 +296,7 @@ WSettingsPage {
         WSettingsSwitch {
             label: Translation.tr("Impact sounds")
             icon: "speaker-0"
-            description: Translation.tr("Little thuds and bells from the system sound theme when she hits things")
+            description: Translation.tr("Little thuds and bells from the sound pack when she hits things")
             checked: Config.options?.mascot?.chaos?.sfx ?? true
             onToggled: checked => Config.setNestedValue("mascot.chaos.sfx", checked)
         }

@@ -366,11 +366,11 @@ QtObject {
         if (spec.choicesFrom) return DesktopWidgetOptions.choicesFor(String(spec.choicesFrom))
         return spec.choices ?? []
     }
-    // Sound packs as tiles: ours, the system theme, then the folders people add.
+    // Sound packs as tiles: ours, then the folders people add.
     function soundPackChoices(): var {
         const ours = { aurora: ["auto_awesome", "Soft keys under a warm glow"], tactile: ["touch_app", "Dry keys and precise dots"],
             lounge: ["weekend", "Warm mallets and soft pads"], orbit: ["public", "Wide tones and deep air"],
-            crystal: ["diamond", "Glass and bells"], arcade: ["sports_esports", "Bright chip sounds"], classic: ["notifications", "Your system's sound theme"] }
+            crystal: ["diamond", "Glass and bells"], arcade: ["sports_esports", "Bright chip sounds"] }
         return Audio.packs.map(pack => ({ label: Audio.packLabel(pack), value: pack, glyph: ours[pack]?.[0] ?? "folder_special", detail: ours[pack]?.[1] ?? "Added by you" }))
     }
     // A scheme's tuning is listed only when that scheme can be the one in use: the one chosen, or dark and light under Auto.

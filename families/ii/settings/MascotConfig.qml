@@ -331,7 +331,7 @@ ContentPage {
                 enabled: Config.options?.mascot?.chaos?.enable ?? false
                 onCheckedChanged: Config.setNestedValue("mascot.chaos.sfx", checked)
                 StyledToolTip {
-                    text: Translation.tr("Little thuds and bells from the system sound theme when she hits things")
+                    text: Translation.tr("Little thuds and bells from the sound pack when she hits things")
                 }
             }
             SettingsSwitch {

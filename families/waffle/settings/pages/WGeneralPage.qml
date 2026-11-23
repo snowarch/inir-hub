@@ -316,13 +316,13 @@ WSettingsPage {
     WSettingsCard {
         id: eventSoundsCard
         title: Translation.tr("Event sounds")
-        description: Translation.tr("Pick the sound each event plays: one from your sound theme, or any audio file")
+        description: Translation.tr("Pick the sound each event plays: one from any sound pack, or any audio file")
         icon: "music-note-2"
         // 23 rows: an expander, as Windows folds a long list under one card
         collapsible: true
         expanded: false
 
-        // One row per shell sound event (keys match Audio.soundEvents)
+        // One row per shell sound event (keys match the files of a sound pack)
         readonly property var soundEventRows: [
             { key: "notification", label: Translation.tr("Notification") },
             { key: "notificationCritical", label: Translation.tr("Critical notification") },

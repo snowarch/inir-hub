@@ -7,8 +7,8 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.waffle.looks
 
-// One shell event's sound as a Windows 11 settings row: hear it, then pick the pack's, a system theme sound or a file.
-// Writes sounds.events.<eventId> as the Audio service reads it ("" = the pack's, a bare name, or an absolute path).
+// One shell event's sound as a Windows 11 settings row: hear it, then pick the pack in use, another pack or a file.
+// Writes sounds.events.<eventId> as the Audio service reads it ("" = the pack in use, a pack's name, or an absolute path).
 WSettingsRow {
     id: root
 
@@ -16,14 +16,15 @@ WSettingsRow {
 
     readonly property string value: Config.options?.sounds?.events?.[root.eventId] ?? ""
     readonly property bool isFile: root.value.startsWith("/") || root.value.startsWith("file://")
-    // The pack's sound, the theme's sounds, and last an entry that opens the file dialog. A file, or a name the
-    // theme no longer has, stays listed after the default so the box always shows what plays.
+    // The pack in use, the other packs, and last an entry that opens the file dialog. A file, or a pack that is gone,
+    // stays listed after the default so the box always shows what plays.
     readonly property var options: {
-        const list = [{ value: "", displayName: Audio.eventDefaultLabel(root.eventId) }]
-        if (root.value !== "" && !Audio.themeSounds.includes(root.value))
-            list.push({ value: root.value, displayName: root.isFile ? root.value.split("/").pop() : root.value })
-        for (const name of Audio.themeSounds)
-            list.push({ value: name, displayName: name })
+        const others = Audio.packs.filter(pack => pack !== Audio.soundPack)
+        const list = [{ value: "", displayName: Audio.packInUseLabel }]
+        if (root.value !== "" && !others.includes(root.value))
+            list.push({ value: root.value, displayName: root.isFile ? root.value.split("/").pop() : Audio.packLabel(root.value) })
+        for (const pack of others)
+            list.push({ value: pack, displayName: Audio.packLabel(pack) })
         list.push({ value: "", displayName: Translation.tr("Choose a file") + "…" })
         return list
     }
