@@ -313,10 +313,18 @@ Item {
         onClicked: root.close()
     }
 
+    // The stage is built on open and kept two minutes after the close, then let go; the model above stays built.
+    KeepWarm {
+        id: keep
+        wanted: root.wanted
+        busy: (content.item?.progress ?? 0) > 0
+    }
     Loader {
         id: content
         anchors.fill: parent
         focus: true
+        active: keep.warm
+        onLoaded: if (root.wanted) root.focusInput()
         sourceComponent: stageComponent
     }
 

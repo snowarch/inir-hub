@@ -40,6 +40,14 @@ Item {
             : ["reel", "mosaic", "browser"].includes(wanted) ? wanted : "reel"
     }
 
+    // The layout is built on open and kept two minutes after the close, then let go: resident, its thumbnails held some
+    // 3000 objects and their images all session for a picker opened now and then. The body waits for it (contentReady).
+    KeepWarm {
+        id: keep
+        wanted: root.morphOpen
+        busy: surface.progress > 0
+    }
+
     // Asked for in one layout, kept across them for the session.
     property bool detailsOpen: false
     property bool filtersOpen: false
@@ -153,6 +161,8 @@ Item {
             x: Math.round((surface.width - width) / 2)
             width: layoutLoader.item?.implicitWidth ?? 0
             height: layoutLoader.item?.implicitHeight ?? 0
+            active: keep.warm
+            asynchronous: true
             sourceComponent: root.layoutName === "mosaic" ? mosaic : root.layoutName === "browser" ? browser : reel
             onLoaded: if (root.morphOpen) layoutLoader.item.focusSearch()
         }

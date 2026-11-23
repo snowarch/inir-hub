@@ -1474,7 +1474,7 @@ Scope {
                     sourceComponent: IrisPalette { screen: barWindow.screen }
                 }
 
-                // Resident like Spotlight: built on open it cost ~90 ms before the first frame and grew from outside the Island.
+                // Its body stays, so it grows from where the Island rests; its layout is built on open (KeepWarm).
                 Loader {
                     id: galleryLoader
                     z: 2.5
@@ -1485,7 +1485,7 @@ Scope {
                     sourceComponent: IrisWallpaperPicker { screen: barWindow.screen }
                 }
 
-                // A Place like Spotlight: resident, so it opens on a warm frame and grows from where the Island rests.
+                // A Place like Spotlight: its host stays, so it grows from where the Island rests; its stage is built on open.
                 Loader {
                     id: orbitLoader
                     z: 2.5

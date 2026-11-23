@@ -311,10 +311,21 @@ Item {
         onClicked: GlobalStates.searchOpen = false
     }
 
+    // Built on open and kept ten minutes after the close, then let go: resident on every output, it held ~750 objects
+    // for a launcher that opens on one.
+    KeepWarm {
+        id: keep
+        wanted: root.here && GlobalStates.searchOpen
+        busy: (content.item?.progress ?? 0) > 0
+        keepMs: 600000
+    }
+
     Loader {
         id: content
         anchors.fill: parent
         focus: true
+        active: keep.warm
+        onLoaded: if (root.here && GlobalStates.searchOpen) root.focusInput()
         // A Design that brings its own Spotlight shows it here; the search, keys and selection stay this file's.
         readonly property string scene: IrisDesign.skin("spotlight")
         sourceComponent: content.scene.length > 0 ? designSpotlight : spotlightComponent

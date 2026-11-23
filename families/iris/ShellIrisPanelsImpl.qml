@@ -55,8 +55,15 @@ Item {
         property int keepMs: 60000
         property bool resident: open
         property Timer closeGrace: Timer {
-            interval: loader.keep ? Math.max(loader.closeGraceMs, loader.keepMs) : loader.closeGraceMs
+            interval: loader.keep && !MemoryPressureService.over ? Math.max(loader.closeGraceMs, loader.keepMs) : loader.closeGraceMs
             onTriggered: loader.resident = loader.open
+        }
+        // Over the memory budget, a closed panel lets go now rather than after its keep.
+        property Connections budget: Connections {
+            target: MemoryPressureService
+            function onOverChanged(): void {
+                if (MemoryPressureService.over && !loader.open && loader.resident) loader.closeGrace.restart()
+            }
         }
         readonly property bool enabledPanel: Config.ready && IrisGate.official
             && (!requireEnabledPanel || (Config.options?.enabledPanels ?? []).includes(identifier))
