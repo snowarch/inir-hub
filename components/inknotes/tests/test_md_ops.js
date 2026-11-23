@@ -44,10 +44,10 @@ t("wrapInline code and link", () => {
     assert.equal(M.wrapInline("a `" + A + "b" + B + "` c", "code"), "a " + A + "b" + B + " c");
     assert.equal(M.wrapInline("a " + A + "**b**" + B, "code"), "a `" + A + "b" + B + "`");
     assert.equal(M.wrapInline("a " + A + "`b" + B + "` c", "code"), "a " + A + "b" + B + " c");
-    assert.equal(M.wrapInline("a " + A + "b" + B, "link", "http://x.y"), "a [" + A + "b" + B + "](http://x.y)");
-    assert.equal(M.wrapInline("[" + A + "b" + B + "](http://x.y)", "link", ""), A + "b" + B);
-    assert.equal(M.wrapInline("[" + A + "b" + B + "](http://x.y)", "link", "http://z"), "[" + A + "b" + B + "](http://z)");
-    assert.equal(M.wrapInline("a " + A + B, "link", "http://x.y"), "a [" + A + "http://x.y" + B + "](http://x.y)");
+    assert.equal(M.wrapInline("a " + A + "b" + B, "link", "https://example.com"), "a [" + A + "b" + B + "](https://example.com)");
+    assert.equal(M.wrapInline("[" + A + "b" + B + "](https://example.com)", "link", ""), A + "b" + B);
+    assert.equal(M.wrapInline("[" + A + "b" + B + "](https://example.com)", "link", "https://example.com/z"), "[" + A + "b" + B + "](https://example.com/z)");
+    assert.equal(M.wrapInline("a " + A + B, "link", "https://example.com"), "a [" + A + "https://example.com" + B + "](https://example.com)");
 });
 t("shortcutOf", () => {
     assert.deepEqual(M.shortcutOf("# ", true), { kind: "h1", length: 2 });
