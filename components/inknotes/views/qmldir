@@ -1,0 +1,8 @@
+PaneRow 1.0 PaneRow.qml
+FoldersPane 1.0 FoldersPane.qml
+NotesPane 1.0 NotesPane.qml
+EditorPane 1.0 EditorPane.qml
+TrashView 1.0 TrashView.qml
+AskSheet 1.0 AskSheet.qml
+SettingsSheet 1.0 SettingsSheet.qml
+InkBody 1.0 InkBody.qml

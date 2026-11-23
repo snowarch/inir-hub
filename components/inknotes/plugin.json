@@ -1,0 +1,12 @@
+{
+    "id": "inknotes",
+    "kind": "component",
+    "name": "Ink Notes",
+    "summary": "Markdown notes in plain files, with folders and a trash",
+    "version": "1.0.0",
+    "icon": "ink_pen",
+    "parts": {
+        "panel": "Panel.qml"
+    },
+    "families": []
+}
