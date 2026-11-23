@@ -34,6 +34,18 @@ Scope {
         running: true
         onTriggered: root.finishWhenReady()
     }
+    // Its entrance has played (the last line rises from 280 ms for 560 ms) and its dots have faded: the shell builds the
+    // desktop under it from here. Started as the dots faded, that work held their fade up.
+    property bool settled: false
+    // With motion off, the dots rest in their still arc and stay.
+    readonly property bool dotsGone: root.motion && root.settled
+    SequentialAnimation {
+        running: true
+        PauseAnimation { duration: root.motion ? 840 : 0 }
+        PropertyAction { target: root; property: "settled"; value: true }
+        PauseAnimation { duration: root.motion ? 260 : 0 }
+        ScriptAction { script: GlobalStates.bootGreetingStill = true }
+    }
     // The desktop opens once it stands under the welcome: on its timing alone it opened onto a wallpaper with no bar.
     property bool held: false
     function finishWhenReady(): void {
@@ -87,8 +99,17 @@ Scope {
         id: ring
         property real size: 28
         property color color: Looks.colors.fg
-        width: ring.size
+        // The dots fade out and give their place to the word before the desktop is built under the welcome: held up by
+        // that work, they stuttered.
+        width: root.dotsGone ? 0 : ring.size
         height: ring.size
+        opacity: root.dotsGone ? 0 : 1
+        Behavior on width {
+            NumberAnimation { duration: root.motion ? 240 : 0; easing.type: Easing.OutCubic }
+        }
+        Behavior on opacity {
+            NumberAnimation { duration: root.motion ? 240 : 0; easing.type: Easing.OutCubic }
+        }
 
         Repeater {
             model: 5
@@ -107,7 +128,7 @@ Scope {
                 }
 
                 SequentialAnimation {
-                    running: Looks.transition.enabled
+                    running: Looks.transition.enabled && ring.opacity > 0
                     loops: Animation.Infinite
                     PauseAnimation { duration: orbit.index * 110 }
                     PropertyAction { target: orbit; property: "opacity"; value: 1 }
@@ -268,7 +289,10 @@ Scope {
                     Row {
                         id: status
                         anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: Looks.dp(12)
+                        spacing: root.dotsGone ? 0 : Looks.dp(12)
+                        Behavior on spacing {
+                            NumberAnimation { duration: root.motion ? 240 : 0; easing.type: Easing.OutCubic }
+                        }
                         opacity: 0
                         transform: Translate { id: statusLift; y: Looks.dp(10) }
                         Rise { target: status; lift: statusLift; delay: 280 }

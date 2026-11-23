@@ -66,6 +66,8 @@ Scope {
                 NumberAnimation { target: root; property: "words"; to: 1; duration: IrisStyle.duration(560); easing.type: Easing.OutCubic }
             }
         }
+        // Its entrance has played: the shell builds the desktop under it from here.
+        ScriptAction { script: GlobalStates.bootGreetingStill = true }
         PauseAnimation { duration: 900 }
         ScriptAction { script: root.openUpWhenReady() }
     }
