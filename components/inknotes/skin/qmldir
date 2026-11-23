@@ -1,0 +1,10 @@
+singleton InkSkin 1.0 InkSkin.qml
+InkText 1.0 InkText.qml
+InkGlyph 1.0 InkGlyph.qml
+InkScrollBar 1.0 InkScrollBar.qml
+InkButton 1.0 InkButton.qml
+InkField 1.0 InkField.qml
+InkMenu 1.0 InkMenu.qml
+InkSelect 1.0 InkSelect.qml
+InkSheet 1.0 InkSheet.qml
+InkGroup 1.0 InkGroup.qml

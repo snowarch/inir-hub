@@ -1,0 +1,11 @@
+{
+    "id": "inknotes",
+    "edit": "https://github.com/snowarch/inir-hub/edit/main/docs/inknotes/",
+    "order": 24,
+    "groups": [
+        {
+            "label": "Components",
+            "pages": ["INKNOTES"]
+        }
+    ]
+}
