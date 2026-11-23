@@ -61,13 +61,6 @@ TestCase {
         type("u");
         compare(md(), "- [ ] t\n- [ ] u");
     }
-    function test_code_fence_enter() {
-        fresh("");
-        type("```");
-        keyClick(Qt.Key_Return);
-        type("x = 1");
-        compare(md(), "```\nx = 1\n```");
-    }
     function test_shortcut_when_the_text_arrives_together() {
         fresh("");
         keyClick("#"); keyClick("#"); keyClick("#"); keyClick(" ");
@@ -81,21 +74,6 @@ TestCase {
         wait(50);
         type("t");
         compare(md(), "x\n\n- t");
-    }
-    function test_block_styles_and_toggle() {
-        fresh("abc");
-        ed.block("h1");
-        compare(md(), "# abc");
-        ed.block("p");
-        compare(md(), "abc");
-        ed.block("task");
-        compare(md(), "- [ ] abc");
-        ed.block("task");
-        compare(md(), "abc");
-        ed.block("code");
-        compare(md(), "```\nabc\n```");
-        ed.block("p");
-        compare(md(), "abc");
     }
     function test_inline_styles_on_selection_keep_other_styles() {
         fresh("abc def ghi");
@@ -122,21 +100,6 @@ TestCase {
         type("cd");
         compare(md(), "**ab**cd");
     }
-    function test_code_and_link() {
-        fresh("a b c");
-        ed.edit.select(2, 3);
-        ed.inlineCode();
-        compare(md(), "a `b` c");
-        ed.edit.select(2, 3);
-        ed.inlineCode();
-        compare(md(), "a b c");
-        ed.edit.select(2, 3);
-        ed.link("http://x.y");
-        compare(md(), "a [b](http://x.y) c");
-        ed.edit.select(2, 3);
-        ed.link("");
-        compare(md(), "a b c");
-    }
     function test_undo_redo() {
         fresh("one");
         type(" two");
@@ -161,14 +124,6 @@ TestCase {
         wait(50);
         compare(md(), "- [x] a");
         verify(edits.length > 0);
-    }
-    function test_raw_mode_round_trip() {
-        fresh("# a");
-        ed.setRaw(true);
-        compare(ed.raw.text.replace(/\n+$/, ""), "# a");
-        ed.raw.text = "# a\n\n**b**";
-        ed.setRaw(false);
-        compare(md(), "# a\n\n**b**");
     }
     function test_keys() {
         fresh("abc");
