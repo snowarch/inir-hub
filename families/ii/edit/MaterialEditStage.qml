@@ -21,8 +21,7 @@ Item {
     property bool waiting: false
     property string still: ""
     // The stage's still is decoded (or will never be): the desktop holds the zoom until it is.
-    readonly property bool ready: root.side !== "under" || root.still === ""
-        || stageStill.status === Image.Ready || stageStill.status === Image.Error
+    readonly property bool ready: root.side !== "under" || (under.item?.done ?? false)
     readonly property real p: Math.max(0, Math.min(1, root.card.p))
     readonly property real cardX: root.card.x
     readonly property real cardY: root.card.y
@@ -32,44 +31,54 @@ Item {
 
     // The surface: Material's base layer with a quiet dot lattice, tiled from one cell so nothing repaints per frame.
     // The person's own wallpaper out of focus and a step darker behind the card; blurred once, nothing per frame.
-    Item {
-        visible: root.side === "under"
+    // Only the side that shows it builds it, and off the frame that asks for it: the blur and the shadow are the stage's
+    // costly parts, and the other sides never draw them.
+    Loader {
+        id: under
         anchors.fill: parent
-        opacity: root.waiting ? 0 : Math.min(1, root.p * 1.6)
-        Rectangle { anchors.fill: parent; color: Appearance.colors.colLayer0 }
-        Image {
-            id: stageStill
-            anchors.fill: parent
-            visible: false
-            source: root.side === "under" ? root.still : ""
-            sourceSize: Qt.size(Math.round(root.width / 3), Math.round(root.height / 3))
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            cache: true
+        active: root.side === "under"
+        asynchronous: true
+        sourceComponent: Item {
+            readonly property bool done: root.still === "" || stageStill.status === Image.Ready || stageStill.status === Image.Error
+            Item {
+                anchors.fill: parent
+                opacity: root.waiting ? 0 : Math.min(1, root.p * 1.6)
+                Rectangle { anchors.fill: parent; color: Appearance.colors.colLayer0 }
+                Image {
+                    id: stageStill
+                    anchors.fill: parent
+                    visible: false
+                    source: root.still
+                    sourceSize: Qt.size(Math.round(root.width / 3), Math.round(root.height / 3))
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                    cache: true
+                }
+                MultiEffect {
+                    anchors.fill: parent
+                    source: stageStill
+                    visible: stageStill.status === Image.Ready
+                    blurEnabled: true
+                    blur: 1
+                    blurMax: 40
+                    saturation: -0.15
+                    autoPaddingEnabled: false
+                }
+                Rectangle { anchors.fill: parent; color: ColorUtils.applyAlpha(Appearance.colors.colLayer0, 0.45) }
+            }
+            RectangularShadow {
+                x: root.cardX
+                y: root.cardY + 8 * root.p
+                width: root.cardW
+                height: root.cardH
+                radius: root.cornerSize
+                blur: 36
+                spread: -6
+                color: ColorUtils.applyAlpha(Appearance.colors.colShadow, 0.55 * root.p)
+            }
         }
-        MultiEffect {
-            anchors.fill: parent
-            source: stageStill
-            visible: stageStill.status === Image.Ready
-            blurEnabled: true
-            blur: 1
-            blurMax: 40
-            saturation: -0.15
-            autoPaddingEnabled: false
-        }
-        Rectangle { anchors.fill: parent; color: ColorUtils.applyAlpha(Appearance.colors.colLayer0, 0.45) }
     }
-    RectangularShadow {
-        visible: root.side === "under"
-        x: root.cardX
-        y: root.cardY + 8 * root.p
-        width: root.cardW
-        height: root.cardH
-        radius: root.cornerSize
-        blur: 36
-        spread: -6
-        color: ColorUtils.applyAlpha(Appearance.colors.colShadow, 0.55 * root.p)
-    }
+
     // The card's shape at the desktop's own size (it is shrunk with it).
     readonly property Item cardMask: root.side === "over" ? mask : null
     // The card's corner in desktop px and whether it is cut: the desktop's own shader draws the shape.

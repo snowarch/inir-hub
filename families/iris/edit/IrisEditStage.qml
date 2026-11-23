@@ -27,8 +27,7 @@ Item {
     // The wallpaper's still, for the stage.
     property string still: ""
     // The stage's still is decoded (or will never be): the desktop holds the zoom until it is.
-    readonly property bool ready: root.side !== "under" || root.still === ""
-        || stageStill.status === Image.Ready || stageStill.status === Image.Error
+    readonly property bool ready: root.side !== "under" || (under.item?.done ?? false)
 
     readonly property real d: IrisStyle.density
     readonly property real p: Math.max(0, Math.min(1, root.card.p))
@@ -41,47 +40,56 @@ Item {
 
     // The stage: the person's own wallpaper, out of focus and a step darker (lighter in light), so the card reads as
     // the thing in front. Decoded small and blurred once; nothing is drawn per frame but its opacity.
-    Item {
-        visible: root.side === "under"
+    // Only the side that shows it builds it, and off the frame that asks for it: the blur and the shadow are the stage's
+    // costly parts, and the other sides never draw them.
+    Loader {
+        id: under
         anchors.fill: parent
-        opacity: root.waiting ? 0 : Math.min(1, root.p * 1.6)
-        Rectangle { anchors.fill: parent; color: root.paper }
-        Image {
-            id: stageStill
-            anchors.fill: parent
-            visible: false
-            source: root.side === "under" ? root.still : ""
-            sourceSize: Qt.size(Math.round(root.width / 3), Math.round(root.height / 3))
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            cache: true
-        }
-        MultiEffect {
-            anchors.fill: parent
-            source: stageStill
-            visible: stageStill.status === Image.Ready
-            blurEnabled: true
-            blur: 1
-            blurMax: 40
-            saturation: -0.15
-            autoPaddingEnabled: false
-        }
-        Rectangle {
-            anchors.fill: parent
-            color: ColorUtils.applyAlpha(root.paper, IrisStyle.light ? 0.32 : 0.46) // iris-literal: the stage's dim over the blurred wallpaper
-        }
-    }
+        active: root.side === "under"
+        asynchronous: true
+        sourceComponent: Item {
+            readonly property bool done: root.still === "" || stageStill.status === Image.Ready || stageStill.status === Image.Error
+            Item {
+                anchors.fill: parent
+                opacity: root.waiting ? 0 : Math.min(1, root.p * 1.6)
+                Rectangle { anchors.fill: parent; color: root.paper }
+                Image {
+                    id: stageStill
+                    anchors.fill: parent
+                    visible: false
+                    source: root.still
+                    sourceSize: Qt.size(Math.round(root.width / 3), Math.round(root.height / 3))
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                    cache: true
+                }
+                MultiEffect {
+                    anchors.fill: parent
+                    source: stageStill
+                    visible: stageStill.status === Image.Ready
+                    blurEnabled: true
+                    blur: 1
+                    blurMax: 40
+                    saturation: -0.15
+                    autoPaddingEnabled: false
+                }
+                Rectangle {
+                    anchors.fill: parent
+                    color: ColorUtils.applyAlpha(root.paper, IrisStyle.light ? 0.32 : 0.46) // iris-literal: the stage's dim over the blurred wallpaper
+                }
+            }
 
-    IrisBodyShadow {
-        visible: root.side === "under"
-        x: root.cardX
-        y: root.cardY + 10 * root.d * root.p
-        width: root.cardW
-        height: root.cardH
-        radius: root.cornerSize
-        blur: 42 * root.d
-        spread: -8 * root.d
-        color: ColorUtils.applyAlpha(IrisStyle.shadow, IrisStyle.shadow.a * root.p)
+            IrisBodyShadow {
+                x: root.cardX
+                y: root.cardY + 10 * root.d * root.p
+                width: root.cardW
+                height: root.cardH
+                radius: root.cornerSize
+                blur: 42 * root.d
+                spread: -8 * root.d
+                color: ColorUtils.applyAlpha(IrisStyle.shadow, IrisStyle.shadow.a * root.p)
+            }
+        }
     }
 
     // The card's shape at the desktop's own size (it is shrunk with it).

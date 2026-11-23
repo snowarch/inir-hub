@@ -366,7 +366,8 @@ Scope {
                 id: outfit
                 property var entry: null
                 readonly property Item widget: outfit.entry?.output === desk.outputName ? outfit.entry.widget : null
-                active: outfit.widget !== null
+                // Only while arranging: letting a widget go on the way out made the hovered one's outfit as the desk left.
+                active: outfit.widget !== null && GlobalStates.widgetEditMode
                 x: desk.card.x + (outfit.widget?.x ?? 0) * desk.card.s
                 y: desk.card.y + (outfit.widget?.y ?? 0) * desk.card.s
                 width: (outfit.widget?.width ?? 0) * desk.card.s

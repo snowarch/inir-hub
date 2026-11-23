@@ -88,7 +88,8 @@ PanelWindow {
         id: outfit
         property var entry: null
         readonly property Item widget: outfit.entry?.output === root.outputName ? outfit.entry.widget : null
-        active: outfit.widget !== null
+        // Only while arranging: letting a widget go on the way out made the hovered one's outfit as the desk left.
+        active: outfit.widget !== null && GlobalStates.widgetEditMode
         x: root.card.x + (outfit.widget?.x ?? 0) * root.card.s
         y: root.card.y + (outfit.widget?.y ?? 0) * root.card.s
         width: (outfit.widget?.width ?? 0) * root.card.s
