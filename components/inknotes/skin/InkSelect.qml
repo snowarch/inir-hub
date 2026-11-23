@@ -8,6 +8,7 @@ Item {
     property string symbol: ""
     property string hint: ""
     property string fallback: ""
+    property bool quiet: false
     signal picked(var value)
     readonly property var chosen: root.options.find(o => o.value === root.current) ?? null
     implicitWidth: button.implicitWidth
@@ -18,6 +19,7 @@ Item {
         label: root.chosen ? root.chosen.label : root.fallback
         symbol: root.symbol
         hint: root.hint
+        quiet: root.quiet
         onClicked: menu.open(button, Qt.point(button.width / 2, button.height))
     }
     InkMenu {

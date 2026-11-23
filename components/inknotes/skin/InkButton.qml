@@ -39,7 +39,7 @@ Loader {
             id: button
             implicitHeight: InkSkin.control
             implicitWidth: Math.max(implicitHeight, content.implicitWidth + InkSkin.gap * 1.5)
-            radius: InkSkin.smallRadius
+            radius: InkSkin.radius
             checked: root.toggled
             colBackground: root.primary ? Looks.colors.accent : root.toggled ? Looks.settings.tilePressed : root.quiet ? "transparent" : Looks.settings.tile
             colBackgroundHover: root.primary ? Looks.colors.accentHover : Looks.settings.tileHover
@@ -60,11 +60,13 @@ Loader {
         RippleButtonWithIcon {
             mainText: root.label
             materialIcon: root.symbol
+            buttonRadius: InkSkin.radius
+            colBackgroundHover: InkSkin.hover
             toggled: root.primary || root.toggled
-            colBackground: root.quiet ? "transparent" : Appearance.colors.colLayer2
+            colBackground: root.quiet ? "transparent" : InkSkin.plate
             colBackgroundToggled: root.primary ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer
             colBackgroundToggledHover: root.primary ? Appearance.colors.colPrimaryHover : Appearance.colors.colSecondaryContainerHover
-            contentColor: root.primary ? Appearance.colors.colOnPrimary : root.danger ? Appearance.colors.colError : root.toggled ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
+            contentColor: root.primary ? Appearance.colors.colOnPrimary : root.danger ? Appearance.colors.colError : root.toggled ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer3
             onClicked: root.clicked()
             Accessible.name: root.label || root.hint
         }

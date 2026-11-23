@@ -19,7 +19,7 @@ Item {
         anchors.centerIn: parent
         width: Math.min(root.width - InkSkin.pad * 2, root.cardWidth)
         height: Math.min(root.height - InkSkin.pad * 2, column.implicitHeight + InkSkin.pad * 2)
-        radius: InkSkin.radius
+        radius: InkSkin.cardRadius
         color: InkSkin.sheet
         border.width: 1
         border.color: InkSkin.edge

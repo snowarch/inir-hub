@@ -155,7 +155,8 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        spacing: 0
+        anchors.margins: InkSkin.small
+        spacing: InkSkin.small
         FoldersPane {
             Layout.fillHeight: true
             Layout.fillWidth: root.narrow
@@ -171,7 +172,6 @@ Item {
             onTrashRequested: { root.trashOpen = true; if (root.narrow) root.page = "list"; }
             onSettingsRequested: settings.open = true
         }
-        Rectangle { visible: root.showFolders; Layout.fillHeight: true; implicitWidth: 1; color: InkSkin.edge }
         NotesPane {
             id: notes
             Layout.fillHeight: true
@@ -186,7 +186,6 @@ Item {
             onRenameNote: rel => root.question("renameNote", rel)
             onTrashNote: rel => { if (rel === root.current) root.flush(); store.toTrash(rel); }
         }
-        Rectangle { visible: root.showList && !root.trashOpen; Layout.fillHeight: true; implicitWidth: 1; color: InkSkin.edge }
         TrashView {
             Layout.fillHeight: true
             Layout.fillWidth: true

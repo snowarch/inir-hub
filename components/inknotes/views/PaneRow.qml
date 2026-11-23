@@ -12,7 +12,7 @@ Rectangle {
     signal clicked()
     signal menu(point at)
     implicitHeight: Math.round(InkSkin.rowHeight * 0.8)
-    radius: InkSkin.smallRadius
+    radius: InkSkin.radius
     color: root.selected ? InkSkin.rowOn : area.containsMouse ? InkSkin.hover : "transparent"
 
     RowLayout {

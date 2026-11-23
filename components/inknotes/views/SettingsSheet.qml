@@ -16,7 +16,7 @@ InkSheet {
 
     onOpenChanged: if (root.open) { custom.text = InkOptions.customPath; root.customInvalid = false }
 
-    InkText { Layout.fillWidth: true; text: Translation.tr("Notes location"); color: InkSkin.muted; role: "meta" }
+    InkText { Layout.fillWidth: true; text: Translation.tr("Notes location"); role: "label" }
     InkSelect {
         current: InkOptions.location
         options: [
@@ -45,14 +45,14 @@ InkSheet {
     }
     InkText { Layout.fillWidth: true; wrapMode: Text.Wrap; role: "meta"; color: InkSkin.muted; text: root.rootPath + "\n" + Translation.tr("Changing the location does not move your notes.") }
 
-    InkText { Layout.fillWidth: true; text: Translation.tr("Sort notes by"); color: InkSkin.muted; role: "meta" }
+    InkText { Layout.fillWidth: true; text: Translation.tr("Sort notes by"); role: "label" }
     InkSelect {
         current: InkOptions.sort
         fallback: Translation.tr("Last edited")
         options: [{ value: "edited", label: Translation.tr("Last edited") }, { value: "title", label: Translation.tr("Title") }]
         onPicked: value => InkOptions.set("sort", value)
     }
-    InkText { Layout.fillWidth: true; text: Translation.tr("Keep trashed notes"); color: InkSkin.muted; role: "meta" }
+    InkText { Layout.fillWidth: true; text: Translation.tr("Keep trashed notes"); role: "label" }
     InkSelect {
         current: InkOptions.trashDays
         fallback: Translation.tr("30 days")

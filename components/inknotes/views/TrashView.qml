@@ -12,7 +12,8 @@ Rectangle {
     signal emptyRequested()
     signal backRequested()
     property bool narrow: false
-    color: InkSkin.page
+    color: InkSkin.side
+    radius: InkSkin.cardRadius
 
     ColumnLayout {
         anchors.fill: parent
@@ -46,7 +47,7 @@ Rectangle {
                 width: ListView.view.width
                 height: InkSkin.rowHeight
                 radius: InkSkin.smallRadius
-                color: InkSkin.side
+                color: InkSkin.plate
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: InkSkin.gap

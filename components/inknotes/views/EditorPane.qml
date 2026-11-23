@@ -24,7 +24,8 @@ Rectangle {
     signal listToggled()
     signal newNote()
     signal linkRequested()
-    color: InkSkin.page
+    color: InkSkin.side
+    radius: InkSkin.cardRadius
 
     function setZoom(percent: int): void { InkOptions.set("zoom", Math.max(80, Math.min(200, percent))) }
     function zoomBy(direction: int): void { root.setZoom(root.percent + direction * 10) }
@@ -87,49 +88,72 @@ Rectangle {
             Layout.fillWidth: true
             visible: root.has && InkOptions.showToolbar
             spacing: InkSkin.small
-            InkButton { symbol: "undo"; quiet: true; hint: Translation.tr("Undo (Ctrl+Z)"); onClicked: rich.undo() }
-            InkButton { symbol: "redo"; quiet: true; hint: Translation.tr("Redo (Ctrl+Shift+Z)"); onClicked: rich.redo() }
-            InkSelect {
-                symbol: "title"; fallback: Translation.tr("Text style"); hint: Translation.tr("Paragraph style")
-                options: [
-                    { value: "p", label: Translation.tr("Body (Ctrl+0)") },
-                    { value: "h1", label: Translation.tr("Heading 1 (Ctrl+1)") },
-                    { value: "h2", label: Translation.tr("Heading 2 (Ctrl+2)") },
-                    { value: "h3", label: Translation.tr("Heading 3 (Ctrl+3)") }
-                ]
-                onPicked: value => { rich.block(value); rich.focusEditor() }
+            InkGroup {
+                InkButton { symbol: "undo"; quiet: true; hint: Translation.tr("Undo (Ctrl+Z)"); onClicked: rich.undo() }
+                InkButton { symbol: "redo"; quiet: true; hint: Translation.tr("Redo (Ctrl+Shift+Z)"); onClicked: rich.redo() }
             }
-            Repeater {
-                model: root.marks
-                InkButton {
-                    required property var modelData
-                    symbol: modelData.sym; quiet: true; toggled: modelData.on; hint: modelData.hint
-                    onClicked: { modelData.act(); rich.focusEditor() }
+            InkGroup {
+                InkSelect {
+                    quiet: true
+                    symbol: "title"; fallback: Translation.tr("Text style"); hint: Translation.tr("Paragraph style")
+                    options: [
+                        { value: "p", label: Translation.tr("Body (Ctrl+0)") },
+                        { value: "h1", label: Translation.tr("Heading 1 (Ctrl+1)") },
+                        { value: "h2", label: Translation.tr("Heading 2 (Ctrl+2)") },
+                        { value: "h3", label: Translation.tr("Heading 3 (Ctrl+3)") }
+                    ]
+                    onPicked: value => { rich.block(value); rich.focusEditor() }
                 }
             }
-            InkSelect {
-                symbol: "text_fields"; hint: Translation.tr("Font"); current: root.font.family
-                options: [
-                    { value: "default", label: Translation.tr("Default font") },
-                    { value: "serif", label: Translation.tr("Serif") },
-                    { value: "mono", label: Translation.tr("Mono") }
-                ]
-                onPicked: value => InkOptions.setFont(root.rel, "family", value)
+            InkGroup {
+                Repeater {
+                    model: root.marks.slice(0, 5)
+                    InkButton {
+                        required property var modelData
+                        symbol: modelData.sym; quiet: true; toggled: modelData.on; hint: modelData.hint
+                        onClicked: { modelData.act(); rich.focusEditor() }
+                    }
+                }
             }
-            InkSelect {
-                symbol: "format_size"; hint: Translation.tr("Text size"); current: root.font.size
-                options: [
-                    { value: "small", label: Translation.tr("Small") },
-                    { value: "default", label: Translation.tr("Default size") },
-                    { value: "large", label: Translation.tr("Large") },
-                    { value: "larger", label: Translation.tr("Larger") }
-                ]
-                onPicked: value => InkOptions.setFont(root.rel, "size", value)
+            InkGroup {
+                Repeater {
+                    model: root.marks.slice(5)
+                    InkButton {
+                        required property var modelData
+                        symbol: modelData.sym; quiet: true; toggled: modelData.on; hint: modelData.hint
+                        onClicked: { modelData.act(); rich.focusEditor() }
+                    }
+                }
             }
-            InkButton { label: root.percent + "%"; quiet: true; hint: Translation.tr("Reset zoom (Ctrl+= and Ctrl+- change it)"); onClicked: root.setZoom(100) }
-            InkButton {
-                symbol: "markdown"; quiet: true; toggled: rich.rawMode
-                hint: Translation.tr("Markdown text (Ctrl+Shift+M)"); onClicked: { root.toggleRaw(); rich.focusEditor() }
+            InkGroup {
+                InkSelect {
+                    quiet: true
+                    symbol: "text_fields"; hint: Translation.tr("Font"); current: root.font.family
+                    options: [
+                        { value: "default", label: Translation.tr("Default font") },
+                        { value: "serif", label: Translation.tr("Serif") },
+                        { value: "mono", label: Translation.tr("Mono") }
+                    ]
+                    onPicked: value => InkOptions.setFont(root.rel, "family", value)
+                }
+                InkSelect {
+                    quiet: true
+                    symbol: "format_size"; hint: Translation.tr("Text size"); current: root.font.size
+                    options: [
+                        { value: "small", label: Translation.tr("Small") },
+                        { value: "default", label: Translation.tr("Default size") },
+                        { value: "large", label: Translation.tr("Large") },
+                        { value: "larger", label: Translation.tr("Larger") }
+                    ]
+                    onPicked: value => InkOptions.setFont(root.rel, "size", value)
+                }
+                InkButton { label: root.percent + "%"; quiet: true; hint: Translation.tr("Reset zoom (Ctrl+= and Ctrl+- change it)"); onClicked: root.setZoom(100) }
+            }
+            InkGroup {
+                InkButton {
+                    symbol: "markdown"; quiet: true; toggled: rich.rawMode
+                    hint: Translation.tr("Markdown text (Ctrl+Shift+M)"); onClicked: { root.toggleRaw(); rich.focusEditor() }
+                }
             }
         }
 

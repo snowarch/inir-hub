@@ -18,7 +18,8 @@ Rectangle {
     signal newNote()
     signal renameNote(string rel)
     signal trashNote(string rel)
-    color: InkSkin.page
+    color: InkSkin.side
+    radius: InkSkin.cardRadius
 
     function focusSearch(): void { search.focusField(); search.selectAll() }
     function when(ms: double): string {
@@ -39,12 +40,13 @@ Rectangle {
         spacing: InkSkin.gap
         RowLayout {
             Layout.fillWidth: true
-            InkText { Layout.fillWidth: true; Layout.leftMargin: InkSkin.small; text: root.heading; role: "title" }
+            InkText { Layout.fillWidth: true; Layout.leftMargin: InkSkin.small; text: root.heading; role: "label" }
             InkButton { label: Translation.tr("New note"); symbol: "add"; primary: true; onClicked: root.newNote() }
         }
         InkField {
             id: search
             Layout.fillWidth: true
+            icon: "search"
             placeholder: Translation.tr("Search notes")
             onTextChanged: if (root.store.query !== text) root.store.query = text
         }
@@ -63,7 +65,7 @@ Rectangle {
                 readonly property bool on: root.current === row.modelData.rel
                 width: ListView.view.width
                 height: InkSkin.rowHeight
-                radius: InkSkin.smallRadius
+                radius: InkSkin.radius
                 color: row.on ? InkSkin.rowOn : area.containsMouse ? InkSkin.hover : "transparent"
                 RowLayout {
                     anchors.fill: parent

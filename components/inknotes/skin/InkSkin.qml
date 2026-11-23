@@ -15,14 +15,14 @@ Singleton {
     readonly property bool iris: Plugins.active === "iris"
     readonly property bool waffle: Plugins.active === "waffle"
 
-    readonly property color page: iris ? IrisStyle.surfaceOpaque : waffle ? Looks.colors.bg0Opaque : Appearance.colors.colLayer0Base
-    readonly property color side: iris ? IrisStyle.surfaceHighOpaque : waffle ? Looks.colors.bg1Base : Appearance.colors.colSurfaceContainer
-    readonly property color sheet: iris ? IrisStyle.surfaceHighestOpaque : waffle ? Looks.colors.bg2Base : Appearance.colors.colSurfaceContainerHigh
-    readonly property color plate: iris ? IrisStyle.fill : waffle ? Looks.settings.tile : Appearance.colors.colSurfaceContainerHighest
-    readonly property color hover: iris ? IrisStyle.fillHover : waffle ? Looks.settings.tileHover : Appearance.colors.colLayer1Hover
+    readonly property color page: iris ? IrisStyle.surfaceOpaque : waffle ? Looks.colors.bg0Opaque : Appearance.colors.colLayer2Base
+    readonly property color side: iris ? IrisStyle.surfaceHighOpaque : waffle ? Looks.colors.bg1Base : Appearance.colors.colLayer1Base
+    readonly property color sheet: iris ? IrisStyle.surfaceHighestOpaque : waffle ? Looks.colors.bg2Base : Appearance.colors.colLayer1Base
+    readonly property color plate: iris ? IrisStyle.fill : waffle ? Looks.settings.tile : Appearance.colors.colLayer3Base
+    readonly property color hover: iris ? IrisStyle.fillHover : waffle ? Looks.settings.tileHover : Appearance.colors.colLayer3Hover
     readonly property color edge: iris ? IrisStyle.hairline : waffle ? Looks.settings.stroke : Appearance.colors.colLayer0Border
     readonly property color text: iris ? IrisStyle.text : waffle ? Looks.colors.fg : Appearance.colors.colOnSurface
-    readonly property color muted: iris ? IrisStyle.textSecondary : waffle ? Looks.colors.subfg : Appearance.colors.colOnSurfaceVariant
+    readonly property color muted: iris ? IrisStyle.subtext : waffle ? Looks.colors.subfg : Appearance.colors.colSubtext
     readonly property color accent: iris ? IrisStyle.accentFill : waffle ? Looks.colors.accent : Appearance.colors.colPrimary
     readonly property color onAccent: iris ? IrisStyle.inkOnAccent : waffle ? Looks.colors.accentFg : Appearance.colors.colOnPrimary
     readonly property color rowOn: iris ? IrisStyle.fillActive : waffle ? Looks.settings.tilePressed : Appearance.colors.colSecondaryContainer
@@ -32,6 +32,7 @@ Singleton {
 
     readonly property real d: iris ? IrisStyle.density : 1
     readonly property int radius: Math.round(iris ? IrisStyle.radiusTile : waffle ? Looks.radius.large : Appearance.rounding.small)
+    readonly property int cardRadius: Math.round(iris ? IrisStyle.radiusCard : waffle ? Looks.radius.xLarge : Appearance.rounding.normal)
     readonly property int smallRadius: Math.round(iris ? IrisStyle.radiusRow : waffle ? Looks.radius.medium : Appearance.rounding.verysmall)
     readonly property real small: iris ? IrisStyle.spaceSmall : waffle ? Looks.settings.cardSpacing : Appearance.sizes.spacingSmall
     readonly property real gap: iris ? IrisStyle.cardPad / 2 : waffle ? Looks.settings.cardPadding / 2 : Appearance.sizes.spacingMedium
@@ -43,6 +44,7 @@ Singleton {
     readonly property int body: iris ? IrisStyle.typeBody : waffle ? Looks.font.pixelSize.large : Appearance.font.pixelSize.small
     readonly property int meta: iris ? IrisStyle.typeMeta : waffle ? Looks.font.pixelSize.normal : Appearance.font.pixelSize.smaller
     readonly property int title: iris ? IrisStyle.typeTitle : waffle ? Looks.font.pixelSize.xlarger : Appearance.font.pixelSize.larger
+    readonly property int labelSize: Math.max(9, meta - 1)
     readonly property int iconSize: Math.round(body * 1.25)
     readonly property int control: Math.round(body * 2.3)
     readonly property int rowHeight: Math.round(body * 3.2)

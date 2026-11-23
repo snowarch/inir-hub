@@ -18,6 +18,7 @@ Rectangle {
     signal trashRequested()
     signal settingsRequested()
     color: InkSkin.side
+    radius: InkSkin.cardRadius
 
     ColumnLayout {
         anchors.fill: parent
@@ -26,7 +27,7 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
-            InkText { Layout.fillWidth: true; Layout.leftMargin: InkSkin.small; text: Translation.tr("Folders"); role: "title" }
+            InkText { Layout.fillWidth: true; Layout.leftMargin: InkSkin.small; text: Translation.tr("Folders"); role: "label" }
             InkButton { symbol: "create_new_folder"; quiet: true; hint: Translation.tr("New folder"); onClicked: root.newFolder() }
         }
         PaneRow {
@@ -67,6 +68,7 @@ Rectangle {
                 role: "meta"; color: InkSkin.muted; wrapMode: Text.Wrap; horizontalAlignment: Text.AlignHCenter
             }
         }
+        Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: InkSkin.edge }
         PaneRow { Layout.fillWidth: true; label: Translation.tr("Trash"); symbol: "delete"; selected: root.trashOpen; onClicked: root.trashRequested() }
         PaneRow { Layout.fillWidth: true; label: Translation.tr("Settings"); symbol: "settings"; onClicked: root.settingsRequested() }
     }
