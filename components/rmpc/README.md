@@ -124,7 +124,9 @@ It needs `yt-dlp` and `ffmpeg` on your PATH (and `python3`), and a folder to kee
 cache_dir: Some("/home/you/.cache/rmpc"),
 ```
 
-Run `rmpc debuginfo` and read the "Youtube playback" section: it lists what is installed and what is missing (for example `python-mutagen`). Only download what you have the right to.
+Run `rmpc debuginfo` and read the "Youtube playback" section: it lists what is installed and what is missing (for example `python-mutagen`).
+
+What to expect, from trying it: it takes regular YouTube links only (YouTube Music links are not accepted), and it brings no lyrics. If you want a music library to live with, pick a provider you are comfortable with: it will give you better files and tags than this. Only download what you have the right to.
 
 ### 7. A keybind to pause (optional)
 
