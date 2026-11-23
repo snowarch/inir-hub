@@ -106,8 +106,6 @@ Item {
     OnDemandPanelLoader { identifier: "wTaskView"; open: WaffleState.taskViewOpen; source: "./taskview/WaffleTaskView.qml" }
 
     // Shared modules that work with waffle
-    // Shown once at login when enabled (off by default): loaded only while open, then gone with its wallpaper.
-    DeferredPanelLoader { identifier: "iiBootGreeting"; extraCondition: GlobalStates.bootGreetingOpen; source: "./screens/WaffleGreeting.qml" }
     // The rest screen (Idle shows it): built when it shows, let go once it has faded.
     OnDemandPanelLoader { identifier: "wRest"; requireEnabledPanel: false; open: GlobalStates.restOpen; source: "./screens/WaffleRest.qml" }
     OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }

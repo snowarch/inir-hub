@@ -11,6 +11,7 @@
   "parts": {
     "critical": "critical/ShellIrisCriticalPanels.qml",
     "panels": "ShellIrisPanelsImpl.qml",
+    "greeting": "screens/IrisWelcome.qml",
     "closeConfirm": "closeConfirm/IrisCloseConfirmContent.qml",
     "editStage": "edit/IrisEditStage.qml",
     "lockSurface": "lock/IrisLockSurface.qml",

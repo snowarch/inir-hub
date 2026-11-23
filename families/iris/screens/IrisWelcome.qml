@@ -39,6 +39,22 @@ Scope {
         opening.start()
     }
 
+    // The desktop opens once it stands under the welcome: on its timing alone it opened onto a wallpaper with no bar.
+    property bool held: false
+    function openUpWhenReady(): void {
+        root.held = !GlobalStates.desktopReady
+        if (!root.held)
+            root.openUp()
+    }
+    Connections {
+        target: GlobalStates
+        enabled: root.held
+        function onDesktopReadyChanged(): void {
+            if (GlobalStates.desktopReady)
+                root.openUp()
+        }
+    }
+
     SequentialAnimation {
         id: timeline
         running: true
@@ -51,7 +67,7 @@ Scope {
             }
         }
         PauseAnimation { duration: 900 }
-        ScriptAction { script: root.openUp() }
+        ScriptAction { script: root.openUpWhenReady() }
     }
 
     SequentialAnimation {

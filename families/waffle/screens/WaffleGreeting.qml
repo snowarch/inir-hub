@@ -32,7 +32,22 @@ Scope {
         id: hold
         interval: root.holdMs
         running: true
-        onTriggered: root.finish()
+        onTriggered: root.finishWhenReady()
+    }
+    // The desktop opens once it stands under the welcome: on its timing alone it opened onto a wallpaper with no bar.
+    property bool held: false
+    function finishWhenReady(): void {
+        root.held = !GlobalStates.desktopReady
+        if (!root.held)
+            root.finish()
+    }
+    Connections {
+        target: GlobalStates
+        enabled: root.held
+        function onDesktopReadyChanged(): void {
+            if (GlobalStates.desktopReady)
+                root.finish()
+        }
     }
 
     SequentialAnimation {

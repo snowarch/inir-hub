@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 
-import qs.modules.shared.bootGreeting
 import qs.modules.shared.lock
 import qs.modules.shared.mascot
 import qs.modules.shared.mediaControls
@@ -151,7 +150,6 @@ Item {
     }
 
     // Shown once at login when enabled (off by default): loaded only while open, then gone with its wallpaper.
-    DeferredPanelLoader { identifier: "iiBootGreeting"; extraCondition: GlobalStates.bootGreetingOpen; component: BootGreeting {} }
     // The rest screen (Idle shows it): built when it shows, let go once it has faded.
     OnDemandPanelLoader { identifier: "iiRest"; requireEnabledPanel: false; open: GlobalStates.restOpen; source: "./screens/MaterialRest.qml" }
     OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }

@@ -10,6 +10,7 @@
   "parts": {
     "critical": "critical/ShellWaffleCriticalPanels.qml",
     "panels": "ShellWafflePanelsImpl.qml",
+    "greeting": "screens/WaffleGreeting.qml",
     "closeConfirm": "closeConfirm/WCloseConfirmContent.qml",
     "lockSurface": "lock/WaffleLockSurfaceSafe.qml",
     "lockSurface.hyprland": "lock/WaffleLockSurface.qml",

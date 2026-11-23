@@ -160,14 +160,8 @@ Item {
         source: "./notificationPopup/IrisNotificationPopup.qml"
     }
 
-    // The welcome at startup and the rest screen: the base says when (shell start, Idle), iRiS draws them.
-    OnDemandPanelLoader {
-        identifier: "irisWelcome"
-        requireEnabledPanel: false
-        open: GlobalStates.bootGreetingOpen
-        closeGraceMs: 0
-        source: "./screens/IrisWelcome.qml"
-    }
+    // The rest screen: the base says when (Idle), iRiS draws it. The welcome at startup is the plugin.json part
+    // `greeting`: the base builds it first, before these.
     OnDemandPanelLoader {
         identifier: "irisRest"
         requireEnabledPanel: false
