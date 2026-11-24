@@ -1,0 +1,14 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "What it adds, in one line",
+    "authors": [
+        "lukatedev"
+    ],
+    "license": "MIT",
+    "tags": [],
+    "permissions": [],
+    "minInir": "2.33.0",
+    "provides": "modules/presets",
+    "preview": "preview.webp"
+}
