@@ -2,9 +2,9 @@
     "id": "presets",
     "kind": "component",
     "name": "Presets",
-    "summary": "What it adds, in one line",
-    "icon": "extension",
+    "summary": "Save desktop looks as presets and apply them again",
     "version": "1.0.0",
+    "icon": "palette",
     "parts": {
         "panel": "Panel.qml"
     },
