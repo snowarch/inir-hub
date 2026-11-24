@@ -19,6 +19,7 @@ Rectangle {
     signal undoRequested()
     signal updateRequested()
     signal groupsRequested()
+    signal quickEditRequested()
     signal renameRequested()
     signal moveTo(string folder)
     signal deleteRequested()
@@ -105,6 +106,7 @@ Rectangle {
                 Layout.fillWidth: true
                 spacing: InkSkin.small
                 InkButton { label: Translation.tr("Update from current look"); symbol: "sync"; enabled: root.idle; onClicked: root.updateRequested() }
+                InkButton { label: Translation.tr("Quick edit"); symbol: "edit_note"; enabled: root.idle; onClicked: root.quickEditRequested() }
                 InkButton { label: Translation.tr("Edit saved groups"); symbol: "tune"; enabled: root.idle; onClicked: root.groupsRequested() }
                 InkButton { label: Translation.tr("Rename"); symbol: "edit"; enabled: root.idle; onClicked: root.renameRequested() }
                 InkButton { id: moveButton; label: Translation.tr("Move"); symbol: "folder"; enabled: root.idle; onClicked: root.openMove(moveButton) }

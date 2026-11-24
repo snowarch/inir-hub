@@ -22,7 +22,7 @@ Item {
     property string target: ""
     property string followName: ""
     readonly property var preset: store.presetAt(root.current)
-    readonly property bool sheetOpen: ask.open || save.open || preview.open
+    readonly property bool sheetOpen: ask.open || save.open || preview.open || quick.open
     readonly property bool typing: ask.typing || save.typing
     readonly property string heading: store.selectedFolder === "" ? Translation.tr("All presets") : store.selectedFolder
     focus: true
@@ -76,7 +76,7 @@ Item {
         if (root.narrow) root.page = "list";
     }
     function leave(): void {
-        if (root.sheetOpen) { ask.open = false; save.open = false; preview.open = false; }
+        if (root.sheetOpen) { ask.open = false; save.open = false; preview.open = false; quick.open = false; }
         else if (root.typing) root.forceActiveFocus();
         else root.closeRequested();
     }
@@ -141,6 +141,17 @@ Item {
         save.reading = false;
         save.open = true;
     }
+    function openQuick(): void {
+        if (!root.preset) return;
+        const loaded = store.readPreset(root.preset.file);
+        if (loaded === null) { store.ok = false; store.message = Translation.tr("Could not read the preset."); return; }
+        quick.preset = loaded;
+        quick.open = true;
+    }
+    function quickSaved(edited: var): void {
+        quick.open = false;
+        if (root.preset) store.saveEdited(root.preset.file, edited);
+    }
     function groupsRead(ids: var): void {
         if (!save.open || !save.reading) return;
         save.available = ids;
@@ -194,6 +205,7 @@ Item {
             onUndoRequested: store.undo()
             onUpdateRequested: root.openUpdate()
             onGroupsRequested: root.openEdit()
+            onQuickEditRequested: root.openQuick()
             onRenameRequested: root.question("renamePreset", "")
             onMoveTo: folder => { root.followName = root.preset.name; store.movePreset(root.preset.file, folder); }
             onDeleteRequested: root.question("deletePreset", "")
@@ -226,6 +238,7 @@ Item {
 
     AskSheet { id: ask; anchors.fill: parent; onAccepted: value => root.answered(value); onClosed: ask.open = false }
     SaveSheet { id: save; anchors.fill: parent; onSubmitted: (name, folder, groups) => root.submitted(name, folder, groups); onClosed: save.open = false }
+    QuickEditSheet { id: quick; anchors.fill: parent; onSubmitted: edited => root.quickSaved(edited); onClosed: quick.open = false }
     PreviewSheet { id: preview; anchors.fill: parent; store: store; onClosed: preview.open = false }
 
     Shortcut { sequence: "Escape"; onActivated: root.leave() }

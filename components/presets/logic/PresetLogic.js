@@ -158,6 +158,95 @@ function overlay(currentLook, preset) {
     return result;
 }
 
+function cloneValue(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
+function groupIndexOf(text) {
+    for (let i = 0; i < GROUPS.length; i += 1) {
+        if (GROUPS[i].paths.some(p => text === p || text.indexOf(p + ".") === 0))
+            return i;
+    }
+    return -1;
+}
+
+// Every setting of the preset's config as one row: path (keys under config), dotted text, group id, kind, value.
+// shown is the text of a value that cannot be edited here (arrays, null).
+function flatten(preset) {
+    const rows = [];
+    const walk = (node, path) => {
+        if (isObject(node)) {
+            Object.keys(node).forEach(key => walk(node[key], path.concat([key])));
+            return;
+        }
+        if (node === undefined)
+            return;
+        const text = path.join(".");
+        const index = groupIndexOf(text);
+        const kind = typeof node === "boolean" ? "bool" : typeof node === "number" ? "number" : typeof node === "string" ? "string" : "json";
+        rows.push({
+            path: path, text: text, group: index < 0 ? "" : GROUPS[index].id, kind: kind, value: node,
+            shown: kind === "json" ? JSON.stringify(node) : "", order: index < 0 ? GROUPS.length : index
+        });
+    };
+    walk(ownValue(preset, "config"), []);
+    rows.sort((a, b) => a.order !== b.order ? a.order - b.order : a.text < b.text ? -1 : a.text > b.text ? 1 : 0);
+    return rows.map(row => ({ path: row.path, text: row.text, group: row.group, kind: row.kind, value: row.value, shown: row.shown }));
+}
+
+// A copy of the preset with one config setting set (parents are made when missing).
+function setValue(preset, path, value) {
+    const result = cloneValue(preset);
+    if (path.length === 0)
+        return result;
+    if (!isObject(result.config))
+        result.config = {};
+    let parent = result.config;
+    for (const key of path.slice(0, -1)) {
+        if (!isObject(ownValue(parent, key)))
+            parent[key] = {};
+        parent = parent[key];
+    }
+    parent[path[path.length - 1]] = value === undefined ? value : cloneValue(value);
+    return result;
+}
+
+// A copy of the preset without one config setting; parents left empty are removed too.
+function removeValue(preset, path) {
+    const result = cloneValue(preset);
+    if (path.length === 0 || !isObject(ownValue(result, "config")))
+        return result;
+    const chain = [result.config];
+    for (const key of path.slice(0, -1)) {
+        const next = ownValue(chain[chain.length - 1], key);
+        if (!isObject(next))
+            return result;
+        chain.push(next);
+    }
+    delete chain[chain.length - 1][path[path.length - 1]];
+    for (let i = chain.length - 1; i > 0 && Object.keys(chain[i]).length === 0; i -= 1)
+        delete chain[i - 1][path[i - 1]];
+    return result;
+}
+
+function parseValue(kind, text) {
+    if (kind === "string")
+        return { ok: true, value: text };
+    if (kind === "number") {
+        const value = Number(text);
+        return text.trim() !== "" && isFinite(value) ? { ok: true, value: value } : { ok: false, value: undefined };
+    }
+    if (kind === "bool") {
+        const value = text.trim();
+        return value === "true" || value === "false" ? { ok: true, value: value === "true" } : { ok: false, value: undefined };
+    }
+    try {
+        return { ok: true, value: JSON.parse(text) };
+    } catch (error) {
+        return { ok: false, value: undefined };
+    }
+}
+
 function slug(name) {
     return name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
         .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "preset";
@@ -188,4 +277,4 @@ function parsePreset(text) {
 }
 
 if (typeof module !== "undefined" && module.exports)
-    module.exports = { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, overlay, slug, uniqueName, parsePreset };
+    module.exports = { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, overlay, flatten, setValue, removeValue, parseValue, slug, uniqueName, parsePreset };

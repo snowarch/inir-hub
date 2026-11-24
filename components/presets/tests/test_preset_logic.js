@@ -8,7 +8,7 @@ const source = fs.readFileSync(logicPath, "utf8");
 const logicModule = { exports: {} };
 // Strip the QML directive and run the same library code in Node.
 vm.compileFunction(source.replace(/^\.pragma library\r?\n/, ""), ["module"], { filename: logicPath })(logicModule);
-const { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, overlay, slug, uniqueName, parsePreset } = logicModule.exports;
+const { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, overlay, flatten, setValue, removeValue, parseValue, slug, uniqueName, parsePreset } = logicModule.exports;
 
 function makeLook(config, extra = {}) {
     return { inirLook: 1, made: "2099-01-01T00:00:00Z", config, ...extra };
@@ -167,6 +167,54 @@ const tests = {
         assert.deepEqual(withWallpaper.wallpaper, { path: "/preset.png" });
         assert.deepEqual(withWallpaper.config.background, { x: 1 });
         assert.equal(overlay(current, makeLook({})).family, "material");
+    },
+
+    "flattens settings by group order and edits copies"() {
+        const preset = makeLook({
+            zeta: { flag: true },
+            material: { dock: { height: 40, label: "x" }, bar: { modulesLayout: ["a"], extra: null } },
+            appearance: { typography: { mainFont: "Test Sans" } },
+            empty: {}
+        }, { presetGroups: ["bar"], presetName: "Test" });
+        const rows = flatten(preset);
+
+        assert.deepEqual(rows.map(r => [r.text, r.group, r.kind]), [
+            ["material.bar.extra", "bar", "json"], ["material.bar.modulesLayout", "bar", "json"],
+            ["appearance.typography.mainFont", "typography", "string"],
+            ["material.dock.height", "dock", "number"], ["material.dock.label", "dock", "string"],
+            ["zeta.flag", "", "bool"]
+        ]);
+        assert.deepEqual(rows[0].path, ["material", "bar", "extra"]);
+        assert.equal(rows[1].shown, '["a"]');
+        assert.equal(rows[3].value, 40);
+        assert.deepEqual(flatten(makeLook({})), []);
+
+        const before = JSON.stringify(preset);
+        const set = setValue(preset, ["material", "dock", "height"], 50);
+        assert.equal(JSON.stringify(preset), before);
+        assert.equal(set.config.material.dock.height, 50);
+        assert.equal(set.presetName, "Test");
+        assert.deepEqual(setValue(preset, ["new", "deep"], 1).config.new, { deep: 1 });
+
+        const removed = removeValue(removeValue(preset, ["zeta", "flag"]), ["appearance", "typography", "mainFont"]);
+        assert.equal(JSON.stringify(preset), before);
+        assert.equal("zeta" in removed.config, false);
+        assert.equal("appearance" in removed.config, false);
+        assert.equal(removed.config.material.dock.height, 40);
+        assert.deepEqual(removeValue(preset, ["material", "missing", "x"]), preset);
+        assert.deepEqual(removeValue(makeLook({ a: { b: { c: 1 } } }), ["a", "b", "c"]).config, {});
+    },
+
+    "parses typed values from text"() {
+        assert.deepEqual(parseValue("number", " 4.5 "), { ok: true, value: 4.5 });
+        assert.equal(parseValue("number", "").ok, false);
+        assert.equal(parseValue("number", "12px").ok, false);
+        assert.equal(parseValue("number", "Infinity").ok, false);
+        assert.deepEqual(parseValue("string", ""), { ok: true, value: "" });
+        assert.deepEqual(parseValue("bool", "false"), { ok: true, value: false });
+        assert.equal(parseValue("bool", "yes").ok, false);
+        assert.deepEqual(parseValue("json", "[1]"), { ok: true, value: [1] });
+        assert.equal(parseValue("json", "[1").ok, false);
     },
 
     "makes filename slugs and resolves name collisions"() {

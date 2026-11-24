@@ -7,4 +7,6 @@ DetailPane 1.0 DetailPane.qml
 AskSheet 1.0 AskSheet.qml
 SaveSheet 1.0 SaveSheet.qml
 PreviewSheet 1.0 PreviewSheet.qml
+QuickEditRow 1.0 QuickEditRow.qml
+QuickEditSheet 1.0 QuickEditSheet.qml
 PresetsBody 1.0 PresetsBody.qml

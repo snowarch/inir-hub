@@ -254,6 +254,21 @@ Item {
         });
     }
 
+    function readPreset(file: string): var {
+        const text = root.readText(file);
+        return text === null ? null : Logic.parsePreset(text);
+    }
+    // preset: the whole file content with the edited settings; it keeps presetName, presetGroups, family and the rest.
+    function saveEdited(file: string, preset: var): void {
+        if (!root.begin()) return;
+        const info = root.presetAt(file);
+        if (info === null || Logic.parsePreset(JSON.stringify(preset)) === null || !root.writeText(file, JSON.stringify(preset, null, 2))) {
+            root.finish(false, Translation.tr("Could not save the preset."));
+            return;
+        }
+        root.settled(Translation.tr("Saved changes to %1.").arg(info.name));
+    }
+
     function renamePreset(file: string, newName: string): void {
         if (!root.begin()) return;
         const info = root.presetAt(file);

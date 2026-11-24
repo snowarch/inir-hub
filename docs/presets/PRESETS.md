@@ -31,6 +31,7 @@ After an apply, **Undo last apply** (also in the message at the bottom) brings b
 ## Change a preset
 
 - **Update from current look**: pick the groups to read again from the current look; the others stay as saved.
+- **Quick edit**: lists every setting saved in the preset. Search by path, change a value (switches for on/off, text fields for numbers and text; a number that is not valid blocks **Save**), **Remove** a setting so applying the preset leaves it as you have it, or **Revert** a changed row. Lists and other structured values are shown but not edited. **Save** rewrites the preset file; name, groups, family and wallpaper stay.
 - **Edit saved groups**: untick a group to remove it from the preset.
 - **Rename**, **Move** to another folder, **Delete**.
 
