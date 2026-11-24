@@ -1,0 +1,151 @@
+.pragma library
+
+var GROUPS = [
+    { id: "family", label: "Shell family", paths: [], special: "family" },
+    { id: "bar", label: "Bar", paths: ["material.bar", "iris.bar", "waffles.bar"] },
+    { id: "theme", label: "Theme", paths: [
+        "appearance.theme", "appearance.palette", "appearance.customTheme",
+        "appearance.wallpaperTheming", "iris.appearance"
+    ] },
+    { id: "typography", label: "Typography", paths: ["appearance.typography"] },
+    { id: "icons", label: "Icons", paths: ["iris.pieces.icons"] },
+    { id: "wallpaper", label: "Wallpaper", paths: ["background"], special: "wallpaper" },
+    { id: "dock", label: "Dock", paths: ["material.dock", "iris.dock"] },
+    { id: "surfaces", label: "Surfaces", paths: [
+        "iris.widgets", "iris.surround", "material.settingsUi", "waffles.theming", "waffles.background"
+    ] },
+    { id: "panels", label: "Panels", paths: [
+        "material.sidebar", "material.notifications", "iris.sidebars", "iris.bubbles",
+        "iris.controlCenter", "iris.notifications", "iris.lock", "waffles.taskView",
+        "waffles.notifications", "lock"
+    ] }
+];
+
+function isObject(value) {
+    return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function ownValue(object, key) {
+    if (isObject(object) && Object.prototype.hasOwnProperty.call(object, key))
+        return object[key];
+    return undefined;
+}
+
+function readPath(object, parts) {
+    return parts.reduce(ownValue, object);
+}
+
+function copyGroup(target, source, group) {
+    if (group.special) {
+        const value = ownValue(source, group.special);
+        if (value !== undefined)
+            target[group.special] = JSON.parse(JSON.stringify(value));
+    }
+
+    for (const path of group.paths) {
+        const parts = path.split(".");
+        const value = readPath(ownValue(source, "config"), parts);
+        if (value === undefined)
+            continue;
+
+        let parent = target.config;
+        const key = parts.pop();
+        for (const part of parts) {
+            if (!Object.prototype.hasOwnProperty.call(parent, part))
+                parent[part] = {};
+            parent = parent[part];
+        }
+        parent[key] = JSON.parse(JSON.stringify(value));
+    }
+}
+
+function filterLook(look, groupIds) {
+    const result = { inirLook: look.inirLook, made: look.made, config: {}, presetGroups: groupIds.slice() };
+    for (const group of GROUPS) {
+        if (groupIds.includes(group.id))
+            copyGroup(result, look, group);
+    }
+    return result;
+}
+
+function countSettings(value) {
+    if (isObject(value))
+        return Object.keys(value).reduce((count, key) => count + countSettings(value[key]), 0);
+    // Arrays are whole setting values in a look file.
+    return value === undefined ? 0 : 1;
+}
+
+function hasWallpaper(look) {
+    const path = ownValue(ownValue(look, "wallpaper"), "path");
+    return typeof path === "string" && path.length > 0;
+}
+
+function familyOf(look) {
+    const family = ownValue(look, "family");
+    return typeof family === "string" && family.length > 0 ? family : null;
+}
+
+function groupsPresent(look) {
+    const config = ownValue(look, "config");
+    return GROUPS.filter(group => {
+        if (group.special === "family" && familyOf(look) !== null)
+            return true;
+        if (group.special === "wallpaper" && hasWallpaper(look))
+            return true;
+        return group.paths.some(path => countSettings(readPath(config, path.split("."))) > 0);
+    }).map(group => group.id);
+}
+
+function summarize(look) {
+    return {
+        family: familyOf(look),
+        groups: groupsPresent(look),
+        settings: countSettings(ownValue(look, "config")),
+        hasWallpaper: hasWallpaper(look)
+    };
+}
+
+function mergeUpdate(oldPreset, currentLook, groupIds) {
+    const oldGroups = groupsPresent(oldPreset);
+    const savedGroups = ownValue(oldPreset, "presetGroups");
+    const result = { inirLook: currentLook.inirLook, made: currentLook.made, config: {}, presetGroups: [] };
+    for (const group of GROUPS) {
+        const recapture = groupIds.includes(group.id);
+        copyGroup(result, recapture ? currentLook : oldPreset, group);
+        if (recapture || oldGroups.includes(group.id) || (Array.isArray(savedGroups) && savedGroups.includes(group.id)))
+            result.presetGroups.push(group.id);
+    }
+    return result;
+}
+
+function slug(name) {
+    return name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "preset";
+}
+
+function uniqueName(name, existingNames) {
+    const base = name.trim() || "Preset";
+    const used = new Set(existingNames.map(slug));
+    let candidate = base;
+    for (let suffix = 2; used.has(slug(candidate)); suffix += 1)
+        candidate = `${base} (${suffix})`;
+    return candidate;
+}
+
+function parsePreset(text) {
+    if (typeof text !== "string")
+        return null;
+
+    try {
+        const look = JSON.parse(text);
+        const version = ownValue(look, "inirLook");
+        if (Number.isInteger(version) && version > 0 && isObject(ownValue(look, "config")))
+            return look;
+    } catch (error) {
+        return null;
+    }
+    return null;
+}
+
+if (typeof module !== "undefined" && module.exports)
+    module.exports = { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, slug, uniqueName, parsePreset };
