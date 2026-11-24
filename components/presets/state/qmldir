@@ -1,0 +1,2 @@
+singleton PresetOptions 1.0 PresetOptions.qml
+PresetStore 1.0 PresetStore.qml
