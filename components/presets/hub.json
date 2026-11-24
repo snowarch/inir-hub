@@ -1,0 +1,29 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Save desktop looks as presets and apply them again",
+    "description": "Save the look of your desktop (shell family, bar, theme, typography, icons, wallpaper, dock, surfaces, panels) as named presets in folders, and apply one with a click. Preview what an apply would change, update a preset from the current look, and undo the last apply. Presets are plain files in a folder you can back up or share. Native Material, iRiS and Waffle styling.",
+    "authors": [
+        "lukatedev"
+    ],
+    "license": "MIT",
+    "tags": [
+        "presets",
+        "look",
+        "theme",
+        "wallpaper"
+    ],
+    "permissions": [
+        "files",
+        "process"
+    ],
+    "hosts": [],
+    "minInir": "2.33.0",
+    "provides": "modules/presets",
+    "preview": "preview.webp",
+    "changes": {
+        "1.0.0": [
+            "Initial release: save looks by group, apply with or without wallpaper, preview, update, undo."
+        ]
+    }
+}

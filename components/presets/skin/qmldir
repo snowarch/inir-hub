@@ -1,0 +1,9 @@
+singleton PrSkin 1.0 PrSkin.qml
+PrText 1.0 PrText.qml
+PrGlyph 1.0 PrGlyph.qml
+PrScrollBar 1.0 PrScrollBar.qml
+PrButton 1.0 PrButton.qml
+PrField 1.0 PrField.qml
+PrMenu 1.0 PrMenu.qml
+PrSelect 1.0 PrSelect.qml
+PrSheet 1.0 PrSheet.qml

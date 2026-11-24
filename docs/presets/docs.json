@@ -1,0 +1,13 @@
+{
+    "id": "presets",
+    "edit": "https://github.com/snowarch/inir-hub/edit/main/docs/presets/",
+    "order": 25,
+    "groups": [
+        {
+            "label": "Components",
+            "pages": [
+                "PRESETS"
+            ]
+        }
+    ]
+}
