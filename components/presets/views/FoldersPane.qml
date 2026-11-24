@@ -13,20 +13,20 @@ Rectangle {
     signal newFolder()
     signal renameFolder(string name)
     signal deleteFolder(string name)
-    color: InkSkin.side
-    radius: InkSkin.cardRadius
+    color: PrSkin.side
+    radius: PrSkin.cardRadius
 
     function countOf(folder: string): int { return root.store.presets.filter(p => p.folder === folder).length }
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: InkSkin.gap
-        spacing: InkSkin.small
+        anchors.margins: PrSkin.gap
+        spacing: PrSkin.small
 
         RowLayout {
             Layout.fillWidth: true
-            InkText { Layout.fillWidth: true; Layout.leftMargin: InkSkin.small; text: Translation.tr("Folders"); role: "label" }
-            InkButton { symbol: "create_new_folder"; quiet: true; hint: Translation.tr("New folder"); enabled: !root.store.busy; onClicked: root.newFolder() }
+            PrText { Layout.fillWidth: true; Layout.leftMargin: PrSkin.small; text: Translation.tr("Folders"); role: "label" }
+            PrButton { symbol: "create_new_folder"; quiet: true; hint: Translation.tr("New folder"); enabled: !root.store.busy; onClicked: root.newFolder() }
         }
         PaneRow {
             Layout.fillWidth: true
@@ -52,16 +52,16 @@ Rectangle {
                     { text: Translation.tr("Move to trash"), iconName: "delete", action: () => root.deleteFolder(row.modelData) }
                 ]; menu.open(row, at); }
             }
-            ScrollBar.vertical: InkScrollBar {}
-            InkText {
+            ScrollBar.vertical: PrScrollBar {}
+            PrText {
                 visible: root.store.folders.length === 0
                 width: parent.width
                 text: Translation.tr("No folders yet.")
-                role: "meta"; color: InkSkin.muted; wrapMode: Text.Wrap; horizontalAlignment: Text.AlignHCenter
+                role: "meta"; color: PrSkin.muted; wrapMode: Text.Wrap; horizontalAlignment: Text.AlignHCenter
             }
         }
-        Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: InkSkin.edge }
+        Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: PrSkin.edge }
         PaneRow { Layout.fillWidth: true; label: Translation.tr("Open presets folder"); symbol: "open_in_new"; onClicked: Quickshell.execDetached(["xdg-open", root.store.rootDir]) }
     }
-    InkMenu { id: menu }
+    PrMenu { id: menu }
 }

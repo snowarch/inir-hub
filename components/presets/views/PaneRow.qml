@@ -11,18 +11,18 @@ Rectangle {
     property bool selected: false
     signal clicked()
     signal menu(point at)
-    implicitHeight: Math.round(InkSkin.rowHeight * 0.8)
-    radius: InkSkin.radius
-    color: root.selected ? InkSkin.rowOn : area.containsMouse ? InkSkin.hover : "transparent"
+    implicitHeight: Math.round(PrSkin.rowHeight * 0.8)
+    radius: PrSkin.radius
+    color: root.selected ? PrSkin.rowOn : area.containsMouse ? PrSkin.hover : "transparent"
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: InkSkin.gap
-        anchors.rightMargin: InkSkin.gap
-        spacing: InkSkin.gap
-        InkGlyph { name: root.symbol; color: root.selected ? InkSkin.rowOnInk : InkSkin.muted }
-        InkText { Layout.fillWidth: true; text: root.label; color: root.selected ? InkSkin.rowOnInk : InkSkin.text }
-        InkText { visible: root.badge !== ""; text: root.badge; role: "meta"; color: InkSkin.muted }
+        anchors.leftMargin: PrSkin.gap
+        anchors.rightMargin: PrSkin.gap
+        spacing: PrSkin.gap
+        PrGlyph { name: root.symbol; color: root.selected ? PrSkin.rowOnInk : PrSkin.muted }
+        PrText { Layout.fillWidth: true; text: root.label; color: root.selected ? PrSkin.rowOnInk : PrSkin.text }
+        PrText { visible: root.badge !== ""; text: root.badge; role: "meta"; color: PrSkin.muted }
     }
     MouseArea {
         id: area

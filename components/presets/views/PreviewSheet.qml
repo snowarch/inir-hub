@@ -5,32 +5,32 @@ import qs.services
 import "../skin"
 
 // What Apply would change, as the dry run reports it.
-InkSheet {
+PrSheet {
     id: root
     required property var store
-    cardWidth: InkSkin.body * 40
+    cardWidth: PrSkin.body * 40
     title: Translation.tr("Changes if applied")
 
     Flickable {
         Layout.fillWidth: true
-        Layout.preferredHeight: Math.min(InkSkin.body * 22, Math.max(InkSkin.body * 4, text.implicitHeight))
+        Layout.preferredHeight: Math.min(PrSkin.body * 22, Math.max(PrSkin.body * 4, text.implicitHeight))
         clip: true
         contentWidth: width
         contentHeight: text.implicitHeight
-        ScrollBar.vertical: InkScrollBar {}
-        InkText {
+        ScrollBar.vertical: PrScrollBar {}
+        PrText {
             id: text
             width: parent.width
             role: "mono"
             wrapMode: Text.WrapAnywhere
             elide: Text.ElideNone
-            color: root.store.busy ? InkSkin.muted : InkSkin.text
+            color: root.store.busy ? PrSkin.muted : PrSkin.text
             text: root.store.busy ? Translation.tr("Reading the changes…") : root.store.ok ? root.store.previewText : root.store.message
         }
     }
     RowLayout {
         Layout.fillWidth: true
         Item { Layout.fillWidth: true }
-        InkButton { label: Translation.tr("Close"); primary: true; onClicked: root.closed() }
+        PrButton { label: Translation.tr("Close"); primary: true; onClicked: root.closed() }
     }
 }

@@ -2,12 +2,12 @@ import QtQuick
 import QtQuick.Controls
 
 ScrollBar {
-    id: root
+    id: bar
     policy: ScrollBar.AsNeeded
     contentItem: Rectangle {
-        implicitWidth: Math.round(InkSkin.small * 0.75)
+        implicitWidth: Math.round(PrSkin.small / 2)
         radius: width / 2
-        color: InkSkin.muted
-        opacity: root.active ? 0.9 : 0.35
+        color: PrSkin.muted
+        opacity: bar.active ? 0.9 : 0.3
     }
 }

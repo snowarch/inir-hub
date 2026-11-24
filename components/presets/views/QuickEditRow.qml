@@ -19,7 +19,7 @@ Item {
     readonly property bool on: root.edit !== undefined && !root.removed ? root.edit.value === true : root.entry.value === true
     readonly property bool typed: root.entry.kind === "number" || root.entry.kind === "string"
     property string lastRaw: ""
-    implicitHeight: column.implicitHeight + InkSkin.small
+    implicitHeight: column.implicitHeight + PrSkin.small
 
     function revert(): void {
         const text = String(root.entry.value);
@@ -36,30 +36,30 @@ Item {
         spacing: 0
         RowLayout {
             Layout.fillWidth: true
-            spacing: InkSkin.small
+            spacing: PrSkin.small
             opacity: root.removed ? 0.45 : 1
             Chip { text: root.groupLabel }
-            InkText {
+            PrText {
                 Layout.fillWidth: true
-                Layout.preferredWidth: InkSkin.body * 10
+                Layout.preferredWidth: PrSkin.body * 10
                 text: root.entry.text
                 role: "mono"
-                color: InkSkin.muted
+                color: PrSkin.muted
                 elide: Text.ElideMiddle
                 font.strikeout: root.removed
             }
-            InkButton {
+            PrButton {
                 visible: root.entry.kind === "bool"
                 enabled: !root.removed
                 label: root.on ? Translation.tr("On") : Translation.tr("Off")
                 toggled: root.on
                 onClicked: root.edited(String(!root.on), !root.on, true)
             }
-            InkField {
+            PrField {
                 id: field
                 visible: root.typed
                 enabled: !root.removed
-                Layout.preferredWidth: InkSkin.body * 14
+                Layout.preferredWidth: PrSkin.body * 14
                 Component.onCompleted: {
                     const raw = root.edit !== undefined && root.edit.raw !== undefined ? root.edit.raw : String(root.entry.value);
                     root.lastRaw = raw;
@@ -72,28 +72,28 @@ Item {
                     root.edited(field.text, parsed.value, parsed.ok);
                 }
             }
-            InkText {
+            PrText {
                 visible: root.entry.kind === "json"
-                Layout.preferredWidth: InkSkin.body * 14
+                Layout.preferredWidth: PrSkin.body * 14
                 text: root.entry.shown
                 role: "mono"
             }
-            InkButton {
+            PrButton {
                 visible: root.changed
                 symbol: "undo"; quiet: true; hint: Translation.tr("Revert")
                 onClicked: root.revert()
             }
-            InkButton {
+            PrButton {
                 visible: !root.removed
                 symbol: "delete"; quiet: true; danger: true; hint: Translation.tr("Remove")
                 onClicked: root.removeRequested()
             }
         }
-        InkText {
+        PrText {
             visible: root.invalid
             Layout.fillWidth: true
             role: "meta"
-            color: InkSkin.danger
+            color: PrSkin.danger
             text: Translation.tr("Enter a number.")
         }
     }

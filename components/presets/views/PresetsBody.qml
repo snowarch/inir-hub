@@ -15,7 +15,7 @@ Item {
     signal requestHandled()
     signal closeRequested()
 
-    readonly property bool narrow: width < InkSkin.body * 52
+    readonly property bool narrow: width < PrSkin.body * 52
     property string page: "list"
     property string current: ""
     property string asking: ""
@@ -166,12 +166,12 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: InkSkin.small
-        spacing: InkSkin.small
+        anchors.margins: PrSkin.small
+        spacing: PrSkin.small
         FoldersPane {
             Layout.fillHeight: true
             Layout.fillWidth: root.narrow
-            Layout.preferredWidth: InkSkin.body * 14
+            Layout.preferredWidth: PrSkin.body * 14
             visible: !root.narrow || root.page === "folders"
             store: store
             onPicked: folder => root.pickFolder(folder)
@@ -182,7 +182,7 @@ Item {
         PresetsPane {
             Layout.fillHeight: true
             Layout.fillWidth: root.narrow
-            Layout.preferredWidth: InkSkin.body * 22
+            Layout.preferredWidth: PrSkin.body * 22
             visible: !root.narrow || root.page === "list"
             store: store
             current: root.current
@@ -218,19 +218,19 @@ Item {
         visible: store.message !== ""
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: InkSkin.pad
-        width: Math.min(root.width - InkSkin.pad * 2, toastRow.implicitWidth + InkSkin.pad * 2)
-        height: toastRow.implicitHeight + InkSkin.gap * 2
-        radius: InkSkin.smallRadius
-        color: InkSkin.sheet
-        border.color: store.ok ? InkSkin.edge : InkSkin.danger
+        anchors.bottomMargin: PrSkin.pad
+        width: Math.min(root.width - PrSkin.pad * 2, toastRow.implicitWidth + PrSkin.pad * 2)
+        height: toastRow.implicitHeight + PrSkin.gap * 2
+        radius: PrSkin.smallRadius
+        color: PrSkin.sheet
+        border.color: store.ok ? PrSkin.edge : PrSkin.danger
         RowLayout {
             id: toastRow
             anchors.centerIn: parent
-            width: parent.width - InkSkin.pad
-            spacing: InkSkin.gap
-            InkText { Layout.fillWidth: true; text: store.message; color: store.ok ? InkSkin.text : InkSkin.danger; wrapMode: Text.Wrap; elide: Text.ElideNone }
-            InkButton { visible: store.ok && store.canUndo; label: Translation.tr("Undo"); symbol: "undo"; enabled: !store.busy; onClicked: store.undo() }
+            width: parent.width - PrSkin.pad
+            spacing: PrSkin.gap
+            PrText { Layout.fillWidth: true; text: store.message; color: store.ok ? PrSkin.text : PrSkin.danger; wrapMode: Text.Wrap; elide: Text.ElideNone }
+            PrButton { visible: store.ok && store.canUndo; label: Translation.tr("Undo"); symbol: "undo"; enabled: !store.busy; onClicked: store.undo() }
         }
         MouseArea { anchors.fill: parent; z: -1; onClicked: store.message = "" }
         Timer { running: store.message !== ""; interval: 8000; onTriggered: store.message = "" }

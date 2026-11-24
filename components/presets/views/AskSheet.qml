@@ -4,7 +4,7 @@ import qs.services
 import "../skin"
 
 // One question over the window: a text to enter, or a plain confirmation.
-InkSheet {
+PrSheet {
     id: root
     property string message: ""
     property bool field: false
@@ -17,12 +17,12 @@ InkSheet {
     onOpenChanged: if (root.open && root.field) { input.text = root.value; focusLater.restart() }
     Timer { id: focusLater; interval: 0; onTriggered: { input.focusField(); input.selectAll() } }
 
-    InkText { visible: root.message !== ""; Layout.fillWidth: true; text: root.message; wrapMode: Text.Wrap; color: InkSkin.muted }
-    InkField { id: input; visible: root.field; Layout.fillWidth: true; onAccepted: root.accepted(input.text) }
+    PrText { visible: root.message !== ""; Layout.fillWidth: true; text: root.message; wrapMode: Text.Wrap; color: PrSkin.muted }
+    PrField { id: input; visible: root.field; Layout.fillWidth: true; onAccepted: root.accepted(input.text) }
     RowLayout {
         Layout.fillWidth: true
         Item { Layout.fillWidth: true }
-        InkButton { label: Translation.tr("Cancel"); onClicked: root.closed() }
-        InkButton { label: root.action; primary: !root.danger; danger: root.danger; onClicked: root.accepted(input.text) }
+        PrButton { label: Translation.tr("Cancel"); onClicked: root.closed() }
+        PrButton { label: root.action; primary: !root.danger; danger: root.danger; onClicked: root.accepted(input.text) }
     }
 }

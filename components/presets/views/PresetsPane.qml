@@ -17,8 +17,8 @@ Rectangle {
     signal picked(string file)
     signal saveRequested()
     signal foldersRequested()
-    color: InkSkin.side
-    radius: InkSkin.cardRadius
+    color: PrSkin.side
+    radius: PrSkin.cardRadius
 
     function groupLabel(id: string): string {
         const group = Logic.GROUPS.find(g => g.id === id);
@@ -31,18 +31,18 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: InkSkin.gap
-        spacing: InkSkin.gap
+        anchors.margins: PrSkin.gap
+        spacing: PrSkin.gap
         RowLayout {
             Layout.fillWidth: true
-            InkButton { visible: root.narrow; symbol: "arrow_back"; quiet: true; hint: Translation.tr("Folders"); onClicked: root.foldersRequested() }
-            InkText { Layout.fillWidth: true; Layout.leftMargin: InkSkin.small; text: root.heading; role: "label" }
-            InkButton { label: Translation.tr("Save current look"); symbol: "add"; primary: true; enabled: !root.store.busy; onClicked: root.saveRequested() }
+            PrButton { visible: root.narrow; symbol: "arrow_back"; quiet: true; hint: Translation.tr("Folders"); onClicked: root.foldersRequested() }
+            PrText { Layout.fillWidth: true; Layout.leftMargin: PrSkin.small; text: root.heading; role: "label" }
+            PrButton { label: Translation.tr("Save current look"); symbol: "add"; primary: true; enabled: !root.store.busy; onClicked: root.saveRequested() }
         }
-        InkText {
+        PrText {
             visible: root.store.skipped > 0
             Layout.fillWidth: true
-            wrapMode: Text.Wrap; role: "meta"; color: InkSkin.muted
+            wrapMode: Text.Wrap; role: "meta"; color: PrSkin.muted
             text: Translation.tr("%1 files in the folder are not presets and are ignored.").arg(root.store.skipped)
         }
         ListView {
@@ -52,53 +52,53 @@ Rectangle {
             clip: true
             spacing: 2
             model: root.shown
-            ScrollBar.vertical: InkScrollBar {}
+            ScrollBar.vertical: PrScrollBar {}
             delegate: Rectangle {
                 id: row
                 required property var modelData
                 readonly property bool on: root.current === row.modelData.file
                 width: ListView.view.width
-                height: content.implicitHeight + InkSkin.gap * 2
-                radius: InkSkin.radius
-                color: row.on ? InkSkin.rowOn : area.containsMouse ? InkSkin.hover : "transparent"
+                height: content.implicitHeight + PrSkin.gap * 2
+                radius: PrSkin.radius
+                color: row.on ? PrSkin.rowOn : area.containsMouse ? PrSkin.hover : "transparent"
                 ColumnLayout {
                     id: content
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: InkSkin.gap
-                    anchors.rightMargin: InkSkin.gap
-                    spacing: InkSkin.small / 2
+                    anchors.leftMargin: PrSkin.gap
+                    anchors.rightMargin: PrSkin.gap
+                    spacing: PrSkin.small / 2
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: InkSkin.small
-                        InkText { Layout.fillWidth: true; text: row.modelData.name; color: row.on ? InkSkin.rowOnInk : InkSkin.text }
+                        spacing: PrSkin.small
+                        PrText { Layout.fillWidth: true; text: row.modelData.name; color: row.on ? PrSkin.rowOnInk : PrSkin.text }
                         Chip { visible: row.modelData.family !== ""; text: Files.familyLabel(row.modelData.family) }
                     }
                     Flow {
                         Layout.fillWidth: true
-                        spacing: InkSkin.small / 2
+                        spacing: PrSkin.small / 2
                         Repeater {
                             model: row.modelData.groups
                             Chip { required property string modelData; text: root.groupLabel(modelData) }
                         }
                     }
-                    InkText {
+                    PrText {
                         Layout.fillWidth: true
-                        role: "meta"; color: InkSkin.muted
+                        role: "meta"; color: PrSkin.muted
                         text: Translation.tr("%1 settings").arg(row.modelData.settings) + "  ·  " + root.when(row.modelData.made)
                             + (row.modelData.folder !== "" && root.store.selectedFolder === "" ? "  ·  " + row.modelData.folder : "")
                     }
                 }
                 MouseArea { id: area; anchors.fill: parent; hoverEnabled: true; onClicked: root.picked(row.modelData.file) }
             }
-            InkText {
+            PrText {
                 anchors.centerIn: parent
-                width: parent.width - InkSkin.pad * 2
+                width: parent.width - PrSkin.pad * 2
                 visible: list.count === 0
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                color: InkSkin.muted
+                color: PrSkin.muted
                 text: !root.store.loaded ? Translation.tr("Reading the presets folder…")
                     : root.store.presets.length === 0 ? Translation.tr("No presets yet. Save current look stores how your desktop looks now.")
                     : Translation.tr("No presets in this folder.")

@@ -6,7 +6,7 @@ import "../skin"
 import "../logic/PresetLogic.js" as Logic
 
 // Change or remove single settings of a preset without saving the whole look again.
-InkSheet {
+PrSheet {
     id: root
     property var preset: null
     property var rows: []
@@ -18,7 +18,7 @@ InkSheet {
     readonly property bool valid: Object.keys(root.edits).every(key => root.edits[key].removed === true || root.edits[key].valid === true)
     signal submitted(var preset)
 
-    cardWidth: InkSkin.body * 56
+    cardWidth: PrSkin.body * 56
     title: Translation.tr("Quick edit")
 
     onOpenChanged: {
@@ -58,13 +58,13 @@ InkSheet {
         return out;
     }
 
-    InkText {
+    PrText {
         Layout.fillWidth: true
         wrapMode: Text.Wrap
-        color: InkSkin.muted
+        color: PrSkin.muted
         text: Translation.tr("Change a value, or remove a setting so applying the preset leaves it as it is on your desktop.")
     }
-    InkField {
+    PrField {
         id: search
         Layout.fillWidth: true
         icon: "search"
@@ -74,11 +74,11 @@ InkSheet {
     ListView {
         id: list
         Layout.fillWidth: true
-        Layout.preferredHeight: InkSkin.body * 24
+        Layout.preferredHeight: PrSkin.body * 24
         clip: true
         model: root.shownRows
         boundsBehavior: Flickable.StopAtBounds
-        ScrollBar.vertical: InkScrollBar {}
+        ScrollBar.vertical: PrScrollBar {}
         delegate: QuickEditRow {
             id: item
             required property var modelData
@@ -90,21 +90,21 @@ InkSheet {
             onRemoveRequested: root.remove(item.modelData)
             onRevertRequested: root.revert(item.modelData)
         }
-        InkText {
+        PrText {
             visible: root.shownRows.length === 0
             anchors.centerIn: parent
-            width: parent.width - InkSkin.pad * 2
+            width: parent.width - PrSkin.pad * 2
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
-            color: InkSkin.muted
+            color: PrSkin.muted
             text: root.rows.length === 0 ? Translation.tr("This preset has no settings.") : Translation.tr("No setting matches the search.")
         }
     }
     RowLayout {
         Layout.fillWidth: true
-        InkText { Layout.fillWidth: true; role: "meta"; color: InkSkin.muted; text: root.changedCount > 0 ? Translation.tr("%1 changed").arg(root.changedCount) : "" }
-        InkButton { label: Translation.tr("Cancel"); onClicked: root.closed() }
-        InkButton {
+        PrText { Layout.fillWidth: true; role: "meta"; color: PrSkin.muted; text: root.changedCount > 0 ? Translation.tr("%1 changed").arg(root.changedCount) : "" }
+        PrButton { label: Translation.tr("Cancel"); onClicked: root.closed() }
+        PrButton {
             label: Translation.tr("Save")
             primary: true
             enabled: root.changedCount > 0 && root.valid

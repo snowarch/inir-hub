@@ -19,10 +19,10 @@ Scope {
         component: FloatingWindow {
             title: Translation.tr("Presets")
             visible: true
-            color: InkSkin.page
-            implicitWidth: Math.round(InkSkin.body * 72 * InkSkin.d)
-            implicitHeight: Math.round(InkSkin.body * 42 * InkSkin.d)
-            minimumSize: Qt.size(Math.round(InkSkin.body * 24), Math.round(InkSkin.body * 24))
+            color: PrSkin.page
+            implicitWidth: Math.round(PrSkin.body * 72)
+            implicitHeight: Math.round(PrSkin.body * 42)
+            minimumSize: Qt.size(Math.round(PrSkin.body * 24), Math.round(PrSkin.body * 24))
             onClosed: root.opened = false
             PresetsBody {
                 anchors.fill: parent
