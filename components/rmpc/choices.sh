@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The plugin's part of its Hub page (plugin.json `choices`):
-#   list          [{id, label, on, lead?, note?}]: a switch for the compact layout and one for song notifications, then
+#   list          [{id, label, on, lead?, note?}]: switches for the iNiR theme, the compact layout and song notifications, then
 #                 one chip per cava shape, cava colour, bar symbol set, progress bar and Directories look
 #   toggle <id>   `compact` flips the layout, `notify` flips song notifications; any other id picks that option; the
 #                 theme is rewritten either way
@@ -11,9 +11,9 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OWN="${XDG_CONFIG_HOME:-$HOME/.config}/inir/plugins"
 SETTINGS="$OWN/rmpc.json"
 SHAPES=(spectrum mirror top dense chunky densemirror)
-COLORS=(gradient solid layers)
+COLORS=(gradient solid layers rainbow)
 SYMBOLS=(blocks braille shades)
-PROGRESS=(plain line dots rounded)
+PROGRESS=(plain line dots rounded pacman)
 DIRS=(columns tree)
 
 read_key() { sed -n 's/.*"'"$1"'"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true; }
@@ -38,12 +38,13 @@ load() {
   PR="$(cur progress plain "${PROGRESS[@]}")"
   DI="$(cur dirs columns "${DIRS[@]}")"
   NO="$(cur notify on on off)"
+  AC="$(cur active on on off)"
 }
 
 save() {
   mkdir -p "$OWN"
-  printf '{"cava": "%s", "color": "%s", "symbols": "%s", "layout": "%s", "progress": "%s", "dirs": "%s", "notify": "%s"}\n' \
-    "$SH" "$CO" "$SY" "$LA" "$PR" "$DI" "$NO" > "$SETTINGS.tmp" && mv -f "$SETTINGS.tmp" "$SETTINGS"
+  printf '{"cava": "%s", "color": "%s", "symbols": "%s", "layout": "%s", "progress": "%s", "dirs": "%s", "notify": "%s", "active": "%s"}\n' \
+    "$SH" "$CO" "$SY" "$LA" "$PR" "$DI" "$NO" "$AC" > "$SETTINGS.tmp" && mv -f "$SETTINGS.tmp" "$SETTINGS"
   bash "$HERE/render.sh" || true
 }
 
@@ -58,6 +59,8 @@ case "${1:-list}" in
     load
     if [[ "$id" == compact ]]; then
       if [[ "$LA" == compact ]]; then LA=full; else LA=compact; fi
+    elif [[ "$id" == active ]]; then
+      if [[ "$AC" == on ]]; then AC=off; else AC=on; fi
     elif [[ "$id" == notify ]]; then
       if [[ "$NO" == on ]]; then NO=off; else NO=on; fi
     elif in_list "$id" "${SHAPES[@]}";   then SH="$id"
@@ -74,7 +77,9 @@ esac
 load
 compact=false; [[ "$LA" == compact ]] && compact=true
 notify=true; [[ "$NO" == off ]] && notify=false
-printf '[{"id":"compact","label":"Compact layout","on":%s,"lead":true,"note":"For terminals smaller than about 110x28"}' "$compact"
+active=true; [[ "$AC" == off ]] && active=false
+printf '[{"id":"active","label":"Use the iNiR theme","on":%s,"lead":true,"note":"Off: rmpc keeps your own theme and this component writes nothing"}' "$active"
+printf ',{"id":"compact","label":"Compact layout","on":%s,"lead":true,"note":"For terminals smaller than about 110x28"}' "$compact"
 printf ',{"id":"notify","label":"Song notifications","on":%s,"lead":true,"note":"Needs the on-song-change hook from the README"}' "$notify"
 chips() {   # prefix current ids...
   local prefix="$1" now="$2" x on; shift 2

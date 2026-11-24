@@ -39,6 +39,8 @@ bash ~/.config/quickshell/inir/scripts/colors/apply-targets.sh rmpc
 
 ## Set it up (once)
 
+No `config.ron` yet? rmpc runs with its defaults until you create one: `rmpc config > ~/.config/rmpc/config.ron` writes the default file for you to edit, and the steps below start from it.
+
 ### 1. Link the theme into rmpc
 
 ```
@@ -145,7 +147,7 @@ The default layout is made for about 130x32 characters. For smaller terminals (a
 Pick how the visualiser moves and looks on rmpc's page in the Hub. The three groups combine freely:
 
 - **Shape:** `spectrum` (bars from the bottom, the default), `mirror` (bars from the centre), `top` (bars hanging from the top), `dense` (no gap between bars), `chunky` (wider bars) and `densemirror` (no gaps, from the centre).
-- **Colour:** `gradient` (the default), `solid` (one colour) and `layers` (a colour band per row).
+- **Colour:** `gradient` (the default), `solid` (one colour), `layers` (a colour band per row) and `rainbow` (fixed colours that do not come from your palette; they go from red at the bottom of the bars to violet at the top).
 - **Symbols:** `blocks` (the default), `braille` and `shades`. Braille and shades need a font that has those characters, and with `top` and the mirrored shapes rmpc warns that non-default symbols can look wrong.
 
 Every colour comes from your palette and follows it live. Your choices are saved in `~/.config/inir/plugins/rmpc.json` and stay if you remove the component. The cava pane needs step 3 above.
@@ -154,7 +156,7 @@ Every colour comes from your palette and follows it live. Your choices are saved
 
 Two more choices on rmpc's page in the Hub:
 
-- **Progress bar:** `plain` (the default), `line`, `dots` and `rounded`. `rounded` uses round caps that need a Nerd Font.
+- **Progress bar:** `plain` (the default), `line`, `dots`, `rounded` and `pacman` (a little Pac-Man eating dots). `rounded` uses round caps that need a Nerd Font.
 - **Directories:** `columns` (the default) or `tree`. rmpc has no real folder tree, so `tree` gives the closest look: folder and branch symbols (`├─`) on the entries and a wider preview column that lists what is inside the selected folder. It needs a Nerd Font for the icons.
 
 ## Song notifications (optional)
@@ -175,6 +177,10 @@ on_song_change: ["/home/you/.config/rmpc/on-song-change"],
 ```
 
 Notifications arrive through the shell's service, so its Do Not Disturb mode silences them too. They are only sent while rmpc is open, because it is rmpc that runs the hook.
+
+## Your own theme or this one
+
+The first switch on rmpc's page in the Hub, **Use the iNiR theme**, decides who is in charge. While it is on, this component writes its theme on every palette change and tells a running rmpc to load it, so it wins over any theme of your own. Turn it off and it writes nothing and sends nothing: rmpc shows whatever theme your `config.ron` names. Turn it on again and it takes over right away.
 
 ## What it does to your system
 

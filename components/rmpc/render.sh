@@ -9,7 +9,9 @@ command -v jq >/dev/null 2>&1 || { echo "rmpc theme: jq is not installed" >&2; e
 PALETTE="${XDG_STATE_HOME:-$HOME/.local/state}/quickshell/user/generated/palette.json"
 OWN="${XDG_CONFIG_HOME:-$HOME/.config}/inir/plugins"
 OUT="$OWN/rmpc/theme.ron"
-SETTINGS="$OWN/rmpc.json"        # {"cava": "<shape>", "color": "gradient|solid|layers", "symbols": "blocks|braille|shades", "layout": "full|compact", "progress": "plain|line|dots|rounded", "dirs": "columns|tree"}
+SETTINGS="$OWN/rmpc.json"        # {"cava": "<shape>", "color": "gradient|solid|layers|rainbow", "symbols": "blocks|braille|shades", "layout": "full|compact", "progress": "plain|line|dots|rounded|pacman", "active": "on|off", "dirs": "columns|tree"}
+# Switched off on the Hub page: this component writes nothing and sends nothing to a running rmpc
+if grep -qs '"active"[[:space:]]*:[[:space:]]*"off"' "$SETTINGS"; then exit 0; fi
 [[ -s "$PALETTE" ]] || exit 0
 
 key() { sed -n 's/.*"'"$1"'"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true; }
@@ -19,9 +21,9 @@ colormode=""
 case "$shape" in solid|layers) colormode="$shape"; shape=spectrum ;; esac
 case "$shape" in spectrum|mirror|top|dense|chunky|densemirror) ;; *) shape=spectrum ;; esac
 [[ -n "$colormode" ]] || colormode="$(key color)"
-case "$colormode" in gradient|solid|layers) ;; *) colormode=gradient ;; esac
+case "$colormode" in gradient|solid|layers|rainbow) ;; *) colormode=gradient ;; esac
 progress="$(key progress)"
-case "$progress" in plain|line|dots|rounded) ;; *) progress=plain ;; esac
+case "$progress" in plain|line|dots|rounded|pacman) ;; *) progress=plain ;; esac
 dirs="$(key dirs)"
 case "$dirs" in columns|tree) ;; *) dirs=columns ;; esac
 symbols="$(sed -n 's/.*"symbols"[[:space:]]*:[[:space:]]*"\([a-z]*\)".*/\1/p' "$SETTINGS" 2>/dev/null | head -1 || true)"
@@ -46,6 +48,14 @@ esac
 case "$colormode" in
   solid)  color="        bar_color: Single(\"$prim\")," ;;
   layers) color="        bar_color: Rows([\"$sec\", \"$prim\", \"$tert\"])," ;;
+  rainbow) color="        bar_color: Gradient({
+            0: \"#ff3b3b\",
+            20: \"#ff9f1c\",
+            40: \"#ffe74c\",
+            60: \"#4cd964\",
+            80: \"#2fa8ff\",
+            100: \"#b266ff\",
+        })," ;;
   *)      color="        bar_color: Gradient({
             0: \"$sec\",
             50: \"$prim\",
@@ -157,6 +167,7 @@ case "$progress" in
   line)    pbsyms='["━", "━", "●", "─", "─"]' ;;
   dots)    pbsyms='["●", "●", "●", "○", "○"]' ;;
   rounded) pbsyms='["", "█", "█", "░", ""]' ;;
+  pacman)  pbsyms='[" ", " ", "ᗧ", "·", "ᗣ"]' ;;
   *)       pbsyms='["█", "█", "█", " ", "█"]' ;;
 esac
 DIRBLOCK=""
