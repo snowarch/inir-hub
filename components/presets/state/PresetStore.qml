@@ -297,13 +297,35 @@ Item {
         root.toTrash(rel, Translation.tr("Could not move the preset to the trash."), Translation.tr("%1 moved to the trash.").arg(info.name));
     }
 
+    // The preset is laid over the current look first: inir treats every setting missing from an imported file as a default.
+    // done(ok, text): the import's output, or the reason it failed.
+    function importMerged(file: string, withWallpaper: bool, dry: bool, done: var): void {
+        const text = root.readText(file);
+        const preset = text === null ? null : Logic.parsePreset(text);
+        if (preset === null) { done(false, Translation.tr("Could not read the preset.")); return; }
+        root.exportCurrent(look => {
+            if (look === null) { done(false, Translation.tr("Could not read the current look.")); return; }
+            const merged = root.rootDir + "/" + Files.WORK + "/apply-" + Date.now() + Files.EXT;
+            if (!root.writeText(merged, JSON.stringify(Logic.overlay(look, preset)))) {
+                root.run(["rm", "-f", "--", merged]);
+                done(false, Translation.tr("Could not write the temporary file."));
+                return;
+            }
+            const argv = ["inir", "look", "import", merged].concat(withWallpaper ? [] : ["--no-wallpaper"], dry ? ["--dry-run"] : []);
+            root.run(argv, (code, out) => {
+                root.run(["rm", "-f", "--", merged]);
+                done(code === 0, code === 0 ? out : Files.firstLine(out));
+            });
+        });
+    }
+
     // These two are the only ones that change the desktop: the look is imported, or the last snapshot is restored.
     function applyPreset(file: string, withWallpaper: bool): void {
         if (!root.begin()) return;
         const info = root.presetAt(file);
         if (info === null) { root.finish(false, Translation.tr("Could not read the preset.")); return; }
-        root.run(["inir", "look", "import", file].concat(withWallpaper ? [] : ["--no-wallpaper"]), (code, out) => {
-            if (code !== 0) { root.finish(false, Files.firstLine(out) || Translation.tr("Could not apply the preset.")); return; }
+        root.importMerged(file, withWallpaper, false, (ok, out) => {
+            if (!ok) { root.finish(false, out || Translation.tr("Could not apply the preset.")); return; }
             root.canUndo = true;
             root.finish(true, Translation.tr("Applied %1.").arg(info.name));
         });
@@ -311,8 +333,8 @@ Item {
     function previewApply(file: string): void {
         if (!root.begin()) return;
         root.previewText = "";
-        root.run(["inir", "look", "import", file, "--dry-run"].concat(root.withWallpaper ? [] : ["--no-wallpaper"]), (code, out) => {
-            if (code !== 0) { root.finish(false, Files.firstLine(out) || Translation.tr("Could not read the changes.")); return; }
+        root.importMerged(file, root.withWallpaper, true, (ok, out) => {
+            if (!ok) { root.finish(false, out || Translation.tr("Could not read the changes.")); return; }
             root.previewText = out.trim() !== "" ? out.trim() : Translation.tr("Nothing would change.");
             root.finish(true, "");
         });

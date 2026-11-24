@@ -118,6 +118,46 @@ function mergeUpdate(oldPreset, currentLook, groupIds) {
     return result;
 }
 
+// The current look with the preset's groups laid over it; everything else stays as it is now.
+function overlay(currentLook, preset) {
+    const result = JSON.parse(JSON.stringify(currentLook));
+    delete result.presetName;
+    if (!isObject(result.config))
+        result.config = {};
+    const ids = ownValue(preset, "presetGroups");
+    for (const group of GROUPS) {
+        if (!Array.isArray(ids) || !ids.includes(group.id))
+            continue;
+        if (group.special) {
+            const value = ownValue(preset, group.special);
+            if (value !== undefined)
+                result[group.special] = JSON.parse(JSON.stringify(value));
+            else
+                delete result[group.special];
+        }
+        for (const path of group.paths) {
+            const parts = path.split(".");
+            const key = parts.pop();
+            const value = readPath(ownValue(preset, "config"), parts.concat(key));
+            let parent = result.config;
+            for (const part of parts) {
+                if (!isObject(ownValue(parent, part))) {
+                    if (value === undefined) { parent = null; break; }
+                    parent[part] = {};
+                }
+                parent = parent[part];
+            }
+            if (parent === null)
+                continue;
+            if (value === undefined)
+                delete parent[key];
+            else
+                parent[key] = JSON.parse(JSON.stringify(value));
+        }
+    }
+    return result;
+}
+
 function slug(name) {
     return name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
         .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "preset";
@@ -148,4 +188,4 @@ function parsePreset(text) {
 }
 
 if (typeof module !== "undefined" && module.exports)
-    module.exports = { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, slug, uniqueName, parsePreset };
+    module.exports = { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, overlay, slug, uniqueName, parsePreset };

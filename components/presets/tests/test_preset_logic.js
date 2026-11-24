@@ -8,7 +8,7 @@ const source = fs.readFileSync(logicPath, "utf8");
 const logicModule = { exports: {} };
 // Strip the QML directive and run the same library code in Node.
 vm.compileFunction(source.replace(/^\.pragma library\r?\n/, ""), ["module"], { filename: logicPath })(logicModule);
-const { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, slug, uniqueName, parsePreset } = logicModule.exports;
+const { GROUPS, filterLook, groupsPresent, summarize, mergeUpdate, overlay, slug, uniqueName, parsePreset } = logicModule.exports;
 
 function makeLook(config, extra = {}) {
     return { inirLook: 1, made: "2099-01-01T00:00:00Z", config, ...extra };
@@ -134,6 +134,39 @@ const tests = {
         ]) {
             assert.equal(parsePreset(invalid), null, String(invalid));
         }
+    },
+
+    "overlays only the preset groups onto the current look"() {
+        const current = makeLook({
+            appearance: { theme: "now", typography: { mainFont: "Now Sans" } },
+            material: { bar: { height: 1 }, dock: { height: 40 } },
+            iris: { bar: { design: "now-island" }, pieces: { icons: { accent: true } } },
+            other: { keep: true }
+        }, { family: "material", wallpaper: { path: "/now.png" }, presetName: "Old" });
+        const preset = makeLook({
+            appearance: { typography: { mainFont: "Preset Sans" } },
+            material: { bar: { height: 9, list: ["a"] } }
+        }, { presetGroups: ["bar", "typography", "icons", "family"], family: "waffle", wallpaper: { path: "/preset.png" } });
+        const before = JSON.stringify([current, preset]);
+        const result = overlay(current, preset);
+
+        assert.equal(JSON.stringify([current, preset]), before);
+        assert.equal("presetName" in result, false);
+        assert.equal(result.made, current.made);
+        assert.equal(result.family, "waffle");
+        assert.deepEqual(result.wallpaper, { path: "/now.png" });
+        assert.deepEqual(result.config.material, { bar: { height: 9, list: ["a"] }, dock: { height: 40 } });
+        assert.deepEqual(result.config.appearance, { theme: "now", typography: { mainFont: "Preset Sans" } });
+        assert.equal("bar" in result.config.iris, false);
+        assert.deepEqual(result.config.iris.pieces, {});
+        assert.deepEqual(result.config.other, { keep: true });
+        result.config.material.bar.list.push("b");
+        assert.deepEqual(preset.config.material.bar.list, ["a"]);
+
+        const withWallpaper = overlay(current, { ...preset, presetGroups: ["wallpaper"], config: { background: { x: 1 } }, wallpaper: { path: "/preset.png" } });
+        assert.deepEqual(withWallpaper.wallpaper, { path: "/preset.png" });
+        assert.deepEqual(withWallpaper.config.background, { x: 1 });
+        assert.equal(overlay(current, makeLook({})).family, "material");
     },
 
     "makes filename slugs and resolves name collisions"() {

@@ -22,7 +22,7 @@ A group the current look does not have is greyed out. A name that is already use
 
 ## Apply
 
-Choose a preset and press **Apply**. **Also apply the wallpaper** appears when the preset holds one; leave it off to keep your current wallpaper. **Preview changes** runs the apply without changing anything and lists what would change.
+Choose a preset and press **Apply**. Only the settings the preset saved change; everything else stays as it is. **Also apply the wallpaper** appears when the preset holds one; leave it off to keep your current wallpaper. **Preview changes** runs the apply without changing anything and lists what would change.
 
 After an apply, **Undo last apply** (also in the message at the bottom) brings back the look from before it.
 
