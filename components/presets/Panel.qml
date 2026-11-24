@@ -1,84 +1,49 @@
 pragma ComponentBehavior: Bound
-
-// A component's own surface: the shell loads this file while the active family is one plugin.json's "families" names
-// (every family when the list is empty). It sits beside the family and never edits it. Keep this shape:
-//   - one window, created only while open (nothing runs while it is closed);
-//   - an IpcHandler whose target is the component's id with a toggle: the app launcher of every family lists it by
-//     its name and opens it with `inir <id> toggle` (a keybind or another surface can too);
-//   - colours, corners and type from the shell's tokens, so the person's theme reaches it;
-//   - its own options in its own file (Directories.pluginFile), never in the person's settings.
-
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
-import qs.modules.common
-import qs.modules.common.widgets
+import qs.services
+import "skin"
+import "views"
 
 Scope {
     id: root
-
-    property bool open: false
-
-    // Options the person changes live in this file; removing the component leaves their settings as they were.
-    FileView {
-        path: Directories.pluginFile("presets")
-        watchChanges: true
-        onFileChanged: reload()
-        onAdapterUpdated: writeAdapter()
-        onLoadFailed: error => { if (error === FileViewError.FileNotFound) writeAdapter() }
-        JsonAdapter {
-            id: options
-            property string greeting: "Hello"
-        }
-    }
+    property bool opened: false
+    property string pendingApply: ""
 
     LazyLoader {
-        active: root.open
-        PanelWindow {
-            WlrLayershell.namespace: "quickshell:presets"
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
-            exclusionMode: ExclusionMode.Ignore
-            color: "transparent"
-            implicitWidth: card.implicitWidth
-            implicitHeight: card.implicitHeight
-
-            Rectangle {
-                id: card
+        active: root.opened
+        component: FloatingWindow {
+            title: Translation.tr("Presets")
+            visible: true
+            color: InkSkin.page
+            implicitWidth: Math.round(InkSkin.body * 72 * InkSkin.d)
+            implicitHeight: Math.round(InkSkin.body * 42 * InkSkin.d)
+            minimumSize: Qt.size(Math.round(InkSkin.body * 24), Math.round(InkSkin.body * 24))
+            onClosed: root.opened = false
+            PresetsBody {
                 anchors.fill: parent
-                implicitWidth: column.implicitWidth + 48
-                implicitHeight: column.implicitHeight + 40
-                radius: Appearance.rounding.large
-                color: Appearance.colors.colLayer1
-                focus: true
-                Keys.onEscapePressed: root.open = false
-
-                ColumnLayout {
-                    id: column
-                    anchors.centerIn: parent
-                    spacing: 8
-                    StyledText {
-                        text: Translation.tr("%1 from Presets").arg(options.greeting)
-                        color: Appearance.colors.colOnLayer1
-                        font.pixelSize: Appearance.font.pixelSize.title
-                    }
-                }
+                requestedName: root.pendingApply
+                onRequestHandled: root.pendingApply = ""
+                onCloseRequested: root.opened = false
             }
         }
     }
 
-    /// Presets: open or close it.
+    /// Presets: save the look of the desktop and apply it again.
     ///
     /// ```kdl
     /// Mod+Shift+P { spawn "inir" "presets" "toggle"; }
     /// ```
     IpcHandler {
         target: "presets"
-        /// Open or close it
-        function toggle(): void { root.open = !root.open }
-        /// Close it
-        function close(): void { root.open = false }
+        /// Open the window, or close it when it is open
+        function toggle(): void { root.opened = !root.opened }
+        /// Open the window
+        function open(): void { root.opened = true }
+        /// Close the window
+        function close(): void { root.opened = false }
+        /// Open the window and apply the preset with this name
+        function apply(name: string): void { root.pendingApply = name; root.opened = true }
     }
 }

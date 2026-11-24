@@ -1,0 +1,10 @@
+PaneRow 1.0 PaneRow.qml
+Chip 1.0 Chip.qml
+GroupCheck 1.0 GroupCheck.qml
+FoldersPane 1.0 FoldersPane.qml
+PresetsPane 1.0 PresetsPane.qml
+DetailPane 1.0 DetailPane.qml
+AskSheet 1.0 AskSheet.qml
+SaveSheet 1.0 SaveSheet.qml
+PreviewSheet 1.0 PreviewSheet.qml
+PresetsBody 1.0 PresetsBody.qml
