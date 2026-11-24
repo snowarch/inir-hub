@@ -10,6 +10,8 @@ import "../logic/PresetLogic.js" as Logic
 Item {
     id: root
     property string requestedName: ""
+    // The name already answered: the owner of requestedName clears it a turn later, and a change of the folder in between must not apply it twice.
+    property string served: ""
     signal requestHandled()
     signal closeRequested()
 
@@ -41,7 +43,10 @@ Item {
         store.selectedFolder = PresetOptions.lastFolder;
         store.refresh();
     }
-    onRequestedNameChanged: root.tryRequest()
+    onRequestedNameChanged: {
+        if (root.requestedName === "") root.served = "";
+        root.tryRequest();
+    }
 
     // After every change: follow a renamed, moved or new preset, and answer an apply asked for by name.
     function settled(): void {
@@ -54,7 +59,8 @@ Item {
     }
     function tryRequest(): void {
         const name = root.requestedName;
-        if (name === "" || !store.loaded || store.busy) return;
+        if (name === "" || name === root.served || !store.loaded || store.busy) return;
+        root.served = name;
         root.requestHandled();
         const found = store.byName(name);
         if (found === null) { store.ok = false; store.message = Translation.tr("No preset is named %1.").arg(name); return; }

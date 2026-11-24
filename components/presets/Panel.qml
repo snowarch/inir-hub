@@ -11,6 +11,9 @@ Scope {
     property bool opened: false
     property string pendingApply: ""
 
+    // Cleared on the next turn: clearing inside the change that delivered the name loops the binding.
+    Timer { id: clearRequest; interval: 0; onTriggered: root.pendingApply = "" }
+
     LazyLoader {
         active: root.opened
         component: FloatingWindow {
@@ -24,7 +27,7 @@ Scope {
             PresetsBody {
                 anchors.fill: parent
                 requestedName: root.pendingApply
-                onRequestHandled: root.pendingApply = ""
+                onRequestHandled: clearRequest.restart()
                 onCloseRequested: root.opened = false
             }
         }
