@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "changes": {
+        "1.5.2": [
+            "The rainbow cava colour is finer: eleven steps from red through yellow, green and blue to purple"
+        ],
         "1.5.1": [
             "A switch to turn the iNiR theme off, a pacman progress bar, a rainbow cava colour and README notes for a first run"
         ],
