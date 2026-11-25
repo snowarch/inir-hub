@@ -147,7 +147,7 @@ The default layout is made for about 130x32 characters. For smaller terminals (a
 Pick how the visualiser moves and looks on rmpc's page in the Hub. The three groups combine freely:
 
 - **Shape:** `spectrum` (bars from the bottom, the default), `mirror` (bars from the centre), `top` (bars hanging from the top), `dense` (no gap between bars), `chunky` (wider bars) and `densemirror` (no gaps, from the centre).
-- **Colour:** `gradient` (the default), `solid` (one colour), `layers` (a colour band per row) and `rainbow` (fixed colours that do not come from your palette; they go from red at the bottom of the bars to violet at the top).
+- **Colour:** `gradient` (the default), `solid` (one colour), `layers` (a colour band per row) and `rainbow` (fixed colours that do not come from your palette: red at the bottom, then yellow, green and blue, to purple at the top, in eleven steps. A terminal cell has a single colour, so how many of them you see depends on how tall the cava pane is).
 - **Symbols:** `blocks` (the default), `braille` and `shades`. Braille and shades need a font that has those characters, and with `top` and the mirrored shapes rmpc warns that non-default symbols can look wrong.
 
 Every colour comes from your palette and follows it live. Your choices are saved in `~/.config/inir/plugins/rmpc.json` and stay if you remove the component. The cava pane needs step 3 above.

@@ -50,10 +50,15 @@ case "$colormode" in
   layers) color="        bar_color: Rows([\"$sec\", \"$prim\", \"$tert\"])," ;;
   rainbow) color="        bar_color: Gradient({
             0: \"#ff3b3b\",
+            10: \"#ff6b2c\",
             20: \"#ff9f1c\",
+            30: \"#ffd23f\",
             40: \"#ffe74c\",
+            50: \"#8be04c\",
             60: \"#4cd964\",
-            80: \"#2fa8ff\",
+            70: \"#2fcfd0\",
+            80: \"#2f8bff\",
+            90: \"#6a5cff\",
             100: \"#b266ff\",
         })," ;;
   *)      color="        bar_color: Gradient({
