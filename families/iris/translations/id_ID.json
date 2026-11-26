@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "Bisukan mikrofon",
   "Legibility": "Keterbacaan",
   "Use as accent": "Gunakan sebagai aksen",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "Suara iRiS: peringatan, mulai, kunci, dan antarmuka.",
@@ -2668,7 +2669,6 @@
   "What each button does": "Fungsi tiap tombol",
   "Left button": "Tombol kiri",
   "Right button": "Tombol kanan",
-  "Wheel": "Roda",
   "Wheel press": "Tekan roda",
   "Wheel tilt": "Miringkan roda",
   "Opens the menu": "Membuka menu",

@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "Отключить микрофон",
   "Legibility": "Читаемость",
   "Use as accent": "Сделать акцентом",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "Голос iRiS: оповещения, запуск, блокировка и интерфейс.",
@@ -2668,7 +2669,6 @@
   "What each button does": "Что делает каждая кнопка",
   "Left button": "Левая кнопка",
   "Right button": "Правая кнопка",
-  "Wheel": "Колесо",
   "Wheel press": "Нажатие колеса",
   "Wheel tilt": "Наклон колеса",
   "Opens the menu": "Открывает меню",

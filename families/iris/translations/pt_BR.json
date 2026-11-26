@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "Silenciar o microfone",
   "Legibility": "Legibilidade",
   "Use as accent": "Usar como destaque",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "A voz do iRiS: alertas, início, bloqueio e interface.",
@@ -2668,7 +2669,6 @@
   "What each button does": "O que cada botão faz",
   "Left button": "Botão esquerdo",
   "Right button": "Botão direito",
-  "Wheel": "Roda",
   "Wheel press": "Clique na roda",
   "Wheel tilt": "Inclinar a roda",
   "Opens the menu": "Abre o menu",

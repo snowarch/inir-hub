@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "השתקת המיקרופון",
   "Legibility": "קריאות",
   "Use as accent": "השתמש כצבע הדגשה",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "הקול של iRiS: התראות, הפעלה, נעילה וממשק.",
@@ -2668,7 +2669,6 @@
   "What each button does": "מה כל כפתור עושה",
   "Left button": "כפתור שמאלי",
   "Right button": "כפתור ימני",
-  "Wheel": "גלגלת",
   "Wheel press": "לחיצה על הגלגלת",
   "Wheel tilt": "הטיית הגלגלת",
   "Opens the menu": "פותח את התפריט",

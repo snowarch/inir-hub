@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "Couper le microphone",
   "Legibility": "Lisibilité",
   "Use as accent": "Utiliser comme accent",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "La voix d'iRiS : alertes, démarrage, verrouillage et interface.",
@@ -2668,7 +2669,6 @@
   "What each button does": "Ce que fait chaque bouton",
   "Left button": "Bouton gauche",
   "Right button": "Bouton droit",
-  "Wheel": "Molette",
   "Wheel press": "Clic de molette",
   "Wheel tilt": "Inclinaison de la molette",
   "Opens the menu": "Ouvre le menu",

@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "Mikrofonu sustur",
   "Legibility": "Okunabilirlik",
   "Use as accent": "Vurgu rengi yap",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "iRiS'in sesi: uyarılar, başlangıç, kilit ve arayüz.",
@@ -2668,7 +2669,6 @@
   "What each button does": "Her düğme ne yapar",
   "Left button": "Sol düğme",
   "Right button": "Sağ düğme",
-  "Wheel": "Tekerlek",
   "Wheel press": "Tekerleğe basma",
   "Wheel tilt": "Tekerleği yana eğme",
   "Opens the menu": "Menüyü açar",

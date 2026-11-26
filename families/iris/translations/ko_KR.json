@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "마이크 음소거",
   "Legibility": "가독성",
   "Use as accent": "강조 색상으로 사용",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "iRiS의 목소리: 알림, 시작, 잠금, 인터페이스.",
@@ -2668,7 +2669,6 @@
   "What each button does": "각 버튼의 기능",
   "Left button": "왼쪽 버튼",
   "Right button": "오른쪽 버튼",
-  "Wheel": "휠",
   "Wheel press": "휠 클릭",
   "Wheel tilt": "휠 기울이기",
   "Opens the menu": "메뉴 열기",

@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "كتم الميكروفون",
   "Legibility": "الوضوح",
   "Use as accent": "استخدامه كلون مميز",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "صوت iRiS: التنبيهات والبدء والقفل والواجهة.",
@@ -2668,7 +2669,6 @@
   "What each button does": "وظيفة كل زر",
   "Left button": "الزر الأيسر",
   "Right button": "الزر الأيمن",
-  "Wheel": "العجلة",
   "Wheel press": "الضغط على العجلة",
   "Wheel tilt": "إمالة العجلة",
   "Opens the menu": "يفتح القائمة",

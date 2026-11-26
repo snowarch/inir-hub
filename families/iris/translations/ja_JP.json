@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "マイクをミュート",
   "Legibility": "読みやすさ",
   "Use as accent": "アクセントにする",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "iRiS の声: 通知、起動、ロック、操作音。",
@@ -2668,7 +2669,6 @@
   "What each button does": "各ボタンの動作",
   "Left button": "左ボタン",
   "Right button": "右ボタン",
-  "Wheel": "ホイール",
   "Wheel press": "ホイールクリック",
   "Wheel tilt": "ホイールのチルト",
   "Opens the menu": "メニューを開く",

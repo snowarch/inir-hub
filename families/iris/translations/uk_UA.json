@@ -1,4 +1,5 @@
 {
+  "Mute the microphone": "Вимкнути мікрофон",
   "Legibility": "Розбірливість",
   "Use as accent": "Зробити акцентом",
   "The voice of iRiS: alerts, startup, the lock and the interface.": "Голос iRiS: сповіщення, запуск, блокування й інтерфейс.",
@@ -2668,7 +2669,6 @@
   "What each button does": "Що робить кожна кнопка",
   "Left button": "Ліва кнопка",
   "Right button": "Права кнопка",
-  "Wheel": "Коліщатко",
   "Wheel press": "Натискання коліщатка",
   "Wheel tilt": "Нахил коліщатка",
   "Opens the menu": "Відкриває меню",
