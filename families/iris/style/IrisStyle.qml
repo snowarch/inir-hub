@@ -569,6 +569,9 @@ QtObject {
     // worn Design's (his 11-21: under glass every Design looked the same, the wallpaper showing through each alike).
     readonly property real wallpaperGlassTint: {
         const chosen = Math.max(0.12, IrisDesign.glassTint, Math.min(0.96, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
+        // On Rin Liquid Glass, let the user's chosen tint show through so GPU lens refraction stays clearly visible.
+        if (CompositorService.isRin && root.glassRequested === "compositor" && IrisCompositorBlur.background === "liquid")
+            return Math.min(chosen, 0.56)
         const needed = IrisMood.sampled ? root.legibleVeil("panel", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
         return Math.max(chosen, Math.min(0.9, needed))
     }
@@ -576,8 +579,10 @@ QtObject {
     // and the accent keep the wallpaper's tint, or every window opened would regenerate every app theme. 4.5:1 there,
     // not 7: an always-thick Blur left nothing to see through.
     readonly property bool bodiesCovered: root.glassCompositor && Lume.covered(root.placeOutput)
-    readonly property real glassTint: root.bodiesCovered
-        ? Math.max(root.wallpaperGlassTint, Math.min(0.9, root.legibleVeil("glass", 0.72, 0.18, 1))) : root.wallpaperGlassTint
+    readonly property real glassTint: (CompositorService.isRin && IrisCompositorBlur.background === "liquid")
+        ? root.wallpaperGlassTint
+        : root.bodiesCovered
+            ? Math.max(root.wallpaperGlassTint, Math.min(0.9, root.legibleVeil("glass", 0.72, 0.18, 1))) : root.wallpaperGlassTint
     // What the apps wear: the paper itself, solved with the shell's palette (IrisWashi `apps`). Frost over the wallpaper
     // changes with every window behind it; an app window is opaque, so it wears the paper the frost is held to.
     readonly property string appsOutput: String(Quickshell.screens[0]?.name ?? "")

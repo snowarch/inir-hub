@@ -11,9 +11,13 @@ Region {
     id: root
 
     property var shapes: []
+    // On Rin, ext-background-effect-v1 regions are parsed into circular RoundedRect panes for GPU blur
+    // and Liquid Glass lens refraction (rin-compositor-panes). Emit clean circular Piece regions instead
+    // of squircle scanlines so every Island, Dock, bubble and card gets full GPU blur and liquid glass.
+    readonly property bool rinExactPanes: CompositorService.isRin
     // qs-rs rasterises the field itself on every build (FieldRegion, IrisFieldRegion.qml): exact on every frame, with the
     // music's wave in the band, so nothing below runs there. Quickshell walks it here.
-    readonly property bool nativeRaster: SystemInfo.runtimeHas(["field-region", "field-corners"])
+    readonly property bool nativeRaster: !root.rinExactPanes && SystemInfo.runtimeHas(["field-region", "field-corners"])
     property var nativeRegion: null
     property vector4d edgeWave: Qt.vector4d(0, 0, 0, 0)
     property real waveClock: 0
@@ -116,7 +120,7 @@ Region {
     readonly property bool empty: root.nativeRaster ? (root.shapes ?? []).length === 0 && !root.framed
         : root.pieces.length === 0 && root.built.runs.length === 0 && !root.framed
     readonly property var target: root.nativeRaster ? root.nativeRegion : root
-    onBuiltChanged: { root.placePieces(); root.placeRuns() }
+    onBuiltChanged: { root.placePieces(); root.placeRuns(); if (root.rinExactPanes) root.kick() }
 
     // The window this region blurs. The region publishes itself, as DMS's WindowBlur does: nothing
     // while the window is hidden, a fresh commit once the shape settles (a nested Region can change
@@ -400,6 +404,30 @@ Region {
         }
     }
     function build(list: var, exact: bool): var {
+        if (root.rinExactPanes) {
+            const out = []
+            const runs = []
+            const i = root.inset
+            for (const s of list) {
+                const c = IrisFrame.cornersOf(s)
+                const half = Math.min(s.width, s.height) / 2
+                const avg = Math.min((c.tl + c.tr + c.bl + c.br) / 4, half)
+                const w = Math.max(0, s.width - 2 * i)
+                const h = Math.max(0, s.height - 2 * i)
+                if (w >= 8 && h >= 8)
+                    out.push({ x: s.x + i, y: s.y + i, width: w, height: h, radius: Math.max(0, avg - i) })
+            }
+            if (root.framed && root.band > 1 && root.windowWidth > 0 && root.windowHeight > 0) {
+                const b = Math.round(root.band)
+                const ww = Math.round(root.windowWidth)
+                const wh = Math.round(root.windowHeight)
+                runs.push({ x: 0, y: 0, width: ww, height: b })
+                runs.push({ x: 0, y: wh - b, width: ww, height: b })
+                runs.push({ x: 0, y: b, width: b, height: Math.max(0, wh - 2 * b) })
+                runs.push({ x: ww - b, y: b, width: b, height: Math.max(0, wh - 2 * b) })
+            }
+            return { bodies: out.slice(0, 12), runs: runs }
+        }
         const byId = {}
         for (const s of list) if (s.id) byId[s.id] = s
         const out = []
@@ -483,8 +511,8 @@ Region {
     }
 
     Region {
-        width: root.framed && !root.nativeRaster ? root.windowWidth : 0
-        height: root.framed && !root.nativeRaster ? root.windowHeight : 0
+        width: root.framed && !root.nativeRaster && !root.rinExactPanes ? root.windowWidth : 0
+        height: root.framed && !root.nativeRaster && !root.rinExactPanes ? root.windowHeight : 0
         Region {
             intersection: Intersection.Subtract
             readonly property int edge: root.hi(root.band - root.inset)
