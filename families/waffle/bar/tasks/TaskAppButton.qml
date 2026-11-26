@@ -35,15 +35,16 @@ AppButton {
 
     // Focused window index for smart indicator (Niri)
     property int focusedWindowIndex: {
-        if (!root.active || appEntry.toplevels.length <= 1) return 0;
-        const focusedToplevel = appEntry.toplevels.find(t => t.activated === true);
+        const shown = root.shownToplevels;
+        if (!root.active || shown.length <= 1) return 0;
+        const focusedToplevel = shown.find(t => t.activated === true);
         if (!focusedToplevel) return 0;
         
         if (CompositorService.isNiri && focusedToplevel.niriWindowId) {
             const niriWindows = NiriService.windows;
             const windowPositions = [];
-            for (let i = 0; i < appEntry.toplevels.length; i++) {
-                const tl = appEntry.toplevels[i];
+            for (let i = 0; i < shown.length; i++) {
+                const tl = shown[i];
                 let col = 999999;
                 if (tl.niriWindowId) {
                     const niriWin = niriWindows.find(w => w.id === tl.niriWindowId);
@@ -59,8 +60,8 @@ AppButton {
             }
         }
         
-        for (let i = 0; i < appEntry.toplevels.length; i++) {
-            if (appEntry.toplevels[i].activated) return i;
+        for (let i = 0; i < shown.length; i++) {
+            if (shown[i].activated) return i;
         }
         return 0;
     }
@@ -83,7 +84,8 @@ AppButton {
     readonly property int minimizedCount: MinimizedWindows.countMinimizedForApp(appEntry.appId)
     readonly property bool hasMinimized: minimizedCount > 0
     // Windows on screen; each minimized one has its dimmed pill instead.
-    readonly property int shownCount: appEntry.toplevels.filter(t => !MinimizedWindows.isMinimized(t.niriWindowId)).length
+    readonly property var shownToplevels: appEntry.toplevels.filter(t => !MinimizedWindows.isMinimized(t.niriWindowId))
+    readonly property int shownCount: shownToplevels.length
 
     function niriWindowIds(): list<var> {
         const ids = []
