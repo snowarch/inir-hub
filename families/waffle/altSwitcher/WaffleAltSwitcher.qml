@@ -269,19 +269,76 @@ Scope {
             autoHideTimer.restart()
     }
 
+    readonly property bool rinDriven: CompositorService.isRin && NiriService.rinSwitcher !== null
+    property bool _openedByRin: false
+
+    function applyRinSwitcher(sw: var): void {
+        if (!sw || !Array.isArray(sw.windows) || sw.windows.length === 0) {
+            if (root._openedByRin) {
+                root._openedByRin = false
+                closeSwitcher()
+            }
+            return
+        }
+        autoHideTimer.stop()
+        const allWins = NiriService.windows || []
+        const byId = {}
+        for (const w of allWins) byId[w.id] = w
+        const orderedWins = []
+        const orderedIds = []
+        for (const cand of sw.windows) {
+            const id = NiriService.rinWindowId(String(cand.id ?? ""))
+            const found = id >= 0 ? byId[id] : null
+            if (found) {
+                orderedWins.push(found)
+                orderedIds.push(found.id)
+            }
+        }
+        if (orderedWins.length === 0) return
+        const built = buildItemsFrom(orderedWins, NiriService.workspaces || {}, orderedIds)
+        const byBuiltId = {}
+        for (const it of built) byBuiltId[it.id] = it
+        itemSnapshot = orderedIds.map(id => byBuiltId[id]).filter(Boolean)
+        currentIndex = Math.max(0, Math.min(itemSnapshot.length - 1, Number(sw.selected ?? 0)))
+        root._openedByRin = true
+        WaffleState.altSwitcherOpen = true
+        root.cardVisible = true
+    }
+
+    Connections {
+        target: NiriService
+        enabled: CompositorService.isRin
+        function onRinSwitcherChanged(): void {
+            root.applyRinSwitcher(NiriService.rinSwitcher)
+        }
+    }
+
+    Component.onCompleted: {
+        if (CompositorService.isRin && NiriService.rinSwitcher !== null)
+            root.applyRinSwitcher(NiriService.rinSwitcher)
+    }
+
     function activateCurrent() {
         const item = itemSnapshot[currentIndex]
         if (item?.id !== undefined) {
-            NiriService.focusWindow(item.id)
+            if (root.rinDriven)
+                NiriService.rinSwitcherChoose(NiriService.rinSwitcher.serial, item.id)
+            else
+                NiriService.focusWindow(item.id)
         }
     }
 
     function confirmCurrent() {
         root.activateCurrent()
-        root.closeSwitcher()
+        if (!root.rinDriven)
+            root.closeSwitcher()
     }
 
     function activateAndClose(windowId) {
+        if (root.rinDriven) {
+            NiriService.rinSwitcherChoose(NiriService.rinSwitcher.serial, windowId)
+            return
+        }
         NiriService.focusWindow(windowId)
         if (root.getCloseOnFocus()) {
             closeSwitcher()
@@ -374,7 +431,7 @@ Scope {
         color: "transparent"
         WlrLayershell.namespace: "quickshell:wAltSwitcher"
         WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: PolkitService.active ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
+        WlrLayershell.keyboardFocus: (PolkitService.active || root.rinDriven) ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
         anchors { top: true; bottom: true; left: true; right: true }
 
         FocusScope {
