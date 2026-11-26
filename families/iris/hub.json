@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.134",
+    "version": "2.33.135",
     "changes": {
+      "2.33.135": ["Settings: the window keys ride the page art up and rows fade out before they reach them"],
       "2.33.134": ["Workspace dots mark the one where a window asks for attention"],
       "2.33.131": ["Keyboard shortcuts read in your language: each bind, its group and its keys"],
       "2.33.128": ["Settings drives Rin: title bars, resize from the edges and tearing; a compositor page with nothing to change is left out"],
