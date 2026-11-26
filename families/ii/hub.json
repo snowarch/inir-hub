@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.36.10",
+    "version": "2.36.11",
     "changes": {
       "2.36.10": ["Cheatsheet settings read in your language: each bind and its group"],
       "2.36.8": ["The bar's distro icon and the sidebar profile's banner, avatar and icons draw sharp, on whole pixels"],
