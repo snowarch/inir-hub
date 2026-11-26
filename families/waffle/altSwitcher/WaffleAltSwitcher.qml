@@ -225,6 +225,8 @@ Scope {
     }
 
     function closeSwitcher() {
+        if (root.rinDriven)
+            NiriService.rinSwitcherDismiss(NiriService.rinSwitcher.serial)
         autoHideTimer.stop()
         WaffleState.altSwitcherOpen = false
         root.cardVisible = false
