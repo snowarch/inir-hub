@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.36.8",
+    "version": "2.36.9",
     "changes": {
       "2.36.8": ["The bar's distro icon and the sidebar profile's banner, avatar and icons draw sharp, on whole pixels"],
       "2.36.7": ["Links and the Anki pages open from Settings as fast as apps from the launcher, outside the shell"],
