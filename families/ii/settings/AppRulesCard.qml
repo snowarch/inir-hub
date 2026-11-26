@@ -91,7 +91,7 @@ SettingsCardSection {
     readonly property var screens: [{ displayName: Translation.tr("Any"), value: "" }]
         .concat(CompositorConfig.outputs.map(out => ({ displayName: CompositorConfig.screenName(out), value: String(out.name) })))
 
-    visible: root.rules !== null && (CompositorService.niriNative || CompositorService.isUmbriel)
+    visible: root.rules !== null && (CompositorService.niriNative || CompositorService.isUmbriel || CompositorService.isRin)
     expanded: true
     icon: "app_registration"
     title: Translation.tr("App rules")
@@ -162,7 +162,7 @@ SettingsCardSection {
                     id: field
                     Layout.fillWidth: true
                     font.pixelSize: Appearance.font.pixelSize.small
-                    placeholderText: Translation.tr("App id, as `%1 windows` shows it").arg(CompositorService.isUmbriel ? "umbriel" : "niri msg")
+                    placeholderText: Translation.tr("App id, as `%1 windows` shows it").arg(CompositorService.isUmbriel ? "umbriel" : CompositorService.isRin ? "rin msg" : "niri msg")
                     onAccepted: root.add(field.text)
                 }
                 RippleButton {
