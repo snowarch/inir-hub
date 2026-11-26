@@ -179,7 +179,7 @@ ContentPage {
                 readonly property var bindIndices: modelData?.binds ?? []
 
                 icon: root.getCategoryIcon(catName)
-                title: catName
+                title: Translation.tr(catName)
 
                 SettingsGroup {
                     Layout.fillWidth: true
@@ -198,7 +198,7 @@ ContentPage {
 
                             mods: _parsed.mods
                             keyName: _parsed.key
-                            action: bindData.description ?? bindData.action ?? ""
+                            action: Translation.trLabel(bindData.description ?? bindData.action ?? "")
                             showDivider: index < enrichedBindRepeater.count - 1
                             keyCombo: bindData.key_combo ?? ""
                             actionRaw: bindData.action ?? ""
@@ -232,7 +232,7 @@ ContentPage {
                 readonly property var categoryKeybinds: modelData.children?.[0]?.keybinds ?? []
 
                 icon: root.getCategoryIcon(modelData.name)
-                title: modelData.name
+                title: Translation.tr(modelData.name)
 
                 SettingsGroup {
                     Layout.fillWidth: true
@@ -247,7 +247,7 @@ ContentPage {
                             Layout.fillWidth: true
                             mods: modelData.mods ?? []
                             keyName: modelData.key ?? ""
-                            action: modelData.comment ?? ""
+                            action: Translation.trLabel(modelData.comment ?? "")
                             showDivider: index < legacyBindRepeater.count - 1
                             keyCombo: ""
                             actionRaw: ""
@@ -294,7 +294,7 @@ ContentPage {
                         const v = text.trim()
                         if (!v) return ""
                         const found = (NiriKeybinds.allBinds ?? []).find(b => b.key_combo === v && !b.commented)
-                        return found ? (found.description ?? found.action ?? v) : ""
+                        return found ? Translation.trLabel(found.description ?? found.action ?? v) : ""
                     }
                 }
 
@@ -678,7 +678,7 @@ ContentPage {
                                             const found = (NiriKeybinds.allBinds ?? []).find(
                                                 b => b.key_combo === v && !b.commented
                                             )
-                                            return found ? (found.description ?? found.action ?? v) : ""
+                                            return found ? Translation.trLabel(found.description ?? found.action ?? v) : ""
                                         }
                                     }
 
