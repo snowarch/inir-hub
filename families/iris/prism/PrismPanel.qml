@@ -421,6 +421,7 @@ Item {
                 transform: Translate { y: Math.round((1 - root.enter) * PrismTheme.dp(14)) }
 
                 PrismPageHead {
+                    id: pageHead
                     width: content.width
                     plain: PrismState.searching
                     person: root.home
@@ -571,6 +572,9 @@ Item {
             flick: centre
             anchors.fill: centre
             reach: PrismTheme.dp(36)
+            // Rows that run under the window's keys are gone before they reach them.
+            headReach: chrome.overRows ? chrome.y + chrome.height + PrismTheme.dp(12) : PrismTheme.dp(36)
+            Behavior on headReach { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
             veil: PrismTheme.glass ? "transparent" : PrismTheme.canvas
             // The veil alone: a blurred band read the page into a texture on every scrolled frame (11-11).
             blurs: false
@@ -580,21 +584,26 @@ Item {
 
         // The window's own keys, where every window keeps them: as a window or over the desktop, the whole room, close.
         // With the side column open they head it, plain on its ground, so a scrolled card never runs under them; without
-        // it they stand inside the page art's top corner, smoked, so they never hang half off its edge.
+        // it they stand inside the page art's top corner, smoked, so they never hang half off its edge. As the page
+        // scrolls they ride the art up to the window's corner and stay there; once the art has gone from under them they
+        // turn plain, and the rows fade out before they reach them (centreEdge's head).
         Row {
             id: chrome
             readonly property bool plain: PrismState.searching || root.asideOpen
+            readonly property real artBottom: content.y + pageHead.y + pageHead.height - centre.contentY
+            readonly property bool overRows: !chrome.plain && chrome.artBottom < chrome.y + chrome.height + PrismTheme.dp(8)
+            readonly property bool bare: chrome.plain || chrome.overRows
             anchors.right: parent.right
             anchors.rightMargin: chrome.plain ? PrismTheme.dp(14)
                 : Math.round((centre.width - root.measure) / 2) + PrismTheme.dp(14)
-            y: chrome.plain ? PrismTheme.dp(14) : PrismTheme.dp(24) + PrismTheme.dp(14)
+            y: chrome.plain ? PrismTheme.dp(14) : Math.max(PrismTheme.dp(14), content.y + PrismTheme.dp(14) - centre.contentY)
             z: 5
             spacing: PrismTheme.dp(2)
             PrismRound {
                 visible: root.asideFits
-                ghost: chrome.plain
-                overArt: !chrome.plain
-                smoked: !chrome.plain
+                ghost: chrome.bare
+                overArt: !chrome.bare
+                smoked: !chrome.bare
                 glyph: root.asideOpen ? "right_panel_close" : "right_panel_open"
                 glyphSize: PrismTheme.dp(17)
                 Accessible.role: Accessible.Button
@@ -602,9 +611,9 @@ Item {
                 onClicked: root.toggleAside()
             }
             PrismRound {
-                ghost: chrome.plain
-                overArt: !chrome.plain
-                smoked: !chrome.plain
+                ghost: chrome.bare
+                overArt: !chrome.bare
+                smoked: !chrome.bare
                 glyph: root.windowed ? "picture_in_picture_center" : "open_in_new"
                 glyphSize: PrismTheme.dp(17)
                 Accessible.role: Accessible.Button
@@ -613,9 +622,9 @@ Item {
             }
             PrismRound {
                 visible: root.windowed
-                ghost: chrome.plain
-                overArt: !chrome.plain
-                smoked: !chrome.plain
+                ghost: chrome.bare
+                overArt: !chrome.bare
+                smoked: !chrome.bare
                 glyph: "remove"
                 glyphSize: PrismTheme.dp(17)
                 Accessible.role: Accessible.Button
@@ -623,9 +632,9 @@ Item {
                 onClicked: root.minimizeRequested()
             }
             PrismRound {
-                ghost: chrome.plain
-                overArt: !chrome.plain
-                smoked: !chrome.plain
+                ghost: chrome.bare
+                overArt: !chrome.bare
+                smoked: !chrome.bare
                 glyph: root.windowed || !PrismState.wide ? "open_in_full" : "close_fullscreen"
                 glyphSize: PrismTheme.dp(16)
                 Accessible.role: Accessible.Button
@@ -633,9 +642,9 @@ Item {
                 onClicked: root.windowed ? root.growRequested() : (PrismState.wide = !PrismState.wide)
             }
             PrismRound {
-                ghost: chrome.plain
-                overArt: !chrome.plain
-                smoked: !chrome.plain
+                ghost: chrome.bare
+                overArt: !chrome.bare
+                smoked: !chrome.bare
                 glyph: "close"
                 glyphSize: PrismTheme.dp(18)
                 Accessible.role: Accessible.Button

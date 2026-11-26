@@ -10,6 +10,8 @@ Item {
 
     required property Flickable flick
     property real reach: 28
+    // The head's own fade, longer where keys float over the list's top: the rows are gone before they reach them.
+    property real headReach: root.reach
     property bool blurs: true
     property real blurMax: 24
     // The corners of what holds the list: rows passing them are cut by the same curve, never by a square clip.
@@ -28,6 +30,7 @@ Item {
     property color veil: "transparent"
     readonly property bool veiled: root.veil.a > 0
     readonly property real share: Math.min(0.5, root.reach / Math.max(1, root.height))
+    readonly property real headShare: Math.min(0.5, root.headReach / Math.max(1, root.height))
 
     // An eased ramp (0, a quarter, a half, all) so the fade has no visible start like a linear one.
     Item {
@@ -40,9 +43,9 @@ Item {
             radius: root.radius
             gradient: Gradient {
                 GradientStop { position: 0; color: root.atTop ? "transparent" : "white" }
-                GradientStop { position: root.share * 0.35; color: root.atTop ? Qt.rgba(1, 1, 1, 0.2) : "white" } // iris-literal: mask alpha, not a colour
-                GradientStop { position: root.share * 0.7; color: root.atTop ? Qt.rgba(1, 1, 1, 0.65) : "white" } // iris-literal: mask alpha, not a colour
-                GradientStop { position: root.share; color: "white" }
+                GradientStop { position: root.headShare * 0.35; color: root.atTop ? Qt.rgba(1, 1, 1, 0.2) : "white" } // iris-literal: mask alpha, not a colour
+                GradientStop { position: root.headShare * 0.7; color: root.atTop ? Qt.rgba(1, 1, 1, 0.65) : "white" } // iris-literal: mask alpha, not a colour
+                GradientStop { position: root.headShare; color: "white" }
                 GradientStop { position: 1 - root.share; color: "white" }
                 GradientStop { position: 1 - root.share * 0.7; color: root.atBottom ? Qt.rgba(1, 1, 1, 0.65) : "white" } // iris-literal: mask alpha, not a colour
                 GradientStop { position: 1 - root.share * 0.35; color: root.atBottom ? Qt.rgba(1, 1, 1, 0.2) : "white" } // iris-literal: mask alpha, not a colour
@@ -55,7 +58,7 @@ Item {
     Rectangle {
         visible: root.veiled && root.atTop
         width: root.width
-        height: root.reach
+        height: root.headReach
         topLeftRadius: root.topLeftRadius
         topRightRadius: root.topRightRadius
         gradient: Gradient {
@@ -84,7 +87,7 @@ Item {
         id: band
         visible: root.blurs && root.atTop
         width: root.width
-        height: Math.min(root.height, Math.round(root.reach * 1.4))
+        height: Math.min(root.height, Math.round(root.headReach * 1.4))
         sourceItem: root.flick.contentItem
         sourceRect: Qt.rect(root.flick.contentX, root.flick.contentY, band.width, band.height)
         live: band.visible
