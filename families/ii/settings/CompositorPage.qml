@@ -196,7 +196,7 @@ ContentPage {
                         { displayName: Translation.tr("Dwindle"), value: "dwindle", icon: "dashboard" },
                         { displayName: Translation.tr("Main and stack"), value: "master", icon: "view_quilt" },
                         { displayName: Translation.tr("Floating"), value: "stacking", icon: "filter_none" }
-                    ]
+                    ].filter(option => CompositorConfig.layoutModes.includes(option.value))
                     currentValue: CompositorRows.layoutMode()
                     onSelected: newValue => CompositorConfig.set({ comp: "layout", key: "mode", fallback: "scrolling" }, newValue)
                 }
