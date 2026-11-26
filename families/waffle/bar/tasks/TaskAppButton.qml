@@ -82,6 +82,8 @@ AppButton {
     // Count of minimized windows for this app
     readonly property int minimizedCount: MinimizedWindows.countMinimizedForApp(appEntry.appId)
     readonly property bool hasMinimized: minimizedCount > 0
+    // Windows on screen; each minimized one has its dimmed pill instead.
+    readonly property int shownCount: appEntry.toplevels.filter(t => !MinimizedWindows.isMinimized(t.niriWindowId)).length
 
     function niriWindowIds(): list<var> {
         const ids = []
@@ -223,7 +225,7 @@ AppButton {
 
         // Active windows
         Repeater {
-            model: Math.min(appEntry.toplevels.length, 5)
+            model: Math.min(root.shownCount, 5)
             delegate: Rectangle {
                 required property int index
                 property bool isFocused: root.active && index === root.focusedWindowIndex
