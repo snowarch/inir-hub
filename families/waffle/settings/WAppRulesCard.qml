@@ -90,7 +90,7 @@ ColumnLayout {
     readonly property var screens: [{ displayName: Translation.tr("Any"), value: "" }]
         .concat(CompositorConfig.outputs.map(out => ({ displayName: CompositorConfig.screenName(out), value: String(out.name) })))
 
-    visible: root.rules !== null && (CompositorService.niriNative || CompositorService.isUmbriel)
+    visible: root.rules !== null && (CompositorService.niriNative || CompositorService.isUmbriel || CompositorService.isRin)
     Layout.fillWidth: true
     spacing: Looks.settings.cardSpacing
 
@@ -198,7 +198,7 @@ ColumnLayout {
                     cardStyle: "item"
                     enableSettingsSearch: false
                     label: Translation.tr("App id")
-                    description: Translation.tr("App id, as `%1 windows` shows it").arg(CompositorService.isUmbriel ? "umbriel" : "niri msg")
+                    description: Translation.tr("App id, as `%1 windows` shows it").arg(CompositorService.isUmbriel ? "umbriel" : CompositorService.isRin ? "rin msg" : "niri msg")
                     control: Component {
                         RowLayout {
                             spacing: Looks.dp(8)
