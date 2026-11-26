@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "컴포지터 블러, 리퀴드 글래스 굴절 및 블러 반경",
+  "Space around and between windows.": "창 주변과 창 사이의 간격.",
   "%1\nInternet access": "%1\n인터넷 접속",
   "%1 mins": "%1분",
   "%1 notification(s)": "%1 알림",
@@ -51,7 +53,6 @@
   "Built-in": "내장",
   "Calendar / Notification Center": "캘린더/알림 센터",
   "Caps Lock: On": "Caps Lock: 켬",
-  "Carousel": "회전목마",
   "Carousel shows desktops equally. Centered highlights the active one.": "캐러셀은 데스크톱을 동일하게 표시합니다. 가운데는 활성 항목을 강조 표시합니다.",
   "Cava Options": "카바 옵션",
   "Centered focus": "중심 초점",

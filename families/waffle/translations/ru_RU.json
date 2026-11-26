@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "Размытие композитора, преломление жидкого стекла и радиус размытия",
+  "Space around and between windows.": "Пространство вокруг окон и между ними.",
   "%1\nInternet access": "%1\nдоступ в Интернет",
   "%1 mins": "%1 мин.",
   "%1 notification(s)": "%1 уведомление(я)",
@@ -51,7 +53,6 @@
   "Built-in": "Встроенный",
   "Calendar / Notification Center": "Календарь/Центр уведомлений",
   "Caps Lock: On": "Caps Lock: вкл.",
-  "Carousel": "Карусель",
   "Carousel shows desktops equally. Centered highlights the active one.": "В карусели одинаково отображаются рабочие столы. По центру выделяется активный.",
   "Cava Options": "Варианты кавы",
   "Centered focus": "Центрированный фокус",

@@ -1,4 +1,5 @@
 {
+  "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "오버뷰 창 배치 방식 (Mod+Tab, 1–4로 즉시 전환).",
   "Mute the microphone": "마이크 음소거",
   "Legibility": "가독성",
   "Use as accent": "강조 색상으로 사용",
@@ -2593,7 +2594,6 @@
   "A split keeps its direction when resized.": "분할은 크기를 바꿔도 방향을 유지합니다.",
   "An edge fills half; a corner, a quarter.": "가장자리는 절반, 모서리는 4분의 1을 채웁니다.",
   "How one app's windows open.": "이 앱의 창이 열리는 방식.",
-  "What shows through is frosted.": "비쳐 보이는 것은 젖빛 유리가 됩니다.",
   "Frosts what shows through every window.": "모든 창을 통해 보이는 것을 흐리게 합니다.",
   "Borders never show through a see-through window.": "테두리는 반투명 창을 통해 보이지 않습니다.",
   "Picking the current one goes back.": "현재 작업 공간을 고르면 이전으로 돌아갑니다.",

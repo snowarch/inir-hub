@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "Desfoque do compositor, refração de vidro líquido e raio de desfoque",
+  "Space around and between windows.": "Espaço em volta e entre as janelas.",
   "%1\nInternet access": "%1\nacesso à Internet",
   "%1 mins": "%1 minutos",
   "%1 notification(s)": "%1 notificação(ões)",
@@ -51,7 +53,6 @@
   "Built-in": "Integrado",
   "Calendar / Notification Center": "Calendário / Central de Notificações",
   "Caps Lock: On": "Caps Lock: ON",
-  "Carousel": "Carrossel",
   "Carousel shows desktops equally. Centered highlights the active one.": "O carrossel mostra os desktops igualmente. Centralizado destaca o ativo.",
   "Cava Options": "Opções de cava",
   "Centered focus": "Foco centrado",

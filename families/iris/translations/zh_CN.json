@@ -1,4 +1,5 @@
 {
+  "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "原生概览的窗口排列方式（Mod+Tab 打开，1–4 实时切换）。",
   "Mute the microphone": "麦克风静音",
   "Legibility": "易读性",
   "Use as accent": "用作强调色",
@@ -2593,7 +2594,6 @@
   "A split keeps its direction when resized.": "调整大小时，分割保持其方向。",
   "An edge fills half; a corner, a quarter.": "拖到边缘填满一半；拖到角落填满四分之一。",
   "How one app's windows open.": "此应用窗口的打开方式。",
-  "What shows through is frosted.": "透出的内容被磨砂化。",
   "Frosts what shows through every window.": "对透出内容的每个窗口进行磨砂。",
   "Borders never show through a see-through window.": "边框绝不会透过半透明窗口显示。",
   "Picking the current one goes back.": "选择当前工作区会返回上一个。",

@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "تمويه المؤلف وانكسار الزجاج السائل ونصف قطر التمويه",
+  "Space around and between windows.": "المساحة حول النوافذ وبينها.",
   "%1\nInternet access": "%1\nالوصول إلى الإنترنت",
   "%1 mins": "%1 دقيقة",
   "%1 notification(s)": "%1 إعلام (إعلامات)",
@@ -51,7 +53,6 @@
   "Built-in": "مدمج",
   "Calendar / Notification Center": "التقويم / مركز الإشعارات",
   "Caps Lock: On": "Caps Lock: تشغيل",
-  "Carousel": "دائري",
   "Carousel shows desktops equally. Centered highlights the active one.": "يعرض الرف الدائري أجهزة الكمبيوتر المكتبية بشكل متساوٍ. توسيط يسلط الضوء على النشطة.",
   "Cava Options": "خيارات الكافا",
   "Centered focus": "التركيز المتمركز",

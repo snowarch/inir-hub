@@ -106,8 +106,8 @@ WSettingsPage {
             { group: "Title bars", icon: "window", title: Translation.tr("Title bars"), line: CompositorService.isRin
                 ? Translation.tr("A bar to drag a window by, with its buttons, on windows that leave their frame to the compositor.")
                 : Translation.tr("A bar over each window, where it sits and how tall") },
-            { group: "Glass behind apps", icon: "blur", title: Translation.tr("Glass behind apps"), line: Translation.tr("Blur behind see-through windows and how it looks") },
-            { group: "Movement", icon: "slide-transition", title: Translation.tr("Movement"), line: Translation.tr("Animations, the overview and workspace changes") }
+            { group: "Glass behind apps", icon: "blur", title: CompositorService.isRin ? Translation.tr("Glass & liquid effects") : Translation.tr("Glass behind apps"), line: CompositorService.isRin ? Translation.tr("Compositor blur, liquid glass refraction, and blur radius") : Translation.tr("Blur behind see-through windows and how it looks") },
+            { group: "Movement", icon: "slide-transition", title: CompositorService.isRin ? Translation.tr("Overview & movement") : Translation.tr("Movement"), line: Translation.tr("Animations, the overview and workspace changes") }
         ]
         WCompositorGroup {
             required property var modelData

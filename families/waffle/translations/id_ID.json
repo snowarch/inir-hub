@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "Blur kompositor, refraksi kaca cair, dan radius blur",
+  "Space around and between windows.": "Ruang di sekitar dan di antara jendela.",
   "%1\nInternet access": "%1\nAkses internet",
   "%1 mins": "%1 menit",
   "%1 notification(s)": "%1 notifikasi",
@@ -51,7 +53,6 @@
   "Built-in": "Bawaan",
   "Calendar / Notification Center": "Kalender / Pusat Notifikasi",
   "Caps Lock: On": "Caps Lock: Nyala",
-  "Carousel": "Korsel",
   "Carousel shows desktops equally. Centered highlights the active one.": "Korsel menampilkan desktop secara setara. Bagian tengah menyoroti desktop yang aktif.",
   "Cava Options": "Opsi Cava",
   "Centered focus": "Fokus di tengah",

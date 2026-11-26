@@ -1,4 +1,5 @@
 {
+  "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "כיצד תצוגת־העל מסדרת חלונות (Mod+Tab; 1–4 מחליף מיד).",
   "Mute the microphone": "השתקת המיקרופון",
   "Legibility": "קריאות",
   "Use as accent": "השתמש כצבע הדגשה",
@@ -2593,7 +2594,6 @@
   "A split keeps its direction when resized.": "פיצול שומר על כיוונו בשינוי גודל.",
   "An edge fills half; a corner, a quarter.": "שפה ממלאת חצי; פינה, רבע.",
   "How one app's windows open.": "איך החלונות של אפליקציה נפתחים.",
-  "What shows through is frosted.": "מה שנראה מבעד לחלון מוזכך.",
   "Frosts what shows through every window.": "מטשטש את מה שנראה מבעד לכל חלון.",
   "Borders never show through a see-through window.": "גבולות לעולם לא נראים דרך חלון שקוף.",
   "Picking the current one goes back.": "בחירה במרחב הנוכחי חוזרת אחורה.",

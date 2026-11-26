@@ -1,4 +1,5 @@
 {
+  "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Как встроенный обзор располагает окна (Mod+Tab; 1–4 переключают на лету).",
   "Mute the microphone": "Отключить микрофон",
   "Legibility": "Читаемость",
   "Use as accent": "Сделать акцентом",
@@ -2593,7 +2594,6 @@
   "A split keeps its direction when resized.": "Разделение сохраняет направление при изменении размера.",
   "An edge fills half; a corner, a quarter.": "Край заполняет половину; угол — четверть.",
   "How one app's windows open.": "Как открываются окна этого приложения.",
-  "What shows through is frosted.": "То, что видно сквозь окно, становится матовым.",
   "Frosts what shows through every window.": "Размывает то, что видно сквозь каждое окно.",
   "Borders never show through a see-through window.": "Рамки никогда не просвечивают через полупрозрачное окно.",
   "Picking the current one goes back.": "Выбор текущего рабочего стола возвращает назад.",

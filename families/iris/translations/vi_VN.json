@@ -1,4 +1,5 @@
 {
+  "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Cách tổng quan sắp xếp cửa sổ (Mod+Tab; 1–4 đổi trực tiếp).",
   "Mute the microphone": "Tắt tiếng micrô",
   "Legibility": "Mức độ dễ đọc",
   "Use as accent": "Dùng làm màu nhấn",
@@ -2593,7 +2594,6 @@
   "A split keeps its direction when resized.": "Phần chia giữ hướng khi đổi kích thước.",
   "An edge fills half; a corner, a quarter.": "Một cạnh lấp nửa; một góc lấp một phần tư.",
   "How one app's windows open.": "Cửa sổ của ứng dụng này mở theo cách nào.",
-  "What shows through is frosted.": "Phần nhìn xuyên qua được làm mờ.",
   "Frosts what shows through every window.": "Làm mờ những gì nhìn xuyên qua mọi cửa sổ.",
   "Borders never show through a see-through window.": "Viền không bao giờ hiện xuyên qua cửa sổ trong.",
   "Picking the current one goes back.": "Chọn không gian hiện tại sẽ quay về không gian trước.",

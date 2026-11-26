@@ -42,6 +42,35 @@ WSettingsPage {
             checked: Config.options?.performance?.compositorBlur ?? true
             onToggled: checked => Config.setNestedValue("performance.compositorBlur", checked)
         }
+        WSettingsDropdown {
+            visible: CompositorService.isRin && (Config.options?.performance?.compositorBlur ?? true)
+            label: Translation.tr("Rin glass material")
+            description: Translation.tr("Glass blurs what lies behind; Liquid adds GPU lens refraction.")
+            icon: "blur"
+            Component.onCompleted: if (CompositorService.isRin) CompositorConfig.ensure()
+            currentValue: { CompositorConfig.revision; return String(CompositorConfig.value({ comp: "glass", key: "style", fallback: "liquid" })) }
+            options: [
+                { displayName: Translation.tr("Solid"), value: "solid" },
+                { displayName: Translation.tr("Glass"), value: "glass" },
+                { displayName: Translation.tr("Liquid"), value: "liquid" }
+            ]
+            onSelected: value => CompositorConfig.set({ comp: "glass", key: "style" }, value)
+        }
+        WSettingsSpinBox {
+            visible: CompositorService.isRin && (Config.options?.performance?.compositorBlur ?? true)
+            label: Translation.tr("Blur radius")
+            description: Translation.tr("How far the compositor blur reaches in logical pixels.")
+            icon: "blur"
+            from: 0
+            to: 128
+            stepSize: 2
+            suffix: " px"
+            value: { CompositorConfig.revision; return Math.round(Number(CompositorConfig.value({ comp: "glass", key: "blur-radius", fallback: 32 }))) }
+            onValueChanged: {
+                const current = Math.round(Number(CompositorConfig.value({ comp: "glass", key: "blur-radius", fallback: 32 })))
+                if (value !== current) CompositorConfig.set({ comp: "glass", key: "blur-radius" }, value)
+            }
+        }
     }
 
     WSettingsCard {

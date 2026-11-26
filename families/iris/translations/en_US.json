@@ -1,4 +1,5 @@
 {
+  "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).",
   "Mute the microphone": "Mute the microphone",
   "Legibility": "Legibility",
   "Use as accent": "Use as accent",
@@ -2593,7 +2594,6 @@
   "A split keeps its direction when resized.": "A split keeps its direction when resized.",
   "An edge fills half; a corner, a quarter.": "An edge fills half; a corner, a quarter.",
   "How one app's windows open.": "How one app's windows open.",
-  "What shows through is frosted.": "What shows through is frosted.",
   "Frosts what shows through every window.": "Frosts what shows through every window.",
   "Borders never show through a see-through window.": "Borders never show through a see-through window.",
   "Picking the current one goes back.": "Picking the current one goes back.",

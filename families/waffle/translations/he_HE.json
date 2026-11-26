@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "טשטוש המנהל, שבירת זכוכית נוזלית ורדיוס טשטוש",
+  "Space around and between windows.": "מרווח סביב חלונות וביניהם.",
   "%1\nInternet access": "%1\nגישה לאינטרנט",
   "%1 mins": "%1 דקות",
   "%1 notification(s)": "%1 הודעות",
@@ -51,7 +53,6 @@
   "Built-in": "מובנה",
   "Calendar / Notification Center": "לוח שנה / מרכז הודעות",
   "Caps Lock: On": "Caps Lock: פעיל",
-  "Carousel": "קרוסלה",
   "Carousel shows desktops equally. Centered highlights the active one.": "קרוסלה מציגה שולחנות עבודה באופן שווה. במרכז מדגיש את הפעיל.",
   "Cava Options": "אפשרויות קאווה",
   "Centered focus": "מיקוד ממוקד",

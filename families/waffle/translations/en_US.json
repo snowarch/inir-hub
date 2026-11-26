@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "Compositor blur, liquid glass refraction, and blur radius",
+  "Space around and between windows.": "Space around and between windows.",
   "%1\nInternet access": "%1\nInternet access",
   "%1 mins": "%1 mins",
   "%1 notification(s)": "%1 notification(s)",
@@ -51,7 +53,6 @@
   "Built-in": "Built-in",
   "Calendar / Notification Center": "Calendar / Notification Center",
   "Caps Lock: On": "Caps Lock: On",
-  "Carousel": "Carousel",
   "Carousel shows desktops equally. Centered highlights the active one.": "Carousel shows desktops equally. Centered highlights the active one.",
   "Cava Options": "Cava Options",
   "Centered focus": "Centered focus",

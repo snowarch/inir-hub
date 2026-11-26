@@ -1,4 +1,5 @@
 {
+  "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Como a visão geral nativa organiza as janelas (Mod+Tab; 1–4 alterna na hora).",
   "Mute the microphone": "Silenciar o microfone",
   "Legibility": "Legibilidade",
   "Use as accent": "Usar como destaque",
@@ -2593,7 +2594,6 @@
   "A split keeps its direction when resized.": "Uma divisão mantém a direção ao ser redimensionada.",
   "An edge fills half; a corner, a quarter.": "Uma borda preenche metade; um canto, um quarto.",
   "How one app's windows open.": "Como as janelas deste app abrem.",
-  "What shows through is frosted.": "O que aparece por trás fica fosco.",
   "Frosts what shows through every window.": "Deixa fosco o que aparece por trás de cada janela.",
   "Borders never show through a see-through window.": "As bordas nunca aparecem através de uma janela translúcida.",
   "Picking the current one goes back.": "Escolher a área de trabalho atual volta para a anterior.",

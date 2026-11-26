@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "コンポジタのぼかし、リキッドガラス屈折、ぼかし半径",
+  "Space around and between windows.": "ウィンドウの周囲と間のすき間。",
   "%1\nInternet access": "%1\nインターネットアクセス",
   "%1 mins": "%1分",
   "%1 notification(s)": "%1 件の通知",
@@ -51,7 +53,6 @@
   "Built-in": "内蔵",
   "Calendar / Notification Center": "カレンダー/通知センター",
   "Caps Lock: On": "Caps Lock: ON",
-  "Carousel": "カルーセル",
   "Carousel shows desktops equally. Centered highlights the active one.": "カルーセルではデスクトップが均等に表示されます。アクティブなものが中央に強調表示されます。",
   "Cava Options": "カヴァのオプション",
   "Centered focus": "中央に焦点を合わせる",

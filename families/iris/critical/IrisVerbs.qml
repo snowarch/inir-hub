@@ -78,8 +78,8 @@ QtObject {
             opens: side => Config.options?.iris?.sidebars?.[side]?.enable ?? true
         },
         taskview: {
-            toggle: () => { if (root._orbitOn()) IrisState.orbitOpen = !IrisState.orbitOpen; else GlobalStates.searchOpen = !GlobalStates.searchOpen },
-            open: () => { if (root._orbitOn()) IrisState.orbitOpen = true; else GlobalStates.searchOpen = true },
+            toggle: () => { if (root._orbitOn()) IrisState.orbitOpen = !IrisState.orbitOpen; else if (CompositorService.isRin) NiriService.toggleOverview(); else GlobalStates.searchOpen = !GlobalStates.searchOpen },
+            open: () => { if (root._orbitOn()) IrisState.orbitOpen = true; else if (CompositorService.isRin) NiriService.toggleOverview(); else GlobalStates.searchOpen = true },
             close: () => { IrisState.orbitOpen = false; GlobalStates.searchOpen = false }
         },
         orbit: {

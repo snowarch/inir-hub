@@ -83,6 +83,31 @@ ContentPage {
                 checked: Config.options?.performance?.compositorBlur ?? true
                 onCheckedChanged: Config.setNestedValue("performance.compositorBlur", checked)
             }
+            ContentSubsection {
+                visible: CompositorService.isRin && (Config.options?.performance?.compositorBlur ?? true)
+                title: Translation.tr("Rin glass material")
+                Component.onCompleted: if (CompositorService.isRin) CompositorConfig.ensure()
+                ConfigSelectionArray {
+                    options: [
+                        { displayName: Translation.tr("Solid"), value: "solid", icon: "crop_square" },
+                        { displayName: Translation.tr("Glass"), value: "glass", icon: "blur_on" },
+                        { displayName: Translation.tr("Liquid"), value: "liquid", icon: "lens_blur" }
+                    ]
+                    currentValue: { CompositorConfig.revision; return String(CompositorConfig.value({ comp: "glass", key: "style", fallback: "liquid" })) }
+                    onSelected: newValue => CompositorConfig.set({ comp: "glass", key: "style" }, newValue)
+                }
+            }
+            ConfigSpinBox {
+                id: rinBlurRadius
+                visible: CompositorService.isRin && (Config.options?.performance?.compositorBlur ?? true)
+                icon: "blur_circular"
+                text: Translation.tr("Blur radius")
+                from: 0
+                to: 128
+                stepSize: 2
+                Binding { target: rinBlurRadius; property: "value"; value: { CompositorConfig.revision; return Math.round(Number(CompositorConfig.value({ comp: "glass", key: "blur-radius", fallback: 32 }))) } }
+                onValueModified: CompositorConfig.set({ comp: "glass", key: "blur-radius" }, rinBlurRadius.value)
+            }
         }
     }
         }

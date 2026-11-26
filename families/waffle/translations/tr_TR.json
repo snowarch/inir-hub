@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "Birleştirici bulanıklık, sıvı cam kırılması ve bulanıklık yarıçapı",
+  "Space around and between windows.": "Pencerelerin çevresinde ve arasında boşluk.",
   "%1\nInternet access": "%1\nİnternet erişimi",
   "%1 mins": "%1 dk",
   "%1 notification(s)": "%1 bildirim",
@@ -51,7 +53,6 @@
   "Built-in": "Yerleşik",
   "Calendar / Notification Center": "Takvim / Bildirim Merkezi",
   "Caps Lock: On": "Caps Lock: Açık",
-  "Carousel": "Döngü",
   "Carousel shows desktops equally. Centered highlights the active one.": "Döngü masaüstlerini eşit gösterir. Ortalanmış olan aktif olanı vurgular.",
   "Cava Options": "Cava Seçenekleri",
   "Centered focus": "Ortalanmış odak",

@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "Làm mờ trình tổng hợp, khúc xạ kính lỏng và bán kính mờ",
+  "Space around and between windows.": "Khoảng quanh và giữa các cửa sổ.",
   "%1\nInternet access": "%1\ntruy cập Internet",
   "%1 mins": "%1 phút",
   "%1 notification(s)": "%1 thông báo",
@@ -51,7 +53,6 @@
   "Built-in": "Tích hợp",
   "Calendar / Notification Center": "Lịch / Trung tâm thông báo",
   "Caps Lock: On": "Caps Lock: Bật",
-  "Carousel": "Băng chuyền",
   "Carousel shows desktops equally. Centered highlights the active one.": "Băng chuyền hiển thị máy tính để bàn như nhau. Căn giữa làm nổi bật cái đang hoạt động.",
   "Cava Options": "Tùy chọn Cava",
   "Centered focus": "Lấy nét ở giữa",

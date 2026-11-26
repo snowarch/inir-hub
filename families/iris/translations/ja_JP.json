@@ -1,4 +1,5 @@
 {
+  "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "オーバービューの配置（Mod+Tab、1〜4で即時切替）。",
   "Mute the microphone": "マイクをミュート",
   "Legibility": "読みやすさ",
   "Use as accent": "アクセントにする",
@@ -2593,7 +2594,6 @@
   "A split keeps its direction when resized.": "分割は領域の形が変わっても向きを保ちます。",
   "An edge fills half; a corner, a quarter.": "端へのドラッグは半分、角は 4 分の 1 を占めます。",
   "How one app's windows open.": "アプリのウィンドウの開き方。",
-  "What shows through is frosted.": "透けて見えるものをすりガラスにします。",
   "Frosts what shows through every window.": "透けるすべてのウィンドウの背後をぼかします。",
   "Borders never show through a see-through window.": "透けたウィンドウに枠やフォーカスリングを見せません。",
   "Picking the current one goes back.": "今のワークスペースを選ぶと、前のものに戻ります。",

@@ -1,4 +1,6 @@
 {
+  "Compositor blur, liquid glass refraction, and blur radius": "合成器模糊、液态玻璃折射与模糊半径",
+  "Space around and between windows.": "窗口周围和之间的间距。",
   "%1\nInternet access": "%1\n互联网接入",
   "%1 mins": "%1 分钟",
   "%1 notification(s)": "%1 条通知",
@@ -51,7 +53,6 @@
   "Built-in": "内置",
   "Calendar / Notification Center": "日历/通知中心",
   "Caps Lock: On": "大写锁定：开",
-  "Carousel": "轮播",
   "Carousel shows desktops equally. Centered highlights the active one.": "轮播同样显示桌面。居中突出显示活动的。",
   "Cava Options": "卡瓦选项",
   "Centered focus": "焦点居中",
