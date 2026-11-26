@@ -652,6 +652,7 @@ ColumnLayout {
                             height: 7 * IrisStyle.density
                             radius: IrisStyle.capsule(height)
                             color: dot.active ? IrisStyle.accent
+                                : dot.modelData.is_urgent ? IrisStyle.secondaryAccent
                                 : (dot.containsMouse ? IrisStyle.textStrong : dot.occupied ? IrisStyle.textTertiary : IrisStyle.fillHover)
                             Behavior on width { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }

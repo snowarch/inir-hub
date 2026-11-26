@@ -901,7 +901,7 @@ Item {
                                 width: Math.max(2, 3 * root.d)
                                 height: width
                                 radius: IrisStyle.capsule(width)
-                                color: entry?.is_active ? root.faceAccent : root.inkFaint
+                                color: entry?.is_active ? root.faceAccent : entry?.is_urgent ? root.highlight : root.inkFaint
                             }
                         }
                     }
