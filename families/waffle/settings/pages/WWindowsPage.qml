@@ -47,7 +47,7 @@ WSettingsPage {
             options: [
                 { displayName: Translation.tr("Scrolling"), value: "scrolling" }, { displayName: Translation.tr("Dwindle"), value: "dwindle" },
                 { displayName: Translation.tr("Main and stack"), value: "master" }, { displayName: Translation.tr("Floating"), value: "stacking" }
-            ]
+            ].filter(option => CompositorConfig.layoutModes.includes(option.value))
             currentValue: CompositorRows.layoutMode()
             onSelected: newValue => { if (newValue !== CompositorRows.layoutMode()) CompositorConfig.set({ comp: "layout", key: "mode", fallback: "scrolling" }, newValue) }
         }
