@@ -103,7 +103,9 @@ WSettingsPage {
             { group: "Borders", icon: "border-all", title: Translation.tr("Borders"), line: Translation.tr("The line round each window and the ring on the focused one") },
             { group: "Shape", icon: "square-hint", title: Translation.tr("Shape"), line: Translation.tr("Rounded corners and shadows") },
             { group: "Tabs", icon: "tab-desktop", title: Translation.tr("Tabs"), line: Translation.tr("Windows stacked as tabs in one column") },
-            { group: "Title bars", icon: "window", title: Translation.tr("Title bars"), line: Translation.tr("A bar over each window, where it sits and how tall") },
+            { group: "Title bars", icon: "window", title: Translation.tr("Title bars"), line: CompositorService.isRin
+                ? Translation.tr("A bar to drag a window by, with its buttons, on windows that leave their frame to the compositor.")
+                : Translation.tr("A bar over each window, where it sits and how tall") },
             { group: "Glass behind apps", icon: "blur", title: Translation.tr("Glass behind apps"), line: Translation.tr("Blur behind see-through windows and how it looks") },
             { group: "Movement", icon: "slide-transition", title: Translation.tr("Movement"), line: Translation.tr("Animations, the overview and workspace changes") }
         ]
