@@ -26,8 +26,9 @@ Flow {
           boxes: [{ x: 4, y: 5, w: 54, h: 52, main: true }, { x: 61, y: 5, w: 35, h: 15.3 }, { x: 61, y: 23.3, w: 35, h: 15.3 }, { x: 61, y: 41.6, w: 35, h: 15.4 }] },
         { value: "stacking", label: Translation.tr("Floating"), detail: Translation.tr("Windows where you leave them."),
           boxes: [{ x: 8, y: 8, w: 46, h: 32 }, { x: 44, y: 22, w: 44, h: 30 }, { x: 22, y: 16, w: 48, h: 34, main: true }] }
-    ]
-    readonly property int perRow: root.width >= Math.round(560 * root.d) ? 4 : 2
+    ].filter(way => CompositorConfig.layoutModes.includes(way.value))
+    // One row when there is room; three ways stay one row, never two and one.
+    readonly property int perRow: root.width >= Math.round(560 * root.d) || root.ways.length === 3 ? root.ways.length : 2
     readonly property real tileWidth: Math.floor((root.width - root.spacing * (root.perRow - 1)) / root.perRow)
 
     spacing: Math.round(8 * root.d)

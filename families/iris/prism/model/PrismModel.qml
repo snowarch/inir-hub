@@ -144,12 +144,24 @@ Singleton {
             for (const id of extras.filter(id => root.dress[id].after === section.id)) add(id, null, section.id)
         }
         // The compositor's pages stand together after the desktop's, in their own order, wherever their areas sit.
-        const own = out.filter(page => page.cluster === 5).sort((a, b) => a.order - b.order)
+        const bare = root.bareCompositorPages.split(",")
+        const own = out.filter(page => page.cluster === 5 && !bare.includes(page.pageId)).sort((a, b) => a.order - b.order)
         const rest = out.filter(page => page.cluster !== 5)
         const at = rest.reduce((last, page, i) => page.cluster <= 1 ? i : last, -1) + 1
         return rest.slice(0, at).concat(own, rest.slice(at))
     }
     readonly property var ids: root.pages.map(page => page.pageId)
+    // The pages whose rows the compositor in use shows none of (Glass on one without blur): left out, never drawn
+    // empty. A string, so the page list is rebuilt only when the set itself changes.
+    readonly property string bareCompositorPages: {
+        const seen = ({})
+        for (const row of root.rows) {
+            if (!row.spec || row.spec.notice) continue
+            if (!(row.page in seen)) seen[row.page] = false
+            if (!seen[row.page] && IrisOptions.shown(row.spec)) seen[row.page] = true
+        }
+        return Object.keys(seen).filter(id => !seen[id]).sort().join(",")
+    }
 
     // ── Rows. Every IrisOptions row once, as a line of the chart: its spec, the page and group it lives in, the key
     // that names it and the cover it wears. Home's "Every day" copies are Prism's tiles, not rows; Settings window's
