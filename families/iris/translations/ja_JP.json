@@ -2708,5 +2708,6 @@
   "Swap with the accent": "アクセントと入れ替える",
   "The accent takes the highlight's colour, and the highlight the accent's.": "アクセントがハイライトの色に、ハイライトがアクセントの色になります。",
   "Control Center sliders filled in grey or in one of your colours.": "コントロールセンターのスライダーをグレーか、あなたの色のひとつで塗ります。",
-  "The artwork's, one of your colours, the wallpaper's or ink.": "ジャケット、あなたの色のひとつ、壁紙、またはインクの色。"
+  "The artwork's, one of your colours, the wallpaper's or ink.": "ジャケット、あなたの色のひとつ、壁紙、またはインクの色。",
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "iNiR のキーが入るまで Rin は独自のキーを使います。ここで変更するとそれらが入ります"
 }

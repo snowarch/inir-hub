@@ -2708,5 +2708,6 @@
   "Swap with the accent": "Поменять с акцентом",
   "The accent takes the highlight's colour, and the highlight the accent's.": "Акцент берёт цвет выделения, а выделение — цвет акцента.",
   "Control Center sliders filled in grey or in one of your colours.": "Ползунки Пункта управления серые или в одном из ваших цветов.",
-  "The artwork's, one of your colours, the wallpaper's or ink.": "Цвет обложки, один из ваших цветов, цвет обоев или основной цвет текста."
+  "The artwork's, one of your colours, the wallpaper's or ink.": "Цвет обложки, один из ваших цветов, цвет обоев или основной цвет текста.",
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin использует свои клавиши, пока не подключены клавиши iNiR: изменение здесь подключит их"
 }

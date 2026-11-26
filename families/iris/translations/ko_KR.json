@@ -2708,5 +2708,6 @@
   "Swap with the accent": "강조색과 바꾸기",
   "The accent takes the highlight's colour, and the highlight the accent's.": "강조색은 하이라이트의 색을, 하이라이트는 강조색의 색을 가집니다.",
   "Control Center sliders filled in grey or in one of your colours.": "제어 센터의 슬라이더를 회색 또는 내 색 중 하나로 채웁니다.",
-  "The artwork's, one of your colours, the wallpaper's or ink.": "앨범 아트, 내 색 중 하나, 바탕화면 또는 잉크의 색."
+  "The artwork's, one of your colours, the wallpaper's or ink.": "앨범 아트, 내 색 중 하나, 바탕화면 또는 잉크의 색.",
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "iNiR의 키가 적용되기 전까지 Rin은 자체 키를 사용합니다. 여기서 변경하면 적용됩니다"
 }
