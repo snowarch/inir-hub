@@ -95,7 +95,7 @@ WSettingsPage {
                     Layout.fillWidth: true
                     mods: modelData.mods ?? []
                     keyName: modelData.key ?? ""
-                    action: modelData.comment ?? ""
+                    action: Translation.trLabel(modelData.comment ?? "")
                     keySubstitutions: root.keySubstitutions
                     
                     // Search registration
@@ -110,7 +110,7 @@ WSettingsPage {
     function displayCategoryName(name: string): string {
         if (name === "ii Shell")
             return Translation.tr("iNiR Shell")
-        return name
+        return Translation.tr(name)
     }
     
     function getCategoryIcon(name: string): string {
