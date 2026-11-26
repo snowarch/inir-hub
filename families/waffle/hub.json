@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.29",
+    "version": "2.34.30",
     "changes": {
+      "2.34.30": ["Shortcuts read in your language: each bind and its group"],
       "2.34.28": ["All apps: a name with an accent files under its plain letter, so É sits with E"],
       "2.34.27": ["Clipboard: each entry is a card that says if it is text, a link, an image or pinned; a friendly empty state; keys on chips"],
       "2.34.26": ["All apps: one search, a letter opens the alphabet to jump through the list, pinned apps wear a dot, a right click pins"],
