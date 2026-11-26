@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.32",
+    "version": "2.34.33",
     "changes": {
+      "2.34.33": ["The focused window's pill stays right when another window of the app is minimized"],
       "2.34.32": ["A minimized window shows one dimmed pill, not two"],
       "2.34.31": ["Taskbar buttons glow when an app asks for attention; a click goes to that window"],
       "2.34.30": ["Shortcuts read in your language: each bind and its group"],
