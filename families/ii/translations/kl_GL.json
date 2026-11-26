@@ -3199,5 +3199,7 @@
   "Remove from bar": "Remove from bar",
   "Add to bar": "Add to bar",
   "Lifted %1 px": "Qaffatsinneqarpoq %1 px",
-  "At the edge": "Sinaani"
+  "At the edge": "Sinaani",
+  "Rest screen after (min)": "Qasuersaarfik skærmi qaangiunnerani (min)",
+  "A calm clock over the desktop when nothing happens for this long, before the screen goes off": "Taama sivisutigisumi pisoqanngippat, skærmi qaminnginnerani nalunaaqutaq eqqissisoq desktop-ip qulaani"
 }
