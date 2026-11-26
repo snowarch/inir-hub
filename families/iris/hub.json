@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.128",
+    "version": "2.33.129",
     "changes": {
       "2.33.128": ["Settings drives Rin: title bars, resize from the edges and tearing; a compositor page with nothing to change is left out"],
       "2.33.127": ["Wallpapers in the gallery reel draw sharp at rest, on whole pixels"],
