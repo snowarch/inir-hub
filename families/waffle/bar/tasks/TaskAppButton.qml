@@ -16,6 +16,9 @@ AppButton {
     readonly property var desktopEntry: AppSearch.lookupDesktopEntry(appEntry.appId)
     property bool active: root.appEntry.toplevels.some(t => t.activated)
     property bool hasWindows: appEntry.toplevels.length > 0
+    // A window of this app asks for attention (Niri and Rin clear the mark when it gets the focus): Windows tints its button.
+    readonly property bool urgent: CompositorService.isNiri
+        && (NiriService.windows ?? []).some(w => w.is_urgent && root.appEntry.toplevels.some(t => t.niriWindowId === w.id))
 
     // Umbriel's scratchpad, for an app with one window (a base without the verbs leaves it out).
     function scratchpadEntry(): var {
@@ -132,6 +135,14 @@ AppButton {
         if (CompositorService.isNiri) {
             const windowIds = root.niriWindowIds()
 
+            // Case 0: a window asks for attention -> go to it.
+            const calling = root.urgent
+                ? (NiriService.windows ?? []).find(w => w.is_urgent && windowIds.includes(w.id)) : null
+            if (calling) {
+                NiriService.focusWindow(calling.id)
+                return
+            }
+
             // Case 1: App is focused -> minimize the exact active window.
             if (isAppFocused && windowIds.length > 0) {
                 const focused = root.appEntry.toplevels.find(t => t.activated)
@@ -186,6 +197,19 @@ AppButton {
         }
     }
 
+    Rectangle {
+        parent: root.background
+        anchors.fill: parent
+        radius: Looks.radius.medium
+        color: ColorUtils.transparentize(Looks.colors.danger, 0.72)
+        opacity: root.urgent ? 1 : 0
+        visible: opacity > 0
+
+        Behavior on opacity {
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+        }
+    }
+
     // Smart indicator: W11 style pills showing window count and which is focused
     Row {
         id: indicatorRow
@@ -207,7 +231,7 @@ AppButton {
                 implicitWidth: isFocused ? 16 : 4
                 implicitHeight: 3
                 radius: height / 2
-                color: isFocused ? Looks.colors.accent : Looks.colors.accentUnfocused
+                color: isFocused ? Looks.colors.accent : root.urgent ? Looks.colors.danger : Looks.colors.accentUnfocused
 
                 Behavior on implicitWidth {
                     animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
