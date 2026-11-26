@@ -76,7 +76,7 @@ Column {
             const raw = String(one.action_raw ?? "")
             if (one.commented || raw.length === 0 || seen[raw]) continue
             seen[raw] = true
-            out.push({ category: String(one.category ?? ""), description: String(one.description || one.action || raw), raw: raw, options: String(one.options ?? "") })
+            out.push({ category: String(one.category ?? ""), description: Translation.trLabel(String(one.description || one.action || raw)), raw: raw, options: String(one.options ?? "") })
         }
         return out
     }

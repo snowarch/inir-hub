@@ -32,7 +32,7 @@ Flickable {
     ScrollBar.vertical: IrisScrollBar {}
 
     function displayCategoryName(name: string): string {
-        return name === "ii Shell" ? Translation.tr("iNiR Shell") : name
+        return name === "ii Shell" ? Translation.tr("iNiR Shell") : Translation.tr(name)
     }
     function categoryGlyph(name: string): string { return IrisBinds.glyphOf(name) }
     // A host may print each category's mark its own way (Prism: a cover of its art); iRiS's squircle otherwise. The
@@ -50,9 +50,15 @@ Flickable {
     readonly property var keySubstitutions: ({
         "Mod": "Super", "Slash": "/", "Comma": ",", "Period": ".", "Minus": "−", "Equal": "=",
         "Return": "Enter", "Escape": "Esc", "Left": "←", "Right": "→", "Up": "↑", "Down": "↓",
-        "Page_Up": "PgUp", "Page_Down": "PgDn", "BackSpace": "⌫", "Print": "PrtSc",
+        "Page_Up": "PgUp", "Page_Down": "PgDn", "BackSpace": "⌫", "Print": "PrtSc", "Delete": "Del", "Insert": "Ins",
         "WheelScrollUp": "Scroll ↑", "WheelScrollDown": "Scroll ↓", "WheelScrollLeft": "Scroll ←", "WheelScrollRight": "Scroll →"
     })
+    // Named keys read as the keyboard above names them (Shift → Mayús, Space → Espacio); letters and marks stay.
+    readonly property var capWords: ["Shift", "Ctrl", "Alt", "Super", "Space", "Esc", "PrtSc", "Home", "End", "PgUp", "PgDn", "Del", "Ins"]
+    function capText(key: string): string {
+        const name = root.keySubstitutions[key] ?? key
+        return root.capWords.includes(name) ? Translation.tr(name) : name
+    }
     readonly property var allCategories: {
         const source = root.hasEnriched ? NiriKeybinds.enrichedCategories : (NiriKeybinds.keybinds?.children ?? [])
         return source.map(category => ({
@@ -61,10 +67,10 @@ Flickable {
                 ? (category.binds ?? []).map(i => {
                     const b = NiriKeybinds.allBinds[i] ?? {}
                     const parsed = root.parseCombo(b.key_combo ?? "")
-                    return { mods: parsed.mods, key: parsed.key, action: b.description ?? b.action ?? "", disabled: b.commented ?? false,
+                    return { mods: parsed.mods, key: parsed.key, action: Translation.trLabel(b.description ?? b.action ?? ""), disabled: b.commented ?? false,
                         keyCombo: b.key_combo ?? "", actionRaw: b.action_raw ?? b.action ?? "", optionsStr: b.options ?? "" }
                 })
-                : (category.children?.[0]?.keybinds ?? []).map(item => ({ mods: item.mods ?? [], key: item.key ?? "", action: item.comment ?? "",
+                : (category.children?.[0]?.keybinds ?? []).map(item => ({ mods: item.mods ?? [], key: item.key ?? "", action: Translation.trLabel(item.comment ?? ""),
                     disabled: false, keyCombo: "", actionRaw: "", optionsStr: "" }))
         }))
     }
@@ -449,7 +455,7 @@ Flickable {
             const v = comboField.text.trim()
             if (!v || v === editor.combo) return ""
             const found = (NiriKeybinds.allBinds ?? []).find(b => b.key_combo === v && !b.commented)
-            return found ? (found.description ?? found.action ?? v) : ""
+            return found ? Translation.trLabel(found.description ?? found.action ?? v) : ""
         }
         spacing: 8 * root.d
         Item { implicitHeight: 2 * root.d }
@@ -553,7 +559,7 @@ Flickable {
         IrisText {
             id: capLabel
             anchors.centerIn: parent
-            text: root.keySubstitutions[parent.keyText] ?? parent.keyText
+            text: root.capText(parent.keyText)
             font.pixelSize: IrisStyle.typeMeta
             font.weight: IrisStyle.weight(Font.Medium)
         }
