@@ -586,6 +586,23 @@ Item {
                             animation: NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
                         }
                     }
+                    Rectangle { // A window here asks for attention (Niri, Rin): Material's small badge
+                        readonly property bool urgent: workspaceButtonBackground.niriWorkspace?.is_urgent ?? false
+                        z: 4
+                        anchors.centerIn: parent
+                        anchors.horizontalCenterOffset: workspaceButtonWidth * 0.3
+                        anchors.verticalCenterOffset: -workspaceButtonWidth * 0.3
+                        width: 6
+                        height: 6
+                        radius: 3
+                        color: Appearance.colors.colError
+                        opacity: urgent ? 1 : 0
+                        visible: opacity > 0
+
+                        Behavior on opacity {
+                            animation: NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
+                        }
+                    }
                     Loader { // Compact workspace marker when no app icon/number is shown
                         id: wsMarker
                         opacity: (root.alwaysShowNumbers
