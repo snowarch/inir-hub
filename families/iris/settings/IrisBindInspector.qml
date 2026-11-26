@@ -24,7 +24,7 @@ Column {
     readonly property real d: IrisStyle.settingsDensity
 
     // Umbriel's keys are written by CompositorConfig.bind, which an older base lacks: there the drawing only reads.
-    readonly property bool canEdit: NiriKeybinds.umbriel ? typeof CompositorConfig.bind === "function" : CompositorService.niriNative
+    readonly property bool canEdit: (NiriKeybinds.tomlBinds ?? NiriKeybinds.umbriel) ? typeof CompositorConfig.bind === "function" : CompositorService.niriNative
     // What the face says: it follows `code` once the face has faded, so a key pointed at eases in instead of snapping.
     property string shown: ""
     property bool fading: false
@@ -96,7 +96,7 @@ Column {
     }
     function program(text: string): string {
         const line = text.trim()
-        return NiriKeybinds.umbriel ? "spawn " + line : "spawn-sh " + JSON.stringify(line)
+        return (NiriKeybinds.tomlBinds ?? NiriKeybinds.umbriel) ? "spawn " + line : "spawn-sh " + JSON.stringify(line)
     }
     Connections {
         target: NiriKeybinds

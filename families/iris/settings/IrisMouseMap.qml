@@ -47,12 +47,15 @@ Column {
         }
         return out
     }
-    // Niri drags with Mod held: the left button moves a window, the right one resizes it, the middle one moves the view.
-    // A bind on the same button takes its place.
+    // Niri and Rin drag with Mod held: the left button moves a window, the right one resizes it; on Niri the middle one
+    // moves the view. A bind on the same button takes its place.
     readonly property var builtIn: CompositorService.niriNative ? {
         mouseleft: { text: Translation.tr("Drag: move the window"), category: "Move Windows" },
         mouseright: { text: Translation.tr("Drag: resize the window"), category: "Resize" },
         mousemiddle: { text: Translation.tr("Drag: move the view"), category: "Focus" }
+    } : CompositorService.isRin ? {
+        mouseleft: { text: Translation.tr("Drag: move the window"), category: "Move" },
+        mouseright: { text: Translation.tr("Drag: resize the window"), category: "Columns and sizes" }
     } : ({})
     // Every set of modifiers the mouse answers to, the busiest first: one press shows its layer.
     readonly property var layers: {

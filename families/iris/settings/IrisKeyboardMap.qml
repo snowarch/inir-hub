@@ -500,10 +500,11 @@ Column {
     }
     // An older base has no step queue: there each edit is written alone and has no way back.
     readonly property bool canStep: typeof NiriKeybinds.applyBinds === "function"
-    // A key as it is now, as a step that writes it back: Umbriel's untouched key goes back by dropping Settings' line.
+    // A key as it is now, as a step that writes it back: Umbriel's or Rin's untouched key goes back by dropping
+    // Settings' line.
     function stateOf(combo: string, bind: var): var {
-        const own = CompositorConfig.own?.keybinds ?? {}
-        if (NiriKeybinds.umbriel && !(combo in own)) return { combo: combo, shipped: true }
+        const own = (NiriKeybinds.rin ? CompositorConfig.rinOwnBinds : CompositorConfig.own?.keybinds) ?? {}
+        if ((NiriKeybinds.tomlBinds ?? NiriKeybinds.umbriel) && !(combo in own)) return { combo: combo, shipped: true }
         return bind ? { combo: combo, action: String(bind.action_raw ?? ""), options: String(bind.options ?? "") } : { combo: combo, action: "" }
     }
     // One change to the keys, written at once and kept in Settings' history: Ctrl+Z or Undo writes the keys back.
