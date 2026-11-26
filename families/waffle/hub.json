@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.28",
+    "version": "2.34.29",
     "changes": {
       "2.34.28": ["All apps: a name with an accent files under its plain letter, so É sits with E"],
       "2.34.27": ["Clipboard: each entry is a card that says if it is text, a link, an image or pinned; a friendly empty state; keys on chips"],
