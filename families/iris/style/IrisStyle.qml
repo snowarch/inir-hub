@@ -590,9 +590,13 @@ QtObject {
         // the whole Tint row acts (capped at 0.32 its upper half did nothing).
         const thin = Math.max(0.06, Math.min(0.72, share * 0.32))
         const contrast = root.materialContrast[material] ?? 4.5
+        // Text sits on the body's groups too (surfaceHigh): solve for that ground, else reading text fell under 7:1 on
+        // every group. Built from the untinted roles: fillInk follows the accent, which follows this veil.
+        const group = frosted && !root.light ? Qt.rgba(0, 0, 0, 0)
+            : ColorUtils.applyAlpha(root.light ? root.text : Qt.color(root.role("fillInk", root.text.toString())), root.fillAlpha(root.light ? 0.06 : 0.07))
         return frosted
-            ? Lume.frost(level, spread, 1, root.light ? root.surfaceOpaque : root.frost, root.light ? root.text : root.inkOnLight, contrast, thin, 0.72)
-            : Lume.veil(level, spread, 1, root.surfaceOpaque, root.text, contrast, thin, 0.72)
+            ? Lume.frost(level, spread, 1, root.light ? root.surfaceOpaque : root.frost, root.light ? root.text : root.inkOnLight, contrast, thin, 0.72, group)
+            : Lume.veil(level, spread, 1, root.surfaceOpaque, root.text, contrast, thin, 0.72, group)
     }
     readonly property real glassTint: root.rinLiquid
         ? root.wallpaperGlassTint
@@ -1045,7 +1049,24 @@ QtObject {
     // Under Signal the accent is the ink itself: what was an accent mark reads as ink, and an accent fill with its
     // own ink on it turns into the inverted plate (ink fill, paper word), Nothing's "chosen".
     readonly property color accent: root.animeEnabled
-        ? root.animeAccent(root.baseAccent, root.animePaletteName, root.animeStrength) : root.signalChosen ? root.signalInk : root.mono ? root.text : root.baseAccent
+        ? root.animeAccent(root.baseAccent, root.animePaletteName, root.animeStrength) : root.signalChosen ? root.signalInk : root.mono ? root.text
+        : root.glassMarkLevel >= 0 ? Lume.mark(root.baseAccent, root.glassMarkLevel, 0, root.light, 4.5) : root.baseAccent
+    // Under glass a mark's ground is the wallpaper through the veil, not the scheme's own: at the scheme's lightness the
+    // accent fell to 4.08:1 on a group (and 4.05 on its own tint) over a bright wallpaper. The worst of those grounds, as
+    // the tokens check reads it (the sampled level one spread toward the ink), so Lume.mark moves the accent just enough.
+    // Built from untinted roles: the tint follows the accent, and reading it here would loop.
+    readonly property real glassMarkLevel: {
+        if (!root.glassy || !IrisMood.sampled || root.mono) return -1
+        const over = (fg, bg) => Qt.rgba(fg.r * fg.a + bg.r * (1 - fg.a), fg.g * fg.a + bg.g * (1 - fg.a), fg.b * fg.a + bg.b * (1 - fg.a), 1)
+        const spread = IrisMood.contrast * 0.5
+        const level = root.light ? Math.max(0, IrisMood.luminance - spread) : Math.min(1, IrisMood.luminance + spread)
+        const body = over(root.bodyTint, Qt.rgba(level, level, level, 1))
+        const group = over(ColorUtils.applyAlpha(root.light ? root.text : Qt.color(root.role("fillInk", root.text.toString())),
+            root.fillAlpha(root.light ? 0.06 : 0.07)), body)
+        const tint = over(ColorUtils.applyAlpha(root.baseAccent, Math.min(0.15, root.fillAlpha(0.13))), body)
+        const lum = [group, tint].map(c => ColorUtils.relativeLuminance(c))
+        return Math.pow(root.light ? Math.min(lum[0], lum[1]) : Math.max(lum[0], lum[1]), 1 / 2.2)
+    }
     // The person's accent as Apple draws it, also where Nothing's ink took `accent` (a place that keeps Apple).
     readonly property color appleAccent: root.animeEnabled || !root.mono ? root.accent : root.baseAccent
     readonly property color appleAccentFill: !root.mono ? root.accentFill : root.washi?.accentFill ? Qt.color(root.washi.accentFill) : root.baseAccent
@@ -1068,8 +1089,9 @@ QtObject {
     readonly property color secondaryAccent: {
         if (root.mono && !(root.animeEnabled && root.animeHighlightOn)) return root.text
         const base = root.baseSecondaryAccent
-        return root.animeEnabled && root.animeHighlightOn
-            ? root.animeHighlight(base, root.animePaletteName, root.animeStrength) : base
+        if (root.animeEnabled && root.animeHighlightOn) return root.animeHighlight(base, root.animePaletteName, root.animeStrength)
+        // Over liquid the highlight is a figure on whatever the lens shows: 3:1 on the body's brightest ground.
+        return root.glassMarkLevel >= 0 ? Lume.mark(base, root.glassMarkLevel, 0, root.light, 3) : base
     }
     // The clock's own accent, the one the person picked for its separator and day (`iris.bar.clockAccent`): every
     // surface that sets the day as a figure wears it, so the Control Center and Today never disagree with the Island.
@@ -1166,7 +1188,7 @@ QtObject {
     }
     // Rules are ink, never paint: on solid the scheme's rule as the fill it is over the body, so Lines at 0 draws no
     // line (it drew the body's own colour, a dark crack across every card and over the lit edge).
-    readonly property color hairline: root.glassy ? ColorUtils.applyAlpha(root.text, Math.min(0.3, 0.08 * root.tweak("lines", 0, 2)))
+    readonly property color hairline: root.glassy ? ColorUtils.applyAlpha(root.text, root.lineAlpha(root.text, Math.min(0.3, 0.08 * root.tweak("lines", 0, 2)), 1.15, 0.3))
         : root.liftOver(root.line(root.ruleOf(Qt.color(root.preset.hairline))), root.surfaceOpaque)
     readonly property color hairlineStrong: root.glassy ? ColorUtils.applyAlpha(root.text, Math.min(0.45, 0.14 * root.tweak("lines", 0, 2)))
         : root.liftOver(root.line(root.ruleOf(Qt.color(root.preset.hairlineStrong))), root.surfaceOpaque)
@@ -1211,7 +1233,20 @@ QtObject {
     function strongOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.textLevel(root.preset.textStrong)) }
     function secondaryOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.inkLevel(Math.max(0.66, root.preset.textSecondary), 0.8)) }
     function tertiaryOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.inkLevel(Math.max(0.5, root.preset.textTertiary), 0.6)) }
-    readonly property color border: ColorUtils.applyAlpha(root.text, Math.min(0.5, 0.14 * root.preset.fill * root.tweak("lines", 0, 2)))
+    readonly property color border: ColorUtils.applyAlpha(root.text, root.lineAlpha(root.text, Math.min(0.5, 0.14 * root.preset.fill * root.tweak("lines", 0, 2)), 1.3, 0.5))
+    // A line over glass: the least alpha of `ink`, from the look's own, that still reads `need` on the body's darkest and
+    // brightest ground (a fixed alpha vanished over a near-black liquid body or a pale frost). Lines turned off stay off.
+    function lineAlpha(ink: color, base: real, need: real, cap: real): real {
+        if (!root.glassy || !IrisMood.sampled || base <= 0) return base
+        const over = (fg, bg) => Qt.rgba(fg.r * fg.a + bg.r * (1 - fg.a), fg.g * fg.a + bg.g * (1 - fg.a), fg.b * fg.a + bg.b * (1 - fg.a), 1)
+        const spread = IrisMood.contrast * 0.5
+        const grounds = [Math.max(0, IrisMood.luminance - spread), Math.min(1, IrisMood.luminance + spread)]
+            .map(level => over(root.bodyTint, Qt.rgba(level, level, level, 1)))
+        let alpha = base
+        while (alpha < cap && grounds.some(ground => ColorUtils.contrastRatio(over(ColorUtils.applyAlpha(ink, alpha), ground), ground) < need + 0.02))
+            alpha += 0.01
+        return Math.min(cap, alpha)
+    }
     readonly property color borderStrong: ColorUtils.applyAlpha(root.text, Math.min(0.6, 0.28 * root.preset.fill * root.tweak("lines", 0, 2)))
     readonly property string rimTint: String(root.theme?.rimTint ?? "neutral")
     // Glass keeps its lit edge whatever this is: without it glass vanishes over a dark desktop.
