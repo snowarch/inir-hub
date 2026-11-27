@@ -11,10 +11,10 @@ Region {
     id: root
 
     property var shapes: []
-    // On Rin, ext-background-effect-v1 regions are parsed into circular RoundedRect panes for GPU blur
-    // and Liquid Glass lens refraction (rin-compositor-panes). Emit clean circular Piece regions instead
-    // of squircle scanlines so every Island, Dock, bubble and card gets full GPU blur and liquid glass.
-    readonly property bool rinExactPanes: CompositorService.isRin
+    // On a Rin or qs-rs without rin-glass-shape-v1, Rin reads the region back into RoundedRect panes
+    // (rin-compositor-panes): emit clean Piece regions there instead of squircle scanlines. With it
+    // (IrisFrame.rinField), FieldRegion below switches the glass on and qs-rs sends Rin the field itself.
+    readonly property bool rinExactPanes: CompositorService.isRin && !IrisFrame.rinField
     // qs-rs rasterises the field itself on every build (FieldRegion, IrisFieldRegion.qml): exact on every frame, with the
     // music's wave in the band, so nothing below runs there. Quickshell walks it here.
     readonly property bool nativeRaster: !root.rinExactPanes && SystemInfo.runtimeHas(["field-region", "field-corners"])

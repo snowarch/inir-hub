@@ -13,6 +13,10 @@ QtObject {
     readonly property var dock: Config.options?.iris?.dock ?? ({})
     readonly property var surround: Config.options?.iris?.surround ?? ({})
     readonly property real d: IrisStyle.density
+    // Rin draws the field itself (rin-glass-shape-v1, sent by qs-rs beside FieldRegion): its glass and lens follow the
+    // field's own bodies, necks and band, so nothing here bends to fit a compositor's guess.
+    readonly property bool rinField: CompositorService.isRin
+        && SystemInfo.runtimeHas(["field-region", "field-corners", "glass-shape"])
 
     // Bodies of Places that meet the frame, keyed by owner ({ screen, shapes }): the chassis of that
     // output draws them in its field, so the join, the shadow and the compositor blur are the frame's own.

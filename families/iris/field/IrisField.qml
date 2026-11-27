@@ -256,8 +256,9 @@ Item {
                 const g = root.glassOf(s)
                 const material = g > 0 && s.frost !== undefined ? g - 0.4 * (1 - Math.max(0, Math.min(1, Number(s.frost)))) : g
                 glassy = glassy || material > 0
-                // On Rin's glass a body welded to the frame takes the fillet Rin's lens draws there (IrisFrame.rinWeld).
-                const weld = s && root.compositorAllowed ? IrisFrame.rinWeld(s, root.sceneOrigin.x, root.sceneOrigin.y, sceneWidth, sceneHeight) : null
+                // On a Rin that guesses fillets from the region, a body welded to the frame takes that fillet
+                // (IrisFrame.rinWeld). A Rin that reads the field (IrisFrame.rinField) draws the field's own.
+                const weld = s && root.compositorAllowed && !IrisFrame.rinField ? IrisFrame.rinWeld(s, root.sceneOrigin.x, root.sceneOrigin.y, sceneWidth, sceneHeight) : null
                 link.push(s ? Qt.vector4d(weld ? weld.fuse : Number(s.fuse ?? root.smoothing), slot(s, 0), slot(s, 1), material + (s.paints ? 4 : 0)) : zero)
             }
             const worn = artAt >= 0 ? list[artAt] : null
