@@ -408,8 +408,26 @@ Region {
             const out = []
             const runs = []
             const i = root.inset
+            const ww = Math.round(root.windowWidth), wh = Math.round(root.windowHeight)
+            const wall = side => Math.round(IrisFrame.wallOn(side))
             for (const s of list) {
                 const c = IrisFrame.cornersOf(s)
+                const weld = root.framed ? IrisFrame.rinWeld(s, 0, 0, root.windowWidth, root.windowHeight) : null
+                if (weld) {
+                    // Squared to the band it melts into, its far corners round: Rin joins it to the band as one lens
+                    // and draws the fillets (IrisFrame.rinWeld), the curve the field draws there too.
+                    const x0 = weld.wall === "left" ? wall("left") : root.lo(s.x)
+                    const y0 = weld.wall === "top" ? wall("top") : root.lo(s.y)
+                    const x1 = weld.wall === "right" ? ww - wall("right") : root.hi(s.x + s.width)
+                    const y1 = weld.wall === "bottom" ? wh - wall("bottom") : root.hi(s.y + s.height)
+                    const r = Math.min(Math.round(weld.far), Math.floor(Math.min(x1 - x0, y1 - y0) / 2))
+                    if (x1 - x0 < 8 || y1 - y0 < 8) continue
+                    out.push({ x: x0, y: y0, width: x1 - x0, height: y1 - y0, radius: r })
+                    const across = weld.wall === "top" || weld.wall === "bottom"
+                    runs.push({ x: weld.wall === "right" ? x0 + r : x0, y: weld.wall === "bottom" ? y0 + r : y0,
+                        width: across ? x1 - x0 : x1 - x0 - r, height: across ? y1 - y0 - r : y1 - y0 })
+                    continue
+                }
                 const half = Math.min(s.width, s.height) / 2
                 const avg = Math.min((c.tl + c.tr + c.bl + c.br) / 4, half)
                 const w = Math.max(0, s.width - 2 * i)
@@ -417,14 +435,12 @@ Region {
                 if (w >= 8 && h >= 8)
                     out.push({ x: s.x + i, y: s.y + i, width: w, height: h, radius: Math.max(0, avg - i) })
             }
-            if (root.framed && root.band > 1 && root.windowWidth > 0 && root.windowHeight > 0) {
-                const b = Math.round(root.band)
-                const ww = Math.round(root.windowWidth)
-                const wh = Math.round(root.windowHeight)
-                runs.push({ x: 0, y: 0, width: ww, height: b })
-                runs.push({ x: 0, y: wh - b, width: ww, height: b })
-                runs.push({ x: 0, y: b, width: b, height: Math.max(0, wh - 2 * b) })
-                runs.push({ x: ww - b, y: b, width: b, height: Math.max(0, wh - 2 * b) })
+            if (root.framed && root.band > 1 && ww > 0 && wh > 0) {
+                const top = wall("top"), bottom = wall("bottom"), left = wall("left"), right = wall("right")
+                runs.push({ x: 0, y: 0, width: ww, height: top })
+                runs.push({ x: 0, y: wh - bottom, width: ww, height: bottom })
+                runs.push({ x: 0, y: top, width: left, height: Math.max(0, wh - top - bottom) })
+                runs.push({ x: ww - right, y: top, width: right, height: Math.max(0, wh - top - bottom) })
             }
             return { bodies: out.slice(0, 12), runs: runs }
         }

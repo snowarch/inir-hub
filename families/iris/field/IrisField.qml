@@ -232,6 +232,8 @@ Item {
             for (let i = 0; i < n; i++)
                 if (list[i]?.id) index[list[i].id] = i
             const geometry = [], corners = [], link = []
+            const sceneWidth = root.sceneSize.width > 0 ? root.sceneSize.width : root.width
+            const sceneHeight = root.sceneSize.height > 0 ? root.sceneSize.height : root.height
             let glassy = false
             // The first body that wears a picture (`art`: a layered item or a ShaderEffectSource, `artShow` 0..1,
             // `artRise`: pixels past the band's inner line it takes to come in).
@@ -254,7 +256,9 @@ Item {
                 const g = root.glassOf(s)
                 const material = g > 0 && s.frost !== undefined ? g - 0.4 * (1 - Math.max(0, Math.min(1, Number(s.frost)))) : g
                 glassy = glassy || material > 0
-                link.push(s ? Qt.vector4d(Number(s.fuse ?? root.smoothing), slot(s, 0), slot(s, 1), material + (s.paints ? 4 : 0)) : zero)
+                // On Rin's glass a body welded to the frame takes the fillet Rin's lens draws there (IrisFrame.rinWeld).
+                const weld = s && root.compositorAllowed ? IrisFrame.rinWeld(s, root.sceneOrigin.x, root.sceneOrigin.y, sceneWidth, sceneHeight) : null
+                link.push(s ? Qt.vector4d(weld ? weld.fuse : Number(s.fuse ?? root.smoothing), slot(s, 0), slot(s, 1), material + (s.paints ? 4 : 0)) : zero)
             }
             const worn = artAt >= 0 ? list[artAt] : null
             return { count: n, geometry: geometry, corners: corners, link: link, glassy: glassy, art: worn?.art ?? null,

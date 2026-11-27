@@ -387,6 +387,25 @@ QtObject {
     // The fillet a body melted into a wall draws there: the field's polynomial smooth union of two perpendicular edges
     // bulges k/4 along the diagonal, which is a circular fillet of radius k / (4·(1 − 1/√2)).
     function filletRadius(fuse: real): real { return fuse / (4 * (1 - Math.SQRT1_2)) }
+    // On Rin the compositor draws the glass, and a body welded to the frame is one lens with the band there: square where
+    // it meets the band, its fillets as round as its far corners (Rin's joined glass). The field joins it with that fillet,
+    // and the blur region hands Rin the body squared to the band, so blur, lens and painted edge are one silhouette.
+    // { wall, far, fuse } for such a body (at ox, oy in a scene width × height), else null.
+    readonly property bool rinGlass: root.framed && CompositorService.isRin && IrisStyle.glassCompositor
+    function rinWeld(body: var, ox: real, oy: real, width: real, height: real): var {
+        if (!root.rinGlass || !body || !(body.width > 0) || !(body.height > 0)) return null
+        const joins = !body.joins ? [] : Array.isArray(body.joins) ? body.joins : [body.joins]
+        if (!joins.includes("frame")) return null
+        const x = body.x + ox, y = body.y + oy
+        const gaps = { top: y - root.wallOn("top"), bottom: height - root.wallOn("bottom") - y - body.height,
+            left: x - root.wallOn("left"), right: width - root.wallOn("right") - x - body.width }
+        const wall = root.edges.reduce((a, k) => gaps[k] < gaps[a] ? k : a, "top")
+        if (gaps[wall] > Math.max(1, Number(body.fuse ?? IrisStyle.fuse))) return null
+        const c = root.cornersOf(body)
+        const far = wall === "top" ? Math.max(c.bl, c.br) : wall === "bottom" ? Math.max(c.tl, c.tr)
+            : wall === "left" ? Math.max(c.tr, c.br) : Math.max(c.tl, c.bl)
+        return { wall: wall, far: far, fuse: far * 4 * (1 - Math.SQRT1_2) }
+    }
     // How each corner of a body near the frame nests ({ tl, tr, bl, br }): the corner that faces the frame's own corner, or
     // the fillet of what stands on the wall beside it (its opener or any surface in `beside`), takes that curve less the air
     // between them; the others keep `radius`.
