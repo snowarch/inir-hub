@@ -167,6 +167,20 @@ Item {
         glider.start()
     }
     NumberAnimation { id: glider; target: centre; property: "contentY"; duration: PrismTheme.ms(360); easing.type: Easing.OutCubic }
+    function cancelAim(): void {
+        glider.stop()
+        aimLater.stop()
+        root.aimed = ""
+        root.aimUntil = 0
+    }
+    Connections {
+        target: Config
+        function onRevisionChanged(): void { root.cancelAim() }
+    }
+    Connections {
+        target: CompositorConfig
+        function onRevisionChanged(): void { root.cancelAim() }
+    }
     // The page under a group asked for is still growing (cards are placed over a few frames): aim again once it rests.
     Timer {
         id: aimLater
@@ -399,7 +413,15 @@ Item {
             contentHeight: content.y + content.implicitHeight + PrismTheme.dp(96)
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            onContentHeightChanged: { if (Date.now() < root.aimUntil) aimLater.restart(); readLater.restart() }
+            onMovingChanged: if (centre.moving) root.cancelAim()
+            onContentHeightChanged: {
+                if (Date.now() < root.aimUntil) aimLater.restart()
+                else if (!glider.running && centre.contentHeight > 0) {
+                    const maxScroll = Math.max(0, centre.contentHeight - centre.height)
+                    if (centre.contentY > maxScroll) centre.contentY = maxScroll
+                }
+                readLater.restart()
+            }
             onContentYChanged: readLater.restart()
             // Over glass the rows fade out through a mask, as the sidebar's do: a band of the fill would stand darker
             // than the glass, and rows cut square at the edge read as a fault (his 11-21).

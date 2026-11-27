@@ -410,6 +410,7 @@ Region {
             const i = root.inset
             const ww = Math.round(root.windowWidth), wh = Math.round(root.windowHeight)
             const wall = side => root.framed ? Math.round(IrisFrame.wallOn(side)) : 0
+            const hasPerCorner = SystemInfo.runtimeHas(["field-corners"])
             for (const s of list) {
                 const c = IrisFrame.cornersOf(s)
                 const weld = IrisFrame.rinWeld(s, 0, 0, root.windowWidth, root.windowHeight)
@@ -420,13 +421,24 @@ Region {
                     const y0 = weld.wall === "top" ? wall("top") : root.lo(s.y)
                     const x1 = weld.wall === "right" ? ww - wall("right") : root.hi(s.x + s.width)
                     const y1 = weld.wall === "bottom" ? wh - wall("bottom") : root.hi(s.y + s.height)
-                    const r = Math.min(Math.round(weld.far), Math.floor(Math.min(x1 - x0, y1 - y0) / 2))
-                    if (x1 - x0 < 8 || y1 - y0 < 8) continue
-                    out.push({ x: x0, y: y0, width: x1 - x0, height: y1 - y0, radius: r })
-                    if (r > 0) {
-                        const across = weld.wall === "top" || weld.wall === "bottom"
-                        runs.push({ x: weld.wall === "right" ? x0 + r : x0, y: weld.wall === "bottom" ? y0 + r : y0,
-                            width: across ? x1 - x0 : x1 - x0 - r, height: across ? y1 - y0 - r : y1 - y0 })
+                    const w = x1 - x0, h = y1 - y0
+                    const r = Math.min(Math.round(weld.far), Math.floor(Math.min(w, h) / 2))
+                    if (w < 8 || h < 8) continue
+                    if (hasPerCorner) {
+                        out.push({
+                            x: x0, y: y0, width: w, height: h, radius: r,
+                            tl: weld.wall === "top" || weld.wall === "left" ? 0 : r,
+                            tr: weld.wall === "top" || weld.wall === "right" ? 0 : r,
+                            bl: weld.wall === "bottom" || weld.wall === "left" ? 0 : r,
+                            br: weld.wall === "bottom" || weld.wall === "right" ? 0 : r
+                        })
+                    } else {
+                        out.push({ x: x0, y: y0, width: w, height: h, radius: r })
+                        if (r > 0) {
+                            const across = weld.wall === "top" || weld.wall === "bottom"
+                            runs.push({ x: weld.wall === "right" ? x0 + r : x0, y: weld.wall === "bottom" ? y0 + r : y0,
+                                width: across ? w : w - r, height: across ? h - r : h })
+                        }
                     }
                     continue
                 }
@@ -435,17 +447,20 @@ Region {
                 const w = x1 - x0, h = y1 - y0
                 if (w < 8 || h < 8) continue
                 const half = Math.floor(Math.min(w, h) / 2)
-                const maxR = Math.min(Math.max(c.tl, c.tr, c.bl, c.br), half)
-                const r = Math.max(0, Math.round(maxR - i))
-                out.push({ x: x0, y: y0, width: w, height: h, radius: r })
-                // Preserve asymmetric square corners (e.g. popout sheets, expanded Island, dock notches, menus)
-                // by squaring off any corner whose radius is near zero so rin-compositor-panes reads exact 4-corner radii.
-                if (r > 1) {
-                    const sq = Math.min(r + 1, half)
-                    if (c.tl < maxR * 0.35) runs.push({ x: x0, y: y0, width: sq, height: sq })
-                    if (c.tr < maxR * 0.35) runs.push({ x: x1 - sq, y: y0, width: sq, height: sq })
-                    if (c.bl < maxR * 0.35) runs.push({ x: x0, y: y1 - sq, width: sq, height: sq })
-                    if (c.br < maxR * 0.35) runs.push({ x: x1 - sq, y: y1 - sq, width: sq, height: sq })
+                const clampR = v => Math.max(0, Math.min(half, Math.round(Number(v ?? 0) - i)))
+                const tl = clampR(c.tl), tr = clampR(c.tr), bl = clampR(c.bl), br = clampR(c.br)
+                const maxR = Math.max(tl, tr, bl, br)
+                if (hasPerCorner) {
+                    out.push({ x: x0, y: y0, width: w, height: h, radius: maxR, tl: tl, tr: tr, bl: bl, br: br })
+                } else {
+                    out.push({ x: x0, y: y0, width: w, height: h, radius: maxR })
+                    if (maxR > 1) {
+                        const sq = Math.min(maxR + 1, half)
+                        if (tl < maxR * 0.35) runs.push({ x: x0, y: y0, width: sq, height: sq })
+                        if (tr < maxR * 0.35) runs.push({ x: x1 - sq, y: y0, width: sq, height: sq })
+                        if (bl < maxR * 0.35) runs.push({ x: x0, y: y1 - sq, width: sq, height: sq })
+                        if (br < maxR * 0.35) runs.push({ x: x1 - sq, y: y1 - sq, width: sq, height: sq })
+                    }
                 }
             }
             if (root.framed && root.band > 1 && ww > 0 && wh > 0) {
@@ -532,11 +547,19 @@ Region {
         y: piece.p ? root.lo(piece.p.y) : 0
         width: piece.p ? Math.max(0, root.hi(piece.p.x + piece.p.width) - root.lo(piece.p.x)) : 0
         height: piece.p ? Math.max(0, root.hi(piece.p.y + piece.p.height) - root.lo(piece.p.y)) : 0
+        readonly property bool perCorner: piece.p !== null && piece.p.tl !== undefined
+        readonly property bool uniform: !piece.perCorner
+            || (piece.p.tl === piece.p.tr && piece.p.tl === piece.p.bl && piece.p.tl === piece.p.br)
         // A disc (a bubble, a satellite) is an ellipse: as a rounded box of odd size its radius truncates and bulges.
-        readonly property bool disc: piece.p !== null && Math.abs(piece.p.width - piece.p.height) < 1
+        readonly property bool disc: piece.p !== null && piece.uniform
+            && Math.abs(piece.p.width - piece.p.height) < 1
             && piece.p.radius >= piece.p.width / 2 - 0.5
         shape: piece.disc ? RegionShape.Ellipse : RegionShape.Rect
-        radius: piece.p && !piece.disc ? Math.ceil(piece.p.radius) : 0
+        radius: piece.p && !piece.disc && !piece.perCorner ? Math.ceil(piece.p.radius) : 0
+        topLeftRadius: piece.p && !piece.disc && piece.perCorner ? Math.round(piece.p.tl) : -1
+        topRightRadius: piece.p && !piece.disc && piece.perCorner ? Math.round(piece.p.tr) : -1
+        bottomLeftRadius: piece.p && !piece.disc && piece.perCorner ? Math.round(piece.p.bl) : -1
+        bottomRightRadius: piece.p && !piece.disc && piece.perCorner ? Math.round(piece.p.br) : -1
     }
 
     Region {

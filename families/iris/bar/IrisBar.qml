@@ -902,7 +902,7 @@ Scope {
             // in one go, the first entry held every window 250 ms and the card jumped). The zoom starts once it is in.
             Loader {
                 id: editDeskLoader
-                asynchronous: false
+                asynchronous: true
                 property bool lingering: false
                 active: GlobalStates.widgetEditMode || editDeskLoader.lingering
                 onActiveChanged: if (GlobalStates.widgetEditMode) editDeskLoader.lingering = true

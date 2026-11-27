@@ -62,9 +62,10 @@ Item {
     // On Rin, desktop widgets sit in Background's Bottom layer above the Background wallpaper layer
     // (awww or rinWallpaperHost), so Rin's chosen GPU Blur or Liquid Glass blurs and refracts static,
     // shader, GIF and live video wallpapers natively with zero per-widget Qt blur FBOs.
-    readonly property var _hostWindow: QsWindow.window ?? root.QsWindow?.window ?? null
+    readonly property var _hostWindow: root.QsWindow?.window ?? null
     readonly property bool rinBlurUsable: CompositorService.isRin
         && IrisCompositorBlur.usable
+        && IrisCompositorBlur.background !== "solid"
         && IrisCompositorBlur.background !== "none"
     readonly property bool compositorGlass: root.glass && !root.ownPlate
         && Boolean(root._hostWindow?.compositorWidgetGlass)
@@ -94,8 +95,21 @@ Item {
         ignoreUnknownSignals: true
         function onXChanged(): void { if (root.compositorGlass) root._syncCompositorBlur() }
         function onYChanged(): void { if (root.compositorGlass) root._syncCompositorBlur() }
+        function onVisibleChanged(): void { root._syncCompositorBlur() }
     }
-    Component.onCompleted: if (root.compositorGlass) Qt.callLater(root._syncCompositorBlur)
+    Connections {
+        target: root.widget?.parent ?? null
+        ignoreUnknownSignals: true
+        function onXChanged(): void { if (root.compositorGlass) root._syncCompositorBlur() }
+        function onYChanged(): void { if (root.compositorGlass) root._syncCompositorBlur() }
+    }
+    Timer {
+        id: blurSettleTimer
+        interval: 80
+        repeat: false
+        onTriggered: if (root.compositorGlass) root._syncCompositorBlur()
+    }
+    Component.onCompleted: if (root.compositorGlass) { Qt.callLater(root._syncCompositorBlur); blurSettleTimer.restart() }
     Component.onDestruction: {
         const win = root._hostWindow
         if (win && typeof win.clearWidgetBlurRect === "function") win.clearWidgetBlurRect(root._blurKey)

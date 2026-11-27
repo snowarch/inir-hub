@@ -17,6 +17,14 @@ Singleton {
     property real saturation: 1.5
     property int radius: 32
     property string background: "glass"
+    // Rin Liquid Glass optical parameters (rin.appearance.toml).
+    property real liquidBevel: 64
+    property real liquidDepth: 210
+    property real liquidIor: 1.52
+    property real liquidDispersion: 0.40
+    property real liquidFrost: 0.40
+    property real liquidBulge: 0.05
+    property real liquidAdapt: 0.35
     property var elsewhere: []
     readonly property bool usable: root.available && root.enabled
     // Whether the compositor blurs behind the shell at all: Niri 26.04+ and Rin through the background-effect regions
@@ -39,6 +47,20 @@ Singleton {
         onLoadFailed: root.umbrielRules = false
     }
 
+    function _applyRinState(state: var): void {
+        if (!state || typeof state !== "object") return
+        if (typeof state.blur === "boolean") root.enabled = state.blur
+        if (typeof state["blur-radius"] === "number") root.radius = Math.round(state["blur-radius"])
+        if (typeof state.background === "string" && state.background.length > 0) root.background = state.background
+        if (typeof state["liquid-bevel"] === "number") root.liquidBevel = Math.round(state["liquid-bevel"])
+        if (typeof state["liquid-depth"] === "number") root.liquidDepth = Math.round(state["liquid-depth"])
+        if (typeof state["liquid-ior"] === "number") root.liquidIor = state["liquid-ior"]
+        if (typeof state["liquid-dispersion"] === "number") root.liquidDispersion = state["liquid-dispersion"]
+        if (typeof state["liquid-frost"] === "number") root.liquidFrost = state["liquid-frost"]
+        if (typeof state["liquid-bulge"] === "number") root.liquidBulge = state["liquid-bulge"]
+        if (typeof state["liquid-adapt"] === "number") root.liquidAdapt = state["liquid-adapt"]
+    }
+
     FileView {
         id: rinAppearanceFile
         path: CompositorService.isRin ? Directories.configPath + "/rin/rin.appearance.toml" : ""
@@ -46,12 +68,24 @@ Singleton {
         onFileChanged: { rinAppearanceFile.reload(); root.reload() }
         onLoaded: {
             const text = rinAppearanceFile.text()
+            const num = key => {
+                const m = text.match(new RegExp("^\\s*" + key + "\\s*=\\s*([0-9.]+)", "m"))
+                return m ? Number(m[1]) : undefined
+            }
             const bgMatch = text.match(/^\s*background\s*=\s*"([^"]+)"/m)
-            if (bgMatch) root.background = bgMatch[1]
             const blurMatch = text.match(/^\s*blur\s*=\s*(true|false)/m)
-            if (blurMatch) root.enabled = blurMatch[1] === "true"
-            const radMatch = text.match(/^\s*blur-radius\s*=\s*([0-9.]+)/m)
-            if (radMatch) root.radius = Math.round(Number(radMatch[1]))
+            root._applyRinState({
+                background: bgMatch ? bgMatch[1] : undefined,
+                blur: blurMatch ? blurMatch[1] === "true" : undefined,
+                "blur-radius": num("blur-radius"),
+                "liquid-bevel": num("liquid-bevel"),
+                "liquid-depth": num("liquid-depth"),
+                "liquid-ior": num("liquid-ior"),
+                "liquid-dispersion": num("liquid-dispersion"),
+                "liquid-frost": num("liquid-frost"),
+                "liquid-bulge": num("liquid-bulge"),
+                "liquid-adapt": num("liquid-adapt")
+            })
         }
     }
 
@@ -79,9 +113,7 @@ Singleton {
                     const state = JSON.parse(text.trim())
                     if (!state || state.error) return
                     root.available = true
-                    if (typeof state.blur === "boolean") root.enabled = state.blur
-                    if (typeof state["blur-radius"] === "number") root.radius = Math.round(state["blur-radius"])
-                    if (typeof state.background === "string" && state.background.length > 0) root.background = state.background
+                    root._applyRinState(state)
                 } catch (e) {}
             }
         }

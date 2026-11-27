@@ -1,7 +1,12 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.139",
+  "version": "2.33.140",
   "changes": {
+    "2.33.140": [
+      "Read and apply all Rin Liquid Glass optical sliders live and stop Prism Settings from jumping columns or scroll on toggles",
+      "Emit per-corner blur radii on Rin so welded pills and desktop widgets keep unbroken Liquid Glass",
+      "Fix Widget Edit Mode inspector and options tabs, restore all 6 desktop pages, categories, cached previews and blurred stage"
+    ],
     "2.33.139": [
       "Desktop widgets always inherit Rin compositor blur and Liquid Glass over static, shader and video wallpapers",
       "Widget Edit Mode redesigned with unified right gallery/inspector panel, floating top wallpaper strip and zero-stutter entry"

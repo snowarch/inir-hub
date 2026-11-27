@@ -60,14 +60,29 @@ Item {
         flush()
         return out
     }
+    // Stable capacity per group on this page (all rows this machine supports, shown now or not).
+    // Sizing cards from stable capacity keeps every folder in its column when toggling switches or
+    // choices that reveal/hide child rows, so clicking a control never teleports the card away.
+    readonly property var stableGroups: {
+        const map = ({})
+        for (const group of PrismModel.layoutOf(root.page))
+            map[String(group.title)] = Array.from(group.rows ?? [])
+        return map
+    }
+    function stableRowsOf(card: var): var {
+        if (!card) return []
+        if (card.merged) return Array.from(card.rows ?? [])
+        const fromLayout = root.stableGroups[String(card.title ?? "")]
+        return fromLayout && fromLayout.length > 0 ? fromLayout : Array.from(card.rows ?? [])
+    }
     // A gallery, or a long group, reads across the page.
     function wide(card: var): bool {
-        const rows = Array.from(card?.rows ?? [])
+        const rows = root.stableRowsOf(card)
         return root.columns === 1 || rows.length >= 7 || rows.some(row => root.laysOut(row))
     }
 
-    // How much a card holds, counted by rows: its height changes with the width it gets, its rows do not.
-    function weight(card: var): int { return Math.max(1, Array.from(card?.rows ?? []).length) }
+    // How much a card holds, counted by its stable rows so toggling sub-options never re-pairs cards.
+    function weight(card: var): int { return Math.max(1, root.stableRowsOf(card).length) }
     function pairs(a: var, b: var): bool {
         const one = root.weight(a.modelData), two = root.weight(b.modelData)
         return Math.min(one, two) / Math.max(one, two) >= 0.5
