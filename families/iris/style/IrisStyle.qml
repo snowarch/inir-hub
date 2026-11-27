@@ -569,9 +569,12 @@ QtObject {
     // worn Design's (his 11-21: under glass every Design looked the same, the wallpaper showing through each alike).
     readonly property real wallpaperGlassTint: {
         const chosen = Math.max(0.12, IrisDesign.glassTint, Math.min(0.96, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
-        // On Rin Liquid Glass, let the user's chosen tint show through so GPU lens refraction stays clearly visible.
-        if (CompositorService.isRin && root.glassRequested === "compositor" && IrisCompositorBlur.background === "liquid")
-            return Math.min(chosen, 0.56)
+        // On Rin Liquid Glass, let the user's chosen tint scale smoothly down to crystal-clear glass
+        // so GPU optical bevel, refraction, bulge and dispersion shine across every surface.
+        if (CompositorService.isRin && root.glassRequested === "compositor" && IrisCompositorBlur.background === "liquid") {
+            const raw = Math.max(0.06, Math.min(0.56, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
+            return raw
+        }
         const needed = IrisMood.sampled ? root.legibleVeil("panel", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
         return Math.max(chosen, Math.min(0.9, needed))
     }

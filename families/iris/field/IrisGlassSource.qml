@@ -30,7 +30,9 @@ Item {
         id: view
         anchors.fill: parent
         screen: root.screen
-        live: root.live
+        // Never spin a second video decoder when the compositor owns glass blur; under wallpaper glass cap at 15 fps.
+        live: root.live && !IrisStyle.glassCompositor
+        decodeFps: 15
         // Under a grade the grade captures the view itself.
         provideTexture: !grade.active
         decodeSize: Qt.size(Math.max(1, Math.round((root.screen?.width ?? root.width) / 2)),

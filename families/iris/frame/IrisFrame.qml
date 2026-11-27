@@ -391,20 +391,23 @@ QtObject {
     // it meets the band, its fillets as round as its far corners (Rin's joined glass). The field joins it with that fillet,
     // and the blur region hands Rin the body squared to the band, so blur, lens and painted edge are one silhouette.
     // { wall, far, fuse } for such a body (at ox, oy in a scene width × height), else null.
-    readonly property bool rinGlass: root.framed && CompositorService.isRin && IrisStyle.glassCompositor
+    readonly property bool rinGlass: CompositorService.isRin && IrisStyle.glassCompositor
     function rinWeld(body: var, ox: real, oy: real, width: real, height: real): var {
         if (!root.rinGlass || !body || !(body.width > 0) || !(body.height > 0)) return null
         const joins = !body.joins ? [] : Array.isArray(body.joins) ? body.joins : [body.joins]
-        if (!joins.includes("frame")) return null
+        const wantsFrame = joins.includes("frame")
         const x = body.x + ox, y = body.y + oy
-        const gaps = { top: y - root.wallOn("top"), bottom: height - root.wallOn("bottom") - y - body.height,
-            left: x - root.wallOn("left"), right: width - root.wallOn("right") - x - body.width }
-        const wall = root.edges.reduce((a, k) => gaps[k] < gaps[a] ? k : a, "top")
-        if (gaps[wall] > Math.max(1, Number(body.fuse ?? IrisStyle.fuse))) return null
+        const wall = side => root.framed ? root.wallOn(side) : 0
+        const gaps = { top: y - wall("top"), bottom: height - wall("bottom") - y - body.height,
+            left: x - wall("left"), right: width - wall("right") - x - body.width }
+        const side = root.edges.reduce((a, k) => gaps[k] < gaps[a] ? k : a, "top")
+        const limit = wantsFrame ? Math.max(1, Number(body.fuse ?? IrisStyle.fuse)) : 2
+        if (gaps[side] > limit) return null
+        if (!wantsFrame && root.framed) return null
         const c = root.cornersOf(body)
-        const far = wall === "top" ? Math.max(c.bl, c.br) : wall === "bottom" ? Math.max(c.tl, c.tr)
-            : wall === "left" ? Math.max(c.tr, c.br) : Math.max(c.tl, c.bl)
-        return { wall: wall, far: far, fuse: far * 4 * (1 - Math.SQRT1_2) }
+        const far = side === "top" ? Math.max(c.bl, c.br) : side === "bottom" ? Math.max(c.tl, c.tr)
+            : side === "left" ? Math.max(c.tr, c.br) : Math.max(c.tl, c.bl)
+        return { wall: side, far: far, fuse: far * 4 * (1 - Math.SQRT1_2) }
     }
     // How each corner of a body near the frame nests ({ tl, tr, bl, br }): the corner that faces the frame's own corner, or
     // the fillet of what stands on the wall beside it (its opener or any surface in `beside`), takes that curve less the air

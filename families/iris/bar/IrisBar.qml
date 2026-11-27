@@ -1568,20 +1568,22 @@ Scope {
                     readonly property bool externalOpen: GlobalStates.controlPanelOpen
                         && (controlCentreLoader.panelMode || IrisState.morphOwner === "stage")
                     readonly property bool wanted: controlCentreLoader.externalOpen || stage.controlIntent
-                    // Built once at idle in panel mode (or on first use) and kept, like the island's.
-                    property bool resident: false
-                    property Timer warm: Timer {
-                        running: controlCentreLoader.panelMode && GlobalStates.deferredPanelsReady && !controlCentreLoader.resident
-                        interval: 4000
-                        onTriggered: controlCentreLoader.resident = true
+                    // Keep built only while open or recently closed so idle RAM does not hold thousands of hidden items.
+                    property bool warm: false
+                    Timer { id: controlWarmth; interval: 12000; onTriggered: controlCentreLoader.warm = false }
+                    onWantedChanged: {
+                        if (controlCentreLoader.wanted) {
+                            controlCentreLoader.warm = true
+                            controlWarmth.stop()
+                        } else {
+                            controlWarmth.restart()
+                        }
                     }
-                    onWantedChanged: if (controlCentreLoader.wanted) controlCentreLoader.resident = true
-                    // By file: built on first use or at idle, so its types compile then.
                     Component.onCompleted: {
                         controlCentreLoader.setSource(Qt.resolvedUrl("../control/IrisControlCenter.qml"), { screenData: barWindow.screen })
-                        if (controlCentreLoader.wanted) controlCentreLoader.resident = true
+                        if (controlCentreLoader.wanted) controlCentreLoader.warm = true
                     }
-                    active: (Config.options?.iris?.modules?.controlCenter ?? true) && controlCentreLoader.resident
+                    active: (Config.options?.iris?.modules?.controlCenter ?? true) && (controlCentreLoader.wanted || controlCentreLoader.warm)
                     asynchronous: true
                 }
             }

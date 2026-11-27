@@ -50,6 +50,17 @@ Item {
     Shortcut { sequence: "Shift+Right"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(10, 0) }
     Shortcut { sequence: "Shift+Up"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(0, -10) }
     Shortcut { sequence: "Shift+Down"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(0, 10) }
+    Shortcut {
+        sequences: [StandardKey.Delete, "Backspace"]
+        enabled: root.nudging
+        onActivated: {
+            const key = GlobalStates.selectedDesktopWidget
+            if (key.length > 0) {
+                Config.setNestedValue(`background.widgets.${key}.enable`, false)
+                GlobalStates.clearDesktopWidgetSelection()
+            }
+        }
+    }
 
     readonly property real fullHeight: shelf.fullHeight
     readonly property real fullWidth: Math.max(Math.round(480 * root.d), Math.min(Math.round(1480 * root.d),

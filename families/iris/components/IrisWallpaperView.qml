@@ -22,6 +22,7 @@ Item {
     property bool asynchronous: true
     property int fillMode: Image.PreserveAspectCrop
     property size decodeSize: Qt.size(0, 0)
+    property int decodeFps: 0
 
     readonly property bool isVideo: Wallpapers.isVideoFile(root.path)
     readonly property bool isGif: root.path.toLowerCase().endsWith(".gif")
@@ -31,6 +32,7 @@ Item {
         && !GlobalStates.screenLocked && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
         && Wallpapers.videoMotionAllowedOn(root.monitorName)
     readonly property bool shown: root.live && (root.QsWindow.window?.visible ?? false)
+        && (root.provideTexture || (root.visible && root.opacity > 0.001))
     readonly property bool playsVideo: root.active && root.isVideo && root.shown
     readonly property bool animated: root.playsVideo || (root.active && root.isGif && root.shown)
     readonly property bool videoFrame: root.playsVideo && (videoLoader.item?.hasFrame ?? false)
@@ -93,6 +95,7 @@ Item {
                 shouldPlay: root.motion
                 enableTransitions: false
                 decodeHeight: root.decodeSize.height > 0 ? root.decodeSize.height : -1
+                decodeFps: root.decodeFps
             }
         }
 

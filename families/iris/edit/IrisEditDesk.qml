@@ -34,6 +34,14 @@ PanelWindow {
         item: shelfHit
         Region { item: sheetHit }
         Region { item: keysHit }
+        Region { item: wallHit }
+    }
+    Item {
+        id: wallHit
+        x: wallStrip.hitRect.x
+        y: wallStrip.hitRect.y
+        width: wallStrip.hitRect.width
+        height: wallStrip.hitRect.height
     }
     Item {
         id: keysHit
@@ -58,7 +66,7 @@ PanelWindow {
         height: sheet.hitRect.height
     }
 
-    readonly property var fieldShapes: bar.fieldShapes.concat(sheet.fieldShapes)
+    readonly property var fieldShapes: bar.fieldShapes.concat(sheet.fieldShapes, wallStrip.fieldShapes)
     Field.IrisField {
         id: field
         anchors.fill: parent
@@ -110,6 +118,12 @@ PanelWindow {
     Outfit {
         id: chosen
         entry: DesktopEditStage.chosen
+    }
+
+    IrisEditWallpaperStrip {
+        id: wallStrip
+        anchors.fill: parent
+        screenData: root.screen
     }
 
     IrisWidgetBar {

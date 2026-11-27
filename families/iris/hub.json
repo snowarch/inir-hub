@@ -1,7 +1,12 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.137",
+    "version": "2.33.138",
     "changes": {
+      "2.33.138": [
+        "Rin glass keeps exact per-corner radii on asymmetric surfaces and raises the pane cap.",
+        "Overview and Alt+Tab switcher settings are configurable in Settings.",
+        "Idle Island pages, Control Center and compositor-glass backdrops unload to cut CPU, GPU and RAM."
+      ],
       "2.33.137": ["On Rin's glass, the island and the bodies welded to the frame join the frame band with matching fillets."],
       "2.33.136": ["The About page names Rin as the compositor."],
       "2.33.135": ["Settings: the window keys ride the page art up and rows fade out before they reach them"],

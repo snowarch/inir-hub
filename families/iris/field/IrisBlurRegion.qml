@@ -409,13 +409,13 @@ Region {
             const runs = []
             const i = root.inset
             const ww = Math.round(root.windowWidth), wh = Math.round(root.windowHeight)
-            const wall = side => Math.round(IrisFrame.wallOn(side))
+            const wall = side => root.framed ? Math.round(IrisFrame.wallOn(side)) : 0
             for (const s of list) {
                 const c = IrisFrame.cornersOf(s)
-                const weld = root.framed ? IrisFrame.rinWeld(s, 0, 0, root.windowWidth, root.windowHeight) : null
+                const weld = IrisFrame.rinWeld(s, 0, 0, root.windowWidth, root.windowHeight)
                 if (weld) {
-                    // Squared to the band it melts into, its far corners round: Rin joins it to the band as one lens
-                    // and draws the fillets (IrisFrame.rinWeld), the curve the field draws there too.
+                    // Squared to the band or screen edge it melts into, far corners round: Rin joins it to the band
+                    // as one lens and draws the fillets (IrisFrame.rinWeld), the curve the field draws there too.
                     const x0 = weld.wall === "left" ? wall("left") : root.lo(s.x)
                     const y0 = weld.wall === "top" ? wall("top") : root.lo(s.y)
                     const x1 = weld.wall === "right" ? ww - wall("right") : root.hi(s.x + s.width)
@@ -423,17 +423,30 @@ Region {
                     const r = Math.min(Math.round(weld.far), Math.floor(Math.min(x1 - x0, y1 - y0) / 2))
                     if (x1 - x0 < 8 || y1 - y0 < 8) continue
                     out.push({ x: x0, y: y0, width: x1 - x0, height: y1 - y0, radius: r })
-                    const across = weld.wall === "top" || weld.wall === "bottom"
-                    runs.push({ x: weld.wall === "right" ? x0 + r : x0, y: weld.wall === "bottom" ? y0 + r : y0,
-                        width: across ? x1 - x0 : x1 - x0 - r, height: across ? y1 - y0 - r : y1 - y0 })
+                    if (r > 0) {
+                        const across = weld.wall === "top" || weld.wall === "bottom"
+                        runs.push({ x: weld.wall === "right" ? x0 + r : x0, y: weld.wall === "bottom" ? y0 + r : y0,
+                            width: across ? x1 - x0 : x1 - x0 - r, height: across ? y1 - y0 - r : y1 - y0 })
+                    }
                     continue
                 }
-                const half = Math.min(s.width, s.height) / 2
-                const avg = Math.min((c.tl + c.tr + c.bl + c.br) / 4, half)
-                const w = Math.max(0, s.width - 2 * i)
-                const h = Math.max(0, s.height - 2 * i)
-                if (w >= 8 && h >= 8)
-                    out.push({ x: s.x + i, y: s.y + i, width: w, height: h, radius: Math.max(0, avg - i) })
+                const x0 = root.lo(s.x + i), y0 = root.lo(s.y + i)
+                const x1 = root.hi(s.x + s.width - i), y1 = root.hi(s.y + s.height - i)
+                const w = x1 - x0, h = y1 - y0
+                if (w < 8 || h < 8) continue
+                const half = Math.floor(Math.min(w, h) / 2)
+                const maxR = Math.min(Math.max(c.tl, c.tr, c.bl, c.br), half)
+                const r = Math.max(0, Math.round(maxR - i))
+                out.push({ x: x0, y: y0, width: w, height: h, radius: r })
+                // Preserve asymmetric square corners (e.g. popout sheets, expanded Island, dock notches, menus)
+                // by squaring off any corner whose radius is near zero so rin-compositor-panes reads exact 4-corner radii.
+                if (r > 1) {
+                    const sq = Math.min(r + 1, half)
+                    if (c.tl < maxR * 0.35) runs.push({ x: x0, y: y0, width: sq, height: sq })
+                    if (c.tr < maxR * 0.35) runs.push({ x: x1 - sq, y: y0, width: sq, height: sq })
+                    if (c.bl < maxR * 0.35) runs.push({ x: x0, y: y1 - sq, width: sq, height: sq })
+                    if (c.br < maxR * 0.35) runs.push({ x: x1 - sq, y: y1 - sq, width: sq, height: sq })
+                }
             }
             if (root.framed && root.band > 1 && ww > 0 && wh > 0) {
                 const top = wall("top"), bottom = wall("bottom"), left = wall("left"), right = wall("right")
@@ -442,7 +455,7 @@ Region {
                 runs.push({ x: 0, y: top, width: left, height: Math.max(0, wh - top - bottom) })
                 runs.push({ x: ww - right, y: top, width: right, height: Math.max(0, wh - top - bottom) })
             }
-            return { bodies: out.slice(0, 12), runs: runs }
+            return { bodies: out.slice(0, 44), runs: runs }
         }
         const byId = {}
         for (const s of list) if (s.id) byId[s.id] = s
