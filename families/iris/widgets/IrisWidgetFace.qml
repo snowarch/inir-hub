@@ -59,15 +59,20 @@ Item {
     readonly property bool glass: root.material === "glass"
     readonly property bool clear: root.material === "clear"
     readonly property bool opaque: !root.glass && !root.clear
-    // On Rin, desktop widgets sit in Background's Bottom layer above the wallpaper (awww or
-    // rin-live-wallpaper on Background layer), so Rin's GPU Glass & Liquid Glass blur and refract
-    // both static and live video wallpapers natively with zero per-widget Qt blur FBOs.
-    readonly property bool compositorGlass: root.glass && !root.ownPlate && IrisStyle.glassCompositor
-        && Boolean(root.QsWindow?.window?.compositorWidgetGlass)
+    // On Rin, desktop widgets sit in Background's Bottom layer above the Background wallpaper layer
+    // (awww or rinWallpaperHost), so Rin's chosen GPU Blur or Liquid Glass blurs and refracts static,
+    // shader, GIF and live video wallpapers natively with zero per-widget Qt blur FBOs.
+    readonly property var _hostWindow: QsWindow.window ?? root.QsWindow?.window ?? null
+    readonly property bool rinBlurUsable: CompositorService.isRin
+        && IrisCompositorBlur.usable
+        && IrisCompositorBlur.background !== "none"
+    readonly property bool compositorGlass: root.glass && !root.ownPlate
+        && Boolean(root._hostWindow?.compositorWidgetGlass)
+        && (IrisStyle.glassCompositor || root.rinBlurUsable)
     readonly property bool rinLiquid: root.compositorGlass && IrisCompositorBlur.background === "liquid"
     readonly property string _blurKey: String(root.widget.configEntryName ?? root.widget.objectName ?? "") + "@" + String(root)
     function _syncCompositorBlur(): void {
-        const win = root.QsWindow?.window
+        const win = root._hostWindow
         if (!win || typeof win.setWidgetBlurRect !== "function") return
         if (!root.compositorGlass || !root.plated || !root.visible || !(root.width >= 8) || !(root.height >= 8)) {
             win.clearWidgetBlurRect(root._blurKey)
@@ -92,7 +97,7 @@ Item {
     }
     Component.onCompleted: if (root.compositorGlass) Qt.callLater(root._syncCompositorBlur)
     Component.onDestruction: {
-        const win = root.QsWindow?.window
+        const win = root._hostWindow
         if (win && typeof win.clearWidgetBlurRect === "function") win.clearWidgetBlurRect(root._blurKey)
     }
     readonly property real strength: root.widget.look.surfaceOpacity(root.widget)
@@ -117,7 +122,8 @@ Item {
     // A worn Design's glass keeps at least its own share of the plate, as every body's does (IrisDesign.glassTint).
     readonly property real veil: root.opaque ? root.strength
         : root.clear ? 0
-        : root.rinLiquid ? Math.max(0.08, Math.min(0.42, root.strength * 0.48))
+        : root.rinLiquid ? Math.max(0.06, Math.min(0.32, root.strength * 0.34))
+        : root.compositorGlass ? Math.max(0.14, Math.min(0.46, root.strength * 0.44))
         : Math.max(IrisDesign.glassTint * root.strength, (root.paper ? IrisStyle.legibleVeil(root.readMaterial, root.frostLevel, root.readSpread, 1)
             : root.lightBackdrop ? IrisStyle.legibleFrost(root.readMaterial, root.frostLevel, root.readSpread, 1)
             : IrisStyle.legibleVeil(root.readMaterial, root.readLevel, root.readSpread, 1))
@@ -222,7 +228,7 @@ Item {
     Loader {
         id: glassLoader
         anchors.fill: parent
-        active: root.glass && !root.compositorGlass
+        active: root.glass && !root.compositorGlass && !(CompositorService.isRin && GlobalStates.widgetEditMode)
         visible: root.plated
         sourceComponent: ClippingRectangle {
             id: glassPane

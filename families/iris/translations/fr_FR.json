@@ -2710,5 +2710,12 @@
   "The accent takes the highlight's colour, and the highlight the accent's.": "L'accent prend la couleur de la surbrillance, et la surbrillance celle de l'accent.",
   "Control Center sliders filled in grey or in one of your colours.": "Curseurs du Centre de contrôle remplis en gris ou d'une de vos couleurs.",
   "The artwork's, one of your colours, the wallpaper's or ink.": "Celle de la pochette, une de vos couleurs, celle du fond d'écran ou l'encre.",
-  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin utilise ses propres touches tant que celles d'iNiR ne sont pas en place : un changement ici les installe"
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin utilise ses propres touches tant que celles d'iNiR ne sont pas en place : un changement ici les installe",
+  "Back to widgets": "Retour aux widgets",
+  "Customize Desktop": "Personnaliser le bureau",
+  "Desktop editor sections": "Sections de l’éditeur de bureau",
+  "Search widgets...": "Rechercher des widgets...",
+  "On desktop": "Sur le bureau",
+  "Click to add": "Cliquer pour ajouter",
+  "Save current layout": "Enregistrer la disposition actuelle"
 }

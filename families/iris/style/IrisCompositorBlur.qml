@@ -39,6 +39,22 @@ Singleton {
         onLoadFailed: root.umbrielRules = false
     }
 
+    FileView {
+        id: rinAppearanceFile
+        path: CompositorService.isRin ? Directories.configPath + "/rin/rin.appearance.toml" : ""
+        watchChanges: true
+        onFileChanged: { rinAppearanceFile.reload(); root.reload() }
+        onLoaded: {
+            const text = rinAppearanceFile.text()
+            const bgMatch = text.match(/^\s*background\s*=\s*"([^"]+)"/m)
+            if (bgMatch) root.background = bgMatch[1]
+            const blurMatch = text.match(/^\s*blur\s*=\s*(true|false)/m)
+            if (blurMatch) root.enabled = blurMatch[1] === "true"
+            const radMatch = text.match(/^\s*blur-radius\s*=\s*([0-9.]+)/m)
+            if (radMatch) root.radius = Math.round(Number(radMatch[1]))
+        }
+    }
+
     function reload(): void {
         if (CompositorService.isRin && !rinReader.running) rinReader.running = true
         else if (CompositorService.niriNative && !reader.running) reader.running = true

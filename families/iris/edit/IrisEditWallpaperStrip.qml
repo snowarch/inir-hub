@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import Quickshell
 import Quickshell.Widgets
 import qs
@@ -12,79 +11,95 @@ import qs.modules.common.widgets
 import qs.modules.iris.components
 import qs.modules.iris.style
 
-// Top wallpaper strip for Widget Edit Mode (matching rin-shell's desk editor):
-// lets you browse and switch static or live video wallpapers right onto the shrunk live desktop card.
+// Top wallpaper thumbnail strip for Widget Edit Mode (1:1 with rin-shell's desk editor):
+// centered in the left stage above the shrunk live desktop card, floating cleanly over the
+// frosted stage with accent ring on current and muted ring on hover.
 Item {
     id: root
 
     property var screenData: null
+    property real panelReserve: 0
+    property real presentation: 0
+
     readonly property string monitorName: WallpaperListener.getMonitorName(root.screenData)
     readonly property real d: IrisStyle.density
     readonly property bool present: GlobalStates.widgetEditMode
-    readonly property real presentation: presentSpring.value
-    readonly property bool shown: root.presentation > 0.001
-    IrisSpring { id: presentSpring; surface: "edit"; intent: "open"; to: root.present ? 1 : 0 }
+    readonly property real p: Math.max(0, Math.min(1, root.presentation))
+    readonly property bool shown: root.p > 0.002
 
-    readonly property int thumbH: Math.round(52 * root.d)
-    readonly property int thumbW: Math.round(root.thumbH * 16 / 9)
-    readonly property int pad: Math.round(8 * root.d)
-    readonly property int barH: root.thumbH + root.pad * 2
-    readonly property int marginTop: Math.round(12 * root.d)
-    readonly property real barW: Math.min(root.width - Math.round(64 * root.d),
-        Math.max(Math.round(320 * root.d), (strip.count + 1) * (root.thumbW + Math.round(8 * root.d)) + root.pad * 2))
-    readonly property real barX: Math.round((root.width - root.barW) / 2)
-    readonly property real barY: Math.round(root.marginTop - (1 - root.presentation) * (root.barH + root.marginTop + 12))
-    readonly property real barRadius: Math.round(18 * root.d)
+    readonly property real roomW: Math.max(240, root.width - root.panelReserve)
+    readonly property real aspect: root.height > 0 ? Math.max(1.2, Math.min(2.4, root.width / root.height)) : 16 / 9
+    readonly property int thumbH: Math.round(Math.max(48 * root.d, Math.min(82 * root.d, root.height * 0.085)))
+    readonly property int thumbW: Math.round(root.thumbH * root.aspect)
+    readonly property int gap: Math.round(12 * root.d)
+    readonly property int sidePad: Math.round(24 * root.d)
+    readonly property int marginTop: Math.round(16 * root.d)
+    readonly property int ringPad: Math.round(4 * root.d)
+    readonly property real thumbRadius: Math.round(10 * root.d)
+
+    readonly property real stripMaxW: Math.max(160, root.roomW - root.sidePad * 2)
+    readonly property real stripY: Math.round(root.marginTop - (1 - root.p) * (root.marginTop + root.thumbH + 16))
+    // Space reserved above the live desktop card so strip and card never overlap.
+    readonly property real reserveTop: root.marginTop + root.thumbH + Math.round(22 * root.d)
 
     readonly property rect hitRect: root.shown && strip.count > 0
-        ? Qt.rect(root.barX, Math.max(0, root.barY), root.barW, root.barH)
+        ? Qt.rect(root.sidePad, Math.max(0, root.stripY - root.ringPad), root.stripMaxW, root.thumbH + root.ringPad * 2)
         : Qt.rect(0, 0, 0, 0)
-    readonly property var fieldShapes: root.shown && strip.count > 0 ? [{
-        id: "edit-wallpapers",
-        x: root.barX,
-        y: root.barY,
-        width: root.barW,
-        height: root.barH,
-        radius: root.barRadius,
-        frost: root.presentation
-    }] : []
+    readonly property var fieldShapes: []
 
     readonly property string activePath: FileUtils.trimFileProtocol(Wallpapers.desktopWallpaperPath(root.monitorName))
 
     visible: root.shown && strip.count > 0
-    opacity: Math.max(0, Math.min(1, root.presentation * 1.4))
+    opacity: root.p
 
     Item {
-        id: barBox
-        x: root.barX
-        y: root.barY
-        width: root.barW
-        height: root.barH
+        id: stripFrame
+        x: root.sidePad
+        y: root.stripY - root.ringPad
+        width: root.stripMaxW
+        height: root.thumbH + root.ringPad * 2
+        clip: true
 
         ListView {
             id: strip
-            anchors.fill: parent
-            anchors.margins: root.pad
+            readonly property real naturalW: strip.contentWidth > 0 ? Math.min(strip.contentWidth, stripFrame.width) : stripFrame.width
+            x: Math.max(0, Math.round((stripFrame.width - strip.naturalW) / 2))
+            y: root.ringPad
+            width: strip.naturalW
+            height: root.thumbH
             orientation: ListView.Horizontal
-            spacing: Math.round(8 * root.d)
-            clip: true
+            spacing: root.gap
             boundsBehavior: Flickable.StopAtBounds
-            model: root.present ? Wallpapers.folderModel : null
+            cacheBuffer: root.thumbW * 4
+            model: root.shown ? Wallpapers.folderModel : null
+
+            WheelHandler {
+                acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                onWheel: event => {
+                    const delta = Math.abs(event.angleDelta.x) > Math.abs(event.angleDelta.y)
+                        ? event.angleDelta.x : event.angleDelta.y
+                    const maxX = Math.max(0, strip.contentWidth - strip.width)
+                    strip.contentX = Math.max(0, Math.min(maxX, strip.contentX - delta * 0.65))
+                    event.accepted = true
+                }
+            }
 
             footer: Item {
-                width: root.thumbH
+                width: root.thumbH + root.gap
                 height: root.thumbH
                 Rectangle {
-                    anchors.fill: parent
+                    x: root.gap
+                    width: root.thumbH
+                    height: root.thumbH
                     readonly property bool hovered: galleryMouse.containsMouse
-                    radius: Math.round(11 * root.d)
+                    radius: root.thumbRadius
                     color: hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
-                    border.width: 1
-                    border.color: IrisStyle.rim
+                    border.width: hovered ? 2 : 1
+                    border.color: hovered ? IrisStyle.textSecondary : IrisStyle.rim
                     MaterialSymbol {
                         anchors.centerIn: parent
                         text: "photo_library"
-                        iconSize: Math.round(20 * root.d)
+                        iconSize: Math.round(22 * root.d)
                         color: IrisStyle.text
                     }
                     MouseArea {
@@ -118,7 +133,7 @@ Item {
 
                 ClippingRectangle {
                     anchors.fill: parent
-                    radius: Math.round(11 * root.d)
+                    radius: root.thumbRadius
                     color: IrisStyle.fillQuiet
 
                     Image {
@@ -127,7 +142,7 @@ Item {
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         cache: true
-                        sourceSize: Qt.size(root.thumbW * 2, root.thumbH * 2)
+                        sourceSize: Qt.size(160, 90)
                     }
 
                     Rectangle {
@@ -148,13 +163,14 @@ Item {
                     }
                 }
 
+                // Crisp outer selection/hover ring matching rin-shell's desk editor strip.
                 Rectangle {
                     anchors.fill: parent
-                    radius: Math.round(11 * root.d)
+                    anchors.margins: -2
+                    radius: root.thumbRadius + 2
                     color: "transparent"
-                    border.width: tile.current ? 2 : tileMouse.containsMouse ? 1.5 : 1
-                    border.color: tile.current ? IrisStyle.accent
-                        : tileMouse.containsMouse ? IrisStyle.text : IrisStyle.rim
+                    border.width: tile.current || tileMouse.containsMouse ? 2 : 0
+                    border.color: tile.current ? IrisStyle.accent : IrisStyle.textSecondary
                 }
 
                 MouseArea {

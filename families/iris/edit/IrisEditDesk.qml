@@ -10,9 +10,9 @@ import qs.modules.iris.style
 import qs.modules.iris.field as Field
 import qs.modules.iris.state
 
-// Arranging the desktop on one output: the shelf, a chosen widget's controls and the lights on what a carried widget
-// meets, in a window above the chassis. The chassis and the desktop recede into the card under it, so everything here
-// keeps its true size: the shelf is read and touched as itself, never shrunk.
+// Arranging the desktop on one output (1:1 with rin-shell's desk editor):
+// left stage carries the top wallpaper strip above the shrunk live desktop card;
+// right glass panel hosts the Widget Gallery / Inspector / Look / Presets in place.
 PanelWindow {
     id: root
 
@@ -22,17 +22,16 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:iris-edit"
-    WlrLayershell.keyboardFocus: PolkitService.active || IrisState.menusUp > 0 ? WlrKeyboardFocus.None : bar.holdsKeyboard || sheet.typing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: PolkitService.active || IrisState.menusUp > 0 ? WlrKeyboardFocus.None : bar.holdsKeyboard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors { left: true; right: true; top: true; bottom: true }
 
     readonly property string outputName: root.screen?.name ?? ""
     readonly property var card: DesktopEditStage.cardFor(root.outputName, root.width, root.height)
-    readonly property bool leaving: !GlobalStates.widgetEditMode && !bar.shown && !sheet.shown
+    readonly property bool leaving: !GlobalStates.widgetEditMode && !bar.shown
     onLeavingChanged: if (root.leaving) Qt.callLater(root.gone)
 
     mask: Region {
-        item: shelfHit
-        Region { item: sheetHit }
+        item: panelHit
         Region { item: keysHit }
         Region { item: wallHit }
     }
@@ -52,21 +51,14 @@ PanelWindow {
         height: keysHit.at.height
     }
     Item {
-        id: shelfHit
+        id: panelHit
         x: bar.hitRect.x
         y: bar.hitRect.y
         width: bar.hitRect.width
         height: bar.hitRect.height
     }
-    Item {
-        id: sheetHit
-        x: sheet.hitRect.x
-        y: sheet.hitRect.y
-        width: sheet.hitRect.width
-        height: sheet.hitRect.height
-    }
 
-    readonly property var fieldShapes: bar.fieldShapes.concat(sheet.fieldShapes, wallStrip.fieldShapes)
+    readonly property var fieldShapes: bar.fieldShapes
     Field.IrisField {
         id: field
         anchors.fill: parent
@@ -82,8 +74,6 @@ PanelWindow {
         windowHeight: root.height
     }
 
-    // What a carried widget lines up with on the card lights in accent: the bodies are the chassis's, drawn shrunk
-    // under this window, so their rims are drawn here where they show.
     IrisEditStage {
         anchors.fill: parent
         side: "lit"
@@ -96,7 +86,6 @@ PanelWindow {
         id: outfit
         property var entry: null
         readonly property Item widget: outfit.entry?.output === root.outputName ? outfit.entry.widget : null
-        // Only while arranging: letting a widget go on the way out made the hovered one's outfit as the desk left.
         active: outfit.widget !== null && GlobalStates.widgetEditMode
         x: root.card.x + (outfit.widget?.x ?? 0) * root.card.s
         y: root.card.y + (outfit.widget?.y ?? 0) * root.card.s
@@ -109,7 +98,7 @@ PanelWindow {
             height: outfit.height
             x: 0
             y: 0
-            room: Qt.rect(0, 0, root.width, bar.hitRect.height > 0 ? bar.hitRect.y : root.height)
+            room: Qt.rect(0, wallStrip.reserveTop, Math.max(200, root.width - bar.panelReserve), Math.max(200, root.height - wallStrip.reserveTop))
         }
     }
     Outfit {
@@ -124,19 +113,14 @@ PanelWindow {
         id: wallStrip
         anchors.fill: parent
         screenData: root.screen
+        panelReserve: bar.panelReserve
+        presentation: bar.presentation
     }
 
     IrisWidgetBar {
         id: bar
         anchors.fill: parent
         screenData: root.screen
-    }
-
-    IrisWidgetSheet {
-        id: sheet
-        anchors.fill: parent
-        outputName: root.outputName
-        card: root.card
-        avoid: bar.hitRect
+        topReserve: wallStrip.reserveTop
     }
 }

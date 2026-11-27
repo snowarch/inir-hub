@@ -2710,5 +2710,12 @@
   "The accent takes the highlight's colour, and the highlight the accent's.": "צבע ההדגשה מקבל את צבע הסימון, והסימון את צבע ההדגשה.",
   "Control Center sliders filled in grey or in one of your colours.": "המחוונים של מרכז הבקרה מתמלאים באפור או באחד מהצבעים שלך.",
   "The artwork's, one of your colours, the wallpaper's or ink.": "של העטיפה, אחד מהצבעים שלך, של הטפט או הדיו.",
-  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin משתמש במקשים שלו עד שהמקשים של iNiR נכנסים: שינוי כאן מכניס אותם"
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin משתמש במקשים שלו עד שהמקשים של iNiR נכנסים: שינוי כאן מכניס אותם",
+  "Back to widgets": "חזרה לווידג'טים",
+  "Customize Desktop": "התאמה אישית של שולחן העבודה",
+  "Desktop editor sections": "מדורי עורך שולחן העבודה",
+  "Search widgets...": "חפש ווידג'טים...",
+  "On desktop": "על שולחן העבודה",
+  "Click to add": "לחץ להוספה",
+  "Save current layout": "שמור פריסה נוכחית"
 }

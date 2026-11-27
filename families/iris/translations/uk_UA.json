@@ -2710,5 +2710,12 @@
   "The accent takes the highlight's colour, and the highlight the accent's.": "Акцент бере колір виділення, а виділення — колір акценту.",
   "Control Center sliders filled in grey or in one of your colours.": "Повзунки Центру керування сірі або в одному з ваших кольорів.",
   "The artwork's, one of your colours, the wallpaper's or ink.": "Колір обкладинки, один із ваших кольорів, колір шпалер або чорнило.",
-  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin використовує власні клавіші, доки не підключено клавіші iNiR: зміна тут підключить їх"
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin використовує власні клавіші, доки не підключено клавіші iNiR: зміна тут підключить їх",
+  "Back to widgets": "Назад до віджетів",
+  "Customize Desktop": "Налаштувати стільницю",
+  "Desktop editor sections": "Розділи редактора стільниці",
+  "Search widgets...": "Пошук віджетів...",
+  "On desktop": "На стільниці",
+  "Click to add": "Натисніть, щоб додати",
+  "Save current layout": "Зберегти поточне розташування"
 }

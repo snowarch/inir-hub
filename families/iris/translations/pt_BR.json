@@ -2710,5 +2710,12 @@
   "The accent takes the highlight's colour, and the highlight the accent's.": "O destaque fica com a cor do realce, e o realce com a do destaque.",
   "Control Center sliders filled in grey or in one of your colours.": "Controles deslizantes da Central de Controle em cinza ou em uma das suas cores.",
   "The artwork's, one of your colours, the wallpaper's or ink.": "A cor da capa, uma das suas cores, a do papel de parede ou a tinta.",
-  "Rin runs its own keys until iNiR's are in: a change here puts them in": "O Rin usa as próprias teclas até as do iNiR entrarem: uma mudança aqui as coloca"
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "O Rin usa as próprias teclas até as do iNiR entrarem: uma mudança aqui as coloca",
+  "Back to widgets": "Voltar aos widgets",
+  "Customize Desktop": "Personalizar área de trabalho",
+  "Desktop editor sections": "Seções do editor de área de trabalho",
+  "Search widgets...": "Pesquisar widgets...",
+  "On desktop": "Na área de trabalho",
+  "Click to add": "Clique para adicionar",
+  "Save current layout": "Salvar layout atual"
 }

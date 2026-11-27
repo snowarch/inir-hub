@@ -2710,5 +2710,12 @@
   "The accent takes the highlight's colour, and the highlight the accent's.": "एक्सेंट हाइलाइट का रंग लेता है, और हाइलाइट एक्सेंट का।",
   "Control Center sliders filled in grey or in one of your colours.": "कंट्रोल सेंटर के स्लाइडर धूसर या आपके किसी रंग में भरे जाते हैं।",
   "The artwork's, one of your colours, the wallpaper's or ink.": "आर्टवर्क का, आपका कोई रंग, वॉलपेपर का या स्याही।",
-  "Rin runs its own keys until iNiR's are in: a change here puts them in": "जब तक iNiR की कुंजियाँ नहीं जुड़तीं, Rin अपनी कुंजियाँ चलाता है: यहाँ एक बदलाव उन्हें जोड़ देता है"
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "जब तक iNiR की कुंजियाँ नहीं जुड़तीं, Rin अपनी कुंजियाँ चलाता है: यहाँ एक बदलाव उन्हें जोड़ देता है",
+  "Back to widgets": "विजेट्स पर वापस जाएँ",
+  "Customize Desktop": "डेस्कटॉप कस्टमाइज़ करें",
+  "Desktop editor sections": "डेस्कटॉप संपादक अनुभाग",
+  "Search widgets...": "विजेट्स खोजें...",
+  "On desktop": "डेस्कटॉप पर",
+  "Click to add": "जोड़ने के लिए क्लिक करें",
+  "Save current layout": "वर्तमान लेआउट सहेजें"
 }

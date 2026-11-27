@@ -2710,5 +2710,12 @@
   "The accent takes the highlight's colour, and the highlight the accent's.": "强调色换成高亮的颜色，高亮换成强调色的颜色。",
   "Control Center sliders filled in grey or in one of your colours.": "控制中心的滑块用灰色或你的某个颜色填充。",
   "The artwork's, one of your colours, the wallpaper's or ink.": "封面、你的某个颜色、壁纸或墨色。",
-  "Rin runs its own keys until iNiR's are in: a change here puts them in": "在 iNiR 的按键生效之前，Rin 使用自己的按键：在此处做出更改即可应用它们"
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "在 iNiR 的按键生效之前，Rin 使用自己的按键：在此处做出更改即可应用它们",
+  "Back to widgets": "返回小组件",
+  "Customize Desktop": "自定义桌面",
+  "Desktop editor sections": "桌面编辑器分区",
+  "Search widgets...": "搜索小组件...",
+  "On desktop": "已在桌面",
+  "Click to add": "点击添加",
+  "Save current layout": "保存当前布局"
 }

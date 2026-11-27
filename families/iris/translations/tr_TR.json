@@ -2710,5 +2710,12 @@
   "The accent takes the highlight's colour, and the highlight the accent's.": "Vurgu rengi öne çıkarma rengini, öne çıkarma da vurgu rengini alır.",
   "Control Center sliders filled in grey or in one of your colours.": "Denetim Merkezi kaydırıcıları gri ya da renklerinden biriyle dolu.",
   "The artwork's, one of your colours, the wallpaper's or ink.": "Kapak, renklerinden biri, duvar kağıdı ya da mürekkep rengi.",
-  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin, iNiR'in tuşları eklenene kadar kendi tuşlarını kullanır: burada bir değişiklik onları ekler"
+  "Rin runs its own keys until iNiR's are in: a change here puts them in": "Rin, iNiR'in tuşları eklenene kadar kendi tuşlarını kullanır: burada bir değişiklik onları ekler",
+  "Back to widgets": "Araç takımlarına dön",
+  "Customize Desktop": "Masaüstünü özelleştir",
+  "Desktop editor sections": "Masaüstü düzenleyici bölümleri",
+  "Search widgets...": "Araç takımlarında ara...",
+  "On desktop": "Masaüstünde",
+  "Click to add": "Eklemek için tıklayın",
+  "Save current layout": "Geçerli düzeni kaydet"
 }

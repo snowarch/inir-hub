@@ -1,229 +1,306 @@
 {
-    "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.138",
-    "changes": {
-      "2.33.138": [
-        "Rin glass keeps exact per-corner radii on asymmetric surfaces and raises the pane cap.",
-        "Overview and Alt+Tab switcher settings are configurable in Settings.",
-        "Idle Island pages, Control Center and compositor-glass backdrops unload to cut CPU, GPU and RAM."
-      ],
-      "2.33.137": ["On Rin's glass, the island and the bodies welded to the frame join the frame band with matching fillets."],
-      "2.33.136": ["The About page names Rin as the compositor."],
-      "2.33.135": ["Settings: the window keys ride the page art up and rows fade out before they reach them"],
-      "2.33.134": ["Workspace dots mark the one where a window asks for attention"],
-      "2.33.131": ["Keyboard shortcuts read in your language: each bind, its group and its keys"],
-      "2.33.128": ["Settings drives Rin: title bars, resize from the edges and tearing; a compositor page with nothing to change is left out"],
-      "2.33.127": ["Wallpapers in the gallery reel draw sharp at rest, on whole pixels"],
-      "2.33.126": [
-        "Settings › Desktop › Prism light: Prism widgets keep white light, or split it into the spectrum",
-        "A Design can keep its glass tinted over any wallpaper, and set the light of the Prism widgets",
-        "Prism Settings: the side list reads clearer, bare glyphs and brighter names on near-black",
-        "Text and titles read in Montserrat by default; Geist stays a choice",
-        "The welcome at startup opens like a camera's iris: seven blades turn back off the desktop from the pupil of its mark"
-      ],
-      "2.33.125": [
-        "Layout opens on the screen as it stands: the Island, the Dock and the bubbles in place, the windows with their gaps",
-        "Windows and Glass & effects open on two windows up close: corners, border, focus ring, shadow, opacity and the blur behind, as set",
-        "Displays says what Scale makes the screen look like"
-      ],
-      "2.33.124": [
-        "Prism Settings opens larger on a large screen, as overlay or window; About, Hub and Shortcuts run as wide as their page",
-        "Displays opens on the screen itself: its shape and wallpaper, a window sized by Scale, Night Light's warmth, its pixel density"
-      ],
-      "2.33.123": [
-        "The music widget wears every Prism form with the other widgets: its name, hour and cover sit on each cut"
-      ],
-      "2.33.122": [
-        "A Prism form picked for every widget reaches each one; the clock leaves its small lens to wear it too",
-        "Edit mode › Look splits into Design, Accents, Material and Legibility; option pages turn in steps of whole groups, no sliding",
-        "Edit mode › Style starts with design, colour and fonts; each app's colours come last"
-      ],
-      "2.33.121": [
-        "Prism widgets wear the form picked in their sheet again; Pocket, Archive, Smoked and Board join Quiet, Beam and Folder",
-        "Mouse map: a button with nothing on it says Unbound in every language",
-        "Settings › Widgets › Prism form cuts every widget's glass at once; a widget that picks its own form keeps it"
-      ],
-      "2.33.120": [
-          "Prism Settings: text is drawn sharp at every size, in the side list and on every page"
-      ],
-      "2.33.119": [
-          "Prism Settings: the sidebar says where you are, the open page on an accent key, its chapter lit and the others stepped back",
-          "Font rows open a search of your installed fonts; the side column lists only what you changed on this visit, each with its undo",
-          "Prism follows the shell's glass, blur or solid in the panel and in the window, unless Settings' own material says otherwise"
-      ],
-      "2.33.118": [
-          "Prism Settings: Style's presets are one calm set of keys, each named in its own type with a dot of its accent",
-          "Home's wallpaper card carries its name alone, with no row of colours under it"
-      ],
-      "2.33.117": [
-          "Prism Settings: the side column is yours to arrange, with Up next, Forecast and Vitals among its blocks",
-          "The player there comes as the large cover or as a compact bar",
-          "Two short groups share a line only when they hold about as much, so no folder stands half empty",
-          "Colour's cards keep their words legible over any accent, highlight or signal"
-      ],
-      "2.33.116": [
-          "Prism Settings: calmer sizes everywhere, clearer text, and your accent marks where you are in the sidebar",
-          "The side column is yours: your picture (press it to change it), the day, Do Not Disturb, what you changed here, the player",
-          "A section pressed in the sidebar stays marked, and its group glows in your accent a moment as the page lands on it",
-          "Home: the wallpaper card carries its name and colours, and Every day holds the volume and brightness"
-      ],
-      "2.33.115": [
-          "Prism Settings: the window's buttons head the side column, so scrolled groups never pass under them",
-          "The side column says how the page's own thing is used and lists the window and layout keys; page heads are shorter"
-      ],
-      "2.33.114": [
-          "Prism Settings: short groups stand two to a line beside the side column, each with its art behind it",
-          "A group that is one level, like Night Light's warmth, shows its figure large over a full fader",
-          "The side column gathers what you changed by page or group, one line each, and lists shortcuts as rows",
-          "Each page opens on its own art; Colour, Surfaces, Layout and the other chapter pages say what they hold",
-          "Where a bubble sits is drawn over your own wallpaper, with the chosen place lit"
-      ],
-      "2.33.113": [
-          "Prism Settings: each page leads with its own thing: the sound mixer, the battery charge, and the switches people flip most as tiles",
-          "The sidebar threads the open page's sections under it and marks the ones on screen; a press goes there",
-          "A side column lists what you changed, each with its own way back, the page's keyboard shortcuts and what is playing",
-          "Screenshots, notifications and the Control Center pages have their own actions at the top"
-      ],
-      "2.33.112": [
-          "Prism Settings: every page opens on its own art with its name large, and groups are folders again",
-          "A row reads its name over what it does, Home shows you instead of a greeting, and long languages fit"
-      ],
-      "2.33.111": ["The desktop menu, the startup file and the themes folder open apps as fast as the launcher, outside the shell"],
-      "2.33.110": [
-        "Hovering a notification in the quick panel no longer moves its row"
-      ],
-      "2.33.109": [
-        "Closing a surface no longer logs an error when its window goes first"
-      ],
-      "2.33.108": [
-          "Prism Settings: Home shows your desktop, the poster art reads vivid and folders match the B · Carpeta study",
-          "Group descriptions are never cut, a group's own choice shows all its options, menus no longer stretch",
-          "Bubbles leads with a place picker drawn in Prism, Anime and other off groups show their rows dimmed",
-          "Short groups share their row, Shortcuts and About marks drawn in ink, callouts stay inside the drawing"
-      ],
-      "2.33.107": ["Prism Settings: Home you arrange, a page made for Colour, Type and Lock, palettes and typefaces as themselves"],
-      "2.33.106": ["Settings lists every installed family from the Hub next to the three built in"],
-      "2.33.105": ["Prism Settings pages lose the small line drawing at their head"],
-      "2.33.104": ["Prism Settings in two looks (General › Settings window › Look): Folders, or Board with category keys, page tabs and group modules", "Keyboard shortcuts on Umbriel name Umbriel's config when they cannot read it"],
-      "2.33.103": ["Prism widgets: one smoked glass, each widget its own form; their material, opacity and shadow work again", "Prism widgets: delete a task, keep or shuffle the palette and lend it to the accent, turn the month one notch at a time", "Marks are white light, never a rainbow; the Dock, the lock screen and Quick controls lose their rims"],
-      "2.33.91": ["Wallpapers downloaded from the web take only safe file names"],
-      "2.33.90": ["Prism Settings' new look: soft ribbons in your wallpaper's colours, folders whose art glows through frosted glass, keys that sink",
+  "$schema": "../../schema/hub.schema.json",
+  "version": "2.33.139",
+  "changes": {
+    "2.33.139": [
+      "Desktop widgets always inherit Rin compositor blur and Liquid Glass over static, shader and video wallpapers",
+      "Widget Edit Mode redesigned with unified right gallery/inspector panel, floating top wallpaper strip and zero-stutter entry"
+    ],
+    "2.33.137": [
+      "On Rin's glass, the island and the bodies welded to the frame join the frame band with matching fillets."
+    ],
+    "2.33.136": [
+      "The About page names Rin as the compositor."
+    ],
+    "2.33.135": [
+      "Settings: the window keys ride the page art up and rows fade out before they reach them"
+    ],
+    "2.33.134": [
+      "Workspace dots mark the one where a window asks for attention"
+    ],
+    "2.33.131": [
+      "Keyboard shortcuts read in your language: each bind, its group and its keys"
+    ],
+    "2.33.128": [
+      "Settings drives Rin: title bars, resize from the edges and tearing; a compositor page with nothing to change is left out"
+    ],
+    "2.33.127": [
+      "Wallpapers in the gallery reel draw sharp at rest, on whole pixels"
+    ],
+    "2.33.126": [
+      "Settings › Desktop › Prism light: Prism widgets keep white light, or split it into the spectrum",
+      "A Design can keep its glass tinted over any wallpaper, and set the light of the Prism widgets",
+      "Prism Settings: the side list reads clearer, bare glyphs and brighter names on near-black",
+      "Text and titles read in Montserrat by default; Geist stays a choice",
+      "The welcome at startup opens like a camera's iris: seven blades turn back off the desktop from the pupil of its mark"
+    ],
+    "2.33.125": [
+      "Layout opens on the screen as it stands: the Island, the Dock and the bubbles in place, the windows with their gaps",
+      "Windows and Glass & effects open on two windows up close: corners, border, focus ring, shadow, opacity and the blur behind, as set",
+      "Displays says what Scale makes the screen look like"
+    ],
+    "2.33.124": [
+      "Prism Settings opens larger on a large screen, as overlay or window; About, Hub and Shortcuts run as wide as their page",
+      "Displays opens on the screen itself: its shape and wallpaper, a window sized by Scale, Night Light's warmth, its pixel density"
+    ],
+    "2.33.123": [
+      "The music widget wears every Prism form with the other widgets: its name, hour and cover sit on each cut"
+    ],
+    "2.33.122": [
+      "A Prism form picked for every widget reaches each one; the clock leaves its small lens to wear it too",
+      "Edit mode › Look splits into Design, Accents, Material and Legibility; option pages turn in steps of whole groups, no sliding",
+      "Edit mode › Style starts with design, colour and fonts; each app's colours come last"
+    ],
+    "2.33.121": [
+      "Prism widgets wear the form picked in their sheet again; Pocket, Archive, Smoked and Board join Quiet, Beam and Folder",
+      "Mouse map: a button with nothing on it says Unbound in every language",
+      "Settings › Widgets › Prism form cuts every widget's glass at once; a widget that picks its own form keeps it"
+    ],
+    "2.33.120": [
+      "Prism Settings: text is drawn sharp at every size, in the side list and on every page"
+    ],
+    "2.33.119": [
+      "Prism Settings: the sidebar says where you are, the open page on an accent key, its chapter lit and the others stepped back",
+      "Font rows open a search of your installed fonts; the side column lists only what you changed on this visit, each with its undo",
+      "Prism follows the shell's glass, blur or solid in the panel and in the window, unless Settings' own material says otherwise"
+    ],
+    "2.33.118": [
+      "Prism Settings: Style's presets are one calm set of keys, each named in its own type with a dot of its accent",
+      "Home's wallpaper card carries its name alone, with no row of colours under it"
+    ],
+    "2.33.117": [
+      "Prism Settings: the side column is yours to arrange, with Up next, Forecast and Vitals among its blocks",
+      "The player there comes as the large cover or as a compact bar",
+      "Two short groups share a line only when they hold about as much, so no folder stands half empty",
+      "Colour's cards keep their words legible over any accent, highlight or signal"
+    ],
+    "2.33.116": [
+      "Prism Settings: calmer sizes everywhere, clearer text, and your accent marks where you are in the sidebar",
+      "The side column is yours: your picture (press it to change it), the day, Do Not Disturb, what you changed here, the player",
+      "A section pressed in the sidebar stays marked, and its group glows in your accent a moment as the page lands on it",
+      "Home: the wallpaper card carries its name and colours, and Every day holds the volume and brightness"
+    ],
+    "2.33.115": [
+      "Prism Settings: the window's buttons head the side column, so scrolled groups never pass under them",
+      "The side column says how the page's own thing is used and lists the window and layout keys; page heads are shorter"
+    ],
+    "2.33.114": [
+      "Prism Settings: short groups stand two to a line beside the side column, each with its art behind it",
+      "A group that is one level, like Night Light's warmth, shows its figure large over a full fader",
+      "The side column gathers what you changed by page or group, one line each, and lists shortcuts as rows",
+      "Each page opens on its own art; Colour, Surfaces, Layout and the other chapter pages say what they hold",
+      "Where a bubble sits is drawn over your own wallpaper, with the chosen place lit"
+    ],
+    "2.33.113": [
+      "Prism Settings: each page leads with its own thing: the sound mixer, the battery charge, and the switches people flip most as tiles",
+      "The sidebar threads the open page's sections under it and marks the ones on screen; a press goes there",
+      "A side column lists what you changed, each with its own way back, the page's keyboard shortcuts and what is playing",
+      "Screenshots, notifications and the Control Center pages have their own actions at the top"
+    ],
+    "2.33.112": [
+      "Prism Settings: every page opens on its own art with its name large, and groups are folders again",
+      "A row reads its name over what it does, Home shows you instead of a greeting, and long languages fit"
+    ],
+    "2.33.111": [
+      "The desktop menu, the startup file and the themes folder open apps as fast as the launcher, outside the shell"
+    ],
+    "2.33.110": [
+      "Hovering a notification in the quick panel no longer moves its row"
+    ],
+    "2.33.109": [
+      "Closing a surface no longer logs an error when its window goes first"
+    ],
+    "2.33.108": [
+      "Prism Settings: Home shows your desktop, the poster art reads vivid and folders match the B · Carpeta study",
+      "Group descriptions are never cut, a group's own choice shows all its options, menus no longer stretch",
+      "Bubbles leads with a place picker drawn in Prism, Anime and other off groups show their rows dimmed",
+      "Short groups share their row, Shortcuts and About marks drawn in ink, callouts stay inside the drawing"
+    ],
+    "2.33.107": [
+      "Prism Settings: Home you arrange, a page made for Colour, Type and Lock, palettes and typefaces as themselves"
+    ],
+    "2.33.106": [
+      "Settings lists every installed family from the Hub next to the three built in"
+    ],
+    "2.33.105": [
+      "Prism Settings pages lose the small line drawing at their head"
+    ],
+    "2.33.104": [
+      "Prism Settings in two looks (General › Settings window › Look): Folders, or Board with category keys, page tabs and group modules",
+      "Keyboard shortcuts on Umbriel name Umbriel's config when they cannot read it"
+    ],
+    "2.33.103": [
+      "Prism widgets: one smoked glass, each widget its own form; their material, opacity and shadow work again",
+      "Prism widgets: delete a task, keep or shuffle the palette and lend it to the accent, turn the month one notch at a time",
+      "Marks are white light, never a rainbow; the Dock, the lock screen and Quick controls lose their rims"
+    ],
+    "2.33.91": [
+      "Wallpapers downloaded from the web take only safe file names"
+    ],
+    "2.33.90": [
+      "Prism Settings' new look: soft ribbons in your wallpaper's colours, folders whose art glows through frosted glass, keys that sink",
       "Prism: the Hub in its own pages: popular items as posters, search and kinds, each item with what it reaches, its changes and reactions",
-      "Prism: the sidebar opens on your own card over your wallpaper, and About shows the iNiR mark lit in your colours"],
-      "2.33.89": ["Prism Settings: each group is a card with its picture beside it, every part numbered; point at one to see what it holds, press to go there",
+      "Prism: the sidebar opens on your own card over your wallpaper, and About shows the iNiR mark lit in your colours"
+    ],
+    "2.33.89": [
+      "Prism Settings: each group is a card with its picture beside it, every part numbered; point at one to see what it holds, press to go there",
       "Prism Settings: every setting says what it does, each group has its own icon, scrolled pages keep a strip of groups (thanks Raell Tech)",
       "Settings › Keyboard draws your keyboard as it types, layouts by country or name; with Super, Ctrl, Alt or Shift each key says its shortcut",
       "Settings › Keyboard: pick a key to give, move or free its shortcut; a changed one wears a dot and goes back in a press, Ctrl+Z undoes",
       "Niri: a compositor setting you changed is marked and Restore defaults puts iNiR's value back, as on Umbriel",
-      "Umbriel: a screen that keeps its own width for new windows says so, and one tap makes it follow the rest (thanks Raell Tech)"],
-      "2.33.88": ["Banners can sit in a corner or at the middle of the top or bottom edge, not only the Island: Settings › Notifications › Banners", "Settings, where you look for it: each bubble has its own card with its icon and place; one map in Classic, Folio and Prism", "Escape closes Orbit, Spotlight, cards, the gallery and the dock", "A hidden Island opens from anywhere along its edge and stays open while the pointer rests there (#12, #13, thanks Xar0P)", "Widget edit mode: the card zooms in once the desktop and its glass are ready", "Lighter at rest: only what is shown is built, the glass rim draws in one pass, and the vitals pause under a fullscreen game"],
-      "2.33.87": ["Bubbles hide like the Island and the Dock: Settings › Bubbles › Visibility, with the same three options (#10)", "With more than one screen, the widget gallery chooses where a widget goes: one screen or every screen (#9)"],
-      "2.33.86": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in iRiS Settings › Gaming & Fullscreen › Floating tools", "Island timers: right click stops one (with Undo), middle click pauses it; the open Island has pause and stop, and the time reads whole", "The dock slides its icons into place when an app opens or closes, without a flicker", "Text fields open their right-click menu in iRiS's look, inside the panel, so a sidebar no longer closes under it", "Window previews in Orbit and the Overview stay live when focus moves", "A fresh install starts with no wallpaper or backdrop dim"],
-      "2.33.85": ["Choosing a file, a folder or a picture opens the shell's own picker in your colours, not a white window"],
-      "2.33.84": ["One key can open a page of the Island and close it again: `inir iris togglePage desktop`", "Edit desktop: the size keys over a widget take the pointer after you move it"],
-      "2.33.83": ["Bubbles can live on the screens you pick (Settings, Display, Screens): the Island elsewhere stays clean", "Island player: a live stream shows Live with a full line instead of a timeline that slides back and forth", "On Umbriel, an app's menu in the dock sends its window to the scratchpad and back", "Island: a hub widget's module can fill its row on the Desktop page (the radio's player)", "Player chips show the same cover as the player, a station's logo included"],
-      "2.33.82": ["Settings reopens on the group you left, Glyph art included", "Glyph art: its rows start from the new, finer factory values", "About shows the new iNiR mark in your colours", "Edit desktop: hub widgets sit in their own aisle (Radio in Media) and search finds them by what they do"],
-      "2.33.81": ["Searches that find nothing answer with a little personality", "Hub: “Nothing matches” sits in the middle of the page"],
-      "2.33.80": ["Controls: tile rows show only with the iRiS face that draws them"],
-      "2.33.79": ["Widgets share one palette: every face and the player take colours from the same roles", "Widgets: Glass blur in Settings tunes how much their glass frosts the wallpaper", "Settings: changing the widgets' material, Style or Design no longer freezes the shell", "Widgets under Prism honour their options; rows a widget can't use hide"],
-        "2.33.78": [
-          "Wallpaper picker: a switch in every layout's head draws the wallpaper as glyphs"
-        ],
-        "2.33.77": [
-          "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame"
-        ],
-        "2.33.76": [
-          "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame",
-          "Widget options: colour swatches, a file chooser instead of a typed path, a tap on a changed value's number puts it back",
-          "Settings: scrolling no longer redraws a blurred band every frame, and the window stays ready for ten minutes after closing",
-          "Wallpaper › Draw the wallpaper as glyphs: your picture, a word or a subject as glowing characters, 16 looks, alive, Restore defaults",
-          "Do Not Disturb: the Control Center tile lights when it is on (it read backwards); on the Island a moon, hover names it, a press ends it",
-          "Settings on Umbriel: screen edge space, dialogs held to their window, maximized apps, tablet and touch screens, lid, NVIDIA sync"
-        ],
-        "2.33.75": [
-            "Island: a small moon rests on it while Do Not Disturb is on, so silence never goes unnoticed",
-            "Displays on Umbriel: each screen's workspaces drawn as miniatures: how many, as needed or fixed, stacked or side by side, looping",
-            "Settings on Umbriel: the width new windows open at, picked from drawn screens, for every screen (Layout) or one screen (Displays)",
-            "Displays on Umbriel: fullscreen apps straight to the screen, the colour curve with HDR on, sharp older apps on a scaled screen"
-        ],
-        "2.33.74": [
-            "Settings: everything of the compositor you run (Niri or Umbriel) sits in one sidebar group named for it, a page per function",
-            "Settings: each of those pages opens on what your machine runs now and shows only what your compositor and hardware support",
-            "Settings: no row names Niri when you run another compositor"
-        ],
-        "2.33.73": [
-            "Umbriel: a screen that looks darker at its highest refresh rate than at 60 Hz gets a fix in Settings › Display › Colour",
+      "Umbriel: a screen that keeps its own width for new windows says so, and one tap makes it follow the rest (thanks Raell Tech)"
+    ],
+    "2.33.88": [
+      "Banners can sit in a corner or at the middle of the top or bottom edge, not only the Island: Settings › Notifications › Banners",
+      "Settings, where you look for it: each bubble has its own card with its icon and place; one map in Classic, Folio and Prism",
+      "Escape closes Orbit, Spotlight, cards, the gallery and the dock",
+      "A hidden Island opens from anywhere along its edge and stays open while the pointer rests there (#12, #13, thanks Xar0P)",
+      "Widget edit mode: the card zooms in once the desktop and its glass are ready",
+      "Lighter at rest: only what is shown is built, the glass rim draws in one pass, and the vitals pause under a fullscreen game"
+    ],
+    "2.33.87": [
+      "Bubbles hide like the Island and the Dock: Settings › Bubbles › Visibility, with the same three options (#10)",
+      "With more than one screen, the widget gallery chooses where a widget goes: one screen or every screen (#9)"
+    ],
+    "2.33.86": [
+      "Floating tools (Super+G): Clock, Timer and Network join the bench, set up in iRiS Settings › Gaming & Fullscreen › Floating tools",
+      "Island timers: right click stops one (with Undo), middle click pauses it; the open Island has pause and stop, and the time reads whole",
+      "The dock slides its icons into place when an app opens or closes, without a flicker",
+      "Text fields open their right-click menu in iRiS's look, inside the panel, so a sidebar no longer closes under it",
+      "Window previews in Orbit and the Overview stay live when focus moves",
+      "A fresh install starts with no wallpaper or backdrop dim"
+    ],
+    "2.33.85": [
+      "Choosing a file, a folder or a picture opens the shell's own picker in your colours, not a white window"
+    ],
+    "2.33.84": [
+      "One key can open a page of the Island and close it again: `inir iris togglePage desktop`",
+      "Edit desktop: the size keys over a widget take the pointer after you move it"
+    ],
+    "2.33.83": [
+      "Bubbles can live on the screens you pick (Settings, Display, Screens): the Island elsewhere stays clean",
+      "Island player: a live stream shows Live with a full line instead of a timeline that slides back and forth",
+      "On Umbriel, an app's menu in the dock sends its window to the scratchpad and back",
+      "Island: a hub widget's module can fill its row on the Desktop page (the radio's player)",
+      "Player chips show the same cover as the player, a station's logo included"
+    ],
+    "2.33.82": [
+      "Settings reopens on the group you left, Glyph art included",
+      "Glyph art: its rows start from the new, finer factory values",
+      "About shows the new iNiR mark in your colours",
+      "Edit desktop: hub widgets sit in their own aisle (Radio in Media) and search finds them by what they do"
+    ],
+    "2.33.81": [
+      "Searches that find nothing answer with a little personality",
+      "Hub: “Nothing matches” sits in the middle of the page"
+    ],
+    "2.33.80": [
+      "Controls: tile rows show only with the iRiS face that draws them"
+    ],
+    "2.33.79": [
+      "Widgets share one palette: every face and the player take colours from the same roles",
+      "Widgets: Glass blur in Settings tunes how much their glass frosts the wallpaper",
+      "Settings: changing the widgets' material, Style or Design no longer freezes the shell",
+      "Widgets under Prism honour their options; rows a widget can't use hide"
+    ],
+    "2.33.78": [
+      "Wallpaper picker: a switch in every layout's head draws the wallpaper as glyphs"
+    ],
+    "2.33.77": [
+      "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame"
+    ],
+    "2.33.76": [
+      "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame",
+      "Widget options: colour swatches, a file chooser instead of a typed path, a tap on a changed value's number puts it back",
+      "Settings: scrolling no longer redraws a blurred band every frame, and the window stays ready for ten minutes after closing",
+      "Wallpaper › Draw the wallpaper as glyphs: your picture, a word or a subject as glowing characters, 16 looks, alive, Restore defaults",
+      "Do Not Disturb: the Control Center tile lights when it is on (it read backwards); on the Island a moon, hover names it, a press ends it",
+      "Settings on Umbriel: screen edge space, dialogs held to their window, maximized apps, tablet and touch screens, lid, NVIDIA sync"
+    ],
+    "2.33.75": [
+      "Island: a small moon rests on it while Do Not Disturb is on, so silence never goes unnoticed",
+      "Displays on Umbriel: each screen's workspaces drawn as miniatures: how many, as needed or fixed, stacked or side by side, looping",
+      "Settings on Umbriel: the width new windows open at, picked from drawn screens, for every screen (Layout) or one screen (Displays)",
+      "Displays on Umbriel: fullscreen apps straight to the screen, the colour curve with HDR on, sharp older apps on a scaled screen"
+    ],
+    "2.33.74": [
+      "Settings: everything of the compositor you run (Niri or Umbriel) sits in one sidebar group named for it, a page per function",
+      "Settings: each of those pages opens on what your machine runs now and shows only what your compositor and hardware support",
+      "Settings: no row names Niri when you run another compositor"
+    ],
+    "2.33.73": [
+      "Umbriel: a screen that looks darker at its highest refresh rate than at 60 Hz gets a fix in Settings › Display › Colour",
       "Prism: turning an option on or off keeps the page where you were reading; a long page no longer jumps to another part",
       "Prism: every option has one home, no copy of the compositor's rows on a second page; the page card names each value it shows"
-        ],
-        "2.33.72": [
-            "The overview over a fullscreen game no longer rebuilds the Island and Dock on every press: they keep their layer, on Umbriel and Niri"
-        ],
-        "2.33.71": [
-            "With a Design on, the resting Island is yours again: Island › Design and modes › The Design's face"
-        ],
-        "2.33.70": [
-            "Prism Settings: the sidebar's sections read brighter"
-        ],
-        "2.33.69": [
-            "Prism: panels take a soft haze of the spectrum from one corner; each place can wear Prism alone (Colour › Look › Places)"
-        ],
-        "2.33.68": [
-            "A fifth look, Prism: black and white controls with the spectrum at each level"
-        ],
-        "2.33.67": [
-            "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
-        ],
-        "2.33.66": [
-            "Settings follow the compositor you run: Niri shows what Niri does, Umbriel gets pages of its own",
-            "Umbriel: layouts drawn as pictures, tabs, title bars, glass, effects you press on a drawn desktop, hot corners, HDR and colour depth",
-            "Display: drag your screens to where they stand, pick a scale from miniatures of your own screen, and keep or undo a change within 15 seconds",
-            "Prism Settings: the side column folds by itself on pages that need the width, with a button to open or close it",
-            "Prism Settings: the open page is named in your accent on a quiet plate of it, so where you are reads at a glance",
-            "A Design can bring the faces of your desktop widgets while it is on (Prism does); taking it off gives yours back"
-        ],
-        "2.33.65": [
-            "Runs on NixOS: every tool and app is found on your PATH, not only in /usr/bin"
-        ],
-        "2.33.60": [
-            "Prism Settings: rows that pick several pieces show which are on and in what order; a tap adds to the list instead of replacing it",
-            "React with any emoji: one small pill opens a search, and votes and reactions show the moment people give them"
-        ],
-        "2.33.59": [
-            "Bubbles stacked in a corner or along its edge join as one smooth body, without a bulge each",
-            "Vote and react on any hub item, and see how many people have it",
-            "Prism Settings: search answers as you type, values save once per wheel turn, and scrolling stays smooth"
-        ],
-        "2.33.58": [
-            "The frame can grow a rail on the left or right, and the dock lives inside it",
-            "Bubbles join a line where you drop them and keep their order",
-            "A larger player: cover, title and five controls on discs, 10 s steps",
-            "The song length no longer jumps between tracks; shuffle and repeat on both players",
-            "Vitals as a chart and four tiles",
-            "Hub items say what is new in their version; inir hub open lands on the Hub"
-        ]
-    },
-    "summary": "One living body: the Island, the chassis and Apple-grade motion.",
-    "authors": [
-        "snowarch"
     ],
-    "license": "GPL-3.0-only",
-    "tags": [
-        "family"
+    "2.33.72": [
+      "The overview over a fullscreen game no longer rebuilds the Island and Dock on every press: they keep their layer, on Umbriel and Niri"
     ],
-    "permissions": [
-        "process",
-        "network",
-        "files"
+    "2.33.71": [
+      "With a Design on, the resting Island is yours again: Island › Design and modes › The Design's face"
     ],
-    "hosts": [
-        "bing.com",
-        "brave.com",
-        "duckduckgo.com",
-        "google.com",
-        "startpage.com"
+    "2.33.70": [
+      "Prism Settings: the sidebar's sections read brighter"
     ],
-    "minInir": "3.1.2",
-    "provides": "modules/iris",
-    "preview": "preview.webp"
+    "2.33.69": [
+      "Prism: panels take a soft haze of the spectrum from one corner; each place can wear Prism alone (Colour › Look › Places)"
+    ],
+    "2.33.68": [
+      "A fifth look, Prism: black and white controls with the spectrum at each level"
+    ],
+    "2.33.67": [
+      "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
+    ],
+    "2.33.66": [
+      "Settings follow the compositor you run: Niri shows what Niri does, Umbriel gets pages of its own",
+      "Umbriel: layouts drawn as pictures, tabs, title bars, glass, effects you press on a drawn desktop, hot corners, HDR and colour depth",
+      "Display: drag your screens to where they stand, pick a scale from miniatures of your own screen, and keep or undo a change within 15 seconds",
+      "Prism Settings: the side column folds by itself on pages that need the width, with a button to open or close it",
+      "Prism Settings: the open page is named in your accent on a quiet plate of it, so where you are reads at a glance",
+      "A Design can bring the faces of your desktop widgets while it is on (Prism does); taking it off gives yours back"
+    ],
+    "2.33.65": [
+      "Runs on NixOS: every tool and app is found on your PATH, not only in /usr/bin"
+    ],
+    "2.33.60": [
+      "Prism Settings: rows that pick several pieces show which are on and in what order; a tap adds to the list instead of replacing it",
+      "React with any emoji: one small pill opens a search, and votes and reactions show the moment people give them"
+    ],
+    "2.33.59": [
+      "Bubbles stacked in a corner or along its edge join as one smooth body, without a bulge each",
+      "Vote and react on any hub item, and see how many people have it",
+      "Prism Settings: search answers as you type, values save once per wheel turn, and scrolling stays smooth"
+    ],
+    "2.33.58": [
+      "The frame can grow a rail on the left or right, and the dock lives inside it",
+      "Bubbles join a line where you drop them and keep their order",
+      "A larger player: cover, title and five controls on discs, 10 s steps",
+      "The song length no longer jumps between tracks; shuffle and repeat on both players",
+      "Vitals as a chart and four tiles",
+      "Hub items say what is new in their version; inir hub open lands on the Hub"
+    ]
+  },
+  "summary": "One living body: the Island, the chassis and Apple-grade motion.",
+  "authors": [
+    "snowarch"
+  ],
+  "license": "GPL-3.0-only",
+  "tags": [
+    "family"
+  ],
+  "permissions": [
+    "process",
+    "network",
+    "files"
+  ],
+  "hosts": [
+    "bing.com",
+    "brave.com",
+    "duckduckgo.com",
+    "google.com",
+    "startpage.com"
+  ],
+  "minInir": "3.1.2",
+  "provides": "modules/iris",
+  "preview": "preview.webp"
 }

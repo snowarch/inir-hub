@@ -1,20 +1,15 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Shapes
 import qs.modules.common.functions
 import qs.modules.iris.style
 import qs
 import qs.services
-import qs.modules.iris.components
 import qs.modules.iris.frame
 
-// Arranging widgets: what the desktop recedes over, and the card's edge. Loaded by the desktop (shared Background):
-// `under` lays the wallpaper softly blurred and dimmed behind the card with its shadow, `over` draws the card's hairline
-// and gives the desktop `cardMask`, the card's shape at full size, to cut its corners. The chassis recedes into the card
-// with the desktop (IrisBar), so the frame, the Island and the Dock on the card are the real ones; the edit window
-// (IrisEditDesk) loads `lit`, the rims of the bodies a carried widget meets, drawn over them.
+// Arranging widgets stage: instant-ready frosted scrim behind the shrunk live desktop card,
+// crisp card hairline edge over it, and accent rims on bodies a carried widget snaps to.
 Item {
     id: root
 
@@ -22,12 +17,9 @@ Item {
     property string output: ""
     property var room: null
     property var card: ({ x: 0, y: 0, s: 1, p: 0 })
-    // The card's own still is still decoding: the real wallpaper keeps showing round the card meanwhile.
     property bool waiting: false
-    // The wallpaper's still, for the stage.
     property string still: ""
-    // The stage's still is decoded (or will never be): the desktop holds the zoom until it is.
-    readonly property bool ready: root.side !== "under" || (under.item?.done ?? false)
+    readonly property bool ready: true
 
     readonly property real d: IrisStyle.density
     readonly property real p: Math.max(0, Math.min(1, root.card.p))
@@ -35,66 +27,29 @@ Item {
     readonly property real cardY: root.card.y
     readonly property real cardW: root.width * root.card.s
     readonly property real cardH: root.height * root.card.s
-    readonly property real cornerSize: IrisStyle.radiusPanel * root.p
+    readonly property real cornerSize: Math.round(22 * root.d) * root.p
     readonly property color paper: IrisStyle.paper
 
-    // The stage: the person's own wallpaper, out of focus and a step darker (lighter in light), so the card reads as
-    // the thing in front. Decoded small and blurred once; nothing is drawn per frame but its opacity.
-    // Only the side that shows it builds it, and off the frame that asks for it: the blur and the shadow are the stage's
-    // costly parts, and the other sides never draw them.
-    Loader {
-        id: under
+    // Lightweight instant backdrop behind the live desktop card — zero blocking MultiEffect FBOs.
+    Rectangle {
         anchors.fill: parent
-        active: root.side === "under"
-        asynchronous: true
-        sourceComponent: Item {
-            readonly property bool done: root.still === "" || stageStill.status === Image.Ready || stageStill.status === Image.Error
-            Item {
-                anchors.fill: parent
-                opacity: root.waiting ? 0 : Math.min(1, root.p * 1.6)
-                Rectangle { anchors.fill: parent; color: root.paper }
-                Image {
-                    id: stageStill
-                    anchors.fill: parent
-                    visible: false
-                    source: root.still
-                    sourceSize: Qt.size(Math.round(root.width / 3), Math.round(root.height / 3))
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                    cache: true
-                }
-                MultiEffect {
-                    anchors.fill: parent
-                    source: stageStill
-                    visible: stageStill.status === Image.Ready
-                    blurEnabled: true
-                    blur: 1
-                    blurMax: 40
-                    saturation: -0.15
-                    autoPaddingEnabled: false
-                }
-                Rectangle {
-                    anchors.fill: parent
-                    color: ColorUtils.applyAlpha(root.paper, IrisStyle.light ? 0.32 : 0.46) // iris-literal: the stage's dim over the blurred wallpaper
-                }
-            }
-
-            IrisBodyShadow {
-                x: root.cardX
-                y: root.cardY + 10 * root.d * root.p
-                width: root.cardW
-                height: root.cardH
-                radius: root.cornerSize
-                blur: 42 * root.d
-                spread: -8 * root.d
-                color: ColorUtils.applyAlpha(IrisStyle.shadow, IrisStyle.shadow.a * root.p)
-            }
-        }
+        visible: root.side === "under" && root.p > 0.001
+        color: ColorUtils.applyAlpha(root.paper, (IrisStyle.light ? 0.56 : 0.72) * root.p)
     }
 
-    // The card's shape at the desktop's own size (it is shrunk with it).
+    // Subtle elevation halo behind the card (pure rectangle, zero GPU blur cost).
+    Rectangle {
+        visible: root.side === "under" && root.p > 0.01
+        x: root.cardX - 1
+        y: root.cardY + Math.round(6 * root.d * root.p)
+        width: root.cardW + 2
+        height: root.cardH + 2
+        radius: root.cornerSize + 1
+        color: ColorUtils.applyAlpha("#000000", (IrisStyle.light ? 0.14 : 0.32) * root.p)
+    }
+
+    // The card's shape at the desktop's own size (cut by CardPicture.frag).
     readonly property Item cardMask: root.side === "over" ? mask : null
-    // The card's corner in desktop px: the desktop's own shader draws the shape.
     readonly property real cardCorner: root.cornerSize / Math.max(0.2, root.card.s)
     Item {
         id: mask
@@ -110,7 +65,7 @@ Item {
     }
 
     Rectangle {
-        visible: root.side === "over"
+        visible: root.side === "over" && root.p > 0.005
         x: root.cardX
         y: root.cardY
         width: root.cardW
@@ -134,8 +89,6 @@ Item {
         for (const id in DesktopArrange.matched) out[id] = true
         return out
     }
-    // One outline for every shape: a capsule's ends are arcs, a smaller radius is the field's squircle (a quartic
-    // superellipse over 1.8409 r, apex where the circle's was).
     function outline(x: real, y: real, w: real, h: real, r: real): string {
         const half = Math.min(w, h) / 2
         if (r >= half - 0.5) {
@@ -184,7 +137,7 @@ Item {
                 Behavior on opacity { NumberAnimation { duration: 110; easing.type: IrisStyle.feedbackEasing } }
                 preferredRendererType: Shape.CurveRenderer
                 ShapePath {
-                    fillColor: ColorUtils.applyAlpha(IrisStyle.accent, 0.12) // iris-literal: a lit body's wash, under its accent rim
+                    fillColor: ColorUtils.applyAlpha(IrisStyle.accent, 0.12)
                     strokeColor: IrisStyle.accent
                     strokeWidth: 2 * root.hair
                     PathSvg { path: root.outline(0, 0, rim.width, rim.height, rim.modelData.radius ?? 0) }
