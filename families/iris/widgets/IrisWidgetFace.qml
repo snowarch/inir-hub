@@ -81,7 +81,7 @@ Item {
         }
         const pos = root.mapToItem(win.contentItem, 0, 0)
         win.setWidgetBlurRect(root._blurKey, {
-            x: pos.x, y: pos.y, width: root.width, height: root.height, radius: root.radius
+            item: root, x: pos.x, y: pos.y, width: root.width, height: root.height, radius: root.radius
         })
     }
     onCompositorGlassChanged: root._syncCompositorBlur()
@@ -136,7 +136,7 @@ Item {
     // A worn Design's glass keeps at least its own share of the plate, as every body's does (IrisDesign.glassTint).
     readonly property real veil: root.opaque ? root.strength
         : root.clear ? 0
-        : root.rinLiquid ? IrisStyle.liquidVeil(root.strength)
+        : root.rinLiquid ? IrisStyle.liquidVeil(root.strength, root.readMaterial, root.readLevel, root.readSpread, root.lightBackdrop)
         : root.compositorGlass ? Math.max(0.14, Math.min(0.46, root.strength * 0.44))
         : Math.max(IrisDesign.glassTint * root.strength, (root.paper ? IrisStyle.legibleVeil(root.readMaterial, root.frostLevel, root.readSpread, 1)
             : root.lightBackdrop ? IrisStyle.legibleFrost(root.readMaterial, root.frostLevel, root.readSpread, 1)

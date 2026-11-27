@@ -571,7 +571,8 @@ QtObject {
         const chosen = Math.max(0.12, IrisDesign.glassTint, Math.min(0.96, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
         // Rin's liquid glass is one material: a body wears the veil a widget wears (liquidVeil), so the lens shows the same
         // on the bar, the dock, menus and widgets. The factory tint (58) gives the widgets' own default.
-        if (root.rinLiquid) return root.liquidVeil(root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 58)
+        if (root.rinLiquid) return root.liquidVeil(root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 58, "panel",
+            IrisMood.sampled ? IrisMood.luminance : -1, IrisMood.contrast * 0.5, root.light)
         const needed = IrisMood.sampled ? root.legibleVeil("panel", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
         return Math.max(chosen, Math.min(0.9, needed))
     }
@@ -581,8 +582,16 @@ QtObject {
     readonly property bool bodiesCovered: root.glassCompositor && Lume.covered(root.placeOutput)
     readonly property bool rinLiquid: CompositorService.isRin && root.glassRequested === "compositor"
         && IrisCompositorBlur.background === "liquid"
-    // How thick liquid glass is for a share of the full veil (1 = the factory's): thin enough for Rin's lens to read.
-    function liquidVeil(share: real): real { return Math.max(0.06, Math.min(0.32, share * 0.32)) }
+    // How thick liquid glass is: a share of the factory's thin veil (1), thin enough for Rin's lens to read, thickened
+    // only as far as its ink needs the material's contrast over the brightest (frosted: darkest) part of what it sits on.
+    // A thin veil alone left white labels unread over a bright patch.
+    function liquidVeil(share: real, material: string, level: real, spread: real, frosted: bool): real {
+        const thin = Math.max(0.06, Math.min(0.32, share * 0.32))
+        const contrast = root.materialContrast[material] ?? 4.5
+        return frosted
+            ? Lume.frost(level, spread, 1, root.light ? root.surfaceOpaque : root.frost, root.light ? root.text : root.inkOnLight, contrast, thin, 0.72)
+            : Lume.veil(level, spread, 1, root.surfaceOpaque, root.text, contrast, thin, 0.72)
+    }
     readonly property real glassTint: root.rinLiquid
         ? root.wallpaperGlassTint
         : root.bodiesCovered

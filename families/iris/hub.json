@@ -1,7 +1,11 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.141",
+  "version": "2.33.142",
   "changes": {
+    "2.33.142": [
+      "Liquid Glass thickens only as far as its text needs over a bright wallpaper, on bodies and widgets alike",
+      "Desktop widget glass follows the widget after Edit Mode, a wallpaper change and parallax instead of staying behind"
+    ],
     "2.33.141": [
       "Rin Liquid Glass is one material: the bar, frame, Island and Dock wear the thin veil the widgets wear, so the lens shows everywhere"
     ],
