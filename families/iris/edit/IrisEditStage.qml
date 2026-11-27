@@ -73,7 +73,7 @@ Item {
             Rectangle {
                 anchors.fill: parent
                 visible: stageStill.status === Image.Ready
-                color: ColorUtils.applyAlpha(root.paper, IrisStyle.light ? 0.32 : 0.46)
+                color: ColorUtils.applyAlpha(root.paper, IrisStyle.light ? 0.32 : 0.46) // iris-literal: the stage still's paper wash, set by eye over the blurred wallpaper
             }
             IrisBodyShadow {
                 x: root.cardX
@@ -99,7 +99,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: root.cardCorner
-            color: "#ffffff"
+            color: "#ffffff" // iris-literal: an opacity mask, only its alpha counts
         }
     }
 
@@ -162,7 +162,7 @@ Item {
                 Behavior on opacity { NumberAnimation { duration: 110; easing.type: IrisStyle.feedbackEasing } }
                 preferredRendererType: Shape.CurveRenderer
                 ShapePath {
-                    fillColor: ColorUtils.applyAlpha(IrisStyle.accent, 0.12)
+                    fillColor: IrisStyle.tintFill(IrisStyle.accent)
                     strokeColor: IrisStyle.accent
                     strokeWidth: 2 * root.hair
                     PathSvg { path: root.outline(0, 0, rim.width, rim.height, rim.modelData.radius ?? 0) }

@@ -35,7 +35,7 @@ Item {
     readonly property int sidePad: Math.round(24 * root.d)
     readonly property int marginTop: Math.round(16 * root.d)
     readonly property int ringPad: Math.round(4 * root.d)
-    readonly property real thumbRadius: Math.round(10 * root.d)
+    readonly property real thumbRadius: IrisStyle.radiusChip
 
     readonly property real stripMaxW: Math.max(160, root.roomW - root.sidePad * 2)
     readonly property real stripY: Math.round(root.marginTop - (1 - root.p) * (root.marginTop + root.thumbH + 16))
@@ -153,12 +153,12 @@ Item {
                         width: Math.round(18 * root.d)
                         height: Math.round(18 * root.d)
                         radius: width / 2
-                        color: ColorUtils.applyAlpha("#000000", 0.65)
+                        color: IrisStyle.veilStrong
                         MaterialSymbol {
                             anchors.centerIn: parent
                             text: "play_arrow"
                             iconSize: Math.round(12 * root.d)
-                            color: "#ffffff"
+                            color: IrisStyle.onMedia
                         }
                     }
                 }

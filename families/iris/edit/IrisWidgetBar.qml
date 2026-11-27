@@ -138,7 +138,7 @@ Item {
     readonly property real bodyHeight: Math.max(200, root.height - root.edge * 2)
     readonly property real bodyX: Math.round(root.width - root.edge - root.bodyWidth + (1 - root.grow) * (root.bodyWidth + root.edge + 20))
     readonly property real bodyY: root.edge
-    readonly property real bodyRadius: Math.round(20 * root.d)
+    readonly property real bodyRadius: IrisStyle.radiusSheet
 
     readonly property var hitRect: root.shown
         ? Qt.rect(root.bodyX, root.bodyY, root.bodyWidth, root.bodyHeight)
@@ -276,7 +276,7 @@ Item {
         id: inspectorComponent
         IrisWidgetControls {
             widget: root.inspectedWidget
-            plateRadius: Math.round(12 * root.d)
+            plateRadius: IrisStyle.radiusTile
             optionRows: rowsComponent
         }
     }
@@ -322,34 +322,37 @@ Item {
                 anchors.fill: parent
                 spacing: Math.round(8 * root.d)
 
-                // Chapter filter strip when a section has multiple groups.
-                Flickable {
+                // A long section (Style holds some thirty groups) picks its group from one menu: a wall of chips
+                // pushed the rows below the fold.
+                IrisPopupButton {
+                    visible: optRoot.groups.length > 8
+                    options: [{ value: "", label: "All" }]
+                        .concat(optRoot.groups.map(group => ({ value: group.name, label: group.name })))
+                    current: optRoot.activeGroup
+                    accessibleName: Translation.tr("Group")
+                    onPicked: value => { optRoot.activeGroup = String(value); optFlick.contentY = 0 }
+                }
+                // A short one shows its groups to jump to, wrapped: every group shows, none hides past the edge.
+                Flow {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Math.round(28 * root.d)
-                    visible: optRoot.groups.length > 1
-                    contentWidth: chapterRow.implicitWidth
-                    clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    Row {
-                        id: chapterRow
-                        spacing: Math.round(4 * root.d)
-                        IrisChip {
-                            implicitHeight: Math.round(26 * root.d)
-                            label: Translation.tr("All")
-                            selected: optRoot.activeGroup.length === 0
+                    visible: optRoot.groups.length > 1 && optRoot.groups.length <= 8
+                    spacing: Math.round(4 * root.d)
+                    IrisChip {
+                        implicitHeight: Math.round(24 * root.d)
+                        label: Translation.tr("All")
+                        selected: optRoot.activeGroup.length === 0
+                        quiet: !selected
+                        onClicked: { optRoot.activeGroup = ""; optFlick.contentY = 0 }
+                    }
+                    Repeater {
+                        model: optRoot.groups
+                        delegate: IrisChip {
+                            required property var modelData
+                            implicitHeight: Math.round(24 * root.d)
+                            label: Translation.tr(modelData.name)
+                            selected: optRoot.activeGroup === modelData.name
                             quiet: !selected
-                            onClicked: { optRoot.activeGroup = ""; optFlick.contentY = 0 }
-                        }
-                        Repeater {
-                            model: optRoot.groups
-                            delegate: IrisChip {
-                                required property var modelData
-                                implicitHeight: Math.round(26 * root.d)
-                                label: Translation.tr(modelData.name)
-                                selected: optRoot.activeGroup === modelData.name
-                                quiet: !selected
-                                onClicked: { optRoot.activeGroup = selected ? "" : modelData.name; optFlick.contentY = 0 }
-                            }
+                            onClicked: { optRoot.activeGroup = selected ? "" : modelData.name; optFlick.contentY = 0 }
                         }
                     }
                 }
@@ -463,8 +466,8 @@ Item {
                 Rectangle {
                     implicitWidth: doneLabel.implicitWidth + Math.round(22 * root.d)
                     implicitHeight: Math.round(32 * root.d)
-                    radius: Math.round(10 * root.d)
-                    color: doneMouse.containsMouse ? ColorUtils.mix(IrisStyle.accent, "#ffffff", 0.14) : IrisStyle.accent
+                    radius: IrisStyle.radiusRow
+                    color: doneMouse.containsMouse ? IrisStyle.accentHover : IrisStyle.accent
                     IrisText {
                         id: doneLabel
                         anchors.centerIn: parent
@@ -483,29 +486,14 @@ Item {
                 }
             }
 
-            // Scrollable navigation tabs (all 6 iNiR pages: Widgets, Look, Island, Dock, Style, Presets).
-            Flickable {
+            // The six pages as one segmented control: every name shows whole, none hides past the edge.
+            IrisSegmented {
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.round(32 * root.d)
                 visible: !root.inspecting
-                contentWidth: navRow.implicitWidth
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
-                Row {
-                    id: navRow
-                    spacing: Math.round(4 * root.d)
-                    Repeater {
-                        model: root.pages
-                        delegate: IrisChip {
-                            required property var modelData
-                            implicitHeight: Math.round(30 * root.d)
-                            label: modelData.label
-                            selected: root.page === modelData.value
-                            quiet: !selected
-                            onClicked: root.page = modelData.value
-                        }
-                    }
-                }
+                options: root.pages
+                current: root.page
+                accessibleName: Translation.tr("Customize Desktop")
+                onPicked: value => root.page = value
             }
 
             // Search box on Widgets gallery.
@@ -513,7 +501,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Math.round(36 * root.d)
                 visible: !root.inspecting && root.page === "widgets"
-                radius: Math.round(11 * root.d)
+                radius: IrisStyle.radiusRow
                 color: IrisStyle.fillQuiet
                 border.width: searchField.activeFocus ? 1.5 : 1
                 border.color: searchField.activeFocus ? IrisStyle.accent : IrisStyle.hairline
@@ -560,34 +548,27 @@ Item {
                 }
             }
 
-            // Category filter pills on Widgets gallery.
-            Flickable {
+            // Category filter pills on Widgets gallery: they wrap, so every category shows without sliding sideways.
+            Flow {
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.round(26 * root.d)
                 visible: !root.inspecting && root.page === "widgets" && root.searchQuery.trim().length === 0 && root.categories.length > 1
-                contentWidth: catRow.implicitWidth
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
-                Row {
-                    id: catRow
-                    spacing: Math.round(4 * root.d)
-                    IrisChip {
+                spacing: Math.round(4 * root.d)
+                IrisChip {
+                    implicitHeight: Math.round(24 * root.d)
+                    label: Translation.tr("All")
+                    selected: root.category.length === 0
+                    quiet: !selected
+                    onClicked: root.category = ""
+                }
+                Repeater {
+                    model: root.categories
+                    delegate: IrisChip {
+                        required property string modelData
                         implicitHeight: Math.round(24 * root.d)
-                        label: Translation.tr("All")
-                        selected: root.category.length === 0
+                        label: root.categoryNames[modelData] ?? modelData
+                        selected: root.category === modelData
                         quiet: !selected
-                        onClicked: root.category = ""
-                    }
-                    Repeater {
-                        model: root.categories
-                        delegate: IrisChip {
-                            required property string modelData
-                            implicitHeight: Math.round(24 * root.d)
-                            label: root.categoryNames[modelData] ?? modelData
-                            selected: root.category === modelData
-                            quiet: !selected
-                            onClicked: root.category = selected ? "" : modelData
-                        }
+                        onClicked: root.category = selected ? "" : modelData
                     }
                 }
             }
@@ -645,11 +626,9 @@ Item {
                             readonly property string shotUrl: card.shot?.url ?? ""
 
                             width: galleryGrid.cellW
-                            height: Math.round(88 * root.d)
-                            radius: Math.round(14 * root.d)
-                            color: card.active
-                                ? IrisStyle.tintFill(IrisStyle.accent)
-                                : card.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
+                            height: Math.round(116 * root.d)
+                            radius: IrisStyle.radiusTile
+                            color: card.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
                             border.width: card.active ? 1.5 : 1
                             border.color: card.active ? IrisStyle.accent
                                 : card.hovered ? IrisStyle.hairlineStrong : IrisStyle.hairline
@@ -662,67 +641,61 @@ Item {
                                 onClicked: root.toggleWidget(card.modelData.key, card)
                             }
 
+                            // A window onto the widget: its own picture from the stage when it is on the desktop, else its glyph
+                            // large on a quiet well. Every card has the same shape, so the grid reads as one set.
                             ColumnLayout {
                                 anchors.fill: parent
-                                anchors.margins: Math.round(10 * root.d)
+                                anchors.margins: Math.round(6 * root.d)
                                 spacing: Math.round(6 * root.d)
 
-                                RowLayout {
+                                ClippingRectangle {
+                                    id: well
                                     Layout.fillWidth: true
-                                    spacing: Math.round(8 * root.d)
+                                    Layout.fillHeight: true
+                                    radius: Math.max(2, IrisStyle.radiusTile - Math.round(6 * root.d))
+                                    color: card.active ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.fillQuiet
 
-                                    Item {
-                                        implicitWidth: Math.round(34 * root.d)
-                                        implicitHeight: Math.round(34 * root.d)
-
-                                        ClippingRectangle {
-                                            anchors.fill: parent
-                                            visible: shotImg.status === Image.Ready
-                                            radius: Math.round(9 * root.d)
-                                            color: IrisStyle.fillQuiet
-                                            Image {
-                                                id: shotImg
-                                                anchors.fill: parent
-                                                source: card.shotUrl
-                                                fillMode: Image.PreserveAspectCrop
-                                                asynchronous: true
-                                                cache: true
-                                                sourceSize: Qt.size(68, 68)
-                                            }
-                                        }
-                                        Rectangle {
-                                            anchors.fill: parent
-                                            visible: shotImg.status !== Image.Ready
-                                            radius: Math.round(10 * root.d)
-                                            color: card.active
-                                                ? ColorUtils.applyAlpha(IrisStyle.accent, 0.22)
-                                                : IrisStyle.fillActive
-                                            MaterialSymbol {
-                                                anchors.centerIn: parent
-                                                text: card.modelData.glyph || "widgets"
-                                                iconSize: Math.round(18 * root.d)
-                                                color: card.active ? IrisStyle.accent : IrisStyle.text
-                                            }
-                                        }
+                                    Image {
+                                        id: shotImg
+                                        anchors.fill: parent
+                                        anchors.margins: Math.round(4 * root.d)
+                                        source: card.shotUrl
+                                        fillMode: Image.PreserveAspectFit
+                                        asynchronous: true
+                                        cache: true
+                                        sourceSize: Qt.size(Math.round(well.width * 2), Math.round(well.height * 2))
+                                        smooth: true
+                                        mipmap: true
                                     }
-
-                                    Item { Layout.fillWidth: true }
-
                                     MaterialSymbol {
-                                        visible: card.active && !card.hovered
-                                        text: "check_circle"
-                                        iconSize: Math.round(16 * root.d)
-                                        color: IrisStyle.accent
+                                        anchors.centerIn: parent
+                                        visible: shotImg.status !== Image.Ready
+                                        text: card.modelData.glyph || "widgets"
+                                        iconSize: Math.round(26 * root.d)
+                                        color: card.active ? IrisStyle.accent : IrisStyle.textSecondary
                                     }
                                 }
 
-                                IrisText {
+                                RowLayout {
                                     Layout.fillWidth: true
-                                    text: Translation.tr(card.modelData.name)
-                                    font.pixelSize: IrisStyle.typeMeta
-                                    font.weight: IrisStyle.weight(card.active ? Font.DemiBold : Font.Medium)
-                                    color: card.active ? IrisStyle.text : IrisStyle.textSecondary
-                                    elide: Text.ElideRight
+                                    Layout.leftMargin: Math.round(4 * root.d)
+                                    Layout.rightMargin: Math.round(2 * root.d)
+                                    spacing: Math.round(6 * root.d)
+                                    IrisText {
+                                        Layout.fillWidth: true
+                                        text: Translation.tr(card.modelData.name)
+                                        font.pixelSize: IrisStyle.typeMeta
+                                        font.weight: IrisStyle.weight(card.active ? Font.DemiBold : Font.Medium)
+                                        color: card.active ? IrisStyle.text : IrisStyle.textSecondary
+                                        elide: Text.ElideRight
+                                    }
+                                    MaterialSymbol {
+                                        visible: card.active
+                                        text: "check_circle"
+                                        fill: 1
+                                        iconSize: Math.round(16 * root.d)
+                                        color: IrisStyle.accent
+                                    }
                                 }
                             }
 
@@ -739,7 +712,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: "close"
                                     iconSize: Math.round(13 * root.d)
-                                    color: removeMouse.containsMouse ? "#ffffff" : IrisStyle.text
+                                    color: removeMouse.containsMouse ? IrisStyle.inkOnDanger : IrisStyle.text
                                 }
                                 MouseArea {
                                     id: removeMouse
@@ -782,7 +755,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: Math.round(40 * root.d)
-                        radius: Math.round(12 * root.d)
+                        radius: IrisStyle.radiusTile
                         color: savePresetMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
                         border.width: 1
                         border.color: IrisStyle.hairline
@@ -810,7 +783,7 @@ Item {
                             readonly property bool userOwned: DesktopPresets.presets.some(p => p.id === presetCard.modelData.id)
                             Layout.fillWidth: true
                             Layout.preferredHeight: Math.round(52 * root.d)
-                            radius: Math.round(12 * root.d)
+                            radius: IrisStyle.radiusTile
                             color: presetCard.worn ? IrisStyle.tintFill(IrisStyle.accent)
                                 : presetMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
                             border.width: presetCard.worn ? 1.5 : 1
@@ -874,7 +847,7 @@ Item {
                     visible: !root.confirmingClear && root.page === "widgets" && DesktopEditHistory.notice.length === 0
                     implicitWidth: clearRow.implicitWidth + Math.round(16 * root.d)
                     implicitHeight: Math.round(30 * root.d)
-                    radius: Math.round(9 * root.d)
+                    radius: IrisStyle.radiusRow
                     opacity: root.enabledCount > 0 ? 1 : 0.35
                     color: clearMouse.containsMouse && root.enabledCount > 0 ? IrisStyle.fillHover : "transparent"
                     RowLayout {
@@ -902,7 +875,7 @@ Item {
                     Rectangle {
                         implicitWidth: cancelLbl.implicitWidth + Math.round(16 * root.d)
                         implicitHeight: Math.round(28 * root.d)
-                        radius: Math.round(9 * root.d)
+                        radius: IrisStyle.radiusRow
                         color: cancelMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
                         IrisText { id: cancelLbl; anchors.centerIn: parent; text: Translation.tr("Cancel"); font.pixelSize: IrisStyle.typeMeta }
                         MouseArea { id: cancelMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.confirmingClear = false }
@@ -910,9 +883,9 @@ Item {
                     Rectangle {
                         implicitWidth: confirmLbl.implicitWidth + Math.round(16 * root.d)
                         implicitHeight: Math.round(28 * root.d)
-                        radius: Math.round(9 * root.d)
+                        radius: IrisStyle.radiusRow
                         color: IrisStyle.danger
-                        IrisText { id: confirmLbl; anchors.centerIn: parent; text: Translation.tr("Clear"); color: "#ffffff"; font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.DemiBold) }
+                        IrisText { id: confirmLbl; anchors.centerIn: parent; text: Translation.tr("Clear"); color: IrisStyle.inkOnDanger; font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.DemiBold) }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.clearAllWidgets() }
                     }
                 }
