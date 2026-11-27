@@ -586,7 +586,9 @@ QtObject {
     // only as far as its ink needs the material's contrast over the brightest (frosted: darkest) part of what it sits on.
     // A thin veil alone left white labels unread over a bright patch.
     function liquidVeil(share: real, material: string, level: real, spread: real, frosted: bool): real {
-        const thin = Math.max(0.06, Math.min(0.32, share * 0.32))
+        // The factory tint (share 1) gives 0.32; above it the veil keeps thickening up to the solve's own ceiling, so
+        // the whole Tint row acts (capped at 0.32 its upper half did nothing).
+        const thin = Math.max(0.06, Math.min(0.72, share * 0.32))
         const contrast = root.materialContrast[material] ?? 4.5
         return frosted
             ? Lume.frost(level, spread, 1, root.light ? root.surfaceOpaque : root.frost, root.light ? root.text : root.inkOnLight, contrast, thin, 0.72)

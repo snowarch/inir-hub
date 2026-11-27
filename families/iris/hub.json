@@ -1,7 +1,10 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.143",
+  "version": "2.33.144",
   "changes": {
+    "2.33.144": [
+      "On Rin, Glass settings follow Rin at once whoever changes it, and show only rows that act: Tint thickens Liquid Glass across its whole range"
+    ],
     "2.33.143": [
       "On Rin, glass and Liquid Glass take the exact shape iRiS draws: necks, fillets and the Island keep their curves, with one seamless lens"
     ],

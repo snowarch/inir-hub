@@ -24,7 +24,6 @@ Singleton {
     property real liquidDispersion: 0.40
     property real liquidFrost: 0.40
     property real liquidBulge: 0.05
-    property real liquidAdapt: 0.35
     property var elsewhere: []
     readonly property bool usable: root.available && root.enabled
     // Whether the compositor blurs behind the shell at all: Niri 26.04+ and Rin through the background-effect regions
@@ -58,34 +57,14 @@ Singleton {
         if (typeof state["liquid-dispersion"] === "number") root.liquidDispersion = state["liquid-dispersion"]
         if (typeof state["liquid-frost"] === "number") root.liquidFrost = state["liquid-frost"]
         if (typeof state["liquid-bulge"] === "number") root.liquidBulge = state["liquid-bulge"]
-        if (typeof state["liquid-adapt"] === "number") root.liquidAdapt = state["liquid-adapt"]
     }
 
-    FileView {
-        id: rinAppearanceFile
-        path: CompositorService.isRin ? Directories.configPath + "/rin/rin.appearance.toml" : ""
-        watchChanges: true
-        onFileChanged: { rinAppearanceFile.reload(); root.reload() }
-        onLoaded: {
-            const text = rinAppearanceFile.text()
-            const num = key => {
-                const m = text.match(new RegExp("^\\s*" + key + "\\s*=\\s*([0-9.]+)", "m"))
-                return m ? Number(m[1]) : undefined
-            }
-            const bgMatch = text.match(/^\s*background\s*=\s*"([^"]+)"/m)
-            const blurMatch = text.match(/^\s*blur\s*=\s*(true|false)/m)
-            root._applyRinState({
-                background: bgMatch ? bgMatch[1] : undefined,
-                blur: blurMatch ? blurMatch[1] === "true" : undefined,
-                "blur-radius": num("blur-radius"),
-                "liquid-bevel": num("liquid-bevel"),
-                "liquid-depth": num("liquid-depth"),
-                "liquid-ior": num("liquid-ior"),
-                "liquid-dispersion": num("liquid-dispersion"),
-                "liquid-frost": num("liquid-frost"),
-                "liquid-bulge": num("liquid-bulge"),
-                "liquid-adapt": num("liquid-adapt")
-            })
+    // Rin says which settings domains changed, whoever wrote them: read the appearance again then.
+    Connections {
+        target: NiriService
+        enabled: CompositorService.isRin
+        function onRinSettingsChanged(domains: var): void {
+            if (domains.includes("rin.appearance")) root.reload()
         }
     }
 
