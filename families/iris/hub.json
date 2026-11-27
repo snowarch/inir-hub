@@ -1,7 +1,10 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.140",
+  "version": "2.33.141",
   "changes": {
+    "2.33.141": [
+      "Rin Liquid Glass is one material: the bar, frame, Island and Dock wear the thin veil the widgets wear, so the lens shows everywhere"
+    ],
     "2.33.140": [
       "Read and apply all Rin Liquid Glass optical sliders live and stop Prism Settings from jumping columns or scroll on toggles",
       "Emit per-corner blur radii on Rin so welded pills and desktop widgets keep unbroken Liquid Glass",

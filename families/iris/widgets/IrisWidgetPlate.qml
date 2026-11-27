@@ -24,7 +24,7 @@ WidgetPlate {
     readonly property string readMaterial: plate.look.legibleAlways ? "panel" : plate.material
     readonly property bool rinLiquid: plate.compositorGlass && IrisCompositorBlur.background === "liquid"
     readonly property real glassAlpha: plate.clear ? 0
-        : plate.rinLiquid ? Math.max(0.06, Math.min(0.32, plate.share * 0.34))
+        : plate.rinLiquid ? IrisStyle.liquidVeil(plate.share)
         : plate.compositorGlass ? Math.max(0.14, Math.min(0.46, plate.share * 0.44))
         : (plate.paper ? IrisStyle.legibleVeil(plate.readMaterial, plate.frostLevel, plate.readSpread, 1)
             : plate.lightBackdrop ? IrisStyle.legibleFrost(plate.readMaterial, plate.frostLevel, plate.readSpread, 1)

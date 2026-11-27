@@ -569,12 +569,9 @@ QtObject {
     // worn Design's (his 11-21: under glass every Design looked the same, the wallpaper showing through each alike).
     readonly property real wallpaperGlassTint: {
         const chosen = Math.max(0.12, IrisDesign.glassTint, Math.min(0.96, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
-        // On Rin Liquid Glass, let the user's chosen tint scale smoothly down to crystal-clear glass
-        // so GPU optical bevel, refraction, bulge and dispersion shine across every surface.
-        if (CompositorService.isRin && root.glassRequested === "compositor" && IrisCompositorBlur.background === "liquid") {
-            const raw = Math.max(0.06, Math.min(0.56, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
-            return raw
-        }
+        // Rin's liquid glass is one material: a body wears the veil a widget wears (liquidVeil), so the lens shows the same
+        // on the bar, the dock, menus and widgets. The factory tint (58) gives the widgets' own default.
+        if (root.rinLiquid) return root.liquidVeil(root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 58)
         const needed = IrisMood.sampled ? root.legibleVeil("panel", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
         return Math.max(chosen, Math.min(0.9, needed))
     }
@@ -582,7 +579,11 @@ QtObject {
     // and the accent keep the wallpaper's tint, or every window opened would regenerate every app theme. 4.5:1 there,
     // not 7: an always-thick Blur left nothing to see through.
     readonly property bool bodiesCovered: root.glassCompositor && Lume.covered(root.placeOutput)
-    readonly property real glassTint: (CompositorService.isRin && IrisCompositorBlur.background === "liquid")
+    readonly property bool rinLiquid: CompositorService.isRin && root.glassRequested === "compositor"
+        && IrisCompositorBlur.background === "liquid"
+    // How thick liquid glass is for a share of the full veil (1 = the factory's): thin enough for Rin's lens to read.
+    function liquidVeil(share: real): real { return Math.max(0.06, Math.min(0.32, share * 0.32)) }
+    readonly property real glassTint: root.rinLiquid
         ? root.wallpaperGlassTint
         : root.bodiesCovered
             ? Math.max(root.wallpaperGlassTint, Math.min(0.9, root.legibleVeil("glass", 0.72, 0.18, 1))) : root.wallpaperGlassTint

@@ -136,7 +136,7 @@ Item {
     // A worn Design's glass keeps at least its own share of the plate, as every body's does (IrisDesign.glassTint).
     readonly property real veil: root.opaque ? root.strength
         : root.clear ? 0
-        : root.rinLiquid ? Math.max(0.06, Math.min(0.32, root.strength * 0.34))
+        : root.rinLiquid ? IrisStyle.liquidVeil(root.strength)
         : root.compositorGlass ? Math.max(0.14, Math.min(0.46, root.strength * 0.44))
         : Math.max(IrisDesign.glassTint * root.strength, (root.paper ? IrisStyle.legibleVeil(root.readMaterial, root.frostLevel, root.readSpread, 1)
             : root.lightBackdrop ? IrisStyle.legibleFrost(root.readMaterial, root.frostLevel, root.readSpread, 1)
