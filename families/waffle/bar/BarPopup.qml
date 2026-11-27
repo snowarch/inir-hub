@@ -185,7 +185,8 @@ Loader {
             height: realContent.height
             opacity: realContent.opacity
             scale: realContent.scale
-            visible: Looks.glassActive && !popupWindow.nativeBlurActive
+            visible: Looks.glassActive
+            compositorBacked: popupWindow.nativeBlurActive
             radius: realContent.radius
             followWindow: true
             auroraTransparency: Appearance.aurora.overlayTransparentize
