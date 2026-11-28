@@ -39,30 +39,31 @@ Item {
         active: root.side === "under"
         asynchronous: true
         sourceComponent: Item {
-            readonly property bool done: root.still === "" || stageStill.status === Image.Ready || stageStill.status === Image.Error
+            readonly property bool done: root.still === "" || stageStill.ready || stageStill.settled
             Item {
                 anchors.fill: parent
                 opacity: root.waiting ? 0 : Math.min(1, root.p * 1.6)
                 Rectangle { anchors.fill: parent; color: Appearance.colors.colLayer0 }
-                Image {
+                // A new wallpaper fades in once decoded; set in place, the still emptied and the stage flashed. Blurred as
+                // its own layer: a MultiEffect fed a hidden crossfader kept an empty texture once the slots swapped.
+                WallpaperCrossfader {
                     id: stageStill
                     anchors.fill: parent
-                    visible: false
+                    visible: stageStill.ready
                     source: root.still
                     sourceSize: Qt.size(Math.round(root.width / 3), Math.round(root.height / 3))
                     fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                    cache: true
-                }
-                MultiEffect {
-                    anchors.fill: parent
-                    source: stageStill
-                    visible: stageStill.status === Image.Ready
-                    blurEnabled: true
-                    blur: 1
-                    blurMax: 40
-                    saturation: -0.15
-                    autoPaddingEnabled: false
+                    enableTransitions: true
+                    transitionType: "crossfade"
+                    transitionBaseDuration: 320
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        blurEnabled: true
+                        blur: 1
+                        blurMax: 40
+                        saturation: -0.15
+                        autoPaddingEnabled: false
+                    }
                 }
                 Rectangle { anchors.fill: parent; color: ColorUtils.applyAlpha(Appearance.colors.colLayer0, 0.45) }
             }
