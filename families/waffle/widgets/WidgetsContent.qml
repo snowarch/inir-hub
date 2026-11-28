@@ -42,7 +42,7 @@ WBarAttachedPanelContent {
             AppLauncher.launch("terminal")
             break
         case "settings":
-            ShellExec.execDetachedArgs([Quickshell.shellPath("scripts/inir"), "settings"], "Open iNiR settings")
+            GlobalStates.toggleSettings()
             break
         case "wallpaper": {
             const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
@@ -145,7 +145,7 @@ WBarAttachedPanelContent {
                             implicitSize: Looks.dp(16)
                         }
                         onClicked: {
-                            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
+                            GlobalStates.toggleSettings()
                             WaffleState.widgetsOpen = false
                         }
                     }

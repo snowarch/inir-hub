@@ -102,7 +102,7 @@ BarIconButton {
                 }
                 onClicked: {
                     menu.close()
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
+                    GlobalStates.toggleSettings()
                 }
             }
         }

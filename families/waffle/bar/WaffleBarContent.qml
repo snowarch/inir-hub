@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects as GE
 import Quickshell
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -85,7 +86,7 @@ Rectangle {
                 iconName: "settings",
                 text: Translation.tr("Taskbar settings"),
                 action: () => {
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
+                    GlobalStates.toggleSettings()
                 }
             }
         ]

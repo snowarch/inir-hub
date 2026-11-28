@@ -311,7 +311,7 @@ WPanelPageColumn {
             FooterButton {
                 iconName: "settings"
                 tip: Translation.tr("Settings")
-                onClicked: { Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"]); root.close() }
+                onClicked: { GlobalStates.toggleSettings(); root.close() }
             }
             PowerButton {}
         }

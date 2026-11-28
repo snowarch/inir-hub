@@ -83,7 +83,7 @@ FooterRectangle {
         FooterButton {
             iconName: "settings"
             tip: Translation.tr("Settings")
-            onClicked: root.closeThen(() => Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"]))
+            onClicked: root.closeThen(() => GlobalStates.toggleSettings())
         }
     }
 
