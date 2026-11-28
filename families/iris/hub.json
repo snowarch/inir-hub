@@ -1,7 +1,12 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.146",
+  "version": "2.33.147",
   "changes": {
+    "2.33.147": [
+      "Customize Desktop: a wallpaper picked from the top row previews until Done; Escape puts the old one back",
+      "The wallpaper row opens on the one on show, slides with the wheel, touchpad or arrows, and marks the one being tried",
+      "Widget cards picture every widget, also those never placed: each is photographed once in the background"
+    ],
     "2.33.146": [
       "Customize Desktop: every page and category shows whole, no sideways sliding; long sections pick a group from one menu",
       "Widget cards show a real picture of each widget, retaken when the scheme or Design changes; tokens replace literal colours",
