@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import qs
@@ -13,7 +14,8 @@ import qs.modules.iris.style
 
 // The wallpapers of the folder, in a row above the shrunk desktop. A tap previews one on the desktop at once; Done
 // applies it, Escape puts back the one that was there (DesktopEditHistory's draft). The row opens on the wallpaper on
-// show, slides by a page from the arrows at its ends, and a wheel or a swipe moves it smoothly.
+// show, slides by a page from the arrows at its ends, and a wheel or a swipe moves it smoothly. Where more pictures
+// lie past an end, the row fades into the air there instead of ending on a cut.
 Item {
     id: root
 
@@ -34,9 +36,12 @@ Item {
     readonly property int gap: Math.round(12 * root.d)
     readonly property int sidePad: Math.round(24 * root.d)
     readonly property int marginTop: Math.round(16 * root.d)
-    readonly property int ringPad: Math.round(4 * root.d)
+    // Room around a tile for its ring and its hover lift, inside the row: the row clips there, never through a ring.
+    readonly property int ringPad: Math.round(8 * root.d)
     readonly property int arrowSize: Math.round(30 * root.d)
     readonly property real thumbRadius: IrisStyle.radiusChip
+    // One thumbnail size for the row, from the size a tile shows at on this screen.
+    readonly property string thumbSize: Images.thumbnailSizeNameForDimensions(Math.round(root.thumbW * root.dpr), Math.round(root.thumbH * root.dpr))
 
     readonly property real stripMaxW: Math.max(160, root.roomW - root.sidePad * 2)
     readonly property real stripY: Math.round(root.marginTop - (1 - root.p) * (root.marginTop + root.thumbH + 16))
@@ -54,8 +59,11 @@ Item {
     visible: root.shown && strip.count > 0
     opacity: root.p
 
-    // Opens on the wallpaper on show, centred, once the folder has been read.
+    // Opens on the wallpaper on show, centred, once the folder has been read. Asked again as the folder fills and the
+    // row takes its width, until the person moves it: centred in a row still growing, it stood at the left end.
+    property bool moved: false
     function reveal(): void {
+        if (root.moved) return
         for (let i = 0; i < strip.count; i++) {
             if (FileUtils.trimFileProtocol(String(Wallpapers.folderModel.get(i, "filePath") ?? "")) === root.shownPath) {
                 strip.positionViewAtIndex(i, ListView.Center)
@@ -64,17 +72,22 @@ Item {
         }
         slide.to = strip.contentX
     }
-    onShownChanged: if (root.shown) Qt.callLater(root.reveal)
+    onShownChanged: if (root.shown) { root.moved = false; Qt.callLater(root.reveal) }
     Connections {
         target: strip
         function onCountChanged(): void { if (root.shown) Qt.callLater(root.reveal) }
+        function onWidthChanged(): void { if (root.shown) Qt.callLater(root.reveal) }
     }
 
     // One smooth slide for wheel, swipe and arrows: each asks for a place and the row eases there.
     function slideTo(x: real): void {
-        const maxX = Math.max(0, strip.contentWidth - strip.width)
-        slide.to = Math.max(0, Math.min(maxX, x))
+        root.moved = true
+        slide.to = root.clampX(x)
         slide.restart()
+    }
+    // The row's own bounds, from its origin (a ListView of tiles that differ in width moves it off 0).
+    function clampX(x: real): real {
+        return Math.max(strip.originX, Math.min(strip.originX + Math.max(0, strip.contentWidth - strip.width), x))
     }
     NumberAnimation {
         id: slide
@@ -90,16 +103,23 @@ Item {
         y: root.stripY - root.ringPad
         width: root.stripMaxW
         height: root.thumbH + root.ringPad * 2
-        clip: true
 
         ListView {
             id: strip
             readonly property real naturalW: strip.contentWidth > 0 ? Math.min(strip.contentWidth, stripFrame.width) : stripFrame.width
             readonly property bool overflows: strip.contentWidth > stripFrame.width + 1
             x: Math.max(0, Math.round((stripFrame.width - strip.naturalW) / 2))
-            y: root.ringPad
             width: strip.naturalW
-            height: root.thumbH
+            height: stripFrame.height
+            clip: true
+            // Faded at an end with more pictures past it (IrisScrollEdge's mask): rendered offscreen only then.
+            layer.enabled: stripEdge.active
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: stripEdge.mask
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1
+            }
             orientation: ListView.Horizontal
             // Each tile carries its own gap: a folder entry takes no room at all (a ListView spacing still spaced it).
             spacing: 0
@@ -108,7 +128,7 @@ Item {
             cacheBuffer: root.thumbW * 6
             reuseItems: true
             model: root.shown ? Wallpapers.folderModel : null
-            onMovementStarted: slide.stop()
+            onMovementStarted: { root.moved = true; slide.stop() }
 
             WheelHandler {
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -118,10 +138,10 @@ Item {
                     // A touchpad scrolls in phases and is followed 1:1; a wheel (no phase) moves the row one tile a notch.
                     // Qt on Wayland gives a wheel's notch a 15 px pixelDelta too, so pixels alone crawled.
                     if (event.phase !== Qt.NoScrollPhase && (event.pixelDelta.x !== 0 || event.pixelDelta.y !== 0)) {
+                        root.moved = true
                         slide.stop()
                         const px = Math.abs(event.pixelDelta.x) > Math.abs(event.pixelDelta.y) ? event.pixelDelta.x : event.pixelDelta.y
-                        const maxX = Math.max(0, strip.contentWidth - strip.width)
-                        strip.contentX = Math.max(0, Math.min(maxX, strip.contentX - px))
+                        strip.contentX = root.clampX(strip.contentX - px)
                         slide.to = strip.contentX
                     } else {
                         root.slideTo((slide.running ? slide.to : strip.contentX) - delta / 120 * (root.thumbW + root.gap))
@@ -132,9 +152,11 @@ Item {
 
             footer: Item {
                 width: root.thumbH
-                height: root.thumbH
+                height: strip.height
                 Rectangle {
-                    anchors.fill: parent
+                    y: root.ringPad
+                    width: root.thumbH
+                    height: root.thumbH
                     readonly property bool hovered: galleryMouse.containsMouse
                     radius: root.thumbRadius
                     color: hovered ? IrisStyle.veilStrong : IrisStyle.veil
@@ -169,18 +191,14 @@ Item {
                 readonly property bool current: tile.cleanPath.length > 0 && tile.cleanPath === root.shownPath
                 readonly property bool drafted: tile.current && DesktopEditHistory.wallpaperDraft.length > 0
                 readonly property bool hovered: tileMouse.containsMouse
-                readonly property string thumbUrl: {
-                    if (tile.fileIsDir || !tile.cleanPath) return ""
-                    const still = Wallpapers.stillUrlFor(tile.cleanPath)
-                    return still.length > 0 ? still : ("file://" + tile.cleanPath)
-                }
 
                 width: tile.fileIsDir ? 0 : root.thumbW + root.gap
-                height: root.thumbH
+                height: strip.height
                 visible: !tile.fileIsDir
 
                 Item {
                     id: face
+                    y: root.ringPad
                     width: root.thumbW
                     height: root.thumbH
                     scale: tileMouse.pressed ? IrisStyle.pressScale(0.95) : tile.hovered && !tile.current ? 1.03 : 1
@@ -191,17 +209,16 @@ Item {
                         radius: root.thumbRadius
                         color: IrisStyle.veil
 
-                        Image {
-                            id: thumb
+                        // The cached thumbnail (a video's own still), never the original: a row of 4K pictures was
+                        // decoded whole for tiles 150 px wide each time Edit Mode opened.
+                        ThumbnailImage {
                             anchors.fill: parent
-                            source: tile.thumbUrl
+                            sourcePath: tile.fileIsDir ? "" : tile.cleanPath
+                            cleanVideoStill: true
+                            thumbnailSizeName: root.thumbSize
                             fillMode: Image.PreserveAspectCrop
-                            asynchronous: true
                             cache: true
-                            // Decoded at the size it shows on this screen: sharp, and no bigger than it needs.
                             sourceSize: Qt.size(Math.round(root.thumbW * root.dpr), Math.round(root.thumbH * root.dpr))
-                            opacity: thumb.status === Image.Ready ? 1 : 0
-                            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
                         }
 
                         // The rest of the row recedes a little, so the one on show reads at a glance.
@@ -210,6 +227,15 @@ Item {
                             color: "black"
                             opacity: tile.current || tile.hovered ? 0 : 0.22
                             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
+                        }
+
+                        // A hairline keeps each picture's edge crisp over the blurred desktop, dark ones included.
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: root.thumbRadius
+                            color: "transparent"
+                            border.width: 1
+                            border.color: IrisStyle.onMediaFill
                         }
 
                         Rectangle {
@@ -267,6 +293,7 @@ Item {
 
                 MouseArea {
                     id: tileMouse
+                    y: root.ringPad
                     width: root.thumbW
                     height: root.thumbH
                     hoverEnabled: true
@@ -290,8 +317,7 @@ Item {
     component Arrow: Rectangle {
         id: arrow
         property bool forward: false
-        readonly property bool needed: strip.overflows && (arrow.forward
-            ? strip.contentX < strip.contentWidth - strip.width - 1 : strip.contentX > 1)
+        readonly property bool needed: strip.overflows && (arrow.forward ? stripEdge.atBottom : stripEdge.atTop)
         y: root.stripY + Math.round((root.thumbH - height) / 2)
         width: root.arrowSize
         height: root.arrowSize
@@ -323,6 +349,17 @@ Item {
         }
         Accessible.role: Accessible.Button
         Accessible.name: arrow.forward ? Translation.tr("Next") : Translation.tr("Previous")
+    }
+    IrisScrollEdge {
+        id: stripEdge
+        x: stripFrame.x + strip.x
+        y: stripFrame.y
+        width: strip.width
+        height: strip.height
+        flick: strip
+        horizontal: true
+        blurs: false
+        reach: Math.round(Math.min(root.thumbW * 0.6, 96 * root.d))
     }
     Arrow {
         x: stripFrame.x + strip.x + Math.round(6 * root.d)

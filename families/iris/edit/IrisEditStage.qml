@@ -47,23 +47,77 @@ Item {
         active: root.side === "under" && root.p > 0.001
         asynchronous: true
         sourceComponent: Item {
+            id: stage
             anchors.fill: parent
             opacity: Math.min(1, root.p * 1.6)
 
-            Image {
-                id: stageStill
+            // Two stills: a new wallpaper (a pick in the strip) decodes in the hidden one and fades in over the one on
+            // show. Set on the shown one, it emptied while it decoded and the stage flashed its bare scrim at every pick.
+            property int current: 0
+            readonly property Image shown: stage.current === 0 ? stillA : stillB
+            readonly property Image next: stage.current === 0 ? stillB : stillA
+            readonly property bool picture: stage.shown.status === Image.Ready
+            function load(): void {
+                if (arrive.running) {
+                    // A pick during a fade: the one fading in takes the place at once and the new one fades over it.
+                    arrive.stop()
+                    stage.next.opacity = 1
+                    stage.current = stage.current === 0 ? 1 : 0
+                }
+                if (String(stage.shown.source) === root.still) {
+                    stage.next.source = ""
+                    return
+                }
+                stage.next.opacity = 0
+                stage.next.z = 1
+                stage.shown.z = 0
+                stage.next.source = root.still
+                if (stage.next.status === Image.Ready) arrive.restart()
+            }
+            function arrived(still: Image): void {
+                if (still === stage.next && still.status === Image.Ready && String(still.source).length > 0) arrive.restart()
+            }
+            Connections {
+                target: root
+                function onStillChanged(): void { stage.load() }
+            }
+            Component.onCompleted: stillA.source = root.still
+            NumberAnimation {
+                id: arrive
+                target: stage.next
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: IrisStyle.duration(320)
+                easing.type: Easing.OutCubic
+                onFinished: stage.current = stage.current === 0 ? 1 : 0
+            }
+            component Still: Image {
                 anchors.fill: parent
-                visible: false
-                source: root.still
                 sourceSize: Qt.size(Math.max(160, Math.round(root.width / 4)), Math.max(90, Math.round(root.height / 4)))
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: true
             }
+            // Blurred as one picture: the blur runs again only while a new still fades in.
+            Item {
+                id: stills
+                anchors.fill: parent
+                visible: false
+                Still {
+                    id: stillA
+                    onStatusChanged: stage.arrived(stillA)
+                }
+                Still {
+                    id: stillB
+                    opacity: 0
+                    onStatusChanged: stage.arrived(stillB)
+                }
+            }
             MultiEffect {
                 anchors.fill: parent
-                source: stageStill
-                visible: stageStill.status === Image.Ready
+                source: stills
+                visible: stage.picture
                 blurEnabled: true
                 blur: 1
                 blurMax: 36
@@ -72,7 +126,7 @@ Item {
             }
             Rectangle {
                 anchors.fill: parent
-                visible: stageStill.status === Image.Ready
+                visible: stage.picture
                 color: ColorUtils.applyAlpha(root.paper, IrisStyle.light ? 0.32 : 0.46) // iris-literal: the stage still's paper wash, set by eye over the blurred wallpaper
             }
             IrisBodyShadow {

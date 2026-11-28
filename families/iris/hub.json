@@ -1,7 +1,13 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.149",
+  "version": "2.33.150",
   "changes": {
+    "2.33.150": [
+      "Customize Desktop: picking a wallpaper fades the blurred stage to it; it no longer flashes dark while the picture loads",
+      "The wallpaper row fades out at an end with more pictures past it, keeps every ring whole and opens centred on the one on show",
+      "The wallpaper row shows cached thumbnails and video stills, not whole pictures decoded for each tile",
+      "A widget without a plate keeps its secondary text readable over a busy wallpaper"
+    ],
     "2.33.149": [
       "Customize Desktop: a right click on a widget puts it back on the shelf again",
       "A mouse wheel moves the wallpaper row a whole wallpaper a notch, and the library row and Orbit Studio at full speed"
