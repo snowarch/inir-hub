@@ -7,10 +7,11 @@ IrisPieceLibrary 1.0 IrisPieceLibrary.qml
 IrisEditRows 1.0 IrisEditRows.qml
 IrisSheetRows 1.0 IrisSheetRows.qml
 IrisPresetTile 1.0 IrisPresetTile.qml
-IrisShelfOptions 1.0 IrisShelfOptions.qml
 IrisEditDesk 1.0 IrisEditDesk.qml
 IrisEditWallpaperStrip 1.0 IrisEditWallpaperStrip.qml
-IrisWidgetSheet 1.0 IrisWidgetSheet.qml
 IrisEditStage 1.0 IrisEditStage.qml
 IrisWidgetOutfit 1.0 IrisWidgetOutfit.qml
 IrisPresetGallery 1.0 IrisPresetGallery.qml
+IrisEditOptions 1.0 IrisEditOptions.qml
+IrisEditPresets 1.0 IrisEditPresets.qml
+IrisEditSearch 1.0 IrisEditSearch.qml

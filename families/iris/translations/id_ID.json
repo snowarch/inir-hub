@@ -1,5 +1,5 @@
 {
-  "Group": "Grup",
+  "Glass style": "Gaya kaca",
   "Open wallpaper gallery": "Buka galeri wallpaper",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Cara ikhtisar asli menata jendela (Mod+Tab; 1–4 ganti langsung).",
   "Mute the microphone": "Bisukan mikrofon",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "Kembali ke widget",
   "Customize Desktop": "Sesuaikan Desktop",
   "Search widgets...": "Cari widget...",
-  "Save current layout": "Simpan tata letak saat ini",
   "Preview: Done applies it": "Pratinjau: Selesai menerapkannya"
 }

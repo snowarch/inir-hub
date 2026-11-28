@@ -1,5 +1,5 @@
 {
-  "Group": "Групування",
+  "Glass style": "Стиль скла",
   "Open wallpaper gallery": "Відкрити галерею шпалер",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Як вбудований огляд розташовує вікна (Mod+Tab; 1–4 перемикають наживо).",
   "Mute the microphone": "Вимкнути мікрофон",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "Назад до віджетів",
   "Customize Desktop": "Налаштувати стільницю",
   "Search widgets...": "Пошук віджетів...",
-  "Save current layout": "Зберегти поточне розташування",
   "Preview: Done applies it": "Попередній перегляд: Готово застосує"
 }

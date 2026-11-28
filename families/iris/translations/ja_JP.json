@@ -1,5 +1,5 @@
 {
-  "Group": "グループ",
+  "Glass style": "ガラスのスタイル",
   "Open wallpaper gallery": "壁紙ギャラリーを開く",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "オーバービューの配置（Mod+Tab、1〜4で即時切替）。",
   "Mute the microphone": "マイクをミュート",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "ウィジェットに戻る",
   "Customize Desktop": "デスクトップをカスタマイズ",
   "Search widgets...": "ウィジェットを検索...",
-  "Save current layout": "現在のレイアウトを保存",
   "Preview: Done applies it": "プレビュー：完了で適用"
 }

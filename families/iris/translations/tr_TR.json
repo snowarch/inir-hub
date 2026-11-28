@@ -1,5 +1,5 @@
 {
-  "Group": "Grupla",
+  "Glass style": "Cam stili",
   "Open wallpaper gallery": "Duvar kağıdı galerisini aç",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Genel bakış pencere düzeni (Mod+Tab; 1–4 anında değiştirir).",
   "Mute the microphone": "Mikrofonu sustur",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "Araç takımlarına dön",
   "Customize Desktop": "Masaüstünü özelleştir",
   "Search widgets...": "Araç takımlarında ara...",
-  "Save current layout": "Geçerli düzeni kaydet",
   "Preview: Done applies it": "Önizleme: Bitti ile uygulanır"
 }

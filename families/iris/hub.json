@@ -1,7 +1,13 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.152",
+  "version": "2.33.153",
   "changes": {
+    "2.33.153": [
+      "Customize Desktop: option pages split into sections with accent headings, an accent-insensitive search and only open ones built",
+      "Presets show a preview of the desktop with each widget's own picture; save, rename and remove are back",
+      "The foot holds background, outline, grid, clear and settings, with Cancel and Done; glyph buttons name themselves on hover",
+      "Widget pictures appear without a blink on entry and follow the language; a fullscreen window closes the mode"
+    ],
     "2.33.152": [
       "Covers, the player backdrop, Orbit's thumbnails and the lock miniature keep the old picture until the new one is ready"
     ],

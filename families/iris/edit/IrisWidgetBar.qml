@@ -36,24 +36,26 @@ Item {
     readonly property bool holdsKeyboard: root.present && (GlobalStates.focusedScreen?.name ?? root.outputName) === root.outputName
         && !GlobalStates.searchOpen && !GlobalStates.settingsOverlayOpen && !GlobalStates.controlPanelOpen
     readonly property bool selecting: GlobalStates.selectedDesktopWidget.length > 0
-    readonly property bool typing: root.present && (searchField.activeFocus || (inspectorLoader.item?.activeFocusItem ?? null) !== null)
+    // Typing in a field (a search, a name, a widget's text row): the arrows, Delete and Undo are the field's.
+    readonly property Item focusItem: root.Window.activeFocusItem
+    readonly property bool typing: root.present && root.focusItem !== null && root.focusItem.cursorPosition !== undefined
 
     property string page: "widgets"
     property string category: ""
-    property string searchQuery: ""
+    readonly property string searchQuery: searchBox.text
     property bool confirmingClear: false
 
     readonly property var pages: [
-        { value: "widgets", label: Translation.tr("Widgets") },
-        { value: "look", label: Translation.tr("Look"), section: "desktop", only: true,
+        { value: "widgets", label: Translation.tr("Widgets"), glyph: "widgets" },
+        { value: "look", label: Translation.tr("Look"), glyph: "wallpaper", section: "desktop", only: true,
             order: ["Design", "Accents", "Material", "Legibility", "Widgets"] },
-        { value: "bar", label: Translation.tr("Island"), section: "bar", only: false, order: [] },
-        { value: "dock", label: Translation.tr("Dock"), section: "dock", only: false, order: [] },
-        { value: "appearance", label: Translation.tr("Style"), section: "appearance", only: false,
+        { value: "bar", label: Translation.tr("Island"), glyph: "toolbar", section: "bar", only: false, order: [] },
+        { value: "dock", label: Translation.tr("Dock"), glyph: "dock_to_bottom", section: "dock", only: false, order: [] },
+        { value: "appearance", label: Translation.tr("Style"), glyph: "palette", section: "appearance", only: false,
             order: ["Design", "Scheme", "Accent", "Faces", "Text", "Material", "Glass", "Shape", "Highlight", "Intensity", "Signal", "Look",
                 "Presets", "Edges", "Light", "Icons", "Wallpaper tint", "Colour theme", "Day and night", "Dark look", "Ink look",
                 "Light look", "Texture", "Frame", "Menus", "Badges", "Previews", "Customize", "Adaptive"] },
-        { value: "presets", label: Translation.tr("Presets") }
+        { value: "presets", label: Translation.tr("Presets"), glyph: "dashboard_customize" }
     ]
     readonly property var currentPageDef: root.pages.find(entry => entry.value === root.page) ?? root.pages[0]
     readonly property bool onOptionsPage: ["look", "bar", "dock", "appearance"].includes(root.page)
@@ -92,13 +94,22 @@ Item {
         if (!root.present) DesktopEditStage.unpark()
     }
 
-    Shortcut { sequence: "Ctrl+F"; enabled: root.holdsKeyboard; onActivated: { root.page = "widgets"; GlobalStates.clearDesktopWidgetSelection(); searchField.forceActiveFocus() } }
+    Shortcut {
+        sequence: "Ctrl+F"
+        enabled: root.holdsKeyboard
+        onActivated: {
+            GlobalStates.clearDesktopWidgetSelection()
+            if (root.onOptionsPage && optionsLoader.item) optionsLoader.item.focusSearch()
+            else { root.page = "widgets"; searchBox.focusInput() }
+        }
+    }
     Shortcut {
         sequence: "Escape"
         enabled: root.holdsKeyboard
         onActivated: {
             if (root.confirmingClear) { root.confirmingClear = false }
-            else if (root.searchQuery.length > 0) { root.searchQuery = ""; searchField.focus = false }
+            else if (root.searchQuery.length > 0) searchBox.clear()
+            else if (root.onOptionsPage && optionsLoader.item?.clearSearch()) {}
             else if (root.inspecting || root.selecting) {
                 if (DesktopEditStage.inspected?.widget) DesktopEditStage.inspected.widget.closeQuickControls()
                 GlobalStates.clearDesktopWidgetSelection()
@@ -319,123 +330,6 @@ Item {
         }
     }
 
-    // Grouped vertical Prism options for Look / Island / Dock / Style inside the right panel.
-    Component {
-        id: optionsPageComponent
-        Item {
-            id: optRoot
-            readonly property string section: String(root.currentPageDef.section ?? root.page)
-            readonly property bool only: Boolean(root.currentPageDef.only)
-            readonly property var order: root.currentPageDef.order ?? []
-            readonly property var drawn: ["switch", "choice", "range", "text", "action"]
-            readonly property var groups: {
-                Config.revision
-                const order = Array.from(optRoot.order ?? [])
-                const rank = spec => { const at = order.indexOf(String(spec.group ?? "")); return at < 0 ? order.length : at }
-                const specs = IrisOptions.settings
-                    .filter(spec => spec.section === optRoot.section
-                        && (!optRoot.only || order.includes(String(spec.group ?? "")))
-                        && !spec.mirror && spec.shelf !== false
-                        && optRoot.drawn.includes(spec.kind) && IrisOptions.shown(spec))
-                    .map((spec, at) => ({ spec: spec, at: at }))
-                    .sort((a, b) => rank(a.spec) - rank(b.spec) || a.at - b.at)
-                    .map(item => item.spec)
-                const out = []
-                for (const spec of specs) {
-                    const name = String(spec.group ?? "")
-                    let grp = out.find(g => g.name === name)
-                    if (!grp) { grp = { name: name, specs: [] }; out.push(grp) }
-                    grp.specs.push(spec)
-                }
-                return out
-            }
-            property string activeGroup: ""
-            readonly property var visibleGroups: optRoot.activeGroup.length > 0 && optRoot.groups.some(g => g.name === optRoot.activeGroup)
-                ? optRoot.groups.filter(g => g.name === optRoot.activeGroup)
-                : optRoot.groups
-
-            onSectionChanged: { optRoot.activeGroup = ""; optFlick.contentY = 0 }
-
-            ColumnLayout {
-                anchors.fill: parent
-                spacing: Math.round(8 * root.d)
-
-                // A long section (Style holds some thirty groups) picks its group from one menu: a wall of chips
-                // pushed the rows below the fold.
-                IrisPopupButton {
-                    visible: optRoot.groups.length > 8
-                    options: [{ value: "", label: "All" }]
-                        .concat(optRoot.groups.map(group => ({ value: group.name, label: group.name })))
-                    current: optRoot.activeGroup
-                    accessibleName: Translation.tr("Group")
-                    onPicked: value => { optRoot.activeGroup = String(value); optFlick.contentY = 0 }
-                }
-                // A short one shows its groups to jump to, wrapped: every group shows, none hides past the edge.
-                Flow {
-                    Layout.fillWidth: true
-                    visible: optRoot.groups.length > 1 && optRoot.groups.length <= 8
-                    spacing: Math.round(4 * root.d)
-                    IrisChip {
-                        implicitHeight: Math.round(24 * root.d)
-                        label: Translation.tr("All")
-                        selected: optRoot.activeGroup.length === 0
-                        quiet: !selected
-                        onClicked: { optRoot.activeGroup = ""; optFlick.contentY = 0 }
-                    }
-                    Repeater {
-                        model: optRoot.groups
-                        delegate: IrisChip {
-                            required property var modelData
-                            implicitHeight: Math.round(24 * root.d)
-                            label: Translation.tr(modelData.name)
-                            selected: optRoot.activeGroup === modelData.name
-                            quiet: !selected
-                            onClicked: { optRoot.activeGroup = selected ? "" : modelData.name; optFlick.contentY = 0 }
-                        }
-                    }
-                }
-
-                Flickable {
-                    id: optFlick
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
-                    contentWidth: width
-                    contentHeight: optCol.implicitHeight + Math.round(12 * root.d)
-                    boundsBehavior: Flickable.StopAtBounds
-
-                    ColumnLayout {
-                        id: optCol
-                        width: optFlick.width
-                        spacing: Math.round(14 * root.d)
-
-                        Repeater {
-                            model: optRoot.visibleGroups
-                            delegate: ColumnLayout {
-                                id: grpBox
-                                required property var modelData
-                                Layout.fillWidth: true
-                                spacing: Math.round(6 * root.d)
-
-                                IrisText {
-                                    visible: grpBox.modelData.name.length > 0
-                                    text: Translation.tr(grpBox.modelData.name)
-                                    color: IrisStyle.textSecondary
-                                    font.pixelSize: IrisStyle.typeMeta
-                                    font.weight: IrisStyle.weight(Font.DemiBold)
-                                }
-                                IrisSheetRows {
-                                    specs: grpBox.modelData.specs
-                                    firstNumber: 1
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     // Every card's picture: the widget's own while it is out, its last look on disk, or one made once off screen.
     WidgetPortraits {
         id: portraits
@@ -473,6 +367,7 @@ Item {
                     materialIcon: "arrow_back"
                     iconSize: Math.round(18 * root.d)
                     Accessible.name: Translation.tr("Back to widgets")
+                    tooltip: Translation.tr("Back to widgets")
                     onClicked: {
                         if (DesktopEditStage.inspected?.widget) DesktopEditStage.inspected.widget.closeQuickControls()
                         GlobalStates.clearDesktopWidgetSelection()
@@ -497,6 +392,7 @@ Item {
                     enabled: DesktopEditHistory.undoStack.length > 0
                     opacity: enabled ? 1 : 0.35
                     Accessible.name: Translation.tr("Undo")
+                    tooltip: Translation.tr("Undo")
                     onClicked: DesktopEditHistory.undo()
                 }
                 IrisIconButton {
@@ -507,92 +403,27 @@ Item {
                     enabled: DesktopEditHistory.redoStack.length > 0
                     opacity: enabled ? 1 : 0.35
                     Accessible.name: Translation.tr("Redo")
+                    tooltip: Translation.tr("Redo")
                     onClicked: DesktopEditHistory.redo()
-                }
-
-                Rectangle {
-                    implicitWidth: doneLabel.implicitWidth + Math.round(22 * root.d)
-                    implicitHeight: Math.round(32 * root.d)
-                    radius: IrisStyle.radiusRow
-                    color: doneMouse.containsMouse ? IrisStyle.accentHover : IrisStyle.accent
-                    IrisText {
-                        id: doneLabel
-                        anchors.centerIn: parent
-                        text: Translation.tr("Done")
-                        color: IrisStyle.inkOnAccent
-                        font.pixelSize: IrisStyle.typeMeta
-                        font.weight: IrisStyle.weight(Font.DemiBold)
-                    }
-                    MouseArea {
-                        id: doneMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: DesktopEditHistory.finish()
-                    }
                 }
             }
 
-            // The six pages as one segmented control: every name shows whole, none hides past the edge.
+            // The six pages as one segmented control, each its glyph over its name: found by shape before it is read.
             IrisSegmented {
                 Layout.fillWidth: true
                 visible: !root.inspecting
+                pictured: true
                 options: root.pages
                 current: root.page
                 accessibleName: Translation.tr("Customize Desktop")
                 onPicked: value => root.page = value
             }
 
-            // Search box on Widgets gallery.
-            Rectangle {
+            IrisEditSearch {
+                id: searchBox
                 Layout.fillWidth: true
-                Layout.preferredHeight: Math.round(36 * root.d)
                 visible: !root.inspecting && root.page === "widgets"
-                radius: IrisStyle.radiusRow
-                color: IrisStyle.fillQuiet
-                border.width: searchField.activeFocus ? 1.5 : 1
-                border.color: searchField.activeFocus ? IrisStyle.accent : IrisStyle.hairline
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: Math.round(10 * root.d)
-                    anchors.rightMargin: Math.round(8 * root.d)
-                    spacing: Math.round(8 * root.d)
-
-                    MaterialSymbol {
-                        text: "search"
-                        iconSize: Math.round(17 * root.d)
-                        color: IrisStyle.textSecondary
-                    }
-                    TextInput {
-                        id: searchField
-                        Layout.fillWidth: true
-                        color: IrisStyle.text
-                        selectionColor: IrisStyle.accent
-                        selectedTextColor: IrisStyle.inkOnAccent
-                        font.family: IrisStyle.fontMain
-                        font.pixelSize: IrisStyle.typeBody
-                        clip: true
-                        text: root.searchQuery
-                        onTextChanged: root.searchQuery = text
-
-                        IrisText {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: Translation.tr("Search widgets...")
-                            color: IrisStyle.textTertiary
-                            font.pixelSize: IrisStyle.typeBody
-                            visible: searchField.text.length === 0
-                        }
-                    }
-                    IrisIconButton {
-                        visible: root.searchQuery.length > 0
-                        implicitWidth: Math.round(24 * root.d)
-                        implicitHeight: Math.round(24 * root.d)
-                        materialIcon: "close"
-                        iconSize: Math.round(15 * root.d)
-                        onClicked: { root.searchQuery = ""; searchField.text = "" }
-                    }
-                }
+                placeholder: Translation.tr("Search widgets...")
             }
 
             // Category filters on the Widgets gallery: none lit shows every widget, a tap on the lit one shows all again.
@@ -700,23 +531,22 @@ Item {
                                     radius: Math.max(2, IrisStyle.radiusTile - Math.round(6 * root.d))
                                     color: card.active ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.fillQuiet
 
-                                    Image {
+                                    // Its picture stays on screen when a newer one is taken (each entry retakes them): the latch
+                                    // keeps it through the reload, where a fade gated on status === Ready blinked every card.
+                                    IrisImage {
                                         id: shotImg
                                         anchors.fill: parent
                                         anchors.margins: Math.round(4 * root.d)
                                         source: card.shotUrl
                                         fillMode: Image.PreserveAspectFit
-                                        asynchronous: true
-                                        cache: true
-                                        // Read at the size it shows on this screen: a smooth downscale keeps the widget's type sharp.
-                                        sourceSize: Qt.size(Math.round(width * (root.screenData?.devicePixelRatio ?? 1)), Math.round(height * (root.screenData?.devicePixelRatio ?? 1)))
-                                        smooth: true
-                                        opacity: status === Image.Ready ? 1 : 0
-                                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
+                                        mipmap: false
+                                        opacity: shotImg.painted ? 1 : 0
+                                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                                     }
+                                    // No picture yet (never seen in this look): its glyph stands in.
                                     MaterialSymbol {
                                         anchors.centerIn: parent
-                                        visible: shotImg.status !== Image.Ready
+                                        visible: card.shotUrl.length === 0 || shotImg.status === Image.Error
                                         text: card.modelData.glyph || "widgets"
                                         iconSize: Math.round(26 * root.d)
                                         color: card.active ? IrisStyle.accent : IrisStyle.textSecondary
@@ -774,183 +604,154 @@ Item {
                 }
             }
 
-            // ── Look / Island / Dock / Style Live Options Page ──
+            // ── Look / Island / Dock / Style: Settings' rows, by section ──
             Loader {
                 id: optionsLoader
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 active: !root.inspecting && root.onOptionsPage && root.shown
                 visible: active
-                sourceComponent: active ? optionsPageComponent : null
+                sourceComponent: IrisEditOptions {
+                    page: root.currentPageDef
+                }
             }
 
-            // ── Presets Page ──
-            Flickable {
+            // ── Presets: saved desktops, each a picture of what it brings back ──
+            Loader {
+                id: presetsLoader
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                visible: !root.inspecting && root.page === "presets"
-                clip: true
-                contentWidth: width
-                contentHeight: presetsCol.implicitHeight + Math.round(12 * root.d)
-                boundsBehavior: Flickable.StopAtBounds
-
-                ColumnLayout {
-                    id: presetsCol
-                    width: parent.width
-                    spacing: Math.round(8 * root.d)
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Math.round(40 * root.d)
-                        radius: IrisStyle.radiusTile
-                        color: savePresetMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
-                        border.width: 1
-                        border.color: IrisStyle.hairline
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: Math.round(8 * root.d)
-                            MaterialSymbol { text: "add"; iconSize: Math.round(18 * root.d); color: IrisStyle.accent }
-                            IrisText { text: Translation.tr("Save current layout"); font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.Medium) }
-                        }
-                        MouseArea {
-                            id: savePresetMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: DesktopPresets.save("")
-                        }
-                    }
-
-                    Repeater {
-                        model: DesktopPresets.factory.concat(DesktopPresets.presets)
-                        delegate: Rectangle {
-                            id: presetCard
-                            required property var modelData
-                            readonly property bool worn: DesktopPresets.wornId() === presetCard.modelData.id
-                            readonly property bool userOwned: DesktopPresets.presets.some(p => p.id === presetCard.modelData.id)
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: Math.round(52 * root.d)
-                            radius: IrisStyle.radiusTile
-                            color: presetCard.worn ? IrisStyle.tintFill(IrisStyle.accent)
-                                : presetMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
-                            border.width: presetCard.worn ? 1.5 : 1
-                            border.color: presetCard.worn ? IrisStyle.accent : IrisStyle.hairline
-
-                            MouseArea {
-                                id: presetMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: DesktopPresets.wear(presetCard.modelData.id)
-                            }
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: Math.round(12 * root.d)
-                                spacing: Math.round(10 * root.d)
-                                MaterialSymbol {
-                                    text: presetCard.worn ? "check_circle" : "dashboard"
-                                    iconSize: Math.round(19 * root.d)
-                                    color: presetCard.worn ? IrisStyle.accent : IrisStyle.textSecondary
-                                }
-                                IrisText {
-                                    Layout.fillWidth: true
-                                    text: presetCard.modelData.name
-                                    font.pixelSize: IrisStyle.typeBody
-                                    font.weight: IrisStyle.weight(presetCard.worn ? Font.DemiBold : Font.Medium)
-                                    elide: Text.ElideRight
-                                }
-                                IrisIconButton {
-                                    visible: presetCard.userOwned
-                                    implicitWidth: Math.round(28 * root.d)
-                                    implicitHeight: Math.round(28 * root.d)
-                                    materialIcon: "delete"
-                                    iconSize: Math.round(16 * root.d)
-                                    Accessible.name: Translation.tr("Delete")
-                                    onClicked: DesktopPresets.remove(presetCard.modelData.id)
-                                }
-                            }
-                        }
-                    }
+                active: !root.inspecting && root.page === "presets" && root.shown
+                visible: active
+                sourceComponent: IrisEditPresets {
+                    outputName: root.outputName
+                    screenWidth: root.width
+                    screenHeight: root.height
+                    pictureOf: key => portraits.url(key)
                 }
             }
 
-            // ── Footer: Clear desktop (with confirmation) + Settings shortcut ──
+            // What the panel just did (saved, worn, undone), above the actions.
+            IrisText {
+                Layout.fillWidth: true
+                visible: DesktopEditHistory.notice.length > 0 && !root.inspecting
+                text: DesktopEditHistory.notice
+                color: IrisStyle.textSecondary
+                font.pixelSize: IrisStyle.typeMeta
+                elide: Text.ElideRight
+            }
+
+            // ── Foot: the desktop-wide switches, then the way out ──
             RowLayout {
+                id: foot
                 Layout.fillWidth: true
                 visible: !root.inspecting
-                spacing: Math.round(8 * root.d)
-
-                IrisText {
-                    visible: DesktopEditHistory.notice.length > 0 && !root.confirmingClear
-                    Layout.fillWidth: true
-                    text: DesktopEditHistory.notice
-                    color: IrisStyle.textSecondary
-                    font.pixelSize: IrisStyle.typeMeta
-                    elide: Text.ElideRight
-                }
-
-                Rectangle {
-                    visible: !root.confirmingClear && root.page === "widgets" && DesktopEditHistory.notice.length === 0
-                    implicitWidth: clearRow.implicitWidth + Math.round(16 * root.d)
-                    implicitHeight: Math.round(30 * root.d)
-                    radius: IrisStyle.radiusRow
-                    opacity: root.enabledCount > 0 ? 1 : 0.35
-                    color: clearMouse.containsMouse && root.enabledCount > 0 ? IrisStyle.fillHover : "transparent"
-                    RowLayout {
-                        id: clearRow
-                        anchors.centerIn: parent
-                        spacing: Math.round(6 * root.d)
-                        MaterialSymbol { text: "delete_sweep"; iconSize: Math.round(16 * root.d); color: IrisStyle.textSecondary }
-                        IrisText { text: Translation.tr("Clear"); color: IrisStyle.textSecondary; font.pixelSize: IrisStyle.typeMeta }
-                    }
-                    MouseArea {
-                        id: clearMouse
-                        anchors.fill: parent
-                        enabled: root.enabledCount > 0
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.confirmingClear = true
-                    }
-                }
-
-                RowLayout {
-                    visible: root.confirmingClear
-                    Layout.fillWidth: true
-                    spacing: Math.round(6 * root.d)
-                    Item { Layout.fillWidth: true }
-                    Rectangle {
-                        implicitWidth: cancelLbl.implicitWidth + Math.round(16 * root.d)
-                        implicitHeight: Math.round(28 * root.d)
-                        radius: IrisStyle.radiusRow
-                        color: cancelMouse.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
-                        IrisText { id: cancelLbl; anchors.centerIn: parent; text: Translation.tr("Cancel"); font.pixelSize: IrisStyle.typeMeta }
-                        MouseArea { id: cancelMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.confirmingClear = false }
-                    }
-                    Rectangle {
-                        implicitWidth: confirmLbl.implicitWidth + Math.round(16 * root.d)
-                        implicitHeight: Math.round(28 * root.d)
-                        radius: IrisStyle.radiusRow
-                        color: IrisStyle.danger
-                        IrisText { id: confirmLbl; anchors.centerIn: parent; text: Translation.tr("Clear"); color: IrisStyle.inkOnDanger; font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.DemiBold) }
-                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.clearAllWidgets() }
-                    }
-                }
-
-                Item { Layout.fillWidth: true; visible: !root.confirmingClear && DesktopEditHistory.notice.length === 0 }
+                spacing: Math.round(4 * root.d)
+                readonly property real key: Math.round(32 * root.d)
+                // Every widget's background or outline away or back in one tap (each widget's own rows say the same):
+                // lit while any widget still shows it.
+                readonly property string plates: DesktopWidgetOptions.everyState("showBackground")
+                readonly property string outlines: DesktopWidgetOptions.everyState("showBorder")
+                readonly property bool gridOn: Config.options?.background?.widgets?.editGrid?.snap ?? true
 
                 IrisIconButton {
+                    visible: !root.confirmingClear && foot.plates !== ""
+                    implicitWidth: foot.key
+                    implicitHeight: foot.key
+                    materialIcon: foot.plates !== "false" ? "layers" : "layers_clear"
+                    iconSize: Math.round(17 * root.d)
+                    selected: foot.plates !== "false"
+                    Accessible.name: Translation.tr("Background")
+                    tooltip: Translation.tr("Background")
+                    tooltipPosition: "top"
+                    Accessible.checkable: true
+                    Accessible.checked: selected
+                    onClicked: DesktopWidgetOptions.setEvery("showBackground", !selected)
+                }
+                IrisIconButton {
+                    visible: !root.confirmingClear && foot.outlines !== ""
+                    implicitWidth: foot.key
+                    implicitHeight: foot.key
+                    materialIcon: "border_style"
+                    iconSize: Math.round(17 * root.d)
+                    selected: foot.outlines !== "false"
+                    Accessible.name: Translation.tr("Outline")
+                    tooltip: Translation.tr("Outline")
+                    tooltipPosition: "top"
+                    Accessible.checkable: true
+                    Accessible.checked: selected
+                    onClicked: DesktopWidgetOptions.setEvery("showBorder", !selected)
+                }
+                IrisIconButton {
                     visible: !root.confirmingClear
-                    implicitWidth: Math.round(30 * root.d)
-                    implicitHeight: Math.round(30 * root.d)
+                    implicitWidth: foot.key
+                    implicitHeight: foot.key
+                    materialIcon: "grid_4x4"
+                    iconSize: Math.round(17 * root.d)
+                    selected: foot.gridOn
+                    Accessible.name: Translation.tr("Snap to grid")
+                    tooltip: Translation.tr("Snap to grid")
+                    tooltipPosition: "top"
+                    Accessible.checkable: true
+                    Accessible.checked: selected
+                    onClicked: Config.setNestedValue("background.widgets.editGrid.snap", !foot.gridOn)
+                }
+                IrisIconButton {
+                    visible: !root.confirmingClear && root.page === "widgets"
+                    implicitWidth: foot.key
+                    implicitHeight: foot.key
+                    materialIcon: "delete_sweep"
+                    iconSize: Math.round(17 * root.d)
+                    enabled: root.enabledCount > 0
+                    opacity: enabled ? 1 : 0.35
+                    Accessible.name: Translation.tr("Clear")
+                    tooltip: Translation.tr("Clear")
+                    tooltipPosition: "top"
+                    onClicked: root.confirmingClear = true
+                }
+                IrisIconButton {
+                    visible: !root.confirmingClear
+                    implicitWidth: foot.key
+                    implicitHeight: foot.key
                     materialIcon: "settings"
                     iconSize: Math.round(17 * root.d)
                     Accessible.name: Translation.tr("Settings")
+                    tooltip: Translation.tr("Settings")
+                    tooltipPosition: "top"
                     onClicked: {
                         DesktopEditHistory.finish()
                         GlobalStates.settingsOverlayRequestedKey = "desktop"
                         GlobalStates.settingsOverlayOpen = true
                     }
+                }
+
+                Item { Layout.fillWidth: true }
+
+                // Clearing asks once: the same place, Cancel or the red Clear.
+                IrisButton {
+                    implicitHeight: foot.key
+                    text: Translation.tr("Cancel")
+                    enabled: root.confirmingClear || DesktopEditHistory.changed
+                    opacity: enabled ? 1 : 0.38
+                    onClicked: {
+                        if (root.confirmingClear) root.confirmingClear = false
+                        else DesktopEditHistory.cancel()
+                    }
+                }
+                IrisButton {
+                    visible: root.confirmingClear
+                    implicitHeight: foot.key
+                    text: Translation.tr("Clear")
+                    emphasized: true
+                    danger: true
+                    onClicked: root.clearAllWidgets()
+                }
+                IrisButton {
+                    visible: !root.confirmingClear
+                    implicitHeight: foot.key
+                    text: Translation.tr("Done")
+                    emphasized: true
+                    onClicked: DesktopEditHistory.finish()
                 }
             }
         }

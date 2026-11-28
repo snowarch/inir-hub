@@ -14,7 +14,7 @@ import qs.modules.iris.widgets.sheet
 
 // A widget's quick controls in Prism Settings' language (his 11-07): its mark and name, the pages as Prism's segmented
 // pill, then each page (`sheet/`): choices drawn as cards that stand on the solid when chosen, settings as the numbered
-// chart. Hosted by the edit sheet (IrisWidgetSheet) and by the lock's inspector.
+// chart. Hosted by the edit panel's inspector (IrisWidgetBar) and by the lock's.
 ColumnLayout {
     id: root
 

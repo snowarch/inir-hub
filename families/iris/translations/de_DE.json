@@ -1,5 +1,5 @@
 {
-  "Group": "Gruppe",
+  "Glass style": "Glasstil",
   "Open wallpaper gallery": "Hintergrundgalerie öffnen",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Wie die Compositor-Übersicht Fenster anordnet (Mod+Tab; 1–4 wechselt live).",
   "Mute the microphone": "Mikrofon stummschalten",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "Zurück zu Widgets",
   "Customize Desktop": "Desktop anpassen",
   "Search widgets...": "Widgets suchen...",
-  "Save current layout": "Aktuelles Layout speichern",
   "Preview: Done applies it": "Vorschau: Fertig übernimmt es"
 }

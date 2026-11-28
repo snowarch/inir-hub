@@ -1,5 +1,5 @@
 {
-  "Group": "그룹",
+  "Glass style": "글래스 스타일",
   "Open wallpaper gallery": "배경화면 갤러리 열기",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "오버뷰 창 배치 방식 (Mod+Tab, 1–4로 즉시 전환).",
   "Mute the microphone": "마이크 음소거",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "위젯으로 돌아가기",
   "Customize Desktop": "데스크톱 사용자 지정",
   "Search widgets...": "위젯 검색...",
-  "Save current layout": "현재 레이아웃 저장",
   "Preview: Done applies it": "미리 보기: 완료를 누르면 적용"
 }

@@ -1,5 +1,5 @@
 {
-  "Group": "分组",
+  "Glass style": "玻璃风格",
   "Open wallpaper gallery": "打开壁纸库",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "原生概览的窗口排列方式（Mod+Tab 打开，1–4 实时切换）。",
   "Mute the microphone": "麦克风静音",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "返回小组件",
   "Customize Desktop": "自定义桌面",
   "Search widgets...": "搜索小组件...",
-  "Save current layout": "保存当前布局",
   "Preview: Done applies it": "预览：点完成即应用"
 }

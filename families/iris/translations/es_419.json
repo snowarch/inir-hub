@@ -1,5 +1,5 @@
 {
-  "Group": "Grupo",
+  "Glass style": "Estilo del cristal",
   "Open wallpaper gallery": "Abrir galería de fondos",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Cómo organiza las ventanas la vista general nativa (Mod+Tab; 1–4 cambia en vivo).",
   "Mute the microphone": "Silenciar el micrófono",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "Volver a widgets",
   "Customize Desktop": "Personalizar escritorio",
   "Search widgets...": "Buscar widgets...",
-  "Save current layout": "Guardar diseño actual",
   "Preview: Done applies it": "Vista previa: se aplica con Listo"
 }

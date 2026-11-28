@@ -1,5 +1,5 @@
 {
-  "Group": "קבוצה",
+  "Glass style": "סגנון זכוכית",
   "Open wallpaper gallery": "פתח גלריית רקעים",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "כיצד תצוגת־העל מסדרת חלונות (Mod+Tab; 1–4 מחליף מיד).",
   "Mute the microphone": "השתקת המיקרופון",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "חזרה לווידג'טים",
   "Customize Desktop": "התאמה אישית של שולחן העבודה",
   "Search widgets...": "חפש ווידג'טים...",
-  "Save current layout": "שמור פריסה נוכחית",
   "Preview: Done applies it": "תצוגה מקדימה: הושלם מחיל אותו"
 }

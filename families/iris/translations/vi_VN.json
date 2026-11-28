@@ -1,5 +1,5 @@
 {
-  "Group": "Nhóm",
+  "Glass style": "Phong cách kính",
   "Open wallpaper gallery": "Mở thư viện hình nền",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "Cách tổng quan sắp xếp cửa sổ (Mod+Tab; 1–4 đổi trực tiếp).",
   "Mute the microphone": "Tắt tiếng micrô",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "Quay lại tiện ích",
   "Customize Desktop": "Tùy chỉnh màn hình nền",
   "Search widgets...": "Tìm tiện ích...",
-  "Save current layout": "Lưu bố cục hiện tại",
   "Preview: Done applies it": "Xem trước: Đã xong để áp dụng"
 }

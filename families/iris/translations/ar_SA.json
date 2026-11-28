@@ -1,5 +1,5 @@
 {
-  "Group": "مجموعة",
+  "Glass style": "نمط الزجاج",
   "Open wallpaper gallery": "فتح معرض الخلفيات",
   "How the native compositor overview arranges windows (Mod+Tab; 1–4 switches live).": "كيف يرتب العرض العام النوافذ (Mod+Tab؛ الأرقام 1–4 للتبديل المباشر).",
   "Mute the microphone": "كتم الميكروفون",
@@ -2714,6 +2714,5 @@
   "Back to widgets": "العودة إلى الأدوات",
   "Customize Desktop": "تخصيص سطح المكتب",
   "Search widgets...": "البحث عن الأدوات...",
-  "Save current layout": "حفظ التخطيط الحالي",
   "Preview: Done applies it": "معاينة: يُطبَّق عند الضغط على تم"
 }
