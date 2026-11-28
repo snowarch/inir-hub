@@ -6,6 +6,7 @@ import Quickshell
 import qs.services
 import qs.services.deferred
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.waffle.looks
 import qs.modules.waffle.settings
@@ -98,7 +99,7 @@ WSettingsPage {
             ].concat(Plugins.families.filter(id => !["ii", "waffle", "iris"].includes(id)).map(id => ({ value: id, displayName: String(Plugins.manifests[id]?.name ?? id) })))
             onSelected: newValue => {
                 if (newValue !== Config.options?.panelFamily) {
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", newValue])
+                    ShellExec.ipc("panelFamily", "set", [newValue])
                 }
             }
         }

@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.common.functions as CF
 import qs.modules.waffle.looks
@@ -1299,7 +1300,7 @@ Item {
                                         accent: true
                                         icon: "image"
                                         text: Translation.tr("Change wallpaper")
-                                        onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
+                                        onClicked: ShellExec.ipc("wallpaperSelector", "toggle")
                                     }
                                     // light and dark, one pill split in two
                                     Rectangle {

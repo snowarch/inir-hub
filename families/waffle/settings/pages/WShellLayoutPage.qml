@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.waffle.looks
 import qs.modules.waffle.settings
 
@@ -20,11 +21,7 @@ WSettingsPage {
         "waffleBar", "")
 
     function openLiveEditor(): void {
-        Quickshell.execDetached([
-            Quickshell.shellPath("scripts/inir"),
-            "shellLayout",
-            "open"
-        ])
+        ShellExec.ipc("shellLayout", "open")
         Qt.quit()
     }
 

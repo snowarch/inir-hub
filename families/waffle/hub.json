@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.37",
+    "version": "2.34.38",
     "changes": {
+    "2.34.38": [
+      "Buttons that act on the shell run inside it, with no process started; the rest call the inir command directly"
+    ],
     "2.34.37": [
       "Settings buttons open Settings in the shell itself, with no script in between"
     ],

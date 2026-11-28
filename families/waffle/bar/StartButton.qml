@@ -67,7 +67,7 @@ AppButton {
             {
                 text: Translation.tr("Search"),
                 action: () => {
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "overview", "toggle"]);
+                    ShellExec.ipc("overview", "toggle");
                 }
             },
         ]

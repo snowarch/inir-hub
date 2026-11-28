@@ -325,7 +325,7 @@ WSettingsPage {
             label: Translation.tr("Unleash chaos")
             buttonText: Translation.tr("Start")
             icon: "flash-on"
-            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "romp"])
+            onClicked: ShellExec.ipc("mascot", "romp")
         }
     }
 
@@ -337,7 +337,7 @@ WSettingsPage {
             buttonText: Translation.tr("Run")
             description: Translation.tr("Every displaced widget returns home")
             icon: "delete"
-            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "tidy"])
+            onClicked: ShellExec.ipc("mascot", "tidy")
         }
 
         WSettingsButton {
@@ -346,7 +346,7 @@ WSettingsPage {
             description: Translation.tr("Explicitly start the mouse chase game; it never starts on its own")
             icon: "gamepad"
             enabled: Config.options?.mascot?.chaos?.enable ?? false
-            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "chase"])
+            onClicked: ShellExec.ipc("mascot", "chase")
         }
 
         WSettingsButton {
@@ -355,7 +355,7 @@ WSettingsPage {
             description: Translation.tr("Explicitly start hide-and-seek; find Kira before the timer expires")
             icon: "search"
             enabled: Config.options?.mascot?.chaos?.enable ?? false
-            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "hideSeek"])
+            onClicked: ShellExec.ipc("mascot", "hideSeek")
         }
 
         WSettingsButton {
@@ -363,14 +363,14 @@ WSettingsPage {
             buttonText: Translation.tr("Run")
             description: Translation.tr("Try her right now instead of waiting for the interval")
             icon: "wand"
-            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "poke"])
+            onClicked: ShellExec.ipc("mascot", "poke")
         }
 
         WSettingsButton {
             label: Translation.tr("Send her away")
             buttonText: Translation.tr("Hide")
             icon: "eye-off"
-            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "hide"])
+            onClicked: ShellExec.ipc("mascot", "hide")
         }
     }
 
@@ -646,7 +646,7 @@ WSettingsPage {
                             Qt.openUrlExternally(Directories.shellConfigPath)
                             break
                         case "shortcuts":
-                            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "cheatsheet", "toggle"])
+                            ShellExec.ipc("cheatsheet", "toggle")
                             break
                         }
                     }

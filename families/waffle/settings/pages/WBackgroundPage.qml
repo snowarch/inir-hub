@@ -7,6 +7,7 @@ import Qt5Compat.GraphicalEffects
 import Quickshell
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.functions as CF
 import qs.modules.waffle.looks
 import qs.modules.waffle.settings
@@ -820,7 +821,7 @@ WSettingsPage {
                                     if (mon) {
                                         Config.setNestedValue("wallpaperSelector.selectionTarget", "main")
                                         Config.setNestedValue("wallpaperSelector.targetMonitor", mon)
-                                        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
+                                        ShellExec.ipc("wallpaperSelector", "toggle")
                                     }
                                 }
                             }
@@ -856,7 +857,7 @@ WSettingsPage {
                                 colForeground: Looks.colors.accentFg
                                 onClicked: {
                                     Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle-backdrop")
-                                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
+                                    ShellExec.ipc("wallpaperSelector", "toggle")
                                 }
                             }
                             WButton {
@@ -1375,7 +1376,7 @@ WSettingsPage {
                     buttonText: Translation.tr("Change")
                     onButtonClicked: {
                         Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle-backdrop")
-                        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
+                        ShellExec.ipc("wallpaperSelector", "toggle")
                     }
                 }
 

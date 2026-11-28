@@ -47,7 +47,7 @@ WBarAttachedPanelContent {
         case "wallpaper": {
             const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
             Config.setNestedValue("wallpaperSelector.selectionTarget", useMain ? "main" : "waffle")
-            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
+            ShellExec.ipc("wallpaperSelector", "toggle")
             break
         }
         case "screenshot":

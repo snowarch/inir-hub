@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.waffle.looks
 import qs.modules.waffle.settings
@@ -375,7 +376,7 @@ WSettingsPage {
             label: Translation.tr("See the welcome screen")
             icon: "eye"
             buttonText: Translation.tr("Preview")
-            onButtonClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "greeting", "show"])
+            onButtonClicked: ShellExec.ipc("greeting", "show")
         }
 
         WSettingsSpinBox {
@@ -392,7 +393,7 @@ WSettingsPage {
             label: Translation.tr("See the rest screen")
             icon: "eye"
             buttonText: Translation.tr("Preview")
-            onButtonClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "rest", "show"])
+            onButtonClicked: ShellExec.ipc("rest", "show")
         }
     }
 
