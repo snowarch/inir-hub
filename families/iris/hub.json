@@ -1,7 +1,13 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.147",
+  "version": "2.33.148",
   "changes": {
+    "2.33.148": [
+      "Settings opens at once: once built it stays ready, let go only when the computer runs short of memory",
+      "Login opens on the greeter in miniature, its styles beside it, one press each",
+      "Anime opens on its scene with Airing, Continue and the colour layer as tiles; their options show only while on",
+      "About shows the iRiS version again"
+    ],
     "2.33.147": [
       "Customize Desktop: a wallpaper picked from the top row previews until Done; Escape puts the old one back",
       "The wallpaper row opens on the one on show, slides with the wheel, touchpad or arrows, and marks the one being tried",
