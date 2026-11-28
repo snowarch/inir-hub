@@ -255,7 +255,9 @@ Item {
             readonly property int layerRevision: glassPane.host?.wallpaperLayerRevision ?? 0
             readonly property int layerFrame: glassPane.host?.wallpaperLayerFrame ?? 0
             onLayerFrameChanged: if (!glassPane.moving) crop.scheduleUpdate()
-            readonly property bool moving: settling.running || GlobalStates.widgetEditMode
+            // Copied live only while it flies to or from the shelf by a transform; arranging otherwise moves it by its place
+            // (`at`, below), which retakes the copy.
+            readonly property bool moving: settling.running || Boolean(root.widget._shelfMoving)
                 || Boolean(glassPane.host?.wallpaperLayerAnimating)
             readonly property point at: {
                 void (root.widget.x + root.widget.y + (root.widget.parent?.x ?? 0) + (root.widget.parent?.y ?? 0))

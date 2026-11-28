@@ -6,7 +6,8 @@
       "Settings opens at once: once built it stays ready, let go only when the computer runs short of memory",
       "Login opens on the greeter in miniature, its styles beside it, one press each",
       "Anime opens on its scene with Airing, Continue and the colour layer as tiles; their options show only while on",
-      "About shows the iRiS version again"
+      "About shows the iRiS version again",
+      "Edit Mode keeps widget glass, copied again only when a widget or the wallpaper changes"
     ],
     "2.33.147": [
       "Customize Desktop: a wallpaper picked from the top row previews until Done; Escape puts the old one back",
