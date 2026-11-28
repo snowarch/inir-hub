@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.UPower
+import qs
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.ii.kit
@@ -200,7 +201,7 @@ Item {
                     ActionTile {
                         tileIcon: "settings"
                         label: Translation.tr("Settings")
-                        onClicked: ShellExec.execDetachedArgs([Quickshell.shellPath("scripts/inir"), "settings"], "Open iNiR settings")
+                        onClicked: GlobalStates.toggleSettings()
                     }
                     ActionTile {
                         tileIcon: "tune"

@@ -980,7 +980,8 @@ Item {
                     RailAction {
                         visible: root.classic
                         symbol: root.navEditMode ? "done" : "edit"
-                        label: root.navEditMode ? Translation.tr("Done") : Translation.tr("Arrange")
+                        // "Edit", not "Arrange": the Arrange page sits in this same list, a row above.
+                        label: root.navEditMode ? Translation.tr("Done") : Translation.tr("Edit")
                         toggled: root.navEditMode
                         onClicked: root.navEditMode = !root.navEditMode
                         StyledToolTip { text: root.navEditMode ? Translation.tr("Done arranging") : Translation.tr("Arrange this list") }

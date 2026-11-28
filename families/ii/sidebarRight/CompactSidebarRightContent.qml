@@ -1867,7 +1867,7 @@ Item {
             }
         }
         GlobalStates.sidebarRightOpen = false
-        Qt.callLater(() => Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"]))
+        Qt.callLater(() => GlobalStates.toggleSettings())
     }
 
     // ═════════════════════════════════════════════════════════════

@@ -133,7 +133,7 @@ RowLayout {
         tooltip: Translation.tr("Settings")
         onClicked: {
             GlobalStates.dashboardOpen = false
-            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
+            GlobalStates.toggleSettings()
         }
     }
     HeaderButton {

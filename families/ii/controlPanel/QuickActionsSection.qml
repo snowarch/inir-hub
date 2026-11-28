@@ -119,7 +119,7 @@ PanelSurface {
             icon: "settings"
             onClicked: {
                 GlobalStates.controlPanelOpen = false
-                Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
+                GlobalStates.toggleSettings()
             }
         }
 
