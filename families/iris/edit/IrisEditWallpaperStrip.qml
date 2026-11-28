@@ -115,8 +115,9 @@ Item {
                 onWheel: event => {
                     const delta = Math.abs(event.angleDelta.x) > Math.abs(event.angleDelta.y)
                         ? event.angleDelta.x : event.angleDelta.y
-                    // A touchpad sends pixels in small steps: follow it 1:1. A wheel's notch moves the row one tile.
-                    if (event.pixelDelta.x !== 0 || event.pixelDelta.y !== 0) {
+                    // A touchpad scrolls in phases and is followed 1:1; a wheel (no phase) moves the row one tile a notch.
+                    // Qt on Wayland gives a wheel's notch a 15 px pixelDelta too, so pixels alone crawled.
+                    if (event.phase !== Qt.NoScrollPhase && (event.pixelDelta.x !== 0 || event.pixelDelta.y !== 0)) {
                         slide.stop()
                         const px = Math.abs(event.pixelDelta.x) > Math.abs(event.pixelDelta.y) ? event.pixelDelta.x : event.pixelDelta.y
                         const maxX = Math.max(0, strip.contentWidth - strip.width)

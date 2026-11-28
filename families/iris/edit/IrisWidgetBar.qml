@@ -88,6 +88,7 @@ Item {
         DesktopEditStage.setSheetHost(root.outputName, false)
         DesktopEditStage.setAside(root.outputName, 0, 0)
         DesktopEditStage.setStage(root.outputName, 0, 0, 0)
+        DesktopEditStage.tiles = ({})
         if (!root.present) DesktopEditStage.unpark()
     }
 
@@ -171,7 +172,10 @@ Item {
 
     readonly property string look: (IrisStyle.light ? "light" : "dark") + "-" + IrisDesign.current
     onLookChanged: if (root.present) DesktopEditStage.look = root.look
-    onPresentChanged: if (root.present) { root.confirmingClear = false; root.prepare() }
+    onPresentChanged: {
+        if (root.present) { root.confirmingClear = false; root.prepare() }
+        tilesLater.restart()
+    }
     function prepare(): void {
         DesktopEditStage.look = root.look
         Quickshell.execDetached(["mkdir", "-p", DesktopEditStage.pictureDir])
@@ -257,6 +261,40 @@ Item {
         const rect = Qt.rect(at.x, at.y, sourceItem?.width ?? 120, sourceItem?.height ?? 64)
         DesktopEditStage.depart(root.outputName, key, rect)
     }
+
+    // Where each widget's card sits on screen, for one taken off the desktop (a right click on it) to shrink into. A card
+    // scrolled out of view lands on the gallery's nearest edge; one not listed (a search, another page) on the panel's top.
+    function publishTiles(): void {
+        if (!root.present) {
+            DesktopEditStage.tiles = ({})
+            return
+        }
+        const cardH = Math.round(116 * root.d)
+        const listed = galleryView.visible && galleryView.height > 0
+        const view = galleryView.mapToItem(null, 0, 0)
+        const cards = {}
+        for (let i = 0; listed && i < galleryCards.count; i++) {
+            const card = galleryCards.itemAt(i)
+            if (card) cards[card.modelData.key] = card
+        }
+        const out = {}
+        for (const entry of root.allEntries) {
+            const card = cards[entry.key]
+            if (card) {
+                const at = card.mapToItem(null, 0, 0)
+                const y = Math.max(view.y, Math.min(view.y + galleryView.height - card.height, at.y))
+                out[entry.key] = Qt.rect(at.x, y, card.width, card.height)
+            } else {
+                out[entry.key] = Qt.rect(root.bodyX + root.bodyWidth / 4, root.bodyY + cardH / 2, root.bodyWidth / 2, cardH)
+            }
+        }
+        DesktopEditStage.tiles = out
+    }
+    Timer { id: tilesLater; interval: 120; onTriggered: root.publishTiles() }
+    onShownChanged: tilesLater.restart()
+    onPageChanged: tilesLater.restart()
+    onFilteredEntriesChanged: tilesLater.restart()
+    onBodyXChanged: tilesLater.restart()
 
     function clearAllWidgets(): void {
         root.confirmingClear = false
@@ -602,6 +640,10 @@ Item {
 
             // ── Widget Gallery Grid (2 columns, cached snapshot thumbnails, zero live clones) ──
             Flickable {
+                id: galleryView
+                onContentYChanged: tilesLater.restart()
+                onHeightChanged: tilesLater.restart()
+                onVisibleChanged: tilesLater.restart()
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 visible: !root.inspecting && root.page === "widgets"
@@ -619,6 +661,7 @@ Item {
                     readonly property real cellW: Math.floor((width - columnSpacing) / 2)
 
                     Repeater {
+                        id: galleryCards
                         model: root.filteredEntries
                         delegate: Rectangle {
                             id: card

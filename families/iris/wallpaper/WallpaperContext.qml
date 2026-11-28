@@ -31,7 +31,9 @@ Flickable {
     WheelHandler {
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onWheel: event => {
-            const delta = event.pixelDelta.x || event.pixelDelta.y || (event.angleDelta.y || event.angleDelta.x) / 2
+            // A touchpad (in phases) by its pixels; a wheel by its notches: Qt on Wayland gives a notch 15 px too.
+            const delta = event.phase !== Qt.NoScrollPhase && (event.pixelDelta.x || event.pixelDelta.y)
+                ? (event.pixelDelta.x || event.pixelDelta.y) : (event.angleDelta.y || event.angleDelta.x) / 2
             root.contentX = Math.max(0, Math.min(Math.max(0, root.contentWidth - root.width), root.contentX - delta))
         }
     }

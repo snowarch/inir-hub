@@ -1,7 +1,11 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.148",
+  "version": "2.33.149",
   "changes": {
+    "2.33.149": [
+      "Customize Desktop: a right click on a widget puts it back on the shelf again",
+      "A mouse wheel moves the wallpaper row a whole wallpaper a notch, and the library row and Orbit Studio at full speed"
+    ],
     "2.33.148": [
       "Settings opens at once: once built it stays ready, let go only when the computer runs short of memory",
       "Login opens on the greeter in miniature, its styles beside it, one press each",
