@@ -190,8 +190,24 @@ Item {
             : root.accent
     }
     readonly property color ink: root.stockInk ? stockLoader.item.ink : root.paper ? IrisStyle.text : root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.light ? IrisStyle.inkOnDark : IrisStyle.text
-    readonly property color inkSecondary: IrisStyle.secondaryOf(root.ink)
-    readonly property color inkTertiary: IrisStyle.tertiaryOf(root.ink)
+    readonly property color inkSecondary: root.clearLevel(IrisStyle.secondaryOf(root.ink))
+    readonly property color inkTertiary: root.clearLevel(IrisStyle.tertiaryOf(root.ink))
+    // A clear face has no plate: a level of ink made by alpha mixes with the wallpaper under it, and a timer's "Ready"
+    // or a second figure sank into a busy patch. There each level takes the least alpha, from its own, that still reads
+    // 4.5:1 on the worst ground of its region (the brightest under light ink, the darkest under dark).
+    function clearLevel(level: color): color {
+        const seen = root.widget.regionBrightness
+        if (!root.clear || root.stockInk || seen < 0) return level
+        const ground = root.lightBackdrop ? Math.max(0, seen - root.readSpread) : Math.min(1, seen + root.readSpread)
+        const groundY = Math.pow(ground, 2.2)
+        const inkV = Math.pow(ColorUtils.relativeLuminance(root.ink), 1 / 2.2)
+        let alpha = level.a
+        for (; alpha < 1; alpha = Math.min(1, alpha + 0.02)) {
+            const mixedY = Math.pow(alpha * inkV + (1 - alpha) * ground, 2.2)
+            if ((Math.max(mixedY, groundY) + 0.05) / (Math.min(mixedY, groundY) + 0.05) >= 4.5) break
+        }
+        return ColorUtils.applyAlpha(root.ink, alpha)
+    }
     readonly property color fillQuiet: root.ownInk ? IrisStyle.fillQuietOf(root.ink) : IrisStyle.fillQuiet
     readonly property color fill: root.ownInk ? IrisStyle.fillOf(root.ink) : IrisStyle.fill
     readonly property color fillHover: root.ownInk ? IrisStyle.fillHoverOf(root.ink) : IrisStyle.fillHover
