@@ -1,7 +1,11 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.150",
+  "version": "2.33.151",
   "changes": {
+    "2.33.151": [
+      "Customize Desktop: the blurred stage keeps its picture through every wallpaper pick and crossfades without a dip",
+      "While a widget is carried, the bar, island or dock it lines up with lights up round its edge"
+    ],
     "2.33.150": [
       "Customize Desktop: picking a wallpaper fades the blurred stage to it; it no longer flashes dark while the picture loads",
       "The wallpaper row fades out at an end with more pictures past it, keeps every ring whole and opens centred on the one on show",

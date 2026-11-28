@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Shapes
 import qs.modules.common.functions
+import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs
 import qs.services
@@ -47,86 +48,34 @@ Item {
         active: root.side === "under" && root.p > 0.001
         asynchronous: true
         sourceComponent: Item {
-            id: stage
             anchors.fill: parent
             opacity: Math.min(1, root.p * 1.6)
 
-            // Two stills: a new wallpaper (a pick in the strip) decodes in the hidden one and fades in over the one on
-            // show. Set on the shown one, it emptied while it decoded and the stage flashed its bare scrim at every pick.
-            property int current: 0
-            readonly property Image shown: stage.current === 0 ? stillA : stillB
-            readonly property Image next: stage.current === 0 ? stillB : stillA
-            readonly property bool picture: stage.shown.status === Image.Ready
-            function load(): void {
-                if (arrive.running) {
-                    // A pick during a fade: the one fading in takes the place at once and the new one fades over it.
-                    arrive.stop()
-                    stage.next.opacity = 1
-                    stage.current = stage.current === 0 ? 1 : 0
-                }
-                if (String(stage.shown.source) === root.still) {
-                    stage.next.source = ""
-                    return
-                }
-                stage.next.opacity = 0
-                stage.next.z = 1
-                stage.shown.z = 0
-                stage.next.source = root.still
-                if (stage.next.status === Image.Ready) arrive.restart()
-            }
-            function arrived(still: Image): void {
-                if (still === stage.next && still.status === Image.Ready && String(still.source).length > 0) arrive.restart()
-            }
-            Connections {
-                target: root
-                function onStillChanged(): void { stage.load() }
-            }
-            Component.onCompleted: stillA.source = root.still
-            NumberAnimation {
-                id: arrive
-                target: stage.next
-                property: "opacity"
-                from: 0
-                to: 1
-                duration: IrisStyle.duration(320)
-                easing.type: Easing.OutCubic
-                onFinished: stage.current = stage.current === 0 ? 1 : 0
-            }
-            component Still: Image {
+            // A pick in the wallpaper row fades the stage to the new still; the old one stays until it is decoded (set in
+            // place, the still emptied while it decoded and the stage flashed its bare scrim at every pick). Blurred as its
+            // own layer: a MultiEffect fed a hidden crossfader kept an empty texture once the slots swapped.
+            WallpaperCrossfader {
+                id: stageStill
                 anchors.fill: parent
+                visible: stageStill.ready
+                source: root.still
                 sourceSize: Qt.size(Math.max(160, Math.round(root.width / 4)), Math.max(90, Math.round(root.height / 4)))
                 fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                cache: true
-            }
-            // Blurred as one picture: the blur runs again only while a new still fades in.
-            Item {
-                id: stills
-                anchors.fill: parent
-                visible: false
-                Still {
-                    id: stillA
-                    onStatusChanged: stage.arrived(stillA)
+                enableTransitions: true
+                transitionType: "crossfade"
+                transitionBaseDuration: 320
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    blurEnabled: true
+                    blur: 1
+                    blurMax: 36
+                    saturation: -0.15
+                    autoPaddingEnabled: false
                 }
-                Still {
-                    id: stillB
-                    opacity: 0
-                    onStatusChanged: stage.arrived(stillB)
-                }
-            }
-            MultiEffect {
-                anchors.fill: parent
-                source: stills
-                visible: stage.picture
-                blurEnabled: true
-                blur: 1
-                blurMax: 36
-                saturation: -0.15
-                autoPaddingEnabled: false
             }
             Rectangle {
                 anchors.fill: parent
-                visible: stage.picture
+                visible: stageStill.ready
                 color: ColorUtils.applyAlpha(root.paper, IrisStyle.light ? 0.32 : 0.46) // iris-literal: the stage still's paper wash, set by eye over the blurred wallpaper
             }
             IrisBodyShadow {
@@ -169,11 +118,12 @@ Item {
         border.color: ColorUtils.applyAlpha(IrisStyle.text, (IrisStyle.light ? 0.14 : 0.16) * root.p)
     }
 
-    readonly property var obstacles: root.side === "lit" && root.output.length > 0
-        ? (DesktopArrange.obstacles?.[root.output] ?? []) : []
+    // inside (shrunk with the desktop, desktop px): accent rims on the bar, island or dock a carried widget lines up with.
     readonly property var lit: {
         const out = ({})
-        if (root.side !== "lit" || DesktopArrange.dragOutput !== root.output) return out
+        if (root.side !== "inside" || DesktopArrange.dragOutput !== root.output || DesktopArrange.phase === "idle") return out
+        for (const line of DesktopArrange.slots)
+            for (const id of (line?.ids ?? [])) out[id] = true
         for (const id in DesktopArrange.matched) out[id] = true
         return out
     }
@@ -197,17 +147,19 @@ Item {
             + ` L ${x} ${y + q}`
             + ` C ${x} ${y + q - s} ${x + q - s} ${y} ${x + q} ${y} Z`
     }
-    readonly property real hair: 1 / Math.max(1, root.Screen?.devicePixelRatio ?? 1)
+    readonly property real hair: 1 / Math.max(0.2, root.card.s)
     Repeater {
-        model: root.obstacles
+        model: root.side === "inside" ? DesktopArrange.bodiesOf(root.output) : []
         delegate: Item {
             id: rim
             required property var modelData
             readonly property bool on: Boolean(root.lit[rim.modelData.id])
-            x: root.cardX + rim.modelData.x * root.card.s
-            y: root.cardY + rim.modelData.y * root.card.s
-            width: rim.modelData.width * root.card.s
-            height: rim.modelData.height * root.card.s
+            // Around the body, not on it: the live bar, island or dock draws over its own place.
+            readonly property real out: 4 * root.hair
+            x: rim.modelData.x - rim.out
+            y: rim.modelData.y - rim.out
+            width: rim.modelData.w + 2 * rim.out
+            height: rim.modelData.h + 2 * rim.out
             visible: rim.width > 0 && rim.height > 0 && (rim.on || rimShape.opacity > 0.005)
             Shape {
                 id: rimShape
@@ -219,7 +171,7 @@ Item {
                     fillColor: IrisStyle.tintFill(IrisStyle.accent)
                     strokeColor: IrisStyle.accent
                     strokeWidth: 2 * root.hair
-                    PathSvg { path: root.outline(0, 0, rim.width, rim.height, rim.modelData.radius ?? 0) }
+                    PathSvg { path: root.outline(0, 0, rim.width, rim.height, (rim.modelData.radius ?? 0) + rim.out) }
                 }
             }
         }
