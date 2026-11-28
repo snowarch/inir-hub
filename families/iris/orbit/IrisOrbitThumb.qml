@@ -59,7 +59,7 @@ Item {
         opacity: root.dimmed ? root.dimOpacity : 1
         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
 
-        Image {
+        IrisImage {
             id: shot
             anchors.fill: parent
             source: root.previews && root.windowId >= 0 ? WindowPreviewService.getPreviewUrl(root.windowId) : ""
@@ -71,7 +71,7 @@ Item {
             retainWhileLoading: true
             sourceSize: root.decodeSize
             // Under a stream the still steps aside: a translucent window would show both.
-            opacity: status === Image.Ready && !liveShot.streaming ? (root.minimised ? 0.55 : 1) : 0
+            opacity: shot.painted && !liveShot.streaming ? (root.minimised ? 0.55 : 1) : 0
             visible: opacity > 0.001
             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
         }

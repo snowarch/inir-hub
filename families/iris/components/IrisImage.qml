@@ -27,4 +27,14 @@ Image {
     smooth: true
     mipmap: true
     retainWhileLoading: true
+    // A picture is on screen: it stays through a source change (retainWhileLoading keeps the old one while status is
+    // Loading) and drops only when nothing is left to show (no source, an error). Gate on it, never on status === Ready.
+    property bool painted: false
+    Component.onCompleted: root.painted = root.status === Image.Ready
+    onStatusChanged: {
+        if (root.status === Image.Ready)
+            root.painted = true;
+        else if (root.status === Image.Null || root.status === Image.Error)
+            root.painted = false;
+    }
 }

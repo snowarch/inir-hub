@@ -44,10 +44,11 @@ Item {
         maskSource: roundMask
         maskThresholdMin: 0.5
         maskSpreadAtMin: 1
-        visible: cover.status === Image.Ready
+        visible: cover.painted
     }
-    // Anything but a cover ready to draw shows the stand-in: a cover loading (or never arriving) left an empty disc (11-02).
-    readonly property bool bare: cover.status !== Image.Ready
+    // No cover on screen shows the stand-in: a first cover loading (or never arriving) left an empty disc (11-02). A cover
+    // being replaced keeps the old one until the new one is decoded.
+    readonly property bool bare: !cover.painted
     IconImage {
         anchors.centerIn: parent
         visible: root.bare && root.appIcon.length > 0

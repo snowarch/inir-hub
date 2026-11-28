@@ -1,7 +1,10 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.151",
+  "version": "2.33.152",
   "changes": {
+    "2.33.152": [
+      "Covers, the player backdrop, Orbit's thumbnails and the lock miniature keep the old picture until the new one is ready"
+    ],
     "2.33.151": [
       "Customize Desktop: the blurred stage keeps its picture through every wallpaper pick and crossfades without a dip",
       "While a widget is carried, the bar, island or dock it lines up with lights up round its edge"

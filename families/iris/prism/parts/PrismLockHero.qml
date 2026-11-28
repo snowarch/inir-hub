@@ -9,6 +9,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.iris.style
+import qs.modules.iris.components
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
@@ -79,18 +80,18 @@ Item {
         radius: PrismTheme.dp(22)
         color: root.source === "colour" ? ColorUtils.mix(IrisStyle.accent, PrismTheme.night, 0.22) : PrismTheme.night
 
-        Image {
+        IrisImage {
             id: picture
             visible: false
             anchors.fill: parent
             source: root.source === "colour" || root.picture.length === 0 ? "" : Wallpapers.stillUrlFor(root.picture)
-            sourceSize.width: Math.round(root.miniW * 1.5)
             fillMode: String(root.scene.fit ?? "cover") === "contain" ? Image.PreserveAspectFit : Image.PreserveAspectCrop
-            asynchronous: true
+            // An effect samples this texture without mipmaps.
+            mipmap: false
         }
         MultiEffect {
             anchors.fill: parent
-            visible: picture.status === Image.Ready
+            visible: picture.painted
             source: picture
             blurEnabled: Number(root.scene.blur ?? 100) > 0
             blurMax: 40

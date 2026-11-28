@@ -17,16 +17,18 @@ Item {
     // A Design may lay the cover its own way (AIRISU: the record's lacquer); the cover and where it sits stay the owner's.
     IrisSkin { id: skin; part: "mediaBackdrop"; host: root }
 
-    Image {
+    IrisImage {
         id: cover
         anchors.fill: parent
         anchors.margins: -root.overscan
         source: skin.active ? "" : root.source
-        sourceSize: Qt.size(160, 160)
+        // A blurred cover needs few pixels.
+        decodeWidth: 160 / cover.pixelRatio
+        decodeHeight: 160 / cover.pixelRatio
         // Its own texture: a mipmapped cover of the same size elsewhere shared it and flipped its filtering.
         cache: false
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
+        // An effect samples this texture without mipmaps.
+        mipmap: false
         visible: false
     }
     Item {
@@ -51,7 +53,7 @@ Item {
             blur: 1
             blurMax: 64
             opacity: root.strength
-            visible: cover.status === Image.Ready
+            visible: cover.painted
         }
         Rectangle {
             anchors.fill: parent
