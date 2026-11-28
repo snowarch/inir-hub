@@ -39,7 +39,7 @@ ContentPage {
                     colBackground: Appearance.colors.colPrimary
                     colBackgroundHover: Appearance.colors.colPrimaryHover
                     colRipple: Appearance.colors.colPrimaryActive
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", "waffle"])
+                    onClicked: ShellExec.ipc("panelFamily", "set", ["waffle"])
                     contentItem: StyledText {
                         id: switchLabel
                         horizontalAlignment: Text.AlignHCenter
@@ -99,7 +99,7 @@ ContentPage {
                 mainText: Translation.tr("Pick main wallpaper")
                 onClicked: {
                     Config.setNestedValue("wallpaperSelector.selectionTarget", "main")
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"]);
+                    ShellExec.ipc("wallpaperSelector", "toggle");
                 }
             }
 
@@ -111,7 +111,7 @@ ContentPage {
                 mainText: Translation.tr("Pick Waffle wallpaper")
                 onClicked: {
                     Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle")
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"]);
+                    ShellExec.ipc("wallpaperSelector", "toggle");
                 }
             }
 
@@ -257,7 +257,7 @@ ContentPage {
                 mainText: Translation.tr("Pick backdrop wallpaper")
                 onClicked: {
                     Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle-backdrop")
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"]);
+                    ShellExec.ipc("wallpaperSelector", "toggle");
                 }
             }
 

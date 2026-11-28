@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.36.17",
+    "version": "2.36.18",
     "changes": {
+    "2.36.18": [
+      "Buttons that act on the shell run inside it, with no process started; the rest call the inir command directly"
+    ],
     "2.36.17": [
       "Settings buttons open Settings in the shell itself, with no script in between",
       "Settings' rail names its reorder button Edit, apart from the Arrange page above it"

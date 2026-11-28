@@ -27,7 +27,7 @@ Item {
 
     Process {
         id: engineFetch
-        command: [Quickshell.shellPath("scripts/inir"), "webengine"]
+        command: [Directories.inir, "webengine"]
         onExited: (exitCode, exitStatus) => root.engineExit = exitCode
     }
 

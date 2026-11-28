@@ -1,5 +1,6 @@
 import qs
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.services
 import QtQuick
@@ -22,7 +23,7 @@ AndroidQuickToggleButton {
         interval: 300
         repeat: false
         onTriggered: {
-            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "screenshot"])
+            ShellExec.ipc("region", "screenshot")
         }
     }
 

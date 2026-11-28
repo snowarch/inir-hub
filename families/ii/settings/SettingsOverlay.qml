@@ -210,8 +210,7 @@ Scope {
                     focus: true
                     active: root.settingsOpen
                     onCloseRequested: GlobalStates.settingsOverlayOpen = false
-                    onWindowRequested: page => Quickshell.execDetached([Quickshell.shellPath("scripts/inir"),
-                        "ipc", "settings", "openWindowAt", String(page)])
+                    onWindowRequested: page => CF.ShellExec.ipc("settings", "openWindowAt", [String(page)])
                     onCurrentPageChanged: GlobalStates.settingsOverlayCurrentPage = chrome.currentPage
                     Component.onCompleted: {
                         root.chrome = chrome

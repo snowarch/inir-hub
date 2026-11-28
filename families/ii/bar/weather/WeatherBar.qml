@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.services
 import Quickshell
@@ -37,7 +38,7 @@ MouseArea {
         eggTapWindow.restart()
         if (root._eggTaps >= 5 && (Config.options?.mascot?.enable ?? false)) {
             root._eggTaps = 0
-            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "appear", "weather-umbrella", "top"])
+            ShellExec.ipc("mascot", "appear", ["weather-umbrella", "top"])
         }
         GlobalStates.sidebarRightRequestedWidget = "weather"
         GlobalStates.openSidebarRight(root.QsWindow.window?.screen?.name ?? "")

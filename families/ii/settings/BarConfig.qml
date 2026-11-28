@@ -430,7 +430,7 @@ ContentPage {
                 mainText: Translation.tr("Edit on screen")
                 onClicked: {
                     GlobalStates.settingsOverlayOpen = false
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "shellLayout", "open"])
+                    ShellExec.ipc("shellLayout", "open")
                 }
             }
 

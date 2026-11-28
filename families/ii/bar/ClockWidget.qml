@@ -1,4 +1,5 @@
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.services
 import Quickshell
@@ -19,7 +20,7 @@ Item {
     // Easter egg: long-press the clock → bedtime lecture, whatever the hour
     TapHandler {
         enabled: Config.options?.mascot?.enable ?? false
-        onLongPressed: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "appear", "late-night", "top"])
+        onLongPressed: ShellExec.ipc("mascot", "appear", ["late-night", "top"])
     }
 
     RowLayout {

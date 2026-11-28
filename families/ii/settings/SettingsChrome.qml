@@ -8,6 +8,7 @@ import Quickshell
 import Quickshell.Widgets
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.ii.kit
 import qs.modules.common.functions as CF
@@ -731,7 +732,7 @@ Item {
                 IconAction {
                     symbol: "lock"
                     tip: Translation.tr("Lock")
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "lock", "activate"])
+                    onClicked: ShellExec.ipc("lock", "activate")
                 }
                 IconAction {
                     visible: !root.windowed

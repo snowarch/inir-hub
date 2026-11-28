@@ -6,6 +6,7 @@ import Quickshell.Io
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.ii.kit
 
@@ -44,7 +45,7 @@ ContentPage {
                 mainText: Translation.tr("Edit on screen")
                 onClicked: {
                     GlobalStates.settingsOverlayOpen = false
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "shellLayout", "open"])
+                    ShellExec.ipc("shellLayout", "open")
                 }
             }
 

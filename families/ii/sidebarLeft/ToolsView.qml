@@ -148,17 +148,17 @@ Item {
                     ActionTile {
                         tileIcon: "screenshot_region"
                         label: Translation.tr("Region")
-                        onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "screenshot"])
+                        onClicked: ShellExec.ipc("region", "screenshot")
                     }
                     ActionTile {
                         tileIcon: "videocam"
                         label: Translation.tr("Record")
-                        onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "record"])
+                        onClicked: ShellExec.ipc("region", "record")
                     }
                     ActionTile {
                         tileIcon: "text_fields"
                         label: Translation.tr("OCR")
-                        onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "ocr"])
+                        onClicked: ShellExec.ipc("region", "ocr")
                     }
                     ActionTile {
                         visible: CompositorService.niriNative

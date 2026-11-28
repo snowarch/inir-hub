@@ -2142,7 +2142,7 @@ Item {
                 label: Translation.tr("Screenshot")
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false
-                    Qt.callLater(() => Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "screenshot"]))
+                    Qt.callLater(() => ShellExec.ipc("region", "screenshot"))
                 }
             }
 
@@ -2152,7 +2152,7 @@ Item {
                 label: Translation.tr("Record")
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false
-                    Qt.callLater(() => Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "record"]))
+                    Qt.callLater(() => ShellExec.ipc("region", "record"))
                 }
             }
 
@@ -2162,7 +2162,7 @@ Item {
                 label: Translation.tr("OCR")
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false
-                    Qt.callLater(() => Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "ocr"]))
+                    Qt.callLater(() => ShellExec.ipc("region", "ocr"))
                 }
             }
 
@@ -2172,7 +2172,7 @@ Item {
                 label: Translation.tr("Search")
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false
-                    Qt.callLater(() => Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "search"]))
+                    Qt.callLater(() => ShellExec.ipc("region", "search"))
                 }
             }
 

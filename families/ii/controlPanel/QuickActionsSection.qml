@@ -127,7 +127,7 @@ PanelSurface {
             icon: "lock"
             onClicked: {
                 GlobalStates.controlPanelOpen = false
-                Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "lock", "activate"])
+                ShellExec.ipc("lock", "activate")
             }
         }
 

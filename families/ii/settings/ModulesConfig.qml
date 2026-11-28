@@ -4,6 +4,7 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.ii.kit
 
@@ -224,7 +225,7 @@ ContentPage {
                         }
                     }
 
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", "ii"])
+                    onClicked: ShellExec.ipc("panelFamily", "set", ["ii"])
                 }
 
                 RippleButton {
@@ -252,7 +253,7 @@ ContentPage {
                         }
                     }
 
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", "waffle"])
+                    onClicked: ShellExec.ipc("panelFamily", "set", ["waffle"])
                 }
 
                 RippleButton {
@@ -280,7 +281,7 @@ ContentPage {
                         }
                     }
 
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", "iris"])
+                    onClicked: ShellExec.ipc("panelFamily", "set", ["iris"])
                 }
 
                 // Every other installed family (one from the Hub) by its manifest name and icon.
@@ -314,7 +315,7 @@ ContentPage {
                             }
                         }
 
-                        onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", extraFamily.modelData])
+                        onClicked: ShellExec.ipc("panelFamily", "set", [extraFamily.modelData])
                     }
                 }
             }
@@ -1239,8 +1240,7 @@ ContentPage {
                 autoToggle: false
                 onToggledByUser: enabled => {
                     const action = enabled ? "openOverlayAt" : "openWindowAt"
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"),
-                        "ipc", "settings", action, String(modulesPage.settingsPageIndex)])
+                    ShellExec.ipc("settings", action, [String(modulesPage.settingsPageIndex)])
                     if (enabled && !GlobalStates.settingsOverlayOpen)
                         Qt.quit()
                 }

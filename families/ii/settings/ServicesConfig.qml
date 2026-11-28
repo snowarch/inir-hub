@@ -70,7 +70,7 @@ ContentPage {
                 RippleButtonWithIcon {
                     materialIcon: "play_arrow"
                     mainText: Translation.tr("Preview")
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "rest", "show"])
+                    onClicked: ShellExec.ipc("rest", "show")
                 }
             }
 
@@ -898,7 +898,7 @@ ContentPage {
                             // Separate window mode (default): Settings is a separate qs process.
                             // Singletons are isolated per-process, so we must use IPC to reach
                             // the main shell's ShellUpdates.openOverlay() instead.
-                            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "shellUpdate", "open"])
+                            ShellExec.ipc("shellUpdate", "open")
                         }
                     }
 

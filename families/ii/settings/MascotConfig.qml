@@ -371,25 +371,25 @@ ContentPage {
                     materialIcon: "cyclone"
                     mainText: Translation.tr("Unleash chaos")
                     enabled: Config.options?.mascot?.chaos?.enable ?? false
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "romp"])
+                    onClicked: ShellExec.ipc("mascot", "romp")
                 }
                 RippleButtonWithIcon {
                     materialIcon: "cleaning_services"
                     mainText: Translation.tr("Tidy up")
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "tidy"])
+                    onClicked: ShellExec.ipc("mascot", "tidy")
                 }
                 RippleButtonWithIcon {
                     materialIcon: "sports_esports"
                     mainText: Translation.tr("Play chase")
                     enabled: Config.options?.mascot?.chaos?.enable ?? false
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "chase"])
+                    onClicked: ShellExec.ipc("mascot", "chase")
                     StyledToolTip { text: Translation.tr("Explicitly start the mouse chase game; it never starts on its own") }
                 }
                 RippleButtonWithIcon {
                     materialIcon: "search"
                     mainText: Translation.tr("Hide and seek")
                     enabled: Config.options?.mascot?.chaos?.enable ?? false
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "hideSeek"])
+                    onClicked: ShellExec.ipc("mascot", "hideSeek")
                     StyledToolTip { text: Translation.tr("Explicitly start hide-and-seek; find Kira before the timer expires") }
                 }
             }
@@ -404,19 +404,19 @@ ContentPage {
                 RippleButtonWithIcon {
                     materialIcon: "waving_hand"
                     mainText: Translation.tr("Peek now")
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "poke"])
+                    onClicked: ShellExec.ipc("mascot", "poke")
                 }
 
                 RippleButtonWithIcon {
                     materialIcon: "sentiment_very_satisfied"
                     mainText: Translation.tr("Say hi")
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "appear", "wave-loop", "bottom"])
+                    onClicked: ShellExec.ipc("mascot", "appear", ["wave-loop", "bottom"])
                 }
 
                 RippleButtonWithIcon {
                     materialIcon: "visibility_off"
                     mainText: Translation.tr("Send her away")
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "hide"])
+                    onClicked: ShellExec.ipc("mascot", "hide")
                 }
             }
 

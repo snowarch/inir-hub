@@ -850,7 +850,7 @@ ContentPage {
             RippleButtonWithIcon {
                 materialIcon: "play_arrow"
                 mainText: Translation.tr("Preview")
-                onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "greeting", "show"])
+                onClicked: ShellExec.ipc("greeting", "show")
             }
 
             SettingsDivider {}

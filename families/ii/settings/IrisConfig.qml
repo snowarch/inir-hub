@@ -4,6 +4,7 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.ii.kit
 
@@ -122,7 +123,7 @@ ContentPage {
                             colBackground: Appearance.colors.colPrimaryContainer
                             colBackgroundHover: Appearance.colors.colPrimaryContainerHover
                             colRipple: Appearance.colors.colPrimaryContainerActive
-                            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", "iris"])
+                            onClicked: ShellExec.ipc("panelFamily", "set", ["iris"])
                             StyledText {
                                 anchors.centerIn: parent
                                 text: Translation.tr("Activate")

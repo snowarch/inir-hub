@@ -6,6 +6,7 @@ import Quickshell
 import qs.services
 import qs.modules.ii.settings
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 
 // Material Settings in its own window (`inir settings-window`, settingsUi.overlayMode off). Same body as the overlay.
@@ -46,7 +47,7 @@ ApplicationWindow {
         onCloseRequested: root.close()
         // The shell opens the overlay on this page; this window has nothing left to show.
         onOverlayRequested: page => {
-            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "ipc", "settings", "openOverlayAt", String(page)])
+            ShellExec.ipc("settings", "openOverlayAt", [String(page)])
             Qt.quit()
         }
 

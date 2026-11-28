@@ -33,7 +33,7 @@ Item {
 
     function lockScreen(): void {
         GlobalStates.controlPanelOpen = false
-        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "lock", "activate"])
+        ShellExec.ipc("lock", "activate")
     }
 
     RowLayout {

@@ -44,8 +44,7 @@ MouseArea {
     // Easter egg: long-press instead of clicking and she takes the credit
     onPressAndHold: {
         if (Config.options?.mascot?.enable ?? false)
-            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "appearWithLine",
-                "update-ready", "top", Translation.tr("Pressed it. You're welcome.")])
+            ShellExec.ipc("mascot", "appearWithLine", ["update-ready", "top", Translation.tr("Pressed it. You're welcome.")])
     }
 
     // Background pill

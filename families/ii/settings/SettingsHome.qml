@@ -121,7 +121,7 @@ ColumnLayout {
                     colBackground: Appearance.colors.colPrimaryContainer
                     colBackgroundHover: ColorUtils.mix(Appearance.colors.colPrimaryContainer, Appearance.colors.colOnPrimaryContainer, 0.92)
                     colRipple: ColorUtils.mix(Appearance.colors.colPrimaryContainer, Appearance.colors.colOnPrimaryContainer, 0.88)
-                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
+                    onClicked: ShellExec.ipc("wallpaperSelector", "toggle")
                     contentItem: RowLayout {
                         id: changeRow
                         spacing: 8

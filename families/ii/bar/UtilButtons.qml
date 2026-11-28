@@ -34,7 +34,7 @@ Item {
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "screenshot"])
+                onClicked: ShellExec.ipc("region", "screenshot")
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 1
