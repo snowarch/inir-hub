@@ -146,7 +146,7 @@ RestWindow {
                             MultiEffect {
                                 anchors.fill: parent
                                 source: art
-                                visible: art.status === Image.Ready
+                                visible: art.painted
                                 maskEnabled: true
                                 maskSource: artMask
                                 maskThresholdMin: 0.5

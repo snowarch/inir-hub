@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.36.15",
+    "version": "2.36.16",
     "changes": {
+    "2.36.16": [
+      "The rest screen's spinning cover keeps the old one until the next track's is ready: no blank flash"
+    ],
     "2.36.15": [
       "Widget edit mode: the blurred surface crossfades to a picked wallpaper instead of flashing"
     ],
