@@ -60,7 +60,7 @@ WBarAttachedPanelContent {
                     radius: Looks.radius.medium
                     color: Looks.colors.bg1Base
 
-                    Image {
+                    StyledImage {
                         id: artImage
                         anchors.fill: parent
                         source: MediaArtwork.displaySource
@@ -68,7 +68,7 @@ WBarAttachedPanelContent {
                         asynchronous: true
                         cache: false
                         sourceSize: Qt.size(140, 140)
-                        visible: MediaArtwork.ready && status === Image.Ready
+                        visible: MediaArtwork.ready && artImage.painted
 
                         layer.enabled: visible
                         layer.effect: OpacityMask {
@@ -101,7 +101,7 @@ WBarAttachedPanelContent {
                         icon: "music-note-2"
                         implicitSize: 28
                         color: Looks.colors.subfg
-                        visible: (!MediaArtwork.ready || artImage.status !== Image.Ready) && root.action === ""
+                        visible: (!MediaArtwork.ready || !artImage.painted) && root.action === ""
                     }
                 }
 

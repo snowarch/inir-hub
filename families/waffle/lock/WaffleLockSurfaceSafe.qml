@@ -327,22 +327,21 @@ MouseArea {
                         anchors.bottomMargin: 16 + mediaWidget.sheetShown
                         spacing: 16
 
-                        Rectangle {
+                        ClippingRectangle {
                             Layout.preferredWidth: 48
                             Layout.preferredHeight: 48
                             Layout.alignment: Qt.AlignVCenter
                             radius: Looks.radius.medium
                             color: Looks.colors.bg2Base
-                            clip: true
 
-                            Image {
+                            StyledImage {
                                 id: mediaArtImage
                                 anchors.fill: parent
                                 source: MediaArtwork.displaySource
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
                                 cache: false
-                                visible: MediaArtwork.ready && status === Image.Ready
+                                visible: MediaArtwork.ready && mediaArtImage.painted
                             }
 
                             FluentIcon {
@@ -350,7 +349,7 @@ MouseArea {
                                 icon: "music-note-2"
                                 implicitSize: 24
                                 color: Looks.colors.subfg
-                                visible: !MediaArtwork.ready || mediaArtImage.status !== Image.Ready
+                                visible: !MediaArtwork.ready || !mediaArtImage.painted
                             }
                         }
 

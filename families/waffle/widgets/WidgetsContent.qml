@@ -596,27 +596,26 @@ WBarAttachedPanelContent {
                         spacing: Looks.dp(16)
 
                         // Album art
-                        Rectangle {
+                        ClippingRectangle {
                             Layout.preferredWidth: Looks.dp(108)
                             Layout.preferredHeight: Looks.dp(108)
                             radius: Looks.radius.xLarge
                             color: Looks.colors.bg1Base
-                            clip: true
 
-                            Image {
+                            StyledImage {
                                 id: mediaArtImage
                                 anchors.fill: parent
                                 source: MediaArtwork.displaySource
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
                                 cache: false
-                                visible: MediaArtwork.ready && status === Image.Ready
+                                visible: MediaArtwork.ready && mediaArtImage.painted
                             }
                             FluentIcon {
                                 anchors.centerIn: parent
                                 icon: "music-note-2"
                                 implicitSize: Looks.dp(40)
-                                visible: !MediaArtwork.ready || mediaArtImage.status !== Image.Ready
+                                visible: !MediaArtwork.ready || !mediaArtImage.painted
                             }
                         }
 

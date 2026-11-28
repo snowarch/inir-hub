@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.35",
+    "version": "2.34.36",
     "changes": {
+    "2.34.36": [
+      "Album art in Widgets, the media OSD and the lock screen keeps the old cover until the next is ready, with rounded corners"
+    ],
       "2.34.35": ["On Rin the taskbar and its menus wear the compositor's glass under their own veil."],
       "2.34.34": ["App rules work on Rin."],
       "2.34.33": ["The focused window's pill stays right when another window of the app is minimized"],
