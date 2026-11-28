@@ -6,6 +6,7 @@ import Quickshell.Bluetooth
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
@@ -303,7 +304,7 @@ GridLayout {
                     onClicked: {
                         page.island.expanded = false
                         if (modelData.glyph === "wallpaper") GlobalStates.wallpaperSelectorOpen = true
-                        else if (modelData.glyph === "lock") Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "lock", "activate"])
+                        else if (modelData.glyph === "lock") ShellExec.ipc("lock", "activate")
                         else GlobalStates.sessionOpen = true
                     }
                 }

@@ -9,6 +9,7 @@ import qs.services
 import qs.services.deferred
 import qs.modules.iris.state
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.iris.frame
 import qs.modules.iris.style
 
@@ -234,7 +235,7 @@ QtObject {
     function act(kind: string, screenName: string): bool {
         if (kind === "awake") Idle.toggleInhibit()
         else if (kind === "nightLight") Hyprsunset.toggle()
-        else if (kind === "capture") Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "screenshot"])
+        else if (kind === "capture") ShellExec.ipc("region", "screenshot")
         else if (kind === "keyboard") NiriService.switchLayout()
         else if (kind === "wallpaper") GlobalStates.wallpaperSelectorOpen = true
         else if (kind === "power") GlobalStates.sessionOpen = true

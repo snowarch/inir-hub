@@ -15,10 +15,6 @@ import qs.modules.iris.state
 Singleton {
     id: root
 
-    function inir(args: var): void {
-        Quickshell.execDetached([Quickshell.shellPath("scripts/inir")].concat(args))
-    }
-
     // Every action the menu can carry. `group` orders the sections: the desktop, tools, the shell.
     readonly property var catalogue: [
         { id: "widgets", group: 0, label: Translation.tr("Edit widgets"), glyph: "widgets", tint: "teal",
@@ -37,19 +33,19 @@ Singleton {
         { id: "nextWallpaper", group: 0, label: Translation.tr("Next wallpaper"), glyph: "shuffle", tint: "pink",
             run: screen => Wallpapers.nextWallpaper(Appearance.m3colors.darkmode, screen) },
         { id: "screenshot", group: 1, label: Translation.tr("Screenshot"), glyph: "screenshot_region", tint: "blue",
-            run: screen => root.inir(["region", "screenshot"]) },
+            run: screen => ShellExec.ipc("region", "screenshot") },
         { id: "record", group: 1, label: Translation.tr("Record screen"), glyph: "screen_record", tint: "red",
-            run: screen => root.inir(["region", "record"]) },
+            run: screen => ShellExec.ipc("region", "record") },
         { id: "colorPicker", group: 1, label: Translation.tr("Pick a colour"), glyph: "colorize", tint: "orange",
-            run: screen => root.inir(["colorpicker"]) },
+            run: screen => ShellExec.inir(["colorpicker"]) },
         { id: "terminal", group: 1, label: Translation.tr("Terminal"), glyph: "terminal", tint: "gray",
-            run: screen => root.inir(["terminal"]) },
+            run: screen => ShellExec.inir(["terminal"]) },
         { id: "files", group: 1, label: Translation.tr("Files"), glyph: "folder", tint: "sky",
             run: screen => ShellExec.execDetachedArgs(["xdg-open", Quickshell.env("HOME") ?? "/"], "Open home folder") },
         { id: "settings", group: 2, label: Translation.tr("Settings"), glyph: "settings", tint: "gray",
-            run: screen => root.inir(["iris", "settings", ""]) },
+            run: screen => ShellExec.ipc("iris", "settings", [""]) },
         { id: "restart", group: 2, label: Translation.tr("Restart shell"), glyph: "restart_alt", tint: "gray",
-            run: screen => root.inir(["restart"]) }
+            run: screen => ShellExec.inir(["restart"]) }
     ]
     readonly property var defaultItems: ["widgets", "customize", "screenshot", "terminal", "settings", "restart"]
 

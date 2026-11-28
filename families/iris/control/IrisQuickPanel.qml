@@ -214,7 +214,7 @@ ColumnLayout {
                     Accessible.name: Translation.tr("Lock")
                     onClicked: {
                         GlobalStates.controlPanelOpen = false
-                        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "lock", "activate"])
+                        ShellExec.ipc("lock", "activate")
                     }
                 }
                 IrisIconButton {

@@ -4,6 +4,7 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.iris.settings
 import qs.modules.iris.prism.core
 
@@ -589,6 +590,6 @@ Singleton {
     function runShow(page: var): void {
         if (!page?.show) return
         GlobalStates.settingsOverlayOpen = false
-        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), String(page.show.target), String(page.show.fn)])
+        ShellExec.ipc(String(page.show.target), String(page.show.fn))
     }
 }

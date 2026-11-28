@@ -1,7 +1,10 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.154",
+  "version": "2.33.155",
   "changes": {
+    "2.33.155": [
+      "Buttons that act on the shell run inside it, with no process started; the rest call the inir command directly"
+    ],
     "2.33.154": [
       "Settings lets go of its memory ten minutes after it closes, at once when the system runs short",
       "The dock's app menu is built only while it shows"
