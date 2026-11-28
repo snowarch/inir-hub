@@ -1,7 +1,11 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "2.33.153",
+  "version": "2.33.154",
   "changes": {
+    "2.33.154": [
+      "Settings lets go of its memory ten minutes after it closes, at once when the system runs short",
+      "The dock's app menu is built only while it shows"
+    ],
     "2.33.153": [
       "Customize Desktop: option pages split into sections with accent headings, an accent-insensitive search and only open ones built",
       "Presets show a preview of the desktop with each widget's own picture; save, rename and remove are back",

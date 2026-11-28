@@ -186,10 +186,11 @@ Item {
         source: "./studio/IrisStudio.qml"
     }
 
-    // Settings is come back to: let go after a minute it was rebuilt on almost every visit (the wait he felt, 11-11),
-    // and after ten it still was for anyone who opens it a few times a day. Built once, it stays; the system running
-    // short of memory lets it go.
-    readonly property int settingsKeepMs: -1
+    // Settings is come back to: let go after a minute it was rebuilt on almost every visit (the wait he felt, 11-11).
+    // Kept for good (11-11 to 11-28) it held ~5700 objects and ~90 MB for the whole session after one visit. Ten minutes
+    // after its close it lets go (at once when the system is short of memory): objects back to idle, measured 11-28,
+    // with ~35 MB of compiled types kept once, not growing over later visits. The palette keeps as long.
+    readonly property int settingsKeepMs: 600000
     // Prism, iRiS's Settings since 11-06: every area of iRiS Settings is a page of it.
     readonly property bool prismOn: (Config.options?.iris?.appearance?.settingsPanel ?? "prism") === "prism"
     OnDemandPanelLoader {
