@@ -8,6 +8,7 @@ import qs.modules.iris.settings
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
+import qs.modules.iris.preview
 
 // A page's lead (his 11-19: "cada página tratada por lo que es"): what the page is, before its groups. The thing itself
 // where it has one (Sound's mixer, the charge), then the page's own switches people flip most as tiles, each said once
@@ -39,16 +40,37 @@ Column {
     }
 
     Rectangle {
+        id: plate
+        readonly property real pad: PrismTheme.dp(14)
+        // A lead that names its scene shows it beside the tiles: what they switch, seen as it switches.
+        readonly property bool staged: String(root.lead.scene ?? "").length > 0
+        readonly property bool side: plate.staged && root.width >= PrismTheme.dp(620)
         visible: root.tiles.length > 0
         width: root.width
-        height: grid.implicitHeight + 2 * PrismTheme.dp(14)
+        height: plate.side ? Math.max(scene.height, grid.implicitHeight) + 2 * plate.pad
+            : (plate.staged ? scene.height + plate.pad : 0) + grid.implicitHeight + 2 * plate.pad
         radius: PrismTheme.cardRadius
         color: PrismTheme.card
+        IrisGroupPreview {
+            id: scene
+            visible: plate.staged
+            x: plate.pad
+            y: plate.pad
+            width: !plate.staged ? 0 : plate.side ? Math.round((root.width - 3 * plate.pad) * 0.6) : root.width - 2 * plate.pad
+            height: Math.round(scene.width / 2)
+            radius: PrismTheme.dp(12)
+            section: String(root.lead.scene ?? "")
+            holdsStill: true
+            framed: false
+            captionOutside: true
+            playing: plate.staged && root.visible
+        }
         Flow {
             id: grid
-            x: PrismTheme.dp(14)
-            y: PrismTheme.dp(14)
-            width: parent.width - 2 * PrismTheme.dp(14)
+            x: plate.side ? scene.x + scene.width + plate.pad : plate.pad
+            y: plate.side ? plate.pad + Math.max(0, Math.round((scene.height - grid.implicitHeight) / 2))
+                : plate.staged ? scene.y + scene.height + plate.pad : plate.pad
+            width: plate.side ? root.width - grid.x - plate.pad : root.width - 2 * plate.pad
             spacing: PrismTheme.dp(8)
             readonly property int columns: Math.max(1, Math.min(root.tiles.length, Math.floor((width + spacing) / (PrismTheme.dp(196) + spacing))))
             readonly property real tileWidth: Math.floor((width - (columns - 1) * spacing) / columns)

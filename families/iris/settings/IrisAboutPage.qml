@@ -21,7 +21,8 @@ Flickable {
     contentHeight: pageColumn.implicitHeight + 40 * root.d
     ScrollBar.vertical: IrisScrollBar {}
 
-    readonly property string irisVersion: irisVersionFile.text().trim()
+    // The family's own version, the one its plugin.json carries and the hub updates by.
+    readonly property string irisVersion: String(Plugins.manifests?.iris?.version ?? "")
     // A host that draws its marks in ink (Prism) sets it: the links open on their glyph alone, without a colour.
     property bool plainMarks: false
     // How wide the column reads; a host with its own measure (Prism) sets it, so the page runs under its head.
@@ -30,10 +31,6 @@ Flickable {
     FileView {
         id: versionFile
         path: Quickshell.shellPath("VERSION")
-    }
-    FileView {
-        id: irisVersionFile
-        path: Quickshell.shellPath("modules/iris/VERSION")
     }
 
     ColumnLayout {

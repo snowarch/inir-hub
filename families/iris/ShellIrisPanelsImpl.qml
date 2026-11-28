@@ -52,13 +52,14 @@ Item {
         // rather than with this file. Built at idle and kept for good (10-26), Settings, both sidebars and the overlay held ~16k objects and
         // ~160 MB from start on a shell that never opened them.
         property bool keep: false
+        // -1: kept for good once built, let go only when the system runs short of memory.
         property int keepMs: 60000
         property bool resident: open
         property Timer closeGrace: Timer {
             interval: loader.keep && !MemoryPressureService.over ? Math.max(loader.closeGraceMs, loader.keepMs) : loader.closeGraceMs
             onTriggered: loader.resident = loader.open
         }
-        // Over the memory budget, a closed panel lets go now rather than after its keep.
+        // With the system short of memory, a closed panel lets go now rather than after its keep.
         property Connections budget: Connections {
             target: MemoryPressureService
             function onOverChanged(): void {
@@ -73,7 +74,7 @@ Item {
             if (open) {
                 closeGrace.stop()
                 resident = true
-            } else {
+            } else if (!loader.keep || loader.keepMs >= 0 || MemoryPressureService.over) {
                 closeGrace.restart()
             }
         }
@@ -185,8 +186,10 @@ Item {
         source: "./studio/IrisStudio.qml"
     }
 
-    // Settings is come back to: let go after a minute it was rebuilt on almost every visit (the wait he felt, 11-11).
-    readonly property int settingsKeepMs: 600000
+    // Settings is come back to: let go after a minute it was rebuilt on almost every visit (the wait he felt, 11-11),
+    // and after ten it still was for anyone who opens it a few times a day. Built once, it stays; the system running
+    // short of memory lets it go.
+    readonly property int settingsKeepMs: -1
     // Prism, iRiS's Settings since 11-06: every area of iRiS Settings is a page of it.
     readonly property bool prismOn: (Config.options?.iris?.appearance?.settingsPanel ?? "prism") === "prism"
     OnDemandPanelLoader {

@@ -100,7 +100,7 @@ Item {
     readonly property bool deskShown: ["layout", "windows", "glass"].includes(root.pageId) && CompositorConfig.available && CompositorConfig.output !== null
     // What a page shows before its groups: the person's own thing, as it is now.
     readonly property Component hero: PrismState.searching ? null
-        : (({ general: homeHero, wallpaper: wallpaperHero, colour: colourHero, typeIcons: typeHero, lock: lockHero })[root.pageId]
+        : (({ general: homeHero, wallpaper: wallpaperHero, colour: colourHero, typeIcons: typeHero, lock: lockHero, login: loginHero })[root.pageId]
             ?? (root.keyboardShown ? keyboardHero : root.displayShown ? displayHero : root.deskShown ? deskHero : root.lead ? leadHero : null))
     // What acts on the page's own thing, at the head: arrange the Control Center, send a notice, take the screen.
     readonly property var pageActions: ({
@@ -691,6 +691,7 @@ Item {
     Component { id: typeHero; PrismTypeHero { onPickGroup: title => root.showGroup(title) } }
     Component { id: leadHero; PrismLead { page: root.pageId } }
     Component { id: lockHero; PrismLockHero { onAction: id => root.act(id); onPickGroup: title => root.showGroup(title) } }
+    Component { id: loginHero; PrismLoginHero {} }
     // Displays: the screen itself, live, then the page's own switches.
     Component {
         id: displayHero

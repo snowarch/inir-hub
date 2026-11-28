@@ -16,6 +16,7 @@ PrismWallpaperHero 1.0 PrismWallpaperHero.qml
 PrismColourHero 1.0 PrismColourHero.qml
 PrismTypeHero 1.0 PrismTypeHero.qml
 PrismLockHero 1.0 PrismLockHero.qml
+PrismLoginHero 1.0 PrismLoginHero.qml
 PrismDisplayHero 1.0 PrismDisplayHero.qml
 PrismDeskHero 1.0 PrismDeskHero.qml
 PrismSheet 1.0 PrismSheet.qml

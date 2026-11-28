@@ -106,7 +106,9 @@ Singleton {
         capture: { tiles: [["regionSelector.targetRegions.windows", "web_asset"], ["regionSelector.annotation.useSatty", "draw"], ["search.imageSearch.useCircleSelection", "gesture"]] },
         display: { tiles: [["light.night.enabled", "nightlight"], ["light.night.automatic", "schedule"], ["light.antiFlashbang.enable", "flash_off"]] },
         sources: { tiles: [["weather.enable", "partly_cloudy_day"], ["calendar.externalSync.enable", "calendar_month"], ["shellUpdates.enabled", "system_update"]] },
-        player: { tiles: [["background.edgeWidgets.organic.enable", "graphic_eq"], ["background.edgeWidgets.organic.audioReactive", "equalizer"]] }    })
+        player: { tiles: [["background.edgeWidgets.organic.enable", "graphic_eq"], ["background.edgeWidgets.organic.audioReactive", "equalizer"]] },
+        anime: { scene: "anime", tiles: [["iris.bubbles.extras.anime.enable", "live_tv"], ["iris.bubbles.extras.watching.enable", "play_circle"], ["iris.appearance.anime.enabled", "palette"]] }
+    })
     // The page a row of IrisOptions' `section`, group `group` lives on.
     function pageOf(section: string, group: string): string {
         const list = root.chapters[section]
@@ -222,8 +224,9 @@ Singleton {
                 glyph: root.coverOf(spec),
                 get choices() { return spec.choices ?? [] },
                 keywords: Array.from(spec.keywords ?? []),
-                // Drawn by the page's stage (the keyboard), not again among the rows; search still finds it.
-                onStage: String(spec.view ?? "").endsWith("IrisKeyboardMap.qml")
+                // Drawn by the page's stage (the keyboard, the login's styles), not again among the rows; search still
+                // finds it.
+                onStage: String(spec.view ?? "").endsWith("IrisKeyboardMap.qml") || path === "lock.loginStyle"
             })
         }
         // One home per option (his 11-10: "cosas que están repetidas por cualquier lado"): where IrisOptions lists
