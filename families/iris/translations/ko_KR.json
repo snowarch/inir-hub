@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "볼륨 및 밝기",
   "Size: %1": "크기: %1",
-  "Shelf pages": "선반 페이지",
   "Hide automatically": "자동으로 숨기기",
   "Play something and it shows here": "무언가를 재생하면 여기에 표시됩니다",
   "Nothing waiting on you": "남은 일이 없습니다",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "위젯으로 돌아가기",
   "Customize Desktop": "데스크톱 사용자 지정",
   "Search widgets...": "위젯 검색...",
-  "Save current layout": "현재 레이아웃 저장"
+  "Save current layout": "현재 레이아웃 저장",
+  "Preview: Done applies it": "미리 보기: 완료를 누르면 적용"
 }

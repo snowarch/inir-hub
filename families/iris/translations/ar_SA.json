@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "مستوى الصوت والسطوع",
   "Size: %1": "الحجم: %1",
-  "Shelf pages": "صفحات الرف",
   "Hide automatically": "إخفاء تلقائي",
   "Play something and it shows here": "شغّل شيئًا وسيظهر هنا",
   "Nothing waiting on you": "لا شيء بانتظارك",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "العودة إلى الأدوات",
   "Customize Desktop": "تخصيص سطح المكتب",
   "Search widgets...": "البحث عن الأدوات...",
-  "Save current layout": "حفظ التخطيط الحالي"
+  "Save current layout": "حفظ التخطيط الحالي",
+  "Preview: Done applies it": "معاينة: يُطبَّق عند الضغط على تم"
 }

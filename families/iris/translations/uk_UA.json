@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Гучність і яскравість",
   "Size: %1": "Розмір: %1",
-  "Shelf pages": "Сторінки полиці",
   "Hide automatically": "Приховувати автоматично",
   "Play something and it shows here": "Увімкніть щось, і воно з’явиться тут",
   "Nothing waiting on you": "Нічого не чекає",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Назад до віджетів",
   "Customize Desktop": "Налаштувати стільницю",
   "Search widgets...": "Пошук віджетів...",
-  "Save current layout": "Зберегти поточне розташування"
+  "Save current layout": "Зберегти поточне розташування",
+  "Preview: Done applies it": "Попередній перегляд: Готово застосує"
 }

@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "עוצמת שמע ובהירות",
   "Size: %1": "גודל: %1",
-  "Shelf pages": "דפי המדף",
   "Hide automatically": "הסתרה אוטומטית",
   "Play something and it shows here": "נגנו משהו והוא יופיע כאן",
   "Nothing waiting on you": "שום דבר לא מחכה לך",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "חזרה לווידג'טים",
   "Customize Desktop": "התאמה אישית של שולחן העבודה",
   "Search widgets...": "חפש ווידג'טים...",
-  "Save current layout": "שמור פריסה נוכחית"
+  "Save current layout": "שמור פריסה נוכחית",
+  "Preview: Done applies it": "תצוגה מקדימה: הושלם מחיל אותו"
 }

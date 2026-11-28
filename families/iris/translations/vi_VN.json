@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Âm lượng và độ sáng",
   "Size: %1": "Kích thước: %1",
-  "Shelf pages": "Các trang kệ",
   "Hide automatically": "Tự động ẩn",
   "Play something and it shows here": "Phát gì đó và nó sẽ hiện ở đây",
   "Nothing waiting on you": "Không còn việc gì",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Quay lại tiện ích",
   "Customize Desktop": "Tùy chỉnh màn hình nền",
   "Search widgets...": "Tìm tiện ích...",
-  "Save current layout": "Lưu bố cục hiện tại"
+  "Save current layout": "Lưu bố cục hiện tại",
+  "Preview: Done applies it": "Xem trước: Đã xong để áp dụng"
 }

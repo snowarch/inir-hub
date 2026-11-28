@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Lautstärke und Helligkeit",
   "Size: %1": "Größe: %1",
-  "Shelf pages": "Regalseiten",
   "Hide automatically": "Automatisch ausblenden",
   "Play something and it shows here": "Spiel etwas ab, dann erscheint es hier",
   "Nothing waiting on you": "Nichts wartet auf dich",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Zurück zu Widgets",
   "Customize Desktop": "Desktop anpassen",
   "Search widgets...": "Widgets suchen...",
-  "Save current layout": "Aktuelles Layout speichern"
+  "Save current layout": "Aktuelles Layout speichern",
+  "Preview: Done applies it": "Vorschau: Fertig übernimmt es"
 }

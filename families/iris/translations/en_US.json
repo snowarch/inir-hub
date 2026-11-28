@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Volume and brightness",
   "Size: %1": "Size: %1",
-  "Shelf pages": "Shelf pages",
   "Hide automatically": "Hide automatically",
   "Play something and it shows here": "Play something and it shows here",
   "Nothing waiting on you": "Nothing waiting on you",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Back to widgets",
   "Customize Desktop": "Customize Desktop",
   "Search widgets...": "Search widgets...",
-  "Save current layout": "Save current layout"
+  "Save current layout": "Save current layout",
+  "Preview: Done applies it": "Preview: Done applies it"
 }

@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Громкость и яркость",
   "Size: %1": "Размер: %1",
-  "Shelf pages": "Страницы полки",
   "Hide automatically": "Скрывать автоматически",
   "Play something and it shows here": "Включите что-нибудь, и это появится здесь",
   "Nothing waiting on you": "Ничего не ждёт",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Назад к виджетам",
   "Customize Desktop": "Настроить рабочий стол",
   "Search widgets...": "Поиск виджетов...",
-  "Save current layout": "Сохранить текущую раскладку"
+  "Save current layout": "Сохранить текущую раскладку",
+  "Preview: Done applies it": "Предпросмотр: Готово применит"
 }

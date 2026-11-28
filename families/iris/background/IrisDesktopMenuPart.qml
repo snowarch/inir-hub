@@ -39,6 +39,6 @@ IrisDesktopMenu {
             action: () => GlobalStates.openSettingsAt("widgets") },
         { type: "separator" },
         { text: Translation.tr("Done"), iconName: "check", tint: "green",
-            action: () => GlobalStates.setWidgetEditMode(false) }
+            action: () => DesktopEditHistory.finish() }
     ] : IrisDesktopActions.menu(menu.screenName, menu.wallpaperPath, menu.wallpaperPath)
 }

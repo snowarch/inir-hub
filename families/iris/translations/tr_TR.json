@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Ses ve parlaklık",
   "Size: %1": "Boyut: %1",
-  "Shelf pages": "Raf sayfaları",
   "Hide automatically": "Otomatik gizle",
   "Play something and it shows here": "Bir şey çal, burada görünsün",
   "Nothing waiting on you": "Seni bekleyen bir şey yok",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Araç takımlarına dön",
   "Customize Desktop": "Masaüstünü özelleştir",
   "Search widgets...": "Araç takımlarında ara...",
-  "Save current layout": "Geçerli düzeni kaydet"
+  "Save current layout": "Geçerli düzeni kaydet",
+  "Preview: Done applies it": "Önizleme: Bitti ile uygulanır"
 }

@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "वॉल्यूम और चमक",
   "Size: %1": "आकार: %1",
-  "Shelf pages": "शेल्फ पेज",
   "Hide automatically": "अपने आप छिपाएँ",
   "Play something and it shows here": "कुछ चलाएँ, वह यहाँ दिखेगा",
   "Nothing waiting on you": "कुछ भी बाकी नहीं",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "विजेट्स पर वापस जाएँ",
   "Customize Desktop": "डेस्कटॉप कस्टमाइज़ करें",
   "Search widgets...": "विजेट्स खोजें...",
-  "Save current layout": "वर्तमान लेआउट सहेजें"
+  "Save current layout": "वर्तमान लेआउट सहेजें",
+  "Preview: Done applies it": "पूर्वावलोकन: हो गया दबाने पर लागू होगा"
 }

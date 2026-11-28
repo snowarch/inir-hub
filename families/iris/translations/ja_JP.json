@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "音量と明るさ",
   "Size: %1": "サイズ: %1",
-  "Shelf pages": "棚のページ",
   "Hide automatically": "自動的に隠す",
   "Play something and it shows here": "何か再生するとここに表示されます",
   "Nothing waiting on you": "やることはありません",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "ウィジェットに戻る",
   "Customize Desktop": "デスクトップをカスタマイズ",
   "Search widgets...": "ウィジェットを検索...",
-  "Save current layout": "現在のレイアウトを保存"
+  "Save current layout": "現在のレイアウトを保存",
+  "Preview: Done applies it": "プレビュー：完了で適用"
 }

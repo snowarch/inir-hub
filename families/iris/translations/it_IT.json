@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Volume e luminosità",
   "Size: %1": "Dimensione: %1",
-  "Shelf pages": "Pagine dello scaffale",
   "Hide automatically": "Nascondi automaticamente",
   "Play something and it shows here": "Riproduci qualcosa e apparirà qui",
   "Nothing waiting on you": "Niente ti aspetta",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Torna ai widget",
   "Customize Desktop": "Personalizza desktop",
   "Search widgets...": "Cerca widget...",
-  "Save current layout": "Salva layout attuale"
+  "Save current layout": "Salva layout attuale",
+  "Preview: Done applies it": "Anteprima: Fatto la applica"
 }

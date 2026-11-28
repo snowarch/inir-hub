@@ -398,6 +398,15 @@ Item {
         }
     }
 
+    // Every card's picture: the widget's own while it is out, its last look on disk, or one made once off screen.
+    WidgetPortraits {
+        id: portraits
+        keys: root.allEntries.map(entry => entry.key)
+        outputName: root.outputName
+        screenWidth: root.width
+        screenHeight: root.height
+    }
+
     // ── Right Panel Contents ──
     Item {
         id: panelBody
@@ -481,7 +490,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: GlobalStates.setWidgetEditMode(false)
+                        onClicked: DesktopEditHistory.finish()
                     }
                 }
             }
@@ -548,18 +557,12 @@ Item {
                 }
             }
 
-            // Category filter pills on Widgets gallery: they wrap, so every category shows without sliding sideways.
+            // Category filters on the Widgets gallery: none lit shows every widget, a tap on the lit one shows all again.
+            // They wrap, so every category shows whole without sliding sideways.
             Flow {
                 Layout.fillWidth: true
                 visible: !root.inspecting && root.page === "widgets" && root.searchQuery.trim().length === 0 && root.categories.length > 1
                 spacing: Math.round(4 * root.d)
-                IrisChip {
-                    implicitHeight: Math.round(24 * root.d)
-                    label: Translation.tr("All")
-                    selected: root.category.length === 0
-                    quiet: !selected
-                    onClicked: root.category = ""
-                }
                 Repeater {
                     model: root.categories
                     delegate: IrisChip {
@@ -622,8 +625,7 @@ Item {
                             required property var modelData
                             readonly property bool active: root.widgetEnabled(card.modelData.key)
                             readonly property bool hovered: cardMouse.containsMouse
-                            readonly property var shot: DesktopEditStage.pictures[card.modelData.key] ?? null
-                            readonly property string shotUrl: card.shot?.url ?? ""
+                            readonly property string shotUrl: portraits.url(card.modelData.key)
 
                             width: galleryGrid.cellW
                             height: Math.round(116 * root.d)
@@ -663,9 +665,11 @@ Item {
                                         fillMode: Image.PreserveAspectFit
                                         asynchronous: true
                                         cache: true
-                                        sourceSize: Qt.size(Math.round(well.width * 2), Math.round(well.height * 2))
+                                        // Read at the size it shows on this screen: a smooth downscale keeps the widget's type sharp.
+                                        sourceSize: Qt.size(Math.round(width * (root.screenData?.devicePixelRatio ?? 1)), Math.round(height * (root.screenData?.devicePixelRatio ?? 1)))
                                         smooth: true
-                                        mipmap: true
+                                        opacity: status === Image.Ready ? 1 : 0
+                                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
                                     }
                                     MaterialSymbol {
                                         anchors.centerIn: parent
@@ -900,7 +904,7 @@ Item {
                     iconSize: Math.round(17 * root.d)
                     Accessible.name: Translation.tr("Settings")
                     onClicked: {
-                        GlobalStates.setWidgetEditMode(false)
+                        DesktopEditHistory.finish()
                         GlobalStates.settingsOverlayRequestedKey = "desktop"
                         GlobalStates.settingsOverlayOpen = true
                     }

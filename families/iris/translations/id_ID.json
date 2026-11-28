@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Volume dan kecerahan",
   "Size: %1": "Ukuran: %1",
-  "Shelf pages": "Halaman rak",
   "Hide automatically": "Sembunyikan otomatis",
   "Play something and it shows here": "Putar sesuatu dan akan muncul di sini",
   "Nothing waiting on you": "Tidak ada yang menunggu",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Kembali ke widget",
   "Customize Desktop": "Sesuaikan Desktop",
   "Search widgets...": "Cari widget...",
-  "Save current layout": "Simpan tata letak saat ini"
+  "Save current layout": "Simpan tata letak saat ini",
+  "Preview: Done applies it": "Pratinjau: Selesai menerapkannya"
 }

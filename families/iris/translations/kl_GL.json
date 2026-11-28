@@ -1684,7 +1684,6 @@
   "Nothing OS": "Nothing OS",
   "Volume and brightness": "Nipip annertussusia qaamaneralu",
   "Size: %1": "Angissusia: %1",
-  "Shelf pages": "Shelf-ip quppernerai",
   "Hide automatically": "Nammineq toqqortaruk",
   "Play something and it shows here": "Sumik nipilersortitsigit maanilu takutinneqassaaq",
   "Nothing waiting on you": "Ilinnik utaqqisoqanngilaq",
@@ -2715,5 +2714,6 @@
   "Back to widgets": "Widgetinut uterit",
   "Customize Desktop": "Desktopimik naleqqussaaneq",
   "Search widgets...": "Widgetinik ujarlerit...",
-  "Save current layout": "Aaqqissuussineq maanna toqqoruk"
+  "Save current layout": "Aaqqissuussineq maanna toqqoruk",
+  "Preview: Done applies it": "Takussutissaq: Naammassivoq tooruk atuutilersinniarlugu"
 }
