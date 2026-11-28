@@ -69,6 +69,7 @@ desktop that installed it.
 
 - `PanelWindow` with a `WlrLayershell.namespace` of `quickshell:<id>`. Never re-anchor, resize per frame or change the
   layer of a live window: unload it and load it again. Limit input with `mask`, not by resizing.
+- A mode that covers the desktop (Edit Mode, an overview) closes when a fullscreen window takes focus, such as a game.
 - Keyboard focus is `OnDemand` for a window people type in, and Escape closes it. A window that must hold the keys
   (`Exclusive`) gives them up while a password prompt asks: `PolkitService.active ? WlrKeyboardFocus.None :
   WlrKeyboardFocus.Exclusive`. On Niri the first exclusive window keeps the keys, and the prompt cannot be typed in.
