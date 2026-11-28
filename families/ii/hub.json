@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.36.13",
+    "version": "2.36.14",
     "changes": {
+      "2.36.14": ["Widget edit mode: a wallpaper picked there applies on Done, Escape puts the old one back"],
       "2.36.13": ["App rules work on Rin."],
       "2.36.12": ["Workspaces show a badge when a window asks for attention"],
       "2.36.10": ["Cheatsheet settings read in your language: each bind and its group"],
