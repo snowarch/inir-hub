@@ -45,6 +45,15 @@ desktop that installed it.
   `active` is the paint condition. Long lists use a `ListView` (delegates made on demand), not a `Repeater`.
 - Per-row bindings never parse or stringify JSON, nor walk the config: compute once in a property.
 - Long work runs in the process, never on the GUI thread: a loop over thousands of items in QML freezes every panel.
+- A shown picture never gets a new `source` in place: it empties while it decodes. Crossfade it (`WallpaperCrossfader`)
+  or keep the old one until the new one is `Ready` (`retainWhileLoading`; status is `Loading` meanwhile, so a
+  `visible: status === Image.Ready` gate still blinks).
+- Blur a picture that changes with `layer.effect: MultiEffect` on the visible item. A `MultiEffect` over a hidden source
+  whose children turn `visible` on and off keeps an empty texture.
+- A crossfade keeps the outgoing picture opaque while the new one fades in: fading both dips to 75 % at the middle.
+- Thumbnails come from `ThumbnailImage` at the size shown, never a whole picture decoded per tile.
+- A layer, mask or blur is on only while it shows something. Wallpaper analysis reads the `WallpaperLuma` grid
+  (`Lume.quietest`), never a process per widget.
 
 ## Bindings and lifecycle
 
