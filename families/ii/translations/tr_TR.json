@@ -1,4 +1,11 @@
 {
+  "Search widgets": "Araç takımlarında ara",
+  "Snap to grid: on": "Izgaraya hizala: açık",
+  "Snap to grid: off": "Izgaraya hizala: kapalı",
+  "Hide every background": "Tüm arka planları gizle",
+  "Hide every outline": "Tüm kenarlıkları gizle",
+  "Show every background": "Tüm arka planları göster",
+  "Show every outline": "Tüm kenarlıkları göster",
   "Download complete": "İndirme tamamlandı",
   "%1 found": "%1 bulundu",
   "Crosshair overlay": "Nişangah bindirmesi",

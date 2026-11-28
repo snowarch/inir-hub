@@ -1,4 +1,11 @@
 {
+  "Search widgets": "위젯 검색",
+  "Snap to grid: on": "격자에 맞춤: 켬",
+  "Snap to grid: off": "격자에 맞춤: 끔",
+  "Hide every background": "모든 배경 숨기기",
+  "Hide every outline": "모든 테두리 숨기기",
+  "Show every background": "모든 배경 표시",
+  "Show every outline": "모든 테두리 표시",
   "Download complete": "다운로드 완료",
   "%1 found": "%1개 찾음",
   "Crosshair overlay": "십자선 오버레이",

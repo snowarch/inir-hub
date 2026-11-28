@@ -1,4 +1,11 @@
 {
+  "Search widgets": "Rechercher des widgets",
+  "Snap to grid: on": "Aimanter à la grille : activé",
+  "Snap to grid: off": "Aimanter à la grille : désactivé",
+  "Hide every background": "Masquer tous les fonds",
+  "Hide every outline": "Masquer tous les contours",
+  "Show every background": "Afficher tous les fonds",
+  "Show every outline": "Afficher tous les contours",
   "Download complete": "Téléchargement terminé",
   "%1 found": "%1 trouvé(s)",
   "Crosshair overlay": "Superposition de réticule",

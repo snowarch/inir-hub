@@ -1,4 +1,11 @@
 {
+  "Search widgets": "विजेट खोजें",
+  "Snap to grid: on": "ग्रिड पर स्नैप: चालू",
+  "Snap to grid: off": "ग्रिड पर स्नैप: बंद",
+  "Hide every background": "सभी पृष्ठभूमि छिपाएँ",
+  "Hide every outline": "सभी आउटलाइन छिपाएँ",
+  "Show every background": "सभी पृष्ठभूमि दिखाएँ",
+  "Show every outline": "सभी आउटलाइन दिखाएँ",
   "Download complete": "पूरा डाउनलोड करें",
   "%1 found": "%1 मिले",
   "Crosshair overlay": "क्रॉसहेयर ओवरले",

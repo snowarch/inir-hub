@@ -304,7 +304,7 @@ Scope {
                         colBackground: Appearance.colors.colPrimary
                         colBackgroundHover: Appearance.colors.colPrimaryHover
                         Accessible.name: Translation.tr("Done")
-                        onClicked: GlobalStates.setWidgetEditMode(false)
+                        onClicked: DesktopEditHistory.finish()
                         contentItem: Row {
                             id: doneRow
                             anchors.centerIn: parent

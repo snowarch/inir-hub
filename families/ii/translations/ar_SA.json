@@ -1,4 +1,11 @@
 {
+  "Search widgets": "البحث في الأدوات",
+  "Snap to grid: on": "المحاذاة إلى الشبكة: مفعّلة",
+  "Snap to grid: off": "المحاذاة إلى الشبكة: معطّلة",
+  "Hide every background": "إخفاء كل الخلفيات",
+  "Hide every outline": "إخفاء كل الحدود",
+  "Show every background": "إظهار كل الخلفيات",
+  "Show every outline": "إظهار كل الحدود",
   "Download complete": "اكتمل التنزيل",
   "%1 found": "تم العثور على %1",
   "Crosshair overlay": "تراكب التقاطع",

@@ -1,4 +1,11 @@
 {
+  "Search widgets": "Widgets suchen",
+  "Snap to grid: on": "Am Raster ausrichten: an",
+  "Snap to grid: off": "Am Raster ausrichten: aus",
+  "Hide every background": "Alle Hintergründe ausblenden",
+  "Hide every outline": "Alle Umrisse ausblenden",
+  "Show every background": "Alle Hintergründe einblenden",
+  "Show every outline": "Alle Umrisse einblenden",
   "Download complete": "Download abgeschlossen",
   "%1 found": "%1 gefunden",
   "Crosshair overlay": "Fadenkreuz-Overlay",

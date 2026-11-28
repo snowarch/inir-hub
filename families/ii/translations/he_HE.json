@@ -1,4 +1,11 @@
 {
+  "Search widgets": "חיפוש וידג'טים",
+  "Snap to grid: on": "הצמדה לרשת: פעיל",
+  "Snap to grid: off": "הצמדה לרשת: כבוי",
+  "Hide every background": "הסתר את כל הרקעים",
+  "Hide every outline": "הסתר את כל קווי המתאר",
+  "Show every background": "הצג את כל הרקעים",
+  "Show every outline": "הצג את כל קווי המתאר",
   "Download complete": "ההורדה הושלמה",
   "%1 found": "נמצאו %1",
   "Crosshair overlay": "שכבת כוונת",

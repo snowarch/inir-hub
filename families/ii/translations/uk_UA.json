@@ -1,4 +1,11 @@
 {
+  "Search widgets": "Пошук віджетів",
+  "Snap to grid: on": "Прив'язка до сітки: увімк.",
+  "Snap to grid: off": "Прив'язка до сітки: вимк.",
+  "Hide every background": "Сховати всі фони",
+  "Hide every outline": "Сховати всі контури",
+  "Show every background": "Показати всі фони",
+  "Show every outline": "Показати всі контури",
   "Download complete": "Завантаження завершено",
   "%1 found": "Знайдено: %1",
   "Crosshair overlay": "Перехрестя",

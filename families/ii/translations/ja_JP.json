@@ -1,4 +1,11 @@
 {
+  "Search widgets": "ウィジェットを検索",
+  "Snap to grid: on": "グリッドに吸着: オン",
+  "Snap to grid: off": "グリッドに吸着: オフ",
+  "Hide every background": "すべての背景を隠す",
+  "Hide every outline": "すべての枠線を隠す",
+  "Show every background": "すべての背景を表示",
+  "Show every outline": "すべての枠線を表示",
   "Download complete": "ダウンロード完了",
   "%1 found": "%1件見つかりました",
   "Crosshair overlay": "十字線オーバーレイ",

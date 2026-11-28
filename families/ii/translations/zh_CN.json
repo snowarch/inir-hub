@@ -1,4 +1,11 @@
 {
+  "Search widgets": "搜索小组件",
+  "Snap to grid: on": "吸附网格：开",
+  "Snap to grid: off": "吸附网格：关",
+  "Hide every background": "隐藏所有背景",
+  "Hide every outline": "隐藏所有描边",
+  "Show every background": "显示所有背景",
+  "Show every outline": "显示所有描边",
   "Download complete": "下载完成",
   "%1 found": "找到 %1 个",
   "Crosshair overlay": "射击准星叠加",

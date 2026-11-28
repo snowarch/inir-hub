@@ -1,4 +1,11 @@
 {
+  "Search widgets": "Поиск виджетов",
+  "Snap to grid: on": "Привязка к сетке: вкл.",
+  "Snap to grid: off": "Привязка к сетке: выкл.",
+  "Hide every background": "Скрыть все фоны",
+  "Hide every outline": "Скрыть все контуры",
+  "Show every background": "Показать все фоны",
+  "Show every outline": "Показать все контуры",
   "Download complete": "Загрузка завершена",
   "%1 found": "Найдено: %1",
   "Crosshair overlay": "Наложение перекрестия",

@@ -1,4 +1,11 @@
 {
+  "Search widgets": "Buscar widgets",
+  "Snap to grid: on": "Ajustar a la cuadrícula: activado",
+  "Snap to grid: off": "Ajustar a la cuadrícula: desactivado",
+  "Hide every background": "Ocultar todos los fondos",
+  "Hide every outline": "Ocultar todos los bordes",
+  "Show every background": "Mostrar todos los fondos",
+  "Show every outline": "Mostrar todos los bordes",
   "Download complete": "Descarga completa",
   "%1 found": "%1 encontrados",
   "Crosshair overlay": "Superposición de punto de mira",
